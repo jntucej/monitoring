@@ -74,37 +74,37 @@ function AdminNotificationSettingsInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Gauge className="w-3.5 h-3.5 text-emerald-400" /> Total Queued
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : totalQueued}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : totalQueued}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Push + SMS + email delivery queues</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Push + SMS + email delivery queues</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Preferences">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Bell className="w-3.5 h-3.5 text-blue-400" /> Preferences Configured
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : (configuredPct ?? 0)}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : (configuredPct ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Users with per-channel settings</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Users with per-channel settings</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Channels">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Inbox className="w-3.5 h-3.5 text-amber-400" /> Active Channels
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : (d?.channels?.length ?? 0)}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : (d?.channels?.length ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Delivery channels in use</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Delivery channels in use</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -114,8 +114,8 @@ function AdminNotificationSettingsInner() {
         <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
-              <div className="h-4 w-40 rounded bg-slate-800 animate-pulse" />
-              <div className="h-4 w-52 rounded bg-slate-800 animate-pulse" />
+              <div className="h-4 w-40 rounded bg-[var(--bg-elevated)] animate-pulse" />
+              <div className="h-4 w-52 rounded bg-[var(--bg-elevated)] animate-pulse" />
             </div>
           ) : res.error ? (
             <div className="p-6 text-sm text-rose-400">{res.error}</div>
@@ -127,16 +127,16 @@ function AdminNotificationSettingsInner() {
                   <Bell className="w-4 h-4 text-emerald-400" /> Channel volume
                 </h2>
                 {(d?.channels?.length ?? 0) === 0 ? (
-                  <p className="text-xs text-slate-500">No notification channel activity recorded yet.</p>
+                  <p className="text-xs text-[var(--text-muted)]">No notification channel activity recorded yet.</p>
                 ) : (
                   <div className="divide-y divide-slate-800/60">
                     {d!.channels.map((c) => (
                       <div key={c.channel} className="flex items-center justify-between py-2.5">
                         <span className="flex items-center gap-2 text-xs font-medium text-slate-200 capitalize">
-                          {CHANNEL_ICONS[c.channel] || <Inbox className="w-3.5 h-3.5 text-slate-400" />}
+                          {CHANNEL_ICONS[c.channel] || <Inbox className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
                           {c.channel.replace(/_/g, " ")}
                         </span>
-                        <span className="text-xs tabular-nums text-slate-400">{c.notifications.toLocaleString()}</span>
+                        <span className="text-xs tabular-nums text-[var(--text-muted)]">{c.notifications.toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -149,7 +149,7 @@ function AdminNotificationSettingsInner() {
                   <Gauge className="w-4 h-4 text-emerald-400" /> Delivery queue depth
                 </h2>
                 {(d?.queue_depth?.length ?? 0) === 0 ? (
-                  <p className="text-xs text-slate-500">No delivery queues configured.</p>
+                  <p className="text-xs text-[var(--text-muted)]">No delivery queues configured.</p>
                 ) : (
                   <div className="divide-y divide-slate-800/60">
                     {d!.queue_depth.map((q) => (
@@ -159,7 +159,7 @@ function AdminNotificationSettingsInner() {
                         </span>
                         <span
                           className={`rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums ${
-                            q.depth > 0 ? "bg-amber-500/15 text-amber-300" : "bg-slate-800 text-slate-400"
+                            q.depth > 0 ? "bg-amber-500/15 text-amber-300" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                           }`}
                         >
                           {q.depth}
@@ -175,14 +175,14 @@ function AdminNotificationSettingsInner() {
           {/* Top notification types */}
           {(d?.top_types?.length ?? 0) > 0 && (
             <div className="border-t border-slate-800 p-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
                 Most-sent notification types
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {d!.top_types.map((t) => (
                   <span
                     key={t.type}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-slate-800 px-2 py-1 text-[11px] text-slate-300"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-[11px] text-slate-300"
                   >
                     {t.type.replace(/_/g, " ")}
                     <span className="tabular-nums text-emerald-400">{t.count}</span>
@@ -199,7 +199,7 @@ function AdminNotificationSettingsInner() {
         <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-amber-300">Read-only view</p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
             Channel enablement, quiet-hours and template configuration are managed by the platform team.
             For per-user channel preferences, users can self-serve via{" "}
             <Link href="/admin/announcements" className="text-emerald-400 hover:underline">

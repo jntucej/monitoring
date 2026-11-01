@@ -38,7 +38,7 @@ function StatusPill({ status }: { status?: string | null }) {
         ? "bg-amber-500/20 text-amber-400"
         : s === "unhealthy"
           ? "bg-rose-500/20 text-rose-400"
-          : "bg-slate-700/40 text-slate-400";
+          : "bg-slate-700/40 text-[var(--text-muted)]";
   return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cls}`}>{s}</span>;
 }
 
@@ -74,7 +74,7 @@ function RedisWorkerInner() {
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-[var(--text-muted)]">
           Signed in as <span className="font-mono text-slate-300">{role}</span>
         </p>
       </div>
@@ -97,23 +97,23 @@ function RedisWorkerInner() {
             {busy ? (
               <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-800/40" />
+                  <div key={i} className="h-12 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
                 ))}
               </div>
             ) : d?.redisDetails ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-[10px] text-slate-500 uppercase">Clients</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase">Clients</p>
                   <p className="text-lg font-bold text-sky-400">
                     {d.redisDetails.connectedClients != null ? d.redisDetails.connectedClients : "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-[10px] text-slate-500 uppercase">Memory</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase">Memory</p>
                   <p className="text-lg font-bold text-sky-400">{formatBytes(d.redisDetails.usedMemoryBytes)}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-[10px] text-slate-500 uppercase">Ops/sec</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase">Ops/sec</p>
                   <p className="text-lg font-bold text-sky-400">
                     {d.redisDetails.opsPerSecond != null ? d.redisDetails.opsPerSecond : "—"}
                   </p>
@@ -121,7 +121,7 @@ function RedisWorkerInner() {
               </div>
             ) : (
               <div className="p-4">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Redis liveness reports from the app health engine. Detailed Prometheus counters
                   are not available in this environment — client, memory and ops fields will
                   appear once the metrics exporter is reachable.
@@ -138,14 +138,14 @@ function RedisWorkerInner() {
             </div>
             <div className="p-4 space-y-3 min-w-0">
               {busy ? (
-                <div className="h-12 animate-pulse rounded-lg bg-slate-800/40" />
+                <div className="h-12 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
               ) : (
                 <>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-slate-500">Queue runner liveness</p>
+                    <p className="text-xs text-[var(--text-muted)]">Queue runner liveness</p>
                     <StatusPill status={d?.worker?.status} />
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--text-muted)]">
                     The worker runs background jobs (statistics aggregation, cleanup, audit
                     rotation). Job schedules and last-run details are listed under Deployment
                     History.

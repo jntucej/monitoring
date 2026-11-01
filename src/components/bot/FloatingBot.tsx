@@ -20,7 +20,7 @@ const LONG_PRESS_MS = 420;
 const BotPanel = dynamic(() => import("./BotPanel").then((m) => m.BotPanel), {
   ssr: false,
   loading: () => (
-    <div className="fixed bottom-24 right-6 h-[520px] w-[380px] rounded-2xl bg-slate-900/70 animate-pulse" />
+    <div className="fixed bottom-24 right-6 h-[520px] w-[380px] rounded-2xl bg-[var(--bg-surface)]/70 animate-pulse" />
   ),
 });
 

@@ -40,7 +40,7 @@ function VisitorHostinfoInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -48,7 +48,7 @@ function VisitorHostinfoInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Host Info</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -80,36 +80,36 @@ function VisitorHostinfoInner() {
             </div>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading host info…
             </div>
           ) : host?.name ? (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Host</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host</p>
                   <p className="mt-1 text-base font-semibold text-slate-100">{host.name}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Host ID</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host ID</p>
                   <p className="mt-1 text-base font-mono text-sky-400">
                     {host.uniqueId ?? "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Host role</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host role</p>
                   <p className="mt-1 text-base font-bold text-amber-400">{host.role ?? "—"}</p>
                 </div>
               </div>
               {visit?.purpose && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Visit purpose: <span className="text-slate-300">{visit.purpose}</span>
                 </p>
               )}
             </div>
           ) : (
             <div className="p-4 min-w-0">
-              <p className="text-sm text-slate-500">No host is linked to your most recent visit.</p>
+              <p className="text-sm text-[var(--text-muted)]">No host is linked to your most recent visit.</p>
             </div>
           )}
         </div>

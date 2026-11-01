@@ -90,37 +90,37 @@ function AdminWorkflowConfigurationInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Pass Types">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <GitBranch className="w-3.5 h-3.5 text-emerald-400" /> Pass Types
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : passTypes.length}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : passTypes.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Configured workflow definitions</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Configured workflow definitions</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Pending">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <FileCheck className="w-3.5 h-3.5 text-amber-400" /> Awaiting Approval
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : totalPending}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : totalPending}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Passes queued across all workflows</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Passes queued across all workflows</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Standard SLA
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : "48 hrs"}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : "48 hrs"}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Approval turnaround target</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Approval turnaround target</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -134,19 +134,19 @@ function AdminWorkflowConfigurationInner() {
               Per-pass-type definitions
             </div>
             <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter pass types…"
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-lg bg-[var(--bg-surface)] border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
                   aria-label="Clear filter"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -159,12 +159,12 @@ function AdminWorkflowConfigurationInner() {
             <div className="p-6 text-sm text-rose-400">{res.error}</div>
           ) : loading ? (
             <div className="p-4 space-y-2">
-              <div className="h-4 w-40 rounded bg-slate-800 animate-pulse" />
-              <div className="h-4 w-52 rounded bg-slate-800 animate-pulse" />
-              <div className="h-4 w-36 rounded bg-slate-800 animate-pulse" />
+              <div className="h-4 w-40 rounded bg-[var(--bg-elevated)] animate-pulse" />
+              <div className="h-4 w-52 rounded bg-[var(--bg-elevated)] animate-pulse" />
+              <div className="h-4 w-36 rounded bg-[var(--bg-elevated)] animate-pulse" />
             </div>
           ) : visible.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500">
+            <div className="p-8 text-center text-sm text-[var(--text-muted)]">
               <p>No pass type definitions found.</p>
               <Link
                 href="/admin/settings"
@@ -176,7 +176,7 @@ function AdminWorkflowConfigurationInner() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[720px]">
-                <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500 border-b border-slate-800">
+                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-slate-800">
                   <tr>
                     <th className="py-2.5 px-4">Pass Type</th>
                     <th className="py-2.5 px-4">Approval</th>
@@ -188,10 +188,10 @@ function AdminWorkflowConfigurationInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
                   {visible.map((p) => (
-                    <tr key={p.code} className="hover:bg-slate-900/40">
+                    <tr key={p.code} className="hover:bg-[var(--bg-surface)]/40">
                       <td className="py-3 px-4">
                         <p className="font-semibold text-white">{p.name}</p>
-                        <p className="text-[11px] text-slate-500">{p.code}</p>
+                        <p className="text-[11px] text-[var(--text-muted)]">{p.code}</p>
                       </td>
                       <td className="py-3 px-4">
                         {p.requires_approval ? (
@@ -199,14 +199,14 @@ function AdminWorkflowConfigurationInner() {
                             <CheckCircle2 className="w-3 h-3" /> {p.approval_flow || "Approval"}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-slate-800 text-slate-400 px-2 py-0.5 text-[11px] font-medium">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-[11px] font-medium">
                             Direct issue
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-slate-300">
                         {p.workflow?.current_stage || (
-                          <span className="text-slate-500">No active requests</span>
+                          <span className="text-[var(--text-muted)]">No active requests</span>
                         )}
                       </td>
                       <td className="py-3 px-4 tabular-nums text-slate-300">
@@ -219,7 +219,7 @@ function AdminWorkflowConfigurationInner() {
                             <CheckCircle2 className="w-3 h-3" /> Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)]">
                             <XCircle className="w-3 h-3" /> Disabled
                           </span>
                         )}
@@ -238,7 +238,7 @@ function AdminWorkflowConfigurationInner() {
         <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-amber-300">Read-only view</p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
             Workflow stage definitions, approver chains and SLA targets are locked for admins — changes
             require sysadmin access. For stage re-ordering or new pass types, contact the platform team.
           </p>

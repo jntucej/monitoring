@@ -33,7 +33,7 @@ const SEVERITY_TONE: Record<Alert["severity"], string> = {
   critical: "text-rose-400 bg-rose-400/10 border-rose-400/20",
   high: "text-amber-400 bg-amber-400/10 border-amber-400/20",
   medium: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  low: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+  low: "text-[var(--text-muted)] bg-slate-400/10 border-slate-400/20",
 };
 
 function fmtTime(iso: string | null | undefined): string {

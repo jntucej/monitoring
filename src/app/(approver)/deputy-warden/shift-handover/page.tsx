@@ -70,7 +70,7 @@ function DeputyWardenHandoverInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -78,7 +78,7 @@ function DeputyWardenHandoverInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -108,18 +108,18 @@ function DeputyWardenHandoverInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Shift Handover</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {(data?.data?.handovers ?? []).length} handover(s) · 7-day window
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Shift Handover…
             </div>
           ) : (data?.data?.handovers ?? []).length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 No shift handovers recorded in the last 7 days. End-of-shift notes from operators
                 and supervisors will appear here.
               </p>
@@ -127,21 +127,21 @@ function DeputyWardenHandoverInner() {
           ) : (
             <div className="p-4 space-y-3 min-w-0">
               {(data?.data?.handovers ?? []).map((h) => (
-                <div key={h.id} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <div key={h.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
                     <p className="text-sm font-semibold text-white min-w-0">
                       {h.byName ? `From ${h.byName}` : "From previous shift"}
-                      <span className="ml-2 text-xs font-normal text-slate-500">{new Date(h.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span className="ml-2 text-xs font-normal text-[var(--text-muted)]">{new Date(h.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                     </p>
-                    <span className="text-xs text-slate-500">{(h.items ?? []).length} item(s)</span>
+                    <span className="text-xs text-[var(--text-muted)]">{(h.items ?? []).length} item(s)</span>
                   </div>
-                  {h.notes ? <p className="mt-1 text-xs text-slate-400">{h.notes}</p> : null}
+                  {h.notes ? <p className="mt-1 text-xs text-[var(--text-muted)]">{h.notes}</p> : null}
                   {(h.items ?? []).length > 0 ? (
                     <ul className="mt-2 space-y-1 min-w-0">
                       {(h.items ?? []).map((it, i) => (
-                        <li key={i} className="text-xs text-slate-400 min-w-0">
-                          <span className="text-slate-500 font-mono">{it.type}</span> · {it.title}
-                          {it.details ? <span className="text-slate-500"> — {it.details}</span> : null}
+                        <li key={i} className="text-xs text-[var(--text-muted)] min-w-0">
+                          <span className="text-[var(--text-muted)] font-mono">{it.type}</span> · {it.title}
+                          {it.details ? <span className="text-[var(--text-muted)]"> — {it.details}</span> : null}
                         </li>
                       ))}
                     </ul>

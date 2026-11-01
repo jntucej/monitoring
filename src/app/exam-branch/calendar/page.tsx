@@ -69,7 +69,7 @@ function ExamBranchCalendarInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -77,7 +77,7 @@ function ExamBranchCalendarInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -110,7 +110,7 @@ function ExamBranchCalendarInner() {
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                   followed.has(c.code)
                     ? "bg-emerald-500/20 text-emerald-300"
-                    : "bg-slate-800 text-slate-400"
+                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                 }`}
               >
                 <span
@@ -122,7 +122,7 @@ function ExamBranchCalendarInner() {
               </span>
             ))}
             {cats.length === 0 && (
-              <span className="text-xs text-slate-500">No categories configured yet.</span>
+              <span className="text-xs text-[var(--text-muted)]">No categories configured yet.</span>
             )}
           </div>
         </div>
@@ -138,7 +138,7 @@ function ExamBranchCalendarInner() {
                 {new Date().toLocaleString([], { month: "long", year: "numeric" })}
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {events.length} event(s)
             </span>
           </div>
@@ -148,14 +148,14 @@ function ExamBranchCalendarInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : events.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <CalendarDays className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 No examination events scheduled this month.
               </p>
               <p className="text-xs text-slate-600 mt-1">
@@ -170,11 +170,11 @@ function ExamBranchCalendarInner() {
                     <span className="text-sm font-medium text-white min-w-0 flex-1 truncate">
                       {ev.title}
                     </span>
-                    <span className="inline-flex items-center rounded-full bg-slate-800 text-slate-400 px-2 py-0.5 text-xs shrink-0">
+                    <span className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs shrink-0">
                       {ev.category}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--text-muted)] min-w-0">
                     <span className="inline-flex items-center gap-1">
                       <CalendarDays className="w-3 h-3" />
                       {new Date(ev.date).toLocaleDateString([], {

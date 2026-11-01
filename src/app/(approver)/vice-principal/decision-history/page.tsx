@@ -84,7 +84,7 @@ function VpDecisionHistoryInner() {
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Decision History">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <History className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Past Decisions — VP Scope
@@ -101,7 +101,7 @@ function VpDecisionHistoryInner() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold border shrink-0 transition-colors ${
                   filter === f
                     ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
-                    : "bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200"
+                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-slate-700 hover:text-slate-200"
                 }`}
               >
                 {f === "ALL" ? "All" : f.charAt(0) + f.slice(1).toLowerCase()}
@@ -121,20 +121,20 @@ function VpDecisionHistoryInner() {
           {loading ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-12 rounded-lg bg-slate-800/60 animate-pulse" />
+                <div key={i} className="h-12 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
               ))}
             </div>
           ) : merged.length === 0 ? (
             <div className="p-6 text-center">
               <ScrollText className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">No past decisions recorded in this scope.</p>
+              <p className="text-sm text-[var(--text-muted)]">No past decisions recorded in this scope.</p>
             </div>
           ) : (
             <ul className="space-y-2 min-w-0">
               {merged.slice(0, 20).map((r) => (
                 <li
                   key={`${r.status}-${r.id}`}
-                  className="rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
@@ -150,7 +150,7 @@ function VpDecisionHistoryInner() {
                     {r.student?.name || "—"}
                     {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
                   </span>
-                  <span className="text-xs text-slate-500 capitalize shrink-0">
+                  <span className="text-xs text-[var(--text-muted)] capitalize shrink-0">
                     {r.workflow_type.replace(/_/g, " ")}
                   </span>
                   <span className="text-xs text-slate-600 shrink-0 ml-auto">

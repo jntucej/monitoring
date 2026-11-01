@@ -66,7 +66,7 @@ function ExamSuperintendentScheduleInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -74,7 +74,7 @@ function ExamSuperintendentScheduleInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -104,54 +104,54 @@ function ExamSuperintendentScheduleInner() {
               <CalendarClock className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white">Exam Schedule</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {pending.length} pending exam clearance(s)
             </span>
           </div>
 
           {/* Summary strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-              <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
+            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Status</p>
               <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
-              <p className="text-xs text-slate-500">Exam schedule streams from the permission workflow engine.</p>
+              <p className="text-xs text-[var(--text-muted)]">Exam schedule streams from the permission workflow engine.</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-              <p className="text-xs text-slate-500 uppercase tracking-wide">Deadlines at Risk</p>
+            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Deadlines at Risk</p>
               <p className={`mt-1 text-lg font-bold ${breached.length > 0 ? "text-amber-400" : "text-slate-300"}`}>
                 {breached.length}
               </p>
-              <p className="text-xs text-slate-500">Pending items past their SLA deadline.</p>
+              <p className="text-xs text-[var(--text-muted)]">Pending items past their SLA deadline.</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-              <p className="text-xs text-slate-500 uppercase tracking-wide">Last Updated</p>
+            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Last Updated</p>
               <p className="mt-1 text-lg font-bold text-sky-400">
                 {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
               </p>
-              <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds.</p>
+              <p className="text-xs text-[var(--text-muted)]">Auto-refreshes every 30 seconds.</p>
             </div>
           </div>
 
           {/* Upcoming exam clearances */}
           <div className="px-4 pb-4 min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Upcoming Clearance Deadlines</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">Upcoming Clearance Deadlines</p>
             {busy ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-800/40" />
+                  <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
                 ))}
               </div>
             ) : upcoming.length === 0 ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-6 text-center min-w-0">
+              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/30 p-6 text-center min-w-0">
                 <ShieldCheck className="w-5 h-5 text-slate-600 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">No scheduled exam clearance deadlines in view.</p>
+                <p className="text-sm text-[var(--text-muted)]">No scheduled exam clearance deadlines in view.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 {upcoming.map((row) => (
-                  <div key={row.id} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                  <div key={row.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{row.candidate_name ?? row.ticket_number ?? "Exam candidate"}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
                       {row.roll_number ? `Roll ${row.roll_number} · ` : ""}
                       Stage: {row.current_stage ?? "—"}
                     </p>

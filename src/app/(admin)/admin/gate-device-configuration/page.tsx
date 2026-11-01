@@ -95,39 +95,39 @@ function AdminGateDeviceConfigurationInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Gate Roster">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <DoorOpen className="w-3.5 h-3.5 text-emerald-400" /> Gate Roster
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : activeGates.length}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : activeGates.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Active gates configured</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Active gates configured</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Schedules">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Schedule Entries
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : totalScheduleEntries}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : totalScheduleEntries}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Gate opening windows defined</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Gate opening windows defined</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Devices">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Cpu className="w-3.5 h-3.5 text-amber-400" /> Device Modes
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading
-                ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" />
+                ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" />
                 : deviceVerification.filter((dv) => dv.enabled).length}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Verification modes enabled</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Verification modes enabled</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -138,15 +138,15 @@ function AdminGateDeviceConfigurationInner() {
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-2 animate-pulse">
-                <div className="h-4 w-32 rounded bg-slate-800" />
-                <div className="h-3 w-40 rounded bg-slate-800" />
-                <div className="h-3 w-24 rounded bg-slate-800" />
+                <div className="h-4 w-32 rounded bg-[var(--bg-elevated)]" />
+                <div className="h-3 w-40 rounded bg-[var(--bg-elevated)]" />
+                <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
               </div>
             ))
           ) : gates.length === 0 ? (
             <div className="col-span-full rounded-xl border border-slate-800 bg-[#0d1220] p-8 text-center">
-              <DoorOpen className="w-6 h-6 text-slate-500 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No gates configured yet.</p>
+              <DoorOpen className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
+              <p className="text-sm text-[var(--text-muted)]">No gates configured yet.</p>
               <Link
                 href="/admin/gates"
                 className="mt-3 inline-block text-xs font-semibold text-emerald-400 hover:text-emerald-300"
@@ -161,7 +161,7 @@ function AdminGateDeviceConfigurationInner() {
                 className={`rounded-xl border p-4 space-y-3 ${
                   gate.is_active
                     ? "bg-[#0d1220] border-slate-800"
-                    : "bg-slate-900/40 border-slate-800/60 opacity-70"
+                    : "bg-[var(--bg-surface)]/40 border-slate-800/60 opacity-70"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -170,11 +170,11 @@ function AdminGateDeviceConfigurationInner() {
                       <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                       <span className="truncate">{gate.name}</span>
                     </p>
-                    <p className="text-[11px] text-slate-500">{gate.gate_code} · {gate.location}</p>
+                    <p className="text-[11px] text-[var(--text-muted)]">{gate.gate_code} · {gate.location}</p>
                   </div>
                   <span
                     className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase shrink-0 ${
-                      gate.is_active ? "bg-emerald-500/15 text-emerald-300" : "bg-slate-800 text-slate-500"
+                      gate.is_active ? "bg-emerald-500/15 text-emerald-300" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                     }`}
                   >
                     {gate.is_active ? "Active" : "Disabled"}
@@ -182,16 +182,16 @@ function AdminGateDeviceConfigurationInner() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                  <div className="rounded-lg bg-slate-900/60 p-2.5">
-                    <p className="text-slate-500 mb-0.5">Geofence</p>
+                  <div className="rounded-lg bg-[var(--bg-surface)]/60 p-2.5">
+                    <p className="text-[var(--text-muted)] mb-0.5">Geofence</p>
                     <p className="text-slate-200 tabular-nums">
                       {gate.latitude != null && gate.longitude != null
                         ? `${gate.latitude.toFixed(4)}, ${gate.longitude.toFixed(4)}`
                         : "Not set"}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-slate-900/60 p-2.5">
-                    <p className="text-slate-500 mb-0.5">Radius</p>
+                  <div className="rounded-lg bg-[var(--bg-surface)]/60 p-2.5">
+                    <p className="text-[var(--text-muted)] mb-0.5">Radius</p>
                     <p className="text-slate-200 tabular-nums">
                       {gate.allowed_radius_meters != null ? `${gate.allowed_radius_meters} m` : "Default"}
                     </p>
@@ -199,16 +199,16 @@ function AdminGateDeviceConfigurationInner() {
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5 flex items-center gap-1">
                     <Clock className="w-3 h-3" /> Schedules
                   </p>
                   {gate.schedules.length === 0 ? (
-                    <p className="text-xs text-slate-500">No schedule entries</p>
+                    <p className="text-xs text-[var(--text-muted)]">No schedule entries</p>
                   ) : (
                     <ul className="space-y-1">
                       {gate.schedules.slice(0, 4).map((s) => (
                         <li key={`${s.day_of_week}-${s.open_time}`} className="flex items-center gap-2 text-xs">
-                          <span className="w-8 text-slate-500 font-medium">{DAY_LABELS[s.day_of_week] || `D${s.day_of_week}`}</span>
+                          <span className="w-8 text-[var(--text-muted)] font-medium">{DAY_LABELS[s.day_of_week] || `D${s.day_of_week}`}</span>
                           <span className="text-slate-300 tabular-nums">
                             {s.open_time?.slice(0, 5)} – {s.close_time?.slice(0, 5)}
                           </span>
@@ -218,7 +218,7 @@ function AdminGateDeviceConfigurationInner() {
                         </li>
                       ))}
                       {gate.schedules.length > 4 && (
-                        <li className="text-[11px] text-slate-500">+{gate.schedules.length - 4} more</li>
+                        <li className="text-[11px] text-[var(--text-muted)]">+{gate.schedules.length - 4} more</li>
                       )}
                     </ul>
                   )}
@@ -234,14 +234,14 @@ function AdminGateDeviceConfigurationInner() {
         <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
-              <div className="h-4 rounded bg-slate-800 animate-pulse" />
-              <div className="h-4 rounded bg-slate-800 animate-pulse" />
+              <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />
+              <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />
             </div>
           ) : deviceVerification.length === 0 ? (
             <div className="p-8 text-center">
-              <Radio className="w-6 h-6 text-slate-500 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No device verification modes configured.</p>
-              <p className="mt-1 text-xs text-slate-500">Modes are provisioned by the platform team.</p>
+              <Radio className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
+              <p className="text-sm text-[var(--text-muted)]">No device verification modes configured.</p>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">Modes are provisioned by the platform team.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-800/70">
@@ -251,20 +251,20 @@ function AdminGateDeviceConfigurationInner() {
                     {dv.enabled ? (
                       <Wifi className="w-4 h-4 text-emerald-400 shrink-0" />
                     ) : (
-                      <WifiOff className="w-4 h-4 text-slate-500 shrink-0" />
+                      <WifiOff className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                     )}
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-white">
                         {DEVICE_LABELS[dv.device_type] || dv.device_type}
                       </p>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-[var(--text-muted)]">
                         Scope: {dv.scope === "global" ? "Campus-wide" : `${dv.scope}${dv.scope_id ? " (scoped)" : ""}`}
                       </p>
                     </div>
                   </div>
                   <span
                     className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase shrink-0 ${
-                      dv.enabled ? "bg-emerald-500/15 text-emerald-300" : "bg-slate-800 text-slate-500"
+                      dv.enabled ? "bg-emerald-500/15 text-emerald-300" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
                     }`}
                   >
                     {dv.enabled ? "Enabled" : "Disabled"}
@@ -283,7 +283,7 @@ function AdminGateDeviceConfigurationInner() {
           <p className="text-sm font-semibold text-amber-300 flex items-center gap-1.5">
             Read-only view <AlertCircle className="w-3.5 h-3.5 opacity-70" />
           </p>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
             Gate geofences, schedules and device verification modes are locked for admins — editing
             requires sysadmin access. Live hardware telemetry and operator assignments stay under the{" "}
             <Link href="/admin/gates" className="text-emerald-400 hover:underline">Gates</Link> section.

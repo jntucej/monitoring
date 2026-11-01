@@ -67,16 +67,16 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-slate-400 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500 min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -93,10 +93,10 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0 hover:bg-slate-800/50 transition-colors"
+      className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0 hover:bg-[var(--bg-elevated)]/50 transition-colors"
     >
       <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="text-xs text-slate-500 mt-1">{sub}</p>
+      <p className="text-xs text-[var(--text-muted)] mt-1">{sub}</p>
     </Link>
   );
 }
@@ -166,7 +166,7 @@ function DeputyWardenDailyOverviewInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>

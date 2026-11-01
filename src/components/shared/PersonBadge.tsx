@@ -40,7 +40,7 @@ export const PersonBadge: React.FC<PersonBadgeProps> = ({
     worker: {
       label: 'Worker',
       bg: 'bg-slate-500/10',
-      text: 'text-slate-400',
+      text: 'text-[var(--text-muted)]',
       border: 'border-slate-500/20',
       icon: <Wrench className="w-3.5 h-3.5 mr-1" />,
     },

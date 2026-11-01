@@ -134,14 +134,14 @@ function MessIssuesInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -167,13 +167,13 @@ function MessIssuesInner() {
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
               <label className="block min-w-0">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                   Issue type
                 </span>
                 <select
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
-                  className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="NO_SHOW_FLAGGED">No-show flagged</option>
                   <option value="TOKEN_REVOKED">Token revoked</option>
@@ -182,7 +182,7 @@ function MessIssuesInner() {
                 </select>
               </label>
               <label className="block min-w-0">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
                   Description
                 </span>
                 <textarea
@@ -190,7 +190,7 @@ function MessIssuesInner() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="What happened, when, and who is affected?"
-                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
                 />
               </label>
             </div>
@@ -206,7 +206,7 @@ function MessIssuesInner() {
               <button
                 type="button"
                 onClick={() => setRaiseOpen(false)}
-                className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:bg-slate-800"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-700 px-3 py-2 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
               >
                 Cancel
               </button>
@@ -220,12 +220,12 @@ function MessIssuesInner() {
           <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
             <BellRing className="w-4 h-4 text-amber-400/70 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Mess Issues Feed</span>
-            <span className="ml-auto text-xs text-slate-500 shrink-0">
+            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
               {issuesRes?.data?.total ?? 0} event(s)
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading issues feed…
             </div>
@@ -233,7 +233,7 @@ function MessIssuesInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-2.5">Event</th>
                     <th className="text-left px-4 py-2.5">Status</th>
                     <th className="text-left px-4 py-2.5">Meal Date</th>
@@ -242,12 +242,12 @@ function MessIssuesInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {issues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={issue.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                       <td className="px-4 py-2.5 min-w-0">
                         <p className="text-slate-200 font-medium capitalize truncate">
                           {issue.eventType.replace(/_/g, " ")}
                         </p>
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-[var(--text-muted)] truncate">
                           {issue.userName ? `${issue.userName} · ` : ""}
                           {issue.channel.toLowerCase()}
                         </p>
@@ -257,16 +257,16 @@ function MessIssuesInner() {
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
                             issue.status === "SENT"
                               ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
-                              : "border-slate-600/40 bg-slate-700/20 text-slate-400"
+                              : "border-slate-600/40 bg-slate-700/20 text-[var(--text-muted)]"
                           }`}
                         >
                           {issue.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-slate-400 whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-[var(--text-muted)] whitespace-nowrap">
                         {issue.mealDate ? fmtTs(issue.mealDate) : "—"}
                       </td>
-                      <td className="px-4 py-2.5 text-slate-500 text-xs whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
                         {fmtTs(issue.createdAt)}
                       </td>
                     </tr>
@@ -277,7 +277,7 @@ function MessIssuesInner() {
           ) : (
             <div className="p-8 text-center">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No mess issues or exception events recorded. No-show flags, token revocations,
                 and raised incidents will appear here.
               </p>

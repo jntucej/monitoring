@@ -50,17 +50,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-      <div className="flex items-center gap-2 text-slate-500 min-w-0">
+    <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-4 h-4 mt-2 animate-spin text-slate-500" />
+        <Loader2 className="w-4 h-4 mt-2 animate-spin text-[var(--text-muted)]" />
       ) : (
         <p className={`mt-1 text-xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500 min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -123,14 +123,14 @@ function MessDailyMealCountsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -146,10 +146,10 @@ function MessDailyMealCountsInner() {
           <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
             <Calculator className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Daily Meal Counts</span>
-            <span className="ml-auto text-xs text-slate-500">{fmtDate(d?.mealDate)}</span>
+            <span className="ml-auto text-xs text-[var(--text-muted)]">{fmtDate(d?.mealDate)}</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading daily meal counts…
             </div>
@@ -163,7 +163,7 @@ function MessDailyMealCountsInner() {
                 <StatCard icon={Users} label="Veg" value={d.veg} sub="Primary item VEG" accent="text-emerald-400" />
                 <StatCard icon={Users} label="Non-Veg" value={d.nonVeg} sub="Primary item NON_VEG" accent="text-rose-400" />
               </div>
-              <p className="mt-4 text-xs text-slate-500">
+              <p className="mt-4 text-xs text-[var(--text-muted)]">
                 Counts stream from the mess preferences and serving logs for the meal day above.
                 Confirmations run from the{" "}
                 <Link href="/mess/scan" className="text-emerald-400 hover:underline">
@@ -175,7 +175,7 @@ function MessDailyMealCountsInner() {
           ) : (
             <div className="p-8 text-center">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No meal selections recorded for this meal day yet. Counts appear once students
                 declare a preference for the scheduled mess day.
               </p>

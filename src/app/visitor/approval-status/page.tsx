@@ -40,13 +40,13 @@ function VisitorApprovalstatusInner() {
     approval?.state === "COMPLETED" ? "Completed" : "No visit on record";
   const stateTone =
     approval?.state === "ACTIVE" ? "text-emerald-400" :
-    approval?.state === "COMPLETED" ? "text-sky-400" : "text-slate-500";
+    approval?.state === "COMPLETED" ? "text-sky-400" : "text-[var(--text-muted)]";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -54,7 +54,7 @@ function VisitorApprovalstatusInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Approval Status</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -86,23 +86,23 @@ function VisitorApprovalstatusInner() {
               ) : approval?.state === "COMPLETED" ? (
                 <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />
               ) : (
-                <XCircle className="w-4 h-4 text-slate-500 shrink-0" />
+                <XCircle className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
               )}
               <span className="text-sm font-semibold text-white truncate">Visit approval state</span>
             </div>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
             </div>
           ) : (
             <div className="p-4 min-w-0 space-y-3">
-              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">State</p>
+              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">State</p>
                 <p className={`mt-1 text-lg font-bold ${stateTone}`}>{stateLabel}</p>
               </div>
               {approval?.checkedInAt && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Checked in at{" "}
                   <span className="text-slate-300">
                     {new Date(approval.checkedInAt).toLocaleString("en-IN", {
@@ -112,12 +112,12 @@ function VisitorApprovalstatusInner() {
                 </p>
               )}
               {approval?.purpose && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Purpose: <span className="text-slate-300">{approval.purpose}</span>
                 </p>
               )}
               {approval?.state === "NONE" && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   No visit is currently on record. Your host must issue a pass at the gate to start a visit.
                 </p>
               )}

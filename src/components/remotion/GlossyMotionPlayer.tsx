@@ -46,7 +46,7 @@ export function GlossyMotionPlayer({
 
     return (
       <div
-        className={`relative w-full h-full min-h-[140px] rounded-2xl border bg-slate-900/60 p-4 flex flex-col items-center justify-center text-center ${statusColor} ${className}`}
+        className={`relative w-full h-full min-h-[140px] rounded-2xl border bg-[var(--bg-surface)]/60 p-4 flex flex-col items-center justify-center text-center ${statusColor} ${className}`}
       >
         <div className="w-10 h-10 rounded-full border border-current flex items-center justify-center animate-pulse mb-2">
           <div className="w-3 h-3 rounded-full bg-current" />

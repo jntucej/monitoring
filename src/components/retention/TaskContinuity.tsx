@@ -166,7 +166,7 @@ export function TaskContinuity() {
 
   return (
     <WidgetBoundary title="Task Continuity">
-      <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <RotateCw className="h-4 w-4 text-violet-400" />
@@ -209,7 +209,7 @@ export function TaskContinuity() {
           <div className="h-20 animate-pulse rounded bg-slate-700/20" />
         ) : !hasDrafts ? (
           <div className="py-6 text-center">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--text-muted)]">
               No saved drafts. In-progress tasks will appear here automatically.
             </p>
           </div>
@@ -217,7 +217,7 @@ export function TaskContinuity() {
           <div className="space-y-2 max-h-72 overflow-y-auto">
             {Object.entries(grouped).map(([type, drafts]) => (
               <div key={type}>
-                <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                <p className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wide mb-1.5 flex items-center gap-1">
                   <ListPlus className="h-3 w-3" />
                   {DRAFT_TYPE_LABELS[type] ?? type}
                 </p>
@@ -227,7 +227,7 @@ export function TaskContinuity() {
                     className={`rounded-lg border p-3 mb-1.5 ${
                       expanded === `${draft.taskType}:${draft.position}`
                         ? "border-violet-500/40 bg-violet-500/10"
-                        : "border-slate-700/40 bg-slate-800/30"
+                        : "border-slate-700/40 bg-[var(--bg-elevated)]/30"
                     }`}
                   >
                     <button
@@ -245,13 +245,13 @@ export function TaskContinuity() {
                         {getDraftLabel(draft)}
                       </span>
                       {draft.updatedAt && (
-                        <span className="text-[10px] text-slate-500 shrink-0 flex items-center gap-1">
+                        <span className="text-[10px] text-[var(--text-muted)] shrink-0 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {new Date(draft.updatedAt).toLocaleDateString()}
                         </span>
                       )}
                       <ChevronRight
-                        className={`h-3.5 w-3.5 text-slate-500 transition-transform motion-reduce:transition-none ${
+                        className={`h-3.5 w-3.5 text-[var(--text-muted)] transition-transform motion-reduce:transition-none ${
                           expanded === `${draft.taskType}:${draft.position}`
                             ? "rotate-90"
                             : ""
@@ -261,7 +261,7 @@ export function TaskContinuity() {
 
                     {expanded === `${draft.taskType}:${draft.position}` && (
                       <div className="mt-2 space-y-2">
-                        <div className="rounded bg-slate-900/50 p-2 text-[10px] text-slate-400 font-mono break-all max-h-24 overflow-y-auto">
+                        <div className="rounded bg-[var(--bg-surface)]/50 p-2 text-[10px] text-[var(--text-muted)] font-mono break-all max-h-24 overflow-y-auto">
                           {JSON.stringify(draft.payload, null, 2)}
                         </div>
                         <div className="flex gap-2">
@@ -276,7 +276,7 @@ export function TaskContinuity() {
                           <button
                             type="button"
                             onClick={() => handleDismiss(draft)}
-                            className="flex items-center gap-1 rounded border border-slate-600/50 px-2.5 py-1 text-[10px] text-slate-400 hover:bg-slate-700/40 transition-colors motion-reduce:transition-none"
+                            className="flex items-center gap-1 rounded border border-slate-600/50 px-2.5 py-1 text-[10px] text-[var(--text-muted)] hover:bg-slate-700/40 transition-colors motion-reduce:transition-none"
                           >
                             <X className="h-3 w-3" />
                             Dismiss

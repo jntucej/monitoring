@@ -85,7 +85,7 @@ function ExamBranchPassQueueInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -93,7 +93,7 @@ function ExamBranchPassQueueInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -119,26 +119,26 @@ function ExamBranchPassQueueInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Pass Queue Stats">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">In Queue</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">In Queue</p>
             <p className="mt-1 text-2xl font-bold text-amber-400">{pendingCount}</p>
-            <p className="text-xs text-slate-500">Exam passes awaiting OIE clearance</p>
+            <p className="text-xs text-[var(--text-muted)]">Exam passes awaiting OIE clearance</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Overdue (SLA)</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Overdue (SLA)</p>
             <p
               className={`mt-1 text-2xl font-bold ${
-                overdueCount > 0 ? "text-rose-400" : "text-slate-400"
+                overdueCount > 0 ? "text-rose-400" : "text-[var(--text-muted)]"
               }`}
             >
               {overdueCount}
             </p>
-            <p className="text-xs text-slate-500">Past SLA deadline — escalate to OIE</p>
+            <p className="text-xs text-[var(--text-muted)]">Past SLA deadline — escalate to OIE</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Total Pending</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Pending</p>
             <p className="mt-1 text-2xl font-bold text-white">{total}</p>
-            <p className="text-xs text-slate-500">All pending exam-stage requests</p>
+            <p className="text-xs text-[var(--text-muted)]">All pending exam-stage requests</p>
           </div>
         </div>
       </WidgetBoundary>
@@ -175,7 +175,7 @@ function ExamBranchPassQueueInner() {
                 Passes Awaiting Clearance
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{requests.length} shown</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{requests.length} shown</span>
           </div>
 
           {busy ? (
@@ -183,14 +183,14 @@ function ExamBranchPassQueueInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <ListChecks className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 No exam passes in the queue.
               </p>
               <p className="text-xs text-slate-600 mt-1">
@@ -219,11 +219,11 @@ function ExamBranchPassQueueInner() {
                         SLA EXCEEDED
                       </span>
                     )}
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-[var(--text-muted)]">
                       stage: {req.current_stage}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] min-w-0">
                     {new Date(req.created_at).toLocaleString([], {
                       month: "short",
                       day: "numeric",

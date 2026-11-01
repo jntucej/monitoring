@@ -47,16 +47,16 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-slate-400 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500 min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -66,7 +66,7 @@ function EmptyState({ message }: { message: string }) {
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
         <Inbox className="w-5 h-5 text-slate-600" />
-        <p className="max-w-md text-sm text-slate-400">{message}</p>
+        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
       </div>
     </div>
   );
@@ -142,14 +142,14 @@ function ExaminationReportsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -179,7 +179,7 @@ function ExaminationReportsInner() {
                 value={
                   <span>
                     {m.value}
-                    {m.unit ? <span className="text-sm text-slate-500 ml-1">{m.unit}</span> : null}
+                    {m.unit ? <span className="text-sm text-[var(--text-muted)] ml-1">{m.unit}</span> : null}
                   </span>
                 }
                 sub={m.key}
@@ -220,17 +220,17 @@ function ExaminationReportsInner() {
                       }}
                       title={`${s.label}: ${s.value}`}
                     />
-                    <span className="text-[10px] text-slate-500 rotate-0">{s.label}</span>
+                    <span className="text-[10px] text-[var(--text-muted)] rotate-0">{s.label}</span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-[var(--text-muted)]">
                 {seriesLabels.length} days with recorded activity in the last 30 days.
               </p>
             </div>
           ) : (
             <div className="p-8 text-center">
-              <p className="text-sm text-slate-500">No daily trend data for this period yet.</p>
+              <p className="text-sm text-[var(--text-muted)]">No daily trend data for this period yet.</p>
             </div>
           )}
         </div>

@@ -551,7 +551,7 @@ function OperatorPageInner() {
             type="button"
             disabled={state !== "idle" || manualOpen}
             onClick={() => { primeAudioOnGesture(); setManualOpen((o) => !o); }}
-            className="min-h-[44px] px-5 py-1.5 rounded-full bg-slate-900/85 backdrop-blur border border-slate-700 text-[11px] font-bold tracking-wide text-slate-300 flex items-center gap-2 disabled:opacity-40 transition-colors"
+            className="min-h-[44px] px-5 py-1.5 rounded-full bg-[var(--bg-surface)]/85 backdrop-blur border border-slate-700 text-[11px] font-bold tracking-wide text-slate-300 flex items-center gap-2 disabled:opacity-40 transition-colors"
           >
             <KeyRound className="w-3.5 h-3.5" /> Manual entry
           </button>

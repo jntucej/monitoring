@@ -87,7 +87,7 @@ export function GlassCard({
     if (displayMode === "outdoor" || performanceTier === "emergency") {
       return isDark ? "bg-slate-950/95 border-slate-700 text-white" : "bg-slate-100/95 border-slate-300 text-slate-900";
     }
-    return isDark ? "bg-slate-900/60 border-white/10 text-slate-100" : "bg-white/80 border-white/80 text-neutral-900";
+    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-slate-100" : "bg-white/80 border-white/80 text-neutral-900";
   };
 
   // 3D Tilt Motion Tracking with critically damped spring

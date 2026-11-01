@@ -33,7 +33,7 @@ interface PermissionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-8 text-center text-sm text-slate-500">
+    <div className="rounded-xl border border-dashed border-slate-700 bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
       {message}
     </div>
   );
@@ -64,7 +64,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Student</th>
             <th className="text-left px-4 py-3">Workflow</th>
@@ -74,7 +74,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 15).map((r) => (
-            <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+            <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
@@ -87,7 +87,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
                 {r.student?.name || "—"}
                 {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
               </td>
-              <td className="px-4 py-3 text-slate-400 capitalize whitespace-nowrap">
+              <td className="px-4 py-3 text-[var(--text-muted)] capitalize whitespace-nowrap">
                 {r.workflow_type.replace(/_/g, " ")}
               </td>
               <td className="px-4 py-3">
@@ -95,7 +95,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
                   {r.status}
                 </span>
               </td>
-              <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
                 {r.sla_deadline ? (
                   new Date(r.sla_deadline).getTime() < Date.now() ? (
                     <span className="text-rose-400">
@@ -114,7 +114,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
       </table>
       {rows.length > 0 && (
         <div className="px-4 py-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
-          <p className="text-xs text-slate-500 min-w-0">
+          <p className="text-xs text-[var(--text-muted)] min-w-0">
             {rows.length} pending at the OIE stage — all are actionable.
           </p>
           <a
@@ -158,7 +158,7 @@ function OieRecordsInner() {
       {/* Back link */}
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -166,7 +166,7 @@ function OieRecordsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -189,16 +189,16 @@ function OieRecordsInner() {
                 OIE Examination-Stage Queue
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">assigned duties only</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">assigned duties only</span>
           </div>
           {queueLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
             </div>
           ) : (
             <TicketTable rows={oieRows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-slate-500 min-w-0">
+          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
             restricted at this tier — this desk surfaces only the records assigned to the
             OIE examination duties.

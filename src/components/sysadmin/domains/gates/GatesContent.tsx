@@ -24,7 +24,7 @@ export function GatesContent({ data, onRowClick }: Props) {
             <li key={item.id}>
               <button
                 type="button"
-                className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="w-full text-left px-3 py-2 rounded hover:bg-slate-100 dark:hover:bg-[var(--bg-elevated)] transition"
                 onClick={() => onRowClick(item as any)}
               >
                 {item.id}

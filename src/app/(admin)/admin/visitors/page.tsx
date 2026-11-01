@@ -43,7 +43,7 @@ function statusBadge(s: string) {
   if (c.includes("OUT") || c === "CHECKED_OUT" || c === "COMPLETE")
     return "bg-sky-500/10 text-sky-400";
   if (c === "PENDING") return "bg-amber-500/10 text-amber-400";
-  return "bg-slate-500/10 text-slate-400";
+  return "bg-slate-500/10 text-[var(--text-muted)]";
 }
 
 /**

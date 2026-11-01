@@ -44,7 +44,7 @@ function EmptyState({ message }: { message: string }) {
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
         <Inbox className="w-5 h-5 text-slate-600" />
-        <p className="max-w-md text-sm text-slate-400">{message}</p>
+        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
       </div>
     </div>
   );
@@ -75,7 +75,7 @@ function StatusBadge({ status }: { status: string }) {
     ESCALATED: "border-purple-400/30 bg-purple-400/10 text-purple-400",
     APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
   };
-  const cls = styles[status] ?? "border-slate-400/30 bg-slate-400/10 text-slate-400";
+  const cls = styles[status] ?? "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]";
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${cls}`}
@@ -95,7 +95,7 @@ function ExceptionTable({ rows }: { rows: AccessExceptionRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Stage</th>
@@ -105,7 +105,7 @@ function ExceptionTable({ rows }: { rows: AccessExceptionRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 20).map((r) => (
-            <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+            <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
@@ -116,15 +116,15 @@ function ExceptionTable({ rows }: { rows: AccessExceptionRow[] }) {
               </td>
               <td className="px-4 py-3 text-slate-300 min-w-0">
                 {r.candidate_name || "—"}
-                {r.roll ? <span className="ml-2 text-xs text-slate-500">{r.roll}</span> : null}
+                {r.roll ? <span className="ml-2 text-xs text-[var(--text-muted)]">{r.roll}</span> : null}
               </td>
-              <td className="px-4 py-3 text-slate-400 capitalize whitespace-nowrap">
+              <td className="px-4 py-3 text-[var(--text-muted)] capitalize whitespace-nowrap">
                 {r.current_stage?.replace(/_/g, " ")}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={r.status} />
               </td>
-              <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
                 {r.sla_deadline ? (
                   new Date(r.sla_deadline).getTime() < Date.now() ? (
                     <span className="text-rose-400">
@@ -177,14 +177,14 @@ function AccessExceptionsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -202,21 +202,21 @@ function AccessExceptionsInner() {
       <WidgetBoundary title="Access Exception KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <FileWarning className="w-4 h-4 shrink-0" />
               <span>Exceptions</span>
             </div>
             <p className="text-2xl font-bold text-amber-400 mt-2">{rows.length}</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>SLA Breached</span>
             </div>
             <p className="text-2xl font-bold text-rose-400 mt-2">{breachedCount}</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <ShieldOff className="w-4 h-4 shrink-0" />
               <span>Rejected</span>
             </div>
@@ -225,7 +225,7 @@ function AccessExceptionsInner() {
             </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wide">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <Inbox className="w-4 h-4 shrink-0" />
               <span>Escala</span>
             </div>
@@ -251,7 +251,7 @@ function AccessExceptionsInner() {
           ) : (
             <ExceptionTable rows={rows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-slate-500 min-w-0">
+          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
             Exceptions are surfaced for OIE review only. Resolution is handled by the
             relevant exam-branch or hod office.
           </div>

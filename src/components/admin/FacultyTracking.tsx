@@ -138,7 +138,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
 
         <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)]">
-            <UserX className="w-3.5 h-3.5 text-slate-400" />
+            <UserX className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             Absent / Unchecked
           </div>
           <div className="text-2xl font-black text-[var(--text-muted)]">
@@ -316,7 +316,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : fac.status === "OUTSIDE"
                               ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                              : "bg-slate-500/10 text-[var(--text-muted)] border-slate-500/20"
                           }`}
                         >
                           {fac.status}
@@ -430,7 +430,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                       : selectedFaculty.status === "OUTSIDE"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                      : "bg-slate-500/10 text-slate-400 border-slate-500/30"
+                      : "bg-slate-500/10 text-[var(--text-muted)] border-slate-500/30"
                   }`}
                 >
                   {selectedFaculty.status === "INSIDE"
@@ -531,7 +531,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   const dayNum = day.date.slice(8);
                   const isSelected = activeHeatmapDay?.date === day.date;
 
-                  let colorClass = "bg-slate-800/40 text-slate-400 border-slate-700/30";
+                  let colorClass = "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)] border-slate-700/30";
                   if (day.status === "ON_TIME") {
                     colorClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 hover:bg-emerald-500 hover:text-white";
                   } else if (day.status === "LATE") {
@@ -541,7 +541,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   } else if (day.status === "ABSENT") {
                     colorClass = "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/30";
                   } else if (day.status === "WEEKEND") {
-                    colorClass = "bg-slate-800/30 text-slate-500 border-slate-700/20 opacity-60";
+                    colorClass = "bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] border-slate-700/20 opacity-60";
                   }
 
                   return (
@@ -577,7 +577,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                           ? "bg-indigo-500/20 text-indigo-400"
                           : activeHeatmapDay.status === "ABSENT"
                           ? "bg-rose-500/20 text-rose-400"
-                          : "bg-slate-500/20 text-slate-400"
+                          : "bg-slate-500/20 text-[var(--text-muted)]"
                       }`}
                     >
                       {activeHeatmapDay.status === "LATE" ? "LATE ARRIVAL (>10:00 AM)" : activeHeatmapDay.status}

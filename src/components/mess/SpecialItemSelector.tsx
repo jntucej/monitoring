@@ -152,7 +152,7 @@ export function SpecialItemSelector() {
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${
-                    open ? "border-emerald-500/40 text-emerald-300" : "border-slate-500/40 text-slate-400"
+                    open ? "border-emerald-500/40 text-emerald-300" : "border-slate-500/40 text-[var(--text-muted)]"
                   }`}>
                     <Clock className="h-3 w-3" />
                     {open ? countdownLabel(ev.interestDeadline) : status}

@@ -57,16 +57,16 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-slate-400 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500 min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -138,7 +138,7 @@ function DeputyWardenDecisionHistoryInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -146,7 +146,7 @@ function DeputyWardenDecisionHistoryInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -211,14 +211,14 @@ function DeputyWardenDecisionHistoryInner() {
       <WidgetBoundary title="Decisions">
         <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
               Loading decision history…
             </div>
           ) : decisions.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <FileText className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 No recorded decisions at the deputy-warden stage yet. Past gate activity and
                 approval outcomes will appear here.
               </p>
@@ -227,7 +227,7 @@ function DeputyWardenDecisionHistoryInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Ticket</th>
                     <th className="text-left px-4 py-3">Workflow</th>
                     <th className="text-left px-4 py-3">Outcome</th>
@@ -236,7 +236,7 @@ function DeputyWardenDecisionHistoryInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {decisions.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={d.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-slate-300 whitespace-nowrap">
                         {d.ticket_number}
                       </td>
@@ -252,7 +252,7 @@ function DeputyWardenDecisionHistoryInner() {
                           {d.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">{fmtStamp(d.decidedAt)}</td>
+                      <td className="px-4 py-3 text-[var(--text-muted)]">{fmtStamp(d.decidedAt)}</td>
                     </tr>
                   ))}
                 </tbody>

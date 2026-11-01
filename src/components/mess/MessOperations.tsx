@@ -90,7 +90,7 @@ export function SectionCard({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-wider text-white">{title}</h2>
-          {subtitle && <p className="text-[11px] text-slate-500 mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-[11px] text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -246,12 +246,12 @@ export function MenuItemsTab() {
             <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
           </div>
         ) : sorted.length === 0 ? (
-          <p className="py-6 text-center text-xs text-slate-500">No menu items yet. Add the first one.</p>
+          <p className="py-6 text-center text-xs text-[var(--text-muted)]">No menu items yet. Add the first one.</p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-sm min-w-[480px]">
               <thead>
-                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   <th className="py-2.5 pr-2">#</th>
                   <th className="py-2.5 px-2">Code</th>
                   <th className="py-2.5 px-2">Label</th>
@@ -261,10 +261,10 @@ export function MenuItemsTab() {
               </thead>
               <tbody className="divide-y divide-slate-800/70">
                 {sorted.map((it) => (
-                  <tr key={it.id} className="hover:bg-slate-800/30 transition">
-                    <td className="py-2.5 pr-2 text-slate-500 tabular-nums">{it.sortOrder}</td>
+                  <tr key={it.id} className="hover:bg-[var(--bg-elevated)]/30 transition">
+                    <td className="py-2.5 pr-2 text-[var(--text-muted)] tabular-nums">{it.sortOrder}</td>
                     <td className="py-2.5 px-2">
-                      <span className="font-mono text-xs text-slate-300 bg-slate-800/60 border border-slate-700 rounded px-1.5 py-0.5">
+                      <span className="font-mono text-xs text-slate-300 bg-[var(--bg-elevated)]/60 border border-slate-700 rounded px-1.5 py-0.5">
                         {it.code}
                       </span>
                     </td>
@@ -275,7 +275,7 @@ export function MenuItemsTab() {
                           <Check className="w-3 h-3" /> Primary
                         </span>
                       ) : (
-                        <span className="text-[11px] text-slate-500">Sub-item</span>
+                        <span className="text-[11px] text-[var(--text-muted)]">Sub-item</span>
                       )}
                     </td>
                     <td className="py-2.5 pl-2">
@@ -283,7 +283,7 @@ export function MenuItemsTab() {
                         <button
                         type="button"
                           onClick={() => startEdit(it)}
-                          className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-[var(--text-muted)] hover:text-white flex items-center justify-center transition"
                           aria-label={`Edit ${it.label}`}
                         >
                           <Pencil className="w-3 h-3" />
@@ -311,41 +311,41 @@ export function MenuItemsTab() {
         <SectionCard
           title={editing.id ? `Edit: ${editing.label}` : "New menu item"}
           action={
-            <button type="button" onClick={() => setEditing(null)} className="text-slate-500 hover:text-white">
+            <button type="button" onClick={() => setEditing(null)} className="text-[var(--text-muted)] hover:text-white">
               <X className="w-4 h-4" />
             </button>
           }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Code</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Code</span>
               <input
                 value={editing.code}
                 onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
                 placeholder="RICE"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Label</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Label</span>
               <input
                 value={editing.label}
                 onChange={(e) => setEditing({ ...editing, label: e.target.value })}
                 placeholder="Rice"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Sort order</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Sort order</span>
               <input
                 type="number"
                 value={editing.sortOrder}
                 onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) || 0 })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </label>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Type</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Type</span>
               <div className="mt-1 flex gap-2">
                 <button
                 type="button"
@@ -353,7 +353,7 @@ export function MenuItemsTab() {
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     editing.isPrimary
                       ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
-                      : "bg-slate-900 border-slate-700 text-slate-400 hover:border-emerald-500/30"
+                      : "bg-[var(--bg-surface)] border-slate-700 text-[var(--text-muted)] hover:border-emerald-500/30"
                   }`}
                 >
                   Primary
@@ -364,7 +364,7 @@ export function MenuItemsTab() {
                   className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
                     !editing.isPrimary
                       ? "bg-slate-500/15 border-slate-500/40 text-slate-300"
-                      : "bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500/30"
+                      : "bg-[var(--bg-surface)] border-slate-700 text-[var(--text-muted)] hover:border-slate-500/30"
                   }`}
                 >
                   Sub-item
@@ -594,20 +594,20 @@ export function MealDaysTab() {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Meal date</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Meal date</span>
             <input
               type="date"
               value={draft.mealDate}
               onChange={(e) => setDraft({ ...draft, mealDate: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Day type</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Day type</span>
             <select
               value={draft.dayType}
               onChange={(e) => setDraft({ ...draft, dayType: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
             >
               {DAY_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -617,28 +617,28 @@ export function MealDaysTab() {
             </select>
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Window opens</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Window opens</span>
             <input
               type="time"
               value={draft.windowOpens}
               onChange={(e) => setDraft({ ...draft, windowOpens: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Window closes</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Window closes</span>
             <input
               type="time"
               value={draft.windowCloses}
               onChange={(e) => setDraft({ ...draft, windowCloses: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
           </label>
         </div>
 
         {/* Items multi-select */}
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
             Items on this day
           </span>
           {items.length === 0 ? (
@@ -655,7 +655,7 @@ export function MealDaysTab() {
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                       on
                         ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                        : "bg-slate-900 border-slate-700 text-slate-500 hover:border-emerald-500/30"
+                        : "bg-[var(--bg-surface)] border-slate-700 text-[var(--text-muted)] hover:border-emerald-500/30"
                     }`}
                   >
                     {on && <Check className="w-3 h-3" />}
@@ -693,7 +693,7 @@ export function MealDaysTab() {
           <button
           type="button"
             onClick={() => void daysRes.refresh()}
-            className="text-slate-500 hover:text-white"
+            className="text-[var(--text-muted)] hover:text-white"
             aria-label="Refresh"
           >
             <RefreshCw className="w-4 h-4" />
@@ -701,12 +701,12 @@ export function MealDaysTab() {
         }
       >
         {sortedDays.length === 0 ? (
-          <p className="py-6 text-center text-xs text-slate-500">No meal days scheduled.</p>
+          <p className="py-6 text-center text-xs text-[var(--text-muted)]">No meal days scheduled.</p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-sm min-w-[560px]">
               <thead>
-                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   <th className="py-2.5 pr-2">Date</th>
                   <th className="py-2.5 px-2">Type</th>
                   <th className="py-2.5 px-2">Window</th>
@@ -716,12 +716,12 @@ export function MealDaysTab() {
               </thead>
               <tbody className="divide-y divide-slate-800/70">
                 {sortedDays.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-800/30 transition">
+                  <tr key={d.id} className="hover:bg-[var(--bg-elevated)]/30 transition">
                     <td className="py-2.5 pr-2 font-semibold text-white">{fmtDate(d.mealDate)}</td>
-                    <td className="py-2.5 px-2 text-[11px] text-slate-400">
+                    <td className="py-2.5 px-2 text-[11px] text-[var(--text-muted)]">
                       {(d.dayType ?? "").replace(/_/g, " ") || "—"}
                     </td>
-                    <td className="py-2.5 px-2 text-[11px] text-slate-400 tabular-nums">
+                    <td className="py-2.5 px-2 text-[11px] text-[var(--text-muted)] tabular-nums">
                       {isoToTime(d.windowOpens) || "—"} – {isoToTime(d.windowCloses) || "—"}
                     </td>
                     <td className="py-2.5 px-2">
@@ -731,7 +731,7 @@ export function MealDaysTab() {
                           return (
                             <span
                               key={iid}
-                              className="px-1.5 py-0.5 rounded bg-slate-800/60 border border-slate-700 text-[10px] text-slate-300"
+                              className="px-1.5 py-0.5 rounded bg-[var(--bg-elevated)]/60 border border-slate-700 text-[10px] text-slate-300"
                             >
                               {it?.label ?? iid.slice(0, 6)}
                             </span>
@@ -745,7 +745,7 @@ export function MealDaysTab() {
                         <button
                         type="button"
                           onClick={() => startEditDay(d)}
-                          className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
+                          className="w-7 h-7 rounded-lg bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-[var(--text-muted)] hover:text-white flex items-center justify-center transition"
                           aria-label="Edit"
                         >
                           <Pencil className="w-3 h-3" />
@@ -773,27 +773,27 @@ export function MealDaysTab() {
         <SectionCard
           title={`Edit meal day — ${fmtDate(editingDraft.mealDate)}`}
           action={
-            <button type="button" onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-slate-500 hover:text-white">
+            <button type="button" onClick={() => { setEditingDay(null); setEditingDraft(null); }} className="text-[var(--text-muted)] hover:text-white">
               <X className="w-4 h-4" />
             </button>
           }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Meal date</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Meal date</span>
               <input
                 type="date"
                 value={editingDraft.mealDate}
                 onChange={(e) => setEditingDraft({ ...editingDraft, mealDate: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Day type</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Day type</span>
               <select
                 value={editingDraft.dayType}
                 onChange={(e) => setEditingDraft({ ...editingDraft, dayType: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
               >
                 {DAY_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -803,26 +803,26 @@ export function MealDaysTab() {
               </select>
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Window opens</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Window opens</span>
               <input
                 type="time"
                 value={editingDraft.windowOpens}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowOpens: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Window closes</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Window closes</span>
               <input
                 type="time"
                 value={editingDraft.windowCloses}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowCloses: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
             </label>
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Items</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Items</span>
             {items.length === 0 ? (
               <p className="text-[11px] text-slate-600 mt-1">No menu items.</p>
             ) : (
@@ -837,7 +837,7 @@ export function MealDaysTab() {
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
                         on
                           ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                          : "bg-slate-900 border-slate-700 text-slate-500 hover:border-emerald-500/30"
+                          : "bg-[var(--bg-surface)] border-slate-700 text-[var(--text-muted)] hover:border-emerald-500/30"
                       }`}
                     >
                       {on && <Check className="w-3 h-3" />}
@@ -1005,17 +1005,17 @@ export function TodayTab() {
           {menuRes.loading && menu.length === 0 ? (
             <div className="py-8 flex items-center justify-center"><Loader2 className="w-6 h-6 text-emerald-400 animate-spin" /></div>
           ) : menu.length === 0 ? (
-            <p className="py-4 text-center text-xs text-slate-500">No menu items scheduled for the active meal day.</p>
+            <p className="py-4 text-center text-xs text-[var(--text-muted)]">No menu items scheduled for the active meal day.</p>
           ) : (
             <ul className="space-y-1.5">
               {menu.map((it) => (
-                <li key={it.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800">
+                <li key={it.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--bg-surface)]/60 border border-slate-800">
                   <div className="flex items-center gap-2 min-w-0">
                     {it.code === "VEG" ? <Leaf className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Beef className="w-3.5 h-3.5 text-rose-400 shrink-0" />}
                     <span className="font-semibold text-white text-xs truncate">{it.label}</span>
-                    <span className="font-mono text-[10px] text-slate-500 bg-slate-800/60 border border-slate-700 rounded px-1.5 py-0.5">{it.code}</span>
+                    <span className="font-mono text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)]/60 border border-slate-700 rounded px-1.5 py-0.5">{it.code}</span>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase ${it.isAvailable ? "text-emerald-400" : "text-slate-500 line-through"}`}>
+                  <span className={`text-[10px] font-bold uppercase ${it.isAvailable ? "text-emerald-400" : "text-[var(--text-muted)] line-through"}`}>
                     {it.isAvailable ? "Available" : "Unavailable"}
                   </span>
                 </li>
@@ -1027,28 +1027,28 @@ export function TodayTab() {
         <SectionCard title="Token Status" subtitle="Issued · verified · remaining">
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+              <div className="rounded-xl bg-[var(--bg-surface)]/60 border border-slate-800 p-3 text-center">
                 <Users className="w-4 h-4 text-sky-400 mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{issued}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Issued</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Issued</p>
               </div>
-              <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+              <div className="rounded-xl bg-[var(--bg-surface)]/60 border border-slate-800 p-3 text-center">
                 <Check className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{confirmed}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Verified</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Verified</p>
               </div>
-              <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-center">
+              <div className="rounded-xl bg-[var(--bg-surface)]/60 border border-slate-800 p-3 text-center">
                 <Ticket className="w-4 h-4 text-amber-400 mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{remaining}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Remaining</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Remaining</p>
               </div>
             </div>
             <div>
               <label className="block">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Final headcount</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Final headcount</span>
                 <div className="mt-1 flex gap-2">
                   <input type="number" min={0} value={headcount} onChange={(e) => setHeadcount(e.target.value)} placeholder={String(confirmed)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500" />
+                    className="flex-1 px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-700 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500" />
                   <button type="button" onClick={() => setConfirmFinalize(true)} disabled={!messDayId || finalizing}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition">
                     {finalizing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />} Finalize Day
@@ -1068,13 +1068,13 @@ export function TodayTab() {
 
       <SectionCard title="Counts Timeline" subtitle="Per-day served headcount, last 14 days">
         {trend.length === 0 ? (
-          <p className="py-4 text-center text-xs text-slate-500">No serving data yet.</p>
+          <p className="py-4 text-center text-xs text-[var(--text-muted)]">No serving data yet.</p>
         ) : (
           <div className="space-y-2">
             {trend.map((r) => (
               <div key={r.messDayId} className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-400 w-24 shrink-0 tabular-nums">{r.mealDate.slice(5)}</span>
-                <div className="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                <span className="text-[11px] text-[var(--text-muted)] w-24 shrink-0 tabular-nums">{r.mealDate.slice(5)}</span>
+                <div className="flex-1 h-2.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                   <div className="h-full bg-emerald-500/80 rounded-full transition-all" style={{ width: `${Math.round((r.servedTotal / maxServed) * 100)}%` }} />
                 </div>
                 <span className="text-[11px] text-white font-bold tabular-nums w-10 text-right">{r.servedTotal}</span>
@@ -1195,7 +1195,7 @@ export function AnalyticsTab() {
           type="button"
             onClick={() => void loadAnalytics()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             Reload
@@ -1207,14 +1207,14 @@ export function AnalyticsTab() {
             <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
           </div>
         ) : rows.length === 0 ? (
-          <p className="py-8 text-center text-xs text-slate-500">
+          <p className="py-8 text-center text-xs text-[var(--text-muted)]">
             No historical data yet. Schedule meal days to start collecting counts.
           </p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-sm min-w-[620px]">
               <thead>
-                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <tr className="text-left border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   <th className="py-2.5 pr-2">Date</th>
                   <th className="py-2.5 px-2">Total</th>
                   <th className="py-2.5 px-2">Declared</th>
@@ -1229,7 +1229,7 @@ export function AnalyticsTab() {
                   const veg = a?.byPrimary?.veg ?? 0;
                   const non = a?.byPrimary?.nonVeg ?? 0;
                   return (
-                    <tr key={r.dayId} className="hover:bg-slate-800/30 transition">
+                    <tr key={r.dayId} className="hover:bg-[var(--bg-elevated)]/30 transition">
                       <td className="py-2.5 pr-2 font-semibold text-white">{fmtDate(r.mealDate)}</td>
                       <td className="py-2.5 px-2 text-slate-300 tabular-nums">{a?.totalHostellers ?? "—"}</td>
                       <td className="py-2.5 px-2 text-emerald-400 tabular-nums">{a?.declaredPresent ?? "—"}</td>
@@ -1238,7 +1238,7 @@ export function AnalyticsTab() {
                       <td className="py-2.5 px-2">
                         {a ? (
                           <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                            <div className="w-16 h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden flex">
                               <div
                                 className="h-full bg-emerald-500"
                                 style={{
@@ -1249,7 +1249,7 @@ export function AnalyticsTab() {
                               />
                               <div className="h-full bg-rose-500 flex-1" />
                             </div>
-                            <span className="text-[10px] text-slate-500 tabular-nums">
+                            <span className="text-[10px] text-[var(--text-muted)] tabular-nums">
                               {veg}/{non}
                             </span>
                           </div>

@@ -82,7 +82,7 @@ function impactTier(score: number): ImpactTier {
   if (score >= 80) return { label: "Critical", accent: "text-rose-400",    bar: "bg-rose-500" };
   if (score >= 60) return { label: "High",     accent: "text-amber-400",   bar: "bg-amber-500" };
   if (score >= 40) return { label: "Medium",   accent: "text-sky-400",     bar: "bg-sky-500" };
-  return               { label: "Low",      accent: "text-slate-400",   bar: "bg-slate-500" };
+  return               { label: "Low",      accent: "text-[var(--text-muted)]",   bar: "bg-slate-500" };
 }
 
 /* ─────────────────────────── Types ─────────────────────────── */

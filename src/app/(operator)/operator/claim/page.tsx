@@ -160,7 +160,7 @@ export default function OperatorClaimPage() {
           </button>
 
           {user?.gateId && (
-            <p className="text-[11px] text-slate-500 text-center">
+            <p className="text-[11px] text-[var(--text-muted)] text-center">
               You already have gate <span className="font-mono text-slate-300">{user.gateId}</span>{" "}
               assigned. Use the link above to return to your desk.
             </p>

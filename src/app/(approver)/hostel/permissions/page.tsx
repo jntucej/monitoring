@@ -72,23 +72,23 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-slate-400">
+      <div className="flex items-center gap-2 text-[var(--text-muted)]">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
     </div>
   );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-8 text-center text-sm text-slate-500">
+    <div className="rounded-xl border border-dashed border-slate-700 bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
       {message}
     </div>
   );
@@ -181,7 +181,7 @@ function HostelPermissionsInner() {
       
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -246,20 +246,20 @@ function HostelPermissionsInner() {
               Live Gate Occupancy
             </h2>
             {presence?.data && (
-              <span className="ml-auto text-xs text-slate-500">
+              <span className="ml-auto text-xs text-[var(--text-muted)]">
                 updated {new Date(presence.data.lastUpdated).toLocaleTimeString()}
               </span>
             )}
           </div>
           {presenceLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading occupancy…
             </div>
           ) : presence ? (
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Gate</th>
                     {roles.map((r) => (
                       <th key={r} className="text-right px-4 py-3 capitalize">
@@ -273,10 +273,10 @@ function HostelPermissionsInner() {
                     const row = matrix[g.id] ?? {};
                     const total = Object.values(row).reduce((a, b) => a + b, 0);
                     return (
-                      <tr key={g.id} className="hover:bg-slate-800/30 transition-colors">
+                      <tr key={g.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                         <td className="px-4 py-3 text-white font-medium">
                           {g.name}
-                          <span className="ml-2 text-xs text-slate-500 font-mono">{g.code}</span>
+                          <span className="ml-2 text-xs text-[var(--text-muted)] font-mono">{g.code}</span>
                         </td>
                         {roles.map((r) => (
                           <td
@@ -288,7 +288,7 @@ function HostelPermissionsInner() {
                             {row[r] ?? 0}
                           </td>
                         ))}
-                        <td className="px-4 py-3 text-right font-mono text-xs text-slate-400">{total}</td>
+                        <td className="px-4 py-3 text-right font-mono text-xs text-[var(--text-muted)]">{total}</td>
                       </tr>
                     );
                   })}

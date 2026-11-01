@@ -37,9 +37,9 @@ interface PermissionPoliciesData {
 function SkeletonCard() {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-2 animate-pulse">
-      <div className="h-3 w-24 rounded bg-slate-800" />
-      <div className="h-5 w-32 rounded bg-slate-800" />
-      <div className="h-3 w-40 rounded bg-slate-800" />
+      <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
+      <div className="h-5 w-32 rounded bg-[var(--bg-elevated)]" />
+      <div className="h-3 w-40 rounded bg-[var(--bg-elevated)]" />
     </div>
   );
 }
@@ -83,39 +83,39 @@ function AdminPermissionPoliciesInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <GitBranch className="w-3.5 h-3.5 text-emerald-400" /> Workflow Types
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : workflows.length}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : workflows.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Defined pass types in circulation</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Defined pass types in circulation</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Open Requests">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <FileCheck className="w-3.5 h-3.5 text-amber-400" /> Open Requests
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading
-                ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" />
+                ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" />
                 : workflows.reduce((sum, w) => sum + (w.open_count || 0), 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Across all workflow types</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Across all workflow types</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Standard SLA
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-slate-800 animate-pulse" /> : "48 hrs"}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : "48 hrs"}
             </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">Approval turnaround target</p>
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Approval turnaround target</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -129,19 +129,19 @@ function AdminPermissionPoliciesInner() {
               Workflow stage definitions
             </div>
             <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter workflows…"
-                className="w-full rounded-lg bg-slate-900 border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-lg bg-[var(--bg-surface)] border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
                   aria-label="Clear filter"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -159,7 +159,7 @@ function AdminPermissionPoliciesInner() {
               <SkeletonCard />
             </div>
           ) : visibleWorkflows.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500">
+            <div className="p-8 text-center text-sm text-[var(--text-muted)]">
               <p>No workflow definitions match the current filter.</p>
               <button
                 type="button"
@@ -172,7 +172,7 @@ function AdminPermissionPoliciesInner() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[700px]">
-                <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500 border-b border-slate-800">
+                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-slate-800">
                   <tr>
                     <th className="py-2.5 px-4">Workflow</th>
                     <th className="py-2.5 px-4">Current Stage</th>
@@ -184,7 +184,7 @@ function AdminPermissionPoliciesInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
                   {visibleWorkflows.map((w) => (
-                    <tr key={w.workflow_type} className="hover:bg-slate-900/40">
+                    <tr key={w.workflow_type} className="hover:bg-[var(--bg-surface)]/40">
                       <td className="py-3 px-4 font-semibold text-white">{w.workflow_type}</td>
                       <td className="py-3 px-4 text-slate-300">
                         {w.stages.length > 0 ? (
@@ -192,7 +192,7 @@ function AdminPermissionPoliciesInner() {
                             {w.stages.map((s) => (
                               <span
                                 key={s.stage}
-                                className="inline-flex items-center gap-1 rounded-md bg-slate-800 px-2 py-0.5 text-[11px] text-slate-300"
+                                className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-slate-300"
                               >
                                 {s.stage}
                                 {s.open > 0 && <span className="text-emerald-400 tabular-nums">{s.open}</span>}
@@ -200,7 +200,7 @@ function AdminPermissionPoliciesInner() {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-slate-500">—</span>
+                          <span className="text-[var(--text-muted)]">—</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-slate-300">{w.document_required ? "Required" : "Optional"}</td>
@@ -226,7 +226,7 @@ function AdminPermissionPoliciesInner() {
 
           {/* Role policy (read-only) */}
           <div className="p-4 border-t border-slate-800">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
+            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <Users className="w-3.5 h-3.5 text-emerald-400" />
               {loading
                 ? "Loading role policy…"
@@ -242,7 +242,7 @@ function AdminPermissionPoliciesInner() {
           <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-amber-300">Read-only view</p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
               Permission workflow definitions, stage SLAs and role policy are locked for admins — editing
               requires sysadmin access. If a stage, SLA or approver chain is out of date, raise a role
               change request or contact the platform team.

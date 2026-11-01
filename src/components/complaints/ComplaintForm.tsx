@@ -61,7 +61,7 @@ export function ComplaintForm() {
           ))}
         </select>
         {selected && (
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Will route to: <strong className="font-mono">{selected.ownerRole}</strong> · SLA {selected.slaHours}h
             {selected.isStatutory && " · statutory category"}
           </p>
@@ -127,7 +127,7 @@ export function ComplaintForm() {
       <button
         type="submit"
         disabled={busy || !selectedCode}
-        className="px-4 py-2 rounded bg-slate-900 text-white text-sm font-medium disabled:opacity-50"
+        className="px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm font-medium disabled:opacity-50"
       >
         {busy ? "Submitting…" : "Submit complaint"}
       </button>

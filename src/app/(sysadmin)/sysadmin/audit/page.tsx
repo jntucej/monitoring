@@ -21,7 +21,7 @@ function SysadminAuditInner() {
           Real-time tracking of security operations, system configurations, and administrative
           actions. Signed in as <span className="font-mono text-slate-300">{role}</span>.
         </p>
-        <p className="mt-2 text-xs text-slate-500 max-w-2xl">
+        <p className="mt-2 text-xs text-[var(--text-muted)] max-w-2xl">
           Note: technical audit trails here record <em>platform</em> actions. Institutional pass
           approvals and their reasoning are recorded in the role-owned approval workspaces —
           technical privileges do not grant institutional pass approvals.

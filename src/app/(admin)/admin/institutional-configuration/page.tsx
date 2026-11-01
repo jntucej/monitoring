@@ -104,7 +104,7 @@ function ReadOnlyCard({
           <Info className="w-4 h-4 text-sky-400 shrink-0" />
           <div>
             <h3 className="text-sm font-bold text-white">{title}</h3>
-            <p className="text-[11px] text-slate-500">{subtitle}</p>
+            <p className="text-[11px] text-[var(--text-muted)]">{subtitle}</p>
           </div>
         </div>
         <a
@@ -244,8 +244,8 @@ function InstitutionalConfigurationInner() {
 
       {/* ── Read-only sysadmin sections ───────────────────────────────────── */}
       <div>
-        <p className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-slate-500" />
+        <p className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[var(--text-muted)]" />
           Sysadmin-Managed (Read-Only)
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -257,12 +257,12 @@ function InstitutionalConfigurationInner() {
               hrefLabel="Open in Sysadmin →"
             >
               {snapshotLoading ? (
-                <div className="h-4 rounded bg-slate-800 animate-pulse" />
+                <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />
               ) : snapshot?.retentionPolicies?.length ? (
                 <div className="divide-y divide-slate-800/60">
                   {snapshot.retentionPolicies.map((rp) => (
                     <div key={rp.id} className="flex items-center justify-between py-2">
-                      <span className="text-xs text-slate-400">{rp.data_category}</span>
+                      <span className="text-xs text-[var(--text-muted)]">{rp.data_category}</span>
                       <span className="text-xs font-medium text-slate-200">
                         {rp.retention_days} days
                         {rp.auto_delete ? " · auto-delete" : ""}
@@ -271,7 +271,7 @@ function InstitutionalConfigurationInner() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">No retention policies configured.</p>
+                <p className="text-xs text-[var(--text-muted)]">No retention policies configured.</p>
               )}
             </ReadOnlyCard>
           </WidgetBoundary>
@@ -284,12 +284,12 @@ function InstitutionalConfigurationInner() {
               hrefLabel="Open in Sysadmin →"
             >
               {snapshotLoading ? (
-                <div className="h-4 rounded bg-slate-800 animate-pulse" />
+                <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />
               ) : snapshot && Object.keys(snapshot.securityPosture).length > 0 ? (
                 <div className="divide-y divide-slate-800/60">
                   {Object.entries(snapshot.securityPosture).map(([key, value]) => (
                     <div key={key} className="flex items-center justify-between py-2">
-                      <span className="text-xs text-slate-400">{key}</span>
+                      <span className="text-xs text-[var(--text-muted)]">{key}</span>
                       <span className="text-xs font-medium text-slate-200">
                         {typeof value === "boolean" ? (value ? "Yes" : "No") : String(value)}
                       </span>
@@ -297,7 +297,7 @@ function InstitutionalConfigurationInner() {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   No security posture settings found. Defaults apply.
                 </p>
               )}
@@ -312,7 +312,7 @@ function InstitutionalConfigurationInner() {
               hrefLabel="Open in Sysadmin →"
             >
               {snapshotLoading ? (
-                <div className="h-4 rounded bg-slate-800 animate-pulse" />
+                <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />
               ) : snapshot?.roleRegistry?.length ? (
                 <div className="divide-y divide-slate-800/60">
                   {snapshot.roleRegistry.map((role) => {
@@ -323,7 +323,7 @@ function InstitutionalConfigurationInner() {
                         : 0;
                     return (
                       <div key={role.code} className="flex items-center justify-between py-2">
-                        <span className="text-xs text-slate-400">{role.display_name}</span>
+                        <span className="text-xs text-[var(--text-muted)]">{role.display_name}</span>
                         <span className="text-xs font-medium text-slate-200">
                           {permCount} permission{permCount === 1 ? "" : "s"}
                         </span>
@@ -332,7 +332,7 @@ function InstitutionalConfigurationInner() {
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">No active roles found.</p>
+                <p className="text-xs text-[var(--text-muted)]">No active roles found.</p>
               )}
             </ReadOnlyCard>
           </WidgetBoundary>

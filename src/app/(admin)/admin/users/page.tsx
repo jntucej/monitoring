@@ -212,7 +212,7 @@ export default function AdminUsersPage() {
             <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-amber-300">Role changes require sysadmin</p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
                 Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
                 escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-emerald-400 hover:underline">view the role hierarchy</Link>{" "}
                 for the assignment map. If an account's role looks out of date, contact the platform team.

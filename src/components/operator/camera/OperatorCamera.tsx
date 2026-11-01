@@ -455,7 +455,7 @@ export function OperatorCamera({
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs text-slate-400 mt-2">Initializing camera...</p>
+            <p className="text-xs text-[var(--text-muted)] mt-2">Initializing camera...</p>
           </div>
         </div>
       )}
@@ -466,7 +466,7 @@ export function OperatorCamera({
             <Camera className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-bold text-rose-400">Camera Unavailable</h3>
-          <p className="text-xs text-slate-400 mt-1">{errorMessage}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">{errorMessage}</p>
         </div>
       )}
 

@@ -81,7 +81,7 @@ function StatCard({
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}

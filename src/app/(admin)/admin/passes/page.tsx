@@ -43,7 +43,7 @@ function statusBadge(s: string) {
   if (c === "PENDING" || c === "REQUESTED") return "bg-amber-500/10 text-amber-400";
   if (c === "REJECTED" || c === "DENIED" || c === "EXPIRED")
     return "bg-rose-500/10 text-rose-400";
-  return "bg-slate-500/10 text-slate-400";
+  return "bg-slate-500/10 text-[var(--text-muted)]";
 }
 
 /**

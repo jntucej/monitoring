@@ -123,7 +123,7 @@ function VpPendingApprovalsInner() {
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Pending Approvals">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Inbox className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               VP-Stage Queue · {rows.length} pending
@@ -149,13 +149,13 @@ function VpPendingApprovalsInner() {
           {queueLoading && !vpQueue ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-14 rounded-lg bg-slate-800/60 animate-pulse" />
+                <div key={i} className="h-14 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
               ))}
             </div>
           ) : grouped.length === 0 ? (
             <div className="p-6 text-center">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">No pending items at the Vice Principal stage.</p>
+              <p className="text-sm text-[var(--text-muted)]">No pending items at the Vice Principal stage.</p>
               <p className="mt-2 text-xs text-slate-600">
                 <ShieldCheck className="inline w-3.5 h-3.5 mr-1" />
                 When a request lands at the VP stage, approve, reject, or escalate it here.
@@ -169,7 +169,7 @@ function VpPendingApprovalsInner() {
                 return (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0"
+                    className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs text-sky-400">{r.ticket_number}</span>
@@ -179,7 +179,7 @@ function VpPendingApprovalsInner() {
                           ? ` · ${r.student.student_details.roll}`
                           : ""}
                       </span>
-                      <span className="text-xs text-slate-500 capitalize whitespace-nowrap">
+                      <span className="text-xs text-[var(--text-muted)] capitalize whitespace-nowrap">
                         {r.workflow_type.replace(/_/g, " ")}
                       </span>
                       {slaBreached(r) && (

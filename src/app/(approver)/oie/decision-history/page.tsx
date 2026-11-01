@@ -49,7 +49,7 @@ function EmptyState({ message }: { message: string }) {
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
         <Inbox className="w-5 h-5 text-slate-600" />
-        <p className="max-w-md text-sm text-slate-400">{message}</p>
+        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
       </div>
     </div>
   );
@@ -79,13 +79,13 @@ function StatusPill({ status }: { status: string }) {
     APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
     REJECTED: "border-rose-400/30 bg-rose-400/10 text-rose-400",
     ESCALATED: "border-purple-400/30 bg-purple-400/10 text-purple-400",
-    CANCELLED: "border-slate-400/30 bg-slate-400/10 text-slate-400",
+    CANCELLED: "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]",
     PENDING: "border-amber-400/30 bg-amber-400/10 text-amber-400",
   };
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
-        cls[status] ?? "border-slate-400/30 bg-slate-400/10 text-slate-400"
+        cls[status] ?? "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]"
       }`}
     >
       {status}
@@ -103,7 +103,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[720px]">
         <thead>
-          <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Final Status</th>
@@ -115,7 +115,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           {rows.slice(0, 20).map((r) => {
             const stageCount = Array.isArray(r.stage_history) ? r.stage_history.length : 0;
             return (
-              <tr key={r.id} className="hover:bg-slate-800/30 transition-colors">
+              <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                 <td className="px-4 py-3">
                   <a
                     href={`/permissions/${r.ticket_number}`}
@@ -127,7 +127,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
                 <td className="px-4 py-3 text-slate-300 min-w-0">
                   {r.student?.name || "—"}
                   {r.student?.student_details?.roll ? (
-                    <span className="ml-2 text-xs text-slate-500">
+                    <span className="ml-2 text-xs text-[var(--text-muted)]">
                       {r.student.student_details.roll}
                     </span>
                   ) : null}
@@ -135,10 +135,10 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
                 <td className="px-4 py-3">
                   <StatusPill status={r.status} />
                 </td>
-                <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
                   {r.updated_at ? new Date(r.updated_at).toLocaleString() : "—"}
                 </td>
-                <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
                   {stageCount > 0 ? `${stageCount} stage(s)` : "—"}
                 </td>
               </tr>
@@ -191,14 +191,14 @@ function DecisionHistoryInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -227,7 +227,7 @@ function DecisionHistoryInner() {
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 isActive
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  : "border-slate-700 bg-slate-800/50 text-slate-400 hover:bg-slate-800"
+                  : "border-slate-700 bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
@@ -244,7 +244,7 @@ function DecisionHistoryInner() {
             <span className="text-sm font-semibold text-white truncate">
               Exam Approval Decisions
             </span>
-            <span className="ml-auto text-xs text-slate-500 shrink-0">
+            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
               {filteredRows.length} record(s)
             </span>
           </div>
@@ -255,7 +255,7 @@ function DecisionHistoryInner() {
           ) : (
             <HistoryTable rows={filteredRows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-slate-500 min-w-0">
+          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
             Records show the final disposition of exam permission tickets that passed
             through the OIE stage. Stage history is retained for audit purposes.
           </div>

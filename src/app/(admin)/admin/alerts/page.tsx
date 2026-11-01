@@ -14,7 +14,7 @@ const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string 
   critical: { bg: "bg-rose-500/10 border-rose-500/30", text: "text-rose-400", label: "Critical Breach" },
   high: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400", label: "High Suspicious" },
   medium: { bg: "bg-blue-500/10 border-blue-500/30", text: "text-blue-400", label: "Medium Alert" },
-  low: { bg: "bg-slate-500/10 border-slate-500/30", text: "text-slate-400", label: "Low Priority" },
+  low: { bg: "bg-slate-500/10 border-slate-500/30", text: "text-[var(--text-muted)]", label: "Low Priority" },
 };
 
 import { fmtRelative } from "@/lib/formatters";

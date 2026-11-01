@@ -16,7 +16,7 @@ export default function GlobalNotFound() {
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
           Page not found
         </h1>
-        <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500">
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--text-muted)]">
           The page you&apos;re looking for doesn&apos;t exist or was moved.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">

@@ -61,7 +61,7 @@ function StaffNotificationsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/staff"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
@@ -69,7 +69,7 @@ function StaffNotificationsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Notifications</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -99,15 +99,15 @@ function StaffNotificationsInner() {
               <Bell className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your notifications</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{notifs.length} item(s)</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{notifs.length} item(s)</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Notifications…
             </div>
           ) : notifs.length === 0 ? (
             <div className="p-4 min-w-0">
-              <p className="text-sm text-slate-500">No notifications for your role.</p>
+              <p className="text-sm text-[var(--text-muted)]">No notifications for your role.</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-800 min-w-0">
@@ -116,12 +116,12 @@ function StaffNotificationsInner() {
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-100 truncate">{n.title ?? "Notification"}</p>
-                      {n.body && <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.body}</p>}
+                      {n.body && <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-2">{n.body}</p>}
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[11px] text-slate-500 capitalize">{n.type ?? "general"}</p>
+                      <p className="text-[11px] text-[var(--text-muted)] capitalize">{n.type ?? "general"}</p>
                       {n.created_at && (
-                        <p className="text-[11px] text-slate-500">
+                        <p className="text-[11px] text-[var(--text-muted)]">
                           {new Date(n.created_at).toLocaleDateString("en-IN", {
                             day: "2-digit", month: "short",
                           })}

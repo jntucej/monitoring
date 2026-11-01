@@ -102,7 +102,7 @@ export default function RepsPage() {
             className="border rounded p-2 text-sm flex-1 min-h-[44px]"
           />
         </div>
-        <button type="submit" className="px-4 py-2 rounded bg-slate-900 text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-[44px]">
+        <button type="submit" className="px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-[44px]">
           Appoint representative
         </button>
       </form>
@@ -140,7 +140,7 @@ export default function RepsPage() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-slate-500">No student representatives appointed.</td>
+                <td colSpan={6} className="p-6 text-center text-[var(--text-muted)]">No student representatives appointed.</td>
               </tr>
             )}
           </tbody>

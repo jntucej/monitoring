@@ -6,7 +6,7 @@ export default function CinematicLoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh flex items-center justify-center bg-[#05070b] text-slate-400">
+        <div className="min-h-dvh flex items-center justify-center bg-[#05070b] text-[var(--text-muted)]">
           Loading...
         </div>
       }
@@ -29,11 +29,11 @@ export default function CinematicLoginPage() {
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
               Autonomous campus gate & entry control.
             </h1>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <p className="text-[var(--text-muted)] text-sm leading-relaxed">
               Real-time movement audits, role-based access control, and automated nightly backups secured on institutional encrypted storage.
             </p>
           </div>
-          <div className="text-xs text-slate-500 flex items-center justify-between">
+          <div className="text-xs text-[var(--text-muted)] flex items-center justify-between">
             <span>© JNTUH University College of Engineering Jagtial</span>
             <Link href="/bootstrap" prefetch={false} className="text-emerald-400 hover:underline">
               Account Setup
@@ -48,10 +48,10 @@ export default function CinematicLoginPage() {
                 GM
               </div>
               <h2 className="text-lg font-semibold text-white">JNTUH UCEJ Gate Monitor</h2>
-              <p className="text-xs text-slate-400">Sign in to your dashboard</p>
+              <p className="text-xs text-[var(--text-muted)]">Sign in to your dashboard</p>
             </div>
 
-            <div className="backdrop-blur-2xl bg-slate-900/55 border border-slate-700/40 rounded-2xl shadow-2xl shadow-black/80 p-8 relative overflow-hidden">
+            <div className="backdrop-blur-2xl bg-[var(--bg-surface)]/55 border border-slate-700/40 rounded-2xl shadow-2xl shadow-black/80 p-8 relative overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-slate-500/40 to-transparent" />
               <LoginForm
                 title="Welcome Back"

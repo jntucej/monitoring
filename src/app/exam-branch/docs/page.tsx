@@ -80,7 +80,7 @@ function ExamBranchDocsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -88,7 +88,7 @@ function ExamBranchDocsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -116,22 +116,22 @@ function ExamBranchDocsInner() {
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0 space-y-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
             <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search exam documentation…"
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 pl-9 pr-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-700 bg-[var(--bg-surface)] pl-9 pr-3 py-2 text-sm text-slate-200 placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none"
                 aria-label="Search exam documentation"
               />
             </div>
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span className="text-xs text-slate-500 shrink-0">Categories:</span>
+              <span className="text-xs text-[var(--text-muted)] shrink-0">Categories:</span>
               {categories.map((cat) => (
                 <span
                   key={cat}
-                  className="inline-flex items-center rounded-full bg-slate-800 text-slate-400 px-2 py-0.5 text-xs"
+                  className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs"
                 >
                   {cat}
                 </span>
@@ -153,13 +153,13 @@ function ExamBranchDocsInner() {
               <p className="text-sm font-medium text-white">
                 Gate Monitor API Reference
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--text-muted)]">
                 OpenAPI 3.0 spec for all system endpoints
               </p>
             </div>
             <Link
               href="/docs"
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 shrink-0"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 shrink-0"
             >
               <ExternalLink className="w-3 h-3" /> Open
             </Link>
@@ -177,7 +177,7 @@ function ExamBranchDocsInner() {
                 Exam Branch Documentation
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {examDocs.length} document(s)
             </span>
           </div>
@@ -187,14 +187,14 @@ function ExamBranchDocsInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-16 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : examDocs.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <FileText className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 No exam documentation found.
               </p>
               <p className="text-xs text-slate-600 mt-1">
@@ -212,14 +212,14 @@ function ExamBranchDocsInner() {
                       <span className="text-sm font-medium text-white min-w-0 flex-1 truncate">
                         {doc.title}
                       </span>
-                      <span className="inline-flex items-center rounded-full bg-slate-800 text-slate-400 px-2 py-0.5 text-xs shrink-0">
+                      <span className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs shrink-0">
                         {doc.category}
                       </span>
                       <span className="text-xs text-slate-600 shrink-0">
                         v{doc.version}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 min-w-0 line-clamp-2">
+                    <p className="text-xs text-[var(--text-muted)] min-w-0 line-clamp-2">
                       {doc.body}
                     </p>
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 min-w-0">

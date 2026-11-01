@@ -88,7 +88,7 @@ function VpExaminationInner() {
       <WeekBar />
       <WidgetBoundary title="Examination Operations">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <CalendarCheck className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Exam Workflow Coordination
@@ -103,15 +103,15 @@ function VpExaminationInner() {
 
           {/* KPI row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <Inbox className="w-4 h-4 text-sky-400" />
                 <span className="text-xs uppercase tracking-wide">Exam Requests</span>
               </div>
               <p className="text-xl font-bold text-white">{examLoading && !examQueue ? "…" : examRows.length}</p>
             </div>
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
                 <span className="text-xs uppercase tracking-wide">SLA At Risk</span>
               </div>
@@ -119,8 +119,8 @@ function VpExaminationInner() {
                 {examLoading && !examQueue ? "…" : slaAtRisk.length}
               </p>
             </div>
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs uppercase tracking-wide">Cleared</span>
               </div>
@@ -133,13 +133,13 @@ function VpExaminationInner() {
           {examLoading && !examQueue ? (
             <div className="space-y-2 min-w-0">
               {[0, 1].map((i) => (
-                <div key={i} className="h-12 rounded-lg bg-slate-800/60 animate-pulse" />
+                <div key={i} className="h-12 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
               ))}
             </div>
           ) : pendingExam.length === 0 ? (
-            <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-center min-w-0">
+            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-4 text-center min-w-0">
               <FileCheck2 className="w-5 h-5 text-emerald-500/60 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 No pending exam requests in your scope. Exam coordination is nominal.
               </p>
               <Link
@@ -154,14 +154,14 @@ function VpExaminationInner() {
               {pendingExam.slice(0, 8).map((r) => (
                 <li
                   key={r.id}
-                  className="rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span className="font-mono text-xs text-sky-400 shrink-0">{r.ticket_number}</span>
                   <span className="text-sm text-slate-300 truncate min-w-0 flex-1">
                     {r.student?.name || "—"}
                     {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
                   </span>
-                  <span className="text-xs text-slate-500 capitalize shrink-0">
+                  <span className="text-xs text-[var(--text-muted)] capitalize shrink-0">
                     stage: {r.current_stage}
                   </span>
                   {slaAtRisk.some((x) => x.id === r.id) && (
@@ -178,7 +178,7 @@ function VpExaminationInner() {
 
       <WidgetBoundary title="Ops Signals">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Loader2 className="w-4 h-4 shrink-0 hidden" />
             <FileCheck2 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -188,17 +188,17 @@ function VpExaminationInner() {
           {analytics?.data?.metrics && analytics.data.metrics.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
               {analytics.data.metrics.map((m) => (
-                <div key={m.key} className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 truncate">{m.label}</p>
+                <div key={m.key} className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] truncate">{m.label}</p>
                   <p className="text-lg font-bold text-white">
                     {m.value}
-                    {m.unit ? <span className="text-xs text-slate-400 ml-1">{m.unit}</span> : null}
+                    {m.unit ? <span className="text-xs text-[var(--text-muted)] ml-1">{m.unit}</span> : null}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--text-muted)]">
               No ops signals for this period. Signals surface once exam workflows are in flight.
             </p>
           )}

@@ -28,7 +28,7 @@ function AdminAuditLogsInner() {
           filtered out. Switch to the <span className="font-semibold text-[var(--text-primary)]">All</span> scope
           (sysadmin-only) to read the complete trail.
         </p>
-        <p className="mt-2 text-xs text-slate-500 max-w-2xl flex items-start gap-2">
+        <p className="mt-2 text-xs text-[var(--text-muted)] max-w-2xl flex items-start gap-2">
           <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
           Audit entries are append-only. Role or permission discrepancies found in this trail
           should be escalated to the platform team — do not attempt manual corrections.
@@ -43,7 +43,7 @@ function AdminAuditLogsInner() {
             </div>
             <div className="min-w-0">
               <p className="text-base sm:text-lg font-black text-white">Campus Audit Trail</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--text-muted)]">
                 Operational events with filters and CSV export. “All” scope is sysadmin-only.
               </p>
             </div>

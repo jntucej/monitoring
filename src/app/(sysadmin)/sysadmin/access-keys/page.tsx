@@ -193,7 +193,7 @@ export default function SysAdminAccessKeysPage() {
             <div>
               <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide">Roll / Employee ID</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
                   type="text"
                   value={rollInput}
@@ -249,7 +249,7 @@ export default function SysAdminAccessKeysPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Recently issued codes</h2>
-            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200">
+            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-slate-200">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
             </button>
           </div>
@@ -275,13 +275,13 @@ export default function SysAdminAccessKeysPage() {
               <tbody className="divide-y divide-[var(--border)]">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-slate-500">
+                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
                       <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Loading codes…
                     </td>
                   </tr>
                 ) : codes.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-slate-500 text-xs">
+                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)] text-xs">
                       No recently issued codes. Generate one above using a roll number.
                     </td>
                   </tr>
@@ -295,15 +295,15 @@ export default function SysAdminAccessKeysPage() {
                       <tr key={c.id} className="hover:bg-[var(--bg-base)]/50">
                         <td className="px-4 py-2.5">
                           <div className="font-mono text-xs text-emerald-400">{c.user_roll || c.user_id?.slice(0, 8)}</div>
-                          {c.user_name && <div className="text-[11px] text-slate-400">{c.user_name}</div>}
+                          {c.user_name && <div className="text-[11px] text-[var(--text-muted)]">{c.user_name}</div>}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-slate-300">{c.purpose}</td>
-                        <td className="px-4 py-2.5 text-xs text-slate-400">{formatTs(c.created_at)}</td>
-                        <td className="px-4 py-2.5 text-xs text-slate-400">{formatTs(c.expires_at)}</td>
+                        <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.created_at)}</td>
+                        <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.expires_at)}</td>
                         <td className="px-4 py-2.5">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                             status === "Active" ? "bg-emerald-500/15 text-emerald-400"
-                            : status === "Used" ? "bg-slate-500/15 text-slate-400"
+                            : status === "Used" ? "bg-slate-500/15 text-[var(--text-muted)]"
                             : "bg-rose-500/15 text-rose-400"
                           }`}>
                             {status}

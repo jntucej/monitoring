@@ -33,7 +33,7 @@ export default function AntiRaggingConfigPage() {
     else           addToast({ variant: "error",   message: j.error?.message ?? "Failed" });
   };
 
-  if (loading) return <p className="p-6 text-slate-500">Loading…</p>;
+  if (loading) return <p className="p-6 text-[var(--text-muted)]">Loading…</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-4 sm:p-6 space-y-4 sm:space-y-4 sm:space-y-6">
@@ -56,7 +56,7 @@ export default function AntiRaggingConfigPage() {
             className="w-full border rounded p-2 text-sm"
           />
         </div>
-        <button type="submit" className="px-4 py-2 bg-slate-900 text-white rounded text-sm font-medium">
+        <button type="submit" className="px-4 py-2 bg-[var(--bg-surface)] text-white rounded text-sm font-medium">
           Save Configuration
         </button>
       </form>

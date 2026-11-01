@@ -569,7 +569,7 @@ const api = useApi();
               <GraduationCap className="w-7 h-7 text-emerald-400" />
               Student Management
             </p>
-            <p className="text-sm text-slate-400 mt-1">Manage student roster. {students.length} records.</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Manage student roster. {students.length} records.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => setShowBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-sky-500">
@@ -583,12 +583,12 @@ const api = useApi();
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
             <input type="text" placeholder="Search by name, roll, email..." value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-[#0d1220] border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 min-h-[44px] text-xs text-slate-300">
               <option value="ALL">All Courses</option>
               {courses.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -612,40 +612,40 @@ const api = useApi();
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* KPI strip */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Students</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Total Students</div>
               <div className="mt-2 text-3xl font-bold text-white">{totalStudents.toLocaleString()}</div>
               <div className="mt-1 text-xs text-emerald-400">{activeCount.toLocaleString()} active ({totalStudents ? Math.round((activeCount / totalStudents) * 100) : 0}%)</div>
             </div>
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Largest Branch</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Largest Branch</div>
               <div className="mt-2 text-3xl font-bold text-emerald-400">{topBranch ? topBranch[0] : "—"}</div>
-              <div className="mt-1 text-xs text-slate-400">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)]">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
             </div>
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Course (B.Tech / M.Tech)</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Course (B.Tech / M.Tech)</div>
               <div className="space-y-1.5">
                 {byCourse.map(([c, n]) => (
                   <div key={c} className="flex items-center gap-2 text-xs">
                     <div className="w-14 text-slate-300 text-right">{c}</div>
-                    <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                       <div className={`h-full rounded-full ${c === "M.Tech" ? "bg-purple-500" : "bg-sky-500"}`} style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
-                    <div className="w-10 text-slate-500 text-right">{n.toLocaleString()}</div>
+                    <div className="w-10 text-[var(--text-muted)] text-right">{n.toLocaleString()}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Branch distribution — canonical 5 branches decoded from roll */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
               <div className="space-y-2">
                 {byBranchCanonical.entries.map(([b, n]) => (
                   <div key={b} className="flex items-center gap-2 text-xs">
                     <div className="w-16 text-slate-300 truncate text-right">{b}</div>
-                    <div className="flex-1 h-2 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
-                    <div className="w-12 text-slate-500 text-right">{n.toLocaleString()}</div>
+                    <div className="w-12 text-[var(--text-muted)] text-right">{n.toLocaleString()}</div>
                   </div>
                 ))}
                 {byBranchCanonical.unassigned > 0 && (
@@ -655,15 +655,15 @@ const api = useApi();
             </div>
             {/* Year distribution */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">Year Distribution</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Year Distribution</div>
               <div className="flex items-end gap-2 h-20">
                 {(() => {
                   const maxCount = byYear.reduce((m, [, n]) => Math.max(m, n), 0);
                   return byYear.map(([y, n]) => (
                     <div key={y} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="text-[10px] text-slate-400">{n}</div>
+                      <div className="text-[10px] text-[var(--text-muted)]">{n}</div>
                       <div className="w-full rounded-t bg-sky-500" style={{ height: `${maxCount ? Math.max(8, (n / maxCount) * 56) : 0}px` }} />
-                      <div className="text-[10px] text-slate-500">Yr {y}</div>
+                      <div className="text-[10px] text-[var(--text-muted)]">Yr {y}</div>
                     </div>
                   ));
                 })()}
@@ -671,13 +671,13 @@ const api = useApi();
             </div>
             {/* Batch → cohort spans with regular/lateral split + live year + graduation */}
             <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
-              <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-3">
+              <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">
                 Batch Cohorts · Regular vs Lateral · Graduation Year
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-slate-500 uppercase text-[10px] tracking-wider">
+                    <tr className="text-[var(--text-muted)] uppercase text-[10px] tracking-wider">
                       <th className="text-left pr-3 py-1">Batch</th>
                       <th className="text-left pr-3 py-1">Course</th>
                       <th className="text-right pr-3 py-1">Regular</th>
@@ -690,7 +690,7 @@ const api = useApi();
                   </thead>
                   <tbody>
                     {cohorts.map((c, i) => (
-                      <tr key={`${c.admissionYear}-${c.course}`} className={i % 2 ? "text-slate-400" : "text-slate-300"}>
+                      <tr key={`${c.admissionYear}-${c.course}`} className={i % 2 ? "text-[var(--text-muted)]" : "text-slate-300"}>
                         <td className="pr-3 py-1 font-mono">{String(c.admissionYear).slice(2)}</td>
                         <td className="pr-3 py-1">
                           <span className={c.course === "M.Tech" ? "text-purple-400" : "text-sky-400"}>{c.course}</span>
@@ -724,7 +724,7 @@ const api = useApi();
         {/* Recently added — quick access to edit the newest students */}
         {recentStudents.length > 0 && (
           <div>
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <UserPlus className="w-3.5 h-3.5 text-emerald-400" /> Recently Added
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -749,7 +749,7 @@ const api = useApi();
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[700px]">
               <thead>
-                <tr className="bg-slate-900/60 text-xs text-slate-400 uppercase tracking-wider">
+                <tr className="bg-[var(--bg-surface)]/60 text-xs text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="px-4 py-3 text-left">Roll No</th>
                   <th className="px-4 py-3 text-left">Name</th>
                   <th className="px-4 py-3 text-left">Course</th>
@@ -761,10 +761,10 @@ const api = useApi();
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {loading ? (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-slate-500"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-[var(--text-muted)]"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</td></tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-4 py-12 text-center text-[var(--text-muted)]">
                       No students found.
                       {students.length === 0 && !search && !loadError && (
                                         <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
@@ -775,7 +775,7 @@ const api = useApi();
                   </tr>
                 ) : (
                   filteredStudents.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={s.id} className="hover:bg-[var(--bg-elevated)]/40 transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-emerald-400">{s.roll || s.uniqueId || "—"}</td>
                       <td className="px-4 py-3 font-medium text-white">{s.name}</td>
                       <td className="px-4 py-3 text-xs">
@@ -828,46 +828,46 @@ const api = useApi();
             <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
                 <h2 className="text-lg font-bold text-white">Add New Student</h2>
-                <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-5 h-5" /></button>
+                <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleCreateStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Roll Number <span className="text-slate-500 font-normal">(legacy — optional if Custom Unique ID set)</span></label>
-                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Roll Number <span className="text-[var(--text-muted)] font-normal">(legacy — optional if Custom Unique ID set)</span></label>
+                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Unique ID <span className="text-slate-500 font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
-                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ucej-s-0042 (overrides auto)" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Unique ID <span className="text-[var(--text-muted)] font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
+                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ucej-s-0042 (overrides auto)" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name *</label>
-                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Full Name *</label>
+                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Email</label>
-                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Email</label>
+                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Phone</label>
-                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Phone</label>
+                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch <span className="text-slate-500 font-normal">(optional — auto-detected from roll when blank)</span></label>
-                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll (e.g. CSE)" />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Branch <span className="text-[var(--text-muted)] font-normal">(optional — auto-detected from roll when blank)</span></label>
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll (e.g. CSE)" />
                   {createForm.roll && getDepartmentFromRoll(createForm.roll) && (
                     <div className="mt-1 text-[11px] text-emerald-400">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
                   )}
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Metadata (JSON)</label>
+                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
                   <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50">{busy ? "Creating..." : "Create Student"}</button>
                 </div>
               </form>
@@ -882,44 +882,44 @@ const api = useApi();
             <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl">
               <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
                 <h2 className="text-lg font-bold text-white">Edit Student — {editingStudent.roll || editingStudent.uniqueId}</h2>
-                <button onClick={() => setEditingStudent(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-5 h-5" /></button>
+                <button onClick={() => setEditingStudent(null)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleEditStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
               <UserRolesPanel userId={editingStudent.id} />
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Full Name</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Full Name</label>
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Email</label>
-                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Email</label>
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-400 block mb-1">Phone</label>
-                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Phone</label>
+                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Branch</label>
-                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Branch</label>
+                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-900/60 border border-slate-800 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl">
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Password (Optional)</label>
-                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Kiosk PIN (Optional)</label>
-                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Metadata (JSON)</label>
+                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
                   <button type="submit" disabled={busy} className="px-4 py-2 min-h-[44px] rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
                 </div>
               </form>
@@ -936,19 +936,19 @@ const api = useApi();
                   <LinkIcon className="w-4 h-4 text-violet-400" />
                   Link Guardian — {linkStudent.roll || linkStudent.uniqueId || linkStudent.name}
                 </h2>
-                <button onClick={() => setLinkStudent(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-4 h-4" /></button>
+                <button onClick={() => setLinkStudent(null)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]"><X className="w-4 h-4" /></button>
               </div>
               <div className="p-5 space-y-4">
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Link a guardian to <strong className="text-white">{linkStudent.name}</strong>.
                   No guardians yet? Create one from the <Link href="/sysadmin/parents" className="text-violet-400 hover:text-violet-300">Parents &amp; Guardians</Link> page.
                 </p>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400 block mb-1" htmlFor="guardian">Guardian</label>
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1" htmlFor="guardian">Guardian</label>
                   <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
-                    className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
+                    className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
                   >
                     <option value="">Select guardian…</option>
                     {parents.map((p) => (
@@ -959,7 +959,7 @@ const api = useApi();
                   </select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
                   <button
                     onClick={handleLinkParent}
                     disabled={linkBusy || !selectedParentId}

@@ -360,17 +360,17 @@ const api = useApi();
 
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-[var(--text-muted)] font-mono">
               <span className="flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-slate-400" />
+                <Mail className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                 {profile?.email || authUser?.email || "sysadmin@jntuhcej.ac.in"}
               </span>
               {profile?.phone && (
                 <span className="flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  <Phone className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                   {profile.phone}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                 {department}
               </span>
             </div>
@@ -537,7 +537,7 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>

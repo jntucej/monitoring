@@ -79,7 +79,7 @@ export function OperatorEmptyState({
         className={`relative z-10 flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
       >
         {icon && (
-          <div className="mb-4 text-slate-500 opacity-60" aria-hidden="true">
+          <div className="mb-4 text-[var(--text-muted)] opacity-60" aria-hidden="true">
             {icon}
           </div>
         )}
@@ -87,7 +87,7 @@ export function OperatorEmptyState({
         <h3 className="text-sm font-semibold text-slate-300 mb-1">{title}</h3>
 
         {description && (
-          <p className="text-xs text-slate-500 max-w-xs">{description}</p>
+          <p className="text-xs text-[var(--text-muted)] max-w-xs">{description}</p>
         )}
 
         {action && <div className="mt-4">{action}</div>}

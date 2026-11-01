@@ -78,7 +78,7 @@ function SecurityReinforcedInner() {
         ? "bg-amber-500/20 text-amber-400"
         : s === "unhealthy"
           ? "bg-rose-500/20 text-rose-400"
-          : "bg-slate-700/40 text-slate-400";
+          : "bg-slate-700/40 text-[var(--text-muted)]";
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6 min-w-0">

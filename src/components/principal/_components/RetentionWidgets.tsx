@@ -25,7 +25,7 @@ import { fetchJson, type Resp } from "@/components/principal/_components/fetchJs
 /* ── TONE_CLASS maps — no dynamic Tailwind var interpolation ── */
 
 const TONE_CLASS: Record<string, { bg: string; text: string; border: string }> = {
-  neutral:  { bg: "bg-slate-500/10",  text: "text-slate-400",   border: "border-slate-500/30"  },
+  neutral:  { bg: "bg-slate-500/10",  text: "text-[var(--text-muted)]",   border: "border-slate-500/30"  },
   positive: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30" },
   warning:  { bg: "bg-amber-500/10",  text: "text-amber-400",   border: "border-amber-500/30"  },
   critical: { bg: "bg-rose-500/10",   text: "text-rose-400",    border: "border-rose-500/30"   },

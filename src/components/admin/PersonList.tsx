@@ -88,7 +88,7 @@ export function PersonList() {
                 className="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-[var(--border)] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                  <div className="w-10 h-10 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center border border-slate-700">
                     <User className="w-5 h-5 text-slate-300" />
                   </div>
                   <div>

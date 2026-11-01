@@ -36,8 +36,8 @@ export const HostelOccupancyPanel = memo(function HostelOccupancyPanel() {
           <Building2 className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Occupancy</span>
         </div>
-        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-[var(--text-muted)] flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
           Block-level occupancy detail is maintained by the hostel manager.
           Gate-level presence is shown in the Live Gate Presence panel above.
         </div>
@@ -56,8 +56,8 @@ export const ResidentDirectoryPanel = memo(function ResidentDirectoryPanel() {
           <span className="text-xs font-semibold uppercase tracking-wide">Resident Directory</span>
           <PlaceholderBadge note="No data source connected yet — wire to /api/students?hostel_block=… to enable" />
         </div>
-        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+        <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-[var(--text-muted)] flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
           Resident lookup is an operator-facing tool. Block &amp; room occupancy is maintained by the hostel manager.
         </div>
       </div>
@@ -83,8 +83,8 @@ export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matri
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Attendance</span>
         </div>
         {rows.length === 0 ? (
-          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-slate-400 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-slate-500 shrink-0" />
+          <div className="rounded-lg border border-slate-600/40 bg-slate-700/20 p-3 text-xs text-[var(--text-muted)] flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
             Detailed hostel attendance is managed by the hostel manager. Gate-level presence is shown below.
           </div>
         ) : (

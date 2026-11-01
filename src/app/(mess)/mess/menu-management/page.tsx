@@ -101,7 +101,7 @@ function MessMenuInner() {
           </div>
           <div className="p-4 min-w-0">
             {menuLoading && !menu ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500 min-w-0">
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
                 <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading…
               </div>
             ) : menuError ? (
@@ -114,7 +114,7 @@ function MessMenuInner() {
                     <CalendarDays className="w-4 h-4 text-amber-400 shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-white truncate">{fmtDate(menuData?.mealDate)}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-[var(--text-muted)]">
                         Window: {fmtTime(menuData?.windowOpens)} – {fmtTime(menuData?.windowCloses)}
                       </p>
                     </div>
@@ -132,7 +132,7 @@ function MessMenuInner() {
                 <div className="overflow-x-auto min-w-0">
                   <table className="w-full text-sm min-w-[360px]">
                     <thead>
-                      <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+                      <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
                         <th className="text-left px-3 py-2.5">Item</th>
                         <th className="text-left px-3 py-2.5">Code</th>
                         <th className="text-left px-3 py-2.5">Available</th>
@@ -140,9 +140,9 @@ function MessMenuInner() {
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
                       {menuItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
+                        <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                           <td className="px-3 py-2.5 text-slate-200 font-medium min-w-0 truncate">{item.label}</td>
-                          <td className="px-3 py-2.5 text-slate-500 font-mono text-xs whitespace-nowrap">{item.code}</td>
+                          <td className="px-3 py-2.5 text-[var(--text-muted)] font-mono text-xs whitespace-nowrap">{item.code}</td>
                           <td className="px-3 py-2.5">
                             {item.isAvailable ? (
                               <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-emerald-400/30 bg-emerald-400/10 text-emerald-400 whitespace-nowrap">
@@ -160,7 +160,7 @@ function MessMenuInner() {
                   </table>
                 </div>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   {menuItems.length} item{menuItems.length !== 1 ? "s" : ""} ·{" "}
                   {menuData?.items.filter((i) => i.isAvailable).length} available · Edit actions
                   run from the approvals desk.
@@ -168,12 +168,12 @@ function MessMenuInner() {
               </div>
             ) : menuHasDay ? (
               <div className="text-center py-6">
-                <p className="text-sm text-slate-400">Menu day is scheduled but no items are published yet.</p>
+                <p className="text-sm text-[var(--text-muted)]">Menu day is scheduled but no items are published yet.</p>
               </div>
             ) : (
               <div className="text-center py-6">
                 <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
-                <p className="text-sm text-slate-500">No menu published yet.</p>
+                <p className="text-sm text-[var(--text-muted)]">No menu published yet.</p>
               </div>
             )}
           </div>

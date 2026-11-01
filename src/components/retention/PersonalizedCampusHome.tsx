@@ -209,7 +209,7 @@ export function PersonalizedCampusHome() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Hero: Greeting + Role */}
         <div
-          className={`rounded-xl border border-slate-700/50 bg-slate-800/40 p-5 ${
+          className={`rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5 ${
             pinnedWidgets.includes("profile") ? "ring-1 ring-indigo-500/30" : ""
           }`}
         >
@@ -221,16 +221,16 @@ export function PersonalizedCampusHome() {
               <p className="text-sm font-medium text-slate-100">
                 Welcome back, {user?.name?.split(" ")[0] ?? "there"}
               </p>
-              <p className="text-xs text-slate-400 capitalize">{role ?? "user"}</p>
+              <p className="text-xs text-[var(--text-muted)] capitalize">{role ?? "user"}</p>
             </div>
           </div>
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
             Your campus home — updated to your role and current context.
           </p>
         </div>
 
         {/* Pending Tasks */}
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-5">
+        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="h-4 w-4 text-amber-400" />
             <h3 className="text-sm font-medium text-slate-200">Pending Tasks</h3>
@@ -238,7 +238,7 @@ export function PersonalizedCampusHome() {
           {loading ? (
             <div className="h-20 animate-pulse rounded bg-slate-700/30" />
           ) : pendingTasks.length === 0 ? (
-            <p className="text-xs text-slate-500">No pending tasks.</p>
+            <p className="text-xs text-[var(--text-muted)]">No pending tasks.</p>
           ) : (
             <ul className="space-y-2">
               {pendingTasks.map((t) => (
@@ -252,7 +252,7 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-5">
+        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="h-4 w-4 text-emerald-400" />
             <h3 className="text-sm font-medium text-slate-200">Upcoming Events</h3>
@@ -260,14 +260,14 @@ export function PersonalizedCampusHome() {
           {loading ? (
             <div className="h-20 animate-pulse rounded bg-slate-700/30" />
           ) : events.length === 0 ? (
-            <p className="text-xs text-slate-500">No upcoming events.</p>
+            <p className="text-xs text-[var(--text-muted)]">No upcoming events.</p>
           ) : (
             <ul className="space-y-2">
               {events.map((e) => (
                 <li key={e.id} className="text-xs text-slate-300 flex items-center gap-2">
                   <span className="text-emerald-400">•</span>
                   <span className="truncate flex-1">{e.title}</span>
-                  <span className="text-slate-500 shrink-0">
+                  <span className="text-[var(--text-muted)] shrink-0">
                     {new Date(e.startsAt).toLocaleDateString()}
                   </span>
                 </li>
@@ -311,8 +311,8 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Quick Access Strip */}
-        <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
-          <h3 className="text-xs font-medium text-slate-400 mb-3">Quick Access</h3>
+        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
+          <h3 className="text-xs font-medium text-[var(--text-muted)] mb-3">Quick Access</h3>
           <div className="flex flex-wrap gap-2">
             {[
               { label: "Knowledge Centre", icon: BookOpen },

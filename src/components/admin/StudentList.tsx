@@ -88,7 +88,7 @@ const api = useApi();
             const decoded = parseRollNumber(roll);
             const branch = decoded?.departmentFullName ?? dept ?? "—";
             const colorClass =
-              (dept && DEPT_COLORS[dept]) ?? "bg-slate-500/20 text-slate-400";
+              (dept && DEPT_COLORS[dept]) ?? "bg-slate-500/20 text-[var(--text-muted)]";
             const sAny = student as any;
             const isOnCampus = sAny.campusStatus === "IN" || sAny.movementStatus === "IN" || student.status === "INSIDE" || student.status === "ON_CAMPUS" || student.status === "IN" || (Boolean(sAny.checkedInAt) && !Boolean(sAny.checkedOutAt));
             const isWarning = student.flagStatus || student.status === "SUSPENDED";
@@ -120,7 +120,7 @@ const api = useApi();
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       isOnCampus
                         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                        : "bg-slate-500/10 text-[var(--text-muted)] border border-slate-500/20"
                     }`}
                   >
                     {isOnCampus ? "ON CAMPUS" : "OUTSIDE"}

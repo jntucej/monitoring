@@ -61,7 +61,7 @@ export default function CategoriesPage() {
               <tr key={c.code} className="hover:bg-slate-50">
                 <td className="p-3 font-mono">{c.code}</td>
                 <td className="p-3 font-medium">{c.label}</td>
-                <td className="p-3 text-slate-500 font-mono">{c.ownerRole}</td>
+                <td className="p-3 text-[var(--text-muted)] font-mono">{c.ownerRole}</td>
                 <td className="p-3">
                   <input
                     type="number"

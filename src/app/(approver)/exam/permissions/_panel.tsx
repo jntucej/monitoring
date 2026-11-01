@@ -43,23 +43,23 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-slate-400">
+      <div className="flex items-center gap-2 text-[var(--text-muted)]">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
     </div>
   );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/30 p-8 text-center text-sm text-slate-500">
+    <div className="rounded-xl border border-dashed border-slate-700 bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
       {message}
     </div>
   );
@@ -111,7 +111,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6 min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -167,7 +167,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               initialPermissions={oieData.data}
             />
           ) : oieLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading OIE queue…
             </div>
           ) : (
@@ -186,7 +186,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               initialPermissions={vpData.data}
             />
           ) : vpLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading VP queue…
             </div>
           ) : (

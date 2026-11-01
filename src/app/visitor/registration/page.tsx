@@ -77,7 +77,7 @@ function VisitorRegistrationInner() {
       {/* Back link */}
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -86,7 +86,7 @@ function VisitorRegistrationInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Registration</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -116,39 +116,39 @@ function VisitorRegistrationInner() {
               <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your registration</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {data?.data?.logs?.length ?? 0} visit(s) on record
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading registration…
             </div>
           ) : (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Name</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Name</p>
                   <p className="mt-1 text-base font-semibold text-slate-100">
                     {reg?.name ?? (user?.name ?? "—")}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Visitor ID</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Visitor ID</p>
                   <p className="mt-1 text-base font-mono text-sky-400">
                     {reg?.uniqueId ?? (user?.id?.slice(0, 8) ?? "—")}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Account</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Account</p>
                   <p className="mt-1 text-base font-bold text-emerald-400">{reg?.status ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Role</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Role</p>
                   <p className="mt-1 text-base font-bold text-amber-400">{reg?.role ?? "visitor"}</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--text-muted)]">
                 Your registration is linked to {user?.email ?? "your account"}. Contact your host
                 or the campus security desk if your visitor ID is missing or incorrect.
               </p>

@@ -60,16 +60,16 @@ function StatCard({
 }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-slate-400 min-w-0">
+      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-slate-500 min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -130,7 +130,7 @@ function HostelManagerResourceManagementInner() {
       {/* Back link */}
       <Link
         href="/hostel-manager"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Operations Overview
       </Link>
@@ -138,7 +138,7 @@ function HostelManagerResourceManagementInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -200,13 +200,13 @@ function HostelManagerResourceManagementInner() {
             <span className="text-sm font-semibold text-white">7-Day Resource Metrics</span>
           </div>
           {analyticsLoading && !analytics ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
             </div>
           ) : metrics.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <AlertTriangle className="w-5 h-5 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 No manager analytics metrics are available for this role yet. Resource metrics
                 will appear once the analytics view is populated.
               </p>
@@ -214,11 +214,11 @@ function HostelManagerResourceManagementInner() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 min-w-0">
               {metrics.map((m) => (
-                <div key={m.key} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide truncate">{m.label}</p>
+                <div key={m.key} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide truncate">{m.label}</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {m.value}
-                    {m.unit ? <span className="ml-1 text-xs font-normal text-slate-400">{m.unit}</span> : null}
+                    {m.unit ? <span className="ml-1 text-xs font-normal text-[var(--text-muted)]">{m.unit}</span> : null}
                   </p>
                 </div>
               ))}

@@ -62,7 +62,7 @@ function FacultyNotificationsInner() {
       {/* Back link */}
       <Link
         href="/faculty"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Faculty Overview
       </Link>
@@ -70,7 +70,7 @@ function FacultyNotificationsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -100,30 +100,30 @@ function FacultyNotificationsInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Notifications</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{announcements.length} active announcement(s)</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{announcements.length} active announcement(s)</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Notifications…
             </div>
           ) : announcements.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">No active campus announcements relevant to your role.</p>
+              <p className="text-sm text-[var(--text-muted)]">No active campus announcements relevant to your role.</p>
             </div>
           ) : (
             <div className="space-y-2 p-4 min-w-0">
               {announcements.slice(0, 10).map((a) => (
-                <div key={a.id} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                <div key={a.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
                     <p className="text-sm font-semibold text-white min-w-0">{a.title}</p>
                     {a.created_at ? (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--text-muted)]">
                         {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                       </span>
                     ) : null}
                   </div>
-                  {a.body ? <p className="mt-1 text-xs text-slate-400">{a.body}</p> : null}
+                  {a.body ? <p className="mt-1 text-xs text-[var(--text-muted)]">{a.body}</p> : null}
                 </div>
               ))}
             </div>

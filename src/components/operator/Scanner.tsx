@@ -683,28 +683,28 @@ export function Scanner({
           {/* Header — one compact status line. No decoration. */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/60 bg-slate-950/85 z-10">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-700">
+              <div className="w-8 h-8 rounded-xl bg-[var(--bg-elevated)] text-slate-300 flex items-center justify-center border border-slate-700">
                 <Camera className="w-4 h-4" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-white truncate">
                   {gateId ? `Gate ${gateId}` : "Scanner"}
                 </h2>
-                <p className="text-[11px] text-slate-400">Auto-detecting · no re-prompt</p>
+                <p className="text-[11px] text-[var(--text-muted)]">Auto-detecting · no re-prompt</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-white flex items-center justify-center transition-colors"
                 title={soundEnabled ? "Mute" : "Unmute"}
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-slate-300" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-slate-300" /> : <VolumeX className="w-4 h-4 text-[var(--text-muted)]" />}
               </button>
               <button
                 onClick={() => { stopCamera(); onClose(); }}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-white flex items-center justify-center transition-colors"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -742,7 +742,7 @@ export function Scanner({
             )}
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
-                <RefreshCw className="w-8 h-8 text-slate-400 animate-spin" />
+                <RefreshCw className="w-8 h-8 text-[var(--text-muted)] animate-spin" />
                 <p className="text-xs text-slate-300 font-medium">Initializing camera...</p>
               </div>
             )}
@@ -766,7 +766,7 @@ export function Scanner({
           </div>
 
           {/* Actions */}
-          <div className="p-4 bg-slate-900 border-t border-slate-800">
+          <div className="p-4 bg-[var(--bg-surface)] border-t border-slate-800">
             <input
               type="file"
               ref={fileInputRef}
@@ -779,18 +779,18 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
-                  <Upload className="w-4 h-4 text-slate-400 shrink-0" />
+                  <Upload className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                   <span className="truncate">Upload QR Image</span>
                 </button>
                 {onManualEntryClick && (
                   <button
                     type="button"
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
-                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
-                    <KeyRound className="w-4 h-4 text-slate-400 shrink-0" />
+                    <KeyRound className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                     <span className="truncate">Manual Entry</span>
                   </button>
                 )}

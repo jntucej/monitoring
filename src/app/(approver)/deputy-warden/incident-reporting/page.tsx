@@ -63,7 +63,7 @@ function DeputyWardenIncidentsInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -71,7 +71,7 @@ function DeputyWardenIncidentsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -101,22 +101,22 @@ function DeputyWardenIncidentsInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Incident Reporting</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{openCount} open alert(s)</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{openCount} open alert(s)</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Incidents…
             </div>
           ) : alerts.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">No open alerts or incidents are visible to your role. The campus is nominal.</p>
+              <p className="text-sm text-[var(--text-muted)]">No open alerts or incidents are visible to your role. The campus is nominal.</p>
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[480px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-left text-xs text-slate-500">
+                  <tr className="border-b border-slate-800 text-left text-xs text-[var(--text-muted)]">
                     <th className="py-2 pr-4">Title</th>
                     <th className="py-2 pr-4">Severity</th>
                     <th className="py-2 pr-4">Status</th>
@@ -128,12 +128,12 @@ function DeputyWardenIncidentsInner() {
                     <tr key={a.id} className="border-b border-slate-800/50 last:border-0">
                       <td className="py-2 pr-4 text-slate-200">{a.title}</td>
                       <td className="py-2 pr-4">
-                        <span className={`text-xs font-semibold ${a.severity === "critical" || a.severity === "high" ? "text-rose-400" : a.severity === "medium" ? "text-amber-400" : "text-slate-400"}`}>
+                        <span className={`text-xs font-semibold ${a.severity === "critical" || a.severity === "high" ? "text-rose-400" : a.severity === "medium" ? "text-amber-400" : "text-[var(--text-muted)]"}`}>
                           {a.severity}
                         </span>
                       </td>
-                      <td className="py-2 pr-4 text-slate-400">{a.status}</td>
-                      <td className="py-2 text-slate-400">
+                      <td className="py-2 pr-4 text-[var(--text-muted)]">{a.status}</td>
+                      <td className="py-2 text-[var(--text-muted)]">
                         {a.created_at ? new Date(a.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                       </td>
                     </tr>

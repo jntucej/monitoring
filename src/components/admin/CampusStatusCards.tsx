@@ -66,7 +66,7 @@ export function CampusStatusCards({ studentStats, facultyStats, staffStats, work
           <div className="text-[9px] text-[var(--text-muted)] mt-0.5 hidden sm:block">on campus now</div>
         </Link>
         <Link href="/admin/reports" className="block p-3 rounded-xl bg-slate-500/5 border border-slate-500/15 hover:bg-slate-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400/80 group-hover:text-slate-400 transition-colors">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--text-muted)]/80 group-hover:text-[var(--text-muted)] transition-colors">
             <Activity className="w-3 h-3" /> <span className="sm:inline hidden">Total Today</span><span className="sm:hidden">📊</span>
           </div>
           <div className="text-xl font-black text-slate-300 mt-0.5">{totalScans.toLocaleString()}</div>

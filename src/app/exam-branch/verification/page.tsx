@@ -109,7 +109,7 @@ function ExamBranchVerificationInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -117,7 +117,7 @@ function ExamBranchVerificationInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -166,7 +166,7 @@ function ExamBranchVerificationInner() {
                 Access Verification — Live Presence
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {lastUpdated
                 ? new Date(lastUpdated).toLocaleTimeString([], {
                     hour: "2-digit",
@@ -181,20 +181,20 @@ function ExamBranchVerificationInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : gates.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <BadgeCheck className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">No active gates reporting.</p>
+              <p className="text-sm text-[var(--text-muted)]">No active gates reporting.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[500px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)]">
                     <th className="text-left px-4 py-2 font-semibold">Gate</th>
                     {Object.keys(
                       presence?.data?.matrix?.[gates[0]?.id] ?? {}
@@ -227,7 +227,7 @@ function ExamBranchVerificationInner() {
                         {presence?.data?.roles?.map((roleKey) => (
                           <td
                             key={roleKey}
-                            className="px-4 py-2.5 text-right tabular-nums text-slate-400"
+                            className="px-4 py-2.5 text-right tabular-nums text-[var(--text-muted)]"
                           >
                             {gateCounts[roleKey] ?? 0}
                           </td>
@@ -240,7 +240,7 @@ function ExamBranchVerificationInner() {
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t border-slate-800 text-slate-400 font-semibold">
+                  <tr className="border-t border-slate-800 text-[var(--text-muted)] font-semibold">
                     <td className="px-4 py-2.5">Total on campus</td>
                     {presence?.data?.roles?.map((roleKey) => (
                       <td key={roleKey} className="px-4 py-2.5 text-right tabular-nums">
@@ -271,7 +271,7 @@ function ExamBranchVerificationInner() {
                 Requests Escalated to Vice Principal
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {examReqs?.total ?? vpRequests.length} pending
             </span>
           </div>
@@ -281,14 +281,14 @@ function ExamBranchVerificationInner() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : vpRequests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <SearchCheck className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 No exam requests escalated to the vice-principal stage.
               </p>
             </div>
@@ -303,9 +303,9 @@ function ExamBranchVerificationInner() {
                     <span className="inline-flex items-center rounded-full bg-sky-500/15 text-sky-300 px-2 py-0.5 text-xs">
                       VP STAGE
                     </span>
-                    <span className="text-xs text-slate-500">{req.status}</span>
+                    <span className="text-xs text-[var(--text-muted)]">{req.status}</span>
                   </div>
-                  <p className="text-xs text-slate-500 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] min-w-0">
                     Created{" "}
                     {new Date(req.created_at).toLocaleString([], {
                       month: "short",

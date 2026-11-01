@@ -76,7 +76,7 @@ function OieApprovalRequestsInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -84,7 +84,7 @@ function OieApprovalRequestsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -136,7 +136,7 @@ function OieApprovalRequestsInner() {
                 Requests Requiring OIE Approval
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {data?.total ?? 0} pending
             </span>
           </div>
@@ -146,14 +146,14 @@ function OieApprovalRequestsInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-16 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <Inbox className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--text-muted)]">
                 No exam requests are currently pending OIE approval.
               </p>
               <p className="text-xs text-slate-600 mt-1">
@@ -178,7 +178,7 @@ function OieApprovalRequestsInner() {
                           className={`text-xs ${
                             new Date(req.sla_deadline).getTime() < Date.now()
                               ? "text-rose-400 font-semibold"
-                              : "text-slate-500"
+                              : "text-[var(--text-muted)]"
                           }`}
                         >
                           SLA {new Date(req.sla_deadline).toLocaleString([], {
@@ -190,7 +190,7 @@ function OieApprovalRequestsInner() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 min-w-0">
+                    <p className="text-xs text-[var(--text-muted)] min-w-0">
                       Created{" "}
                       {new Date(req.created_at).toLocaleString([], {
                         month: "short",
@@ -203,7 +203,7 @@ function OieApprovalRequestsInner() {
                         ? ` · scope: ${req.hostel_scope}`
                         : ""}
                     </p>
-                    <p className="text-xs text-slate-400 italic">
+                    <p className="text-xs text-[var(--text-muted)] italic">
                       OIE must review and approve before the next stage.
                     </p>
                   </div>

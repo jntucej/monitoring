@@ -126,13 +126,13 @@ export function CampusFeedbackDesk() {
 
   return (
     <WidgetBoundary title="Campus Feedback Desk">
-      <div className="rounded-xl border border-slate-700/50 bg-slate-800/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-cyan-400" />
             <h3 className="text-sm font-medium text-slate-100">Feedback & Issues</h3>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-[var(--text-muted)]">
               {reports.length} report(s)
             </span>
           </div>
@@ -154,13 +154,13 @@ export function CampusFeedbackDesk() {
 
         {/* New Report Form */}
         {showForm && (
-          <div className="mb-4 space-y-3 rounded-lg border border-slate-700/50 bg-slate-900/40 p-4">
+          <div className="mb-4 space-y-3 rounded-lg border border-slate-700/50 bg-[var(--bg-surface)]/40 p-4">
             <div>
-              <label className="block text-[11px] text-slate-400 mb-1.5" htmlFor="category">Category</label>
+              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5" htmlFor="category">Category</label>
               <select id="category"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
-                className="w-full rounded-lg border border-slate-600/50 bg-slate-800/50 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="w-full rounded-lg border border-slate-600/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 {FEEDBACK_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -170,7 +170,7 @@ export function CampusFeedbackDesk() {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 mb-1.5">
+              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5">
                 Subject <span className="text-rose-400">*</span>
               </label>
               <input
@@ -178,17 +178,17 @@ export function CampusFeedbackDesk() {
                 value={formSubject}
                 onChange={(e) => setFormSubject(e.target.value)}
                 placeholder="Brief description of the issue"
-                className="w-full rounded-lg border border-slate-600/50 bg-slate-800/50 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="w-full rounded-lg border border-slate-600/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-slate-200 placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-slate-400 mb-1.5" htmlFor="details">Details</label>
+              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5" htmlFor="details">Details</label>
               <textarea id="details"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={3}
                 placeholder="Additional context (optional)"
-                className="w-full rounded-lg border border-slate-600/50 bg-slate-800/50 px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
+                className="w-full rounded-lg border border-slate-600/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-slate-200 placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
               />
             </div>
             <button
@@ -211,7 +211,7 @@ export function CampusFeedbackDesk() {
         {loading ? (
           <div className="h-24 animate-pulse rounded bg-slate-700/20" />
         ) : reports.length === 0 ? (
-          <p className="text-xs text-slate-500 py-6 text-center">
+          <p className="text-xs text-[var(--text-muted)] py-6 text-center">
             No reports yet. Be the first to flag an issue.
           </p>
         ) : (
@@ -221,7 +221,7 @@ export function CampusFeedbackDesk() {
               return (
                 <div
                   key={report.id}
-                  className="rounded-lg border border-slate-700/40 bg-slate-800/30 p-3"
+                  className="rounded-lg border border-slate-700/40 bg-[var(--bg-elevated)]/30 p-3"
                 >
                   {/* Subject + Status Badge */}
                   <div className="flex items-start gap-2">
@@ -234,12 +234,12 @@ export function CampusFeedbackDesk() {
                       <p className="text-xs font-medium text-slate-200 truncate">
                         {report.subject}
                       </p>
-                      <p className="text-[10px] text-slate-500 capitalize">
+                      <p className="text-[10px] text-[var(--text-muted)] capitalize">
                         {report.category.replace(/_/g, " ")}
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status] ?? "text-slate-400"}`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status] ?? "text-[var(--text-muted)]"}`}
                     >
                       {report.status.replace(/_/g, " ").toUpperCase()}
                     </span>
@@ -283,24 +283,24 @@ export function CampusFeedbackDesk() {
                   {/* Follow-through details */}
                   <div className="mt-3 space-y-1.5">
                     {report.assignedTo && (
-                      <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                         <User className="h-3 w-3" />
                         Assigned to: <span className="text-slate-300">{report.assignedTo}</span>
                       </p>
                     )}
                     {report.reviewerNote && (
-                      <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
                         <span className="line-clamp-2">{report.reviewerNote}</span>
                       </p>
                     )}
                     {report.notes && report.status === "in_progress" && (
-                      <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span className="line-clamp-2">{report.notes}</span>
                       </p>
                     )}
-                    <p className="text-[10px] text-slate-500">
+                    <p className="text-[10px] text-[var(--text-muted)]">
                       {new Date(report.createdAt).toLocaleDateString()}
                       {report.resolvedAt
                         ? ` · Resolved ${new Date(report.resolvedAt).toLocaleDateString()}`

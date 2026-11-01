@@ -110,7 +110,7 @@ function ExamBranchReportsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -118,7 +118,7 @@ function ExamBranchReportsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -145,55 +145,55 @@ function ExamBranchReportsInner() {
       <WidgetBoundary title="Examination-Day Reports">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <Users className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 On Campus Now
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
             ) : (
               <p className="text-2xl font-bold text-emerald-400">{totalOnCampus}</p>
             )}
-            <p className="text-xs text-slate-500">All roles inside active gates</p>
+            <p className="text-xs text-[var(--text-muted)]">All roles inside active gates</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <ChartBar className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Active Gates
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
             ) : (
               <p className="text-2xl font-bold text-sky-400">{gates.length}</p>
             )}
-            <p className="text-xs text-slate-500">Gates reporting in real-time</p>
+            <p className="text-xs text-[var(--text-muted)]">Gates reporting in real-time</p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <FileBarChart className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Analytics
               </span>
             </div>
             {analyticsLoading && !analytics ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-slate-500" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
             ) : hasMeaningfulMetrics ? (
               <p className="text-2xl font-bold text-amber-400">{metrics.length} metrics</p>
             ) : (
-              <p className="text-2xl font-bold text-slate-500">N/A</p>
+              <p className="text-2xl font-bold text-[var(--text-muted)]">N/A</p>
             )}
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--text-muted)]">
               {hasMeaningfulMetrics
                 ? "Approval and turnaround analytics"
                 : "Analytics not available for this role"}
             </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-slate-400 min-w-0">
+            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <Clock className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Last Updated
@@ -207,7 +207,7 @@ function ExamBranchReportsInner() {
                   })
                 : "—"}
             </p>
-            <p className="text-xs text-slate-500">Auto-refreshes every 30 seconds</p>
+            <p className="text-xs text-[var(--text-muted)]">Auto-refreshes every 30 seconds</p>
           </div>
         </div>
       </WidgetBoundary>
@@ -222,7 +222,7 @@ function ExamBranchReportsInner() {
                 Gate × Role Occupancy
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {gates.length} gates · live
             </span>
           </div>
@@ -232,20 +232,20 @@ function ExamBranchReportsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : gates.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <ChartBar className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">No active gates reporting.</p>
+              <p className="text-sm text-[var(--text-muted)]">No active gates reporting.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[480px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)]">
                     <th className="text-left px-4 py-2.5 font-semibold">Gate</th>
                     {presence?.data?.roles?.map((roleKey) => (
                       <th key={roleKey} className="text-right px-3 py-2.5 font-semibold">
@@ -297,11 +297,11 @@ function ExamBranchReportsInner() {
         <WidgetBoundary title="Role Analytics">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
             {metrics.map((m) => (
-              <div key={m.key} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">{m.label}</p>
+              <div key={m.key} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">{m.label}</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {m.value}
-                  {m.unit && <span className="text-sm text-slate-500 ml-1">{m.unit}</span>}
+                  {m.unit && <span className="text-sm text-[var(--text-muted)] ml-1">{m.unit}</span>}
                 </p>
               </div>
             ))}
@@ -316,7 +316,7 @@ function ExamBranchReportsInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[300px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-500">
+                  <tr className="border-b border-slate-800 text-[var(--text-muted)]">
                     {Object.keys(series[0]).map((k) => (
                       <th key={k} className="text-left px-4 py-2 font-semibold">
                         {k}

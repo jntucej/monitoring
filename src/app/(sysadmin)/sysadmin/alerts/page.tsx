@@ -94,7 +94,7 @@ function AlertsInner() {
                   ? "text-emerald-600 bg-emerald-50 border border-emerald-200"
                   : sseState === "polling"
                     ? "text-amber-600 bg-amber-50 border border-amber-200"
-                    : "text-slate-500 bg-slate-50 border border-slate-200"
+                    : "text-[var(--text-muted)] bg-slate-50 border border-slate-200"
               )}
             >
               {sseState === "live" ? "SSE live" : sseState === "polling" ? "SSE polling" : "SSE idle"}

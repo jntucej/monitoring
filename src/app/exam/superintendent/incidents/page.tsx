@@ -67,7 +67,7 @@ function ExamSuperintendentIncidentsInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -75,7 +75,7 @@ function ExamSuperintendentIncidentsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -105,7 +105,7 @@ function ExamSuperintendentIncidentsInner() {
               <BellRing className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-sm font-semibold text-white">Exam-Related Alerts & Exceptions</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {examAlerts.length + exceptions.length} open item(s)
             </span>
           </div>
@@ -113,14 +113,14 @@ function ExamSuperintendentIncidentsInner() {
           {busy ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 min-w-0">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-800/40" />
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
               ))}
             </div>
           ) : examAlerts.length === 0 && exceptions.length === 0 ? (
             <div className="p-8 text-center min-w-0">
               <div className="flex flex-col items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-slate-600" />
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[var(--text-muted)]">
                   No open exam-related alerts or access exceptions right now.
                 </p>
                 <p className="text-xs text-slate-600 max-w-md">
@@ -133,16 +133,16 @@ function ExamSuperintendentIncidentsInner() {
             <div className="p-4 space-y-4 min-w-0">
               {exceptions.length > 0 && (
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
                     Exam Access Exceptions
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                     {exceptions.slice(0, 9).map((row, i) => (
-                      <div key={row.id ?? i} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                      <div key={row.id ?? i} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
                         <p className="text-sm font-semibold text-amber-400 truncate">
                           {row.title ?? (row.id ? `Exception ${row.id.slice(0, 8)}` : "Exam exception")}
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5 truncate">{row.message ?? row.source}</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">{row.message ?? row.source}</p>
                       </div>
                     ))}
                   </div>
@@ -150,12 +150,12 @@ function ExamSuperintendentIncidentsInner() {
               )}
               {examAlerts.length > 0 && (
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
                     Unresolved Alerts (exam-related)
                   </p>
                   <div className="space-y-2 min-w-0">
                     {examAlerts.slice(0, 12).map((a) => (
-                      <div key={a.id} className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
+                      <div key={a.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-medium text-slate-200 truncate">{a.title ?? a.message ?? "Alert"}</p>
                           <span
@@ -164,13 +164,13 @@ function ExamSuperintendentIncidentsInner() {
                                 ? "bg-rose-500/20 text-rose-400"
                                 : a.severity === "warning"
                                   ? "bg-amber-500/20 text-amber-400"
-                                  : "bg-slate-700/40 text-slate-400"
+                                  : "bg-slate-700/40 text-[var(--text-muted)]"
                             }`}
                           >
                             {a.severity ?? "info"}
                           </span>
                         </div>
-                        {a.message && a.title && <p className="text-xs text-slate-500 mt-1 truncate">{a.message}</p>}
+                        {a.message && a.title && <p className="text-xs text-[var(--text-muted)] mt-1 truncate">{a.message}</p>}
                       </div>
                     ))}
                   </div>

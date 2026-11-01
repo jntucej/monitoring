@@ -88,13 +88,13 @@ function FacultyAttendanceInner() {
             <Users className="w-6 h-6 text-emerald-400" />
             Faculty Attendance Desk
           </p>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-[var(--text-muted)] mt-1">
             {isFaculty
               ? `Your department${deptCode || " (assigned branch)"} — live entry/exit, punctuality and attendance metrics.`
               : "Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics."}
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
           {user?.name && <span className="truncate max-w-[220px]">{user.name}</span>}
         </div>
       </div>
@@ -125,10 +125,10 @@ function FacultyAttendanceInner() {
       ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
         /* Empty state — no attendance records yet */
         <div className="flex flex-col items-center justify-center p-12 bg-[#111827] border border-slate-800 rounded-2xl text-center space-y-3">
-          <Inbox className="w-10 h-10 text-slate-500" />
+          <Inbox className="w-10 h-10 text-[var(--text-muted)]" />
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-slate-200">No attendance records yet</h3>
-            <p className="text-xs text-slate-500 max-w-sm">
+            <p className="text-xs text-[var(--text-muted)] max-w-sm">
               Faculty appear here after their first gate check-in today. Metrics refresh
               automatically while Live mode is on.
             </p>

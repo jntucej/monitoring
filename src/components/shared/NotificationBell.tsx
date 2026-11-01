@@ -222,7 +222,7 @@ export function NotificationBell() {
               ) : (
                 filteredNotifications.map((n) => {
                   const Icon = PRIORITY_ICONS[n.priority] || Bell;
-                  const color = PRIORITY_COLORS[n.priority] || 'text-slate-400';
+                  const color = PRIORITY_COLORS[n.priority] || 'text-[var(--text-muted)]';
 
                   return (
                     <div

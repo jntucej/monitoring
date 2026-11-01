@@ -277,7 +277,7 @@ function MessFoodPreferenceInner() {
         LOCKED
       </span>
     ) : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/15 border border-slate-500/30 text-slate-400 text-[10px] font-bold">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/15 border border-slate-500/30 text-[var(--text-muted)] text-[10px] font-bold">
       {msLeft > 0 ? (
         <span className="tabular-nums">Opens in {formatCountdown(msLeft)}</span>
       ) : (

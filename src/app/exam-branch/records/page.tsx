@@ -92,7 +92,7 @@ function ExamBranchRecordsInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -100,7 +100,7 @@ function ExamBranchRecordsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -126,20 +126,20 @@ function ExamBranchRecordsInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Records Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Total Records</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Records</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalCount}</p>
-            <p className="text-xs text-slate-500">All exam workflow requests</p>
+            <p className="text-xs text-[var(--text-muted)]">All exam workflow requests</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Pending</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Pending</p>
             <p className="mt-1 text-2xl font-bold text-amber-400">{pendingCount}</p>
-            <p className="text-xs text-slate-500">Awaiting stage action</p>
+            <p className="text-xs text-[var(--text-muted)]">Awaiting stage action</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Resolved</p>
+          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Resolved</p>
             <p className="mt-1 text-2xl font-bold text-emerald-400">{resolvedCount}</p>
-            <p className="text-xs text-slate-500">Approved or rejected</p>
+            <p className="text-xs text-[var(--text-muted)]">Approved or rejected</p>
           </div>
         </div>
       </WidgetBoundary>
@@ -154,7 +154,7 @@ function ExamBranchRecordsInner() {
                 Examination Records
               </span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{requests.length} shown</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{requests.length} shown</span>
           </div>
 
           {busy ? (
@@ -162,14 +162,14 @@ function ExamBranchRecordsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-slate-800 bg-slate-900/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
               <UserCheck className="w-8 h-8 mx-auto text-slate-600 mb-2" />
-              <p className="text-sm text-slate-400">No examination records yet.</p>
+              <p className="text-sm text-[var(--text-muted)]">No examination records yet.</p>
               <p className="text-xs text-slate-600 mt-1">
                 Records appear when exam workflow requests are created.
               </p>
@@ -187,11 +187,11 @@ function ExamBranchRecordsInner() {
                     >
                       {req.status}
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-[var(--text-muted)]">
                       stage: {req.current_stage}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] min-w-0">
                     {new Date(req.created_at).toLocaleString([], {
                       month: "short",
                       day: "numeric",
@@ -204,7 +204,7 @@ function ExamBranchRecordsInner() {
                 </li>
               ))}
               {requests.length > 50 && (
-                <li className="px-4 py-2 text-xs text-slate-500 text-center">
+                <li className="px-4 py-2 text-xs text-[var(--text-muted)] text-center">
                   + {requests.length - 50} more records (refresh to see latest)
                 </li>
               )}

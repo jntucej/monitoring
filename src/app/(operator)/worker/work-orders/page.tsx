@@ -53,7 +53,7 @@ function WorkerWorkOrdersInner() {
         <ClipboardList className="h-6 w-6 text-sky-400 shrink-0" />
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-white truncate">My Work Orders</h1>
-          <p className="text-sm text-slate-400 min-w-0">Maintenance tasks assigned to you</p>
+          <p className="text-sm text-[var(--text-muted)] min-w-0">Maintenance tasks assigned to you</p>
         </div>
       </div>
 
@@ -65,9 +65,9 @@ function WorkerWorkOrdersInner() {
 
       <OperatorWidgetBoundary title="Open">
         <div className="min-w-0">
-          <p className="mb-3 text-xs text-slate-500">{totalOpen} open task(s)</p>
+          <p className="mb-3 text-xs text-[var(--text-muted)]">{totalOpen} open task(s)</p>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> Loading…
             </div>
           ) : open.length === 0 ? (
@@ -78,7 +78,7 @@ function WorkerWorkOrdersInner() {
                 <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{o.ticket}</p>
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="text-xs text-[var(--text-muted)] truncate">
                       {o.requesterName ? `${o.requesterName} · ` : ""}
                       {o.type ?? "task"}
                       {o.stage ? ` · ${o.stage}` : ""}
@@ -103,7 +103,7 @@ function WorkerWorkOrdersInner() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{c.ticket}</p>
                     {c.updatedAt && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-[var(--text-muted)]">
                         Updated {new Date(c.updatedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}

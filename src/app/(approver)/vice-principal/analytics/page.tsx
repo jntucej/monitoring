@@ -69,12 +69,12 @@ function VpAnalyticsInner() {
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="VP Analytics">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-slate-400 mb-4 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-4 min-w-0">
             <BarChart3 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Exam Approvals — Analytics
             </span>
-            <span className="ml-auto text-xs text-slate-500">{total} approved</span>
+            <span className="ml-auto text-xs text-[var(--text-muted)]">{total} approved</span>
           </div>
 
           {error && (
@@ -86,14 +86,14 @@ function VpAnalyticsInner() {
           {loading && !approved ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-12 rounded-lg bg-slate-800/60 animate-pulse" />
+                <div key={i} className="h-12 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
               ))}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-3 min-w-0">
               {/* By stage */}
-              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                <div className="flex items-center gap-2 mb-2 text-xs text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <ScrollText className="w-3.5 h-3.5" /> By stage
                 </div>
                 {Object.keys(byStage).length === 0 ? (
@@ -113,8 +113,8 @@ function VpAnalyticsInner() {
               </div>
 
               {/* By status */}
-              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                <div className="flex items-center gap-2 mb-2 text-xs text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <CheckCircle2 className="w-3.5 h-3.5" /> By status
                 </div>
                 {Object.keys(byStatus).length === 0 ? (
@@ -134,8 +134,8 @@ function VpAnalyticsInner() {
               </div>
 
               {/* Recent approved tickets */}
-              <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                <div className="flex items-center gap-2 mb-2 text-xs text-slate-400">
+              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <Clock className="w-3.5 h-3.5" /> Recent tickets
                 </div>
                 {rows.length === 0 ? (
@@ -155,7 +155,7 @@ function VpAnalyticsInner() {
                       .map((r) => (
                         <li key={r.id} className="flex items-center justify-between text-xs gap-2">
                           <span className="font-mono text-sky-400 truncate">{r.ticket_number}</span>
-                          <span className="text-slate-500 truncate">{r.student?.name || "—"}</span>
+                          <span className="text-[var(--text-muted)] truncate">{r.student?.name || "—"}</span>
                         </li>
                       ))}
                   </ul>

@@ -42,13 +42,13 @@ function VisitorRequestInner() {
     req?.state === "COMPLETED" ? "Completed" : "No request";
   const stateTone =
     req?.state === "ACTIVE" ? "text-emerald-400" :
-    req?.state === "COMPLETED" ? "text-sky-400" : "text-slate-500";
+    req?.state === "COMPLETED" ? "text-sky-400" : "text-[var(--text-muted)]";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -56,7 +56,7 @@ function VisitorRequestInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Visit Request</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -88,31 +88,31 @@ function VisitorRequestInner() {
             </div>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
             </div>
           ) : (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">State</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">State</p>
                   <p className={`mt-1 text-base font-bold ${stateTone}`}>{stateLabel}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Host</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host</p>
                   <p className="mt-1 text-base text-slate-100">{req?.hostName ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Purpose</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Purpose</p>
                   <p className="mt-1 text-base text-slate-100">{req?.purpose ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Requested</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Requested</p>
                   <p className="mt-1 text-base font-semibold text-amber-400">{fmt(req?.requestedAt)}</p>
                 </div>
               </div>
               {req?.state === "NONE" && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   No visit request is on record yet. Ask your host to issue a visitor pass at the gate.
                 </p>
               )}

@@ -63,7 +63,7 @@ function ExamSuperintendentReportsInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -71,7 +71,7 @@ function ExamSuperintendentReportsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-slate-400 min-w-0">
+          <p className="text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -101,36 +101,36 @@ function ExamSuperintendentReportsInner() {
               <FileBarChart className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white">Examination Reports & Analytics</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">{total} exam record(s)</span>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{total} exam record(s)</span>
           </div>
 
           {/* Outcome breakdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 min-w-0">
             {busy ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-14 animate-pulse rounded-lg bg-slate-800/40" />
+                <div key={i} className="h-14 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
               ))
             ) : (
               <>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Approval Rate</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Approval Rate</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">{approvalRate}%</p>
-                  <p className="text-xs text-slate-500">{approved} approved of {total}</p>
+                  <p className="text-xs text-[var(--text-muted)]">{approved} approved of {total}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Pending</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Pending</p>
                   <p className="mt-1 text-lg font-bold text-sky-400">{pending}</p>
-                  <p className="text-xs text-slate-500">Awaiting clearance</p>
+                  <p className="text-xs text-[var(--text-muted)]">Awaiting clearance</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Escalated</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Escalated</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">{escalated}</p>
-                  <p className="text-xs text-slate-500">Held for review</p>
+                  <p className="text-xs text-[var(--text-muted)]">Held for review</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">Rejected</p>
+                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Rejected</p>
                   <p className="mt-1 text-lg font-bold text-rose-400">{rejected}</p>
-                  <p className="text-xs text-slate-500">Denied clearances</p>
+                  <p className="text-xs text-[var(--text-muted)]">Denied clearances</p>
                 </div>
               </>
             )}
@@ -138,7 +138,7 @@ function ExamSuperintendentReportsInner() {
 
           {/* Data availability note */}
           <div className="px-4 pb-4 min-w-0">
-            <p className="text-xs text-slate-500 flex items-center gap-2">
+            <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-slate-600 shrink-0" />
               Outcome counts derived from the live exam workflow queue; auto-refreshes every 30 seconds.
             </p>

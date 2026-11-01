@@ -51,7 +51,7 @@ function WorkerShiftsInner() {
         <Clock className="h-6 w-6 text-emerald-400 shrink-0" />
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-white truncate">My Shift</h1>
-          <p className="text-sm text-slate-400 min-w-0">Today&apos;s gate check-in/out activity</p>
+          <p className="text-sm text-[var(--text-muted)] min-w-0">Today&apos;s gate check-in/out activity</p>
         </div>
       </div>
 
@@ -64,26 +64,26 @@ function WorkerShiftsInner() {
       <OperatorWidgetBoundary title="Today">
         <div className="min-w-0">
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> Loading…
             </div>
           ) : todayShift ? (
             <div className="flex flex-wrap items-center gap-6 p-1 min-w-0">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Check-in</p>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Check-in</p>
                 <p className="mt-1 text-lg font-mono font-semibold text-emerald-400">{fmtTime(todayShift.check_in)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Check-out</p>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Check-out</p>
                 <p className="mt-1 text-lg font-mono font-semibold text-rose-400">{fmtTime(todayShift.check_out)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Scans</p>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Scans</p>
                 <p className="mt-1 text-lg font-mono font-semibold text-slate-200">{todayShift.scans ?? 0}</p>
               </div>
             </div>
           ) : (
-            <OperatorEmptyState icon={<Clock className="h-6 w-6 text-slate-500" />} title="No shift recorded today" description="Gate check-ins will appear here once recorded." />
+            <OperatorEmptyState icon={<Clock className="h-6 w-6 text-[var(--text-muted)]" />} title="No shift recorded today" description="Gate check-ins will appear here once recorded." />
           )}
         </div>
       </OperatorWidgetBoundary>
@@ -91,14 +91,14 @@ function WorkerShiftsInner() {
       <OperatorWidgetBoundary title="Recent Gate Activity">
         <div className="min-w-0">
           {myRecent.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-slate-500">No recent gate scans recorded.</p>
+            <p className="px-4 py-3 text-sm text-[var(--text-muted)]">No recent gate scans recorded.</p>
           ) : (
             <div className="divide-y divide-slate-800">
               {myRecent.map((m) => (
                 <div key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <ArrowRight
-                      className={`h-4 w-4 shrink-0 ${m.direction === "IN" ? "text-emerald-400" : "text-slate-400"}`}
+                      className={`h-4 w-4 shrink-0 ${m.direction === "IN" ? "text-emerald-400" : "text-[var(--text-muted)]"}`}
                       style={m.direction === "OUT" ? { transform: "scaleX(-1)" } : undefined}
                     />
                     <span className="text-sm text-slate-200 truncate">
@@ -106,7 +106,7 @@ function WorkerShiftsInner() {
                       {m.is_manual ? " (manual)" : ""}
                     </span>
                   </div>
-                  <span className="shrink-0 font-mono text-xs text-slate-500">
+                  <span className="shrink-0 font-mono text-xs text-[var(--text-muted)]">
                     {new Date(m.timestamp).toLocaleString([], {
                       day: "2-digit",
                       month: "short",

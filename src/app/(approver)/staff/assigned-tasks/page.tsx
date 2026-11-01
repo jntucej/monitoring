@@ -40,7 +40,7 @@ function StaffAssignedTasksInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/staff"
-        className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
@@ -48,7 +48,7 @@ function StaffAssignedTasksInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Assigned Tasks</h1>
-          <p className="mt-1 text-sm text-slate-400 min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
             Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
@@ -78,12 +78,12 @@ function StaffAssignedTasksInner() {
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Open staff-leave requests</span>
             </div>
-            <span className="text-xs text-slate-500 shrink-0">
+            <span className="text-xs text-[var(--text-muted)] shrink-0">
               {slice?.totalOpen ?? 0} open
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-slate-500 min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Assigned Tasks…
             </div>
           ) : (
@@ -91,23 +91,23 @@ function StaffAssignedTasksInner() {
               {slice && slice.openRequests.length > 0 ? (
                 <div className="space-y-2 min-w-0">
                   {slice.openRequests.map((r) => (
-                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-3 min-w-0">
-                      <span className="text-xs text-slate-500 font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
+                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                      <span className="text-xs text-[var(--text-muted)] font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
                       <span className="flex-1 text-sm text-slate-200">{r.workflow_type}</span>
                       <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-700/40 text-slate-300 shrink-0 capitalize">
                         {r.current_stage ?? r.status}
                       </span>
-                      <span className="text-xs text-slate-500 shrink-0">
+                      <span className="text-xs text-[var(--text-muted)] shrink-0">
                         {new Date(r.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">No open staff-leave requests assigned to you.</p>
+                <p className="text-sm text-[var(--text-muted)]">No open staff-leave requests assigned to you.</p>
               )}
               {slice?.lastMovement && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Most recent movement:{" "}
                   <span className="text-slate-300">{slice.lastMovement.direction}</span> at{" "}
                   <span className="text-slate-300">

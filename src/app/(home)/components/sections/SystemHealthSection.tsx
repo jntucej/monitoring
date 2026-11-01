@@ -46,7 +46,7 @@ export function SystemHealthSection() {
               className="rounded-2xl border border-white/10 bg-white/5 p-5"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-widest text-slate-400">
+                <span className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
                   {item.label}
                 </span>
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
@@ -54,7 +54,7 @@ export function SystemHealthSection() {
               <div className="mt-2 text-lg font-semibold text-white">
                 {item.status}
               </div>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
                 {item.desc}
               </p>
             </motion.div>

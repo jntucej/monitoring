@@ -298,7 +298,7 @@ export function PromotionRequests() {
                 {targetUser && (
                   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs">
                     <span className="text-sky-300 font-semibold">{targetUser.name} → {newRole}</span>
-                    <button type="button" onClick={() => { setTargetUser(null); setTargetUserId(""); }} className="text-slate-400 hover:text-white">✕</button>
+                    <button type="button" onClick={() => { setTargetUser(null); setTargetUserId(""); }} className="text-[var(--text-muted)] hover:text-white">✕</button>
                   </div>
                 )}
               </div>

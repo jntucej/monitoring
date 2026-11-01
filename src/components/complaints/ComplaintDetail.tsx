@@ -83,8 +83,8 @@ export function ComplaintDetail({ role }: { role: string }) {
     } else alert(j.error?.message ?? "Upload failed");
   };
 
-  if (loading) return <p className="p-6 text-slate-500">Loading…</p>;
-  if (!data?.complaint) return <p className="p-6 text-slate-500">Complaint not found.</p>;
+  if (loading) return <p className="p-6 text-[var(--text-muted)]">Loading…</p>;
+  if (!data?.complaint) return <p className="p-6 text-[var(--text-muted)]">Complaint not found.</p>;
 
   const c = data.complaint;
   const isRaiser = role === "student" && c.raised_by; // Note: client view might verify auth store
@@ -93,7 +93,7 @@ export function ComplaintDetail({ role }: { role: string }) {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="border-b pb-4">
-        <span className="font-mono text-xs text-slate-500">{c.complaintNumber}</span>
+        <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
         <h1 className="text-2xl font-semibold text-slate-900 mt-1">{c.title}</h1>
         <p className="text-sm text-slate-600 mt-1">
           {c.categoryLabel} · Status: <strong className="uppercase">{c.status}</strong> · Owner:{" "}
@@ -181,9 +181,9 @@ export function ComplaintDetail({ role }: { role: string }) {
             <div key={t.id} className="p-3 space-y-1">
               <div className="flex justify-between font-medium">
                 <span>{t.action}</span>
-                <span className="uppercase text-xs text-slate-500 font-mono">{t.status}</span>
+                <span className="uppercase text-xs text-[var(--text-muted)] font-mono">{t.status}</span>
               </div>
-              <p className="text-xs text-slate-500">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
+              <p className="text-xs text-[var(--text-muted)]">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
               {t.notes && <p className="text-slate-700 mt-1 bg-slate-50 p-2 rounded">{t.notes}</p>}
             </div>
           ))}
@@ -197,7 +197,7 @@ export function ComplaintDetail({ role }: { role: string }) {
             onChange={(e) => setNoteText(e.target.value)}
             className="border rounded p-2 text-sm flex-1"
           />
-          <button type="submit" className="px-3 py-2 rounded bg-slate-800 text-white text-sm">
+          <button type="submit" className="px-3 py-2 rounded bg-[var(--bg-elevated)] text-white text-sm">
             Post note
           </button>
         </form>
@@ -222,7 +222,7 @@ export function ComplaintDetail({ role }: { role: string }) {
         </div>
         <form onSubmit={uploadAttachment} className="flex gap-2 items-center pt-2">
           <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-          <button type="submit" disabled={!file} className="px-3 py-1.5 rounded bg-slate-800 text-white text-sm">
+          <button type="submit" disabled={!file} className="px-3 py-1.5 rounded bg-[var(--bg-elevated)] text-white text-sm">
             Upload file
           </button>
         </form>

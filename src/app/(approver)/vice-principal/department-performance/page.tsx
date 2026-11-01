@@ -71,7 +71,7 @@ function VpDepartmentPerformanceInner() {
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Department Performance">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Building2 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Cross-Department Comparison
@@ -80,22 +80,22 @@ function VpDepartmentPerformanceInner() {
 
           {/* KPI row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <School className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Departments</span>
               </div>
               <p className="text-xl font-bold text-white">{totals.departments}</p>
             </div>
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <Users className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Total Students</span>
               </div>
               <p className="text-xl font-bold text-sky-400">{totals.students || "—"}</p>
             </div>
-            <div className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+              <div className="flex items-center gap-2 text-[var(--text-muted)]">
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Faculty</span>
               </div>
@@ -112,13 +112,13 @@ function VpDepartmentPerformanceInner() {
           {deptLoading && !departments ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-8 rounded-lg bg-slate-800/60 animate-pulse" />
+                <div key={i} className="h-8 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
               ))}
             </div>
           ) : comparison.length === 0 ? (
             <div className="p-6 text-center">
               <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 No department performance data yet.
               </p>
             </div>
@@ -128,14 +128,14 @@ function VpDepartmentPerformanceInner() {
                 <div key={d.code} className="min-w-0">
                   <div className="flex items-center justify-between gap-2 text-sm mb-1">
                     <span className="text-slate-200 truncate">
-                      <span className="text-slate-500 font-mono text-xs mr-2">#{d.rank}</span>
+                      <span className="text-[var(--text-muted)] font-mono text-xs mr-2">#{d.rank}</span>
                       {d.name}
                     </span>
-                    <span className="text-slate-400 text-xs shrink-0">
+                    <span className="text-[var(--text-muted)] text-xs shrink-0">
                       {d.totalStudents ?? 0} students · {d.facultyCount ?? 0} faculty
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-800 overflow-hidden" role="presentation">
+                  <div className="h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden" role="presentation">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all motion-reduce:transition-none"
                       style={{ width: `${d.pct}%` }}
@@ -150,7 +150,7 @@ function VpDepartmentPerformanceInner() {
 
       <WidgetBoundary title="Role Analytics Signal">
         <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-slate-400 mb-3 min-w-0">
+          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <TrendingUp className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Institutional Turnaround & Queue Signals
@@ -159,17 +159,17 @@ function VpDepartmentPerformanceInner() {
           {analytics?.data?.metrics && analytics.data.metrics.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
               {analytics.data.metrics.map((m) => (
-                <div key={m.key} className="rounded-lg bg-slate-800/40 p-3 min-w-0">
-                  <p className="text-xs text-slate-500 truncate">{m.label}</p>
+                <div key={m.key} className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
+                  <p className="text-xs text-[var(--text-muted)] truncate">{m.label}</p>
                   <p className="text-lg font-bold text-white">
                     {m.value}
-                    {m.unit ? <span className="text-xs text-slate-400 ml-1">{m.unit}</span> : null}
+                    {m.unit ? <span className="text-xs text-[var(--text-muted)] ml-1">{m.unit}</span> : null}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--text-muted)]">
               No role analytics signals for this period. Full analytics are available to the
               Principal and Administrator desks.
             </p>
@@ -179,7 +179,7 @@ function VpDepartmentPerformanceInner() {
             onClick={() => {
               void refreshAnalytics();
             }}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
           >
             <Loader2 className={`w-3.5 h-3.5 ${!analytics ? "animate-spin" : "hidden"}`} />
             Refresh signals

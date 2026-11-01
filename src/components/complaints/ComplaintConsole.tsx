@@ -55,7 +55,7 @@ export function ComplaintConsole({
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">{title}</h1>
         {role === "student" && (
-          <Link href="/student/complaints/new" className="px-4 py-2 rounded bg-slate-900 text-white text-sm">
+          <Link href="/student/complaints/new" className="px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm">
             Raise complaint
           </Link>
         )}
@@ -79,16 +79,16 @@ export function ComplaintConsole({
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-[var(--text-muted)]">Loading…</p>
       ) : complaints.length === 0 ? (
-        <p className="text-sm text-slate-500">No complaints found.</p>
+        <p className="text-sm text-[var(--text-muted)]">No complaints found.</p>
       ) : (
         <div className="border rounded divide-y bg-white">
           {complaints.map((c) => (
             <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-slate-50 transition">
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="font-mono text-xs text-slate-500">{c.complaintNumber}</span>
+                  <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
                   <h2 className="font-medium text-slate-900">{c.title}</h2>
                   <p className="text-xs text-slate-600 mt-0.5">
                     {c.categoryLabel} · Owner: <span className="font-mono">{c.currentOwnerRole}</span>
@@ -98,7 +98,7 @@ export function ComplaintConsole({
                   <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-slate-100 text-slate-800">
                     {c.status}
                   </span>
-                  <p className="text-xs text-slate-400 mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             </Link>

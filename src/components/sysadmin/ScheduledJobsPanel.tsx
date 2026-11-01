@@ -510,8 +510,8 @@ const api = useApi();
     <div className="space-y-6">
       {!loading && rows.length === 0 && (
         <div className="flex items-start gap-3 rounded-xl border border-slate-500/20 bg-slate-500/5 p-4 text-sm">
-          <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400" />
-          <div className="text-slate-400/90">
+          <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
+          <div className="text-[var(--text-muted)]/90">
             <p className="font-medium">No scheduled jobs configured</p>
             <p className="text-xs opacity-80">
               The <code>scheduled_jobs</code> table is empty. Add a job via the admin console

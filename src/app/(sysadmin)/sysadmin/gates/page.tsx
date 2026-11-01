@@ -242,7 +242,7 @@ const api = useApi();
             <p className="text-2xl font-bold text-white flex items-center gap-2.5">
               <DoorOpen className="w-7 h-7 text-emerald-400" /> Gate Management
             </p>
-            <p className="text-sm text-slate-400 mt-1">{gates.length} gates · add / edit / assign operators · all DB-driven</p>
+            <p className="text-sm text-[var(--text-muted)] mt-1">{gates.length} gates · add / edit / assign operators · all DB-driven</p>
           </div>
           <button onClick={() => { setEditing(null); setForm({ gateCode: "", name: "", location: "", type: "main", audience: "all" }); setShowAdd(true); }}
             className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 self-start">
@@ -257,9 +257,9 @@ const api = useApi();
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <div className="text-sm font-bold text-white">{g.name}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{g.location || "—"}</div>
+                  <div className="text-xs text-[var(--text-muted)] mt-0.5">{g.location || "—"}</div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${g.is_active ? "bg-emerald-500/15 text-emerald-400" : "bg-slate-700 text-slate-400"}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${g.is_active ? "bg-emerald-500/15 text-emerald-400" : "bg-slate-700 text-[var(--text-muted)]"}`}>
                   {g.is_active ? "Active" : "Off"}
                 </span>
               </div>
@@ -270,10 +270,10 @@ const api = useApi();
               </div>
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
                 <button type="button" onClick={() => { setEditing(g); setForm({ gateCode: gateCodeOf(g), name: g.name, location: g.location || "", type: g.type || "main", audience: g.audience || "all" }); setShowAdd(true); }}
-                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-800 text-sky-400" title="Edit"><Pencil className="w-4 h-4" /></button>
-                <button type="button" onClick={() => setAssigningGate(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-800 text-emerald-400" title="Assign user to this gate"><UserCog className="w-4 h-4" /></button>
-                <button type="button" onClick={() => toggleActive(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-800 text-amber-400" title={g.is_active ? "Deactivate" : "Activate"}><Power className="w-4 h-4" /></button>
-                <button type="button" onClick={() => removeGate(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-800 text-rose-400" title="Deactivate (soft)"><Trash2 className="w-4 h-4" /></button>
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-sky-400" title="Edit"><Pencil className="w-4 h-4" /></button>
+                <button type="button" onClick={() => setAssigningGate(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-emerald-400" title="Assign user to this gate"><UserCog className="w-4 h-4" /></button>
+                <button type="button" onClick={() => toggleActive(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-amber-400" title={g.is_active ? "Deactivate" : "Activate"}><Power className="w-4 h-4" /></button>
+                <button type="button" onClick={() => removeGate(g)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-rose-400" title="Deactivate (soft)"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -288,43 +288,43 @@ const api = useApi();
                   {editing ? <Pencil className="w-4 h-4 text-sky-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}
                   {editing ? "Edit Gate" : "New Gate"}
                 </h2>
-                <button type="button" onClick={() => setShowAdd(false)} className="text-slate-400 hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><X className="w-5 h-5" /></button>
+                <button type="button" onClick={() => setShowAdd(false)} className="text-[var(--text-muted)] hover:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"><X className="w-5 h-5" /></button>
               </div>
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-slate-400 block mb-1">Gate code *</label>
+                  <label className="text-[var(--text-muted)] block mb-1">Gate code *</label>
                   <input required value={form.gateCode} onChange={(e) => setForm({ ...form, gateCode: e.target.value })}
-                    placeholder="e.g. MAIN_BOYS" className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-emerald-500" />
+                    placeholder="e.g. MAIN_BOYS" className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="text-slate-400 block mb-1">Display name *</label>
+                  <label className="text-[var(--text-muted)] block mb-1">Display name *</label>
                   <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="e.g. Main Gate - Boys" className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
+                    placeholder="e.g. Main Gate - Boys" className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="text-slate-400 block mb-1">Location description</label>
+                  <label className="text-[var(--text-muted)] block mb-1">Location description</label>
                   <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    placeholder="e.g. North campus near block 3" className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
+                    placeholder="e.g. North campus near block 3" className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-slate-400 block mb-1">Type</label>
+                    <label className="text-[var(--text-muted)] block mb-1">Type</label>
                     <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
                       {GATE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="text-slate-400 block mb-1">Audience scope</label>
+                    <label className="text-[var(--text-muted)] block mb-1">Audience scope</label>
                     <select value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
+                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500">
                       {AUDIENCES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
                     </select>
                   </div>
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 min-h-[44px] rounded-xl hover:bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+                <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 min-h-[44px] rounded-xl hover:bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold">Cancel</button>
                 <button type="submit" className="px-4 py-2 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Save Gate</button>
               </div>
             </form>
@@ -339,15 +339,15 @@ const api = useApi();
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <UserCog className="w-5 h-5 text-emerald-400" /> Assign Operator → {assigningGate.name}
                 </h2>
-                <button type="button" onClick={() => setAssigningGate(null)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+                <button type="button" onClick={() => setAssigningGate(null)} className="text-[var(--text-muted)] hover:text-white"><X className="w-5 h-5" /></button>
               </div>
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-slate-400 block mb-1">Search user by name, roll or email</label>
+                  <label className="text-[var(--text-muted)] block mb-1">Search user by name, roll or email</label>
                   <div className="relative">
-                    <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
                     <input autoFocus value={userQuery} onChange={(e) => searchUsers(e.target.value)}
-                      placeholder="Type at least 2 chars..." className="w-full min-h-[44px] pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
+                      placeholder="Type at least 2 chars..." className="w-full min-h-[44px] pl-9 pr-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div className="max-h-60 overflow-y-auto space-y-1.5 divide-y divide-slate-800/50">
@@ -355,7 +355,7 @@ const api = useApi();
                     <div key={u.id} className="pt-2 first:pt-0 flex items-center justify-between gap-2">
                       <div>
                         <div className="font-semibold text-white">{u.name || u.email || u.id}</div>
-                        <div className="text-[11px] text-slate-400">{u.role} · {u.uniqueId || u.email}</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">{u.role} · {u.uniqueId || u.email}</div>
                       </div>
                       <button type="button" onClick={() => assignUserToGate(u)}
                         className="px-3 py-1.5 min-h-[44px] rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold shrink-0 flex items-center justify-center">
@@ -364,12 +364,12 @@ const api = useApi();
                     </div>
                   ))}
                   {userQuery.trim().length >= 2 && userResults.length === 0 && (
-                    <p className="text-center py-4 text-slate-500">No matching users found.</p>
+                    <p className="text-center py-4 text-[var(--text-muted)]">No matching users found.</p>
                   )}
                 </div>
               </div>
               <div className="flex justify-end pt-2">
-                <button type="button" onClick={() => setAssigningGate(null)} className="px-4 py-2 min-h-[44px] rounded-xl hover:bg-slate-800 text-slate-300 text-xs font-semibold">Done</button>
+                <button type="button" onClick={() => setAssigningGate(null)} className="px-4 py-2 min-h-[44px] rounded-xl hover:bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold">Done</button>
               </div>
             </div>
           </div>
@@ -378,7 +378,7 @@ const api = useApi();
         {/* Gate-claim codes (OTP strings the operator enters to self-assign) */}
         <WidgetBoundary title="Gate-Claim Codes (OTP assign)">
           <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5">
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-[var(--text-muted)] mb-4">
               Generate a one-time string code for a gate. Hand it to an operator (in person, read aloud, or via chat) —
               they enter it at the kiosk / operator console and get assigned to that gate automatically. No other
               admin action required.
@@ -395,7 +395,7 @@ const api = useApi();
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Monitor className="w-4 h-4 text-emerald-400" /> Kiosk Default Operator
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   Designate one operator account to act as the default identity for unattended touch-kiosks.
                 </p>
               </div>
@@ -408,17 +408,17 @@ const api = useApi();
             </div>
 
             {kioskOperator ? (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--bg-surface)]/60 border border-slate-800 text-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-white">{kioskOperator.name || kioskOperator.email || kioskOperator.id}</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-[10px]">Active Kiosk ID</span>
                   </div>
-                  <div className="text-slate-400 font-mono text-[11px]">Unique ID: {kioskOperator.uniqueId || "—"}</div>
+                  <div className="text-[var(--text-muted)] font-mono text-[11px]">Unique ID: {kioskOperator.uniqueId || "—"}</div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <select value={kioskGate} onChange={(e) => setKioskGate(e.target.value)}
-                    className="px-2.5 py-1.5 min-h-[44px] bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none">
+                    className="px-2.5 py-1.5 min-h-[44px] bg-[var(--bg-surface)] border border-slate-700 rounded-lg text-white text-xs focus:outline-none">
                     <option value="">Select Default Gate…</option>
                     {gates.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
@@ -434,7 +434,7 @@ const api = useApi();
                   No operator account is currently designated as the kiosk default. Choose an operator below to promote them.
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <select id="kiosk-select" className="px-3 py-2 min-h-[44px] bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none flex-1">
+                  <select id="kiosk-select" className="px-3 py-2 min-h-[44px] bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white text-xs focus:outline-none flex-1">
                     <option value="">Select operator account…</option>
                   </select>
                   <button type="button" onClick={() => {

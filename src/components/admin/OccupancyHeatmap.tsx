@@ -122,7 +122,7 @@ export function OccupancyHeatmap() {
             <MapPin className="h-5 w-5 text-emerald-400" />
             Live Campus Presence Matrix
           </p>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Who is inside each gate right now — entry/exit combined by role. Click any cell for details.
           </p>
         </div>
@@ -132,16 +132,16 @@ export function OccupancyHeatmap() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
               live
                 ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                : "bg-slate-700 text-slate-400 border border-slate-600"
+                : "bg-slate-700 text-[var(--text-muted)] border border-slate-600"
             }`}
           >
             <Activity className="h-3.5 w-3.5" />
             {live ? "LIVE" : "PAUSED"}
           </button>
-          <button onClick={load} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700" title="Refresh">
+          <button onClick={load} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-slate-700" title="Refresh">
             <RefreshCw className="h-4 w-4" />
           </button>
-          <span className="text-[10px] text-slate-500 ml-2">
+          <span className="text-[10px] text-[var(--text-muted)] ml-2">
             {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : "…"}
           </span>
         </div>
@@ -149,20 +149,20 @@ export function OccupancyHeatmap() {
 
       {/* Summary strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Inside</div>
+        <div className="bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Inside</div>
           <div className="text-2xl font-black text-white mt-1">{totalInside}</div>
         </div>
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Gates</div>
+        <div className="bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Active Gates</div>
           <div className="text-2xl font-black text-emerald-400 mt-1">{data?.gates.length ?? 0}</div>
         </div>
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Peak Cell</div>
+        <div className="bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Peak Cell</div>
           <div className="text-2xl font-black text-rose-400 mt-1">{maxCell}</div>
         </div>
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Roles Tracked</div>
+        <div className="bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl p-3">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Roles Tracked</div>
           <div className="text-2xl font-black text-purple-400 mt-1">{data?.roles.length ?? 0}</div>
         </div>
       </div>
@@ -175,18 +175,18 @@ export function OccupancyHeatmap() {
 
       {/* ── THE MATRIX ── */}
       {data && data.gates.length > 0 && (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="bg-[var(--bg-surface)]/40 border border-slate-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-[520px]">
               <thead>
                 <tr>
-                  <th className="sticky left-0 bg-slate-900 z-10 p-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-left border-r border-slate-800 min-w-[100px]">
+                  <th className="sticky left-0 bg-[var(--bg-surface)] z-10 p-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider text-left border-r border-slate-800 min-w-[100px]">
                     Role ↓ / Gate →
                   </th>
                   {data.gates.map((g) => (
                     <th key={g.id} className="p-2 text-center">
                       <div className="text-[10px] font-bold text-slate-300">{g.code || g.name}</div>
-                      <div className="text-[9px] text-slate-500 capitalize">{g.audience === "all" ? "main" : g.audience}</div>
+                      <div className="text-[9px] text-[var(--text-muted)] capitalize">{g.audience === "all" ? "main" : g.audience}</div>
                     </th>
                   ))}
                 </tr>
@@ -196,14 +196,14 @@ export function OccupancyHeatmap() {
                   const rowMax = Math.max(...data.gates.map((g) => data.matrix[g.id]?.[role] ?? 0));
                   return (
                     <tr key={role}>
-                      <td className="sticky left-0 bg-slate-900 z-10 p-2 border-r border-slate-800 border-b border-slate-800/60">
+                      <td className="sticky left-0 bg-[var(--bg-surface)] z-10 p-2 border-r border-slate-800 border-b border-slate-800/60">
                         <span className={`text-xs font-bold ${
                           role === "student" ? "text-blue-400" :
                           role === "faculty" ? "text-emerald-400" :
                           role === "staff" ? "text-purple-400" :
                           role === "worker" ? "text-amber-400" :
                           role === "visitor" ? "text-cyan-400" :
-                          role === "principal" ? "text-rose-400" : "text-slate-400"
+                          role === "principal" ? "text-rose-400" : "text-[var(--text-muted)]"
                         }`}>
                           {ROLE_LABELS[role] ?? role}
                         </span>
@@ -236,7 +236,7 @@ export function OccupancyHeatmap() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-slate-800 text-[10px] text-slate-500">
+          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-slate-800 text-[10px] text-[var(--text-muted)]">
             <span className="font-bold">Heat:</span>
             {[0.05, 0.15, 0.30, 0.50, 0.70, 0.85, 1.0].map((pct) => (
               <div key={pct} className="flex items-center gap-1">
@@ -252,23 +252,23 @@ export function OccupancyHeatmap() {
       {/* ── Drill-down modal ── */}
       {selected && cellDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
+          <div className="bg-[var(--bg-surface)] border border-slate-700 rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
                   <Users className="h-4 w-4 text-emerald-400" />
                   {cellDetail.count} {cellDetail.count === 1 ? "person" : "people"} inside
                 </div>
-                <div className="text-xs text-slate-400 mt-1">
+                <div className="text-xs text-[var(--text-muted)] mt-1">
                   {ROLE_LABELS[selected.role] ?? selected.role} @ {data?.gates.find((g) => g.id === selected.gate.id)?.name}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setSelected(null)} className="text-[var(--text-muted)] hover:text-white"><X className="w-5 h-5" /></button>
             </div>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-[var(--text-muted)]">
               Individual names are resolved from live movement logs. When scan data is recorded at this gate, each person will appear here by name, roll, and timestamp.
             </div>
-            <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-700">Close</button>
+            <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-bold hover:bg-slate-700">Close</button>
           </div>
         </div>
       )}
