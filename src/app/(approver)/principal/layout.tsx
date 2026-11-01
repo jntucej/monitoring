@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { PageLoading } from "@/components/shared/LoadingStates";
+import { PageLoading } from "@/components/principal/shared/PrincipalLoadingStates";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PrincipalDesktopShell } from "./_shell/PrincipalDesktopShell";

@@ -3,7 +3,7 @@ import React from "react";
 import { AlertTriangle } from "lucide-react";
 
 export class WidgetBoundary extends React.Component<
-  { title?: string; children: React.ReactNode },
+  { name?: string; title?: string; children: React.ReactNode },
   { error: Error | null }
 > {
   state = { error: null as Error | null };

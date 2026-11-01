@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import type { PermissionItem } from "@/components/approver/PermissionRow";

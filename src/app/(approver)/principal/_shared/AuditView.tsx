@@ -1,7 +1,7 @@
 "use client";
 
 import { useApiResource } from "@/hooks/useApiResource";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";

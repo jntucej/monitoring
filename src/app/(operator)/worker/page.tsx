@@ -5,7 +5,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { QuickActions } from "@/components/shared/QuickActions";
+import { QuickActions } from "@/components/operator/shared/QuickActions";
 import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";

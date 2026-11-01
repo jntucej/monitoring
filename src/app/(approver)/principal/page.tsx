@@ -16,16 +16,16 @@ import { InsightCard } from "./_retention/InsightCard";
 import { EmergencyPulse } from "./_retention/EmergencyPulse";
 import { UpcomingPreview, type UpcomingItem } from "./_retention/UpcomingPreview";
 import { CelebrateOverlay } from "./_retention/CelebrateOverlay";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
+import { QuickActions } from "@/components/principal/shared/PrincipalQuickActions";
+import { NotificationCenter } from "@/components/principal/shared/PrincipalNotificationCenter";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 

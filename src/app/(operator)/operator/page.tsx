@@ -4,15 +4,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { OperatorWidgetBoundary as WidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
-import { QuickActions } from "@/components/shared/QuickActions";
+import { QuickActions } from "@/components/operator/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { PageHeader } from "@/components/operator/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
 
 

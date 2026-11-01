@@ -26,8 +26,8 @@
   {
     "feature": "hod.see-approvals",
     "role": "hod",
-    "ok": true,
-    "detail": "HOD approvals list renders"
+    "ok": false,
+    "detail": "HOD approvals list missing"
   },
   {
     "feature": "sysadmin.see-health",

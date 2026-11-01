@@ -18,9 +18,9 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { QuickActions } from "@/components/shared/QuickActions";
+import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { PageHeader } from "@/components/admin/shared/PageHeader";
+import { QuickActions } from "@/components/admin/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { DevContactStrip } from "@/components/shared/DevContactStrip";
 import { getAuthHeaders } from "@/lib/utils";
