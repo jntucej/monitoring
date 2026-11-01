@@ -82,6 +82,13 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # SLA breach sweep — hourly
 0 * * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
                 ${CRON_BASE}/api/cron/sla-breach >> /var/log/gate-cron.log 2>&1
+
+# Retention policy sweep — daily 04:30 (purges expired records per
+# retention_policies table: api_metrics 30d, sessions 30d, notifications
+# 90d, mess_reviews 7d, email_queue 30d. audit_logs auto_delete=FALSE,
+# so it is retained — legal obligation under CERT-In Directions 2022.)
+30 4 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/admin/retention/run >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

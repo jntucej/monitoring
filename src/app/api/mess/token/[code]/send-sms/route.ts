@@ -4,7 +4,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { sendSMS } from "@/lib/integrations/sms";
+import { enqueueTemplatedSms } from "@/lib/sms-templates";
 import type { AuthContext } from "@/lib/authContext";
 
 function getCode(req: NextRequest): string {
@@ -79,23 +79,31 @@ async function handlePost(
     );
   }
 
-  const message = `Your mess token code is ${tokenCode}. Valid until ${new Date(row.expires_at).toLocaleString()}. Do not share.`;
-  const sms = await sendSMS({ to: row.phone, message });
+  const { queueId } = await enqueueTemplatedSms({
+    templateCode: "mess_token",
+    to: row.phone,
+    vars: {
+      code: tokenCode,
+      expires: new Date(row.expires_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+    },
+    priority: "normal",
+    createdBy: auth.userId,
+  });
 
   await addAudit({
-    action: "MESS_TOKEN_SMS_SENT",
+    action: "MESS_TOKEN_SMS_QUEUED",
     userId: auth.userId,
     userName: auth.email ?? auth.userId,
     role: auth.role,
-    details: JSON.stringify({ tokenCode, studentUserId: row.user_id, smsId: sms?.id ?? null }),
+    details: JSON.stringify({ tokenCode, studentUserId: row.user_id, queueId }),
   });
 
   return NextResponse.json({
     success: true,
     data: {
       tokenCode,
-      smsId: sms?.id ?? null,
-      delivered: Boolean(sms),
+      queueId,
+      queued: true,
     },
   });
 }

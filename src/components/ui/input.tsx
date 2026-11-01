@@ -11,19 +11,36 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, helper, error, icon, type, ...props }, ref) => {
+  ({ className, label, helper, error, icon, type, id, ...props }, ref) => {
+    // WCAG 3.3.1: associate the error/helper text with the input via
+    // aria-describedby so screen readers announce it when the field has focus.
+    const uid = id ?? React.useId();
+    const errorId = error ? `${uid}-error` : undefined;
+    const helperId = helper && !error ? `${uid}-helper` : undefined;
+    const describedBy = [errorId, helperId].filter(Boolean).join(" ") || undefined;
+
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+          <label
+            htmlFor={uid}
+            className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase"
+          >
             {label}
           </label>
         )}
         <div className="relative">
-          {icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">{icon}</div>}
+          {icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+              {icon}
+            </div>
+          )}
           <input
+            id={uid}
             type={type}
             ref={ref}
+            aria-invalid={error ? "true" : undefined}
+            aria-describedby={describedBy}
             className={cn(
               "w-full h-11 px-4 rounded-md bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:border-transparent",
               icon && "pl-10",
@@ -34,11 +51,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p className="mt-1 text-sm text-[var(--action-danger)] flex items-center gap-1">
-            ⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-1 text-sm text-[var(--action-danger)] flex items-center gap-1"
+          >
+            ⚠️{" "}
+            {typeof error === "string"
+              ? error
+              : (error as unknown as { message?: string }).message || String(error)}
           </p>
         )}
-        {helper && !error && <p className="mt-1 text-xs text-[var(--text-muted)]">{helper}</p>}
+        {helper && !error && (
+          <p id={helperId} className="mt-1 text-xs text-[var(--text-muted)]">
+            {helper}
+          </p>
+        )}
       </div>
     );
   }

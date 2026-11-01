@@ -3,6 +3,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { query, addAudit, addNotification } from "@/lib/db";
+import { enqueueTemplatedSms } from "@/lib/sms-templates";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handlePost(
@@ -25,14 +26,31 @@ async function handlePost(
   );
   const sos = rows[0];
 
-  const { rows: recipients } = await query<{ id: string; role: string }>(
-    `SELECT id, role FROM users
+  const { rows: recipients } = await query<{ id: string; role: string; phone: string | null }>(
+    `SELECT id, role, phone FROM users
       WHERE role IN ('supervisor','principal','admin','deputy_warden')
         AND status = 'ACTIVE'`
   );
 
-  await Promise.all(
-    recipients.map((r) =>
+  // Fetch student details for the SMS vars
+  const { rows: stuRows } = await query<{ name: string; unique_id: string | null }>(
+    `SELECT name, unique_id FROM users WHERE id = $1 LIMIT 1`,
+    [auth.userId]
+  );
+  const stu = stuRows[0];
+  const time = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+  const sosVars = {
+    name: stu?.name ?? "Student",
+    roll: stu?.unique_id ?? "",
+    time,
+    location: `${latitude?.toFixed(4) ?? "—"}, ${longitude?.toFixed(4) ?? "—"}`,
+    phone: process.env.CAMPUS_SECURITY_PHONE ?? "910000000000",
+  };
+
+  // Notify via in-app + SMS (fire-and-forget — a single bad phone shouldn't
+  // block the other recipients or the alert response)
+  await Promise.all([
+    ...recipients.map((r) =>
       addNotification(
         "user",
         r.id,
@@ -40,8 +58,19 @@ async function handlePost(
         "SOS Raised",
         `SOS from ${auth.email ?? auth.userId}${message ? `: ${message}` : ""}`
       )
-    )
-  );
+    ),
+    ...recipients
+      .filter((r) => r.phone)
+      .map((r) =>
+        enqueueTemplatedSms({
+          templateCode: "emergency_sos",
+          to: r.phone as string,
+          vars: sosVars,
+          priority: "urgent",
+          createdBy: auth.userId,
+        }).catch(() => undefined)
+      ),
+  ]);
 
   await addAudit({
     action: "SOS_RAISED",

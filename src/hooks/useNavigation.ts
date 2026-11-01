@@ -219,6 +219,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/sysadmin/deployments", label: "Deployments", icon: "Rocket" },
             { href: "/sysadmin/backup", label: "Backup", icon: "HardDrive" },
             { href: "/sysadmin/audit", label: "Audit", icon: "ShieldAlert" },
+            { href: "/sysadmin/sms/templates", label: "SMS Templates", icon: "FileText" },
           ],
         },
       ];
@@ -241,6 +242,8 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/audit-logs", label: "Audit", icon: "ScrollText" },
             { href: "/admin/health", label: "Backup", icon: "Activity" },
             { href: "/admin/reports", label: "Reports", icon: "FileSpreadsheet" },
+            { href: "/admin/sms/compose", label: "Send SMS", icon: "MessageSquare" },
+            { href: "/admin/sms/queue", label: "SMS Delivery", icon: "ListChecks" },
           ],
         },
       ];

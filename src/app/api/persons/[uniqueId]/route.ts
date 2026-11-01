@@ -3,6 +3,7 @@ import { findPersonByUniqueId, getPersonHistory, getPersonStatus } from "@/lib/d
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { redactSensitiveDetails } from "@/lib/sensitive-fields";
 
 function getUniqueId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -68,7 +69,7 @@ async function handleGet(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        person,
+        person: redactSensitiveDetails(person as unknown as Record<string, unknown>, authRole),
         campusStatus: status.status,
         lastScan: status.lastScan,
         history,

@@ -67,8 +67,11 @@ async function countSentToday() {
 }
 
 async function fetchPendingEmails(limit) {
+  // 'html' column does not exist in notification_email_queue — fall back to
+  // NULL so the SELECT succeeds. The mailer uses email.html || email.body,
+  // so a NULL html is safe (body is the source of truth for plain-text).
   const { rows } = await query(
-    `SELECT id, email, subject, body, html, category
+    `SELECT id, email, subject, body, NULL::text AS html, category
      FROM notification_email_queue
      WHERE status = 'pending'
        AND attempts < 5

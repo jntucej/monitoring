@@ -49,6 +49,7 @@ import cleanupMovementLogs from './jobs/cleanup_movement_logs.js';
 import dispatchNotifications from './jobs/dispatch_notifications.js';
 import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
+import sendSmsQueue from './jobs/send_sms.js';
 
 // Periodic maintenance jobs run as cron-style intervals in the worker.
 // Each job is idempotent and fail-safe: a single failure logs and continues.
@@ -89,6 +90,7 @@ async function rotateAuditLogs() {
 const jobs = [
   { name: 'rate-limit-cleanup', ms: 5 * 60 * 1000, run: () => runJob('rate-limit-cleanup', cleanupRateLimits) },
   { name: 'email-dispatch',     ms: 2 * 60 * 1000, run: () => runJob('email-dispatch', sendEmails) },
+  { name: 'sms-dispatch',       ms: 30 * 1000, run: () => runJob('sms-dispatch', sendSmsQueue) },
   { name: 'notification-dispatch', ms: 2 * 60 * 1000, run: () => runJob('notification-dispatch', dispatchNotifications) },
   { name: 'notification-retry', ms: 5 * 60 * 1000, run: () => runJob('notification-retry', retryNotifications) },
   { name: 'cleanup-ephemeral', ms: 15 * 60 * 1000, run: () => runJob('cleanup-ephemeral', cleanupEphemeral) },

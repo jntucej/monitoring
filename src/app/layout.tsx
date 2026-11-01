@@ -57,6 +57,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/icon", sizes: "any", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/icon",
+  },
   verification: {
     google: "pUsD_GnlIE8aG5lekStc6zJ3BYyZ1iZNGLjQ2rWeRlU",
   },
@@ -66,6 +74,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
@@ -106,6 +115,12 @@ try {
         />
       </head>
       <body>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[var(--action-primary)] focus:text-white focus:rounded focus:text-sm focus:font-medium"
+        >
+          Skip to main content
+        </a>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--action-primary)] focus:px-4 focus:py-2 focus:text-white"

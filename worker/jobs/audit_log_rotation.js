@@ -35,10 +35,12 @@ export default async function auditLogRotation() {
     );
     console.log(`[Worker Job] Purged ${intRes.rowCount || 0} integration logs older than ${integrationLogRetentionDays} days.`);
 
-    // 3. Purge old resolved security alerts
+    // 3. Purge old resolved security alerts.
+    // 'resolved' is not a column in security_alerts — the status column is
+    // 'resolved' (text value, not boolean).
     const alertRes = await query(
-      `DELETE FROM security_alerts 
-       WHERE resolved = TRUE 
+      `DELETE FROM security_alerts
+       WHERE status = 'resolved'
          AND created_at < NOW() - ($1 || ' days')::INTERVAL`,
       [alertRetentionDays]
     );

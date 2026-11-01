@@ -6,10 +6,14 @@ import { query } from "@/lib/postgres";
 
 const TABLE_MAP = {
   movement_logs: { table: "movement_logs", timestampCol: "timestamp" },
+  api_metrics: { table: "api_metrics", timestampCol: "created_at" },
   expired_passes: { table: "gate_passes", timestampCol: "to_datetime", extraWhere: "final_status = 'APPROVED'" },
   audit_logs: { table: "audit_logs", timestampCol: "timestamp" },
   support_tickets: { table: "support_tickets", timestampCol: "created_at" },
   notifications: { table: "notifications", timestampCol: "created_at" },
+  sessions: { table: "sessions", timestampCol: "created_at" },
+  mess_meal_reviews: { table: "mess_meal_reviews", timestampCol: "created_at" },
+  notification_email_queue: { table: "notification_email_queue", timestampCol: "created_at" },
 };
 
 async function handlePost(req: NextRequest) {

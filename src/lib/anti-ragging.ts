@@ -1,4 +1,4 @@
-import { createHash, randomInt } from "crypto";
+import { createHmac, randomInt } from "crypto";
 import { query } from "@/lib/postgres";
 
 export function generateCaseNumber(): string {
@@ -6,10 +6,28 @@ export function generateCaseNumber(): string {
   return `ARC-${y}-${randomInt(100_000, 999_999 + 1)}`;
 }
 
+/**
+ * HMAC-SHA256 keyed hash of the reporter's userId.
+ *
+ * UGC Anti-Ragging Regulations 2009 require the complainant's identity to be
+ * kept confidential. A plain SHA-256 of a known userId list is crackable in
+ * milliseconds; an HMAC keyed with a server-side secret is not — an attacker
+ * who obtains both a case row and the userIds still cannot recover which
+ * userId produced which hash without ANTI_RAGGING_HASH_SECRET.
+ *
+ * The secret MUST be set in .env (generate with: openssl rand -hex 32).
+ * It is NOT the same secret as other app secrets — rotation isolates this
+ * hashing domain.
+ */
 export function reporterHash(userId: string): string {
-  return createHash("sha256")
-    .update(`${userId}:${process.env.ANTI_RAGGING_SALT ?? "default-salt"}`)
-    .digest("hex");
+  const secret = process.env.ANTI_RAGGING_HASH_SECRET;
+  if (!secret) {
+    // Fail loudly: an unkeyed hash defeats the whole point.
+    throw new Error(
+      "ANTI_RAGGING_HASH_SECRET is not set — refusing to produce an unkeyed reporter hash."
+    );
+  }
+  return createHmac("sha256", secret).update(userId).digest("hex");
 }
 
 export interface RaggingAlertConfig {

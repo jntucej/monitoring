@@ -1,3 +1,5 @@
+import { COLLEGE } from "@/lib/college-config";
+
 export const PAGE_META: Record<string, { title: string; description?: string }> = {
   "/admin": { title: "Admin Overview", description: "Campus dashboard and live telemetry" },
   "/admin/attendance": { title: "Attendance", description: "Student and staff attendance records" },
@@ -87,6 +89,30 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/health": { title: "Health", description: "System health check" },
 };
 
-export function metaFor(path: string) {
-  return PAGE_META[path] ?? { title: "Gate Monitor" };
+export function metaFor(path: string): { title: string; description: string } {
+  if (PAGE_META[path])
+    return {
+      title: PAGE_META[path].title,
+      description: PAGE_META[path].description ?? `${COLLEGE.officialName} campus portal.`,
+    };
+
+  // Fallback: derive a human-readable title from the last path segment so
+  // every route gets a sensible document.title even if it isn't in the map.
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length === 0)
+    return { title: COLLEGE.shortName, description: `${COLLEGE.officialName} campus portal.` };
+
+  const last = parts[parts.length - 1];
+  const label = last
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+  const roleLabel = parts[0]
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const title = parts.length === 1 ? label : `${label} · ${roleLabel}`;
+  return {
+    title: `${title} · ${COLLEGE.shortName}`,
+    description: `${title} — ${COLLEGE.officialName} campus portal.`,
+  };
 }

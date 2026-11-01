@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation";
-
-// Consolidated into the guardian portal. The live movement log lives at
-// /guardian/movement-info; redirect here so the stale slug keeps working.
-export default function ParentChildMovementRedirect() {
-  redirect("/guardian/movement-info");
-}
+// Consolidated into the guardian portal. /guardian/movement-info is the
+// single source of truth for the live movement log; re-export so the stale
+// /parent/child-movement slug keeps working.
+export { default } from "@/app/(approver)/guardian/movement-info/page";

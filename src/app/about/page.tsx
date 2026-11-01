@@ -16,6 +16,7 @@ import {
   breadcrumbJsonLd,
   organizationJsonLd,
 } from "@/lib/seo";
+import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "About the Campus Portal",
@@ -156,20 +157,14 @@ export default function AboutPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[var(--action-primary)]" />
-            <a href={`mailto:${COLLEGE.email}`} className="hover:underline">
-              {COLLEGE.email}
-            </a>
-            <span className="text-[var(--text-muted)]">·</span>
-            <a href={`mailto:${COLLEGE.emailAlt}`} className="hover:underline">
-              {COLLEGE.emailAlt}
-            </a>
+            <Mail className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <EmailLink email={COLLEGE.email} />
+            <span className="text-[var(--text-muted)]" aria-hidden="true">·</span>
+            <EmailLink email={COLLEGE.emailAlt} />
           </div>
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-[var(--action-primary)]" />
-            <a href={`tel:+91${COLLEGE.phone}`} className="hover:underline">
-              +91 {COLLEGE.phone}
-            </a>
+            <Phone className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <PhoneLink phone={`+91${COLLEGE.phone}`} label={`+91 ${COLLEGE.phone}`} />
           </div>
         </div>
       </section>

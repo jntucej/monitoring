@@ -101,6 +101,8 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
           {showNav && <DynamicHeader />}
 
           <main
+            id="main-content"
+            tabIndex={-1}
             className={
               isStandaloneConsole
                 ? "flex-1 w-full"

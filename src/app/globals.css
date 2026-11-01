@@ -1587,3 +1587,39 @@ body.is-home .app-loading-screen {
 
 
 
+
+/* ============================================================
+   HORIZONTAL OVERFLOW GUARDS — Fix 1 / 13
+   Wraps wide tables and charts without forcing page-level scroll.
+   ============================================================ */
+.safe-x {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.safe-x::-webkit-scrollbar { height: 6px; }
+.safe-x::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* Charts must never exceed the viewport, even before ResponsiveContainer
+   runs its first resize. */
+.recharts-responsive-container {
+  max-width: 100vw !important;
+  min-width: 0 !important;
+}
+
+/* Tables that aren't inside DataTable or .safe-x — provide a safe default
+   so they scroll internally instead of breaking the layout. */
+main > div > table,
+main > table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Kill width:100vw (forces scrollbar-less layout that can extend past content) */
+.w-screen { width: 100dvw; }
+
+/* Any element that would otherwise exceed the viewport gets clamped */
+.max-w-viewport { max-width: 100dvw; }

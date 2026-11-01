@@ -5,6 +5,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
+import { redactSensitiveDetails } from "@/lib/sensitive-fields";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -49,7 +50,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     return NextResponse.json({
       success: true,
       data: {
-        student,
+        student: redactSensitiveDetails(student as unknown as Record<string, unknown>, auth.role),
         campusStatus: status.status,
         lastScan: status.lastScan,
         history,

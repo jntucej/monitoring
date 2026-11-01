@@ -16,7 +16,7 @@ export function RoleDesktopShell({
       <aside className="w-64 shrink-0 border-r border-[var(--border)]">
         <RoleSidebar manifest={manifest} />
       </aside>
-      <main className="flex-1 overflow-y-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-7xl px-6 py-6">{children}</div>
       </main>
       <RoleNotificationBell className="fixed right-6 top-6 z-20" />

@@ -34,7 +34,7 @@ export function RoleMobileShell({
         <RoleNotificationBell />
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full px-4 py-4">{children}</div>
       </main>
 

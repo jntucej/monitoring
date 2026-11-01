@@ -199,10 +199,25 @@ async function main() {
       seen.has(f.name) ||
       seen.has(f.name.replace(/\.sql$/, "")) ||
       Array.from(seen).some((v) => v.length === 14 && version.startsWith(v));
+      // Checksum lookup order matters: a file may be recorded under BOTH its
+      // full filename AND a bare version (pre-canonicalization legacy row).
+      // The real recorded checksum is under the bare version; a
+      // 'legacy-no-checksum' placeholder under the filename form must not
+      // shadow it. Prefer the filename forms first (most specific), then the
+      // bare version, but skip any 'legacy-no-checksum' placeholder when a
+      // real checksum is available in another form.
+      // Note: bare-version rows may carry md5 checksums (32 hex chars) from
+      // pre-canonicalization installs — those are handled by isLegacyChecksum
+      // below. The key insight: the bare-version row stores its checksum under
+      // version-key (filename == version in legacy rows), so we look it up via
+      // checksums.get(version) as a final fallback.
+      const placeholderSkipped = (c?: string | undefined) =>
+        c !== undefined && c !== "legacy-no-checksum" ? c : undefined;
       const prev =
-        checksums.get(f.name) ??
-        // fall back to a checksum recorded under the extension-less filename form
-        checksums.get(f.name.replace(/\.sql$/, ""));
+        placeholderSkipped(checksums.get(f.name)) ??
+        placeholderSkipped(checksums.get(f.name.replace(/\.sql$/, ""))) ??
+        checksums.get(version) ??
+        undefined;
 
       if (recorded && prev === sum) {
         console.log(`✓ ${f.name} (already applied)`);

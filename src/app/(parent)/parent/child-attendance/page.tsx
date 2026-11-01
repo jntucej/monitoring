@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
-
-// The parent-app sub-page tree is consolidated into the guardian portal.
-// /guardian/child-attendance (approver route group) is the single source of
-// truth; this page only redirects so deep links + stale nav entries keep
-// working without duplicating the UI.
-export default function ParentChildAttendanceRedirect() {
-  redirect("/guardian/child-attendance");
-}
+// Consolidated into the guardian portal. /guardian/child-attendance is the
+// single source of truth; re-export so nav links resolve to the real page
+// (a redirect would also work, but re-export keeps the URL stable for
+// deep links and bookmarks).
+export { default } from "@/app/(approver)/guardian/child-attendance/page";

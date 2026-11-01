@@ -82,7 +82,6 @@ function ToastContainer() {
       className="fixed bottom-4 right-4 z-toast flex flex-col gap-2 pointer-events-none"
       aria-live="polite"
       aria-atomic="false"
-      role="status"
     >
       <AnimatePresence>
         {visibleToasts.map((t) => (
@@ -92,6 +91,7 @@ function ToastContainer() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 50, scale: 0.9 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
+            role={t.variant === "error" || t.variant === "warning" ? "alert" : "status"}
             className={cn(
               "pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-lg text-sm max-w-sm",
               toastStyles[t.variant]
@@ -104,9 +104,10 @@ function ToastContainer() {
             </div>
             <button
               onClick={() => ctx.removeToast(t.id)}
+              aria-label="Dismiss notification"
               className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </motion.div>
         ))}

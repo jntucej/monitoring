@@ -21,7 +21,7 @@ import {
   checkStepupPassword,
 } from "@/lib/permission-forward";
 import { addAudit, addNotification, getStudentGuardianLink } from "@/lib/db";
-import { sendSMS } from "@/lib/integrations/sms";
+import { enqueueTemplatedSms } from "@/lib/sms-templates";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 import type { WorkflowType, Role } from "@/lib/types";
@@ -289,17 +289,44 @@ async function notifyGuardianSMS(
   ticket: string,
   reason: string,
 ): Promise<void> {
+  // Fetch student + guardian details for the templated SMS vars
+  const { rows: stuRows } = await query<{ name: string; phone: string | null; unique_id: string | null }>(
+    `SELECT name, phone, unique_id FROM users WHERE id = $1 LIMIT 1`,
+    [studentUserId]
+  );
+  const stu = stuRows[0];
   const guardianId = await getStudentGuardianLink(studentUserId);
   if (!guardianId) return;
   const { rows } = await query<{ phone: string | null }>(
     `SELECT phone FROM users WHERE id = $1 LIMIT 1`,
-    [guardianId],
+    [guardianId]
   );
   const phone = rows[0]?.phone;
   if (!phone) return;
-  await sendSMS({
+
+  const date = new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" });
+  const vars = {
+    name: stu?.name ?? "your ward",
+    reason: reason.replace(/_/g, " "),
+    date,
+    ticket,
+  };
+
+  // Student SMS (if they have a phone)
+  if (stu?.phone) {
+    await enqueueTemplatedSms({
+      templateCode: "pass_approved",
+      to: stu.phone,
+      vars,
+      priority: "urgent",
+    }).catch(() => undefined);
+  }
+  // Guardian SMS
+  await enqueueTemplatedSms({
+    templateCode: "pass_approved",
     to: phone,
-    message: `Your ward's ${reason.replace("_", " ")} pass (${ticket}) has been approved.`,
+    vars,
+    priority: "urgent",
   }).catch(() => undefined);
 }
 

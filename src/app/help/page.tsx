@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Mail, Phone, LifeBuoy } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
+import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
 import {
   buildPageMetadata,
   breadcrumbJsonLd,
@@ -99,20 +100,14 @@ export default function HelpPage() {
         </h2>
         <div className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[var(--action-primary)]" />
-            <a href={`mailto:${COLLEGE.email}`} className="hover:underline">
-              {COLLEGE.email}
-            </a>
-            <span className="text-[var(--text-muted)]">·</span>
-            <a href={`mailto:${COLLEGE.emailAlt}`} className="hover:underline">
-              {COLLEGE.emailAlt}
-            </a>
+            <Mail className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <EmailLink email={COLLEGE.email} />
+            <span className="text-[var(--text-muted)]" aria-hidden="true">·</span>
+            <EmailLink email={COLLEGE.emailAlt} />
           </div>
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-[var(--action-primary)]" />
-            <a href={`tel:+91${COLLEGE.phone}`} className="hover:underline">
-              +91 {COLLEGE.phone}
-            </a>
+            <Phone className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <PhoneLink phone={`+91${COLLEGE.phone}`} label={`+91 ${COLLEGE.phone}`} />
           </div>
         </div>
       </section>

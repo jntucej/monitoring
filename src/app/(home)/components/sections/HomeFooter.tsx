@@ -1,4 +1,5 @@
 import { COLLEGE } from "@/lib/college-config";
+import { EmailLink, PhoneLink } from "@/components/shared/ContactLink";
 import Link from "next/link";
 
 export function HomeFooter() {
@@ -11,7 +12,8 @@ export function HomeFooter() {
         <div className="flex items-center gap-6">
           <Link href="/about" className="hover:underline">About</Link>
           <Link href="/help" className="hover:underline">Help</Link>
-          <a href={`mailto:${COLLEGE.email ?? "support@college.edu"}`} className="hover:underline">Contact</a>
+          <EmailLink email={COLLEGE.email ?? "support@college.edu"} showIcon={false} label="Contact support" />
+          <PhoneLink phone={`+91${COLLEGE.phone}`} label={`+91 ${COLLEGE.phone}`} />
         </div>
       </div>
     </footer>
