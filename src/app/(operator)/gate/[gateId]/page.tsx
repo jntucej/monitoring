@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, Suspense } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
@@ -16,11 +16,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
-import { GateConfirmCard } from "@/components/operator/GateConfirmCard";
 import { GatePickerScreen } from "@/components/operator/GatePickerScreen";
-import { OfflineBanner } from "@/components/operator/OfflineBanner";
 import { primeAudio } from "@/lib/sound";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
+import { recommend } from "@/lib/operator-recommend";
+import { ConfirmSheet } from "@/components/operator/sheet/ConfirmSheet";
+import type { EntryButtonId } from "@/lib/operator-recommend";
 
 /**
  * Option A gate desk — a scanning surface, not a dashboard.
@@ -120,6 +121,27 @@ function OperatorPageInner() {
   const confirmScan = useOperatorStore((s) => s.confirmScan);
   const lastOutReason = useOperatorStore((s) => s.lastOutReason);
   const gateState = useOperatorStore((s) => s.gate);
+  const entryType = useOperatorStore((s) => s.entryType);
+  const cachedPasses = useOperatorStore((s) => s._cachedPasses);
+
+  // Pure derivation — `recommend()` reads the scanned student's state and
+  // returns { direction, reason, entryType, entryButton, confidence,
+  // alternatives }. A first-ever scan (entryType === null) yields
+  // [Home In] + [Day Scholar In], which is the exact set the server's
+  // ENTRY_TYPE_REQUIRED check accepts — this is the fix for "operator not
+  // working": without it the desk submitted a bare IN with no type and
+  // got a 400 back.
+  const recommendation = useMemo(() => {
+    if (!currentStudent) return null;
+    return recommend({
+      campusStatus: currentCampusStatus,
+      lastReason: lastOutReason,
+      currentEntryType: entryType,
+      hasApprovedPass: cachedPasses.length > 0,
+      curfewMinutes: null, // TODO: derive from student_details.hostel_curfew_time
+      biometricReady: !!currentStudent.hasThumbprint,
+    });
+  }, [currentStudent, currentCampusStatus, lastOutReason, entryType, cachedPasses]);
 
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   // Manual entry is ONE button that opens an inline sheet — not a mode.
@@ -338,7 +360,10 @@ function OperatorPageInner() {
       {/* ── Operational status + confirmation card (above the camera layer) ── */}
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">
-          <OfflineBanner />
+          {/* OfflineBanner removed: the desk has no offline queue — a scan
+              failure surfaces via the standard error panel instead. The
+              global NetworkStatusBanner in SafeAreaAppShell still shows a
+              truthful offline hint on every page. */}
 
           {gateMode === "MAINTENANCE" && (
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-1 shadow-sm">
@@ -378,15 +403,23 @@ function OperatorPageInner() {
         </div>
 
         <AnimatePresence>
-          {canConfirm && currentStudent && !manualOpen && (
-            <GateConfirmCard
-              key="confirm-card"
+          {canConfirm && currentStudent && recommendation && !manualOpen && (
+            <ConfirmSheet
+              key="confirm-sheet"
               student={currentStudent}
-              campusStatus={currentCampusStatus}
+              recommendation={recommendation}
+              currentEntryType={entryType}
               lastOutReason={lastOutReason}
-              onConfirm={(dir) => { void confirmScan(addToast, dir); }}
+              isOpen={true}
+              autoConfirmMs={null}
+              onConfirm={(dir, reason, et, buttonId) => {
+                // ConfirmSheet passes the exact payload the engine chose. The
+                // store's confirmScan accepts all four overrides; buttonId ===
+                // "return_to_hostel" signals a round-trip (no type write), the
+                // other two buttonIds write the canonical entry type.
+                void confirmScan(addToast, dir, reason, et, buttonId as EntryButtonId);
+              }}
               onCancel={cancelScan}
-              onManualEntry={() => { cancelScan(); setManualOpen(true); }}
             />
           )}
         </AnimatePresence>

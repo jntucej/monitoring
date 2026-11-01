@@ -1,37 +1,40 @@
-import type { Metadata } from "next";
-import { NOINDEX_METADATA } from "@/lib/seo";
-import { GateAwareOperatorShell } from "./GateAwareOperatorShell";
+"use client";
 
-export const metadata: Metadata = {
-  ...NOINDEX_METADATA,
-  title: "Operator · Gate Monitor",
-};
+import { Suspense } from "react";
+import { usePathname } from "next/navigation";
+import { PageLoading } from "@/components/shared/LoadingStates";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import { OperatorShell } from "./OperatorShell";
+import type { Role } from "@/lib/types";
 
-/**
- * Root layout for the (operator) route group.
- *
- * The gate desk at /gate/[gateId] is a chrome-free scanning surface:
- * the camera is the page and the two IN/OUT buttons are the only
- * tappable elements bottom-centre. Mounting the operator drawer, the
- * floating hamburger/settings buttons, and a GatePickerScreen wrapper
- * over it defeats that design — the desk page already renders its own
- * GatePickerScreen when the operator is unassigned, plus the offline
- * banner, scanner, and confirm card. So /gate/* must render bare
- * (AuthGuard only, no shell chrome).
- *
- * The branch decision uses usePathname (a client hook), so it lives in
- * the small client component `GateAwareOperatorShell` (its own file
- * with the "use client" directive). On /gate/* it renders AuthGuard
- * only; everywhere else it renders the full OperatorShell.
- *
- * The nested (operator)/operator/layout.tsx adds the RoleDesktopShell /
- * RoleMobileShell chrome for /operator/* pages only — that is one shell
- * per tree, not two: this root layout never mounts a RoleShell.
- */
 export default function OperatorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <GateAwareOperatorShell>{children}</GateAwareOperatorShell>;
+  const pathname = usePathname();
+  // The gate desk is a focused scanning surface. No drawer, no floating
+  // buttons, no side rail — the desk's own status strip + IN/OUT buttons
+  // are the entire UI. This is the "operator UI is overwhelming" fix.
+  const isDesk = pathname?.startsWith("/gate/") ?? false;
+
+  if (isDesk) {
+    return (
+      <AuthGuard allowedRoles={["operator", "worker"] as Role[]}>
+        <Suspense fallback={<PageLoading />}>{children}</Suspense>
+      </AuthGuard>
+    );
+  }
+
+  // /operator/* (dashboard, stats, transactions, lookup, claim, mode, ...)
+  // and /worker/* (dashboard, shifts, work-orders, history) keep the full
+  // OperatorShell. Its drawer + floating buttons match the widget layout
+  // on /operator/page.tsx.
+  return (
+    <AuthGuard allowedRoles={["operator", "worker"] as Role[]}>
+      <Suspense fallback={<PageLoading />}>
+        <OperatorShell>{children}</OperatorShell>
+      </Suspense>
+    </AuthGuard>
+  );
 }
