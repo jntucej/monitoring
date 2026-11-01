@@ -522,18 +522,24 @@
   {
     "role": "caretaker",
     "leaf": "/caretaker/buildings",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker/complaints",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "caretaker",
@@ -554,110 +560,88 @@
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/complaints",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/curfew",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/curfew-oversight",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/daily-overview",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/decision-history",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/delegated-approvals",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/gate-movement",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/incident-reporting",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/leave-requests",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -665,19 +649,18 @@
     "role": "deputy_warden",
     "leaf": "/deputy-warden/outpass-queue",
     "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/shift-handover",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -764,10 +747,13 @@
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/pass-queue",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "exam_branch",
@@ -796,20 +782,16 @@
   {
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -817,39 +799,34 @@
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent/access",
     "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent/incidents",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent/reports",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_superintendent",
     "leaf": "/exam/superintendent/schedule",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1106,40 +1083,32 @@
   {
     "role": "hod",
     "leaf": "/hod",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/approvals",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/approvals/escalated",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1147,169 +1116,138 @@
     "role": "hod",
     "leaf": "/hod/approvals/pending",
     "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "hod",
     "leaf": "/hod/classes",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty/attendance",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty/directory",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/profile",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/reports",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/students",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/allocation",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/complaints",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/housekeeping-tasks",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/maintenance",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/residents",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/resource-management",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hostel_manager",
     "leaf": "/hostel-manager/rooms",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1317,11 +1255,12 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/tickets",
     "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "mess_incharge",
@@ -1678,10 +1617,13 @@
   {
     "role": "parent",
     "leaf": "/parent/child",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "parent",
@@ -1694,10 +1636,13 @@
   {
     "role": "parent",
     "leaf": "/parent/child-movement",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "parent",
@@ -1726,18 +1671,24 @@
   {
     "role": "parent",
     "leaf": "/parent/passes",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "parent",
     "leaf": "/parent/settings",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "principal",
@@ -1790,10 +1741,13 @@
   {
     "role": "principal",
     "leaf": "/principal/approvals/pending",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "principal",
@@ -1910,110 +1864,88 @@
   {
     "role": "staff",
     "leaf": "/staff",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/assigned-tasks",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/duties",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/history",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/leaves",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/my-day",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/my-profile",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/notifications",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/request-status",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "staff",
     "leaf": "/staff/requests",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -2228,40 +2160,32 @@
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject/attendance",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject/classes",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -2284,10 +2208,13 @@
   {
     "role": "supervisor",
     "leaf": "/supervisor/approvals",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "supervisor",
@@ -3208,10 +3135,13 @@
   {
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals/pending",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 ()",
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
   },
   {
     "role": "vice_principal",
