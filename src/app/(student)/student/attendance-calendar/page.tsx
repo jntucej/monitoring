@@ -4,7 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { getAuthHeaders } from "@/lib/utils";
 import { extractStudentRoll } from "@/lib/student-utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -223,7 +223,6 @@ function StudentAttendanceCalendarInner() {
         </Link>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

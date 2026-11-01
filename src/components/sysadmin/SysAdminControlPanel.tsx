@@ -28,7 +28,7 @@ import {
 import { GovernanceModules } from "./SysAdminGovernanceModules";
 import { HealthDashboard } from "./HealthDashboard";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useApi } from "@/hooks/useApi";
 
 interface AuditLog {
@@ -121,7 +121,7 @@ const api = useApi();
 
       {/* Incoming developer messages (direct-to-dev channel from all users) */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 items-start">
-        <DevContactStrip />
+
         <DevMessagesPanel />
       </div>
 

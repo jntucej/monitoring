@@ -439,7 +439,7 @@ function SidebarInner() {
       // warden role is folded into principal — /warden resolves to principal nav
       activeRole = storeRole === "principal" ? "principal" : "supervisor";
     } else if (pathname?.startsWith("/student")) activeRole = "student";
-    else if (pathname?.startsWith("/parent")) activeRole = "parent";
+    else if (pathname?.startsWith("/guardian")) activeRole = "parent";
     else if (storeRole) activeRole = storeRole;
     else {
       if (typeof window !== "undefined") {

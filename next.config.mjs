@@ -44,6 +44,18 @@ const nextConfig = {
         destination: "/",
         permanent: true,
       },
+      // Parent console is consolidated into the guardian portal (single source
+      // of truth). The /parent/* slugs still redirect so deep links work.
+      {
+        source: "/parent/:path*",
+        destination: "/guardian/:path*",
+        permanent: true,
+      },
+      {
+        source: "/parent",
+        destination: "/guardian",
+        permanent: true,
+      },
     ];
   },
   async headers() {

@@ -37,8 +37,8 @@ export function getDefaultRouteForRole(role: Role | string, gateId?: string): st
     admin: "/admin",
     sysadmin: "/sysadmin",
     supervisor: "/supervisor",
-    guardian: "/parent",
-    parent: "/parent",
+    guardian: "/guardian",
+    parent: "/guardian",
     student: "/student",
     warden: "/principal", // folded role — legacy warden users land on principal
     faculty: "/faculty/permissions",

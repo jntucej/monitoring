@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -237,7 +237,6 @@ function MessDefaultInner() {
         )}
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

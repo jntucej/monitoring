@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -258,7 +258,6 @@ function AccessExceptionsInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

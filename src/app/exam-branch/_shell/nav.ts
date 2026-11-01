@@ -6,11 +6,12 @@ import {
 } from "lucide-react";
 
 export const EXAM_BRANCH_NAV: NavEntry[] = [
-  { kind: "link", href: "/exam-branch", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/exam-branch", label: "Pass queue", icon: ClipboardList },
+  { kind: "link", href: "/exam-branch/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group", id: "queue", label: "Exam queue", icon: ClipboardList,
     children: [
-      { href: "/exam-branch/pass-queue", label: "Pass queue" },
+      { href: "/exam-branch", label: "Queue" },
       { href: "/exam-branch/oie-approval-requests", label: "OIE approvals" },
       { href: "/exam-branch/oie-handoff", label: "OIE handoff" },
     ],

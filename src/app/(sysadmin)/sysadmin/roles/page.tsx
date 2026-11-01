@@ -71,7 +71,7 @@ const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
   { label: "Faculty / Leaves", path: "/faculty/permissions", roles: ["faculty", "admin", "sysadmin"] },
   { label: "Staff Directory", path: "/staff", roles: ["staff", "admin", "sysadmin"] },
   { label: "Student Dashboard", path: "/student", roles: ["student", "admin", "sysadmin"] },
-  { label: "Parent / Guardian", path: "/parent", roles: ["parent", "guardian", "admin", "sysadmin"] },
+  { label: "Parent / Guardian", path: "/guardian", roles: ["parent", "guardian", "admin", "sysadmin"] },
   { label: "Visitor Passes", path: "/visitor", roles: ["visitor", "admin", "sysadmin"] },
 ];
 

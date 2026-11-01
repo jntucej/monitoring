@@ -44,6 +44,16 @@ async function handlePost(
       { status: 400 }
     );
   }
+  // 1.16 — alerts are operational-response work: only approver-tier roles may be
+  // assignees. Students / parents / guardians / visitors / workers must not be
+  // assigned alerts.
+  const NON_ASSIGNEE_ROLES = ["student", "parent", "guardian", "visitor", "worker"];
+  if (NON_ASSIGNEE_ROLES.includes(assignee.role)) {
+    return NextResponse.json(
+      { success: false, error: { code: "INVALID_ASSIGNEE", message: "Cannot assign an alert to this role." } },
+      { status: 400 }
+    );
+  }
 
   const { data: alert, error: alErr } = await supabase
     .from("alerts")
@@ -87,7 +97,7 @@ async function handlePost(
 }
 
 export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] as Role[] }),
+  withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin", "supervisor", "principal"] as Role[] }),
   {
     windowMs: 60_000,
     maxRequests: 60,

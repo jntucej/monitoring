@@ -3,7 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -81,7 +81,6 @@ function StaffMyProfileInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

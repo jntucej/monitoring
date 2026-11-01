@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { OperatorChangePasswordCard } from "@/components/operator/profile/OperatorChangePassword";
 
 function OperatorPasswordInner() {
@@ -20,7 +20,6 @@ function OperatorPasswordInner() {
         <OperatorChangePasswordCard />
       </OperatorWidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

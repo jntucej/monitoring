@@ -24,7 +24,6 @@ import {
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { parseRollNumber, getGraduationYearFromRoll } from "@/lib/rollNumber";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
 
 export type AlumniTab = "auto" | "graduated" | "deprovisioned";
 
@@ -556,7 +555,6 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
         </>
       )}
 
-      <DevContactStrip />
     </div>
   );
 }

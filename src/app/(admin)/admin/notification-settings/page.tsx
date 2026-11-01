@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
@@ -210,7 +210,6 @@ function AdminNotificationSettingsInner() {
         </div>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

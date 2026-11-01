@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
+import { withMessMutation } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -110,7 +111,6 @@ export const GET = withRateLimit(
   { keyPrefix: "mess_op_requests_get" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: TIER.MESS_INCHARGE }),
-  { keyPrefix: "mess_op_requests_post", maxRequests: 20 }
-);
+export const POST = withMessMutation(handlePost, {
+  rateLimit: { keyPrefix: "mess_op_requests_post", maxRequests: 20 },
+});

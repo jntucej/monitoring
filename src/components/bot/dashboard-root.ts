@@ -16,7 +16,7 @@ export const DASHBOARD_ROOTS = [
   "/supervisor",
   "/operator",
   "/worker",
-  "/parent",
+  "/guardian",
   "/caretaker",
   "/deputy-warden",
   "/hostel-manager",

@@ -47,4 +47,6 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ resolved: true, alertId: id });
 }
 
-export const PATCH = withAuthorization(handlePatch);
+export const PATCH = withAuthorization(handlePatch, {
+  requiredRole: ["sysadmin", "admin", "principal", "supervisor"],
+});

@@ -76,6 +76,7 @@ interface ManifestCategory {
   label: string;
   icon: string;
   order: number;
+  hidden?: boolean;
   infographic?: { kind: string; source: string; color?: string };
   pages: ManifestPage[];
 }
@@ -173,9 +174,13 @@ export interface SidebarProps {
 export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
+  const [showAll, setShowAll] = useState(false);
   const categories = useMemo(
-    () => [...ia.categories].sort((a, b) => a.order - b.order),
-    []
+    () =>
+      [...ia.categories]
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .filter((c) => showAll || !c.hidden),
+    [showAll]
   );
 
   // Per-category open map. Hydrate from localStorage on mount, default to
@@ -403,6 +408,16 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
             >
               <ChevronsUpDown className="h-4 w-4" />
             </button>
+            {!showAll && ia.categories.some((c) => c.hidden) && (
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                title="Show all categories"
+                className="rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]"
+              >
+                Show all
+              </button>
+            )}
           </>
         )}
       </div>

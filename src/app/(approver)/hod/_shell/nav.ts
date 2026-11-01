@@ -27,14 +27,15 @@ export interface HodGroup {
 export type HodEntry = HodLink | HodGroup;
 
 export const HOD_NAV: HodEntry[] = [
-  { kind: "link", href: "/hod", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/hod", label: "Approvals", icon: CheckSquare },
+  { kind: "link", href: "/hod/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "approvals",
     label: "Approvals",
     icon: CheckSquare,
     children: [
-      { href: "/hod/approvals/pending", label: "Pending" },
+      { href: "/hod", label: "Queue" },
       { href: "/hod/approvals/escalated", label: "Escalated" },
     ],
   },

@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
@@ -260,7 +260,6 @@ function PassVerificationInner() {
         </div>
       </OperatorWidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

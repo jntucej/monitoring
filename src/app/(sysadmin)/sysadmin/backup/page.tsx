@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useMemo } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { BackupManagement } from "@/components/sysadmin/BackupManagement";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
@@ -208,7 +208,6 @@ function BackupReinforcedInner() {
         </Link>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

@@ -27,7 +27,8 @@ export interface PrincipalGroup {
 export type PrincipalEntry = PrincipalLink | PrincipalGroup;
 
 export const PRINCIPAL_NAV: PrincipalEntry[] = [
-  { kind: "link", href: "/principal", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/principal", label: "Approvals", icon: CheckSquare },
+  { kind: "link", href: "/principal/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "approvals",

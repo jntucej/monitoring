@@ -4,7 +4,7 @@ import { Suspense, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import {
   Loader2,
   AlertTriangle,
@@ -252,7 +252,6 @@ function DeputyWardenDailyOverviewInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 
@@ -179,7 +179,7 @@ function MessMenuInner() {
           </div>
         </div>
       </WidgetBoundary>
-      <DevContactStrip />
+
     </div>
   );
 }

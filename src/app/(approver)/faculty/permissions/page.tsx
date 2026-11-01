@@ -3,7 +3,7 @@
 
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PermissionList } from "@/components/approver/PermissionList";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import type { Role } from "@/lib/types";
@@ -37,7 +37,6 @@ function FacultyPermissionsInner() {
         fetchUrl="/api/permissions?workflow_type=memo&stage=hod&status=PENDING"
       />
 
-      <DevContactStrip />
     </div>
   );
 }

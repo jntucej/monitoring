@@ -4,7 +4,7 @@ import { HardHat } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QuickActions } from "@/components/operator/shared/QuickActions";
 import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -19,7 +19,7 @@ export default function WorkerPage() {
     <Suspense fallback={<OperatorPageLoading />}>
       <AuthGuard allowedRoles={["worker"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-          <DevContactStrip />
+
           <OperatorWidgetBoundary name="RoleDashboardPanel" title="Worker Dashboard">
             <RoleDashboardPanel
               title="Worker dashboard"

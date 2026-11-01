@@ -147,8 +147,10 @@ export function CaretakerCommandBar({ role, open, onClose }: CaretakerCommandBar
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
       if (parsed.action === "VIEW_ASSETS") {
-        router.push("/caretaker/assets");
-        addToast({ variant: "info", message: "Opening asset register" });
+        // 1.11 — no asset register exists yet; route to the complaints queue,
+        // the closest real maintenance surface.
+        router.push("/caretaker");
+        addToast({ variant: "info", message: "Opening complaint queue" });
         onClose();
         return;
       }

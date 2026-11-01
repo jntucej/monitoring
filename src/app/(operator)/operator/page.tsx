@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { OperatorWidgetBoundary as WidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
@@ -72,7 +72,7 @@ export default function OperatorPage() {
           <WidgetBoundary name="NotificationCenter" title="Notification Center">
             <NotificationCenter />
           </WidgetBoundary>
-          <DevContactStrip />
+
         </div>
       </AuthGuard>
     </Suspense>

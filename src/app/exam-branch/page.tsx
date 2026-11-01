@@ -1,50 +1,287 @@
 "use client";
-import { Suspense } from "react";
-import { FileSpreadsheet } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-import { PageLoading } from "@/components/shared/LoadingStates";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
-import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
-import { KanbanBoard } from "@/components/shared/KanbanBoard";
 
-export default function ExamBranchPage() {
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { PageLoading } from "@/components/shared/LoadingStates";
+
+import { useAuthStore } from "@/stores/authStore";
+import { getRoleTier } from "@/lib/alert-hierarchy";
+import { getAuthHeaders } from "@/lib/utils";
+import type { Role } from "@/lib/types";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
+import Link from "next/link";
+import {
+  ShieldCheck,
+  AlertTriangle,
+  ArrowRight,
+  ListChecks,
+} from "lucide-react";
+
+/* /api/permissions response shape — filtered to pending exam clearances */
+interface PermissionRequest {
+  id: string;
+  ticket_number: string;
+  workflow_type: string;
+  student_user_id: string;
+  status: string;
+  current_stage: string;
+  created_at: string;
+  updated_at: string;
+  sla_deadline?: string;
+  hostel_scope?: string | null;
+  [key: string]: unknown;
+}
+
+interface PermissionsResponse {
+  success: boolean;
+  data: PermissionRequest[] | null;
+  total: number;
+}
+
+function isOverdue(sla: string | undefined): boolean {
+  return !!sla && new Date(sla).getTime() < Date.now();
+}
+
+function ExamBranchPassQueueInner() {
+  const user = useAuthStore((s) => s.user);
+  const role = (user?.role ?? "exam_branch") as Role;
+  const tier = getRoleTier(role);
+  const [forwarding, setForwarding] = useState<string | null>(null);
+
+  const {
+    data,
+    loading,
+    error,
+    refresh,
+  } = useApiResource<PermissionsResponse>(
+    "/api/permissions?workflow_type=exam&status=PENDING&stage=oie",
+    { ttlMs: 30_000 }
+  );
+
+  const refreshAll = useCallback(async () => {
+    clearCache();
+    await refresh();
+  }, [refresh]);
+
+  usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
+
+  const busy = loading && !data;
+  const requests = useMemo<PermissionRequest[]>(
+    () => (data?.data as unknown as PermissionRequest[]) ?? [],
+    [data]
+  );
+
+  const total = data?.total ?? requests.length;
+  const pendingCount = requests.filter((r) => r.status === "PENDING").length;
+  const overdueCount = requests.filter((r) => isOverdue(r.sla_deadline)).length;
+
+  // 1.14 — "Send to OIE": exam branch prepares, OIE approves. The forward POST
+  // moves the ticket's current_stage from exam_branch to oie.
+  const sendToOie = useCallback(
+    async (ticket: PermissionRequest) => {
+      setForwarding(ticket.id);
+      try {
+        const res = await fetch(
+          `/api/permissions/${encodeURIComponent(ticket.ticket_number)}/forward`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+            body: JSON.stringify({
+              targetRole: "oie",
+              comment: "Forwarded to OIE for clearance",
+            }),
+          },
+        );
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          console.error("[exam-branch] forward to OIE failed", res.status, json);
+        }
+        await refreshAll();
+      } finally {
+        setForwarding(null);
+      }
+    },
+    [refreshAll],
+  );
+
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+      <Link
+        href="/exam-branch"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+      >
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+      </Link>
+
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
+        <div className="min-w-0">
+          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+            {user?.name ? ` · ${user.name}` : ""}
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <span className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span className="truncate">Pass queue unavailable: {error}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* KPI cards */}
+      <WidgetBoundary title="Pass Queue Stats">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">In Queue</p>
+            <p className="mt-1 text-2xl font-bold text-amber-400">{pendingCount}</p>
+            <p className="text-xs text-[var(--text-muted)]">Exam passes awaiting OIE clearance</p>
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Overdue (SLA)</p>
+            <p
+              className={`mt-1 text-2xl font-bold ${
+                overdueCount > 0 ? "text-rose-400" : "text-[var(--text-muted)]"
+              }`}
+            >
+              {overdueCount}
+            </p>
+            <p className="text-xs text-[var(--text-muted)]">Past SLA deadline — escalate to OIE</p>
+          </div>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Pending</p>
+            <p className="mt-1 text-2xl font-bold text-white">{total}</p>
+            <p className="text-xs text-[var(--text-muted)]">All pending exam-stage requests</p>
+          </div>
+        </div>
+      </WidgetBoundary>
+
+      {/* OIE dependency notice */}
+      <div
+        className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 min-w-0"
+        role="note"
+      >
+        <p className="flex items-center gap-2 text-xs text-sky-300 font-medium">
+          <ShieldCheck className="w-4 h-4 shrink-0" />
+          Pass clearances require OIE approval. Exam branch cannot self-clear.
+        </p>
+        <p className="mt-1 text-xs text-sky-200/60">
+          Items here are visible for preparation only. Final approval is owned
+          by the OIE — see the{" "}
+          <Link
+            href="/exam-branch/oie-approval-requests"
+            className="underline decoration-dotted hover:text-sky-100"
+          >
+            OIE Approvals
+          </Link>{" "}
+          tab to track approval status.
+        </p>
+      </div>
+
+      {/* Queue list */}
+      <WidgetBoundary title="Exam Pass Queue">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <ListChecks className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-sm font-semibold text-white truncate">
+                Passes Awaiting Clearance
+              </span>
+            </div>
+            <span className="text-xs text-[var(--text-muted)] shrink-0">{requests.length} shown</span>
+          </div>
+
+          {busy ? (
+            <div className="p-4 space-y-3 min-w-0">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-14 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                />
+              ))}
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <ListChecks className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
+              <p className="text-sm text-[var(--text-muted)]">
+                No exam passes in the queue.
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                Passes appear here when a candidate enters the exam clearance
+                workflow.
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-slate-800 min-w-0">
+              {requests.map((req) => (
+                <li
+                  key={req.id}
+                  className={`px-4 py-3 flex flex-col gap-1 min-w-0 ${
+                    isOverdue(req.sla_deadline) ? "bg-rose-500/5" : ""
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
+                    <span className="font-mono text-xs text-[var(--text-secondary)]">
+                      {req.ticket_number}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-amber-500/15 text-amber-300 px-2 py-0.5 text-xs">
+                      PENDING
+                    </span>
+                    {isOverdue(req.sla_deadline) && (
+                      <span className="inline-flex items-center rounded-full bg-rose-500/15 text-rose-300 px-2 py-0.5 text-xs font-semibold">
+                        SLA EXCEEDED
+                      </span>
+                    )}
+                    <span className="text-xs text-[var(--text-muted)]">
+                      stage: {req.current_stage}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] min-w-0">
+                    {new Date(req.created_at).toLocaleString([], {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {req.sla_deadline
+                      ? ` · SLA: ${new Date(req.sla_deadline).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}`
+                      : ""}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={forwarding === req.id}
+                    onClick={() => void sendToOie(req)}
+                    className="mt-1 self-start rounded-md border border-sky-400/40 px-2 py-1 text-xs text-sky-300 hover:bg-sky-500/10 disabled:opacity-50"
+                  >
+                    {forwarding === req.id ? "Forwarding…" : "Send to OIE"}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </WidgetBoundary>
+
+    </div>
+  );
+}
+
+export default function ExamBranchPassQueuePage() {
   return (
     <Suspense fallback={<PageLoading />}>
-      <AuthGuard allowedRoles={["exam_branch"]}>
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-          <DevContactStrip />
-          <WidgetBoundary name="RoleDashboardPanel" title="Exam Branch Dashboard">
-            <RoleDashboardPanel
-              title="Exam Branch dashboard"
-              icon={FileSpreadsheet}
-              endpoint={null}
-            />
-          </WidgetBoundary>
-          <KanbanBoard
-            source="/api/permissions?workflow_type=exam"
-            itemKey="permission"
-            columns={["PENDING", "VERIFYING", "APPROVED", "REJECTED"]}
-            onSelect={() => {}}
-          />
-          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
-          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
-        </div>
-      </AuthGuard>
+      <ExamBranchPassQueueInner />
     </Suspense>
   );
 }

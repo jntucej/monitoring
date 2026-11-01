@@ -3,7 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
@@ -160,7 +160,6 @@ function RedisWorkerInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

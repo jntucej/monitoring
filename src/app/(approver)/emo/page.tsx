@@ -4,7 +4,7 @@ import { Wrench, AlertTriangle, ArrowRight } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { ComplaintConsole } from "@/components/complaints/ComplaintConsole";
@@ -85,7 +85,7 @@ export default function EmoLandingPage() {
       <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
       <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
       <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
-      <DevContactStrip />
+
     </div>
   );
 }

@@ -571,7 +571,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }): Pr
         for (const cid of childIds) {
           const reqs = await fetchOpenRequestsByStudentId(db, cid);
           for (const item of reqs) {
-            childReqs.push({ ...item, ctaHref: "/parent/passes" });
+            childReqs.push({ ...item, ctaHref: "/guardian/request-status" });
           }
         }
 

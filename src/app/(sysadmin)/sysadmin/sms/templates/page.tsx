@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { SmsTemplates } from "@/components/admin/sms/SmsTemplates";
 
 export default function SysadminSmsTemplatesPage() {
@@ -19,7 +19,7 @@ export default function SysadminSmsTemplatesPage() {
           <SmsTemplates />
         </WidgetBoundary>
       </Suspense>
-      <DevContactStrip />
+
     </div>
   );
 }

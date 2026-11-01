@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMessMutation } from "@/server/http/mutation-guard";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { query, withTransaction } from "@/lib/postgres";
@@ -109,7 +109,7 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ updated: true });
 }
 
-export const PATCH = withAuthorization(
+export const PATCH = withMessMutation(
   withRateLimit(handlePatch, { windowMs: 60_000, maxRequests: 60 }),
   {},
 );

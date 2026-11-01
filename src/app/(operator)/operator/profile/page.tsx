@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
 import {
@@ -172,7 +172,6 @@ function OperatorProfileInner() {
         </div>
       </OperatorWidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

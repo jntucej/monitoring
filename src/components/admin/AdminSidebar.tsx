@@ -97,6 +97,8 @@ interface ManifestCategory {
   icon: string;
   role?: string;
   infographic?: { kind: string; source: string; color?: string };
+  order?: number;
+  hidden?: boolean;
   pages: ManifestPage[];
 }
 
@@ -207,8 +209,6 @@ export interface AdminSidebarProps {
 export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
 
-  const categories = useMemo(() => ia.categories, []);
-
   // Per-category open map. Hydrate from localStorage on mount; default to
   // "the manifest's defaultExpanded + all open" so the user sees every
   // category on first visit.
@@ -216,6 +216,18 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
   const [hydratedOpen, setHydratedOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hydratedCollapsed, setHydratedCollapsed] = useState(false);
+  // 1.9 — tail categories are hidden by default; "Show all" reveals them.
+  const [showAll, setShowAll] = useState(false);
+
+  // Sort by manifest `order` (1..6 canonical buckets first), then hide
+  // `hidden: true` categories unless showAll is set.
+  const categories = useMemo(
+    () =>
+      [...ia.categories]
+        .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+        .filter((c) => showAll || !c.hidden),
+    [ia.categories, showAll],
+  );
 
   // Effective collapsed state: forceExpanded overrides the stored value.
   const isCollapsed = forceExpanded ? false : collapsed;
@@ -427,6 +439,16 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
             >
               <ChevronsUpDown className="h-4 w-4" />
             </button>
+            {!showAll && ia.categories.some((c) => c.hidden) && (
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                title="Show all categories"
+                className="mx-1 rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]"
+              >
+                Show all
+              </button>
+            )}
           </>
         )}
       </div>

@@ -5,7 +5,7 @@ import React from "react";
 import { Suspense } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PermissionList } from "@/components/approver/PermissionList";
 
@@ -19,7 +19,7 @@ function StaffLeavesInner() {
           subtitle="Manage teaching and non-teaching staff leave permissions"
         />
       </WidgetBoundary>
-      <DevContactStrip />
+
     </div>
   );
 }

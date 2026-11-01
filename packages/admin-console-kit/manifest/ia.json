@@ -3,155 +3,258 @@
   "defaultExpanded": "command-center",
   "categories": [
     {
-      "id": "command-center",
-      "label": "Command Center",
-      "icon": "LayoutDashboard",
-      "role": "admin",
-      "infographic": {
-        "kind": "sparkline",
-        "source": "operations.traffic24h"
-      },
+      "id": "command",
+      "label": "Command",
+      "order": 1,
       "pages": [
-        { "label": "Campus Dashboard", "href": "/admin/overview", "icon": "LayoutDashboard", "exact": true },
-        { "label": "Alerts & Radar", "href": "/admin/alerts", "icon": "Bell" },
-        { "label": "Gates", "href": "/admin/gates", "icon": "QrCode" }
-      ]
+        {
+          "label": "Campus Dashboard",
+          "href": "/admin/overview",
+          "icon": "LayoutDashboard",
+          "exact": true
+        },
+        {
+          "label": "Alerts & Radar",
+          "href": "/admin/alerts",
+          "icon": "Bell"
+        },
+        {
+          "label": "Gates",
+          "href": "/admin/gates",
+          "icon": "QrCode"
+        },
+        {
+          "label": "Analytics Dashboard",
+          "href": "/admin/analytics",
+          "icon": "Activity"
+        },
+        {
+          "label": "Reports",
+          "href": "/admin/reports",
+          "icon": "FileSpreadsheet"
+        },
+        {
+          "label": "Sustainability",
+          "href": "/admin/sustainability",
+          "icon": "Leaf"
+        },
+        {
+          "label": "Sessions",
+          "href": "/admin/sessions",
+          "icon": "Activity"
+        }
+      ],
+      "icon": "Activity"
     },
     {
-      "id": "students",
-      "label": "Students",
-      "icon": "GraduationCap",
-      "role": "admin",
+      "id": "people",
+      "label": "People",
+      "order": 2,
       "pages": [
-        { "label": "Student Roster", "href": "/admin/students", "icon": "GraduationCap" },
-        { "label": "Bulk Import", "href": "/admin/students/import", "icon": "FileSpreadsheet" },
-        { "label": "Alumni", "href": "/admin/alumni", "icon": "GraduationCap" }
-      ]
+        {
+          "label": "Student Roster",
+          "href": "/admin/students",
+          "icon": "GraduationCap"
+        },
+        {
+          "label": "Bulk Import",
+          "href": "/admin/students/import",
+          "icon": "FileSpreadsheet"
+        },
+        {
+          "label": "Alumni",
+          "href": "/admin/alumni",
+          "icon": "GraduationCap"
+        },
+        {
+          "label": "Faculty Directory",
+          "href": "/admin/faculty",
+          "icon": "Users"
+        },
+        {
+          "label": "Staff Directory",
+          "href": "/admin/staff",
+          "icon": "Briefcase"
+        },
+        {
+          "label": "Workers",
+          "href": "/admin/workers",
+          "icon": "HardHat"
+        },
+        {
+          "label": "Attendance Overview",
+          "href": "/admin/attendance",
+          "icon": "CalendarCheck"
+        },
+        {
+          "label": "Bulk Attendance",
+          "href": "/admin/attendance/bulk-import",
+          "icon": "FileSpreadsheet"
+        }
+      ],
+      "icon": "CalendarCheck"
     },
     {
-      "id": "academics",
-      "label": "Academics",
-      "icon": "BookOpen",
-      "role": "admin",
+      "id": "access",
+      "label": "Access",
+      "order": 3,
       "pages": [
-        { "label": "Classes", "href": "/admin/classes", "icon": "Layers" },
-        { "label": "Subjects", "href": "/admin/subjects", "icon": "BookOpen" },
-        { "label": "Faculty Assignments", "href": "/admin/faculty-assignments", "icon": "Link2" }
-      ]
+        {
+          "label": "Users & Roles",
+          "href": "/admin/users",
+          "icon": "UserCog"
+        },
+        {
+          "label": "Parents & Guardians",
+          "href": "/admin/parents",
+          "icon": "Users"
+        },
+        {
+          "label": "Permission Policies",
+          "href": "/admin/permission-policies",
+          "icon": "Shield"
+        },
+        {
+          "label": "Roles & Hierarchy",
+          "href": "/admin/roles",
+          "icon": "Shield"
+        }
+      ],
+      "icon": "Shield"
     },
     {
-      "id": "faculty",
-      "label": "Faculty",
-      "icon": "Users",
-      "role": "admin",
+      "id": "ops",
+      "label": "Ops",
+      "order": 4,
       "pages": [
-        { "label": "Faculty Directory", "href": "/admin/faculty", "icon": "Users" },
-        { "label": "Staff Directory", "href": "/admin/staff", "icon": "Briefcase" },
-        { "label": "Workers", "href": "/admin/workers", "icon": "HardHat" }
-      ]
+        {
+          "label": "Gate Devices",
+          "href": "/admin/gates",
+          "icon": "QrCode"
+        },
+        {
+          "label": "Occupancy & Twin",
+          "href": "/admin/occupancy",
+          "icon": "MapPin"
+        },
+        {
+          "label": "Device Configuration",
+          "href": "/admin/gate-device-configuration",
+          "icon": "SlidersHorizontal"
+        },
+        {
+          "label": "Visitors",
+          "href": "/admin/visitors",
+          "icon": "MapPin"
+        },
+        {
+          "label": "Gate Passes",
+          "href": "/admin/passes",
+          "icon": "FileSpreadsheet"
+        },
+        {
+          "label": "Emergency Lockdown",
+          "href": "/admin/lockdown",
+          "icon": "Shield"
+        },
+        {
+          "label": "Audit Logs",
+          "href": "/admin/audit-logs",
+          "icon": "ScrollText"
+        },
+        {
+          "label": "Institutional Config",
+          "href": "/admin/institutional-configuration",
+          "icon": "Building2"
+        },
+        {
+          "label": "Workflow Configuration",
+          "href": "/admin/workflow-configuration",
+          "icon": "GitBranch"
+        },
+        {
+          "label": "Knowledge Base",
+          "href": "/admin/kb",
+          "icon": "BookOpen"
+        },
+        {
+          "label": "Settings",
+          "href": "/admin/settings",
+          "icon": "Settings"
+        },
+        {
+          "label": "System Health",
+          "href": "/admin/health",
+          "icon": "Activity"
+        },
+        {
+          "label": "Today",
+          "href": "/admin/mess/today",
+          "icon": "UtensilsCrossed"
+        },
+        {
+          "label": "Menu Items",
+          "href": "/admin/mess/items",
+          "icon": "UtensilsCrossed"
+        },
+        {
+          "label": "Meal Days",
+          "href": "/admin/mess/days",
+          "icon": "CalendarDays"
+        },
+        {
+          "label": "Analytics",
+          "href": "/admin/mess/analytics",
+          "icon": "BarChart3"
+        },
+        {
+          "label": "Campus Announcements",
+          "href": "/admin/announcements",
+          "icon": "Megaphone"
+        },
+        {
+          "label": "Notification Settings",
+          "href": "/admin/notification-settings",
+          "icon": "BellRing"
+        },
+        {
+          "label": "Campus Events",
+          "href": "/admin/events",
+          "icon": "CalendarCheck"
+        },
+        {
+          "label": "Departments",
+          "href": "/admin/departments",
+          "icon": "Building2"
+        },
+        {
+          "label": "Classes",
+          "href": "/admin/classes",
+          "icon": "Layers"
+        },
+        {
+          "label": "Subjects",
+          "href": "/admin/subjects",
+          "icon": "BookOpen"
+        },
+        {
+          "label": "Faculty Assignments",
+          "href": "/admin/faculty-assignments",
+          "icon": "Link2"
+        },
+        {
+          "label": "Support Tickets",
+          "href": "/admin/support",
+          "icon": "HelpCircle"
+        }
+      ],
+      "icon": "HelpCircle"
     },
     {
-      "id": "attendance",
-      "label": "Attendance",
-      "icon": "CalendarCheck",
-      "role": "admin",
-      "infographic": "heat",
-      "dataKey": "analytics.traffic7d",
-      "pages": [
-        { "label": "Attendance Overview", "href": "/admin/attendance", "icon": "CalendarCheck" },
-        { "label": "Bulk Attendance", "href": "/admin/attendance/bulk-import", "icon": "FileSpreadsheet" }
-      ]
-    },
-    {
-      "id": "gates",
-      "label": "Gates & Access",
-      "icon": "MapPin",
-      "role": "admin",
-      "infographic": "sparkline",
-      "dataKey": "gates.status",
-      "pages": [
-        { "label": "Gate Devices", "href": "/admin/gates", "icon": "QrCode" },
-        { "label": "Occupancy & Twin", "href": "/admin/occupancy", "icon": "MapPin" },
-        { "label": "Device Configuration", "href": "/admin/gate-device-configuration", "icon": "SlidersHorizontal" },
-        { "label": "Visitors", "href": "/admin/visitors", "icon": "MapPin" },
-        { "label": "Gate Passes", "href": "/admin/passes", "icon": "FileSpreadsheet" },
-        { "label": "Emergency Lockdown", "href": "/admin/lockdown", "icon": "Shield" }
-      ]
-    },
-    {
-      "id": "access-control",
-      "label": "Access Control",
-      "icon": "Shield",
-      "role": "admin",
-      "pages": [
-        { "label": "Users & Roles", "href": "/admin/users", "icon": "UserCog" },
-        { "label": "Parents & Guardians", "href": "/admin/parents", "icon": "Users" },
-        { "label": "Permission Policies", "href": "/admin/permission-policies", "icon": "Shield" },
-        { "label": "Roles & Hierarchy", "href": "/admin/roles", "icon": "Shield" }
-      ]
-    },
-    {
-      "id": "announcements",
-      "label": "Announcements",
-      "icon": "Megaphone",
-      "role": "admin",
-      "pages": [
-        { "label": "Campus Announcements", "href": "/admin/announcements", "icon": "Megaphone" },
-        { "label": "Notification Settings", "href": "/admin/notification-settings", "icon": "BellRing" },
-        { "label": "Campus Events", "href": "/admin/events", "icon": "CalendarCheck" },
-        { "label": "Departments", "href": "/admin/departments", "icon": "Building2" }
-      ]
-    },
-    {
-      "id": "mess",
-      "label": "Mess & Facilities",
-      "icon": "UtensilsCrossed",
-      "role": "admin",
-      "pages": [
-        { "label": "Today", "href": "/admin/mess/today", "icon": "UtensilsCrossed" },
-        { "label": "Menu Items", "href": "/admin/mess/items", "icon": "UtensilsCrossed" },
-        { "label": "Meal Days", "href": "/admin/mess/days", "icon": "CalendarDays" },
-        { "label": "Analytics", "href": "/admin/mess/analytics", "icon": "BarChart3" }
-      ]
-    },
-    {
-      "id": "analytics",
-      "label": "Analytics & Reports",
-      "icon": "Activity",
-      "role": "admin",
-      "infographic": "heat",
-      "dataKey": "governance.events7d",
-      "pages": [
-        { "label": "Analytics Dashboard", "href": "/admin/analytics", "icon": "Activity" },
-        { "label": "Reports", "href": "/admin/reports", "icon": "FileSpreadsheet" },
-        { "label": "Sustainability", "href": "/admin/sustainability", "icon": "Leaf" },
-        { "label": "Sessions", "href": "/admin/sessions", "icon": "Activity" }
-      ]
-    },
-    {
-      "id": "support",
-      "label": "Support Desk",
-      "icon": "HelpCircle",
-      "role": "admin",
-      "pages": [
-        { "label": "Support Tickets", "href": "/admin/support", "icon": "HelpCircle" }
-      ]
-    },
-    {
-      "id": "governance",
-      "label": "Governance & Settings",
-      "icon": "Settings",
-      "role": "admin",
-      "infographic": "list",
-      "dataKey": "governance.events7d",
-      "pages": [
-        { "label": "Audit Logs", "href": "/admin/audit-logs", "icon": "ScrollText" },
-        { "label": "Institutional Config", "href": "/admin/institutional-configuration", "icon": "Building2" },
-        { "label": "Workflow Configuration", "href": "/admin/workflow-configuration", "icon": "GitBranch" },
-        { "label": "Knowledge Base", "href": "/admin/kb", "icon": "BookOpen" },
-        { "label": "Settings", "href": "/admin/settings", "icon": "Settings" },
-        { "label": "System Health", "href": "/admin/health", "icon": "Activity" }
-      ]
+      "id": "platform",
+      "label": "Platform",
+      "order": 5,
+      "pages": []
     }
   ],
   "personal": [

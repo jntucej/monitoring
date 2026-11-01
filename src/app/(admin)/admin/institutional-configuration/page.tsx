@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
@@ -338,8 +338,6 @@ function InstitutionalConfigurationInner() {
           </WidgetBoundary>
         </div>
       </div>
-
-      <DevContactStrip />
 
       <ConfirmDialog
         open={!!confirmDeactivate}

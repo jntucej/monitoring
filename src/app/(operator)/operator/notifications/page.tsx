@@ -3,7 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { OperatorNotifications } from "@/components/operator/shared/OperatorNotifications";
 
 function OperatorNotificationsInner() {
@@ -20,7 +20,6 @@ function OperatorNotificationsInner() {
         <OperatorNotifications compact={false} pollMs={30_000} />
       </OperatorWidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

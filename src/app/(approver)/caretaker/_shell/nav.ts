@@ -5,14 +5,15 @@ import {
 } from "lucide-react";
 
 export const CARETAKER_NAV: NavEntry[] = [
-  { kind: "link", href: "/caretaker", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/caretaker", label: "Complaints", icon: AlertCircle },
+  { kind: "link", href: "/caretaker/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "tickets",
     label: "Tickets",
     icon: AlertCircle,
     children: [
-      { href: "/caretaker/complaints", label: "Complaints" },
+      { href: "/caretaker", label: "Queue" },
       { href: "/caretaker/maintenance", label: "Maintenance" },
     ],
   },
@@ -23,7 +24,6 @@ export const CARETAKER_NAV: NavEntry[] = [
     icon: Home,
     children: [
       { href: "/caretaker/workers", label: "Workers" },
-      { href: "/caretaker/buildings", label: "Buildings" },
     ],
   },
 ];

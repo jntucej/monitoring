@@ -4,7 +4,7 @@ import { Briefcase } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -22,7 +22,7 @@ export default function StaffPage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["staff"]}>
         <div className="space-y-6">
-          <DevContactStrip />
+
           <WidgetBoundary name="RoleDashboardPanel" title="Staff Dashboard">
             <RoleDashboardPanel
               title="Staff dashboard"

@@ -5,14 +5,15 @@ import {
 } from "lucide-react";
 
 export const DEPUTY_WARDEN_NAV: NavEntry[] = [
-  { kind: "link", href: "/deputy-warden", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/deputy-warden", label: "Outpass queue", icon: CheckSquare },
+  { kind: "link", href: "/deputy-warden/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "approvals",
     label: "Approvals",
     icon: CheckSquare,
     children: [
-      { href: "/deputy-warden/outpass-queue", label: "Outpass queue" },
+      { href: "/deputy-warden", label: "Queue" },
       { href: "/deputy-warden/leave-requests", label: "Leave requests" },
       { href: "/deputy-warden/delegated-approvals", label: "Delegated" },
     ],

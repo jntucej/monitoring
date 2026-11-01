@@ -88,10 +88,10 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
   // Parent / Guardian
   if (role === "parent" || role === "guardian") {
     return [
-      { label: "Request Pass", icon: FilePlus2, href: "/parent/passes" },
-      { label: "View My Requests", icon: Ticket, href: "/parent/passes" },
-      { label: "Child Status", icon: LayoutDashboard, href: "/parent/child" },
-      { label: "Dashboard", icon: LayoutDashboard, href: "/parent" },
+      { label: "Request Pass", icon: FilePlus2, href: "/guardian/request-status" },
+      { label: "View My Requests", icon: Ticket, href: "/guardian/request-status" },
+      { label: "Child Status", icon: LayoutDashboard, href: "/guardian/child-status" },
+      { label: "Dashboard", icon: LayoutDashboard, href: "/guardian" },
     ];
   }
 

@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
@@ -79,7 +79,7 @@ export default function SysadminConsoleLayout({
 
   const main = (
     <ScrollEdgeBlue className="h-full">
-      <DevContactStrip />
+
       <div className="mx-auto max-w-7xl p-4 sm:p-6">{children}</div>
     </ScrollEdgeBlue>
   );

@@ -4,9 +4,7 @@
     {
       "id": "command",
       "label": "Command Center",
-      "icon": "LayoutDashboard",
       "order": 1,
-      "infographic": { "kind": "dots", "source": "command.health" },
       "pages": [
         {
           "id": "command-center",
@@ -15,32 +13,76 @@
           "kind": "cockpit",
           "pollMs": 10000,
           "sse": "/api/admin/alerts/stream"
+        },
+        {
+          "id": "health",
+          "route": "health",
+          "title": "Health",
+          "kind": "group",
+          "pollMs": 30000,
+          "children": [
+            {
+              "id": "health-app",
+              "route": "health/app",
+              "title": "App Health",
+              "kind": "cards"
+            },
+            {
+              "id": "health-database",
+              "route": "health/database",
+              "title": "Database",
+              "kind": "cards"
+            },
+            {
+              "id": "health-infra",
+              "route": "health/infra",
+              "title": "Infra",
+              "kind": "cards"
+            },
+            {
+              "id": "health-redis",
+              "route": "health/redis",
+              "title": "Redis",
+              "kind": "cards"
+            }
+          ]
+        },
+        {
+          "id": "alerts",
+          "route": "alerts",
+          "title": "Alerts",
+          "kind": "feed+rules",
+          "pollMs": 10000,
+          "sse": "/api/admin/alerts/stream"
+        },
+        {
+          "id": "safety",
+          "route": "safety",
+          "title": "Safety",
+          "kind": "cockpit",
+          "pollMs": 15000
+        },
+        {
+          "id": "runbooks",
+          "route": "runbooks",
+          "title": "Runbooks",
+          "kind": "list",
+          "pollMs": 120000
+        },
+        {
+          "id": "alert-rules",
+          "route": "alerts/rules",
+          "title": "Alert Rules",
+          "kind": "table",
+          "pollMs": 60000
         }
-      ]
+      ],
+      "icon": "LayoutDashboard"
     },
     {
-      "id": "analytics",
-      "label": "Analytics & Reports",
-      "icon": "Activity",
-      "order": 1.5,
-      "infographic": { "kind": "heat", "source": "analytics.traffic7d" },
-      "pages": [
-        { "id": "analytics", "route": "analytics", "title": "Analytics", "kind": "charts", "pollMs": 60000 },
-        { "id": "reports", "route": "reports", "title": "Reports", "kind": "list", "pollMs": 120000 },
-        { "id": "attendance", "route": "attendance", "title": "Attendance", "kind": "table", "pollMs": 60000 },
-        { "id": "announcements", "route": "announcements", "title": "Announcements", "kind": "list", "pollMs": 60000 },
-        { "id": "support", "route": "support", "title": "Support Desk", "kind": "table", "pollMs": 30000 },
-        { "id": "events", "route": "events", "title": "Campus Events", "kind": "list", "pollMs": 60000 },
-        { "id": "achievements", "route": "achievements", "title": "Achievements", "kind": "table", "pollMs": 120000 },
-        { "id": "communities", "route": "communities", "title": "Communities", "kind": "table", "pollMs": 120000 }
-      ]
-    },
-    {
-      "id": "identity",
-      "label": "Identity",
-      "icon": "Users",
+      "id": "people",
+      "label": "People",
       "order": 2,
-      "infographic": { "kind": "stacked-bar", "source": "identity" },
       "pages": [
         {
           "id": "people",
@@ -48,10 +90,18 @@
           "title": "People",
           "kind": "faceted-table",
           "pollMs": 60000,
-          "api": { "overview": "GET /api/admin/people/overview" },
+          "api": {
+            "overview": "GET /api/admin/people/overview"
+          },
           "drawer": {
             "entity": "person",
-            "sections": ["profile", "roles", "sessions", "audit", "links"]
+            "sections": [
+              "profile",
+              "roles",
+              "sessions",
+              "audit",
+              "links"
+            ]
           }
         },
         {
@@ -110,14 +160,13 @@
           "kind": "kanban",
           "pollMs": 30000
         }
-      ]
+      ],
+      "icon": "Users"
     },
     {
       "id": "access",
       "label": "Access & Auth",
-      "icon": "ShieldCheck",
       "order": 3,
-      "infographic": { "kind": "gauge", "source": "access.mfaCoverage" },
       "pages": [
         {
           "id": "access",
@@ -147,14 +196,13 @@
           "kind": "table",
           "pollMs": 60000
         }
-      ]
+      ],
+      "icon": "ShieldCheck"
     },
     {
-      "id": "gates",
-      "label": "Gates & Devices",
-      "icon": "DoorOpen",
+      "id": "ops",
+      "label": "Ops",
       "order": 4,
-      "infographic": { "kind": "dots", "source": "gates.status" },
       "pages": [
         {
           "id": "gates",
@@ -183,80 +231,7 @@
           "title": "Exam Day Ops",
           "kind": "cockpit",
           "pollMs": 30000
-        }
-      ]
-    },
-    {
-      "id": "monitoring",
-      "label": "Monitoring",
-      "icon": "Activity",
-      "order": 5,
-      "infographic": {
-        "kind": "sparkline",
-        "source": "monitoring.errorRate24h",
-        "color": "var(--action-warning)"
-      },
-      "pages": [
-        {
-          "id": "health",
-          "route": "health",
-          "title": "Health",
-          "kind": "group",
-          "pollMs": 30000,
-          "children": [
-            { "id": "health-app", "route": "health/app", "title": "App Health", "kind": "cards" },
-            { "id": "health-database", "route": "health/database", "title": "Database", "kind": "cards" },
-            { "id": "health-infra", "route": "health/infra", "title": "Infra", "kind": "cards" },
-            { "id": "health-redis", "route": "health/redis", "title": "Redis", "kind": "cards" }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "alerts",
-      "label": "Alerts & Incidents",
-      "icon": "Bell",
-      "order": 6,
-      "infographic": { "kind": "severity", "source": "alerts" },
-      "pages": [
-        {
-          "id": "alerts",
-          "route": "alerts",
-          "title": "Alerts",
-          "kind": "feed+rules",
-          "pollMs": 10000,
-          "sse": "/api/admin/alerts/stream"
         },
-        {
-          "id": "safety",
-          "route": "safety",
-          "title": "Safety",
-          "kind": "cockpit",
-          "pollMs": 15000
-        },
-        {
-          "id": "runbooks",
-          "route": "runbooks",
-          "title": "Runbooks",
-          "kind": "list",
-          "pollMs": 120000
-        },
-        {
-          "id": "alert-rules",
-          "route": "alerts/rules",
-          "title": "Alert Rules",
-          "kind": "table",
-          "pollMs": 60000
-        }
-      ]
-    },
-    {
-      "id": "automation",
-      "label": "Automation",
-      "icon": "Clock",
-      "order": 7,
-      "infographic": { "kind": "heat", "source": "automation.runs14d" },
-      "pages": [
         {
           "id": "jobs",
           "route": "jobs",
@@ -298,20 +273,7 @@
           "title": "Cron / Scheduled Jobs",
           "kind": "table",
           "pollMs": 30000
-        }
-      ]
-    },
-    {
-      "id": "data",
-      "label": "Data & Recovery",
-      "icon": "Database",
-      "order": 8,
-      "infographic": {
-        "kind": "gauge",
-        "source": "data.backupFreshness",
-        "color": "var(--action-info)"
-      },
-      "pages": [
+        },
         {
           "id": "data",
           "route": "data",
@@ -325,16 +287,7 @@
           "title": "Backup",
           "kind": "cards",
           "pollMs": 60000
-        }
-      ]
-    },
-    {
-      "id": "reference",
-      "label": "Reference Data",
-      "icon": "Layers",
-      "order": 9,
-      "infographic": { "kind": "counts", "source": "reference" },
-      "pages": [
+        },
         {
           "id": "departments",
           "route": "departments",
@@ -405,14 +358,13 @@
           "kind": "table",
           "pollMs": 60000
         }
-      ]
+      ],
+      "icon": "DoorOpen"
     },
     {
       "id": "platform",
-      "label": "Platform Config",
-      "icon": "Settings",
-      "order": 10,
-      "infographic": { "kind": "drift", "source": "platform" },
+      "label": "Platform",
+      "order": 5,
       "pages": [
         {
           "id": "reasons",
@@ -463,18 +415,13 @@
           "kind": "table",
           "pollMs": 120000
         }
-      ]
+      ],
+      "icon": "Settings"
     },
     {
       "id": "governance",
       "label": "Governance",
-      "icon": "Scale",
-      "order": 11,
-      "infographic": {
-        "kind": "sparkline",
-        "source": "governance.events7d",
-        "color": "var(--action-info)"
-      },
+      "order": 6,
       "pages": [
         {
           "id": "security",
@@ -511,7 +458,77 @@
           "kind": "cards",
           "pollMs": 120000
         }
-      ]
+      ],
+      "icon": "Scale"
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics & Reports",
+      "icon": "Activity",
+      "order": 7,
+      "infographic": {
+        "kind": "heat",
+        "source": "analytics.traffic7d"
+      },
+      "pages": [
+        {
+          "id": "analytics",
+          "route": "analytics",
+          "title": "Analytics",
+          "kind": "charts",
+          "pollMs": 60000
+        },
+        {
+          "id": "reports",
+          "route": "reports",
+          "title": "Reports",
+          "kind": "list",
+          "pollMs": 120000
+        },
+        {
+          "id": "attendance",
+          "route": "attendance",
+          "title": "Attendance",
+          "kind": "table",
+          "pollMs": 60000
+        },
+        {
+          "id": "announcements",
+          "route": "announcements",
+          "title": "Announcements",
+          "kind": "list",
+          "pollMs": 60000
+        },
+        {
+          "id": "support",
+          "route": "support",
+          "title": "Support Desk",
+          "kind": "table",
+          "pollMs": 30000
+        },
+        {
+          "id": "events",
+          "route": "events",
+          "title": "Campus Events",
+          "kind": "list",
+          "pollMs": 60000
+        },
+        {
+          "id": "achievements",
+          "route": "achievements",
+          "title": "Achievements",
+          "kind": "table",
+          "pollMs": 120000
+        },
+        {
+          "id": "communities",
+          "route": "communities",
+          "title": "Communities",
+          "kind": "table",
+          "pollMs": 120000
+        }
+      ],
+      "hidden": true
     }
   ],
   "personal": [

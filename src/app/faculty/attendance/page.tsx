@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from "react";
 import { Users, AlertCircle, RotateCw, Inbox } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { useAuthStore } from "@/stores/authStore";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
@@ -142,7 +142,6 @@ function FacultyAttendanceInner() {
         />
       )}
 
-      <DevContactStrip />
     </div>
   );
 }

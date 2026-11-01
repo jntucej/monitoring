@@ -3,7 +3,7 @@
 import React from "react";
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleConsole } from "@/components/shared/RoleConsole";
 import type { Role } from "@/lib/types";
@@ -30,7 +30,7 @@ export default function GuardianConsoleLayout({
           <RoleConsole role="guardian" roleRoot="/guardian">
             {children}
           </RoleConsole>
-          <DevContactStrip />
+
         </div>
       </Suspense>
     </AuthGuard>

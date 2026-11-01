@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { AcademicPersonalSection } from "@/components/student/AcademicPersonalSection";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { User } from "lucide-react";
 
 function StudentProfileInner() {
@@ -16,7 +16,7 @@ function StudentProfileInner() {
       </div>
       <UserProfileTab />
       <AcademicPersonalSection />
-      <DevContactStrip />
+
     </div>
   );
 }

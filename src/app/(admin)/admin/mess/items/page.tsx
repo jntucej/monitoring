@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { MenuItemsTab } from "@/components/mess/MessOperations";
 
 export default function AdminMessItemsPage() {
@@ -16,7 +16,7 @@ export default function AdminMessItemsPage() {
           <MenuItemsTab />
         </WidgetBoundary>
       </Suspense>
-      <DevContactStrip />
+
     </div>
   );
 }

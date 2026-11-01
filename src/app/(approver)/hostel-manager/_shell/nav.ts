@@ -5,11 +5,12 @@ import {
 } from "lucide-react";
 
 export const HOSTEL_MANAGER_NAV: NavEntry[] = [
-  { kind: "link", href: "/hostel-manager", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/hostel-manager", label: "Resident tickets", icon: Ticket },
+  { kind: "link", href: "/hostel-manager/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group", id: "tickets", label: "Tickets", icon: Ticket,
     children: [
-      { href: "/hostel-manager/tickets", label: "Resident tickets" },
+      { href: "/hostel-manager", label: "Queue" },
       { href: "/hostel-manager/complaints", label: "Complaints" },
     ],
   },

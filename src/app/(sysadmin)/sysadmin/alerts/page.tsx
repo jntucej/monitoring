@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -125,7 +125,6 @@ function AlertsInner() {
         )}
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

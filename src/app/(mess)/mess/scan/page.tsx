@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Scanner } from "@/components/operator/Scanner";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import type { MessToken } from "@/lib/types";
@@ -394,8 +394,6 @@ function ScanPageInner() {
           )}
         </div>
       </WidgetBoundary>
-
-      <DevContactStrip />
 
       {/* Camera scanner modal (reused operator Scanner) */}
       <Scanner

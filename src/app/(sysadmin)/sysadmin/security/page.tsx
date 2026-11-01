@@ -4,7 +4,7 @@ import { Suspense, useCallback } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
@@ -193,7 +193,6 @@ function SecurityReinforcedInner() {
         <SecurityManagement />
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

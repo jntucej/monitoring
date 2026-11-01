@@ -4,7 +4,7 @@ import { Suspense, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import {
   Loader2,
   AlertTriangle,
@@ -19,6 +19,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { PermissionList } from "@/components/approver/PermissionList";
 
 /* response shapes */
 
@@ -235,74 +236,43 @@ function DeputyWardenDelegatedApprovalsInner() {
         </p>
       </div>
 
-      {/* Queue table */}
-      <WidgetBoundary title="Approval Queue">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          {busy ? (
+      {/* Queue — actionable when delegation is recorded; the shared
+          PermissionList carries per-row Approve / Reject / Forward (1.13). */}
+      {busy ? (
+        <WidgetBoundary title="Approval Queue">
+          <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
             <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
               Loading delegated-approval queue…
             </div>
-          ) : rows.length === 0 ? (
+          </div>
+        </WidgetBoundary>
+      ) : rows.length === 0 ? (
+        <WidgetBoundary title="Approval Queue">
+          <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
             <div className="p-6 text-center min-w-0">
               <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No pending items at the deputy-warden stage. The queue is clear.
               </p>
             </div>
-          ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[640px]">
-                <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
-                    <th className="text-left px-4 py-3">Ticket</th>
-                    <th className="text-left px-4 py-3">Workflow</th>
-                    <th className="text-left px-4 py-3">Status</th>
-                    <th className="text-left px-4 py-3">SLA</th>
-                    <th className="text-left px-4 py-3">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {rows.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {r.ticket_number}
-                      </td>
-                      <td className="px-4 py-3 text-[var(--text-secondary)]">{r.workflow_type}</td>
-                      <td className="px-4 py-3 text-[var(--text-muted)]">{r.status}</td>
-                      <td className="px-4 py-3">
-                        {r.sla_deadline ? (
-                          <span className="text-[var(--text-muted)]">
-                            {new Date(r.sla_deadline).toLocaleDateString("en-IN", {
-                              day: "2-digit",
-                              month: "short",
-                            })}
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-muted)]">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        {delegationActive ? (
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-emerald-400/30 bg-emerald-400/10 text-emerald-400 whitespace-nowrap">
-                            Reviewable
-                          </span>
-                        ) : (
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] whitespace-nowrap">
-                            Read-only
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </WidgetBoundary>
+          </div>
+        </WidgetBoundary>
+      ) : (
+        <WidgetBoundary title="Approval Queue">
+          <div className="mx-auto max-w-7xl space-y-4 px-4 py-6 md:px-6 min-w-0">
+            <PermissionList
+              title="Delegated approval queue"
+              subtitle="Act within the recorded delegation scope; forward anything outside it to the warden stage."
+              workflowType="hostel"
+              currentStage="deputy_warden"
+              fetchUrl="/api/permissions?workflow_type=hostel&status=PENDING&stage=deputy_warden"
+              allowForward
+            />
+          </div>
+        </WidgetBoundary>
+      )}
 
-      <DevContactStrip />
     </div>
   );
 }

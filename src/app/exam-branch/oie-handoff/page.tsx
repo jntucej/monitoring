@@ -3,7 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
@@ -122,7 +122,6 @@ function ExamBranchOiehandoffInner() {
         </div>
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

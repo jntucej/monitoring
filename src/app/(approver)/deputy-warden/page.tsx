@@ -1,61 +1,40 @@
 "use client";
+
+// 1.13 — the deputy warden is L2 in the hostel chain: the outpass queue must be
+// actionable, not a read-only feed. Mount the shared PermissionList (which has
+// per-row Approve / Reject / Forward wired to PATCH /api/permissions/<ticket>)
+// instead of the static table.
+
 import { Suspense } from "react";
-import { ShieldCheck } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
-import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
-import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { PermissionList } from "@/components/approver/PermissionList";
+import { AuthGuard } from "@/components/shared/AuthGuard";
+import type { Role } from "@/lib/types";
 
-export default function DeputyWardenPage() {
+function DeputyWardenOutpassInner() {
   return (
-    <Suspense fallback={<PageLoading />}>
-      <AuthGuard allowedRoles={["deputy_warden", "principal"]}>
-        <div className="space-y-6">
-          <PageHeader title="Deputy Warden" subtitle="Hostel delegation & discipline" />
-          <WidgetBoundary name="RoleDashboardPanel" title="Deputy Warden Dashboard">
-            <RoleDashboardPanel
-              title="Deputy Warden dashboard"
-              icon={ShieldCheck}
-              endpoint="/api/deputy-warden/delegation"
-              mapKpis={(raw: unknown) => {
-                const d = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
-                const scopes = Array.isArray(d.scopes) ? d.scopes.length : 0;
-                return [
-                  { label: "Delegation", value: d.active ? "Active" : "Inactive", tone: d.active ? ("ok" as const) : ("neutral" as const) },
-                  { label: "Scopes", value: scopes },
-                  { label: "Delegated by", value: (d.delegatedBy as string) ?? "—", hint: (d.note as string) ?? undefined },
-                ];
-              }}
-            />
-          </WidgetBoundary>
-          <KanbanBoard
-            source="/api/permissions?workflow_type=hostel"
-            itemKey="permission"
-            columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
-            onSelect={() => {}}
-          />
-          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
-          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
-          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
-          <DevContactStrip />
-        </div>
-      </AuthGuard>
-    </Suspense>
+    <WidgetBoundary title="Outpass">
+      <div className="mx-auto max-w-7xl space-y-4 px-4 py-6 md:px-6 min-w-0">
+        <PermissionList
+          title="Outpass queue"
+          subtitle="Hostel out-passes at the deputy-warden stage. Approve, reject, or forward to hostel management."
+          workflowType="hostel"
+          currentStage="deputy_warden"
+          fetchUrl="/api/permissions?workflow_type=hostel&status=PENDING&stage=deputy_warden"
+          allowForward
+        />
+      </div>
+    </WidgetBoundary>
+  );
+}
+
+export default function DeputyWardenOutpassPage() {
+  return (
+    <AuthGuard allowedRoles={["deputy_warden", "admin", "sysadmin"] as Role[]}>
+      <Suspense fallback={<PageLoading />}>
+        <DeputyWardenOutpassInner />
+      </Suspense>
+    </AuthGuard>
   );
 }

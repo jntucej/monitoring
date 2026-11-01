@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { AuditLogViewer } from "@/components/sysadmin/AuditLogViewer";
 import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
@@ -32,7 +32,6 @@ function SysadminAuditInner() {
         <AuditLogViewer />
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

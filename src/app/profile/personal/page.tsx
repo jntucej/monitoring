@@ -7,7 +7,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import {
   User as UserIcon, Mail, Loader2, Save,
 } from "lucide-react";
@@ -103,7 +103,7 @@ export function ProfilePersonalPanel() {
             </div>
           </div>
         </div>
-        <DevContactStrip />
+
         <form onSubmit={saveName} className="glass-card p-6 space-y-5">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Personal details</h2>
           <div>

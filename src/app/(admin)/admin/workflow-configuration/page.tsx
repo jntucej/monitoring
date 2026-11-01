@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
@@ -245,7 +245,6 @@ function AdminWorkflowConfigurationInner() {
         </div>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

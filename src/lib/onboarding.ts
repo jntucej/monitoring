@@ -26,7 +26,7 @@ const ROLE_STEPS: Record<string, OnboardingStep[]> = {
     { id: "stu_pass_req", title: "Requesting Passes", description: "Apply for outstation or local leave passes.", targetPath: "/student/passes", role: "student" },
   ],
   parent: [
-    { id: "par_presence", title: "Ward Presence Status", description: "Check real-time entry and exit timestamps of your ward.", targetPath: "/parent/child", role: "parent" },
+    { id: "par_presence", title: "Ward Presence Status", description: "Check real-time entry and exit timestamps of your ward.", targetPath: "/guardian/child-status", role: "parent" },
   ],
 };
 

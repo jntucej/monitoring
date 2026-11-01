@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMessMutation } from "@/server/http/mutation-guard";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { query, withTransaction } from "@/lib/postgres";
@@ -268,12 +268,12 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ event });
 }
 
-export const GET = withAuthorization(
+export const GET = withMessMutation(
   withRateLimit(handleGet, { windowMs: 60_000, maxRequests: 120 }),
   {},
 );
 
-export const POST = withAuthorization(
+export const POST = withMessMutation(
   withRateLimit(handlePost, { windowMs: 60_000, maxRequests: 30 }),
   {},
 );

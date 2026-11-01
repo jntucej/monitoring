@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  CheckSquare,
   Clock,
   Users,
   DoorOpen,
@@ -28,7 +29,8 @@ export interface SupervisorGroup {
 export type SupervisorEntry = SupervisorLink | SupervisorGroup;
 
 export const SUPERVISOR_NAV: SupervisorEntry[] = [
-  { kind: "link", href: "/supervisor", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/supervisor", label: "Approvals", icon: CheckSquare },
+  { kind: "link", href: "/supervisor/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "shift",

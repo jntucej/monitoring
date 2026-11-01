@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import Link from "next/link";
 
@@ -220,7 +220,6 @@ export default function AdminUsersPage() {
             </div>
           </div>
 
-          <DevContactStrip />
         </div>
       )}
     </div>

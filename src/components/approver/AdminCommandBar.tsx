@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { getConsoleConfig } from "@/config/consoles";
+import adminManifest from "../../../packages/admin-console-kit/manifest/ia.json";
 
 interface CommandDef {
   id: string;
@@ -118,13 +119,59 @@ export function AdminCommandBar({ role, open, onClose }: AdminCommandBarProps) {
     return COMMAND_DEFS.filter((c) => ids.includes(c.id));
   }, [role]);
 
-  const filtered = useMemo(() => {
-    if (!query.trim()) return available;
-    const q = query.toLowerCase();
-    return available.filter(
-      (c) => c.label.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q)
+  // 1.10 — default mode fuzzy-searches every admin manifest page; typing ">"
+  // switches to the navigation commands.
+  const ALL_PAGES = useMemo(() => {
+    const root = "/admin";
+    return (adminManifest.categories ?? []).flatMap((c: { label?: string; pages?: Array<Record<string, unknown>> }) =>
+      (c.pages ?? []).map((p) => {
+        const raw = String(p.href ?? p.route ?? p.label ?? "");
+        const href = raw.startsWith("/") ? raw : `${root}/${raw}`;
+        return {
+          label: String(p.label ?? p.title ?? raw),
+          href,
+          category: String(c.label ?? ""),
+        };
+      }),
     );
-  }, [query, available]);
+  }, []);
+
+  const isCommandMode = query.startsWith(">");
+  const pageQuery = isCommandMode ? "" : query;
+
+  const filtered = useMemo(() => {
+    if (isCommandMode) {
+      const q = query.slice(1).trim().toLowerCase();
+      return q === ""
+        ? available
+        : available.filter(
+            (c) =>
+              c.id.startsWith(q) ||
+              c.label.toLowerCase().includes(q) ||
+              c.hint.toLowerCase().includes(q),
+          );
+    }
+    const q = pageQuery.trim().toLowerCase();
+    if (q === "") return available.slice(0, 12);
+    const matched = ALL_PAGES.filter(
+      (p) =>
+        p.label.toLowerCase().includes(q) ||
+        p.href.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q),
+    ).slice(0, 12);
+    return [
+      ...matched.map((p) => ({
+        id: `page:${p.href}`,
+        label: p.label,
+        hint: `${p.category} — ${p.href}`,
+        icon: Search,
+        href: p.href,
+      })),
+      ...available.filter((c) =>
+        c.label.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q),
+      ),
+    ];
+  }, [query, isCommandMode, available, ALL_PAGES, pageQuery]);
 
   useEffect(() => {
     if (open) {
@@ -135,22 +182,13 @@ export function AdminCommandBar({ role, open, onClose }: AdminCommandBarProps) {
     }
   }, [open]);
 
-  const executeCommand = useCallback(
-    (parsed: ParsedCommand) => {
-      if (parsed.action === "UNKNOWN") {
-        addToast({ variant: "error", message: "Unknown command. Type a command from the list below." });
-        return;
-      }
-      const target = available.find((c) => c.id === parsed.commandId);
-      if (!target) {
-        addToast({ variant: "error", message: "Command not available for this console." });
-        return;
-      }
+  const executeTarget = useCallback(
+    (target: { href: string }) => {
       setBusy(true);
       window.location.href = target.href;
       onClose();
     },
-    [available, addToast, onClose]
+    [onClose],
   );
 
   const handleSelect = useCallback((cmd: CommandDef) => {
@@ -159,14 +197,24 @@ export function AdminCommandBar({ role, open, onClose }: AdminCommandBarProps) {
   }, []);
 
   const handleEnter = useCallback(() => {
-    const parsed = parseCommand(query);
-    if (parsed.action === "UNKNOWN") {
-      // Keep focus so the user can finish typing the command keyword.
-      inputRef.current?.focus();
+    if (isCommandMode) {
+      const parsed = parseCommand(query);
+      if (parsed.action === "UNKNOWN") {
+        addToast({ variant: "error", message: "Unknown command. Type a command from the list below." });
+        return;
+      }
+      const target = filtered.find((c) => c.id === parsed.commandId);
+      if (!target) {
+        addToast({ variant: "error", message: "Command not available for this console." });
+        return;
+      }
+      executeTarget(target);
       return;
     }
-    executeCommand(parsed);
-  }, [executeCommand, query]);
+    const target = filtered[active];
+    if (!target) return;
+    executeTarget(target);
+  }, [isCommandMode, query, filtered, active, addToast, executeTarget]);
 
   const onListKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -213,7 +261,7 @@ export function AdminCommandBar({ role, open, onClose }: AdminCommandBarProps) {
               setActive(0);
             }}
             onKeyDown={onListKeyDown}
-            placeholder={`Admin command (role: ${role})…`}
+            placeholder={isCommandMode ? "Command…" : `Search pages or type ">" for commands (${role})…`}
             className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none min-w-0"
             aria-label="Admin command input"
           />

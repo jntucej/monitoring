@@ -18,8 +18,8 @@ const HOME_DEFAULT_ROUTE: Record<string, string> = {
   admin: '/admin',
   sysadmin: '/sysadmin',
   supervisor: '/supervisor',
-  guardian: '/parent',
-  parent: '/parent',
+  guardian: '/guardian',
+  parent: '/guardian',
   student: '/student',
   warden: '/principal',
   faculty: '/faculty/permissions',
@@ -143,9 +143,9 @@ export async function proxy(req: NextRequest) {
     // Anonymous hit on a protected role route → clean 302 to /login?next=…
     // (the shell no longer leaks over the wire; AuthGuard still owns data access).
     const PROTECTED_HTML_PREFIXES = [
-      '/admin', '/sysadmin', '/student', '/operator', '/parent',
+      '/admin', '/sysadmin', '/student', '/operator', '/guardian',
       '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
-      '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions', '/emo',
+      '/hostel', '/hostel-manager', '/oie', '/permissions', '/emo',
       '/principal', '/staff', '/vice-principal', '/supervisor',
       '/mess', '/exam', '/exam-branch', '/visitor', '/person',
       '/campus', '/onboarding', '/settings',

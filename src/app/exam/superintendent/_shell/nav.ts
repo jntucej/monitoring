@@ -5,14 +5,15 @@ import {
 } from "lucide-react";
 
 export const EXAM_SUPER_NAV: NavEntry[] = [
-  { kind: "link", href: "/exam/superintendent", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/exam/superintendent", label: "Access desk", icon: DoorOpen },
+  { kind: "link", href: "/exam/superintendent/home", label: "Today", icon: LayoutDashboard },
   {
     kind: "group",
     id: "operations",
     label: "Operations",
     icon: CalendarClock,
     children: [
-      { href: "/exam/superintendent/access", label: "Access" },
+      { href: "/exam/superintendent", label: "Queue" },
       { href: "/exam/superintendent/schedule", label: "Schedule" },
       { href: "/exam/superintendent/incidents", label: "Incidents" },
     ],

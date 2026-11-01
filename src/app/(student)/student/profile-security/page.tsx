@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import {
   User, KeyRound, Bell, ArrowRight, Lock, Shield, Eye, CheckCircle2,
 } from "lucide-react";
@@ -111,7 +111,6 @@ function StudentProfileSecurityInner() {
         </p>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

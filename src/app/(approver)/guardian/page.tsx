@@ -4,7 +4,7 @@ import { Suspense, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import {
   ShieldCheck,
   Users,
@@ -284,7 +284,6 @@ function GuardianOverviewInner() {
         <UnifiedCampusCalendar />
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }

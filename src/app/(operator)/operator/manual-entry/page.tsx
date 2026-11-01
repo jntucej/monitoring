@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useAuthStore } from "@/stores/authStore";
 import { useToast } from "@/components/ui/toast";
 import { getAuthHeaders } from "@/lib/utils";
@@ -586,7 +586,6 @@ function ManualEntryInner() {
         </OperatorWidgetBoundary>
       )}
 
-      <DevContactStrip />
     </div>
   );
 }

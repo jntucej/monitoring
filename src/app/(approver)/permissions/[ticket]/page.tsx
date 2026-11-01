@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import type { Role } from "@/lib/types";
 
 function PermissionTicketInner() {

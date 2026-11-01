@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QrCode } from "lucide-react";
 
 function StudentIdInner() {
@@ -16,7 +16,7 @@ function StudentIdInner() {
       <div className="max-w-md mx-auto sm:max-w-none">
         <DigitalIdCard />
       </div>
-      <DevContactStrip />
+
     </div>
   );
 }

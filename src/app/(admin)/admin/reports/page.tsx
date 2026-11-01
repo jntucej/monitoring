@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import type { DashboardData } from "@/lib/types";
 interface GeneratedReport {
   id: string;
@@ -310,7 +310,6 @@ export default function AdminReportsPage() {
         </div>
       </div>
 
-      <DevContactStrip />
     </div>
     
     

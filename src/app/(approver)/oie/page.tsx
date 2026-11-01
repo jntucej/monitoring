@@ -4,7 +4,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -39,7 +39,7 @@ export default function OiePage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["oie"]}>
         <div className="space-y-6">
-          <DevContactStrip />
+
           <PageHeader title="OIE" subtitle="Examinations cell — clearances & exceptions" />
           <WidgetBoundary name="OieKpis" title="OIE KPIs">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

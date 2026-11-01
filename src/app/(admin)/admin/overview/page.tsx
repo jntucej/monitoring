@@ -22,7 +22,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { QuickActions } from "@/components/admin/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
@@ -250,7 +250,6 @@ function AdminOverviewInner() {
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
       </WidgetBoundary>
-      <DevContactStrip />
 
       {/* Info Strip */}
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-center gap-3">

@@ -54,11 +54,10 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Caretaker Console",
           items: [
-            { href: "/caretaker", label: "Today" },
-            { href: "/caretaker/complaints", label: "Complaints" },
+            { href: "/caretaker", label: "Complaints" },
+            { href: "/caretaker/home", label: "Today" },
             { href: "/caretaker/maintenance", label: "Maintenance" },
             { href: "/caretaker/workers", label: "Workers" },
-            { href: "/caretaker/buildings", label: "Buildings" },
           ],
         },
       ];
@@ -383,17 +382,17 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Parent Console",
           items: [
-            { href: "/parent", label: "Today" },
-            { href: "/parent/child", label: "Status" },
+            { href: "/guardian", label: "Today" },
+            { href: "/guardian/child-status", label: "Status" },
             // Sub-pages consolidated into the guardian portal (single source
             // of truth); the /parent/* slugs still redirect to these routes
             // so deep links keep working.
             { href: "/guardian/child-attendance", label: "Attendance" },
             { href: "/guardian/child-requests", label: "Requests" },
             { href: "/guardian/movement-info", label: "Movement" },
-            { href: "/parent/passes", label: "Passes" },
+            { href: "/guardian/request-status", label: "Passes" },
             { href: "/guardian/pass-leave-submission", label: "Submit" },
-            { href: "/parent/settings", label: "Settings" },
+            { href: "/guardian/contact-info", label: "Settings" },
             { href: "/guardian/contact-info", label: "Contact info" },
           ],
         },
@@ -405,9 +404,9 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
         {
           groupLabel: "Guardian Portal",
           items: [
-            { href: "/parent", label: "Child Movement Tracker", icon: "Users", badge: "LIVE" },
-            { href: "/parent/child", label: "Gate Movement Logs", icon: "Clock" },
-            { href: "/parent/passes", label: "Outpass Approvals", icon: "CheckSquare" },
+            { href: "/guardian/movement-info", label: "Child Movement Tracker", icon: "Users", badge: "LIVE" },
+            { href: "/guardian/movement-info", label: "Gate Movement Logs", icon: "Clock" },
+            { href: "/guardian/request-status", label: "Outpass Approvals", icon: "CheckSquare" },
           ],
         },
         {

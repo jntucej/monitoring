@@ -12,7 +12,7 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
 import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
@@ -94,7 +94,7 @@ export default function SysadminCommandCenterPage() {
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
       </WidgetBoundary>
-      <DevContactStrip />
+
     </>
   );
 }

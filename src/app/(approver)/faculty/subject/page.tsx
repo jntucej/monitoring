@@ -6,7 +6,7 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
@@ -35,7 +35,7 @@ export default function SubjectFacultyTodayPage() {
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
       </WidgetBoundary>
-      <DevContactStrip />
+
     </div>
   );
 }

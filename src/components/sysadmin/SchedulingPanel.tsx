@@ -28,7 +28,7 @@ import {
 
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { EmptyState } from "@/components/shared/EmptyState";
 
@@ -361,8 +361,6 @@ export function SchedulingPanel() {
           </WidgetBoundary>
         </aside>
       </div>
-
-      <DevContactStrip />
 
       <ConfirmDialog
         open={pendingApply !== null}

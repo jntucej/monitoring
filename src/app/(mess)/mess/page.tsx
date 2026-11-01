@@ -4,7 +4,7 @@ import { UtensilsCrossed } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -19,7 +19,7 @@ export default function MessPage() {
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["mess_incharge", "admin", "sysadmin"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-          <DevContactStrip />
+
           <WidgetBoundary name="RoleDashboardPanel" title="Mess Incharge Dashboard">
             <RoleDashboardPanel
               title="Mess Incharge dashboard"

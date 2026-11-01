@@ -29,6 +29,12 @@ export const VP_NAV: VPEntry[] = [
   {
     kind: "link",
     href: "/vice-principal",
+    label: "Approvals",
+    icon: CheckSquare,
+  },
+  {
+    kind: "link",
+    href: "/vice-principal/home",
     label: "Today",
     icon: LayoutDashboard,
   },
@@ -38,7 +44,7 @@ export const VP_NAV: VPEntry[] = [
     label: "Approvals",
     icon: CheckSquare,
     children: [
-      { href: "/vice-principal/approvals/pending", label: "Pending" },
+      { href: "/vice-principal", label: "Queue" },
       { href: "/vice-principal/approvals/escalated", label: "Escalated" },
       { href: "/vice-principal/approvals/all", label: "All open" },
     ],

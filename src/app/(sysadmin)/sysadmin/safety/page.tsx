@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SafetyContent } from "@/components/sysadmin/domains/alerts/SafetyContent";
@@ -47,7 +47,6 @@ function SafetyInner() {
         )}
       </WidgetBoundary>
 
-      <DevContactStrip />
     </div>
   );
 }

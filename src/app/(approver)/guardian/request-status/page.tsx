@@ -8,7 +8,7 @@ import {
   Loader2,
   Inbox
 } from "lucide-react";
-import { DevContactStrip } from "@/components/shared/DevContactStrip";
+
 import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -170,7 +170,6 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
         </div>
       </div>
 
-      <DevContactStrip />
     </div>
   );
 }
