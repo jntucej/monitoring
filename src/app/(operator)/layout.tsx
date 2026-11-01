@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { NOINDEX_METADATA } from "@/lib/seo";
-import { OperatorShell } from "./OperatorShell";
-import { usePathname } from "next/navigation";
-import { AuthGuard } from "@/components/shared/AuthGuard";
+import { GateAwareOperatorShell } from "./GateAwareOperatorShell";
 
 export const metadata: Metadata = {
   ...NOINDEX_METADATA,
@@ -22,9 +20,9 @@ export const metadata: Metadata = {
  * (AuthGuard only, no shell chrome).
  *
  * The branch decision uses usePathname (a client hook), so it lives in
- * the small client component `GateAwareOperatorShell` below: on /gate/*
- * it renders AuthGuard-only; everywhere else it renders the full
- * OperatorShell (drawer + rail + floating buttons).
+ * the small client component `GateAwareOperatorShell` (its own file
+ * with the "use client" directive). On /gate/* it renders AuthGuard
+ * only; everywhere else it renders the full OperatorShell.
  *
  * The nested (operator)/operator/layout.tsx adds the RoleDesktopShell /
  * RoleMobileShell chrome for /operator/* pages only — that is one shell
@@ -35,22 +33,5 @@ export default function OperatorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <GateAwareOperatorShell>
-      {children}
-    </GateAwareOperatorShell>
-  );
-}
-
-function GateAwareOperatorShell({ children }: { children: React.ReactNode }) {
-  "use client";
-  const pathname = usePathname();
-
-  if (pathname?.startsWith("/gate/")) {
-    // Desk owns the viewport. AuthGuard enforces the role; the page
-    // renders everything else (picker, scanner, IN/OUT, banners).
-    return <AuthGuard allowedRoles={["operator"] as const}>{children}</AuthGuard>;
-  }
-
-  return <OperatorShell>{children}</OperatorShell>;
+  return <GateAwareOperatorShell>{children}</GateAwareOperatorShell>;
 }
