@@ -6,7 +6,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { fail } from "@/server/http/response";
 import { addAudit, addNotification, getLinkedPersons, getStudentGuardianLink } from "@/lib/db";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import {
   resolveInitialStageForRequester,
   generateTicketNumber,
@@ -168,42 +168,54 @@ async function handlePost(
   const ticketNumber = await generateTicketNumber(workflowType);
   const slaDeadline = computeSlaDeadline(workflowType, initialStage);
 
-  const supabase = getSupabaseServiceClient();
-  const { data: inserted, error: insErr } = await supabase
-    .from("permissions")
-    .insert({
-      ticket_number: ticketNumber,
-      workflow_type: workflowType,
-      requester_user_id: auth.userId,
-      student_user_id: studentUserId,
-      current_stage: initialStage,
-      status: "PENDING",
-      priority,
-      stage_history: [],
-      document_required: Boolean(body.documentRequired),
-      reason,
-      description: body.description ?? null,
-      from_date: fromDate?.toISOString() ?? null,
-      to_date: toDate?.toISOString() ?? null,
-      hostel_scope: hostelScope,
-      branch,
-      routed_to_role: initialStage,
-      sla_deadline: slaDeadline,
-    })
-    .select()
-    .single();
-
-  if (insErr || !inserted) {
-    const code = (insErr as { code?: string } | null)?.code;
-    const message = insErr?.message ?? "Insert failed";
-    if (code === "42501") {
-      console.error("[permissions POST] RLS blocked insert", { code, message });
-      return fail("DB_RLS", "Row-level security blocked this request", 500);
+  let inserted: { id: string } | null = null;
+  let insErr: unknown = null;
+  try {
+    const result = await withTransaction(
+      async (tx) => {
+        const res = await tx.query(
+          `INSERT INTO public.permissions (
+             ticket_number, workflow_type, requester_user_id, student_user_id,
+             current_stage, status, priority, stage_history, document_required,
+             reason, description, from_date, to_date, hostel_scope, branch,
+             routed_to_role, sla_deadline
+           ) VALUES (
+             $1, $2, $3, $4, $5, 'PENDING', $6,
+             '{}', $7, $8, $9, $10, $11, $12, $13, $5, $14
+           )
+           RETURNING id, ticket_number, workflow_type, current_stage, status`,
+          [
+            ticketNumber,         // $1 ticket_number
+            workflowType,         // $2 workflow_type
+            auth.userId,          // $3 requester_user_id
+            studentUserId,        // $4 student_user_id
+            initialStage,         // $5 current_stage (= routed_to_role)
+            priority,             // $6 priority
+            Boolean(body.documentRequired), // $7 document_required
+            reason,               // $8 reason
+            body.description ?? null,      // $9 description
+            fromDate?.toISOString() ?? null, // $10 from_date
+            toDate?.toISOString() ?? null,   // $11 to_date
+            hostelScope,          // $12 hostel_scope
+            branch,               // $13 branch
+            slaDeadline,          // $14 sla_deadline
+          ]
+        );
+        return res.rows[0];
+      },
+      { currentUserId: auth.userId, currentRole: auth.role }
+    );
+    inserted = result;
+  } catch (e: any) {
+    insErr = e;
+    if (e?.code === "42501") {
+      console.error("[permissions POST] RLS blocked insert", e.message);
+    } else {
+      console.error("[permissions POST] DB error", e.message);
     }
-    if (code) {
-      console.error("[permissions POST] DB error", { code, message });
-    }
-    return fail("DB_ERROR", message, 500);
+  }
+  if (!inserted) {
+    return fail("DB_ERROR", insErr ? "Insert failed: RLS or constraint violation" : "Insert failed", 500);
   }
 
   await addAudit({

@@ -6,7 +6,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { generateCaseNumber, reporterHash, loadAlertConfig, resolveAlertRecipients } from "@/lib/anti-ragging";
 import { sendEmail } from "@/lib/integrations/email";
@@ -42,24 +42,31 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const caseNumber = generateCaseNumber();
   const rHash = isAnonymous ? reporterHash(auth.userId) : null;
 
-  await query(
-    `INSERT INTO public.anti_ragging_cases (
-       case_number, is_anonymous, reporter_hash, category, severity,
-       narrative, location, occurred_at, accused_info, witness_info
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::timestamptz, $9, $10)`,
-    [
-      caseNumber,
-      isAnonymous,
-      rHash,
-      category,
-      severity,
-      narrative.slice(0, 5000),
-      body.location ? body.location.trim().slice(0, 250) : null,
-      body.occurredAt ?? null,
-      body.accusedInfo ? body.accusedInfo.trim().slice(0, 1000) : null,
-      body.witnessInfo ? body.witnessInfo.trim().slice(0, 1000) : null,
-    ],
-  );
+  await withTransaction(
+    async (tx) =>
+      tx.query(
+        `INSERT INTO public.anti_ragging_cases (
+           case_number, is_anonymous, reporter_hash, category, severity,
+           narrative, location, occurred_at, accused_info, witness_info
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::timestamptz, $9, $10)`,
+        [
+          caseNumber,
+          isAnonymous,
+          rHash,
+          category,
+          severity,
+          narrative.slice(0, 5000),
+          body.location ? body.location.trim().slice(0, 250) : null,
+          body.occurredAt ?? null,
+          body.accusedInfo ? body.accusedInfo.trim().slice(0, 1000) : null,
+          body.witnessInfo ? body.witnessInfo.trim().slice(0, 1000) : null,
+        ]
+      ),
+    { currentUserId: auth.userId, currentRole: auth.role }
+  ).catch((e: any) => {
+    if (e?.code === "42501") return fail("DB_RLS", "Row-level security blocked this report", 500);
+    throw e;
+  });
 
   // Send alerts if configured
   try {

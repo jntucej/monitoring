@@ -8,8 +8,11 @@ import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
-  if (!["principal", "sysadmin", "admin"].includes(auth.role)) {
-    return fail("FORBIDDEN", "Not allowed", 403);
+  // Students may view their own cases (matched via reporter_hash for
+// anonymous filings); all other roles need principal/sysadmin/admin.
+const isStaffRole = ["principal", "sysadmin", "admin"].includes(auth.role);
+if (!isStaffRole && auth.role !== "student") {
+  return fail("FORBIDDEN", "Not allowed", 403);
   }
 
   const { rows } = await query(

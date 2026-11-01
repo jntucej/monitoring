@@ -107,6 +107,7 @@ export async function query<T extends QueryResultRow = any>(
   try {
     if (options?.currentUserId) {
       await client.query("SELECT set_config('app.current_user_id', $1, false)", [options.currentUserId]);
+      await client.query("SELECT set_config('app.current_user_role', $1, false)", [options.currentRole ?? '']);
     }
     if (options?.currentRole) {
       await client.query("SELECT set_config('app.current_role', $1, false)", [options.currentRole]);
@@ -155,6 +156,10 @@ export async function withTransaction<T>(
     if (options?.currentRole) {
       await client.query(
         "SELECT set_config($$app.current_role$$, $1, true)",
+        [options.currentRole],
+      );
+      await client.query(
+        "SELECT set_config($$app.current_user_role$$, $1, true)",
         [options.currentRole],
       );
     }

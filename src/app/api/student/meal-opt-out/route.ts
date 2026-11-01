@@ -8,7 +8,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { getIstDateString } from "@/server/policy/dates";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { isMessBillExempt } from "@/lib/delegation";
 import type { AuthContext } from "@/lib/authContext";
@@ -54,14 +54,32 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     return fail("CUTOFF_PASSED", `Opt-out cutoff for ${mealDate} has passed (${cutoffHour}:00 AM)`, 422);
   }
 
-  const { rows } = await query<{ id: string }>(
-    `INSERT INTO public.meal_opt_outs (student_id, meal_date, meal_type, reason)
-     VALUES ($1::uuid, $2::date, $3, $4)
-     ON CONFLICT (student_id, meal_date, meal_type) DO UPDATE
-       SET reason = EXCLUDED.reason
-     RETURNING id`,
-    [auth.userId, mealDate, mealType, body.reason ? body.reason.trim().slice(0, 200) : null],
-  );
+  let optOutRow: { id: string } | null = null;
+  let optOutErr: unknown = null;
+  try {
+    const res = await withTransaction(
+      async (tx) =>
+        (
+          await tx.query(
+            `INSERT INTO public.meal_opt_outs (student_id, meal_date, meal_type, reason)
+             VALUES ($1::uuid, $2::date, $3, $4)
+             ON CONFLICT (student_id, meal_date, meal_type) DO UPDATE
+               SET reason = EXCLUDED.reason
+             RETURNING id`,
+            [auth.userId, mealDate, mealType, body.reason ? body.reason.trim().slice(0, 200) : null]
+          )
+        ).rows[0],
+      { currentUserId: auth.userId, currentRole: auth.role }
+    );
+    optOutRow = res;
+  } catch (e: any) {
+    optOutErr = e;
+    if (e?.code === "42501") console.error("[meal-opt-out POST] RLS blocked", e.message);
+  }
+  if (!optOutRow) {
+    return fail("DB_ERROR", optOutErr ? "Insert failed (RLS or constraint)" : "Insert failed", 500);
+  }
+  const rows = [optOutRow];
 
   await addAudit({
     action: "MEAL_OPT_OUT_CREATED",
