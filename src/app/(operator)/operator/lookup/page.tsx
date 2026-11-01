@@ -18,7 +18,10 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Clock,
+  Mic,
 } from "lucide-react";
+import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
+import type { VoiceCommand } from "@/lib/voice";
 
 interface LookupPerson {
   id: string;
@@ -82,6 +85,16 @@ function OperatorLookupInner() {
   const [result, setResult] = useState<LookupPerson | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
 
+  // O12: voice-assisted lookup — prefill the id field on high-confidence
+  // recognition so the operator confirms before searching.
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const handleVoiceCommand = useCallback((cmd: VoiceCommand) => {
+    if (cmd.roll_number) {
+      setIdNumber(cmd.roll_number);
+      setVoiceOpen(false);
+    }
+  }, []);
+
   const {
     data: lastScanData,
     loading: lastScanLoading,
@@ -139,6 +152,16 @@ function OperatorLookupInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {/* Search form */}
       <OperatorWidgetBoundary title="Person Lookup">
+        {/* O12: voice-assisted lookup — prefill the id field */}
+        <button
+          type="button"
+          onClick={() => setVoiceOpen(true)}
+          className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          <Mic className="h-3.5 w-3.5" aria-hidden />
+          Voice lookup
+        </button>
+        <VoiceAssistantModal onExecuteCommand={handleVoiceCommand} />
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
             <div className="space-y-1.5 min-w-0">

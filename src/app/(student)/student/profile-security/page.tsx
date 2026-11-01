@@ -79,7 +79,7 @@ function StudentProfileSecurityInner() {
 
           {/* Active sessions */}
           <Link
-            href="/security"
+            href="/student/profile-security/sessions"
             className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:border-[var(--action-primary)]/40 hover:bg-[var(--action-primary)]/5 transition-colors flex items-start gap-3 min-w-0"
           >
             <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">

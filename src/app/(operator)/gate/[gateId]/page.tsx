@@ -23,6 +23,12 @@ import { recommend } from "@/lib/operator-recommend";
 import { ConfirmSheet } from "@/components/operator/sheet/ConfirmSheet";
 import type { EntryButtonId } from "@/lib/operator-recommend";
 import { GateModeBanner } from "@/components/operator/GateModeBanner";
+import { PassPreviewFetcher } from "@/components/operator/PassPreview";
+import { RecentScansSheet } from "@/components/operator/RecentScansSheet";
+import { GeoFenceWarning, resolveKioskLocation, haversineMeters } from "@/components/operator/GeoFenceWarning";
+import { BiometricPrompt } from "@/components/operator/BiometricPrompt";
+import { formatTime } from "@/lib/utils";
+import { useOperatorShiftClock } from "@/hooks/useOperatorShiftClock";
 import type { GateMode } from "@/lib/gate-operations";
 
 /**
@@ -125,6 +131,8 @@ function OperatorPageInner() {
   const gateState = useOperatorStore((s) => s.gate);
   const entryType = useOperatorStore((s) => s.entryType);
   const cachedPasses = useOperatorStore((s) => s._cachedPasses);
+const recentScans = useOperatorStore((s) => s.recentScans);
+const shift = useOperatorShiftClock();
 
   // Pure derivation — `recommend()` reads the scanned student's state and
   // returns { direction, reason, entryType, entryButton, confidence,
@@ -286,6 +294,60 @@ function OperatorPageInner() {
     return () => clearTimeout(t);
   }, [state, reset]);
 
+  // ── O8: pass preview on OUT confirm ─────────────────────────────────
+  // When the operator is on an OUT decision, fetch the scanned roll's pass
+  // (advisory, not load-bearing) and surface it above the button bar.
+  const [passPreview, setPassPreview] = useState<{ roll: string; reason: string; ticketNumber?: string } | null>(null);
+  const [biometricPending, setBiometricPending] = useState(false);
+  const doConfirm = useCallback(
+    (dir: "IN" | "OUT", reason?: string, et?: "hosteller" | "day_scholar", buttonId?: EntryButtonId) => {
+      void confirmScan(addToast, dir, reason, et, buttonId as EntryButtonId);
+      // O8: show the pass preview for OUT scans; IN scans don't need one.
+      if (dir === "OUT" && currentStudent) {
+        const reasonLabel = reason ?? "home_out";
+        setPassPreview({ roll: currentStudent.roll ?? "", reason: reasonLabel, ticketNumber: cachedPasses.find((p: any) => p?.roll === currentStudent?.roll)?.ticket_number });
+        // O10: high-risk OUT = home_out with an approved pass.
+        if (reasonLabel === "home_out" && cachedPasses.length > 0) setBiometricPending(true);
+      } else {
+        setPassPreview(null);
+        setBiometricPending(false);
+      }
+    },
+    [confirmScan, addToast, currentStudent, cachedPasses],
+  );
+
+  // ── O11: geo-fence intercept (gates with a configured fence radius) ──
+  // Before an OUT scan at a geofenced gate, check the kiosk's GPS distance
+  // to the gate. If outside the allowed radius, show the warning dialog
+  // with a "Continue anyway" escape hatch. Advisory only: a null GPS
+  // (permission denied / no receiver) never hard-blocks a scan.
+  const [geoFence, setGeoFence] = useState<{ distanceMeters: number; pending: [string, string?, ("hosteller" | "day_scholar")?, EntryButtonId?] } | null>(null);
+  const doConfirmWithGeo = useCallback(
+    (dir: "IN" | "OUT", reason?: string, et?: "hosteller" | "day_scholar", buttonId?: EntryButtonId) => {
+      const fenceLat = gateState?.latitude;
+      const fenceLon = gateState?.longitude;
+      const fenceRadius = gateState?.allowedRadiusMeters;
+      if (dir === "OUT" && fenceLat != null && fenceLon != null) {
+        const allowed = fenceRadius ?? 200;
+        resolveKioskLocation()
+          .then(async (loc) => {
+            if (!loc) return doConfirm(dir, reason, et, buttonId);
+            const distance = haversineMeters(loc.latitude, loc.longitude, fenceLat, fenceLon);
+            if (distance > allowed) {
+              // Hold the confirm; "Continue anyway" replays it with the pending payload.
+              setGeoFence({ distanceMeters: distance, pending: [dir, reason, et, buttonId] });
+            } else {
+              doConfirm(dir, reason, et, buttonId);
+            }
+          })
+          .catch(() => doConfirm(dir, reason, et, buttonId));
+        return;
+      }
+      doConfirm(dir, reason, et, buttonId);
+    },
+    [doConfirm, gateState],
+  );
+
   // Manual entry submit: one button → inline input → same scan flow.
   const submitManual = (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,6 +420,22 @@ function OperatorPageInner() {
       {/* ── Operational status + confirmation card (above the camera layer) ── */}
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">
+          {/* O16: shift clock — first-scan-derived 8h window label. */}
+          <div className="pointer-events-none flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+            {shift.start ? (
+              <>
+                <span className="font-mono font-semibold text-[var(--text-secondary)]">
+                  {formatTime(shift.start.toISOString())}
+                </span>
+                <span>shift · {shift.end ? formatTime(shift.end.toISOString()) : ""}</span>
+                {shift.remainingHours != null && (
+                  <span className="text-emerald-400">{shift.remainingHours.toFixed(1)}h left</span>
+                )}
+              </>
+            ) : (
+              <span>shift starts at first scan</span>
+            )}
+          </div>
           {/* A1: compact mode + lockdown banner (always visible, incl. OPEN). */}
           <GateModeBanner
             mode={gateMode as GateMode}
@@ -420,16 +498,55 @@ function OperatorPageInner() {
               isOpen={true}
               autoConfirmMs={null}
               onConfirm={(dir, reason, et, buttonId) => {
-                // ConfirmSheet passes the exact payload the engine chose. The
-                // store's confirmScan accepts all four overrides; buttonId ===
-                // "return_to_hostel" signals a round-trip (no type write), the
-                // other two buttonIds write the canonical entry type.
-                void confirmScan(addToast, dir, reason, et, buttonId as EntryButtonId);
+                // O8+O11: the geo-fence intercept runs before the store
+                // commit; ConfirmSheet's payload is passed straight through.
+                doConfirmWithGeo(dir, reason, et, buttonId);
               }}
               onCancel={cancelScan}
             />
           )}
         </AnimatePresence>
+
+        {/* O8: pass preview for OUT scans (advisory, fetches /api/gate/verify-pass) */}
+        {passPreview && (
+          <PassPreviewFetcher roll={passPreview.roll} reason={passPreview.reason} />
+        )}
+
+        {/* O10: biometric gate for high-risk OUT (home_out with valid pass).
+            Hardware note: the reader <Input> is the integration point — wire
+            only after a fingerprint reader is tested on the kiosk. Kept
+            inert (mounted only when a pass is present and OUT is confirmed)
+            so it cannot accidentally block a routine scan. */}
+        {passPreview && biometricPending && (
+          <BiometricPrompt
+            ticketNumber={passPreview.ticketNumber ?? ""}
+            roll={passPreview.roll}
+            mode="thumb"
+            onVerified={() => setBiometricPending(false)}
+            onCancel={() => setBiometricPending(false)}
+          />
+        )}
+
+        {/* O11: geo-fence warning (advisory "continue anyway" escape hatch) */}
+        {geoFence && (
+          <GeoFenceWarning
+            distanceMeters={geoFence.distanceMeters}
+            allowedRadiusMeters={gateState?.allowedRadiusMeters ?? 200}
+            gateName={gateName}
+            onContinue={() => {
+              const [dir, reason, et, buttonId] = geoFence.pending;
+              setGeoFence(null);
+              doConfirm(dir as "IN" | "OUT", reason, et, buttonId);
+            }}
+            onCancel={() => {
+              setGeoFence(null);
+              cancelScan();
+            }}
+          />
+        )}
+
+        {/* O9: swipe-up recent scans sheet above the decision bar */}
+        <RecentScansSheet scans={recentScans} gateName={gateName} />
       </div>
 
       {/* ── Manual entry: one button, inline sheet (not a mode) ── */}
@@ -652,7 +769,7 @@ function OperatorPageInner() {
             <button
               type="button"
               disabled={!canConfirm}
-              onClick={() => { void confirmScan(addToast, "IN"); }}
+              onClick={() => { void doConfirmWithGeo("IN"); }}
               className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               IN
@@ -660,7 +777,7 @@ function OperatorPageInner() {
             <button
               type="button"
               disabled={!canConfirm}
-              onClick={() => { void confirmScan(addToast, "OUT"); }}
+              onClick={() => { void doConfirmWithGeo("OUT"); }}
               className="min-h-[56px] rounded-xl bg-[var(--action-danger)] text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               OUT

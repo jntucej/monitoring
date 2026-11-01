@@ -6,8 +6,6 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { getAuthHeaders } from "@/lib/utils";
-import { extractStudentRoll } from "@/lib/student-utils";
-import { useAuthStore } from "@/stores/authStore";
 import { CalendarDays, CheckCircle2, XCircle, Clock, Loader2, ArrowRight } from "lucide-react";
 
 /* ── response shape ── */
@@ -34,7 +32,6 @@ function statusOf(d: { status: string | null; time_in: string | null }): "presen
 }
 
 function StudentAttendanceCalendarInner() {
-  const user = useAuthStore((s) => s.user);
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth()); // 0-indexed

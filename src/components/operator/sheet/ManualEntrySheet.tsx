@@ -2,18 +2,24 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, KeyRound } from "lucide-react";
+import { X, KeyRound, ListChecks } from "lucide-react";
 import { normalizeScannedPayload } from "@/lib/barcode";
+import { ReasonSelect } from "@/components/shared/ReasonSelect";
+import type { WorkflowType } from "@/lib/types";
 
 interface ManualEntrySheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onScan: (roll: string) => void;
+  onScan: (roll: string, reason?: string) => void;
   gateId?: string;
+  /** Workflow type that scopes the reason list — "hostel" for student manual entries. */
+  workflowType?: WorkflowType;
 }
 
-export function ManualEntrySheet({ isOpen, onClose, onScan, gateId }: ManualEntrySheetProps) {
+export function ManualEntrySheet({ isOpen, onClose, onScan, gateId, workflowType = "hostel" }: ManualEntrySheetProps) {
   const [rollInput, setRollInput] = useState("");
+  const [reasonCode, setReasonCode] = useState("");
+  const [reasonLabel, setReasonLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(() => {
@@ -32,9 +38,12 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId }: ManualEntr
     }
 
     setError(null);
-    onScan(normalized);
+    // O15: pass the structured reason code when one is selected.
+    onScan(normalized, reasonCode || undefined);
     setRollInput("");
-  }, [rollInput, onScan]);
+    setReasonCode("");
+    setReasonLabel("");
+  }, [rollInput, reasonCode, onScan]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -121,6 +130,21 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId }: ManualEntr
                   {error}
                 </p>
               )}
+
+              {/* O15: structured reason — replaces the free-text input */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <ListChecks className="h-3.5 w-3.5 text-[var(--text-muted)]" aria-hidden />
+                  <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                    Entry reason <span className="normal-case text-[var(--text-muted)]/60">(optional)</span>
+                  </label>
+                </div>
+                <ReasonSelect
+                  workflowType={workflowType}
+                  value={reasonCode}
+                  onChange={(code, label) => { setReasonCode(code); setReasonLabel(label); }}
+                />
+              </div>
 
               <p className="text-xs text-[var(--text-muted)]">
                 Type &gt; then roll number, or paste directly. Press Enter to submit.

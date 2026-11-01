@@ -37,15 +37,18 @@ export function useOperatorShiftClock(): OperatorShift {
     };
 
     const load = () => {
-      fetch("/api/operator/shift", {
+      fetch("/api/operator/last-scan", {
         cache: "no-store",
         headers: getAuthHeaders(),
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((json) => {
           if (cancelled) return;
-          const firstScan = json?.data?.firstScanAt ?? json?.firstScanAt ?? null;
-          derive(firstScan);
+          // Shift derives from the FIRST scan today: last-scan of the new day
+          // (no earlier scan returned) is that first scan; a mid-day first scan
+          // is the start of the window we derive the 8h from.
+          const row = json?.data ?? null;
+          derive(typeof row?.at === "string" ? row.at : null);
         })
         .catch(() => {
           if (!cancelled) derive(null);

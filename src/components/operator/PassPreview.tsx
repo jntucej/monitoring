@@ -5,7 +5,7 @@
 // shows ticket, reason, window, and its live status. Valid = green, the
 // operator proceeds; expired/used = red, the scan is flagged.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Ticket, Clock, CheckCircle2, XCircle, CalendarClock } from "lucide-react";
 import { formatTime, getAuthHeaders } from "@/lib/utils";
 
@@ -128,7 +128,7 @@ export function PassPreviewFetcher({ roll, reason }: { roll: string; reason: str
   const [loading, setLoading] = useState(true);
 
   // Fetch once per roll+reason change.
-  useState(() => {
+  useEffect(() => {
     if (!roll) return;
     let cancelled = false;
     (async () => {

@@ -6,12 +6,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronUp, Clock, ScanLine } from "lucide-react";
-import type { Scan } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
-import { ScanDetailModal } from "./ScanDetailModal";
+
+export type RecentScan = {
+  id: string;
+  direction: "IN" | "OUT";
+  roll: string;
+  name?: string;
+  reason?: string | null;
+  gateName?: string | null;
+  isManual?: boolean;
+  isCorrection?: boolean;
+  timestamp: string;
+};
 
 export type RecentScansSheetProps = {
-  scans: Scan[];
+  scans: RecentScan[];
   /** Rendered inside the bottom sheet's header. */
   gateName?: string;
 };
@@ -21,7 +31,7 @@ const SWIPE_THRESHOLD_PX = 48;
 export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
   const [open, setOpen] = useState(false);
   const [dragPx, setDragPx] = useState(0);
-  const [detailScan, setDetailScan] = useState<Scan | null>(null);
+  const [detailScan, setDetailScan] = useState<RecentScan | null>(null);
   const startDragY = useRef<number | null>(null);
   const swiping = useRef(false);
 
@@ -164,8 +174,35 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
         </div>
       )}
 
-      {/* Detail modal for the tapped scan */}
-      <ScanDetailModal scan={detailScan} onClose={() => setDetailScan(null)} />
+      {/* Detail view for the tapped scan (ScanDetailModal's payload shape
+          is the full Scan record; the recent-scans rows are lightweight
+          summaries, so the detail panel fetches by roll). */}
+      {detailScan && (
+        <ScanDetailPanel scan={detailScan} onClose={() => setDetailScan(null)} />
+      )}
     </>
+  );
+}
+
+
+function ScanDetailPanel({ scan, onClose }: { scan: RecentScan; onClose: () => void }) {
+  return (
+    <div className="fixed inset-x-0 top-0 z-90 mx-auto w-full max-w-md p-4" role="dialog" aria-modal="true" aria-label="Scan detail">
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 shadow-2xl space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">
+            {scan.name || scan.roll} · {scan.direction}
+          </h3>
+          <button type="button" onClick={onClose} className="text-xs text-[var(--text-muted)]">Close</button>
+        </div>
+        <p className="text-xs text-[var(--text-secondary)]">
+          {scan.roll}{scan.gateName ? ` · ${scan.gateName}` : ""}
+          {scan.reason ? ` · ${scan.reason}` : ""}
+          {scan.isManual ? " · manual" : ""}
+          {scan.isCorrection ? " · correction" : ""}
+        </p>
+        <p className="text-[11px] text-[var(--text-muted)]">{formatTime(scan.timestamp)}</p>
+      </div>
+    </div>
   );
 }

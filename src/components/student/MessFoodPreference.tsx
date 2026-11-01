@@ -19,6 +19,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { friendlyApiError } from "@/lib/student-utils";
+import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
@@ -88,24 +89,17 @@ function formatCountdown(ms: number): string {
 /* ------------------------------------------------------------------ */
 
 function useAuthUser() {
-  const [user, setUser] = useState<{ hostelBlock?: string; uniqueId?: string } | null>(null);
-  useEffect(() => {
-    const read = () => {
-      try {
-        const raw = sessionStorage.getItem("gate-monitor-auth") ?? localStorage.getItem("gate-monitor-auth");
-        const parsed = raw ? JSON.parse(raw) : null;
-        const state = parsed?.state ?? {};
-        setUser({
-          hostelBlock: state.user?.hostelBlock ?? state.user?.studentDetails?.hostelBlock,
-          uniqueId: state.user?.uniqueId ?? state.user?.roll,
-        });
-      } catch {
-        setUser(null);
+  // S9 root fix: read the live zustand user (hydrated once at boot) instead
+  // of re-parsing the persisted store on every mount. The raw sessionStorage
+  // parse below was the defensive fallback that hid the hydration bug.
+  const authUser = useAuthStore((st) => st.user);
+  const hasHydrated = useHasHydrated();
+  const user = hasHydrated
+    ? {
+        hostelBlock: authUser?.studentDetails?.hostelBlock,
+        uniqueId: authUser?.uniqueId,
       }
-    };
-    read();
-    return () => undefined;
-  }, []);
+    : null;
   return user;
 }
 
