@@ -3,7 +3,7 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { PersonIdCard } from "@/components/person/PersonIdCard";
+import { DigitalIdCard } from "@/components/student/DigitalIdCard";
 import { ActivePasses } from "@/components/student/ActivePasses";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
@@ -55,7 +55,7 @@ function PersonDashboardInner() {
               <h2 className="text-lg font-bold text-[var(--text-primary)]">Digital Campus ID Card</h2>
             </div>
             <div className="max-w-md mx-auto sm:max-w-none">
-              <PersonIdCard />
+              <DigitalIdCard />
             </div>
           </div>
         );

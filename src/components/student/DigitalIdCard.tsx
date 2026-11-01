@@ -24,6 +24,30 @@ const api = useApi();
   const [downloading, setDownloading] = useState(false);
   const qrRef = useRef<HTMLDivElement | null>(null);
 
+  // P0: signed short-lived QR token (replaces the raw roll value above).
+  // /api/students/qr-token returns { data: { qrToken } }; the scanner's
+  // normalizeScannedPayload accepts the signed 3-segment form.
+  const [qrToken, setQrToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      fetch("/api/students/qr-token", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((json) => {
+          if (!cancelled && json?.data?.qrToken) setQrToken(json.data.qrToken);
+        })
+        .catch(() => {});
+    };
+    load();
+    // 15-min token TTL; refresh at 14 min.
+    const id = setInterval(load, 14 * 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
   // Mess token for today's mess code
   const [messToken, setMessToken] = useState<MessToken | null>(null);
   const [messError, setMessError] = useState<string | null>(null);
@@ -184,20 +208,26 @@ const api = useApi();
         </div>
       </div>
 
-      {/* Static QR Code — value is student's uniqueId */}
+      {/* Signed QR Code — short-lived token, not the raw roll */}
       <div ref={qrRef} className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
-        <QRCode
-          value={student.uniqueId || student.roll || ""}
-          size={140}
-          style={{ width: "100%", maxWidth: 140, height: "auto" }}
-        />
+        {qrToken ? (
+          <QRCode
+            value={qrToken}
+            size={140}
+            style={{ width: "100%", maxWidth: 140, height: "auto" }}
+          />
+        ) : (
+          <div className="h-[140px] w-[140px] flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+          </div>
+        )}
         <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-[var(--text-muted)] font-mono flex items-center gap-1 sm:gap-1.5 bg-[var(--bg-elevated)] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-[var(--border)]">
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500" />
           Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
-          disabled={downloading}
+          disabled={downloading || !qrToken}
           className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-white text-[11px] font-bold hover:bg-[var(--bg-elevated)] disabled:opacity-50 transition"
         >
           <Download className="w-3.5 h-3.5" />
@@ -206,7 +236,7 @@ const api = useApi();
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-1">
         <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
-        Static Gate Verification Token
+        Signed token — refreshes automatically
       </p>
 
       {/* Today's Mess Code */}
