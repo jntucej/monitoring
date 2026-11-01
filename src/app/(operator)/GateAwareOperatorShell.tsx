@@ -20,9 +20,14 @@ import { OperatorShell } from "./OperatorShell";
 export function GateAwareOperatorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // The desk (/gate/*) renders its own chrome (scanner, picker, banners);
+  // AuthGuard enforces the role so an unauthenticated visit bounces to
+  // /login?role=operator.
   if (pathname?.startsWith("/gate/")) {
-    return <AuthGuard allowedRoles={["operator"] as const}>{children}</AuthGuard>;
+    return <AuthGuard allowedRoles={["operator", "worker"] as const}>{children}</AuthGuard>;
   }
 
+  // /operator/* and /worker get the full OperatorShell (drawer, rail,
+  // floating buttons, gate picker for unassigned operators).
   return <OperatorShell>{children}</OperatorShell>;
 }

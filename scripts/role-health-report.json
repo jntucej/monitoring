@@ -1,0 +1,3458 @@
+[
+  {
+    "role": "admin",
+    "leaf": "/admin",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/alerts",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/alumni",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/advanced",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/occupancy",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/predictive",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/sustainability",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/traffic",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/analytics/users",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/announcements",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/anti-ragging-config",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/attendance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/attendance/bulk-import",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/audit-logs",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/classes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/complaints/categories",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/complaints/chains",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/dashboard",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/departments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/events",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/faculty",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/faculty-assignments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gate-device-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gates",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gates/schedule",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/health",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/institutional-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/kb",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/lockdown",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/analytics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/days",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/items",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/today",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/notification-settings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/occupancy",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/overview",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/parents",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/passes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/permission-policies",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/appearance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/personal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/security",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/roles",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sessions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/settings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sms/compose",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sms/queue",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/staff",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/student-representatives",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/students",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/students/import",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/subjects",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/support",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sustainability",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/users",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/visitors",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/workers",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/workflow-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker/buildings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker/complaints",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker/maintenance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "caretaker",
+    "leaf": "/caretaker/workers",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/complaints",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/curfew",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/curfew-oversight",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/daily-overview",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/decision-history",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/delegated-approvals",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/gate-movement",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/incident-reporting",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/leave-requests",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/outpass-queue",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "deputy_warden",
+    "leaf": "/deputy-warden/shift-handover",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "emo",
+    "leaf": "/emo",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "emo",
+    "leaf": "/emo",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "emo",
+    "leaf": "/emo/complaints",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/calendar",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/discrepancies",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/docs",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/oie-approval-requests",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/oie-handoff",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/pass-queue",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/records",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_branch",
+    "leaf": "/exam-branch/verification",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent/access",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent/incidents",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent/reports",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent/schedule",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/attendance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/class",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/correction-requests",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/my-classes",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/notifications",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/permissions",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/reports",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/request-history",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/student-directory",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/subject",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/subject/attendance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "faculty",
+    "leaf": "/faculty/subject/classes",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/child-attendance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/child-requests",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/child-status",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/contact-info",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/movement-info",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/notifications",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/pass-leave-submission",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/request-status",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "guardian",
+    "leaf": "/guardian/visit-schedule",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/approvals",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/approvals/escalated",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/approvals/pending",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/classes",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/faculty",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/faculty/attendance",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/faculty/directory",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/profile",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/reports",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hod",
+    "leaf": "/hod/students",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/allocation",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/complaints",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/housekeeping-tasks",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/maintenance",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/residents",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/resource-management",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/rooms",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "hostel_manager",
+    "leaf": "/hostel-manager/tickets",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/consumption-reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/daily-meal-counts",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/default",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/inventory-stock",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/meal-attendance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/menu-management",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/mess-issues",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/operational-requests",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/reviews",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/scan",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/special-events",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "mess_incharge",
+    "leaf": "/mess/verify-token",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/access-exceptions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/candidate-attendance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/decision-history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/exam-branch-coordination",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/examination-day-access",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/examination-reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/queue",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/queue/escalated",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/queue/history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/queue/pending",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "oie",
+    "leaf": "/oie/records",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/announcements",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/claim",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/exceptions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/kiosk-pin",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/lookup",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/manual-entry",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/mode",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/notifications",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/pass-verification",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/password",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/stats",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "operator",
+    "leaf": "/operator/transactions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/child",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/child-attendance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/child-movement",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/child-requests",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/contact-info",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/pass-leave-submission",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/passes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/parent/settings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/approvals",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/approvals/delegated",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/approvals/escalated",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/approvals/overdue",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/approvals/pending",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/examinations",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/governance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/governance/analytics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/governance/audit",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/governance/delegations",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/governance/reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/operations",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/operations/gates",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/operations/hostel",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/operations/incidents",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/people",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/people/attendance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/people/departments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "principal",
+    "leaf": "/principal/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/assigned-tasks",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/duties",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/history",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/leaves",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/my-day",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/my-profile",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/notifications",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/request-status",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "staff",
+    "leaf": "/staff/requests",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/anti-ragging",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/attendance-calendar",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/complaints",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/complaints/new",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/gate-pass",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/id",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/leave-requests",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/mess",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/mess-bill",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/mess/reviews",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/mess/special",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/mess/token",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/notifications",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/notifications/alerts",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/notifications/announcements",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/pass-application",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/passes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/permissions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/permissions/new",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/profile-security",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/profile/privacy",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "student",
+    "leaf": "/student/request-tracking",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "subject_faculty",
+    "leaf": "/faculty/subject",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "subject_faculty",
+    "leaf": "/faculty/subject",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "subject_faculty",
+    "leaf": "/faculty/subject/attendance",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "subject_faculty",
+    "leaf": "/faculty/subject/classes",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/approvals",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/gates",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/gates/activity",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/gates/live",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/gates/wall",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/response",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/response/escalations",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/response/exceptions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/response/incidents",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/shift",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/shift/handover",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/shift/history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/shift/live",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/team",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/team/curfew",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/team/shifts",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "supervisor",
+    "leaf": "/supervisor/team/workers",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/access",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/access-keys",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/achievements",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alerts",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alerts/rules",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alumni",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alumni/auto",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alumni/deprovisioned",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/alumni/graduated",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/analytics",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/announcements",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/application-health",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/attendance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/audit",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/backup",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/classes",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/communities",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/compliance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/consent",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/cron",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/data",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/database-health",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/departments",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/deployments",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/devices",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/docker-services",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/events",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/exam-day",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/exit-reasons",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/faculty-assignments",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/feature-flags",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/gate-schedule",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/gates",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/health",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/hostel-tickets",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/infrastructure",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/integrations",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/jobs",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/maintenance",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/mess",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/mess/analytics",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/mess/days",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/mess/items",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/mess/today",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/navigation",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/notifications",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/parents",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/people",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/profile",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/promotions",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/reasons",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/redis-worker",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/reports",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/retention-policies",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/roles",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/runbooks",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/safety",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/scheduled-jobs",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/scheduling",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/security",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/sessions",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/sms/templates",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/staff",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/students",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/subjects",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/support",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/system",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/webhooks",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/academics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/academics/departments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/academics/exceptions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/analytics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/approvals",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/approvals/all",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/approvals/escalated",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/approvals/pending",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/attendance-exceptions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/decision-history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/delegated-responsibilities",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/department-performance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/escalated-requests",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/examination-coordination",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/examinations",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/history/30-days",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/history/7-days",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/history/90-days",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/hostel-security-summaries",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/pending-approvals",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "vice_principal",
+    "leaf": "/vice-principal/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/approval-status",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/checkin-out",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/history",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/host-info",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/registration",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/request",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "visitor",
+    "leaf": "/visitor/visit-details",
+    "status": "broken",
+    "errors": [
+      "no-creds"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "worker",
+    "leaf": "/worker",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "worker",
+    "leaf": "/worker",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "worker",
+    "leaf": "/worker/history",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "worker",
+    "leaf": "/worker/shifts",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "worker",
+    "leaf": "/worker/work-orders",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  }
+]

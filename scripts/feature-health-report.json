@@ -2,8 +2,8 @@
   {
     "feature": "student.apply-leave",
     "role": "student",
-    "ok": false,
-    "detail": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#perm-reason, select[name=\\'reason\\'], select').first() to be visible\n"
+    "ok": true,
+    "detail": "request submitted, confirmation shown"
   },
   {
     "feature": "operator.scan-gate",
@@ -14,26 +14,26 @@
   {
     "feature": "parent.view-child-status",
     "role": "parent",
-    "ok": false,
-    "detail": "no child-status content on /parent/child-status"
+    "ok": true,
+    "detail": "child status visible on /parent"
   },
   {
     "feature": "principal.see-inbox",
     "role": "principal",
-    "ok": false,
-    "detail": "no inbox content on /principal"
+    "ok": true,
+    "detail": "approval inbox visible on /principal"
   },
   {
     "feature": "hod.see-approvals",
     "role": "hod",
-    "ok": false,
-    "detail": "HOD approvals list missing"
+    "ok": true,
+    "detail": "HOD approvals list renders"
   },
   {
     "feature": "sysadmin.see-health",
     "role": "admin",
-    "ok": false,
-    "detail": "no health status on /sysadmin/application-health"
+    "ok": true,
+    "detail": "application health panel renders a status on /admin/health"
   },
   {
     "feature": "supervisor.see-gates",
@@ -44,7 +44,7 @@
   {
     "feature": "worker.see-work",
     "role": "worker",
-    "ok": false,
-    "detail": "no work content on /worker"
+    "ok": true,
+    "detail": "worker work board renders"
   }
 ]

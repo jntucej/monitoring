@@ -8,7 +8,6 @@ import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
-import { useUIStore } from "@/stores/uiStore";
 import { validateRollNumber } from "@/lib/rollNumber";
 import { getClientLocation, getClientSysTag } from "@/lib/geo";
 import { recommend, type Recommendation } from "@/lib/operator-recommend";
@@ -780,11 +779,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
     }
     const user = useAuthStore.getState().user;
     if (user?.role === "operator" && user.gateId && user.gateId !== gateId) {
-      useUIStore.getState().addToast({
-        variant: "error",
-        title: "Gate Restricted",
-        message: "You are not assigned to this gate.",
-      });
+      // Silent snap-back: the operator is viewing a gate they don't own.
+      // Re-anchor to their assigned gate without a toast — toasts stack
+      // on top of the camera surface and the desk already shows a
+      // per-gate header. The URL deep-link guard (gate page) will
+      // router.replace to /gate/<assigned> on the next render pass.
       set({
         gate: { id: user.gateId, name: user.gateId, location: "Assigned Gate", type: "ENTRY_EXIT" as const, isActive: true },
         gateId: user.gateId,

@@ -62,7 +62,12 @@ function OperatorPageInner() {
   const gateId = isSpecialPath
     ? (user?.gateId || "")
     : (gateIdParam || user?.gateId || "");
-  const needsAssignment = gateId === "";
+  // An unassigned operator (no gate_id in the auth store) always shows the
+  // picker overlay — even if the URL path carries a gate param. This
+  // prevents the "Gate Restricted / not assigned" toast + frozen desk
+  // when a stale /gate/<uuid> URL outlives a gate reassignment.
+  const isUnassigned = !user?.gateId;
+  const needsAssignment = gateId === "" || isUnassigned;
 
   const { addToast } = useToast();
 
@@ -499,10 +504,13 @@ function OperatorPageInner() {
       {/* Person detail sheet, opened from the transaction log */}
       <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
 
-      {/* ── The camera IS the page: full-bleed, z-50, auto-detecting ── */}
+      {/* ── The camera IS the page: full-bleed, z-50, auto-detecting ──
+          Unassigned operators see the picker OVER the camera layer — the
+          camera keeps warm underneath so the desk activates instantly
+          once a gate is claimed. */}
       <Scanner
         isOpen
-        active={scannerActive}
+        active={scannerActive && !needsAssignment}
         onClose={() => {}}
         onScan={handleQRScanned}
         onManualEntryClick={() => { primeAudioOnGesture(); setManualOpen(true); }}
