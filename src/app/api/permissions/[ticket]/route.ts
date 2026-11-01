@@ -22,7 +22,7 @@ import {
 } from "@/lib/permission-forward";
 import { addAudit, addNotification, getStudentGuardianLink } from "@/lib/db";
 import { enqueueTemplatedSms } from "@/lib/sms-templates";
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 import type { WorkflowType, Role } from "@/lib/types";
 
@@ -145,12 +145,40 @@ async function handlePatch(
     updates.routed_to_role = nextStage;
   }
 
-  const { error: updErr } = await supabase
-    .from("permissions")
-    .update(updates)
-    .eq("id", row.id);
+  let updErr: string | null = null;
+  try {
+    const res = await withTransaction(
+      async (tx) =>
+        tx.query(
+          `UPDATE public.permissions
+            SET status = $1,
+                current_stage = $2,
+                stage_history = $3::jsonb,
+                updated_at = $4,
+                routed_to_role = COALESCE($5, routed_to_role)
+          WHERE id = $6::uuid
+          RETURNING id`,
+          [
+            newStatus,
+            newCurrentStage,
+            JSON.stringify((updates as Record<string, unknown>).stage_history),
+            now,
+            (action === "APPROVE" && nextStage) ? nextStage : null,
+            row.id,
+          ],
+        ),
+      { currentUserId: row.requester_user_id ?? auth.userId, currentRole: auth.role }
+    );
+    if (res.rowCount === 0) {
+      updErr = "RLS policy did not permit the status update (0 rows affected)";
+    }
+  } catch (e: any) {
+    updErr = e?.message ?? "unknown DB error";
+    if (e?.code === "42501") console.error("[permissions PATCH] RLS blocked update", e.message);
+    else console.error("[permissions PATCH] DB error", e.message);
+  }
 
-  if (updErr) return fail("DB_ERROR", updErr.message, 500);
+  if (updErr) return fail("DB_ERROR", updErr, 500);
 
   await addAudit({
     action: action === "APPROVE" ? "PERMISSION_REQUEST_APPROVED" : "PERMISSION_REQUEST_REJECTED",

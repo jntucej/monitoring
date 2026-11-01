@@ -3,7 +3,7 @@
  *
  * Orchestrates hostel-permission forwards and step-up authentication.
  */
-import { query } from "@/lib/postgres";
+import { query, withTransaction } from "@/lib/postgres";
 import { verifyPassword, hashPassword } from "@/lib/auth-token";
 import { forwardTicket, type ForwardTicketResult } from "@/lib/permission-workflow-pure";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -219,18 +219,34 @@ export async function applyEscalateUp(args: {
     { from: args.ticket.current_stage, to: args.nextStage }
   );
 
-  const { error } = await supabase
-    .from("permissions")
-    .update({
-      current_stage: args.nextStage,
-      routed_to_role: args.nextStage,
-      stage_history: history,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", args.ticket.id);
+  let dbError: string | null = null;
+  try {
+    const res = await withTransaction(
+      async (tx) =>
+        tx.query(
+          `UPDATE public.permissions
+            SET current_stage = $1, routed_to_role = $1, stage_history = $2::jsonb, updated_at = now()
+          WHERE id = $3::uuid
+          RETURNING id`,
+          [args.nextStage, JSON.stringify(history), args.ticket.id]
+        ),
+      { currentUserId: args.ticket.requester_user_id, currentRole: args.actor.role }
+    );
+    if (res.rowCount === 0) {
+      dbError = "RLS policy did not permit the stage update (0 rows affected)";
+      console.error("[permissions escalate] RLS no-op update", dbError);
+    }
+  } catch (e: any) {
+    dbError = e?.message ?? "unknown error";
+    if (e?.code === "42501") {
+      console.error("[permissions escalate] RLS blocked update", e.message);
+    } else {
+      console.error("[permissions escalate] DB error", e.message);
+    }
+  }
 
-  if (error) {
-    return { ok: false, response: NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 }) };
+  if (dbError) {
+    return { ok: false, response: NextResponse.json({ success: false, error: { code: "DB_ERROR", message: dbError } }, { status: 500 }) };
   }
 
   await addAudit({
