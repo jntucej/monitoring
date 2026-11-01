@@ -1,7 +1,8 @@
 "use client";
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { ThumbsUp, ThumbsDown, AlertCircle, RotateCcw } from "lucide-react";
+import { ThumbsUp, ThumbsDown, AlertCircle, RotateCcw, Copy, RefreshCw } from "lucide-react";
+import { MarkdownLite } from "./MarkdownLite";
 import type { BotMsg } from "./store";
 import { playAudioFeedback } from "@/lib/sound";
 
@@ -59,14 +60,20 @@ export const BotBubble = memo(function BotBubble({
           </div>
         )}
 
-        <div className="whitespace-pre-wrap break-words">
-          {m.content || (isStreaming && (
+        <div className="break-words">
+          {m.content ? (
+            isUser ? (
+              <div className="whitespace-pre-wrap">{m.content}</div>
+            ) : (
+              <MarkdownLite content={m.content} />
+            )
+          ) : isStreaming ? (
             <span className="inline-flex items-center gap-1 py-0.5">
               <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "0ms" }} />
               <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "300ms" }} />
             </span>
-          ))}
+          ) : null}
         </div>
 
         {!isUser && cites.length > 0 && !isStreaming && (
@@ -90,8 +97,30 @@ export const BotBubble = memo(function BotBubble({
               >
                 <RotateCcw className="h-3 w-3" /> {retryLabel}
               </button>
-            ) : !thanked ? (
-              canGiveFeedback ? (
+            ) : (
+              <>
+                {/* Regenerate — same question, new answer (not a new user
+                    message). Distinct from retry, which re-sends the
+                    question after an error. */}
+                <button
+                  onClick={() => onRetry(m.__retryOf ?? "")}
+                  aria-label="Regenerate response"
+                  title="Regenerate"
+                  className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+                {/* Copy — the most-requested assistant feature: quoting an
+                    answer into a ticket or email. */}
+                <button
+                  onClick={() => void navigator.clipboard.writeText(m.content)}
+                  aria-label="Copy response"
+                  title="Copy"
+                  className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+                {canGiveFeedback && (
                 <>
                 <button
                     aria-label="Good response"
@@ -110,19 +139,20 @@ export const BotBubble = memo(function BotBubble({
                     <ThumbsDown aria-hidden="true" className="h-3.5 w-3.5" />
                   </button>
                 </>
-              ) : (
-                <span className="text-[10px] text-[var(--text-muted)] opacity-60">
-                  {m.status === "streaming" ? "Still generating…" : "Offline"}
-                </span>
-              )
-            ) : (
-              <motion.span
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-[10px] text-[var(--text-muted)]"
-              >
-                {thanksLabel}
-              </motion.span>
+                )}
+                {thanked && (
+                  <motion.span
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-[10px] text-[var(--text-muted)]"
+                  >
+                    {thanksLabel}
+                  </motion.span>
+                )}
+              </>
+            )}
+            {!thanked && !isError && !canGiveFeedback && (
+              <span className="text-[10px] text-[var(--text-muted)] opacity-60">Offline</span>
             )}
           </div>
         )}

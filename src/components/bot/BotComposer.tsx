@@ -1,7 +1,7 @@
 "use client";
-import { forwardRef, memo, useEffect, useRef } from "react";
+import { forwardRef, memo, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Mic, MicOff, Square } from "lucide-react";
+import { Send, Mic, MicOff, Square, Loader2 } from "lucide-react";
 import type { BotStrings } from "@/lib/i18n/bot-strings";
 
 interface Props {
@@ -14,13 +14,25 @@ interface Props {
   streaming: boolean;
   micSupported: boolean;
   onToggleMic: () => void;
+  /** Seconds remaining before the mic hard-caps its recording (null = no countdown showing). */
+  micRemainingSeconds?: number | null;
 }
 
 export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function BotComposer(
-  { t, value, onChange, onSend, onStop, listening, streaming, micSupported, onToggleMic },
+  { t, value, onChange, onSend, onStop, listening, streaming, micSupported, onToggleMic, micRemainingSeconds },
   ref,
 ) {
   const localRef = useRef<HTMLTextAreaElement>(null);
+  // Elapsed-seconds counter for the "Generating…" indicator — so the
+  // user knows the stream is still alive when the LLM is slow, and
+  // can hit Stop (kept right beside the timer) without guessing.
+  const [streamingSeconds, setStreamingSeconds] = useState(0);
+  useEffect(() => {
+    if (!streaming) { setStreamingSeconds(0); return; }
+    const t0 = Date.now();
+    const iv = setInterval(() => setStreamingSeconds(Math.floor((Date.now() - t0) / 1000)), 1000);
+    return () => clearInterval(iv);
+  }, [streaming]);
   useEffect(() => {
     const el = (ref as any)?.current ?? localRef.current;
     if (!el) return;
@@ -69,6 +81,14 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
             transition={{ duration: 1.1, repeat: Infinity }}
           />
         )}
+        {listening && micRemainingSeconds != null && (
+          <span
+            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-semibold flex items-center justify-center leading-none"
+            aria-label={`${micRemainingSeconds} seconds remaining`}
+          >
+            {micRemainingSeconds}
+          </span>
+        )}
       </button>
 
       <textarea
@@ -90,15 +110,21 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
       />
 
       {streaming ? (
-        <button
-          type="button"
-          onClick={onStop}
-          aria-label={t.stop}
-          className="h-10 px-3 rounded-lg bg-[var(--bg-elevated)] text-xs text-[var(--text-secondary)]
-                     active:scale-95 transition inline-flex items-center gap-1.5"
-        >
-          <Square className="h-3 w-3 fill-current" /> {t.stop}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)]" role="status" aria-live="polite">
+            <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+            <span className="whitespace-nowrap">Generating… {streamingSeconds}s</span>
+          </div>
+          <button
+            type="button"
+            onClick={onStop}
+            aria-label={t.stop}
+            className="h-8 px-2.5 rounded-lg bg-[var(--bg-elevated)] text-[11px] text-[var(--text-secondary)]
+                       active:scale-95 transition inline-flex items-center gap-1"
+          >
+            <Square className="h-3 w-3 fill-current" /> {t.stop}
+          </button>
+        </div>
       ) : (
         <button
           type="submit"

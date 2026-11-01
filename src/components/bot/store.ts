@@ -52,6 +52,21 @@ function writePrefs(lang: BotLang, voiceReplies: boolean) {
   }
 }
 
+/**
+ * Clear the per-browser bot prefs (lang, voiceReplies) so a shared
+ * workstation's next user doesn't inherit the previous user's language or
+ * voice-reply choice. Called from authStore.logout() — the server-side
+ * bot_lang / bot_voice_replies columns are per-user and untouched.
+ */
+export function clearBotPrefs() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LS_KEY);
+  } catch {
+    /* private mode — nothing to clear */
+  }
+}
+
 const initialPrefs = typeof window !== "undefined" ? readPrefs() : {};
 
 interface BotStore {
@@ -63,6 +78,16 @@ interface BotStore {
   streaming: boolean;
   error: string | null;
   voiceMode: boolean;
+  // Set true the first time the user explicitly confirms voice mode
+  // (or dismisses the warning). Subsequent long-presses skip the chip.
+  voiceModeConfirmed: boolean;
+  setVoiceModeConfirmed: (v: boolean) => void;
+  // Transient: set when a long-press on an unconfirmed voice-mode asks
+  // the panel to surface the one-time mic confirmation chip. Consumed
+  // (and cleared) by the chip itself in BotPanel.
+  voicePrompt: boolean;
+  setVoicePrompt: (v: boolean) => void;
+  clearVoicePrompt: () => void;
   requestVoiceMode: () => void;
   clearVoiceMode: () => void;
 
@@ -94,6 +119,11 @@ export const useBotStore = create<BotStore>((set) => ({
   streaming: false,
   error: null,
   voiceMode: false,
+  voiceModeConfirmed: false,
+  setVoiceModeConfirmed: (v) => set({ voiceModeConfirmed: v }),
+  voicePrompt: false,
+  setVoicePrompt: (v) => set({ voicePrompt: v }),
+  clearVoicePrompt: () => set({ voicePrompt: false }),
   requestVoiceMode: () => set({ open: true, voiceMode: true, voiceReplies: true }),
   clearVoiceMode: () => set({ voiceMode: false }),
 

@@ -32,7 +32,8 @@ export function BotPanel() {
   const vv = useVisualViewport();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastSpokenRef = useRef<string | null>(null);
-  const lastUserQuestionRef = useRef<string>("");
+  const lastUserQuestionRef = useRef("");
+  const confirmPendingRef = useRef(false);
 
   const open = useBotStore((s) => s.open);
   const setOpen = useBotStore((s) => s.setOpen);
@@ -42,6 +43,11 @@ export function BotPanel() {
   const setVoiceReplies = useBotStore((s) => s.setVoiceReplies);
   const voiceMode = useBotStore((s) => s.voiceMode);
   const clearVoiceMode = useBotStore((s) => s.clearVoiceMode);
+  const voicePrompt = useBotStore((s) => s.voicePrompt);
+  const setVoicePrompt = useBotStore((s) => s.setVoicePrompt);
+  const voiceModeConfirmed = useBotStore((s) => s.voiceModeConfirmed);
+  const setVoiceModeConfirmed = useBotStore((s) => s.setVoiceModeConfirmed);
+  const requestVoiceMode = useBotStore((s) => s.requestVoiceMode);
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
   const error = useBotStore((s) => s.error);
@@ -164,6 +170,13 @@ export function BotPanel() {
     setInput("");
   };
 
+  // Quick-chip / suggestion behavior: SEND IMMEDIATELY (single-tap), not
+  // prefill. The prompt is submitted straight to send() — the user's
+  // question appears in the thread and the answer streams in, so a tap is
+  // one round-trip, not two. Documenting this so it's a conscious choice
+  // (prefill + edit would feel faster for power users, but the welcome
+  // screen's job is "one tap to an answer," which is the right default for
+  // a first-open assistant surface).
   const handleChip = (prompt: string) => {
     if (voiceMode) clearVoiceMode();
     playAudioFeedback("success");
@@ -324,7 +337,21 @@ export function BotPanel() {
         voiceReplies={voiceReplies}
         ttsSupported={tts.supported}
         onToggleVoiceReplies={handleToggleVoiceReplies}
-        onNewChat={() => { resetChat(); tts.stop(); }}
+        onNewChat={() => {
+          // Two-tap destructive action: first tap surfaces a confirm row,
+          // second tap (within 4s) actually clears. A single accidental
+          // tap no longer burns the whole thread.
+          const st = useBotStore.getState();
+          if (st.messages.length === 0) return;
+          if (!confirmPendingRef.current) {
+            confirmPendingRef.current = true;
+            window.setTimeout(() => { confirmPendingRef.current = false; }, 4000);
+            return;
+          }
+          confirmPendingRef.current = false;
+          resetChat();
+          tts.stop();
+        }}
         onClose={handleClose}
       />
 
@@ -334,15 +361,53 @@ export function BotPanel() {
             ? "Microphone permission denied. Enable it in your browser settings to use voice."
             : error?.startsWith("HTTP 401")
               ? "Session expired. Please sign in again."
-              : error?.startsWith("HTTP")
-                ? t.errorNetwork
-                : t.errorGeneric}
+              : /RAG_UNAVAILABLE/.test(error ?? "")
+                ? t.errorRagUnavailable
+                : /RATE_LIMITED|HTTP 429/.test(error ?? "")
+                  ? t.errorRateLimit
+                  : error?.startsWith("HTTP")
+                    ? t.errorNetwork
+                    : t.errorGeneric}
         </div>
       )}
 
       {!stt.supported && isMobile && (
         <div className="relative z-10 px-3 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border-b border-[var(--border)]">
           {t.micUnsupported}
+        </div>
+      )}
+
+      {voicePrompt && !voiceModeConfirmed && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="relative z-10 mx-3 mb-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-[11px] text-[var(--text-secondary)]"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span>Voice mode uses your microphone. Enable it?</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  requestVoiceMode();
+                  setVoiceModeConfirmed(true);
+                  setVoicePrompt(false);
+                }}
+                className="text-emerald-500 hover:underline underline-offset-2"
+              >
+                Enable
+              </button>
+              <button
+                onClick={() => {
+                  setVoiceModeConfirmed(true); // remember: don't ask again
+                  setVoicePrompt(false);
+                }}
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                aria-label="Not now"
+              >
+                Not now
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -366,6 +431,7 @@ export function BotPanel() {
         streaming={streaming}
         micSupported={stt.supported}
         onToggleMic={handleToggleMic}
+        micRemainingSeconds={stt.remainingSeconds}
       />
     </motion.div>
   );

@@ -63,7 +63,16 @@ export function FloatingBot() {
     pressTimer.current = setTimeout(() => {
       didLongPress.current = true;
       playAudioFeedback("success");
-      requestVoiceMode();           // opens panel AND auto-activates mic + TTS
+      // First time: open the panel normally and let it surface a one-time
+      // "Voice mode — enable microphone?" confirmation before touching the
+      // mic. After that (voiceModeConfirmed), go straight into voice mode.
+      const st = useBotStore.getState();
+      if (st.voiceModeConfirmed) {
+        requestVoiceMode();
+      } else {
+        st.setOpen(true);
+        st.setVoicePrompt(true);
+      }
       clearPress();
       dragRef.current = null;
     }, LONG_PRESS_MS);

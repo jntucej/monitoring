@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useCallback, useSyncExternalStore } from "react";
 import type { User, Role } from "@/lib/types";
+import { clearBotPrefs } from "@/components/bot/store";
 
 function toUser(raw: any): User {
   return {
@@ -122,6 +123,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
       logout: async () => {
         const token = get().token;
+        clearBotPrefs(); // per-browser bot prefs (lang/voiceReplies) must
+        // not bleed onto the next user of a shared workstation; server-side
+        // per-user bot_lang / bot_voice_replies columns are untouched.
         tokenStorage.clear();
         set({
           token: null,

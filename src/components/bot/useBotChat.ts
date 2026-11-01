@@ -93,8 +93,23 @@ export function useBotChat() {
       });
 
       if (!res.ok || !res.body) {
+        // Surface specific, actionable error codes (RAG_UNAVAILABLE →
+        // "KB is offline", 429 → "rate limited") instead of a generic
+        // "something went wrong" — the bot-strings banner in BotPanel
+        // matches on these.
         const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}${bodyText ? `: ${bodyText.slice(0, 120)}` : ""}`);
+        let code: string | null = null;
+        try {
+          const j = JSON.parse(bodyText || "{}");
+          if (j?.error?.code && typeof j.error.code === "string") code = j.error.code;
+        } catch { /* non-JSON body — fall through to status-based mapping */ }
+        if (!code) {
+          if (res.status === 429) code = "RATE_LIMITED";
+          else if (res.status === 503) code = "RAG_UNAVAILABLE";
+        }
+        const error = new Error(`HTTP ${res.status}${code ? ` [${code}]` : ""}${bodyText ? `: ${bodyText.slice(0, 120)}` : ""}`) as Error & { code?: string };
+        error.code = code ?? undefined;
+        throw error;
       }
 
       const reader = res.body.getReader();

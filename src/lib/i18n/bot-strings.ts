@@ -8,6 +8,7 @@ export interface BotStrings {
   voiceReplies: string; voiceOn: string; voiceOff: string;
   suggestions: string[]; quickChips: { label: string; prompt: string }[];
   feedbackThanks: string; errorGeneric: string; errorNetwork: string; retry: string;
+  errorRagUnavailable: string; errorRateLimit: string;
   citations: string; offline: string; keyboardHint: string;
 }
 
@@ -37,6 +38,8 @@ export const BOT_STRINGS: Record<BotLang, BotStrings> = {
     feedbackThanks: "Thanks — noted!",
     errorGeneric: "Something went wrong. Try again.",
     errorNetwork: "Network hiccup — check your connection and retry.",
+    errorRagUnavailable: "Knowledge base search is offline — try again in a few minutes.",
+    errorRateLimit: "Too many messages — wait 30 seconds.",
     retry: "Retry",
     citations: "Sources",
     offline: "You're offline",
@@ -65,9 +68,11 @@ export const BOT_STRINGS: Record<BotLang, BotStrings> = {
       { label: "🚨 అత్యవసరం",     prompt: "లాక్‌డౌన్ సమయంలో ఏమి జరుగుతుంది?" },
     ],
     feedbackThanks: "ధన్యవాదాలు!",
-    errorGeneric: "ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి.",
-    errorNetwork: "నెట్‌వర్క్ సమస్య — కనెక్షన్ తనిఖీ చేసి మళ్ళీ ప్రయత్నించండి.",
-    retry: "మళ్ళీ ప్రయత్నించండి",
+    errorGeneric: "ఏదో తప్పూ జరిగింది. మళ్లీ ప్రయత్నించండి.",
+    errorNetwork: "నెట్‌వర్క్ సమస్య — కనెక్షన్ తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+    errorRagUnavailable: "జ్ఞానాంశ పరిశోధన అధ్నియ్యదు — కొన్ని నిమిషాల్లో మళ్లీ ప్రయత్నించండి.",
+    errorRateLimit: "అధిక సందేశాలు — 30 సెకన్లు ఆపండి.",
+    retry: "మళ్లీ ప్రయత్నించండి",
     citations: "మూలాలు",
     offline: "మీరు ఆఫ్‌లైన్‌లో ఉన్నారు",
     keyboardHint: "పంపడానికి Enter · కొత్త లైన్‌కు Shift+Enter",
