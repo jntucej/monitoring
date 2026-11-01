@@ -1398,27 +1398,66 @@ export async function createUser(userData: {
     }
   }
 
-  const { data, error } = await db
-    .from('users')
-    .upsert({
-      id: userData.id,
-      unique_id: uniqueId,
-      handle,
-      name: userData.name,
-      role: userData.role,
-      email: userData.email || null,
-      phone: userData.phone || null,
-      gate_id: userData.gateId || null,
-      supervised_gates: userData.supervisedGates || null,
-      assigned_hostel: userData.assignedHostel || userData.hostelRoom || null,
-      department_id: userData.departmentId || null,
-      can_view_gender: userData.canViewGender || null,
-      status: userData.status || 'ACTIVE',
-      login_identifier: userData.loginIdentifier || uniqueId,
-      initial_pin_hash: userData.initialPinHash || null,
-    }, { onConflict: 'id' })
-    .select()
-    .single();
+  // The trg_sync_primary_role trigger on users upserts into user_roles,
+  // whose gate_app RLS policy requires app.current_role IN ('sysadmin','admin').
+  // Run the upsert on a raw pool client that first does SET ROLE gate_app
+  // + set_config so the trigger's INSERT passes RLS WITH CHECK.
+  const upsertSql = `
+    INSERT INTO users (
+      id, unique_id, handle, name, role, email, phone, gate_id,
+      supervised_gates, assigned_hostel, department_id, can_view_gender,
+      status, login_identifier, initial_pin_hash
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      unique_id        = EXCLUDED.unique_id,
+      handle           = COALESCE(users.handle, EXCLUDED.handle),
+      name             = EXCLUDED.name,
+      role             = EXCLUDED.role,
+      email            = EXCLUDED.email,
+      phone            = EXCLUDED.phone,
+      gate_id          = EXCLUDED.gate_id,
+      supervised_gates = EXCLUDED.supervised_gates,
+      assigned_hostel  = EXCLUDED.assigned_hostel,
+      department_id    = EXCLUDED.department_id,
+      can_view_gender  = EXCLUDED.can_view_gender,
+      status           = EXCLUDED.status,
+      login_identifier = EXCLUDED.login_identifier,
+      initial_pin_hash = COALESCE(users.initial_pin_hash, EXCLUDED.initial_pin_hash)
+    RETURNING id, unique_id, handle, name, role, email, phone, status,
+      login_identifier, created_at, updated_at, deleted_at
+  `;
+  const upsertParams = [
+    userData.id,
+    uniqueId,
+    handle,
+    userData.name,
+    userData.role,
+    userData.email || null,
+    userData.phone || null,
+    userData.gateId || null,
+    userData.supervisedGates || null,
+    userData.assignedHostel || userData.hostelRoom || null,
+    userData.departmentId || null,
+    userData.canViewGender || null,
+    userData.status || 'ACTIVE',
+    userData.loginIdentifier || uniqueId,
+    userData.initialPinHash || null,
+  ];
+  let data: any = null;
+  let error: any = null;
+  try {
+    data = await withTransaction(
+      async (tx) => {
+        const res = await tx.query(upsertSql, upsertParams);
+        return res.rows[0] || null;
+      },
+      { currentRole: 'sysadmin' }
+    );
+  } catch (e: any) {
+    error = { message: e.message, code: e.code };
+  }
 
   if (error) {
     console.error('Error creating user:', error);

@@ -63,11 +63,24 @@ export async function getPostgresPool(): Promise<Pool> {
 export async function poolQuery<T extends QueryResultRow = any>(
   text: string,
   params: any[] = [],
-  retries = 3
+  retries = 3,
+  options?: { currentRole?: string; currentUserId?: string }
 ): Promise<QueryResult<T>> {
   const pool = await getPostgresPool();
   try {
-    return await pool.query<T>(text, params);
+    const client = await pool.connect();
+    try {
+      if (options?.currentRole || options?.currentUserId) {
+        await client.query("SET ROLE gate_app");
+      }
+      const result = await client.query<T>(text, params);
+      return result;
+    } finally {
+      if (options?.currentRole || options?.currentUserId) {
+        try { await client.query("RESET ROLE"); } catch {}
+      }
+      client.release();
+    }
   } catch (err: any) {
     if (retries > 0 && (err.code === '40P01' || err.code === '40001')) {
       await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
@@ -122,6 +135,12 @@ export async function withTransaction<T>(
   const pool = await getPostgresPool();
   const client = await pool.connect();
   try {
+    // The pool connects as the DB superuser (postgres). RLS policies on
+    // user_roles are written FOR gate_app. Setting role = gate_app here
+    // activates the RLS context so set_config('app.current_role', ...) GUC
+    // checks pass. (SET ROLE reverts on session end, not on COMMIT — so we
+    // reset after each transaction.)
+    await client.query("SET ROLE gate_app");
     await client.query("BEGIN");
     // SET/SET LOCAL do not accept $n bind placeholders in PostgreSQL — the
     // command parser rejects them ("syntax error at or near \"$1\""). The
@@ -150,6 +169,7 @@ export async function withTransaction<T>(
     }
     throw err;
   } finally {
+    try { await client.query("RESET ROLE"); } catch {}
     client.release();
   }
 }
