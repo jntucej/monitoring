@@ -39,7 +39,7 @@ interface AvailableItem {
 
 const TIER_STYLES: Record<string, string> = {
   bronze: "bg-orange-500/15 text-orange-300 border-orange-500/30",
-  silver: "bg-slate-400/15 text-slate-300 border-slate-400/30",
+  silver: "bg-[var(--bg-elevated)]/15 text-[var(--text-secondary)] border-[var(--border)]/30",
   gold: "bg-amber-500/15 text-amber-300 border-amber-500/30",
 };
 

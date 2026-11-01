@@ -63,7 +63,7 @@ export function UserProfileTab() {
             <div className="w-20 h-20 rounded-full bg-[var(--action-primary)]/10 text-[var(--action-primary)] border-2 border-[var(--action-primary)]/30 flex items-center justify-center text-3xl font-extrabold shadow-inner">
               {user.name ? user.name.charAt(0).toUpperCase() : (role?.charAt(0).toUpperCase() || "U")}
             </div>
-            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-slate-950 p-1 rounded-full border-2 border-[var(--bg-surface)]" title="Account Active">
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-1 rounded-full border-2 border-[var(--bg-surface)]" title="Account Active">
               <CheckCircle className="w-4 h-4 text-emerald-950 fill-emerald-400" />
             </div>
           </div>

@@ -94,7 +94,7 @@ function AdminGateDeviceConfigurationInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Gate Roster">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <DoorOpen className="w-3.5 h-3.5 text-emerald-400" /> Gate Roster
             </div>
@@ -106,7 +106,7 @@ function AdminGateDeviceConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Schedules">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Schedule Entries
             </div>
@@ -118,7 +118,7 @@ function AdminGateDeviceConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Devices">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Cpu className="w-3.5 h-3.5 text-amber-400" /> Device Modes
             </div>
@@ -137,14 +137,14 @@ function AdminGateDeviceConfigurationInner() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-2 animate-pulse">
+              <div key={i} className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 space-y-2 animate-pulse">
                 <div className="h-4 w-32 rounded bg-[var(--bg-elevated)]" />
                 <div className="h-3 w-40 rounded bg-[var(--bg-elevated)]" />
                 <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
               </div>
             ))
           ) : gates.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-slate-800 bg-[#0d1220] p-8 text-center">
+            <div className="col-span-full rounded-xl border border-[var(--border)] bg-[#0d1220] p-8 text-center">
               <DoorOpen className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No gates configured yet.</p>
               <Link
@@ -160,8 +160,8 @@ function AdminGateDeviceConfigurationInner() {
                 key={gate.id}
                 className={`rounded-xl border p-4 space-y-3 ${
                   gate.is_active
-                    ? "bg-[#0d1220] border-slate-800"
-                    : "bg-[var(--bg-surface)]/40 border-slate-800/60 opacity-70"
+                    ? "bg-[#0d1220] border-[var(--border)]"
+                    : "bg-[var(--bg-surface)]/40 border-[var(--border)]/60 opacity-70"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -184,7 +184,7 @@ function AdminGateDeviceConfigurationInner() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div className="rounded-lg bg-[var(--bg-surface)]/60 p-2.5">
                     <p className="text-[var(--text-muted)] mb-0.5">Geofence</p>
-                    <p className="text-slate-200 tabular-nums">
+                    <p className="text-[var(--text-secondary)] tabular-nums">
                       {gate.latitude != null && gate.longitude != null
                         ? `${gate.latitude.toFixed(4)}, ${gate.longitude.toFixed(4)}`
                         : "Not set"}
@@ -192,7 +192,7 @@ function AdminGateDeviceConfigurationInner() {
                   </div>
                   <div className="rounded-lg bg-[var(--bg-surface)]/60 p-2.5">
                     <p className="text-[var(--text-muted)] mb-0.5">Radius</p>
-                    <p className="text-slate-200 tabular-nums">
+                    <p className="text-[var(--text-secondary)] tabular-nums">
                       {gate.allowed_radius_meters != null ? `${gate.allowed_radius_meters} m` : "Default"}
                     </p>
                   </div>
@@ -209,11 +209,11 @@ function AdminGateDeviceConfigurationInner() {
                       {gate.schedules.slice(0, 4).map((s) => (
                         <li key={`${s.day_of_week}-${s.open_time}`} className="flex items-center gap-2 text-xs">
                           <span className="w-8 text-[var(--text-muted)] font-medium">{DAY_LABELS[s.day_of_week] || `D${s.day_of_week}`}</span>
-                          <span className="text-slate-300 tabular-nums">
+                          <span className="text-[var(--text-secondary)] tabular-nums">
                             {s.open_time?.slice(0, 5)} – {s.close_time?.slice(0, 5)}
                           </span>
                           {!s.is_active && (
-                            <span className="text-[10px] text-slate-600 uppercase">off</span>
+                            <span className="text-[10px] text-[var(--text-muted)] uppercase">off</span>
                           )}
                         </li>
                       ))}
@@ -231,7 +231,7 @@ function AdminGateDeviceConfigurationInner() {
 
       {/* Device verification modes */}
       <WidgetBoundary title="Device Verification Modes">
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
               <div className="h-4 rounded bg-[var(--bg-elevated)] animate-pulse" />

@@ -209,7 +209,7 @@ export function PersonalizedCampusHome() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Hero: Greeting + Role */}
         <div
-          className={`rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5 ${
+          className={`rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-5 ${
             pinnedWidgets.includes("profile") ? "ring-1 ring-indigo-500/30" : ""
           }`}
         >
@@ -218,7 +218,7 @@ export function PersonalizedCampusHome() {
               <User className="h-5 w-5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-100">
+              <p className="text-sm font-medium text-[var(--text-primary)]">
                 Welcome back, {user?.name?.split(" ")[0] ?? "there"}
               </p>
               <p className="text-xs text-[var(--text-muted)] capitalize">{role ?? "user"}</p>
@@ -230,19 +230,19 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Pending Tasks */}
-        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5">
+        <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="h-4 w-4 text-amber-400" />
-            <h3 className="text-sm font-medium text-slate-200">Pending Tasks</h3>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">Pending Tasks</h3>
           </div>
           {loading ? (
-            <div className="h-20 animate-pulse rounded bg-slate-700/30" />
+            <div className="h-20 animate-pulse rounded bg-[var(--bg-elevated)]/30" />
           ) : pendingTasks.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)]">No pending tasks.</p>
           ) : (
             <ul className="space-y-2">
               {pendingTasks.map((t) => (
-                <li key={t.id} className="text-xs text-slate-300 flex items-center gap-2">
+                <li key={t.id} className="text-xs text-[var(--text-secondary)] flex items-center gap-2">
                   <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                   <span className="truncate">{t.title}</span>
                 </li>
@@ -252,19 +252,19 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5">
+        <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="h-4 w-4 text-emerald-400" />
-            <h3 className="text-sm font-medium text-slate-200">Upcoming Events</h3>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">Upcoming Events</h3>
           </div>
           {loading ? (
-            <div className="h-20 animate-pulse rounded bg-slate-700/30" />
+            <div className="h-20 animate-pulse rounded bg-[var(--bg-elevated)]/30" />
           ) : events.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)]">No upcoming events.</p>
           ) : (
             <ul className="space-y-2">
               {events.map((e) => (
-                <li key={e.id} className="text-xs text-slate-300 flex items-center gap-2">
+                <li key={e.id} className="text-xs text-[var(--text-secondary)] flex items-center gap-2">
                   <span className="text-emerald-400">•</span>
                   <span className="truncate flex-1">{e.title}</span>
                   <span className="text-[var(--text-muted)] shrink-0">
@@ -278,13 +278,13 @@ export function PersonalizedCampusHome() {
 
         {/* Recommended Actions */}
         <div
-          className={`rounded-xl border border-slate-700/50 bg-gradient-to-br from-indigo-900/40 to-slate-800/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3 ${
+          className={`rounded-xl border border-[var(--border)]/50 bg-gradient-to-br from-indigo-900/40 to-slate-800/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3 ${
             pinnedWidgets.includes("feed") ? "ring-1 ring-indigo-500/30" : ""
           }`}
         >
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-indigo-400" />
-            <h3 className="text-sm font-medium text-slate-100">Recommended Next Actions</h3>
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">Recommended Next Actions</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {actions.map((a, i) => (
@@ -295,7 +295,7 @@ export function PersonalizedCampusHome() {
                     ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
                     : a.priority === "medium"
                     ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
-                    : "border-slate-600/50 bg-slate-700/30 text-slate-300"
+                    : "border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-secondary)]"
                 }`}
               >
                 {a.icon === "alert" && <AlertTriangle className="h-4 w-4 shrink-0" />}
@@ -311,7 +311,7 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Quick Access Strip */}
-        <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
+        <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
           <h3 className="text-xs font-medium text-[var(--text-muted)] mb-3">Quick Access</h3>
           <div className="flex flex-wrap gap-2">
             {[
@@ -324,7 +324,7 @@ export function PersonalizedCampusHome() {
               <button
                 key={label}
                 type="button"
-                className="flex items-center gap-1.5 rounded-lg border border-slate-600/50 bg-slate-700/30 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-600/40 transition-colors motion-reduce:transition-none"
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/40 transition-colors motion-reduce:transition-none"
               >
                 <Icon className="h-3.5 w-3.5" />
                 {label}

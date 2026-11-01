@@ -72,7 +72,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -90,7 +90,7 @@ function StatCard({
 function DelegationBadge({ active, loading }: { active: boolean; loading: boolean }) {
   if (loading) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 px-2.5 py-1 text-xs text-[var(--text-muted)]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
         <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" /> Checking delegation…
       </span>
     );
@@ -100,7 +100,7 @@ function DelegationBadge({ active, loading }: { active: boolean; loading: boolea
       <Gavel className="w-3 h-3" /> Within delegated scope — approval actions enabled
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-600/50 bg-slate-700/30 px-2.5 py-1 text-xs font-semibold text-slate-300">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
       <Gavel className="w-3 h-3" /> Read-only — no delegation data recorded yet
     </span>
   );
@@ -157,7 +157,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -166,7 +166,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
           <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
@@ -220,14 +220,14 @@ function DeputyWardenDelegatedApprovalsInner() {
                 ? "Approval actions enabled within delegated scope"
                 : "No delegation data — this view is read-only"
             }
-            accent={delegationActive ? "text-emerald-400" : "text-slate-300"}
+            accent={delegationActive ? "text-emerald-400" : "text-[var(--text-secondary)]"}
             loading={delegationLoading && !delegation}
           />
         </div>
       </WidgetBoundary>
 
       {/* Delegation status banner */}
-      <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-wrap items-center gap-3 min-w-0">
+      <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-wrap items-center gap-3 min-w-0">
         <DelegationBadge active={delegationActive} loading={delegationLoading && !delegation} />
         <p className="text-xs text-[var(--text-muted)] min-w-0">
           {delegation?.data?.note ??
@@ -237,7 +237,7 @@ function DeputyWardenDelegatedApprovalsInner() {
 
       {/* Queue table */}
       <WidgetBoundary title="Approval Queue">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
@@ -245,7 +245,7 @@ function DeputyWardenDelegatedApprovalsInner() {
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No pending items at the deputy-warden stage. The queue is clear.
               </p>
@@ -254,7 +254,7 @@ function DeputyWardenDelegatedApprovalsInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Ticket</th>
                     <th className="text-left px-4 py-3">Workflow</th>
                     <th className="text-left px-4 py-3">Status</th>
@@ -265,10 +265,10 @@ function DeputyWardenDelegatedApprovalsInner() {
                 <tbody className="divide-y divide-slate-800/60">
                   {rows.map((r) => (
                     <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-300 whitespace-nowrap">
+                      <td className="px-4 py-3 font-mono text-xs text-[var(--text-secondary)] whitespace-nowrap">
                         {r.ticket_number}
                       </td>
-                      <td className="px-4 py-3 text-slate-300">{r.workflow_type}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{r.workflow_type}</td>
                       <td className="px-4 py-3 text-[var(--text-muted)]">{r.status}</td>
                       <td className="px-4 py-3">
                         {r.sla_deadline ? (
@@ -279,7 +279,7 @@ function DeputyWardenDelegatedApprovalsInner() {
                             })}
                           </span>
                         ) : (
-                          <span className="text-slate-600">—</span>
+                          <span className="text-[var(--text-muted)]">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -288,7 +288,7 @@ function DeputyWardenDelegatedApprovalsInner() {
                             Reviewable
                           </span>
                         ) : (
-                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-slate-600/50 bg-slate-700/30 text-[var(--text-muted)] whitespace-nowrap">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] whitespace-nowrap">
                             Read-only
                           </span>
                         )}

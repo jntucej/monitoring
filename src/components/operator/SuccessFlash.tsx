@@ -45,14 +45,14 @@ export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, directi
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-slate-950 select-none"
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-black select-none"
     >
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
       >
-        <CheckCircle className="w-24 h-24 text-slate-950" aria-hidden="true" />
+        <CheckCircle className="w-24 h-24 text-black" aria-hidden="true" />
       </motion.div>
       {children || (
         <>
@@ -68,7 +68,7 @@ export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, directi
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             transition={{ delay: 0.3 }}
-            className="mt-2 text-xs font-semibold uppercase tracking-wider bg-slate-950/10 px-3 py-1 rounded-full text-slate-900"
+            className="mt-2 text-xs font-semibold uppercase tracking-wider bg-[var(--bg-elevated)]/10 px-3 py-1 rounded-full text-[var(--text-primary)]"
           >
             {reason ? `${reason} · ` : ""}Next scan ready
           </motion.p>

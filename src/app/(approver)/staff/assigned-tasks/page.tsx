@@ -40,7 +40,7 @@ function StaffAssignedTasksInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/staff"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
@@ -49,7 +49,7 @@ function StaffAssignedTasksInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Assigned Tasks</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -72,8 +72,8 @@ function StaffAssignedTasksInner() {
       )}
 
       <WidgetBoundary title="Assigned Tasks">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Open staff-leave requests</span>
@@ -91,10 +91,10 @@ function StaffAssignedTasksInner() {
               {slice && slice.openRequests.length > 0 ? (
                 <div className="space-y-2 min-w-0">
                   {slice.openRequests.map((r) => (
-                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                       <span className="text-xs text-[var(--text-muted)] font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
-                      <span className="flex-1 text-sm text-slate-200">{r.workflow_type}</span>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-700/40 text-slate-300 shrink-0 capitalize">
+                      <span className="flex-1 text-sm text-[var(--text-secondary)]">{r.workflow_type}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--bg-elevated)]/40 text-[var(--text-secondary)] shrink-0 capitalize">
                         {r.current_stage ?? r.status}
                       </span>
                       <span className="text-xs text-[var(--text-muted)] shrink-0">
@@ -109,8 +109,8 @@ function StaffAssignedTasksInner() {
               {slice?.lastMovement && (
                 <p className="text-xs text-[var(--text-muted)]">
                   Most recent movement:{" "}
-                  <span className="text-slate-300">{slice.lastMovement.direction}</span> at{" "}
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">{slice.lastMovement.direction}</span> at{" "}
+                  <span className="text-[var(--text-secondary)]">
                     {new Date(slice.lastMovement.timestamp).toLocaleString("en-IN", {
                       day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                     })}

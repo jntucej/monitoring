@@ -99,11 +99,11 @@ export function CampusKnowledgeCentre() {
 
   return (
     <WidgetBoundary title="Campus Knowledge Centre">
-      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="h-4 w-4 text-amber-400" />
-          <h3 className="text-sm font-medium text-slate-100">Knowledge Centre</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Knowledge Centre</h3>
           <span className="text-xs text-[var(--text-muted)] ml-auto">
             {docs.length} document(s)
           </span>
@@ -118,14 +118,14 @@ export function CampusKnowledgeCentre() {
               placeholder="Search documents…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-600/50 bg-[var(--bg-surface)]/50 py-2 pl-9 pr-3 text-xs text-slate-200 placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+              className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/50 py-2 pl-9 pr-3 text-xs text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
               aria-label="Search knowledge documents"
             />
           </div>
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
-            className="rounded-lg border border-slate-600/50 bg-[var(--bg-surface)]/50 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+            className="rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
             aria-label="Filter by category"
           >
             <option value="all">All Categories</option>
@@ -139,7 +139,7 @@ export function CampusKnowledgeCentre() {
 
         {/* Document List */}
         {loading ? (
-          <div className="h-32 animate-pulse rounded bg-slate-700/20" />
+          <div className="h-32 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
         ) : docs.length === 0 ? (
           <p className="text-xs text-[var(--text-muted)] py-8 text-center">
             No documents found. Documents are published by campus administrators.
@@ -167,17 +167,17 @@ export function CampusKnowledgeCentre() {
                   selectedDoc?.id === doc.id
                     ? "border-indigo-500/50 bg-indigo-500/10"
                     : i === activeIndex
-                    ? "border-slate-500/50 bg-slate-700/30"
-                    : "border-slate-700/40 bg-[var(--bg-elevated)]/30 hover:bg-slate-700/20"
+                    ? "border-[var(--border)]/50 bg-[var(--bg-elevated)]/30"
+                    : "border-[var(--border)]/40 bg-[var(--bg-elevated)]/30 hover:bg-[var(--bg-elevated)]/20"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-200 truncate">
+                    <p className="text-xs font-medium text-[var(--text-secondary)] truncate">
                       {doc.title}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[var(--text-muted)]">
-                      <span className="rounded bg-slate-700/50 px-1.5 py-0.5 capitalize">
+                      <span className="rounded bg-[var(--bg-elevated)]/50 px-1.5 py-0.5 capitalize">
                         {doc.category}
                       </span>
                       <span className="flex items-center gap-1">

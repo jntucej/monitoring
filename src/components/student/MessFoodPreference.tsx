@@ -277,7 +277,7 @@ function MessFoodPreferenceInner() {
         LOCKED
       </span>
     ) : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-500/15 border border-slate-500/30 text-[var(--text-muted)] text-[10px] font-bold">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--bg-elevated)]/15 border border-[var(--border)]/30 text-[var(--text-muted)] text-[10px] font-bold">
       {msLeft > 0 ? (
         <span className="tabular-nums">Opens in {formatCountdown(msLeft)}</span>
       ) : (
@@ -423,7 +423,7 @@ function MessFoodPreferenceInner() {
               aria-checked={willBePresent}
               onClick={() => setWillBePresent((v) => !v)}
               className={`relative w-10 h-5.5 h-[22px] rounded-full transition-colors ${
-                willBePresent ? "bg-emerald-500" : "bg-slate-600"
+                willBePresent ? "bg-emerald-500" : "bg-[var(--bg-elevated)]"
               }`}
             >
               <span

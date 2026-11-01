@@ -56,7 +56,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -138,7 +138,7 @@ function DeputyWardenDecisionHistoryInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -147,7 +147,7 @@ function DeputyWardenDecisionHistoryInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -209,7 +209,7 @@ function DeputyWardenDecisionHistoryInner() {
 
       {/* Decision table */}
       <WidgetBoundary title="Decisions">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
@@ -217,7 +217,7 @@ function DeputyWardenDecisionHistoryInner() {
             </div>
           ) : decisions.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <FileText className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <FileText className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No recorded decisions at the deputy-warden stage yet. Past gate activity and
                 approval outcomes will appear here.
@@ -227,7 +227,7 @@ function DeputyWardenDecisionHistoryInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Ticket</th>
                     <th className="text-left px-4 py-3">Workflow</th>
                     <th className="text-left px-4 py-3">Outcome</th>
@@ -237,10 +237,10 @@ function DeputyWardenDecisionHistoryInner() {
                 <tbody className="divide-y divide-slate-800/60">
                   {decisions.map((d) => (
                     <tr key={d.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-300 whitespace-nowrap">
+                      <td className="px-4 py-3 font-mono text-xs text-[var(--text-secondary)] whitespace-nowrap">
                         {d.ticket_number}
                       </td>
-                      <td className="px-4 py-3 text-slate-300">{d.workflow_type}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{d.workflow_type}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${

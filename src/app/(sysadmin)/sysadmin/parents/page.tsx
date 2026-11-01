@@ -72,7 +72,7 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
+      <div className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <KeyRound className="w-4 h-4 text-violet-400" /> Enrollment Code — {userName}
@@ -83,7 +83,7 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
           Generate a one-time secure onboarding code for this parent to set their password and sign in directly.
         </p>
         {codeData?.code ? (
-          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-slate-800 text-center space-y-2">
+          <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-center space-y-2">
             <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Secure Code</span>
             <span className="text-2xl font-mono font-black text-emerald-400 tracking-wider">{codeData.code}</span>
             <p className="text-[11px] text-[var(--text-muted)]">Provide this code to the guardian. Expires in 24 hours.</p>
@@ -96,7 +96,7 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
           </button>
         )}
         <div className="flex justify-end pt-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 text-slate-300 text-xs font-semibold">Done</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold">Done</button>
         </div>
       </div>
     </div>
@@ -269,7 +269,7 @@ export default function SysAdminParentsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search guardians by name, email, phone or student roll…"
-            className="w-full pl-10 pr-4 py-2.5 bg-[#0d1220] border border-slate-800 rounded-xl text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-violet-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0d1220] border border-[var(--border)] rounded-xl text-sm text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-violet-500"
           />
         </div>
 
@@ -287,7 +287,7 @@ export default function SysAdminParentsPage() {
               );
             })
             .map((p) => (
-              <div key={p.id} className="rounded-2xl border border-slate-800 bg-[#0d1220] p-5 space-y-4 shadow-xl">
+              <div key={p.id} className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-5 space-y-4 shadow-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -304,12 +304,12 @@ export default function SysAdminParentsPage() {
                 </div>
 
                 {/* Linked children */}
-                <div className="space-y-2 pt-2 border-t border-slate-800">
+                <div className="space-y-2 pt-2 border-t border-[var(--border)]">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Linked Students</span>
                   {p.children && p.children.length > 0 ? (
                     <div className="space-y-1.5">
                       {p.children.map((c) => (
-                        <div key={c.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-slate-800 text-xs">
+                        <div key={c.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs">
                           <div>
                             <span className="font-semibold text-white">{c.name}</span>
                             <span className="font-mono text-violet-400 ml-2">{c.roll || c.uniqueId}</span>
@@ -331,14 +331,14 @@ export default function SysAdminParentsPage() {
         </div>
 
         {/* Unlinked students section */}
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-5 space-y-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-5 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <LinkIcon className="w-4 h-4 text-emerald-400" /> Students Awaiting Guardian Link
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead>
-                <tr className="text-[var(--text-muted)] uppercase border-b border-slate-800">
+                <tr className="text-[var(--text-muted)] uppercase border-b border-[var(--border)]">
                   <th className="pb-2.5 px-3">Student</th>
                   <th className="pb-2.5 px-3">Roll / ID</th>
                   <th className="pb-2.5 px-3">Department</th>
@@ -349,7 +349,7 @@ export default function SysAdminParentsPage() {
                 {unlinkedStudents.map((s) => (
                   <tr key={s.id} className="hover:bg-[var(--bg-surface)]/40">
                     <td className="py-2.5 px-3 font-semibold text-white">{s.name}</td>
-                    <td className="py-2.5 px-3 font-mono text-slate-300">{s.roll || s.uniqueId}</td>
+                    <td className="py-2.5 px-3 font-mono text-[var(--text-secondary)]">{s.roll || s.uniqueId}</td>
                     <td className="py-2.5 px-3 text-[var(--text-muted)]">{s.department || "—"}</td>
                     <td className="py-2.5 px-3 text-right">
                       <button type="button" onClick={() => setLinkTarget({ student: s })}
@@ -367,7 +367,7 @@ export default function SysAdminParentsPage() {
         {/* Create modal */}
         {showCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <form onSubmit={createParent} className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
+            <form onSubmit={createParent} className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Plus className="w-5 h-5 text-violet-400" /> Register Parent / Guardian
@@ -402,26 +402,26 @@ export default function SysAdminParentsPage() {
                     <div>
                       <label className="text-[var(--text-muted)] block mb-1">Full Name *</label>
                       <input required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                        placeholder="e.g. Rajesh Sharma" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-violet-500" />
+                        placeholder="e.g. Rajesh Sharma" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-violet-500" />
                     </div>
                     <div>
                       <label className="text-[var(--text-muted)] block mb-1">Email (portal login) *</label>
                       <input type="email" required value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                        placeholder="e.g. rajesh@example.com" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-violet-500" />
+                        placeholder="e.g. rajesh@example.com" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-violet-500" />
                     </div>
                     <div>
                       <label className="text-[var(--text-muted)] block mb-1">Phone Number</label>
                       <input value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
-                        placeholder="e.g. +91 9876543210" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white focus:outline-none focus:border-violet-500" />
+                        placeholder="e.g. +91 9876543210" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-violet-500" />
                     </div>
                     <div>
                       <label className="text-[var(--text-muted)] block mb-1">Student Roll Number (optional auto-link)</label>
                       <input value={createForm.studentRoll} onChange={(e) => setCreateForm({ ...createForm, studentRoll: e.target.value })}
-                        placeholder="e.g. 24JJ1A0501" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-violet-500" />
+                        placeholder="e.g. 24JJ1A0501" className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-white font-mono focus:outline-none focus:border-violet-500" />
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
-                    <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-xl hover:bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold">Cancel</button>
+                    <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 rounded-xl hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold">Cancel</button>
                     <button type="submit" disabled={creating} className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold disabled:opacity-50">
                       {creating ? "Creating..." : "Register Guardian"}
                     </button>
@@ -435,8 +435,8 @@ export default function SysAdminParentsPage() {
         {/* Link guardian modal */}
         {linkTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-              <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+              <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
                 <h3 className="font-bold text-white flex items-center gap-2">
                   <LinkIcon className="w-4 h-4 text-emerald-400" /> Link Guardian to Student
                 </h3>
@@ -455,7 +455,7 @@ export default function SysAdminParentsPage() {
                   <select id="guardian"
                     value={linkParentId}
                     onChange={(e) => setLinkParentId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
+                    className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
                   >
                     <option value="">Select guardian…</option>
                     {parents.map((p) => (
@@ -470,7 +470,7 @@ export default function SysAdminParentsPage() {
                   <button
                     type="button"
                     onClick={() => setLinkTarget(null)}
-                    className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                    className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold hover:bg-[var(--bg-elevated)]"
                   >
                     Cancel
                   </button>

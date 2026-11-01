@@ -170,7 +170,7 @@ export function PromotionRequests() {
           <button
             onClick={fetchRequests}
             disabled={loading}
-            className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-white hover:bg-gray-800 transition-all"
+            className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-white hover:bg-[var(--bg-elevated)] transition-all"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>

@@ -85,17 +85,17 @@ export function ComplaintConsole({
       ) : (
         <div className="border rounded divide-y bg-white">
           {complaints.map((c) => (
-            <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-slate-50 transition">
+            <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-[var(--bg-elevated)] transition">
               <div className="flex justify-between items-start">
                 <div>
                   <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
-                  <h2 className="font-medium text-slate-900">{c.title}</h2>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <h2 className="font-medium text-[var(--text-primary)]">{c.title}</h2>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
                     {c.categoryLabel} · Owner: <span className="font-mono">{c.currentOwnerRole}</span>
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-slate-100 text-slate-800">
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
                     {c.status}
                   </span>
                   <p className="text-xs text-[var(--text-muted)] mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>

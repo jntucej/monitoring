@@ -85,7 +85,7 @@ export function PersonIdCard({ person: initialPerson, type }: PersonIdCardProps 
       </div>
       <p className="text-[var(--text-secondary)] font-mono text-lg">{uniqueId}</p>
       {person.department && (
-        <p className="text-sm font-medium text-slate-300 mt-1">{person.department} {person.designation ? `• ${person.designation}` : ""}</p>
+        <p className="text-sm font-medium text-[var(--text-secondary)] mt-1">{person.department} {person.designation ? `• ${person.designation}` : ""}</p>
       )}
 
       {decoded && (

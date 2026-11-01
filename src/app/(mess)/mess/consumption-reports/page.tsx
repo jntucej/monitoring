@@ -116,7 +116,7 @@ function MessConsumptionReportsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -124,7 +124,7 @@ function MessConsumptionReportsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -135,8 +135,8 @@ function MessConsumptionReportsInner() {
       )}
 
       <WidgetBoundary title="Consumption Reports">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Consumption Reports</span>
             <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">last {d?.days ?? 14} days</span>
@@ -149,21 +149,21 @@ function MessConsumptionReportsInner() {
           ) : trend.length > 0 ? (
             <div className="p-4 min-w-0 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Served</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">{d?.totals?.served}</p>
                   <p className="text-xs text-[var(--text-muted)]">{d?.avgPerDay} avg/day</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Via Token Scan</p>
                   <p className="mt-1 text-lg font-bold text-sky-400">{d?.totals?.viaToken}</p>
                   <p className="text-xs text-[var(--text-muted)]">{d?.totals?.viaManual} manual confirmations</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Veg</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">{d?.totals?.veg}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Non-Veg</p>
                   <p className="mt-1 text-lg font-bold text-rose-400">{d?.totals?.nonVeg}</p>
                 </div>
@@ -181,7 +181,7 @@ function MessConsumptionReportsInner() {
                       </span>
                       <div className="flex-1 h-2.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden min-w-0">
                         <div
-                          className={`h-full rounded-full ${row.isActive ? "bg-emerald-400/70" : "bg-slate-600"}`}
+                          className={`h-full rounded-full ${row.isActive ? "bg-emerald-400/70" : "bg-[var(--bg-elevated)]"}`}
                           style={{
                             width: maxServed > 0 ? `${Math.max(4, (row.servedTotal / maxServed) * 100)}%` : "4%",
                           }}
@@ -198,7 +198,7 @@ function MessConsumptionReportsInner() {
               <div className="overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                       <th className="text-left px-4 py-2.5">Date</th>
                       <th className="text-left px-4 py-2.5">Type</th>
                       <th className="text-left px-4 py-2.5">Served</th>
@@ -210,7 +210,7 @@ function MessConsumptionReportsInner() {
                   <tbody className="divide-y divide-slate-800/60">
                     {trend.map((row) => (
                       <tr key={row.messDayId} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                        <td className="px-4 py-2.5 text-slate-200 font-medium whitespace-nowrap">
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)] font-medium whitespace-nowrap">
                           {fmtDate(row.mealDate)}
                           {!row.isActive && (
                             <span className="ml-2 text-[10px] text-[var(--text-muted)] uppercase">closed</span>
@@ -236,13 +236,13 @@ function MessConsumptionReportsInner() {
               </div>
 
               <div className="text-xs text-[var(--text-muted)] min-w-0 flex items-center gap-2">
-                <ScanLine className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                <ScanLine className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                 Servings stream from the token scanner and manual confirmations.
               </div>
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No consumption recorded in the last {d?.days ?? 14} days. Meals served through the{" "}
                 <Link href="/mess/scan" className="text-emerald-400 hover:underline">

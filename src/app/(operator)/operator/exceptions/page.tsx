@@ -188,7 +188,7 @@ function ExceptionsInner() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No exceptions {filter === "ALL" ? "" : filter.toLowerCase()}
                 recorded in the selected filter today.
@@ -329,7 +329,7 @@ function ExceptionsInner() {
             </div>
           ) : deniedPermissionRows.length === 0 ? (
             <div className="p-4 text-center min-w-0">
-              <Clock className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <Clock className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-xs text-[var(--text-muted)]">
                 No hostel passes were rejected at the main-gate stage today.
               </p>

@@ -212,7 +212,7 @@ function OperatorModeInner() {
               if (selected) void handleSetMode(selected.mode);
             }}
             disabled={submitting || !mode}
-            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

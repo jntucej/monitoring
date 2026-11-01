@@ -49,7 +49,7 @@ export function SnapSuccess({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-emerald-500 text-slate-950 select-none"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-emerald-500 text-black select-none"
         aria-live="polite"
       >
         <motion.div
@@ -72,7 +72,7 @@ export function SnapSuccess({
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             transition={{ delay: 0.2 }}
-            className="mt-2 text-sm font-semibold uppercase tracking-wider bg-slate-950/10 px-3 py-1 rounded-full"
+            className="mt-2 text-sm font-semibold uppercase tracking-wider bg-[var(--bg-elevated)]/10 px-3 py-1 rounded-full"
           >
             {reason}
           </motion.p>

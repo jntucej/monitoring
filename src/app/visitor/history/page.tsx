@@ -53,7 +53,7 @@ function VisitorHistoryInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -62,7 +62,7 @@ function VisitorHistoryInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">History</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -85,8 +85,8 @@ function VisitorHistoryInner() {
       )}
 
       <WidgetBoundary title="History">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <History className="w-4 h-4 text-sky-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Completed visits</span>
@@ -108,7 +108,7 @@ function VisitorHistoryInner() {
                   <span className="text-xs text-[var(--text-muted)] w-40 shrink-0">{fmtRange(l)}</span>
                   <div className="flex-1 min-w-0">
                     {l.host?.name ? (
-                      <p className="text-sm text-slate-200 truncate">Visiting <span className="font-semibold">{l.host.name}</span></p>
+                      <p className="text-sm text-[var(--text-secondary)] truncate">Visiting <span className="font-semibold">{l.host.name}</span></p>
                     ) : (
                       <p className="text-sm text-[var(--text-muted)]">Host not recorded</p>
                     )}
@@ -116,7 +116,7 @@ function VisitorHistoryInner() {
                       <p className="text-xs text-[var(--text-muted)] truncate">Purpose: {l.purpose}</p>
                     )}
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-700/40 text-slate-300 shrink-0">completed</span>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--bg-elevated)]/40 text-[var(--text-secondary)] shrink-0">completed</span>
                 </div>
               ))}
             </div>

@@ -217,31 +217,31 @@ export function UserManagement() {
       {showForm && (
         <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="name">Name</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="name">Name</label>
             <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. John Doe"
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="email">Email</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="email">Email</label>
             <input id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. john@example.com"
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="role">Role</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="role">Role</label>
             <select id="role"
               value={role}
               onChange={(e) => setRole(e.target.value as any)}
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
               <option value="operator">Operator</option>
@@ -266,27 +266,27 @@ export function UserManagement() {
           </div>
           {["student", "parent", "guardian", "visitor", "worker"].includes(role) && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Custom Unique ID <span className="text-xs text-gray-500">(optional — auto-generated if blank, e.g. ucej-s-0001)</span>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+                Custom Unique ID <span className="text-xs text-[var(--text-muted)]">(optional — auto-generated if blank, e.g. ucej-s-0001)</span>
               </label>
               <input
                 type="text"
                 value={customUniqueId}
                 onChange={(e) => setCustomUniqueId(e.target.value)}
                 placeholder={`auto: ucej-${role === "student" ? "s" : role === "parent" ? "p" : role === "guardian" ? "g" : role === "visitor" ? "v" : "w"}-NNNN`}
-                className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+                className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
               />
             </div>
           )}
           {role === "operator" && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                 {role === "operator" ? "Assign Gate" : "Primary Gate"}
               </label>
               <select
                 value={gateId}
                 onChange={(e) => setGateId(e.target.value)}
-                className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+                className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
               >
                 <option value="">— No gate —</option>
                 {gates.map((g) => (
@@ -335,7 +335,7 @@ export function UserManagement() {
           {users.map((user) => (
             <div key={user.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-gray-400" />
+                <User className="w-5 h-5 text-[var(--text-muted)]" />
                 <div>
                   <p className="font-medium">{user.name}</p>
                   <p className="text-xs text-[var(--text-muted)]">
@@ -350,7 +350,7 @@ export function UserManagement() {
                     <ShieldCheck className="w-3 h-3" /> Biometric ✓
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-400 border border-gray-500/25">
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)] border border-[var(--border)]/25">
                     No biometric
                   </span>
                 )}
@@ -387,7 +387,7 @@ export function UserManagement() {
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${
                     user.status === "ACTIVE"
                       ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-gray-500/10 text-gray-400"
+                      : "bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)]"
                   }`}
                 >
                   {user.status}

@@ -71,7 +71,7 @@ export function GateSchedule() {
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Gate Access Scheduling</p>
-          <p className="text-sm text-gray-500">Configure time-of-day access rules.</p>
+          <p className="text-sm text-[var(--text-muted)]">Configure time-of-day access rules.</p>
         </div>
         <Button onClick={() => setShowAddRule(!showAddRule)} className="gap-2">
           <Plus className="w-4 h-4" /> {showAddRule ? "Cancel" : "Add Access Rule"}
@@ -83,13 +83,13 @@ export function GateSchedule() {
           {currentStatus.isRestricted ? <ShieldAlert className="w-6 h-6 text-amber-600" /> : <ShieldCheck className="w-6 h-6 text-emerald-600" />}
           <div>
             <div className="font-semibold text-sm">Status: {currentStatus.isRestricted ? "Restricted" : "Open"}</div>
-            <div className="text-xs text-gray-600">{currentStatus.reason}</div>
+            <div className="text-xs text-[var(--text-muted)]">{currentStatus.reason}</div>
           </div>
         </Card>
       )}
 
       {showAddRule && (
-        <Card className="border p-4 bg-gray-50 dark:bg-gray-800/40">
+        <Card className="border p-4 bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/40">
           <form onSubmit={handleCreateRule} className="space-y-4">
             <h3 className="font-semibold text-lg">New Access Rule</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -107,7 +107,7 @@ export function GateSchedule() {
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                 <tr><th className="p-3">Rule</th><th className="p-3">Time Window</th><th className="p-3">Action</th><th className="p-3 text-right">Delete</th></tr>
               </thead>
               <tbody className="divide-y">

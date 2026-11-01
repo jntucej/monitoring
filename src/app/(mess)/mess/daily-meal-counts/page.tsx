@@ -50,7 +50,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
       <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -123,7 +123,7 @@ function MessDailyMealCountsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -131,7 +131,7 @@ function MessDailyMealCountsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -142,8 +142,8 @@ function MessDailyMealCountsInner() {
       )}
 
       <WidgetBoundary title="Daily Meal Counts">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <Calculator className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Daily Meal Counts</span>
             <span className="ml-auto text-xs text-[var(--text-muted)]">{fmtDate(d?.mealDate)}</span>
@@ -174,7 +174,7 @@ function MessDailyMealCountsInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No meal selections recorded for this meal day yet. Counts appear once students
                 declare a preference for the scheduled mess day.

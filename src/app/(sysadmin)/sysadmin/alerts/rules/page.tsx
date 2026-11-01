@@ -111,7 +111,7 @@ export default function AlertRulesPage() {
             <p className="text-2xl font-bold tracking-tight flex items-center gap-2">
               <Bell className="w-6 h-6 text-amber-500" /> Alert Rules Management
             </p>
-            <p className="text-sm text-gray-500">Configure real-time monitoring and threshold alerts.</p>
+            <p className="text-sm text-[var(--text-muted)]">Configure real-time monitoring and threshold alerts.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2 min-h-[44px]"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
@@ -124,7 +124,7 @@ export default function AlertRulesPage() {
             {loading ? <div className="py-6 text-center text-xs">Loading rules...</div> : rules.length === 0 ? <div className="py-6 text-center text-xs">No alert rules created yet.</div> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left min-w-[650px]">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+                  <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                     <tr>
                       <th className="p-3">Name</th>
                       <th className="p-3">Metric</th>
@@ -139,7 +139,7 @@ export default function AlertRulesPage() {
                     {rules.map((rule) => (
                       <tr key={rule.id}>
                         <td className="p-3 font-semibold">{rule.name}</td>
-                        <td className="p-3 font-mono text-xs text-gray-500">{rule.metric}</td>
+                        <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{rule.metric}</td>
                         <td className="p-3 font-mono text-xs">
                           &gt; {rule.threshold} / {rule.durationMinutes}m
                         </td>
@@ -192,11 +192,11 @@ export default function AlertRulesPage() {
           </CardHeader>
           <CardContent>
             {history.length === 0 ? (
-              <div className="py-6 text-center text-xs text-gray-500">No alert trigger events logged in this period.</div>
+              <div className="py-6 text-center text-xs text-[var(--text-muted)]">No alert trigger events logged in this period.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+                  <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                     <tr>
                       <th className="p-3">Rule Name</th>
                       <th className="p-3">Metric</th>
@@ -209,12 +209,12 @@ export default function AlertRulesPage() {
                     {history.map((h) => (
                       <tr key={h.id}>
                         <td className="p-3 font-semibold">{h.ruleName}</td>
-                        <td className="p-3 font-mono text-xs text-gray-500">{h.metric}</td>
+                        <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{h.metric}</td>
                         <td className="p-3">
                           <Badge variant={h.severity === "critical" ? "error" : "dayout"}>{h.severity.toUpperCase()}</Badge>
                         </td>
                         <td className="p-3 text-xs text-[var(--text-primary)]">{h.message}</td>
-                        <td className="p-3 text-xs font-mono text-gray-500">
+                        <td className="p-3 text-xs font-mono text-[var(--text-muted)]">
                           {new Date(h.triggeredAt).toLocaleString("en-IN")}
                         </td>
                       </tr>
@@ -232,7 +232,7 @@ export default function AlertRulesPage() {
             <Input label="Metric Token" value={formData.metric} onChange={(e) => setFormData({ ...formData, metric: e.target.value })} required />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium mb-1 uppercase text-gray-500">Severity</label>
+                <label className="block text-xs font-medium mb-1 uppercase text-[var(--text-muted)]">Severity</label>
                 <Select
                   options={[
                     { value: "critical", label: "Critical" },
@@ -244,7 +244,7 @@ export default function AlertRulesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1 uppercase text-gray-500">Channel</label>
+                <label className="block text-xs font-medium mb-1 uppercase text-[var(--text-muted)]">Channel</label>
                 <Select
                   options={[
                     { value: "opsgenie", label: "OpsGenie" },

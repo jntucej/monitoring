@@ -75,7 +75,7 @@ export default function MessBillPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
             <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Meals Served</span>
-            <p className="text-2xl font-bold text-slate-900">{data.totalServed}</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{data.totalServed}</p>
           </div>
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
             <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Total Amount</span>
@@ -84,17 +84,17 @@ export default function MessBillPage() {
           </div>
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
             <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Daily Cutoff</span>
-            <p className="text-sm font-medium text-slate-900 mt-1">{data.cutoffTime}</p>
+            <p className="text-sm font-medium text-[var(--text-primary)] mt-1">{data.cutoffTime}</p>
             <p className="text-xs text-[var(--text-muted)]">Opt out before cutoff to skip billing.</p>
           </div>
         </div>
       ) : null}
 
       <div className="border rounded bg-white p-6 space-y-4 shadow-sm">
-        <h2 className="font-semibold text-slate-900">Opt out of a upcoming meal</h2>
+        <h2 className="font-semibold text-[var(--text-primary)]">Opt out of a upcoming meal</h2>
         <form onSubmit={optOut} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="date">Date</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="date">Date</label>
             <input id="date"
               type="date"
               required
@@ -104,7 +104,7 @@ export default function MessBillPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="meal">Meal</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="meal">Meal</label>
             <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
@@ -116,7 +116,7 @@ export default function MessBillPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1" htmlFor="reason-optional">Reason (optional)</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="reason-optional">Reason (optional)</label>
             <input id="reason-optional"
               placeholder="e.g. Going home"
               value={optOutReason}

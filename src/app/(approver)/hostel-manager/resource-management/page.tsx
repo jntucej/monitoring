@@ -59,7 +59,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -130,7 +130,7 @@ function HostelManagerResourceManagementInner() {
       {/* Back link */}
       <Link
         href="/hostel-manager"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Operations Overview
       </Link>
@@ -139,15 +139,15 @@ function HostelManagerResourceManagementInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {/* Authority note */}
-      <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
-        <p className="text-sm text-slate-300 min-w-0">
+      <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
+        <p className="text-sm text-[var(--text-secondary)] min-w-0">
           The hostel manager owns <span className="font-semibold text-sky-300">resources and facilities</span> —
           rooms, beds, utilities, and stock. They do <span className="font-semibold text-rose-300">not</span> hold
           hostel-disciplinary authority or final outpass power; outpass decisions route through the hostel-manager/principal chain.
@@ -194,8 +194,8 @@ function HostelManagerResourceManagementInner() {
 
       {/* Manager analytics metrics */}
       <WidgetBoundary title="Manager Metrics">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <Package className="w-4 h-4 text-amber-400 shrink-0" />
             <span className="text-sm font-semibold text-white">7-Day Resource Metrics</span>
           </div>
@@ -205,7 +205,7 @@ function HostelManagerResourceManagementInner() {
             </div>
           ) : metrics.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <AlertTriangle className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <AlertTriangle className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No manager analytics metrics are available for this role yet. Resource metrics
                 will appear once the analytics view is populated.
@@ -214,7 +214,7 @@ function HostelManagerResourceManagementInner() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 min-w-0">
               {metrics.map((m) => (
-                <div key={m.key} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div key={m.key} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide truncate">{m.label}</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {m.value}

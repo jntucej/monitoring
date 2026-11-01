@@ -113,7 +113,7 @@ const CATEGORY_META: Record<
   ScheduledJobCategory,
   { label: string; icon: React.ComponentType<{ className?: string }>; tint: string }
 > = {
-  maintenance:   { label: "Maintenance",   icon: Settings2, tint: "text-slate-300" },
+  maintenance:   { label: "Maintenance",   icon: Settings2, tint: "text-[var(--text-secondary)]" },
   notifications: { label: "Notifications", icon: Bell,      tint: "text-indigo-300" },
   analytics:     { label: "Analytics",     icon: BarChart3, tint: "text-cyan-300"   },
   security:      { label: "Security",      icon: Shield,    tint: "text-amber-300"  },
@@ -121,7 +121,7 @@ const CATEGORY_META: Record<
 };
 
 const PRIORITY_TINT: Record<Row["priority"], string> = {
-  low:      "bg-slate-500/15 text-slate-300 border-slate-500/30",
+  low:      "bg-[var(--bg-elevated)]/15 text-[var(--text-secondary)] border-[var(--border)]/30",
   medium:   "bg-sky-500/15 text-sky-300 border-sky-500/30",
   high:     "bg-amber-500/15 text-amber-300 border-amber-500/30",
   critical: "bg-rose-500/15 text-rose-300 border-rose-500/30",
@@ -509,7 +509,7 @@ const api = useApi();
   return (
     <div className="space-y-6">
       {!loading && rows.length === 0 && (
-        <div className="flex items-start gap-3 rounded-xl border border-slate-500/20 bg-slate-500/5 p-4 text-sm">
+        <div className="flex items-start gap-3 rounded-xl border border-[var(--border)]/20 bg-[var(--bg-elevated)]/5 p-4 text-sm">
           <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text-muted)]" />
           <div className="text-[var(--text-muted)]/90">
             <p className="font-medium">No scheduled jobs configured</p>

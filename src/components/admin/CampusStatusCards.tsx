@@ -65,11 +65,11 @@ export function CampusStatusCards({ studentStats, facultyStats, staffStats, work
           <div className="text-xl font-black text-cyan-400 mt-0.5">{visitorStats.onCampus.toLocaleString()}</div>
           <div className="text-[9px] text-[var(--text-muted)] mt-0.5 hidden sm:block">on campus now</div>
         </Link>
-        <Link href="/admin/reports" className="block p-3 rounded-xl bg-slate-500/5 border border-slate-500/15 hover:bg-slate-500/10 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group">
+        <Link href="/admin/reports" className="block p-3 rounded-xl bg-[var(--bg-elevated)]/5 border border-[var(--border)]/15 hover:bg-[var(--bg-elevated)]/10 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group">
           <div className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--text-muted)]/80 group-hover:text-[var(--text-muted)] transition-colors">
             <Activity className="w-3 h-3" /> <span className="sm:inline hidden">Total Today</span><span className="sm:hidden">📊</span>
           </div>
-          <div className="text-xl font-black text-slate-300 mt-0.5">{totalScans.toLocaleString()}</div>
+          <div className="text-xl font-black text-[var(--text-secondary)] mt-0.5">{totalScans.toLocaleString()}</div>
           <div className="text-[9px] text-[var(--text-muted)] mt-0.5 hidden sm:block">
             <span className="text-emerald-400">{todayIn} in</span>
             <span className="mx-0.5">·</span>

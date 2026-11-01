@@ -376,7 +376,7 @@ function OperatorPageInner() {
               <button
                 type="submit"
                 disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="flex-1 min-h-[44px] px-4 rounded-xl bg-[var(--action-primary)] disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="flex-1 min-h-[44px] px-4 rounded-xl bg-[var(--action-primary)] disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>Verify Roll Number</span>
@@ -471,7 +471,7 @@ function OperatorPageInner() {
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -534,7 +534,7 @@ function OperatorPageInner() {
               type="button"
               disabled={!canConfirm}
               onClick={() => { void confirmScan(addToast, "IN"); }}
-              className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-slate-950 font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               IN
             </button>
@@ -551,7 +551,7 @@ function OperatorPageInner() {
             type="button"
             disabled={state !== "idle" || manualOpen}
             onClick={() => { primeAudioOnGesture(); setManualOpen((o) => !o); }}
-            className="min-h-[44px] px-5 py-1.5 rounded-full bg-[var(--bg-surface)]/85 backdrop-blur border border-slate-700 text-[11px] font-bold tracking-wide text-slate-300 flex items-center gap-2 disabled:opacity-40 transition-colors"
+            className="min-h-[44px] px-5 py-1.5 rounded-full bg-[var(--bg-surface)]/85 backdrop-blur border border-[var(--border)] text-[11px] font-bold tracking-wide text-[var(--text-secondary)] flex items-center gap-2 disabled:opacity-40 transition-colors"
           >
             <KeyRound className="w-3.5 h-3.5" /> Manual entry
           </button>

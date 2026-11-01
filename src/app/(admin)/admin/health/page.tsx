@@ -23,7 +23,7 @@ const DOT: Record<ComponentStatus, string> = {
   healthy: "bg-emerald-400",
   degraded: "bg-amber-400",
   unhealthy: "bg-rose-400",
-  unknown: "bg-slate-500",
+  unknown: "bg-[var(--bg-elevated)]",
 };
 
 function StatusDot({ status, label, detail }: { status: ComponentStatus; label: string; detail?: string }) {

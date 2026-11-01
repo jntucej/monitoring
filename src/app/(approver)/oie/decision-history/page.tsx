@@ -46,9 +46,9 @@ type StatusFilter = "ALL" | "COMPLETED" | "APPROVED" | "REJECTED" | "ESCALATED";
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
-        <Inbox className="w-5 h-5 text-slate-600" />
+        <Inbox className="w-5 h-5 text-[var(--text-muted)]" />
         <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
       </div>
     </div>
@@ -79,13 +79,13 @@ function StatusPill({ status }: { status: string }) {
     APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
     REJECTED: "border-rose-400/30 bg-rose-400/10 text-rose-400",
     ESCALATED: "border-purple-400/30 bg-purple-400/10 text-purple-400",
-    CANCELLED: "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]",
+    CANCELLED: "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]",
     PENDING: "border-amber-400/30 bg-amber-400/10 text-amber-400",
   };
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
-        cls[status] ?? "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]"
+        cls[status] ?? "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]"
       }`}
     >
       {status}
@@ -103,7 +103,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[720px]">
         <thead>
-          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+          <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Final Status</th>
@@ -124,7 +124,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
                     {r.ticket_number}
                   </a>
                 </td>
-                <td className="px-4 py-3 text-slate-300 min-w-0">
+                <td className="px-4 py-3 text-[var(--text-secondary)] min-w-0">
                   {r.student?.name || "—"}
                   {r.student?.student_details?.roll ? (
                     <span className="ml-2 text-xs text-[var(--text-muted)]">
@@ -191,7 +191,7 @@ function DecisionHistoryInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -199,7 +199,7 @@ function DecisionHistoryInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -227,7 +227,7 @@ function DecisionHistoryInner() {
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 isActive
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  : "border-slate-700 bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                  : "border-[var(--border)] bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
@@ -238,8 +238,8 @@ function DecisionHistoryInner() {
       </div>
 
       <WidgetBoundary title="Decision History">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <History className="w-4 h-4 text-sky-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Exam Approval Decisions
@@ -255,7 +255,7 @@ function DecisionHistoryInner() {
           ) : (
             <HistoryTable rows={filteredRows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
+          <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
             Records show the final disposition of exam permission tickets that passed
             through the OIE stage. Stage history is retained for audit purposes.
           </div>

@@ -85,9 +85,9 @@ export function GlassCard({
 
   const getContainerBackground = () => {
     if (displayMode === "outdoor" || performanceTier === "emergency") {
-      return isDark ? "bg-slate-950/95 border-slate-700 text-white" : "bg-slate-100/95 border-slate-300 text-slate-900";
+      return isDark ? "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-white" : "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-[var(--text-primary)]";
     }
-    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-slate-100" : "bg-white/80 border-white/80 text-neutral-900";
+    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-[var(--text-primary)]" : "bg-white/80 border-white/80 text-neutral-900";
   };
 
   // 3D Tilt Motion Tracking with critically damped spring
@@ -124,7 +124,7 @@ export function GlassCard({
   const statusMap = {
     entry: { color: "emerald", text: "Granted", pulse: "bg-emerald-500", border: "border-emerald-500/30", bg: "bg-emerald-500/20", textCol: "text-emerald-300" },
     exit: { color: "rose", text: "Restricted", pulse: "bg-rose-500", border: "border-rose-500/30", bg: "bg-rose-500/20", textCol: "text-rose-300" },
-    idle: { color: "slate", text: "Standby", pulse: "bg-slate-400", border: "border-slate-500/30", bg: "bg-slate-500/20", textCol: "text-slate-300" },
+    idle: { color: "slate", text: "Standby", pulse: "bg-[var(--bg-elevated)]", border: "border-[var(--border)]/30", bg: "bg-[var(--bg-elevated)]/20", textCol: "text-[var(--text-secondary)]" },
     warning: { color: "amber", text: "Alert", pulse: "bg-amber-500", border: "border-amber-500/30", bg: "bg-amber-500/20", textCol: "text-amber-300" },
   };
 
@@ -236,14 +236,14 @@ export function GlassCard({
             {current.text}
           </span>
         </div>
-        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-slate-200" : "text-slate-700")}>
+        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-[var(--text-secondary)]" : "text-[var(--text-muted)]")}>
           <WordByWordText text={subtitle} delay={0.05} />
         </p>
         {children}
         <button
           type="button"
           onClick={() => setActiveGate(isActive ? null : id)}
-          className="mt-4 min-h-[44px] px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-slate-200 hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
+          className="mt-4 min-h-[44px] px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-[var(--text-secondary)] hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
         >
           {isActive ? "Close Focus" : "Focus Gate"}
         </button>

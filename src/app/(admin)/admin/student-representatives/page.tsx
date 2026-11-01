@@ -109,7 +109,7 @@ export default function RepsPage() {
 
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left border-b bg-slate-50">
+          <thead className="text-left border-b bg-[var(--bg-elevated)]">
             <tr>
               <th className="p-3">Name</th>
               <th className="p-3">Roll</th>
@@ -121,7 +121,7 @@ export default function RepsPage() {
           </thead>
           <tbody className="divide-y">
             {rows.map((r) => (
-              <tr key={r.id} className="hover:bg-slate-50">
+              <tr key={r.id} className="hover:bg-[var(--bg-elevated)]">
                 <td className="p-3 font-medium">{r.studentName}</td>
                 <td className="p-3 font-mono">{r.studentRoll}</td>
                 <td className="p-3">{r.scopeType}:{r.scopeId}</td>

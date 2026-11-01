@@ -71,7 +71,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-[var(--text-muted)]">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
@@ -88,7 +88,7 @@ function StatCard({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-700 bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
+    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
       {message}
     </div>
   );
@@ -182,7 +182,7 @@ function HostelPermissionsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -239,10 +239,10 @@ function HostelPermissionsInner() {
 
       {/* occupancy heatmap — gate × role matrix */}
       <WidgetBoundary title="Hostel Occupancy">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
             <Building2 className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+            <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
               Live Gate Occupancy
             </h2>
             {presence?.data && (
@@ -259,7 +259,7 @@ function HostelPermissionsInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Gate</th>
                     {roles.map((r) => (
                       <th key={r} className="text-right px-4 py-3 capitalize">
@@ -282,7 +282,7 @@ function HostelPermissionsInner() {
                           <td
                             key={r}
                             className={`px-4 py-3 text-right font-mono text-xs ${
-                              row[r] > 0 ? "text-emerald-400" : "text-slate-600"
+                              row[r] > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"
                             }`}
                           >
                             {row[r] ?? 0}

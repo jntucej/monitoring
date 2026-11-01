@@ -66,7 +66,7 @@ function ExamSuperintendentScheduleInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -75,7 +75,7 @@ function ExamSuperintendentScheduleInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -98,8 +98,8 @@ function ExamSuperintendentScheduleInner() {
       )}
 
       <WidgetBoundary title="Exam Schedule">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <CalendarClock className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white">Exam Schedule</span>
@@ -111,19 +111,19 @@ function ExamSuperintendentScheduleInner() {
 
           {/* Summary strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
               <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Status</p>
               <p className="mt-1 text-lg font-bold text-emerald-400">Live</p>
               <p className="text-xs text-[var(--text-muted)]">Exam schedule streams from the permission workflow engine.</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
               <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Deadlines at Risk</p>
-              <p className={`mt-1 text-lg font-bold ${breached.length > 0 ? "text-amber-400" : "text-slate-300"}`}>
+              <p className={`mt-1 text-lg font-bold ${breached.length > 0 ? "text-amber-400" : "text-[var(--text-secondary)]"}`}>
                 {breached.length}
               </p>
               <p className="text-xs text-[var(--text-muted)]">Pending items past their SLA deadline.</p>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
               <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Last Updated</p>
               <p className="mt-1 text-lg font-bold text-sky-400">
                 {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
@@ -142,14 +142,14 @@ function ExamSuperintendentScheduleInner() {
                 ))}
               </div>
             ) : upcoming.length === 0 ? (
-              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/30 p-6 text-center min-w-0">
-                <ShieldCheck className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/30 p-6 text-center min-w-0">
+                <ShieldCheck className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
                 <p className="text-sm text-[var(--text-muted)]">No scheduled exam clearance deadlines in view.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 {upcoming.map((row) => (
-                  <div key={row.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div key={row.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{row.candidate_name ?? row.ticket_number ?? "Exam candidate"}</p>
                     <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
                       {row.roll_number ? `Roll ${row.roll_number} · ` : ""}

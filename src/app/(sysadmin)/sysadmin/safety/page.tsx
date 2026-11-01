@@ -39,8 +39,8 @@ function SafetyInner() {
       <WidgetBoundary title="Safety">
         {busy ? (
           <div className="grid gap-3">
-            <div className="h-40 rounded-xl bg-slate-100 animate-pulse" />
-            <div className="h-64 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-40 rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
+            <div className="h-64 rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
           </div>
         ) : (
           data && <SafetyContent data={data} />

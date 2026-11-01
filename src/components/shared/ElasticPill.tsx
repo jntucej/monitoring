@@ -26,7 +26,7 @@ export function ElasticPill({
     emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20",
     rose: "bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20",
     amber: "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20",
-    slate: "bg-slate-500/10 border-slate-500/30 text-slate-300 hover:bg-slate-500/20",
+    slate: "bg-[var(--bg-elevated)]/10 border-[var(--border)]/30 text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/20",
     indigo: "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20",
   };
 

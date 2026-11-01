@@ -136,13 +136,13 @@ export function SupportDashboard() {
     <div className="space-y-6">
       <div>
         <p className="text-2xl font-bold tracking-tight">Support Ticket Management</p>
-        <p className="text-sm text-gray-500">Triage, assign, and resolve user feedback and gate issues.</p>
+        <p className="text-sm text-[var(--text-muted)]">Triage, assign, and resolve user feedback and gate issues.</p>
       </div>
 
       {metrics && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <Card className="p-4 border text-center">
-            <div className="text-xs text-gray-500">Total Tickets</div>
+            <div className="text-xs text-[var(--text-muted)]">Total Tickets</div>
             <div className="text-2xl font-bold">{String(m.totalTickets ?? 0)}</div>
           </Card>
           <Card className="p-4 border text-center">
@@ -167,7 +167,7 @@ export function SupportDashboard() {
               <LifeBuoy className="w-5 h-5 text-blue-500" /> Tickets
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-gray-400" />
+              <Filter className="w-4 h-4 text-[var(--text-muted)]" />
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-1.5 border rounded text-xs">
                 {STATUS_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
               </select>
@@ -180,7 +180,7 @@ export function SupportDashboard() {
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                 <tr>
                   <th className="p-3">Ticket #</th>
                   <th className="p-3">User</th>
@@ -194,14 +194,14 @@ export function SupportDashboard() {
               </thead>
               <tbody className="divide-y">
                 {tickets.length === 0 && (
-                  <tr><td colSpan={8} className="p-6 text-center text-sm text-gray-500">No tickets found.</td></tr>
+                  <tr><td colSpan={8} className="p-6 text-center text-sm text-[var(--text-muted)]">No tickets found.</td></tr>
                 )}
                 {tickets.map((t) => (
                   <tr key={t.id}>
                     <td className="p-3 font-mono text-xs">{t.ticket_number}</td>
                     <td className="p-3">
                       <div>{t.user_name}</div>
-                      <div className="text-xs text-gray-400 capitalize">{t.user_role}</div>
+                      <div className="text-xs text-[var(--text-muted)] capitalize">{t.user_role}</div>
                     </td>
                     <td className="p-3 font-medium max-w-48 truncate" title={t.subject}>{t.subject}</td>
                     <td className="p-3 text-xs capitalize">{(t.category ?? "").replace("_", " ")}</td>

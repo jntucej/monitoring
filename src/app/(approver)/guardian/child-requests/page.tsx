@@ -45,13 +45,13 @@ function statusBadge(status?: string) {
     return "border-rose-400/30 bg-rose-400/10 text-rose-400";
   if (s === "PENDING")
     return "border-amber-400/30 bg-amber-400/10 text-amber-400";
-  return "border-slate-400/30 bg-slate-400/10 text-[var(--text-muted)]";
+  return "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]";
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-base)]/60 p-8 text-center text-sm text-[var(--text-muted)]">
-      <Inbox className="w-6 h-6 mx-auto mb-2 text-slate-600" />
+      <Inbox className="w-6 h-6 mx-auto mb-2 text-[var(--text-muted)]" />
       <p>{message}</p>
     </div>
   );

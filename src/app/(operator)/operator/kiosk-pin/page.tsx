@@ -111,7 +111,7 @@ export default function OperatorKioskPinPage() {
                 if (e.key === "Enter") submit();
               }}
               placeholder="••••••"
-              className="w-full px-4 py-3 rounded-lg bg-[#0b1220] border border-slate-700 text-2xl font-mono tracking-[0.3em] text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-emerald-500/40 outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-[#0b1220] border border-[var(--border)] text-2xl font-mono tracking-[0.3em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-emerald-500/40 outline-none"
               disabled={submitting}
             />
           </label>

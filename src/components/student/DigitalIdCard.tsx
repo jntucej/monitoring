@@ -191,14 +191,14 @@ const api = useApi();
           size={140}
           style={{ width: "100%", maxWidth: 140, height: "auto" }}
         />
-        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1 sm:gap-1.5 bg-slate-100 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-slate-200">
+        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-[var(--text-muted)] font-mono flex items-center gap-1 sm:gap-1.5 bg-[var(--bg-elevated)] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-[var(--border)]">
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500" />
           Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
           disabled={downloading}
-          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-white text-[11px] font-bold hover:bg-slate-700 disabled:opacity-50 transition"
+          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-white text-[11px] font-bold hover:bg-[var(--bg-elevated)] disabled:opacity-50 transition"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Saving…" : "Save QR as PNG"}

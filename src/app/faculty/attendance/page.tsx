@@ -124,10 +124,10 @@ function FacultyAttendanceInner() {
         </div>
       ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
         /* Empty state — no attendance records yet */
-        <div className="flex flex-col items-center justify-center p-12 bg-[#111827] border border-slate-800 rounded-2xl text-center space-y-3">
+        <div className="flex flex-col items-center justify-center p-12 bg-[#111827] border border-[var(--border)] rounded-2xl text-center space-y-3">
           <Inbox className="w-10 h-10 text-[var(--text-muted)]" />
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-slate-200">No attendance records yet</h3>
+            <h3 className="text-base font-semibold text-[var(--text-secondary)]">No attendance records yet</h3>
             <p className="text-xs text-[var(--text-muted)] max-w-sm">
               Faculty appear here after their first gate check-in today. Metrics refresh
               automatically while Live mode is on.

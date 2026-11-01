@@ -144,13 +144,13 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
                     <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground">{s.scheduledShift}</td>
                     <td className="py-3.5 px-4 font-mono font-bold">{s.checkIn || "--"}</td>
                     <td className="py-3.5 px-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.status === "on_shift" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-gray-500/10 text-gray-400 border border-gray-500/20"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.status === "on_shift" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)] border border-[var(--border)]/20"}`}>
                         {s.status.replace("_", " ")}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 min-w-[120px]">
                       <div className="text-[10px] text-muted-foreground mb-1">{s.hoursLogged} / 8 hrs</div>
-                      <div className="w-full bg-gray-700/30 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-[var(--bg-elevated)]/30 rounded-full h-1.5 overflow-hidden">
                         <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(s.hoursLogged / 8) * 100}%` }} />
                       </div>
                     </td>

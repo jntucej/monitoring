@@ -123,12 +123,12 @@ export function ContributionPortfolio() {
 
   return (
     <WidgetBoundary title="Contribution Portfolio">
-      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Award className="h-4 w-4 text-amber-400" />
-            <h3 className="text-sm font-medium text-slate-100">Contribution Portfolio</h3>
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">Contribution Portfolio</h3>
             {totalVerified > 0 && (
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300">
                 {totalVerified} verified
@@ -158,7 +158,7 @@ export function ContributionPortfolio() {
         </div>
 
         {/* Disclaimer */}
-        <div className="mb-4 rounded-lg border border-slate-700/40 bg-[var(--bg-surface)]/30 p-2.5">
+        <div className="mb-4 rounded-lg border border-[var(--border)]/40 bg-[var(--bg-surface)]/30 p-2.5">
           <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified contributions only. This is a personal record, not an
@@ -168,10 +168,10 @@ export function ContributionPortfolio() {
 
         {/* Content */}
         {loading ? (
-          <div className="h-32 animate-pulse rounded bg-slate-700/20" />
+          <div className="h-32 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
         ) : items.length === 0 ? (
           <div className="py-8 text-center">
-            <FileText className="h-8 w-8 text-slate-600 mx-auto mb-2" />
+            <FileText className="h-8 w-8 text-[var(--text-muted)] mx-auto mb-2" />
             <p className="text-xs text-[var(--text-muted)]">
               No contributions yet. Participate in campus events, complete goals,
               and earn achievements to build your portfolio.
@@ -183,12 +183,12 @@ export function ContributionPortfolio() {
               <div
                 key={item.id}
                 className={`rounded-lg border p-3 ${
-                  TYPE_COLORS[item.type] ?? "text-slate-300 border-slate-700/40 bg-[var(--bg-elevated)]/30"
+                  TYPE_COLORS[item.type] ?? "text-[var(--text-secondary)] border-[var(--border)]/40 bg-[var(--bg-elevated)]/30"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-100 truncate">
+                    <p className="text-xs font-medium text-[var(--text-primary)] truncate">
                       {item.title}
                     </p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">

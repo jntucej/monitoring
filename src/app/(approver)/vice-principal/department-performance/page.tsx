@@ -70,7 +70,7 @@ function VpDepartmentPerformanceInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Department Performance">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Building2 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -117,7 +117,7 @@ function VpDepartmentPerformanceInner() {
             </div>
           ) : comparison.length === 0 ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No department performance data yet.
               </p>
@@ -127,7 +127,7 @@ function VpDepartmentPerformanceInner() {
               {comparison.map((d) => (
                 <div key={d.code} className="min-w-0">
                   <div className="flex items-center justify-between gap-2 text-sm mb-1">
-                    <span className="text-slate-200 truncate">
+                    <span className="text-[var(--text-secondary)] truncate">
                       <span className="text-[var(--text-muted)] font-mono text-xs mr-2">#{d.rank}</span>
                       {d.name}
                     </span>
@@ -149,7 +149,7 @@ function VpDepartmentPerformanceInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Role Analytics Signal">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <TrendingUp className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -179,7 +179,7 @@ function VpDepartmentPerformanceInner() {
             onClick={() => {
               void refreshAnalytics();
             }}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
           >
             <Loader2 className={`w-3.5 h-3.5 ${!analytics ? "animate-spin" : "hidden"}`} />
             Refresh signals

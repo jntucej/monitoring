@@ -264,7 +264,7 @@ function AdminStaffInner() {
         </div>
         <div className="glass-card p-4">
           <p className="text-xs text-[var(--text-muted)]">Workers</p>
-          <p className="text-2xl font-bold text-slate-300 tabular-nums">
+          <p className="text-2xl font-bold text-[var(--text-secondary)] tabular-nums">
             {roleCounts.worker}
           </p>
           <MiniStackedBar label="by role" segments={roleSegments} />

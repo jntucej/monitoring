@@ -150,7 +150,7 @@ function OperatorProfileInner() {
                   type="button"
                   onClick={() => void handleSavePhone()}
                   disabled={saving}
-                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-3 py-2 text-xs font-bold text-slate-950 hover:brightness-110 disabled:opacity-50 shrink-0"
+                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-3 py-2 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 shrink-0"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 </button>

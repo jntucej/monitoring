@@ -100,7 +100,7 @@ function CampusDigitalTwinView() {
         </div>
       </div>
 
-      <div className="relative w-full h-[400px] bg-slate-950 border border-[var(--border)] rounded-lg overflow-hidden flex items-center justify-center p-4">
+      <div className="relative w-full h-[400px] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg overflow-hidden flex items-center justify-center p-4">
         <svg viewBox="0 0 800 400" className="w-full h-full">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">

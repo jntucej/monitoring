@@ -94,7 +94,7 @@ function AlertsInner() {
                   ? "text-emerald-600 bg-emerald-50 border border-emerald-200"
                   : sseState === "polling"
                     ? "text-amber-600 bg-amber-50 border border-amber-200"
-                    : "text-[var(--text-muted)] bg-slate-50 border border-slate-200"
+                    : "text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)]"
               )}
             >
               {sseState === "live" ? "SSE live" : sseState === "polling" ? "SSE polling" : "SSE idle"}
@@ -117,8 +117,8 @@ function AlertsInner() {
       <WidgetBoundary title="Alerts">
         {busy ? (
           <div className="grid gap-3">
-            <div className="h-24 rounded-xl bg-slate-100 animate-pulse" />
-            <div className="h-48 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-24 rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
+            <div className="h-48 rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
           </div>
         ) : (
           data && <AlertsContent data={data} sseState={sseState} />

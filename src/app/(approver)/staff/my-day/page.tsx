@@ -40,7 +40,7 @@ function StaffMydayInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/staff"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
@@ -49,7 +49,7 @@ function StaffMydayInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">My Day</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -72,8 +72,8 @@ function StaffMydayInner() {
       )}
 
       <WidgetBoundary title="My Day">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Day at a glance</span>
@@ -89,17 +89,17 @@ function StaffMydayInner() {
           ) : (
             <div className="p-4 min-w-0 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Movements</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">{summary?.movementsToday ?? 0}</p>
                   <p className="text-xs text-[var(--text-muted)]">Recent in/out events.</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Open requests</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">{summary?.openRequestsCount ?? 0}</p>
                   <p className="text-xs text-[var(--text-muted)]">Staff-leave requests pending.</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">On shift</p>
                   <p className="mt-1 text-lg font-bold text-sky-400">{summary?.rosterOnShift ?? 0}</p>
                   <p className="text-xs text-[var(--text-muted)]">Staff on duty today.</p>
@@ -110,7 +110,7 @@ function StaffMydayInner() {
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide mb-2">Recent movements</p>
                   <div className="space-y-1.5 min-w-0">
                     {summary.lastMovements.map((m) => (
-                      <div key={m.id} className="flex items-center gap-3 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0">
+                      <div key={m.id} className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0">
                         <span className={`text-xs font-bold shrink-0 ${m.direction === "IN" ? "text-emerald-400" : "text-rose-400"}`}>
                           {m.direction}
                         </span>

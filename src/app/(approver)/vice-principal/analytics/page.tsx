@@ -68,7 +68,7 @@ function VpAnalyticsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="VP Analytics">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-4 min-w-0">
             <BarChart3 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -92,19 +92,19 @@ function VpAnalyticsInner() {
           ) : (
             <div className="grid gap-4 md:grid-cols-3 min-w-0">
               {/* By stage */}
-              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <ScrollText className="w-3.5 h-3.5" /> By stage
                 </div>
                 {Object.keys(byStage).length === 0 ? (
-                  <p className="text-xs text-slate-600">No stage data.</p>
+                  <p className="text-xs text-[var(--text-muted)]">No stage data.</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {Object.entries(byStage)
                       .sort((a, b) => b[1] - a[1])
                       .map(([stage, n]) => (
                         <li key={stage} className="flex items-center justify-between text-xs">
-                          <span className="text-slate-300">{STAGE_LABELS[stage] || stage}</span>
+                          <span className="text-[var(--text-secondary)]">{STAGE_LABELS[stage] || stage}</span>
                           <span className="font-mono text-sky-400">{n}</span>
                         </li>
                       ))}
@@ -113,19 +113,19 @@ function VpAnalyticsInner() {
               </div>
 
               {/* By status */}
-              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <CheckCircle2 className="w-3.5 h-3.5" /> By status
                 </div>
                 {Object.keys(byStatus).length === 0 ? (
-                  <p className="text-xs text-slate-600">No status data.</p>
+                  <p className="text-xs text-[var(--text-muted)]">No status data.</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {Object.entries(byStatus)
                       .sort((a, b) => b[1] - a[1])
                       .map(([status, n]) => (
                         <li key={status} className="flex items-center justify-between text-xs">
-                          <span className="text-slate-300 capitalize">{status}</span>
+                          <span className="text-[var(--text-secondary)] capitalize">{status}</span>
                           <span className="font-mono text-sky-400">{n}</span>
                         </li>
                       ))}
@@ -134,12 +134,12 @@ function VpAnalyticsInner() {
               </div>
 
               {/* Recent approved tickets */}
-              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-[var(--text-muted)]">
                   <Clock className="w-3.5 h-3.5" /> Recent tickets
                 </div>
                 {rows.length === 0 ? (
-                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                     <XCircle className="w-3.5 h-3.5" /> No approved exam tickets yet.
                   </div>
                 ) : (

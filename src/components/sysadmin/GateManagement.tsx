@@ -104,31 +104,31 @@ const api = useApi();
       {showForm && (
         <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="name">Name</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="name">Name</label>
             <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Main Gate"
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="location">Location</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="location">Location</label>
             <input id="location"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. North Campus"
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1" htmlFor="type">Type</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="type">Type</label>
             <select id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "main" | "hostel" | "back")}
-              className="block w-full rounded-md border-gray-700 bg-gray-800 text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             >
               <option value="main">Main</option>
               <option value="hostel">Hostel</option>
@@ -173,7 +173,7 @@ const api = useApi();
           {gates.map((gate) => (
             <div key={gate.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
               <div className="flex items-center gap-3">
-                <DoorOpen className="w-5 h-5 text-gray-400" />
+                <DoorOpen className="w-5 h-5 text-[var(--text-muted)]" />
                 <div>
                   <p className="font-medium">{gate.name}</p>
                   <p className="text-xs text-[var(--text-muted)]">

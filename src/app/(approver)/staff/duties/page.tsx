@@ -40,7 +40,7 @@ function StaffDutiesInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/staff"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
       </Link>
@@ -49,7 +49,7 @@ function StaffDutiesInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Duties</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -72,8 +72,8 @@ function StaffDutiesInner() {
       )}
 
       <WidgetBoundary title="Duties">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Users className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Today&apos;s duty roster</span>
@@ -88,7 +88,7 @@ function StaffDutiesInner() {
             <div className="divide-y divide-slate-800 min-w-0">
               {slice.roster.map((m) => (
                 <div key={m.id} className="px-4 py-2.5 flex items-center gap-3 min-w-0">
-                  <span className="flex-1 text-sm text-slate-200 truncate">{m.name}</span>
+                  <span className="flex-1 text-sm text-[var(--text-secondary)] truncate">{m.name}</span>
                   <span className="text-xs text-[var(--text-muted)] capitalize shrink-0">{m.role}</span>
                 </div>
               ))}

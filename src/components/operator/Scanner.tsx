@@ -681,9 +681,9 @@ export function Scanner({
           className="relative w-full h-full flex flex-col overflow-hidden"
         >
           {/* Header — one compact status line. No decoration. */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800/60 bg-slate-950/85 z-10">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border)]/60 bg-[var(--bg-elevated)]/85 z-10">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[var(--bg-elevated)] text-slate-300 flex items-center justify-center border border-slate-700">
+              <div className="w-8 h-8 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] flex items-center justify-center border border-[var(--border)]">
                 <Camera className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -700,7 +700,7 @@ export function Scanner({
                 className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-white flex items-center justify-center transition-colors"
                 title={soundEnabled ? "Mute" : "Unmute"}
               >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-slate-300" /> : <VolumeX className="w-4 h-4 text-[var(--text-muted)]" />}
+                {soundEnabled ? <Volume2 className="w-4 h-4 text-[var(--text-secondary)]" /> : <VolumeX className="w-4 h-4 text-[var(--text-muted)]" />}
               </button>
               <button
                 onClick={() => { stopCamera(); onClose(); }}
@@ -733,7 +733,7 @@ export function Scanner({
             {cameraState === "active" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
                 <div className="w-40 h-40 rounded-2xl border border-white/15" />
-                <p className="text-[11px] font-semibold text-white/90 bg-slate-950/70 rounded-full px-3 py-1">
+                <p className="text-[11px] font-semibold text-white/90 bg-[var(--bg-elevated)]/70 rounded-full px-3 py-1">
                   {mode === "qr"
                     ? "Point at a QR code — auto-detecting"
                     : "Point at a barcode (1D/2D) — auto-detecting"}
@@ -741,23 +741,23 @@ export function Scanner({
               </div>
             )}
             {cameraState === "requesting" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 text-white space-y-3 p-4 text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-elevated)] text-white space-y-3 p-4 text-center">
                 <RefreshCw className="w-8 h-8 text-[var(--text-muted)] animate-spin" />
-                <p className="text-xs text-slate-300 font-medium">Initializing camera...</p>
+                <p className="text-xs text-[var(--text-secondary)] font-medium">Initializing camera...</p>
               </div>
             )}
 
             {cameraState === "error" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-center p-6 space-y-3">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-elevated)]/95 text-center p-6 space-y-3">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-amber-400">Camera Unavailable</h3>
-                <p className="text-xs text-slate-300 max-w-xs">{errorMessage}</p>
+                <p className="text-xs text-[var(--text-secondary)] max-w-xs">{errorMessage}</p>
                 <button
                   type="button"
                   onClick={() => startCamera()}
-                  className="mt-2 px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold flex items-center gap-1.5"
+                  className="mt-2 px-4 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-white text-xs font-semibold flex items-center gap-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> Retry
                 </button>
@@ -766,7 +766,7 @@ export function Scanner({
           </div>
 
           {/* Actions */}
-          <div className="p-4 bg-[var(--bg-surface)] border-t border-slate-800">
+          <div className="p-4 bg-[var(--bg-surface)] border-t border-[var(--border)]">
             <input
               type="file"
               ref={fileInputRef}
@@ -779,7 +779,7 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
                   <Upload className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                   <span className="truncate">Upload QR Image</span>
@@ -788,7 +788,7 @@ export function Scanner({
                   <button
                     type="button"
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
-                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
                     <KeyRound className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                     <span className="truncate">Manual Entry</span>

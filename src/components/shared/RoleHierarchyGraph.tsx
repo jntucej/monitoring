@@ -114,7 +114,7 @@ export function RoleHierarchyGraph({
           } ${
             isRoot
               ? "border-emerald-500/40 bg-emerald-500/[0.08]"
-              : "border-slate-800 bg-[var(--bg-surface)]/40 hover:bg-[var(--bg-surface)]"
+              : "border-[var(--border)] bg-[var(--bg-surface)]/40 hover:bg-[var(--bg-surface)]"
           }`}
         >
           <button
@@ -133,7 +133,7 @@ export function RoleHierarchyGraph({
                 <ChevronRight className="w-4 h-4" />
               )
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-elevated)]" />
             )}
           </button>
 
@@ -163,7 +163,7 @@ export function RoleHierarchyGraph({
               {showOnCampus && (
                 <span
                   className={`inline-flex items-center gap-1 text-[11px] ${
-                    onCampus > 0 ? "text-emerald-400" : "text-slate-600"
+                    onCampus > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"
                   }`}
                 >
                   <Lock className="w-3 h-3" />
@@ -176,7 +176,7 @@ export function RoleHierarchyGraph({
         </div>
 
         {hasChildren && isExpanded && (
-          <div className={`ml-4 border-l-2 border-slate-800 pl-4 ${compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}`}>
+          <div className={`ml-4 border-l-2 border-[var(--border)] pl-4 ${compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}`}>
             {node.children.map((child) => (
               <div key={child.code} className="relative">
                 <div className="absolute -left-4 top-1/2 h-0.5 w-4 bg-[var(--bg-elevated)]" />
@@ -193,11 +193,11 @@ export function RoleHierarchyGraph({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-[11px] text-slate-300">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-secondary)]">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             {totals.roles} roles
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-[11px] text-slate-300">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-secondary)]">
             <Users className="w-3.5 h-3.5 text-emerald-400" />
             {totals.members} total users
           </span>
@@ -212,14 +212,14 @@ export function RoleHierarchyGraph({
           <button
             type="button"
             onClick={expandAll}
-            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-[10px] font-semibold text-slate-300 hover:text-white hover:border-slate-600 transition"
+            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-secondary)] hover:text-white hover:border-[var(--border)] transition"
           >
             Expand All
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-[10px] font-semibold text-slate-300 hover:text-white hover:border-slate-600 transition"
+            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-secondary)] hover:text-white hover:border-[var(--border)] transition"
           >
             Collapse All
           </button>

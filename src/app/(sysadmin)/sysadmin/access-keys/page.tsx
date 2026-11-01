@@ -249,7 +249,7 @@ export default function SysAdminAccessKeysPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Recently issued codes</h2>
-            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-slate-200">
+            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
             </button>
           </div>
@@ -297,13 +297,13 @@ export default function SysAdminAccessKeysPage() {
                           <div className="font-mono text-xs text-emerald-400">{c.user_roll || c.user_id?.slice(0, 8)}</div>
                           {c.user_name && <div className="text-[11px] text-[var(--text-muted)]">{c.user_name}</div>}
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-slate-300">{c.purpose}</td>
+                        <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{c.purpose}</td>
                         <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.created_at)}</td>
                         <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.expires_at)}</td>
                         <td className="px-4 py-2.5">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                             status === "Active" ? "bg-emerald-500/15 text-emerald-400"
-                            : status === "Used" ? "bg-slate-500/15 text-[var(--text-muted)]"
+                            : status === "Used" ? "bg-[var(--bg-elevated)]/15 text-[var(--text-muted)]"
                             : "bg-rose-500/15 text-rose-400"
                           }`}>
                             {status}

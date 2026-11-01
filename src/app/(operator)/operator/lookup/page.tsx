@@ -173,7 +173,7 @@ function OperatorLookupInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -284,7 +284,7 @@ function OperatorLookupInner() {
                 </div>
               ) : (
                 <div className="p-6 text-center min-w-0">
-                  <Clock className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+                  <Clock className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
                   <p className="text-sm text-[var(--text-muted)]">No scan history for this person.</p>
                 </div>
               )}

@@ -89,7 +89,7 @@ function AdminWorkflowConfigurationInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Pass Types">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <GitBranch className="w-3.5 h-3.5 text-emerald-400" /> Pass Types
             </div>
@@ -101,7 +101,7 @@ function AdminWorkflowConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Pending">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <FileCheck className="w-3.5 h-3.5 text-amber-400" /> Awaiting Approval
             </div>
@@ -113,7 +113,7 @@ function AdminWorkflowConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Standard SLA
             </div>
@@ -127,8 +127,8 @@ function AdminWorkflowConfigurationInner() {
 
       {/* Per-pass-type definitions */}
       <WidgetBoundary title="Workflow Definitions">
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-slate-800">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
               <GitBranch className="w-4 h-4 text-emerald-400" />
               Per-pass-type definitions
@@ -140,7 +140,7 @@ function AdminWorkflowConfigurationInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter pass types…"
-                className="w-full rounded-lg bg-[var(--bg-surface)] border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
               />
               {query && (
                 <button
@@ -176,7 +176,7 @@ function AdminWorkflowConfigurationInner() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[720px]">
-                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-slate-800">
+                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border)]">
                   <tr>
                     <th className="py-2.5 px-4">Pass Type</th>
                     <th className="py-2.5 px-4">Approval</th>
@@ -204,15 +204,15 @@ function AdminWorkflowConfigurationInner() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-slate-300">
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">
                         {p.workflow?.current_stage || (
                           <span className="text-[var(--text-muted)]">No active requests</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 tabular-nums text-slate-300">
+                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">
                         {p.volume_total} ({p.volume_pending} pending)
                       </td>
-                      <td className="py-3 px-4 tabular-nums text-slate-300">{p.sla_hours} hrs</td>
+                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">{p.sla_hours} hrs</td>
                       <td className="py-3 px-4">
                         {p.is_active ? (
                           <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400">

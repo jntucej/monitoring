@@ -105,7 +105,7 @@ export function GlassInteractiveCard({
       ? "bg-emerald-500/30"
       : status === "exit"
       ? "bg-rose-500/30"
-      : "bg-slate-500/15";
+      : "bg-[var(--bg-elevated)]/15";
 
   const pulseDotClass = status === "entry" ? "bg-emerald-500" : "bg-rose-500";
   const isOutdoorOrEmergency = displayMode === "outdoor" || performanceTier === "emergency";
@@ -113,9 +113,9 @@ export function GlassInteractiveCard({
 
   const getContainerBackground = () => {
     if (isOutdoorOrEmergency) {
-      return isDark ? "bg-slate-950/95 border-slate-700 text-white" : "bg-slate-100/95 border-slate-300 text-slate-900";
+      return isDark ? "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-white" : "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-[var(--text-primary)]";
     }
-    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-slate-100" : "bg-white/80 border-white/80 text-neutral-900";
+    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-[var(--text-primary)]" : "bg-white/80 border-white/80 text-neutral-900";
   };
 
   const getBlurClass = () => {

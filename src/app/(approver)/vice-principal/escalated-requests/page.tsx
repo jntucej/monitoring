@@ -47,7 +47,7 @@ function VpEscalatedInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Escalated Requests">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Inbox className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -69,7 +69,7 @@ function VpEscalatedInner() {
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No escalated requests right now.</p>
             </div>
           ) : (
@@ -79,11 +79,11 @@ function VpEscalatedInner() {
                 return (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0"
+                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs text-amber-400">{r.ticket_number}</span>
-                      <span className="text-sm text-slate-300 truncate min-w-0 flex-1">
+                      <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
                         {r.student?.student_details?.roll
                           ? ` · ${r.student.student_details.roll}`
@@ -99,14 +99,14 @@ function VpEscalatedInner() {
                         type="button"
                         onClick={() => setOpenTicket(open ? null : r.ticket_number)}
                         aria-expanded={open}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-700 bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
                       >
                         {open ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         {open ? "Hide timeline" : "Timeline"}
                       </button>
                     </div>
                     {open && (
-                      <div className="mt-4 rounded-lg border border-slate-800 bg-[#0f172a] p-3 min-w-0">
+                      <div className="mt-4 rounded-lg border border-[var(--border)] bg-[#0f172a] p-3 min-w-0">
                         <RequestTimeline ticket={r.ticket_number} compact />
                       </div>
                     )}

@@ -72,7 +72,7 @@ export function HealthDashboard() {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-500/10 text-gray-400 border border-gray-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)] border border-[var(--border)]/20">
             Unknown
           </span>
         );
@@ -102,7 +102,7 @@ export function HealthDashboard() {
             {health && getStatusBadge(health.status)}
           </div>
           <p className="text-xs text-[var(--text-muted)] flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-gray-400" />
+            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
             {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Fetching..."} (refresh on demand)
           </p>
         </div>

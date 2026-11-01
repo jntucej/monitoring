@@ -269,7 +269,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
         </div>
         <button
           onClick={() => { setLoading(true); fetchStudents(); fetchDeprovisioned(); }}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-slate-700 text-sm text-slate-300 transition"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-sm text-[var(--text-secondary)] transition"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -304,7 +304,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, roll, or course…"
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           />
         </div>
       </div>
@@ -324,7 +324,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
             {t.icon}
             {t.label}
             <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
-              tab === t.id ? "bg-emerald-500/20 text-emerald-300" : "bg-slate-700 text-[var(--text-muted)]"
+              tab === t.id ? "bg-emerald-500/20 text-emerald-300" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
             }`}>{t.count}</span>
           </button>
         ))}
@@ -367,7 +367,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
 
                   {confirmBulk && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                      <div className="bg-[var(--bg-surface)] border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full shadow-2xl">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="p-2 rounded-full bg-emerald-500/15">
                             <GraduationCap className="text-emerald-400" size={20} />
@@ -377,12 +377,12 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                             <p className="text-[var(--text-muted)] text-xs">{filteredAuto.length} student(s) will be marked DEPROVISIONED</p>
                           </div>
                         </div>
-                        <p className="text-slate-300 text-sm mb-4">
+                        <p className="text-[var(--text-secondary)] text-sm mb-4">
                           These students will be removed from all active rosters, gate logs, and mess eligibility.
                           Their historical data is preserved. This action can be reversed via the "Re-activate" button.
                         </p>
                         <div className="flex gap-3">
-                          <button onClick={() => setConfirmBulk(false)} className="flex-1 px-4 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-slate-700 text-slate-300 text-sm transition">Cancel</button>
+                          <button onClick={() => setConfirmBulk(false)} className="flex-1 px-4 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-sm transition">Cancel</button>
                           <button onClick={handleBulkGraduate} disabled={bulkLoading} className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium transition flex items-center justify-center gap-2">
                             {bulkLoading && <Loader2 size={14} className="animate-spin" />}
                             Confirm
@@ -392,7 +392,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                     </div>
                   )}
 
-                  <div className="overflow-x-auto rounded-xl border border-slate-800">
+                  <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
                     <table className="w-full text-sm min-w-[680px]">
                       <thead>
                         <tr className="bg-[var(--bg-elevated)]/60 text-[var(--text-muted)] text-xs uppercase tracking-wider">
@@ -409,10 +409,10 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                         {filteredAuto.map((s) => {
                           const decoded = parseRollNumber(s.roll);
                           return (
-                            <tr key={s.id} className="border-t border-slate-800/60 hover:bg-[var(--bg-elevated)]/30">
+                            <tr key={s.id} className="border-t border-[var(--border)]/60 hover:bg-[var(--bg-elevated)]/30">
                               <td className="px-4 py-3 font-mono text-emerald-300">{s.roll || "—"}</td>
                               <td className="px-4 py-3 text-white">{s.name}</td>
-                              <td className="px-4 py-3 text-slate-300">{s.courseLabel || "—"}</td>
+                              <td className="px-4 py-3 text-[var(--text-secondary)]">{s.courseLabel || "—"}</td>
                               <td className="px-4 py-3 text-[var(--text-muted)]">{decoded?.admissionYear ?? "—"}</td>
                               <td className="px-4 py-3 text-amber-300 font-medium">{s.gradYear ?? "—"}</td>
                               <td className="px-4 py-3">
@@ -446,7 +446,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={rosterCourse}
                   onChange={(e) => setRosterCourse(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-xs text-slate-300"
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)]"
                 >
                   <option value="ALL">All Courses</option>
                   {rosterCourses.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -454,7 +454,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={rosterYear}
                   onChange={(e) => setRosterYear(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-xs text-slate-300"
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)]"
                 >
                   <option value="ALL">All Grad. Years</option>
                   {rosterYears.map((y) => <option key={y} value={String(y)}>{y}</option>)}
@@ -463,7 +463,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
               {filteredGraduated.length === 0 ? (
                 <EmptyState icon={<Archive size={24} />} text="No graduated students yet. Use the Auto-Detected tab to mark graduates." />
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
+                <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
                   <table className="w-full text-sm min-w-[640px]">
                     <thead>
                       <tr className="bg-[var(--bg-elevated)]/60 text-[var(--text-muted)] text-xs uppercase tracking-wider">
@@ -477,10 +477,10 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                     </thead>
                     <tbody>
                       {filteredGraduated.map((s) => (
-                        <tr key={s.id} className="border-t border-slate-800/60 hover:bg-[var(--bg-elevated)]/30">
+                        <tr key={s.id} className="border-t border-[var(--border)]/60 hover:bg-[var(--bg-elevated)]/30">
                           <td className="px-4 py-3 font-mono text-emerald-300">{s.roll || "—"}</td>
                           <td className="px-4 py-3 text-white">{s.name}</td>
-                          <td className="px-4 py-3 text-slate-300">{s.courseLabel || "—"}</td>
+                          <td className="px-4 py-3 text-[var(--text-secondary)]">{s.courseLabel || "—"}</td>
                           <td className="px-4 py-3 text-violet-300 font-medium">{s.gradYear ?? "—"}</td>
                           <td className="px-4 py-3 font-mono text-xs text-[var(--text-muted)]">{fmtDate(s.completedAt)}</td>
                           <td className="px-4 py-3">
@@ -506,7 +506,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={depRole}
                   onChange={(e) => setDepRole(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-slate-700 text-xs text-slate-300"
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-secondary)]"
                 >
                   <option value="ALL">All Roles</option>
                   {depRoles.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -515,7 +515,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
               {filteredDeprovisioned.length === 0 ? (
                 <EmptyState icon={<Ban size={24} />} text="No deprovisioned users found." />
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-slate-800">
+                <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
                   <table className="w-full text-sm min-w-[560px]">
                     <thead>
                       <tr className="bg-[var(--bg-elevated)]/60 text-[var(--text-muted)] text-xs uppercase tracking-wider">
@@ -528,10 +528,10 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                     </thead>
                     <tbody>
                       {filteredDeprovisioned.map((u) => (
-                        <tr key={u.id} className="border-t border-slate-800/60 hover:bg-[var(--bg-elevated)]/30">
+                        <tr key={u.id} className="border-t border-[var(--border)]/60 hover:bg-[var(--bg-elevated)]/30">
                           <td className="px-4 py-3 font-mono text-rose-300">{u.uniqueId || "—"}</td>
                           <td className="px-4 py-3 text-white">{u.name}</td>
-                          <td className="px-4 py-3 text-slate-300">{u.role || "—"}</td>
+                          <td className="px-4 py-3 text-[var(--text-secondary)]">{u.role || "—"}</td>
                           <td className="px-4 py-3 text-xs text-[var(--text-muted)] max-w-[220px] truncate" title={u.reason || ""}>
                             {u.reason || "—"}
                           </td>
@@ -563,7 +563,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
 
 function KpiCard({ label, value, icon, color, sub }: { label: string; value: number; icon: ReactNode; color: string; sub?: string }) {
   return (
-    <div className="bg-[var(--bg-elevated)]/40 border border-slate-700/60 rounded-xl p-4">
+    <div className="bg-[var(--bg-elevated)]/40 border border-[var(--border)]/60 rounded-xl p-4">
       <div className={`flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1`}>
         {icon}
         {label}

@@ -141,7 +141,7 @@ function PassVerificationInner() {
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 Verification queue is clear — no pending passes at this stage.
               </p>
@@ -223,7 +223,7 @@ function PassVerificationInner() {
                           type="button"
                           onClick={() => void act(ticket, "APPROVE")}
                           disabled={actingTicket === key}
-                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-black hover:bg-emerald-400 disabled:opacity-50 transition-colors"
                         >
                           {actingTicket === key ? (
                             <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />

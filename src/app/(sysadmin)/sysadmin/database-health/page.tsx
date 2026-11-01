@@ -53,7 +53,7 @@ function DatabaseHealthInner() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-slate-300">{role}</span>
+          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
         </p>
       </div>
 
@@ -72,7 +72,7 @@ function DatabaseHealthInner() {
             ))
           ) : (
             <>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Connectivity</p>
                 <p className={`mt-1 text-xl font-bold ${d?.status === "healthy" ? "text-emerald-400" : "text-rose-400"}`}>
                   {d?.status ?? "unknown"}
@@ -81,35 +81,35 @@ function DatabaseHealthInner() {
                   {d?.latencyMs != null ? `${d.latencyMs} ms round-trip` : "latency unavailable"}
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Database Size</p>
                 <p className="mt-1 text-xl font-bold text-sky-400">{d?.databaseSize ?? "N/A"}</p>
                 <p className="text-xs text-[var(--text-muted)]">pg_database_size(current)</p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Connections</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {d?.connections ? `${d.connections.active} / ${d.connections.total}` : "N/A"}
                 </p>
                 <p className="text-xs text-[var(--text-muted)]">active / total sessions</p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Longest Query</p>
                 <p className="mt-1 text-xl font-bold text-amber-400">
                   {d?.longestQuery != null ? `${d.longestQuery}s` : "idle"}
                 </p>
                 <p className="text-xs text-[var(--text-muted)]">active query running time</p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Cache Hit Ratio</p>
                 <p className="mt-1 text-xl font-bold text-emerald-400">
                   {d?.cacheHitRatio != null ? `${d.cacheHitRatio}%` : "N/A"}
                 </p>
                 <p className="text-xs text-[var(--text-muted)]">shared buffers hit / read</p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase">Data &amp; Backups</p>
-                <p className="mt-1 text-xl font-bold text-slate-300">Governed</p>
+                <p className="mt-1 text-xl font-bold text-[var(--text-secondary)]">Governed</p>
                 <p className="text-xs text-[var(--text-muted)]">See Backup Status for dump freshness</p>
               </div>
             </>

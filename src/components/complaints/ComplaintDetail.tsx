@@ -94,16 +94,16 @@ export function ComplaintDetail({ role }: { role: string }) {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="border-b pb-4">
         <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
-        <h1 className="text-2xl font-semibold text-slate-900 mt-1">{c.title}</h1>
-        <p className="text-sm text-slate-600 mt-1">
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{c.title}</h1>
+        <p className="text-sm text-[var(--text-muted)] mt-1">
           {c.categoryLabel} · Status: <strong className="uppercase">{c.status}</strong> · Owner:{" "}
           <span className="font-mono">{c.currentOwnerRole}</span>
         </p>
       </div>
 
-      <div className="bg-slate-50 border rounded p-4 space-y-2">
-        <h2 className="font-medium text-slate-900">Description</h2>
-        <p className="text-sm text-slate-700 whitespace-pre-wrap">{c.description}</p>
+      <div className="bg-[var(--bg-elevated)] border rounded p-4 space-y-2">
+        <h2 className="font-medium text-[var(--text-primary)]">Description</h2>
+        <p className="text-sm text-[var(--text-muted)] whitespace-pre-wrap">{c.description}</p>
         {c.resolutionSummary && (
           <div className="mt-3 pt-3 border-t">
             <h3 className="font-medium text-emerald-800">Resolution Summary</h3>
@@ -138,7 +138,7 @@ export function ComplaintDetail({ role }: { role: string }) {
               </button>
             </div>
           )}
-          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 rounded bg-slate-700 text-white text-sm">
+          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 rounded bg-[var(--bg-elevated)] text-white text-sm">
             Forward / Escalate
           </button>
           <button onClick={() => patchAction("reject")} className="px-3 py-1.5 rounded bg-rose-600 text-white text-sm">
@@ -175,7 +175,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Tasks / Timeline */}
       <div className="space-y-3">
-        <h2 className="font-medium text-slate-900">Timeline & Tasks</h2>
+        <h2 className="font-medium text-[var(--text-primary)]">Timeline & Tasks</h2>
         <div className="border rounded divide-y bg-white text-sm">
           {data.tasks.map((t: any) => (
             <div key={t.id} className="p-3 space-y-1">
@@ -184,7 +184,7 @@ export function ComplaintDetail({ role }: { role: string }) {
                 <span className="uppercase text-xs text-[var(--text-muted)] font-mono">{t.status}</span>
               </div>
               <p className="text-xs text-[var(--text-muted)]">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
-              {t.notes && <p className="text-slate-700 mt-1 bg-slate-50 p-2 rounded">{t.notes}</p>}
+              {t.notes && <p className="text-[var(--text-muted)] mt-1 bg-[var(--bg-elevated)] p-2 rounded">{t.notes}</p>}
             </div>
           ))}
         </div>
@@ -205,7 +205,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Attachments */}
       <div className="space-y-3 pt-4 border-t">
-        <h2 className="font-medium text-slate-900">Attachments</h2>
+        <h2 className="font-medium text-[var(--text-primary)]">Attachments</h2>
         <div className="flex flex-wrap gap-2">
           {data.attachments.map((a: any) => (
             <a
@@ -213,7 +213,7 @@ export function ComplaintDetail({ role }: { role: string }) {
               href={`/api/complaints/${id}/attachments/${a.id}`}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-slate-50 flex items-center gap-1.5"
+              className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-[var(--bg-elevated)] flex items-center gap-1.5"
             >
               <span>{a.name}</span>
               {a.internal && <span className="text-[10px] bg-amber-100 text-amber-800 px-1 rounded">Internal</span>}

@@ -194,7 +194,7 @@ export function AnnouncementsManager() {
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Announcements</p>
-          <p className="text-sm text-gray-500">Create, schedule, and publish broadcast notifications.</p>
+          <p className="text-sm text-[var(--text-muted)]">Create, schedule, and publish broadcast notifications.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)} className="gap-2">
           <Plus className="w-4 h-4" /> {showCreate ? "Cancel" : "New Broadcast"}
@@ -277,7 +277,7 @@ export function AnnouncementsManager() {
 
       <div className="space-y-4">
         {announcements.length === 0 && (
-          <Card className="border p-6 text-center text-sm text-gray-500">No announcements yet.</Card>
+          <Card className="border p-6 text-center text-sm text-[var(--text-muted)]">No announcements yet.</Card>
         )}
         {announcements.map((a) => (
           <Card key={a.id} className="border p-4">
@@ -295,8 +295,8 @@ export function AnnouncementsManager() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 break-words">{a.message}</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-sm text-[var(--text-muted)] dark:text-[var(--text-secondary)] break-words">{a.message}</p>
+                <p className="text-xs text-[var(--text-muted)]">
                   {a.is_published && !a.scheduled_at ? "Live now" : a.scheduled_at ? `Scheduled for ${new Date(a.scheduled_at).toLocaleString()}` : "Not yet published"}
                 </p>
               </div>
@@ -307,7 +307,7 @@ export function AnnouncementsManager() {
                   </Button>
                 )}
                 <Button variant="ghost" size="sm" title={a.is_published ? "Unpublish" : "Publish"} onClick={() => handleTogglePublish(a)}>
-                  {a.is_published ? <EyeOff className="w-4 h-4 text-gray-500" /> : <Eye className="w-4 h-4 text-emerald-500" />}
+                  {a.is_published ? <EyeOff className="w-4 h-4 text-[var(--text-muted)]" /> : <Eye className="w-4 h-4 text-emerald-500" />}
                 </Button>
                 <Button variant="ghost" size="sm" title="Delete" onClick={() => handleDelete(a)}>
                   <Trash2 className="w-4 h-4 text-red-500" />

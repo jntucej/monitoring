@@ -36,7 +36,7 @@ interface PermissionPoliciesData {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 space-y-2 animate-pulse">
+    <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 space-y-2 animate-pulse">
       <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
       <div className="h-5 w-32 rounded bg-[var(--bg-elevated)]" />
       <div className="h-3 w-40 rounded bg-[var(--bg-elevated)]" />
@@ -82,7 +82,7 @@ function AdminPermissionPoliciesInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <GitBranch className="w-3.5 h-3.5 text-emerald-400" /> Workflow Types
             </div>
@@ -94,7 +94,7 @@ function AdminPermissionPoliciesInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Open Requests">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <FileCheck className="w-3.5 h-3.5 text-amber-400" /> Open Requests
             </div>
@@ -108,7 +108,7 @@ function AdminPermissionPoliciesInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="w-3.5 h-3.5 text-blue-400" /> Standard SLA
             </div>
@@ -122,8 +122,8 @@ function AdminPermissionPoliciesInner() {
 
       {/* Workflow table */}
       <WidgetBoundary title="Permission Workflow Policies">
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-slate-800">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               Workflow stage definitions
@@ -135,7 +135,7 @@ function AdminPermissionPoliciesInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter workflows…"
-                className="w-full rounded-lg bg-[var(--bg-surface)] border border-slate-700 pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
               />
               {query && (
                 <button
@@ -172,7 +172,7 @@ function AdminPermissionPoliciesInner() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[700px]">
-                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-slate-800">
+                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border)]">
                   <tr>
                     <th className="py-2.5 px-4">Workflow</th>
                     <th className="py-2.5 px-4">Current Stage</th>
@@ -186,13 +186,13 @@ function AdminPermissionPoliciesInner() {
                   {visibleWorkflows.map((w) => (
                     <tr key={w.workflow_type} className="hover:bg-[var(--bg-surface)]/40">
                       <td className="py-3 px-4 font-semibold text-white">{w.workflow_type}</td>
-                      <td className="py-3 px-4 text-slate-300">
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">
                         {w.stages.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {w.stages.map((s) => (
                               <span
                                 key={s.stage}
-                                className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-slate-300"
+                                className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]"
                               >
                                 {s.stage}
                                 {s.open > 0 && <span className="text-emerald-400 tabular-nums">{s.open}</span>}
@@ -203,11 +203,11 @@ function AdminPermissionPoliciesInner() {
                           <span className="text-[var(--text-muted)]">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-slate-300">{w.document_required ? "Required" : "Optional"}</td>
-                      <td className="py-3 px-4 tabular-nums text-slate-300">
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">{w.document_required ? "Required" : "Optional"}</td>
+                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">
                         {w.open_count} / {w.pending_count}
                       </td>
-                      <td className="py-3 px-4 tabular-nums text-slate-300">{w.sla_hours} hrs</td>
+                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">{w.sla_hours} hrs</td>
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {w.approver_roles.map((r) => (
@@ -225,7 +225,7 @@ function AdminPermissionPoliciesInner() {
           )}
 
           {/* Role policy (read-only) */}
-          <div className="p-4 border-t border-slate-800">
+          <div className="p-4 border-t border-[var(--border)]">
             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <Users className="w-3.5 h-3.5 text-emerald-400" />
               {loading

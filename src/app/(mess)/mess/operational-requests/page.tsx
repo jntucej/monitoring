@@ -163,7 +163,7 @@ function MessOperationalRequestsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -171,7 +171,7 @@ function MessOperationalRequestsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -197,7 +197,7 @@ function MessOperationalRequestsInner() {
         <WidgetBoundary title="Raise Operational Request">
           <form
             onSubmit={submitRequest}
-            className="rounded-xl border border-slate-800 bg-[#111827] p-4 space-y-3 min-w-0"
+            className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 space-y-3 min-w-0"
           >
             <p className="text-xs text-[var(--text-muted)]">
               Requests are routed to the caretaker / facilities authority via the approvals
@@ -212,7 +212,7 @@ function MessOperationalRequestsInner() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Water filter replacement for mess"
-                className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
+                className="mt-1 w-full min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
               />
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
@@ -223,7 +223,7 @@ function MessOperationalRequestsInner() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -239,7 +239,7 @@ function MessOperationalRequestsInner() {
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="mt-1 w-full min-h-[44px] rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p} value={p}>
@@ -258,7 +258,7 @@ function MessOperationalRequestsInner() {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 placeholder="Context, affected area, urgency notes (optional)"
-                className="mt-1 w-full rounded-lg border border-slate-700 bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
               />
             </label>
             <div className="flex flex-wrap items-center gap-2">
@@ -281,8 +281,8 @@ function MessOperationalRequestsInner() {
 
       {/* Queue */}
       <WidgetBoundary title="Operational Requests">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <Wrench className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Mess Operational Requests
@@ -300,7 +300,7 @@ function MessOperationalRequestsInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-2.5">Request</th>
                     <th className="text-left px-4 py-2.5">Category</th>
                     <th className="text-left px-4 py-2.5">Priority</th>
@@ -312,7 +312,7 @@ function MessOperationalRequestsInner() {
                   {requests.map((r) => (
                     <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
                       <td className="px-4 py-2.5 min-w-0 max-w-md">
-                        <p className="text-slate-200 font-medium truncate">{r.title}</p>
+                        <p className="text-[var(--text-secondary)] font-medium truncate">{r.title}</p>
                         {r.description ? (
                           <p className="text-xs text-[var(--text-muted)] truncate">{r.description}</p>
                         ) : null}
@@ -348,7 +348,7 @@ function MessOperationalRequestsInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No operational requests yet. Raise one above to flag supply, equipment,
                 staffing or hygiene items to the caretaker / facilities authority.

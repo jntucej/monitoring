@@ -72,7 +72,7 @@ function VpDelegatedResponsibilitiesInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Delegated Responsibilities">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Briefcase className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -81,7 +81,7 @@ function VpDelegatedResponsibilitiesInner() {
           </div>
 
           {/* Scope card */}
-          <div className="mb-4 rounded-lg border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-slate-300 min-w-0">
+          <div className="mb-4 rounded-lg border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-[var(--text-secondary)] min-w-0">
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
               <div>
@@ -100,7 +100,7 @@ function VpDelegatedResponsibilitiesInner() {
             {DUTIES.map((d) => (
               <div
                 key={d.title}
-                className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 flex flex-col gap-2 min-w-0"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 flex flex-col gap-2 min-w-0"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <ClipboardCheck className="w-4 h-4 text-sky-400 shrink-0" />
@@ -120,11 +120,11 @@ function VpDelegatedResponsibilitiesInner() {
           </div>
 
           {/* Delegation backend status */}
-          <div className="mt-4 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-4 min-w-0">
+          <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 min-w-0">
             <div className="flex items-start gap-3">
               <ScrollText className="w-5 h-5 text-[var(--text-muted)] shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-200">Live delegation ledger</p>
+                <p className="text-sm font-medium text-[var(--text-secondary)]">Live delegation ledger</p>
                 {backendPending ? (
                   <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">
                     Delegation backend pending — the institution administrator has not yet

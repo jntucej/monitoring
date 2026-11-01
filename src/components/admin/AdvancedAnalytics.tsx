@@ -69,7 +69,7 @@ export function AdvancedAnalytics() {
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Advanced Analytics</p>
-          <p className="text-sm text-gray-500">Build queries and custom reports.</p>
+          <p className="text-sm text-[var(--text-muted)]">Build queries and custom reports.</p>
         </div>
         <Button onClick={() => setShowSave(!showSave)} variant="secondary" size="sm" className="gap-2">
           <Save className="w-4 h-4" /> {showSave ? "Cancel" : "Save Definition"}
@@ -108,7 +108,7 @@ export function AdvancedAnalytics() {
           )}
           <Card className={data.model === "unavailable" ? "lg:col-span-3 border p-4" : "lg:col-span-2 border p-4"}>
             {data.model === "historical-ma" && (
-              <p className="text-xs text-gray-400 mb-2">Historical trend (moving average of recorded movement logs). Not a forecast.</p>
+              <p className="text-xs text-[var(--text-muted)] mb-2">Historical trend (moving average of recorded movement logs). Not a forecast.</p>
             )}
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -131,7 +131,7 @@ export function AdvancedAnalytics() {
                       <Badge variant="entry">{b.count}</Badge>
                     </div>
                   ))
-                : <p className="text-xs text-gray-500">No breakdown available.</p>}
+                : <p className="text-xs text-[var(--text-muted)]">No breakdown available.</p>}
             </Card>
           )}
         </div>

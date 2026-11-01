@@ -46,7 +46,7 @@ export function ComplaintForm() {
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-4 p-6 bg-white border rounded shadow-sm">
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="complaint-category">Complaint Category</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="complaint-category">Complaint Category</label>
         <select id="complaint-category"
           required
           value={selectedCode}
@@ -69,7 +69,7 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="title">Title</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="title">Title</label>
         <input id="title"
           required
           placeholder="Brief summary of the issue"
@@ -80,7 +80,7 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="description">Description</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="description">Description</label>
         <textarea id="description"
           required
           rows={5}
@@ -92,7 +92,7 @@ export function ComplaintForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="location-optional">Location (optional)</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="location-optional">Location (optional)</label>
         <input id="location-optional"
           placeholder="e.g. Hostel A, Room 204"
           value={form.location}

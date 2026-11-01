@@ -67,7 +67,7 @@ function ExamSuperintendentIncidentsInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -76,7 +76,7 @@ function ExamSuperintendentIncidentsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -99,8 +99,8 @@ function ExamSuperintendentIncidentsInner() {
       )}
 
       <WidgetBoundary title="Exam Incidents">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <BellRing className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-sm font-semibold text-white">Exam-Related Alerts & Exceptions</span>
@@ -119,11 +119,11 @@ function ExamSuperintendentIncidentsInner() {
           ) : examAlerts.length === 0 && exceptions.length === 0 ? (
             <div className="p-8 text-center min-w-0">
               <div className="flex flex-col items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-slate-600" />
+                <ShieldCheck className="w-5 h-5 text-[var(--text-muted)]" />
                 <p className="text-sm text-[var(--text-muted)]">
                   No open exam-related alerts or access exceptions right now.
                 </p>
-                <p className="text-xs text-slate-600 max-w-md">
+                <p className="text-xs text-[var(--text-muted)] max-w-md">
                   Unresolved alerts from /api/alerts and exam access exceptions are auto-filtered
                   to exam topics; the rest stay on the shared alerting console.
                 </p>
@@ -138,7 +138,7 @@ function ExamSuperintendentIncidentsInner() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                     {exceptions.slice(0, 9).map((row, i) => (
-                      <div key={row.id ?? i} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                      <div key={row.id ?? i} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                         <p className="text-sm font-semibold text-amber-400 truncate">
                           {row.title ?? (row.id ? `Exception ${row.id.slice(0, 8)}` : "Exam exception")}
                         </p>
@@ -155,16 +155,16 @@ function ExamSuperintendentIncidentsInner() {
                   </p>
                   <div className="space-y-2 min-w-0">
                     {examAlerts.slice(0, 12).map((a) => (
-                      <div key={a.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                      <div key={a.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-sm font-medium text-slate-200 truncate">{a.title ?? a.message ?? "Alert"}</p>
+                          <p className="text-sm font-medium text-[var(--text-secondary)] truncate">{a.title ?? a.message ?? "Alert"}</p>
                           <span
                             className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                               a.severity === "critical"
                                 ? "bg-rose-500/20 text-rose-400"
                                 : a.severity === "warning"
                                   ? "bg-amber-500/20 text-amber-400"
-                                  : "bg-slate-700/40 text-[var(--text-muted)]"
+                                  : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]"
                             }`}
                           >
                             {a.severity ?? "info"}

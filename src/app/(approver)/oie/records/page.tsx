@@ -33,7 +33,7 @@ interface PermissionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-700 bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
+    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
       {message}
     </div>
   );
@@ -64,7 +64,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+          <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Student</th>
             <th className="text-left px-4 py-3">Workflow</th>
@@ -83,7 +83,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
                   {r.ticket_number}
                 </a>
               </td>
-              <td className="px-4 py-3 text-slate-300 min-w-0">
+              <td className="px-4 py-3 text-[var(--text-secondary)] min-w-0">
                 {r.student?.name || "—"}
                 {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
               </td>
@@ -113,7 +113,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
         </tbody>
       </table>
       {rows.length > 0 && (
-        <div className="px-4 py-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="px-4 py-3 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
           <p className="text-xs text-[var(--text-muted)] min-w-0">
             {rows.length} pending at the OIE stage — all are actionable.
           </p>
@@ -158,7 +158,7 @@ function OieRecordsInner() {
       {/* Back link */}
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -167,7 +167,7 @@ function OieRecordsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -181,8 +181,8 @@ function OieRecordsInner() {
       )}
 
       <WidgetBoundary title="Assigned Operational Records">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -198,7 +198,7 @@ function OieRecordsInner() {
           ) : (
             <TicketTable rows={oieRows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
+          <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
             restricted at this tier — this desk surfaces only the records assigned to the
             OIE examination duties.

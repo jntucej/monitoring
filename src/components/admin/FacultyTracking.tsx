@@ -316,7 +316,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : fac.status === "OUTSIDE"
                               ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                              : "bg-slate-500/10 text-[var(--text-muted)] border-slate-500/20"
+                              : "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border-[var(--border)]/20"
                           }`}
                         >
                           {fac.status}
@@ -384,7 +384,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                         ? "bg-emerald-500"
                         : selectedFaculty.status === "OUTSIDE"
                         ? "bg-amber-500"
-                        : "bg-slate-500"
+                        : "bg-[var(--bg-elevated)]"
                     }`}
                   />
                 </div>
@@ -394,7 +394,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-mono font-bold">
                       {selectedFaculty.uniqueId}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-500/10 text-[var(--text-primary)] border border-slate-500/20 text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-[var(--bg-elevated)]/10 text-[var(--text-primary)] border border-[var(--border)]/20 text-[10px] font-bold">
                       {selectedFaculty.department}
                     </span>
                   </div>
@@ -430,7 +430,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                       : selectedFaculty.status === "OUTSIDE"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                      : "bg-slate-500/10 text-[var(--text-muted)] border-slate-500/30"
+                      : "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border-[var(--border)]/30"
                   }`}
                 >
                   {selectedFaculty.status === "INSIDE"
@@ -521,7 +521,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <span className="w-2.5 h-2.5 rounded bg-rose-500/40 inline-block" /> Absent
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-slate-700/50 inline-block" /> Weekend
+                    <span className="w-2.5 h-2.5 rounded bg-[var(--bg-elevated)]/50 inline-block" /> Weekend
                   </span>
                 </div>
               </div>
@@ -531,7 +531,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   const dayNum = day.date.slice(8);
                   const isSelected = activeHeatmapDay?.date === day.date;
 
-                  let colorClass = "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)] border-slate-700/30";
+                  let colorClass = "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)] border-[var(--border)]/30";
                   if (day.status === "ON_TIME") {
                     colorClass = "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 hover:bg-emerald-500 hover:text-white";
                   } else if (day.status === "LATE") {
@@ -541,7 +541,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   } else if (day.status === "ABSENT") {
                     colorClass = "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/30";
                   } else if (day.status === "WEEKEND") {
-                    colorClass = "bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] border-slate-700/20 opacity-60";
+                    colorClass = "bg-[var(--bg-elevated)]/30 text-[var(--text-muted)] border-[var(--border)]/20 opacity-60";
                   }
 
                   return (
@@ -577,7 +577,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                           ? "bg-indigo-500/20 text-indigo-400"
                           : activeHeatmapDay.status === "ABSENT"
                           ? "bg-rose-500/20 text-rose-400"
-                          : "bg-slate-500/20 text-[var(--text-muted)]"
+                          : "bg-[var(--bg-elevated)]/20 text-[var(--text-muted)]"
                       }`}
                     >
                       {activeHeatmapDay.status === "LATE" ? "LATE ARRIVAL (>10:00 AM)" : activeHeatmapDay.status}

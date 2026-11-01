@@ -122,7 +122,7 @@ function VpPendingApprovalsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Pending Approvals">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Inbox className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -154,9 +154,9 @@ function VpPendingApprovalsInner() {
             </div>
           ) : grouped.length === 0 ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No pending items at the Vice Principal stage.</p>
-              <p className="mt-2 text-xs text-slate-600">
+              <p className="mt-2 text-xs text-[var(--text-muted)]">
                 <ShieldCheck className="inline w-3.5 h-3.5 mr-1" />
                 When a request lands at the VP stage, approve, reject, or escalate it here.
               </p>
@@ -169,11 +169,11 @@ function VpPendingApprovalsInner() {
                 return (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0"
+                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs text-sky-400">{r.ticket_number}</span>
-                      <span className="text-sm text-slate-300 truncate min-w-0 flex-1">
+                      <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
                         {r.student?.student_details?.roll
                           ? ` · ${r.student.student_details.roll}`
@@ -217,7 +217,7 @@ function VpPendingApprovalsInner() {
                         <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
                       </button>
                       {!inScope && (
-                        <span className="text-[11px] text-slate-600">
+                        <span className="text-[11px] text-[var(--text-muted)]">
                           view-only · outside delegated scope
                         </span>
                       )}
@@ -226,7 +226,7 @@ function VpPendingApprovalsInner() {
                 );
               })}
               {rows.length > 12 && (
-                <li className="text-xs text-slate-600">
+                <li className="text-xs text-[var(--text-muted)]">
                   Showing 12 of {rows.length} items.
                 </li>
               )}

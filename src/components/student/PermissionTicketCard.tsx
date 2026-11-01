@@ -29,7 +29,7 @@ const WORKFLOW_BADGES: Record<string, { label: string; className: string }> = {
   hostel: { label: "Hostel", className: "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20" },
   exam: { label: "Exam", className: "bg-teal-500/10 text-teal-500 border border-teal-500/20" },
   memo: { label: "Memo", className: "bg-violet-500/10 text-violet-500 border border-violet-500/20" },
-  staff_leave: { label: "Staff Leave", className: "bg-slate-500/10 text-[var(--text-muted)] border border-slate-500/20" },
+  staff_leave: { label: "Staff Leave", className: "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20" },
 };
 
 const STATUS_CLASSES: Record<string, string> = {
@@ -48,9 +48,9 @@ const STATUS_CLASSES: Record<string, string> = {
 export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardProps) {
   const workflow = WORKFLOW_BADGES[ticket.workflow_type] || {
     label: ticket.workflow_type,
-    className: "bg-slate-500/10 text-[var(--text-muted)] border border-slate-500/20",
+    className: "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20",
   };
-  const statusClass = STATUS_CLASSES[ticket.status] || "bg-slate-500/10 text-[var(--text-muted)] border border-slate-500/20";
+  const statusClass = STATUS_CLASSES[ticket.status] || "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20";
   const stageLabel = STAGE_LABELS[ticket.current_stage] || ticket.current_stage;
   const history = ticket.stage_history || [];
   const latest = history[history.length - 1];

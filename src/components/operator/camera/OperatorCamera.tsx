@@ -445,23 +445,23 @@ export function OperatorCamera({
       {cameraState === "active" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
           <div className="w-40 h-40 rounded-2xl border border-white/15" />
-          <p className="text-[11px] font-semibold text-white/90 bg-slate-950/70 rounded-full px-3 py-1">
+          <p className="text-[11px] font-semibold text-white/90 bg-[var(--bg-elevated)]/70 rounded-full px-3 py-1">
             {mode === "qr" ? "Point at a QR code" : "Point at a barcode"}
           </p>
         </div>
       )}
 
       {cameraState === "requesting" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
+        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-elevated)]">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-slate-400 border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-8 h-8 border-2 border-[var(--border)] border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs text-[var(--text-muted)] mt-2">Initializing camera...</p>
           </div>
         </div>
       )}
 
       {cameraState === "error" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 text-center p-6">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-elevated)]/95 text-center p-6">
           <div className="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mb-3">
             <Camera className="w-6 h-6" />
           </div>

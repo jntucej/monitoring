@@ -73,7 +73,7 @@ function AdminNotificationSettingsInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Gauge className="w-3.5 h-3.5 text-emerald-400" /> Total Queued
             </div>
@@ -85,7 +85,7 @@ function AdminNotificationSettingsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Preferences">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Bell className="w-3.5 h-3.5 text-blue-400" /> Preferences Configured
             </div>
@@ -97,7 +97,7 @@ function AdminNotificationSettingsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Channels">
-          <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               <Inbox className="w-3.5 h-3.5 text-amber-400" /> Active Channels
             </div>
@@ -111,7 +111,7 @@ function AdminNotificationSettingsInner() {
 
       {/* Channel + queue table */}
       <WidgetBoundary title="Channel & Queue Status">
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] overflow-hidden">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
               <div className="h-4 w-40 rounded bg-[var(--bg-elevated)] animate-pulse" />
@@ -122,7 +122,7 @@ function AdminNotificationSettingsInner() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* Channels */}
-              <div className="p-4 lg:border-r lg:border-slate-800">
+              <div className="p-4 lg:border-r lg:border-[var(--border)]">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
                   <Bell className="w-4 h-4 text-emerald-400" /> Channel volume
                 </h2>
@@ -132,7 +132,7 @@ function AdminNotificationSettingsInner() {
                   <div className="divide-y divide-slate-800/60">
                     {d!.channels.map((c) => (
                       <div key={c.channel} className="flex items-center justify-between py-2.5">
-                        <span className="flex items-center gap-2 text-xs font-medium text-slate-200 capitalize">
+                        <span className="flex items-center gap-2 text-xs font-medium text-[var(--text-secondary)] capitalize">
                           {CHANNEL_ICONS[c.channel] || <Inbox className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
                           {c.channel.replace(/_/g, " ")}
                         </span>
@@ -154,7 +154,7 @@ function AdminNotificationSettingsInner() {
                   <div className="divide-y divide-slate-800/60">
                     {d!.queue_depth.map((q) => (
                       <div key={q.queue} className="flex items-center justify-between py-2.5">
-                        <span className="text-xs font-medium text-slate-200 capitalize">
+                        <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">
                           {q.queue.replace(/_/g, " ")} queue
                         </span>
                         <span
@@ -174,7 +174,7 @@ function AdminNotificationSettingsInner() {
 
           {/* Top notification types */}
           {(d?.top_types?.length ?? 0) > 0 && (
-            <div className="border-t border-slate-800 p-4">
+            <div className="border-t border-[var(--border)] p-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
                 Most-sent notification types
               </h3>
@@ -182,7 +182,7 @@ function AdminNotificationSettingsInner() {
                 {d!.top_types.map((t) => (
                   <span
                     key={t.type}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-[11px] text-slate-300"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-[11px] text-[var(--text-secondary)]"
                   >
                     {t.type.replace(/_/g, " ")}
                     <span className="tabular-nums text-emerald-400">{t.count}</span>

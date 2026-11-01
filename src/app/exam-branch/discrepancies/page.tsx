@@ -96,7 +96,7 @@ function ExamBranchDiscrepanciesInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -105,7 +105,7 @@ function ExamBranchDiscrepanciesInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -130,12 +130,12 @@ function ExamBranchDiscrepanciesInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Discrepancy Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Open Discrepancies</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalOpen}</p>
             <p className="text-xs text-[var(--text-muted)]">Unresolved alerts visible to this role</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Critical</p>
             <p
               className={`mt-1 text-2xl font-bold ${
@@ -146,7 +146,7 @@ function ExamBranchDiscrepanciesInner() {
             </p>
             <p className="text-xs text-[var(--text-muted)]">Requires immediate attention</p>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
             <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">High</p>
             <p
               className={`mt-1 text-2xl font-bold ${
@@ -162,8 +162,8 @@ function ExamBranchDiscrepanciesInner() {
 
       {/* Discrepancy list */}
       <WidgetBoundary title="Attendance Discrepancies">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <CircleAlert className="w-4 h-4 text-rose-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -175,11 +175,11 @@ function ExamBranchDiscrepanciesInner() {
 
           {forbidden ? (
             <div className="p-6 text-center min-w-0">
-              <ShieldAlert className="w-8 h-8 mx-auto text-slate-600 mb-2" />
+              <ShieldAlert className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 Access to live discrepancies is restricted.
               </p>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1">
                 The alerts feed is limited to administrative roles. Contact your
                 supervisor or admin if you need attendance discrepancy details.
               </p>
@@ -189,7 +189,7 @@ function ExamBranchDiscrepanciesInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
@@ -199,7 +199,7 @@ function ExamBranchDiscrepanciesInner() {
               <p className="text-sm text-[var(--text-muted)]">
                 No open discrepancies.
               </p>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1">
                 Attendance and access discrepancies appear here when they are
                 flagged by the gate system.
               </p>

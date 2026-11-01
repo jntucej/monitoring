@@ -51,7 +51,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
       : "#3b82f6";
 
   return (
-    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden rounded-2xl bg-slate-950/40 backdrop-blur-md border border-white/10 p-4">
+    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden rounded-2xl bg-[var(--bg-elevated)]/40 backdrop-blur-md border border-white/10 p-4">
       {/* Laser Scanning Line Wave */}
       <div
         className="absolute left-0 right-0 h-[2px] pointer-events-none shadow-[0_0_15px_#10b981]"

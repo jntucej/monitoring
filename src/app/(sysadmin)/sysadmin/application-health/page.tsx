@@ -71,7 +71,7 @@ function ApplicationHealthInner() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-slate-300">{role}</span>
+          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
         </p>
       </div>
 
@@ -84,12 +84,12 @@ function ApplicationHealthInner() {
 
       <WidgetBoundary title="Application Health">
         {!busy && !health ? (
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
             <p className="text-sm text-[var(--text-muted)]">No application health data available.</p>
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+            <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm font-semibold text-white">Process &amp; Request Metrics</span>
               <span
                 className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -110,29 +110,29 @@ function ApplicationHealthInner() {
                 ))
               ) : (
                 <>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Uptime</p>
                     <p className="text-lg font-bold text-sky-400">{formatUptime(safeHealth.uptimeSeconds)}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Active Users</p>
                     <p className="text-lg font-bold text-emerald-400">{safeHealth.metrics.activeUsers}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Active Sessions</p>
                     <p className="text-lg font-bold text-emerald-400">{safeHealth.metrics.activeSessions}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Req/min</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.requestsPerMinute}</p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Error Rate</p>
                     <p className={`text-lg font-bold ${safeHealth.metrics.errorRate > 5 ? "text-rose-400" : "text-emerald-400"}`}>
                       {safeHealth.metrics.errorRate}%
                     </p>
                   </div>
-                  <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                     <p className="text-[10px] text-[var(--text-muted)] uppercase">Avg Response</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.avgResponseTime}ms</p>
                   </div>
@@ -144,15 +144,15 @@ function ApplicationHealthInner() {
                 <p className="text-xs font-semibold uppercase text-[var(--text-muted)] mb-2">Recent Alerts</p>
                 <div className="space-y-2 min-w-0">
                   {safeHealth.recentAlerts.slice(0, 5).map((a) => (
-                    <div key={a.id} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 flex items-center justify-between gap-2">
-                      <span className="text-sm text-slate-300 truncate">{a.message}</span>
+                    <div key={a.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 flex items-center justify-between gap-2">
+                      <span className="text-sm text-[var(--text-secondary)] truncate">{a.message}</span>
                       <span
                         className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                           a.severity === "critical"
                             ? "bg-rose-500/20 text-rose-400"
                             : a.severity === "warning"
                               ? "bg-amber-500/20 text-amber-400"
-                              : "bg-slate-700/40 text-[var(--text-muted)]"
+                              : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]"
                         }`}
                       >
                         {a.severity}

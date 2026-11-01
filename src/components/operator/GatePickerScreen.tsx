@@ -185,7 +185,7 @@ export function GatePickerScreen() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !selected}
-          className="w-full py-3 px-4 rounded-xl bg-[var(--action-primary)] hover:brightness-110 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+          className="w-full py-3 px-4 rounded-xl bg-[var(--action-primary)] hover:brightness-110 disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
         >
           {submitting ? (
             <>

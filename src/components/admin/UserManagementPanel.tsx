@@ -312,7 +312,7 @@ function UserManagementPanelBody({
       s === "ACTIVE" ? "bg-emerald-500/10 text-emerald-400" :
       s === "SUSPENDED" ? "bg-rose-500/10 text-rose-400" :
       s === "LOCKED" ? "bg-amber-500/10 text-amber-400" :
-      "bg-slate-500/10 text-[var(--text-muted)]";
+      "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]";
     return (
       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
         {s}

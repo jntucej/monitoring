@@ -39,9 +39,9 @@ export const PersonBadge: React.FC<PersonBadgeProps> = ({
     },
     worker: {
       label: 'Worker',
-      bg: 'bg-slate-500/10',
+      bg: 'bg-[var(--bg-elevated)]/10',
       text: 'text-[var(--text-muted)]',
-      border: 'border-slate-500/20',
+      border: 'border-[var(--border)]/20',
       icon: <Wrench className="w-3.5 h-3.5 mr-1" />,
     },
     visitor: {

@@ -46,12 +46,12 @@ export default function AntiRaggingPage() {
         <p className="text-sm">
           Your confidential case number is <strong className="font-mono">{caseNumber}</strong>.
         </p>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--text-muted)]">
           Only the Principal&apos;s office will see this report. You may be contacted via the secure channels you provided.
         </p>
         <div className="pt-4 border-t space-y-2">
           <p className="text-sm font-medium">Helpline references:</p>
-          <ul className="text-sm list-disc pl-5 text-slate-700 space-y-1">
+          <ul className="text-sm list-disc pl-5 text-[var(--text-muted)] space-y-1">
             <li>UGC Anti-Ragging Helpline: 1800-180-5522</li>
             <li>AICTE Anti-Ragging: 1800-425-2248</li>
             <li>Campus Security Desk: 24/7 Helpline</li>
@@ -65,13 +65,13 @@ export default function AntiRaggingPage() {
     <form onSubmit={submit} className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-6">
       <div>
         <h1 className="text-2xl font-semibold text-rose-600">Anti-Ragging / Harassment Report</h1>
-        <p className="text-sm text-slate-600 mt-1">
+        <p className="text-sm text-[var(--text-muted)] mt-1">
           This is a confidential, restricted channel. Only the Principal&apos;s office will see this filing.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="category">Category</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="category">Category</label>
         <select id="category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -86,7 +86,7 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="narrative">Narrative</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="narrative">Narrative</label>
         <textarea id="narrative"
           required
           rows={6}
@@ -98,7 +98,7 @@ export default function AntiRaggingPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1" htmlFor="location-optional">Location (optional)</label>
+        <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="location-optional">Location (optional)</label>
         <input id="location-optional"
           placeholder="e.g. Hostel B Mess, Corridor 2"
           value={form.location}

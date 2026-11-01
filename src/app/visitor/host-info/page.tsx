@@ -40,7 +40,7 @@ function VisitorHostinfoInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -49,7 +49,7 @@ function VisitorHostinfoInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Host Info</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -72,8 +72,8 @@ function VisitorHostinfoInner() {
       )}
 
       <WidgetBoundary title="Host Info">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 min-w-0">
               <User className="w-4 h-4 text-sky-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your host</span>
@@ -86,24 +86,24 @@ function VisitorHostinfoInner() {
           ) : host?.name ? (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host</p>
-                  <p className="mt-1 text-base font-semibold text-slate-100">{host.name}</p>
+                  <p className="mt-1 text-base font-semibold text-[var(--text-primary)]">{host.name}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host ID</p>
                   <p className="mt-1 text-base font-mono text-sky-400">
                     {host.uniqueId ?? "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Host role</p>
                   <p className="mt-1 text-base font-bold text-amber-400">{host.role ?? "—"}</p>
                 </div>
               </div>
               {visit?.purpose && (
                 <p className="text-xs text-[var(--text-muted)]">
-                  Visit purpose: <span className="text-slate-300">{visit.purpose}</span>
+                  Visit purpose: <span className="text-[var(--text-secondary)]">{visit.purpose}</span>
                 </p>
               )}
             </div>

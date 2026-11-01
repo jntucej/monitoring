@@ -104,7 +104,7 @@ const api = useApi();
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Compliance & Data Retention</p>
-          <p className="text-sm text-gray-500">Automate GDPR right-to-be-forgotten and data lifecycle policies.</p>
+          <p className="text-sm text-[var(--text-muted)]">Automate GDPR right-to-be-forgotten and data lifecycle policies.</p>
         </div>
         <Button onClick={handleRunRetention} variant="secondary" className="gap-2">
           <Play className="w-4 h-4" /> Run Retention Sweep Now
@@ -118,7 +118,7 @@ const api = useApi();
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left min-w-[650px]">
-              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                 <tr><th className="p-3">Data Category</th><th className="p-3">Retention Window</th><th className="p-3">Auto Sweep</th><th className="p-3 text-right">Actions</th></tr>
               </thead>
               <tbody className="divide-y">
@@ -143,7 +143,7 @@ const api = useApi();
       <Card className="border p-4 space-y-4">
         <h3 className="font-semibold text-lg flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-purple-500" /> GDPR User Data Tools</h3>
         <div className="flex gap-3">
-          <input value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)} placeholder="Enter User Unique ID / Roll No." className="flex-1 p-2 border rounded text-sm bg-white dark:bg-gray-900" />
+          <input value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)} placeholder="Enter User Unique ID / Roll No." className="flex-1 p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]" />
           <Button onClick={handleExport} variant="secondary" size="sm" className="gap-1"><Download className="w-3.5 h-3.5" /> Export Data</Button>
           <Button onClick={handleAnonymize} variant="danger" size="sm" className="gap-1"><UserX className="w-3.5 h-3.5" /> Anonymize PII</Button>
         </div>
@@ -151,7 +151,7 @@ const api = useApi();
         {exportData && (
           <div className="mt-4">
             <div className="text-xs font-semibold mb-1">JSON Data Export:</div>
-            <pre className="p-3 bg-gray-900 text-green-400 text-xs rounded max-h-48 overflow-y-auto font-mono">{exportData}</pre>
+            <pre className="p-3 bg-[var(--bg-elevated)] text-green-400 text-xs rounded max-h-48 overflow-y-auto font-mono">{exportData}</pre>
           </div>
         )}
       </Card>
@@ -178,7 +178,7 @@ const api = useApi();
                 id="auto_delete"
                 checked={editingPolicy.auto_delete}
                 onChange={(e) => setEditingPolicy({ ...editingPolicy, auto_delete: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="auto_delete" className="text-sm font-medium text-[var(--text-primary)] cursor-pointer">
                 Enable Auto Sweep (Purge records older than retention limit)

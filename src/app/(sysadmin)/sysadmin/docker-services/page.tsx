@@ -69,7 +69,7 @@ function DockerServicesInner() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-slate-300">{role}</span>
+          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
         </p>
       </div>
 
@@ -82,8 +82,8 @@ function DockerServicesInner() {
 
       {/* App-level service + container summary */}
       <WidgetBoundary title="Services & Containers">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Service &amp; Container Status</span>
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -91,7 +91,7 @@ function DockerServicesInner() {
                   ? "bg-emerald-500/20 text-emerald-400"
                   : d?.status === "degraded"
                     ? "bg-amber-500/20 text-amber-400"
-                    : "bg-slate-700/40 text-[var(--text-muted)]"
+                    : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]"
               }`}
             >
               {d?.status ?? "loading"}
@@ -108,7 +108,7 @@ function DockerServicesInner() {
             <div className="divide-y divide-slate-800/60 min-w-0">
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-200">PostgreSQL</p>
+                  <p className="text-sm font-medium text-[var(--text-secondary)]">PostgreSQL</p>
                   <p className="text-xs text-[var(--text-muted)]">
                     {d?.database ? `latency ${d.database.latencyMs} ms` : "latency n/a"}
                   </p>
@@ -125,7 +125,7 @@ function DockerServicesInner() {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-200">Redis (cache)</p>
+                  <p className="text-sm font-medium text-[var(--text-secondary)]">Redis (cache)</p>
                   <p className="text-xs text-[var(--text-muted)]">shared cache layer</p>
                 </div>
                 <span
@@ -140,7 +140,7 @@ function DockerServicesInner() {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-200">Gateways (edge nodes)</p>
+                  <p className="text-sm font-medium text-[var(--text-secondary)]">Gateways (edge nodes)</p>
                   <p className="text-xs text-[var(--text-muted)]">
                     {d?.gateways
                       ? `${d.gateways.online} online / ${d.gateways.offline} offline of ${d.gateways.total}`
@@ -162,8 +162,8 @@ function DockerServicesInner() {
         </div>
 
         {/* Containers table */}
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Containers</span>
             <span className="text-xs text-[var(--text-muted)]">
               {d?.containers ? `${d.containers.length} tracked` : "not available"}
@@ -180,7 +180,7 @@ function DockerServicesInner() {
               <p className="text-sm text-[var(--text-muted)]">
                 Container telemetry requires the host Prometheus/cAdvisor exporter.
               </p>
-              <p className="text-xs text-slate-600 max-w-md mx-auto mt-1">
+              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto mt-1">
                 {d?.containersError
                   ? `Exporter unreachable: ${d.containersError}`
                   : "No container data in this environment."}
@@ -190,7 +190,7 @@ function DockerServicesInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-left text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-xs text-[var(--text-muted)] uppercase">
+                  <tr className="border-b border-[var(--border)] text-xs text-[var(--text-muted)] uppercase">
                     <th className="px-4 py-2 font-medium">Container</th>
                     <th className="px-3 py-2 font-medium">State</th>
                     <th className="px-3 py-2 font-medium">CPU</th>
@@ -200,8 +200,8 @@ function DockerServicesInner() {
                 </thead>
                 <tbody>
                   {d.containers.map((c) => (
-                    <tr key={c.name} className="border-b border-slate-800/50">
-                      <td className="px-4 py-2 font-mono text-xs text-slate-300">{c.name}</td>
+                    <tr key={c.name} className="border-b border-[var(--border)]/50">
+                      <td className="px-4 py-2 font-mono text-xs text-[var(--text-secondary)]">{c.name}</td>
                       <td className="px-3 py-2">
                         <span
                           className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -213,9 +213,9 @@ function DockerServicesInner() {
                           {c.running ? "running" : "stopped"}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-slate-300">{c.cpuPercent}%</td>
-                      <td className="px-3 py-2 text-slate-300">{formatBytes(c.memoryBytes)}</td>
-                      <td className="px-3 py-2 text-slate-300">
+                      <td className="px-3 py-2 text-[var(--text-secondary)]">{c.cpuPercent}%</td>
+                      <td className="px-3 py-2 text-[var(--text-secondary)]">{formatBytes(c.memoryBytes)}</td>
+                      <td className="px-3 py-2 text-[var(--text-secondary)]">
                         {c.restartsLastHour > 0 ? (
                           <span className="text-amber-400">{c.restartsLastHour}</span>
                         ) : (

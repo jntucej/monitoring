@@ -130,7 +130,7 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId }: ManualEntr
                 type="button"
                 onClick={handleSubmit}
                 disabled={!rollInput.trim()}
-                className="w-full py-3 rounded-xl bg-[var(--action-primary)] text-slate-950 font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99]"
+                className="w-full py-3 rounded-xl bg-[var(--action-primary)] text-black font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99]"
               >
                 Verify Roll Number
               </button>

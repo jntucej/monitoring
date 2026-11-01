@@ -79,7 +79,7 @@ function WorkerShiftsInner() {
               </div>
               <div>
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Scans</p>
-                <p className="mt-1 text-lg font-mono font-semibold text-slate-200">{todayShift.scans ?? 0}</p>
+                <p className="mt-1 text-lg font-mono font-semibold text-[var(--text-secondary)]">{todayShift.scans ?? 0}</p>
               </div>
             </div>
           ) : (
@@ -101,7 +101,7 @@ function WorkerShiftsInner() {
                       className={`h-4 w-4 shrink-0 ${m.direction === "IN" ? "text-emerald-400" : "text-[var(--text-muted)]"}`}
                       style={m.direction === "OUT" ? { transform: "scaleX(-1)" } : undefined}
                     />
-                    <span className="text-sm text-slate-200 truncate">
+                    <span className="text-sm text-[var(--text-secondary)] truncate">
                       {m.gate_name ?? "Gate"}
                       {m.is_manual ? " (manual)" : ""}
                     </span>

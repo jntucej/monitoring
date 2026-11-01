@@ -145,19 +145,19 @@ export function UnifiedCampusCalendar() {
 
   return (
     <WidgetBoundary title="Unified Campus Calendar">
-      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-indigo-400" />
-            <h3 className="text-sm font-medium text-slate-100">Campus Calendar</h3>
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">Campus Calendar</h3>
             <span className="text-xs text-[var(--text-muted)]">{monthLabel}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1 rounded hover:bg-slate-700/50 text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
+              className="p-1 rounded hover:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -165,7 +165,7 @@ export function UnifiedCampusCalendar() {
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1 rounded hover:bg-slate-700/50 text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
+              className="p-1 rounded hover:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
               aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
@@ -173,7 +173,7 @@ export function UnifiedCampusCalendar() {
             <button
               type="button"
               onClick={() => setView(view === "month" ? "list" : "month")}
-              className="px-2 py-1 rounded text-xs text-[var(--text-muted)] hover:bg-slate-700/50 transition-colors motion-reduce:transition-none"
+              className="px-2 py-1 rounded text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]/50 transition-colors motion-reduce:transition-none"
             >
               {view === "month" ? "List" : "Month"}
             </button>
@@ -192,7 +192,7 @@ export function UnifiedCampusCalendar() {
                 className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs transition-colors motion-reduce:transition-none ${
                   followed
                     ? "text-white"
-                    : "border border-slate-600/50 text-[var(--text-muted)] hover:bg-slate-700/40"
+                    : "border border-[var(--border)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]/40"
                 }`}
                 style={
                   followed
@@ -212,7 +212,7 @@ export function UnifiedCampusCalendar() {
         </div>
 
         {loading ? (
-          <div className="h-48 animate-pulse rounded bg-slate-700/20" />
+          <div className="h-48 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
         ) : view === "month" ? (
           /* Month Grid */
           <div className="grid grid-cols-7 gap-1">
@@ -226,7 +226,7 @@ export function UnifiedCampusCalendar() {
                 key={i}
                 className={`min-h-[3.5rem] rounded border p-1 text-xs ${
                   cell.isCurrentMonth
-                    ? "border-slate-700/50 bg-[var(--bg-elevated)]/30"
+                    ? "border-[var(--border)]/50 bg-[var(--bg-elevated)]/30"
                     : "border-transparent"
                 } ${
                   cell.day &&
@@ -273,7 +273,7 @@ export function UnifiedCampusCalendar() {
               events.map((ev) => (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 rounded-lg border border-slate-700/40 bg-[var(--bg-elevated)]/30 p-3"
+                  className="flex items-start gap-3 rounded-lg border border-[var(--border)]/40 bg-[var(--bg-elevated)]/30 p-3"
                 >
                   <div
                     className="mt-0.5 h-2 w-2 rounded-full shrink-0"
@@ -282,7 +282,7 @@ export function UnifiedCampusCalendar() {
                     }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-200 truncate">{ev.title}</p>
+                    <p className="text-xs font-medium text-[var(--text-secondary)] truncate">{ev.title}</p>
                     <p className="text-[10px] text-[var(--text-muted)]">
                       {new Date(ev.date).toLocaleDateString()}
                       {ev.time ? ` · ${ev.time}` : ""}
@@ -294,7 +294,7 @@ export function UnifiedCampusCalendar() {
                     onClick={() =>
                       toggleFollow(ev.category, !(ev.reminderOptin ?? false))
                     }
-                    className="p-1 text-[var(--text-muted)] hover:text-slate-300 transition-colors motion-reduce:transition-none"
+                    className="p-1 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors motion-reduce:transition-none"
                     aria-label="Toggle reminder"
                   >
                     {ev.reminderOptin ? (

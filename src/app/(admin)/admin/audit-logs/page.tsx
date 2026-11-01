@@ -36,7 +36,7 @@ function AdminAuditLogsInner() {
       </div>
 
       <WidgetBoundary title="Audit Trail">
-        <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-4 sm:p-5">
+        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-4 sm:p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
               <History className="w-5 h-5 text-emerald-400" />

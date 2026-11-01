@@ -84,7 +84,7 @@ const api = useApi();
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Integration Hub</p>
-          <p className="text-sm text-gray-500">Manage HR, SIS, Email/SMS, and Biometric connections.</p>
+          <p className="text-sm text-[var(--text-muted)]">Manage HR, SIS, Email/SMS, and Biometric connections.</p>
         </div>
         <Button onClick={fetchIntegrations} variant="secondary" size="sm" className="gap-2">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
@@ -106,7 +106,7 @@ const api = useApi();
             <Badge variant="success">Active</Badge>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
-            <div className="text-xs text-gray-500 flex justify-between">
+            <div className="text-xs text-[var(--text-muted)] flex justify-between">
               <span>Status:</span>
               <span className="font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Connected</span>
             </div>
@@ -120,7 +120,7 @@ const api = useApi();
           <Card key={item.id} className="border shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="p-2 bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)] rounded-lg">
                   {item.type === "hr_sync" ? <Database className="w-5 h-5 text-blue-500" /> : <Server className="w-5 h-5 text-purple-500" />}
                 </div>
                 <div>
@@ -131,7 +131,7 @@ const api = useApi();
               <Badge variant={item.enabled ? "success" : "offline"}>{item.enabled ? "Active" : "Disabled"}</Badge>
             </CardHeader>
             <CardContent className="space-y-4 pt-2">
-              <div className="text-xs text-gray-500 flex justify-between">
+              <div className="text-xs text-[var(--text-muted)] flex justify-between">
                 <span>Status:</span>
                 <span className="font-medium text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Connected</span>
               </div>
@@ -150,7 +150,7 @@ const api = useApi();
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-600">
+              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
                 <tr><th className="p-3">Integration</th><th className="p-3">Status</th><th className="p-3">Records</th><th className="p-3">Timestamp</th></tr>
               </thead>
               <tbody className="divide-y">
@@ -159,7 +159,7 @@ const api = useApi();
                     <td className="p-3 font-medium capitalize">{log.type.replace("_", " ")}</td>
                     <td className="p-3"><Badge variant={log.status === "success" ? "success" : "error"}>{log.status}</Badge></td>
                     <td className="p-3 font-mono">{log.records_synced}</td>
-                    <td className="p-3 text-xs text-gray-500">{new Date(log.timestamp).toLocaleString()}</td>
+                    <td className="p-3 text-xs text-[var(--text-muted)]">{new Date(log.timestamp).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

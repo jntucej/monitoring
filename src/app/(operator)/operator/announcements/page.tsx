@@ -100,7 +100,7 @@ function OperatorAnnouncementsInner() {
             </div>
           ) : announcements.length === 0 ? (
             <div className="p-8 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No active announcements at this time.</p>
             </div>
           ) : (

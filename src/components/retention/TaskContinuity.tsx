@@ -166,11 +166,11 @@ export function TaskContinuity() {
 
   return (
     <WidgetBoundary title="Task Continuity">
-      <div className="rounded-xl border border-slate-700/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <RotateCw className="h-4 w-4 text-violet-400" />
-          <h3 className="text-sm font-medium text-slate-100">Resume Where You Left Off</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Resume Where You Left Off</h3>
           {hasDrafts && (
             <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-violet-300">
               {allDrafts.length} draft(s)
@@ -206,7 +206,7 @@ export function TaskContinuity() {
 
         {/* Draft List */}
         {loading ? (
-          <div className="h-20 animate-pulse rounded bg-slate-700/20" />
+          <div className="h-20 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
         ) : !hasDrafts ? (
           <div className="py-6 text-center">
             <p className="text-xs text-[var(--text-muted)]">
@@ -227,7 +227,7 @@ export function TaskContinuity() {
                     className={`rounded-lg border p-3 mb-1.5 ${
                       expanded === `${draft.taskType}:${draft.position}`
                         ? "border-violet-500/40 bg-violet-500/10"
-                        : "border-slate-700/40 bg-[var(--bg-elevated)]/30"
+                        : "border-[var(--border)]/40 bg-[var(--bg-elevated)]/30"
                     }`}
                   >
                     <button
@@ -241,7 +241,7 @@ export function TaskContinuity() {
                       }
                       className="flex w-full items-center gap-2 text-left"
                     >
-                      <span className="text-xs text-slate-200 flex-1 truncate">
+                      <span className="text-xs text-[var(--text-secondary)] flex-1 truncate">
                         {getDraftLabel(draft)}
                       </span>
                       {draft.updatedAt && (
@@ -276,7 +276,7 @@ export function TaskContinuity() {
                           <button
                             type="button"
                             onClick={() => handleDismiss(draft)}
-                            className="flex items-center gap-1 rounded border border-slate-600/50 px-2.5 py-1 text-[10px] text-[var(--text-muted)] hover:bg-slate-700/40 transition-colors motion-reduce:transition-none"
+                            className="flex items-center gap-1 rounded border border-[var(--border)]/50 px-2.5 py-1 text-[10px] text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]/40 transition-colors motion-reduce:transition-none"
                           >
                             <X className="h-3 w-3" />
                             Dismiss

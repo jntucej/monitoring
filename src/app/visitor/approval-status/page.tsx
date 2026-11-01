@@ -46,7 +46,7 @@ function VisitorApprovalstatusInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -55,7 +55,7 @@ function VisitorApprovalstatusInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Approval Status</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -78,8 +78,8 @@ function VisitorApprovalstatusInner() {
       )}
 
       <WidgetBoundary title="Approval Status">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 min-w-0">
               {approval?.state === "ACTIVE" ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -97,14 +97,14 @@ function VisitorApprovalstatusInner() {
             </div>
           ) : (
             <div className="p-4 min-w-0 space-y-3">
-              <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">State</p>
                 <p className={`mt-1 text-lg font-bold ${stateTone}`}>{stateLabel}</p>
               </div>
               {approval?.checkedInAt && (
                 <p className="text-xs text-[var(--text-muted)]">
                   Checked in at{" "}
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {new Date(approval.checkedInAt).toLocaleString("en-IN", {
                       day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
                     })}
@@ -113,7 +113,7 @@ function VisitorApprovalstatusInner() {
               )}
               {approval?.purpose && (
                 <p className="text-xs text-[var(--text-muted)]">
-                  Purpose: <span className="text-slate-300">{approval.purpose}</span>
+                  Purpose: <span className="text-[var(--text-secondary)]">{approval.purpose}</span>
                 </p>
               )}
               {approval?.state === "NONE" && (

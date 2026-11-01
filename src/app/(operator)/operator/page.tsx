@@ -38,7 +38,7 @@ function OperatorDeskHero() {
         </div>
         <Link
           href={gateId ? `/gate/${gateId}` : "/operator/claim"}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-5 text-sm font-bold text-slate-950 transition-colors"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-5 text-sm font-bold text-black transition-colors"
         >
           {gateId ? "Open gate desk" : "Claim your gate"}
         </Link>

@@ -103,10 +103,10 @@ export function CampusStatusBar() {
           <span className="text-lg font-black text-cyan-400">{visitorStats.onCampus}</span>
           <span className="text-[9px] text-[var(--text-muted)] hidden sm:inline">online</span>
         </Link>
-        <Link href="/admin/reports" className="flex flex-col items-center p-2 rounded-lg bg-slate-500/5 border border-slate-500/15 hover:bg-slate-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/reports" className="flex flex-col items-center p-2 rounded-lg bg-[var(--bg-elevated)]/5 border border-[var(--border)]/15 hover:bg-[var(--bg-elevated)]/10 transition cursor-pointer text-center">
           <Activity className="w-4 h-4 text-[var(--text-muted)] mb-1" />
           <span className="text-[10px] text-[var(--text-muted)]/80 hidden sm:inline">Today</span><span className="text-base sm:hidden">📊</span>
-          <span className="text-lg font-black text-slate-300">{totalScans}</span>
+          <span className="text-lg font-black text-[var(--text-secondary)]">{totalScans}</span>
           <span className="text-[9px] text-[var(--text-muted)] hidden sm:inline">{todayIn}in/{todayOut}out</span>
         </Link>
       </div>

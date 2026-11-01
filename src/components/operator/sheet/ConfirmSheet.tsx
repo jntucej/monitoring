@@ -168,7 +168,7 @@ export function ConfirmSheet({
                           className={cn(
                             "py-2.5 rounded-xl border text-sm font-bold transition-all",
                             selectedDirection === dir
-                              ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-slate-950"
+                              ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-black"
                               : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                           )}
                         >
@@ -248,7 +248,7 @@ export function ConfirmSheet({
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className="py-3 rounded-xl bg-[var(--action-primary)] text-slate-950 font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
+                  className="py-3 rounded-xl bg-[var(--action-primary)] text-black font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
                 >
                   Confirm
                 </button>

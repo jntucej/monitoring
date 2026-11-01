@@ -41,9 +41,9 @@ interface PermissionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-8 text-center min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
-        <Inbox className="w-5 h-5 text-slate-600" />
+        <Inbox className="w-5 h-5 text-[var(--text-muted)]" />
         <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
       </div>
     </div>
@@ -78,7 +78,7 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+          <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Stage</th>
@@ -97,7 +97,7 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
                   {r.ticket_number}
                 </a>
               </td>
-              <td className="px-4 py-3 text-slate-300 min-w-0">
+              <td className="px-4 py-3 text-[var(--text-secondary)] min-w-0">
                 {r.student?.name || "—"}
                 {r.student?.student_details?.roll ? (
                   <span className="ml-2 text-xs text-[var(--text-muted)]">{r.student.student_details.roll}</span>
@@ -128,7 +128,7 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
           ))}
         </tbody>
       </table>
-      <div className="px-4 py-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+      <div className="px-4 py-3 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
         <p className="text-xs text-[var(--text-muted)] min-w-0">
           {rows.length} item(s) awaiting exam-branch coordination
         </p>
@@ -172,7 +172,7 @@ function ExamBranchCoordinationInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -180,7 +180,7 @@ function ExamBranchCoordinationInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -196,28 +196,28 @@ function ExamBranchCoordinationInner() {
       {/* KPI strip */}
       <WidgetBoundary title="Exam-Branch Coordination KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <Users className="w-4 h-4 shrink-0" />
               <span>Exam Branch Queue</span>
             </div>
             <p className="text-2xl font-bold text-purple-400 mt-2">{total}</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <Inbox className="w-4 h-4 shrink-0" />
               <span>Stage</span>
             </div>
             <p className="text-2xl font-bold text-white mt-2">exam_branch</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <GitMerge className="w-4 h-4 shrink-0" />
               <span>Workflow</span>
             </div>
             <p className="text-2xl font-bold text-sky-400 mt-2">exam</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wide">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>Action Required</span>
@@ -228,8 +228,8 @@ function ExamBranchCoordinationInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Exam-Branch Coordination Queue">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <GitMerge className="w-4 h-4 text-purple-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Coordination Queue with Exam Branch
@@ -242,7 +242,7 @@ function ExamBranchCoordinationInner() {
           ) : (
             <CoordinationTable rows={rows} />
           )}
-          <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
+          <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
             OIE coordinates with the Exam Branch on candidate eligibility, scheduling, and
             access confirmation. Items here are pending exam-branch sign-off.
           </div>

@@ -95,7 +95,7 @@ export function GateConfirmCard({
         <button
           type="button"
           onClick={() => onConfirm("IN")}
-          className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-slate-950 font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform"
+          className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-black font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform"
         >
           <LogIn className="w-5 h-5" /> IN
         </button>

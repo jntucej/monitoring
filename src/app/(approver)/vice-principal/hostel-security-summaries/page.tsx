@@ -67,7 +67,7 @@ function VpHostelSecurityInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Hostel & Security Rollup">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -113,14 +113,14 @@ function VpHostelSecurityInner() {
             </div>
           ) : gateTotals.length === 0 ? (
             <div className="p-4 text-center">
-              <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No active gates configured.</p>
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[420px]">
                 <thead>
-                  <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-slate-800">
+                  <tr className="text-[var(--text-muted)] text-xs uppercase tracking-wide border-b border-[var(--border)]">
                     <th className="text-left px-3 py-2">Gate</th>
                     <th className="text-left px-3 py-2">Code</th>
                     <th className="text-right px-3 py-2">On Campus</th>
@@ -129,7 +129,7 @@ function VpHostelSecurityInner() {
                 <tbody className="divide-y divide-slate-800/60">
                   {gateTotals.map((g) => (
                     <tr key={g.id} className="hover:bg-[var(--bg-elevated)]/30">
-                      <td className="px-3 py-2 text-slate-200">{g.name}</td>
+                      <td className="px-3 py-2 text-[var(--text-secondary)]">{g.name}</td>
                       <td className="px-3 py-2 font-mono text-xs text-[var(--text-muted)]">{g.code}</td>
                       <td className="px-3 py-2 text-right">
                         <span className={`font-bold ${g.total > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"}`}>
@@ -146,7 +146,7 @@ function VpHostelSecurityInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Security Alerts">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Siren className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -158,8 +158,8 @@ function VpHostelSecurityInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Checking access…
             </div>
           ) : alertsProbe.restricted ? (
-            <div className="rounded-xl border-slate-800 bg-[var(--bg-elevated)]/20 p-5 text-center text-sm text-[var(--text-muted)] min-w-0">
-              <Siren className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+            <div className="rounded-xl border-[var(--border)] bg-[var(--bg-elevated)]/20 p-5 text-center text-sm text-[var(--text-muted)] min-w-0">
+              <Siren className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="max-w-md mx-auto">
                 Campus alert detail is restricted at the Vice Principal tier. The Principal and
                 Administrator desks carry the live alert feed. Presence rollups above remain
@@ -180,7 +180,7 @@ function VpHostelSecurityInner() {
               {activeAlerts.slice(0, 10).map((a) => (
                 <li
                   key={a.id}
-                  className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
@@ -188,12 +188,12 @@ function VpHostelSecurityInner() {
                         ? "bg-rose-500/15 text-rose-400 border border-rose-500/30"
                         : a.severity === "high"
                           ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
-                          : "bg-slate-700 text-slate-300 border border-slate-600"
+                          : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]"
                     }`}
                   >
                     {a.severity?.toUpperCase() || "INFO"}
                   </span>
-                  <span className="text-sm text-slate-200 truncate min-w-0 flex-1">{a.title}</span>
+                  <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">{a.title}</span>
                   <span className="text-xs text-[var(--text-muted)] shrink-0">
                     {new Date(a.timestamp).toLocaleString(undefined, {
                       month: "short",

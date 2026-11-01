@@ -9,7 +9,7 @@ export default function SmartSchedulingPage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
           <p className="text-2xl font-bold tracking-tight">AI Smart Scheduling Assistant</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--text-muted)]">
             AI recommendations based on gate scan telemetry to optimize shift timing and gate throughput.
           </p>
         </div>

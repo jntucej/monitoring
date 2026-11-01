@@ -87,7 +87,7 @@ function VpExaminationInner() {
     <div className="mx-auto w-full max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 py-6 min-w-0">
       <WeekBar />
       <WidgetBoundary title="Examination Operations">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <CalendarCheck className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -137,7 +137,7 @@ function VpExaminationInner() {
               ))}
             </div>
           ) : pendingExam.length === 0 ? (
-            <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-4 text-center min-w-0">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 text-center min-w-0">
               <FileCheck2 className="w-5 h-5 text-emerald-500/60 mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No pending exam requests in your scope. Exam coordination is nominal.
@@ -154,10 +154,10 @@ function VpExaminationInner() {
               {pendingExam.slice(0, 8).map((r) => (
                 <li
                   key={r.id}
-                  className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span className="font-mono text-xs text-sky-400 shrink-0">{r.ticket_number}</span>
-                  <span className="text-sm text-slate-300 truncate min-w-0 flex-1">
+                  <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
                     {r.student?.name || "—"}
                     {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
                   </span>
@@ -177,7 +177,7 @@ function VpExaminationInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Ops Signals">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <Loader2 className="w-4 h-4 shrink-0 hidden" />
             <FileCheck2 className="w-4 h-4 shrink-0" />

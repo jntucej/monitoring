@@ -66,7 +66,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -93,7 +93,7 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0 hover:bg-[var(--bg-elevated)]/50 transition-colors"
+      className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0 hover:bg-[var(--bg-elevated)]/50 transition-colors"
     >
       <p className="text-sm font-semibold text-white">{title}</p>
       <p className="text-xs text-[var(--text-muted)] mt-1">{sub}</p>
@@ -167,7 +167,7 @@ function DeputyWardenDailyOverviewInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -231,10 +231,10 @@ function DeputyWardenDailyOverviewInner() {
 
       {/* Authority note */}
       <WidgetBoundary title="Authority Scope">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
             <Gavel className="w-5 h-5 text-sky-400 shrink-0" />
-            <p className="text-sm text-slate-300 min-w-0">
+            <p className="text-sm text-[var(--text-secondary)] min-w-0">
               Deputy-warden approvals are effective only <span className="font-semibold text-sky-300">within an explicit delegation or standing policy scope</span> issued by the
               principal/warden. Without recorded delegation data, review actions surface as
               read-only here and are escalated to the warden stage.

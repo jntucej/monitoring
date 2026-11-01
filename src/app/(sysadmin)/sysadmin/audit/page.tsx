@@ -19,7 +19,7 @@ function SysadminAuditInner() {
         <p className="text-2xl font-bold text-[var(--text-primary)]">Technical Audit Logs</p>
         <p className="text-sm text-[var(--text-muted)]">
           Real-time tracking of security operations, system configurations, and administrative
-          actions. Signed in as <span className="font-mono text-slate-300">{role}</span>.
+          actions. Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>.
         </p>
         <p className="mt-2 text-xs text-[var(--text-muted)] max-w-2xl">
           Note: technical audit trails here record <em>platform</em> actions. Institutional pass

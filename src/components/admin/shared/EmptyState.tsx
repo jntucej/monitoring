@@ -94,7 +94,7 @@ export function EmptyState({
           </div>
         )}
 
-        <h3 className="text-sm font-semibold text-slate-300 mb-1">{title}</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-1">{title}</h3>
 
         {description && (
           <p className="text-xs text-[var(--text-muted)] max-w-xs">{description}</p>

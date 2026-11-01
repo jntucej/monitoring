@@ -141,7 +141,7 @@ export function PassQrModal({
             {/* QR Canvas */}
             <div
               ref={qrRef}
-              className="bg-white p-5 rounded-2xl flex flex-col items-center justify-center shadow-inner border border-slate-200"
+              className="bg-white p-5 rounded-2xl flex flex-col items-center justify-center shadow-inner border border-[var(--border)]"
             >
               <QRCodeCanvas
                 value={qrText || ""}
@@ -150,7 +150,7 @@ export function PassQrModal({
                 includeMargin
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
-              <div className="mt-2 text-[10px] font-bold text-slate-700 font-mono flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+              <div className="mt-2 text-[10px] font-bold text-[var(--text-muted)] font-mono flex items-center gap-1.5 bg-[var(--bg-elevated)] px-3 py-1 rounded-full border border-[var(--border)]">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 Live Gate Token • Refreshes in {expiresIn}s
               </div>

@@ -81,7 +81,7 @@ function MessInventoryStockInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -89,7 +89,7 @@ function MessInventoryStockInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -100,8 +100,8 @@ function MessInventoryStockInner() {
       )}
 
       <WidgetBoundary title="Inventory and Stock">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <Package className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Inventory &amp; Stock</span>
             <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">{d ? `${d.total} item(s)` : "—"}</span>
@@ -114,15 +114,15 @@ function MessInventoryStockInner() {
           ) : items.length > 0 ? (
             <div className="min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Active Items</p>
                   <p className="mt-1 text-lg font-bold text-emerald-400">{d?.total}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Primary Items</p>
                   <p className="mt-1 text-lg font-bold text-amber-400">{d?.primaryCount}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Stock Levels</p>
                   <p className="mt-1 text-lg font-bold text-sky-400">
                     {items.reduce((sum, i) => sum + i.scheduledDays, 0)}
@@ -134,7 +134,7 @@ function MessInventoryStockInner() {
               <div className="overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[520px]">
                   <thead>
-                    <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                       <th className="text-left px-4 py-2.5">Item</th>
                       <th className="text-left px-4 py-2.5">Code</th>
                       <th className="text-left px-4 py-2.5">Type</th>
@@ -144,7 +144,7 @@ function MessInventoryStockInner() {
                   <tbody className="divide-y divide-slate-800/60">
                     {items.map((item) => (
                       <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                        <td className="px-4 py-3 text-slate-200 font-medium min-w-0 truncate">{item.label}</td>
+                        <td className="px-4 py-3 text-[var(--text-secondary)] font-medium min-w-0 truncate">{item.label}</td>
                         <td className="px-4 py-3 text-[var(--text-muted)] font-mono text-xs whitespace-nowrap">{item.code}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {item.isPrimary ? (
@@ -152,7 +152,7 @@ function MessInventoryStockInner() {
                               <CheckCircle2 className="w-3 h-3" /> Primary
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-slate-600/40 bg-slate-700/20 text-[var(--text-muted)]">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-[var(--border)]/40 bg-[var(--bg-elevated)]/20 text-[var(--text-muted)]">
                               Add-on
                             </span>
                           )}
@@ -161,7 +161,7 @@ function MessInventoryStockInner() {
                           {item.scheduledDays > 0 ? (
                             <span className="text-emerald-400">{item.scheduledDays} day(s)</span>
                           ) : (
-                            <span className="text-slate-600">Not scheduled</span>
+                            <span className="text-[var(--text-muted)]">Not scheduled</span>
                           )}
                         </td>
                       </tr>
@@ -170,7 +170,7 @@ function MessInventoryStockInner() {
                 </table>
               </div>
 
-              <div className="px-4 py-3 border-t border-slate-800 text-xs text-[var(--text-muted)] min-w-0">
+              <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
                 Stock state mirrors the active menu-item catalog. Use{" "}
                 <Link href="/mess/operational-requests" className="text-emerald-400 hover:underline">
                   Operational Requests
@@ -180,7 +180,7 @@ function MessInventoryStockInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
                 No active inventory items. Items are published on mess days via the menu
                 catalog — manage them from the{" "}

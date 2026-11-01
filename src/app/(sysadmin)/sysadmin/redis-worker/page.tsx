@@ -38,7 +38,7 @@ function StatusPill({ status }: { status?: string | null }) {
         ? "bg-amber-500/20 text-amber-400"
         : s === "unhealthy"
           ? "bg-rose-500/20 text-rose-400"
-          : "bg-slate-700/40 text-[var(--text-muted)]";
+          : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]";
   return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cls}`}>{s}</span>;
 }
 
@@ -75,7 +75,7 @@ function RedisWorkerInner() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-slate-300">{role}</span>
+          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
         </p>
       </div>
 
@@ -89,8 +89,8 @@ function RedisWorkerInner() {
       <WidgetBoundary title="Redis & Worker Health">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-0">
           {/* Redis card */}
-          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+            <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Redis (cache layer)</span>
               <StatusPill status={d?.redis?.status} />
             </div>
@@ -102,17 +102,17 @@ function RedisWorkerInner() {
               </div>
             ) : d?.redisDetails ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-[10px] text-[var(--text-muted)] uppercase">Clients</p>
                   <p className="text-lg font-bold text-sky-400">
                     {d.redisDetails.connectedClients != null ? d.redisDetails.connectedClients : "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-[10px] text-[var(--text-muted)] uppercase">Memory</p>
                   <p className="text-lg font-bold text-sky-400">{formatBytes(d.redisDetails.usedMemoryBytes)}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-[10px] text-[var(--text-muted)] uppercase">Ops/sec</p>
                   <p className="text-lg font-bold text-sky-400">
                     {d.redisDetails.opsPerSecond != null ? d.redisDetails.opsPerSecond : "—"}
@@ -131,8 +131,8 @@ function RedisWorkerInner() {
           </div>
 
           {/* Worker card */}
-          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+            <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Background Worker</span>
               <StatusPill status={d?.worker?.status} />
             </div>

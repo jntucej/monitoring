@@ -94,8 +94,8 @@ function MessMenuInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <WidgetBoundary title="Menu Management">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
             <UtensilsCrossed className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Current Menu</span>
           </div>
@@ -132,7 +132,7 @@ function MessMenuInner() {
                 <div className="overflow-x-auto min-w-0">
                   <table className="w-full text-sm min-w-[360px]">
                     <thead>
-                      <tr className="border-b border-slate-800 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                      <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
                         <th className="text-left px-3 py-2.5">Item</th>
                         <th className="text-left px-3 py-2.5">Code</th>
                         <th className="text-left px-3 py-2.5">Available</th>
@@ -141,7 +141,7 @@ function MessMenuInner() {
                     <tbody className="divide-y divide-slate-800/60">
                       {menuItems.map((item) => (
                         <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                          <td className="px-3 py-2.5 text-slate-200 font-medium min-w-0 truncate">{item.label}</td>
+                          <td className="px-3 py-2.5 text-[var(--text-secondary)] font-medium min-w-0 truncate">{item.label}</td>
                           <td className="px-3 py-2.5 text-[var(--text-muted)] font-mono text-xs whitespace-nowrap">{item.code}</td>
                           <td className="px-3 py-2.5">
                             {item.isAvailable ? (
@@ -172,7 +172,7 @@ function MessMenuInner() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+                <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
                 <p className="text-sm text-[var(--text-muted)]">No menu published yet.</p>
               </div>
             )}

@@ -274,7 +274,7 @@ function ManualEntryInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -432,7 +432,7 @@ function ManualEntryInner() {
                     disabled={recordState === "submitting"}
                     className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg border text-sm font-bold transition disabled:opacity-50 ${
                       recordDirection === d
-                        ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-slate-950"
+                        ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-black"
                         : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border)]"
                     }`}
                   >
@@ -573,7 +573,7 @@ function ManualEntryInner() {
               type="button"
               onClick={() => void submitRecord()}
               disabled={recordState === "submitting"}
-              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-slate-950 hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
             >
               {recordState === "submitting" ? (
                 <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />

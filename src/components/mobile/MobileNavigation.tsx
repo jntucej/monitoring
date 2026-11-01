@@ -238,7 +238,7 @@ export function MobileNavigation() {
   return (
     <nav
       aria-label="Mobile navigation bar"
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-slate-800 pb-safe select-none"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none"
     >
       <div className="grid grid-cols-4 h-14 max-w-md mx-auto items-center">
         {tabs.map((tab) => {
@@ -251,7 +251,7 @@ export function MobileNavigation() {
               href={tab.href}
               title={tab.label}
               className={`relative flex flex-col items-center justify-center min-h-[48px] min-w-[44px] px-1 py-1 transition-all active-tap ${
-                isActive ? "text-emerald-400 font-bold" : "text-[var(--text-muted)] hover:text-slate-200"
+                isActive ? "text-emerald-400 font-bold" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? "text-emerald-400 scale-110" : "text-[var(--text-muted)]"}`} />

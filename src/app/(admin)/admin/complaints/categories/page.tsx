@@ -45,7 +45,7 @@ export default function CategoriesPage() {
       <h1 className="text-2xl font-semibold">Complaint categories</h1>
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left border-b bg-slate-50">
+          <thead className="text-left border-b bg-[var(--bg-elevated)]">
             <tr>
               <th className="p-3">Code</th>
               <th className="p-3">Label</th>
@@ -58,7 +58,7 @@ export default function CategoriesPage() {
           </thead>
           <tbody className="divide-y">
             {rows.map((c) => (
-              <tr key={c.code} className="hover:bg-slate-50">
+              <tr key={c.code} className="hover:bg-[var(--bg-elevated)]">
                 <td className="p-3 font-mono">{c.code}</td>
                 <td className="p-3 font-medium">{c.label}</td>
                 <td className="p-3 text-[var(--text-muted)] font-mono">{c.ownerRole}</td>

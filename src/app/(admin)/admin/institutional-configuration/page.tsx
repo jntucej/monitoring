@@ -98,7 +98,7 @@ function ReadOnlyCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-[#0d1220] p-5">
+    <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-5">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-sky-400 shrink-0" />
@@ -263,7 +263,7 @@ function InstitutionalConfigurationInner() {
                   {snapshot.retentionPolicies.map((rp) => (
                     <div key={rp.id} className="flex items-center justify-between py-2">
                       <span className="text-xs text-[var(--text-muted)]">{rp.data_category}</span>
-                      <span className="text-xs font-medium text-slate-200">
+                      <span className="text-xs font-medium text-[var(--text-secondary)]">
                         {rp.retention_days} days
                         {rp.auto_delete ? " · auto-delete" : ""}
                       </span>
@@ -290,7 +290,7 @@ function InstitutionalConfigurationInner() {
                   {Object.entries(snapshot.securityPosture).map(([key, value]) => (
                     <div key={key} className="flex items-center justify-between py-2">
                       <span className="text-xs text-[var(--text-muted)]">{key}</span>
-                      <span className="text-xs font-medium text-slate-200">
+                      <span className="text-xs font-medium text-[var(--text-secondary)]">
                         {typeof value === "boolean" ? (value ? "Yes" : "No") : String(value)}
                       </span>
                     </div>
@@ -324,7 +324,7 @@ function InstitutionalConfigurationInner() {
                     return (
                       <div key={role.code} className="flex items-center justify-between py-2">
                         <span className="text-xs text-[var(--text-muted)]">{role.display_name}</span>
-                        <span className="text-xs font-medium text-slate-200">
+                        <span className="text-xs font-medium text-[var(--text-secondary)]">
                           {permCount} permission{permCount === 1 ? "" : "s"}
                         </span>
                       </div>

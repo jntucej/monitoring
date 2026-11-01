@@ -110,7 +110,7 @@ export default function OperatorClaimPage() {
                 if (e.key === "Enter") submit();
               }}
               placeholder="e.g. 482913"
-              className="w-full px-4 py-3 rounded-lg bg-[#0b1220] border border-slate-700 text-2xl font-mono tracking-[0.3em] text-slate-100 placeholder:text-slate-600 placeholder:text-base placeholder:tracking-normal placeholder:font-sans focus:ring-2 focus:ring-emerald-500/40 outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-[#0b1220] border border-[var(--border)] text-2xl font-mono tracking-[0.3em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:text-base placeholder:tracking-normal placeholder:font-sans focus:ring-2 focus:ring-emerald-500/40 outline-none"
               disabled={submitting}
             />
           </label>
@@ -161,7 +161,7 @@ export default function OperatorClaimPage() {
 
           {user?.gateId && (
             <p className="text-[11px] text-[var(--text-muted)] text-center">
-              You already have gate <span className="font-mono text-slate-300">{user.gateId}</span>{" "}
+              You already have gate <span className="font-mono text-[var(--text-secondary)]">{user.gateId}</span>{" "}
               assigned. Use the link above to return to your desk.
             </p>
           )}

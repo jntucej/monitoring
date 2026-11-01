@@ -47,7 +47,7 @@ function VisitorCheckinoutInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/visitor"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
       </Link>
@@ -56,7 +56,7 @@ function VisitorCheckinoutInner() {
         <div className="min-w-0">
           <h1 className="text-base font-semibold text-white">Check-in / Out</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -79,8 +79,8 @@ function VisitorCheckinoutInner() {
       )}
 
       <WidgetBoundary title="Check-in / Out">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 min-w-0">
               <Clock className="w-4 h-4 text-sky-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Visit timing</span>
@@ -93,15 +93,15 @@ function VisitorCheckinoutInner() {
           ) : co?.checkedInAt ? (
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Checked in</p>
                   <p className="mt-1 text-base font-semibold text-emerald-400">{fmt(co.checkedInAt)}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Checked out</p>
                   <p className="mt-1 text-base font-semibold text-rose-400">{fmt(co.checkedOutAt)}</p>
                 </div>
-                <div className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                   <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Duration</p>
                   <p className="mt-1 text-base font-bold text-amber-400">
                     {durLabel ?? "In progress"}

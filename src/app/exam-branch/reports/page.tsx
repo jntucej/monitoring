@@ -110,7 +110,7 @@ function ExamBranchReportsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -119,7 +119,7 @@ function ExamBranchReportsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -144,7 +144,7 @@ function ExamBranchReportsInner() {
       {/* Top KPI cards */}
       <WidgetBoundary title="Examination-Day Reports">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <Users className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -158,7 +158,7 @@ function ExamBranchReportsInner() {
             )}
             <p className="text-xs text-[var(--text-muted)]">All roles inside active gates</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <ChartBar className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -172,7 +172,7 @@ function ExamBranchReportsInner() {
             )}
             <p className="text-xs text-[var(--text-muted)]">Gates reporting in real-time</p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <FileBarChart className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -192,7 +192,7 @@ function ExamBranchReportsInner() {
                 : "Analytics not available for this role"}
             </p>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
               <Clock className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -214,8 +214,8 @@ function ExamBranchReportsInner() {
 
       {/* Gate × role matrix */}
       <WidgetBoundary title="Gate Occupancy Matrix">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ChartBar className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -232,20 +232,20 @@ function ExamBranchReportsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : gates.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <ChartBar className="w-8 h-8 mx-auto text-slate-600 mb-2" />
+              <ChartBar className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No active gates reporting.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[480px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)]">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
                     <th className="text-left px-4 py-2.5 font-semibold">Gate</th>
                     {presence?.data?.roles?.map((roleKey) => (
                       <th key={roleKey} className="text-right px-3 py-2.5 font-semibold">
@@ -262,10 +262,10 @@ function ExamBranchReportsInner() {
                     const counts = matrix[gate.id] ?? {};
                     const total = Object.values(counts).reduce((a, b) => a + b, 0);
                     return (
-                      <tr key={gate.id} className="border-b border-slate-800/40 last:border-b-0">
-                        <td className="px-4 py-2.5 text-slate-300 font-medium">
+                      <tr key={gate.id} className="border-b border-[var(--border)]/40 last:border-b-0">
+                        <td className="px-4 py-2.5 text-[var(--text-secondary)] font-medium">
                           {gate.name}
-                          <span className="ml-1.5 text-slate-600">{gate.code}</span>
+                          <span className="ml-1.5 text-[var(--text-muted)]">{gate.code}</span>
                         </td>
                         {presence?.data?.roles?.map((roleKey) => (
                           <td
@@ -273,7 +273,7 @@ function ExamBranchReportsInner() {
                             className={`px-3 py-2.5 text-right tabular-nums ${
                               (counts[roleKey] ?? 0) > 0
                                 ? "text-white"
-                                : "text-slate-700"
+                                : "text-[var(--text-muted)]"
                             }`}
                           >
                             {counts[roleKey] ?? 0}
@@ -297,7 +297,7 @@ function ExamBranchReportsInner() {
         <WidgetBoundary title="Role Analytics">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
             {metrics.map((m) => (
-              <div key={m.key} className="rounded-lg border border-slate-800 bg-[var(--bg-surface)]/40 p-3 min-w-0">
+              <div key={m.key} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
                 <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">{m.label}</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {m.value}
@@ -312,11 +312,11 @@ function ExamBranchReportsInner() {
       {/* Series data (daily breakdown) */}
       {series.length > 0 && (
         <WidgetBoundary title="Daily Series">
-          <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
+          <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[300px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-[var(--text-muted)]">
+                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
                     {Object.keys(series[0]).map((k) => (
                       <th key={k} className="text-left px-4 py-2 font-semibold">
                         {k}
@@ -326,9 +326,9 @@ function ExamBranchReportsInner() {
                 </thead>
                 <tbody>
                   {series.slice(0, 14).map((row, i) => (
-                    <tr key={i} className="border-b border-slate-800/40 last:border-b-0">
+                    <tr key={i} className="border-b border-[var(--border)]/40 last:border-b-0">
                       {Object.values(row).map((val, j) => (
-                        <td key={j} className="px-4 py-2 text-slate-300 tabular-nums">
+                        <td key={j} className="px-4 py-2 text-[var(--text-secondary)] tabular-nums">
                           {String(val)}
                         </td>
                       ))}

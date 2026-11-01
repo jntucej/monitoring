@@ -57,7 +57,7 @@ function VpAttendanceExceptionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Attendance Exceptions">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
           <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -79,7 +79,7 @@ function VpAttendanceExceptionsInner() {
             </div>
           ) : !exceptions ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No exception data recorded yet.</p>
             </div>
           ) : (
@@ -120,11 +120,11 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.absent.map((e) => (
                           <li
                             key={`a-${e.id}`}
-                            className="rounded-lg border border-slate-800/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-slate-200 truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-[var(--text-muted)]">{e.department}</span>
-                            <span className="text-xs font-mono text-slate-600">{e.uniqueId}</span>
+                            <span className="text-xs font-mono text-[var(--text-muted)]">{e.uniqueId}</span>
                           </li>
                         ))}
                       </ul>
@@ -139,9 +139,9 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.late.map((e) => (
                           <li
                             key={`l-${e.id}`}
-                            className="rounded-lg border border-slate-800/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-slate-200 truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-[var(--text-muted)]">{e.department}</span>
                             <span className="text-xs text-amber-300">
                               in at {e.firstInTime || "—"}
@@ -160,9 +160,9 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.flagged.map((e) => (
                           <li
                             key={`f-${e.id}`}
-                            className="rounded-lg border border-slate-800/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-slate-200 truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-sky-300">{e.flagStatus}</span>
                           </li>
                         ))}

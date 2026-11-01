@@ -172,7 +172,7 @@ function OperatorTransactionsInner() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">
                 No {filter === "ALL" ? "" : filter === "IN" ? "entry" : "exit"} transactions
                 recorded yet today.

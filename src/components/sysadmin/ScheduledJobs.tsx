@@ -153,7 +153,7 @@ const api = useApi();
                         className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border transition-all ${
                           job.enabled
                             ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                            : "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                            : "bg-[var(--bg-elevated)]0/20 text-[var(--text-muted)] border-[var(--border)]/30"
                         }`}
                       >
                         {job.enabled ? "ENABLED" : "DISABLED"}

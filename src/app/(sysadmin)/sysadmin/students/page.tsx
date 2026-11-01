@@ -585,23 +585,23 @@ const api = useApi();
           <div className="relative flex-1 min-w-[220px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
             <input type="text" placeholder="Search by name, roll, email..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-[#0d1220] border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+              className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-[#0d1220] border border-[var(--border)] rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 min-h-[44px] text-xs text-slate-300">
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-[#0d1220] border border-[var(--border)] rounded-lg px-3 py-2 min-h-[44px] text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Courses</option>
               {courses.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 min-h-[44px] text-xs text-slate-300">
+            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-[#0d1220] border border-[var(--border)] rounded-lg px-3 py-2 min-h-[44px] text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Branches</option>
               {branches.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
-            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 min-h-[44px] text-xs text-slate-300">
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-[#0d1220] border border-[var(--border)] rounded-lg px-3 py-2 min-h-[44px] text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Years</option>
               {years.map((y) => <option key={y} value={y}>Year {y}</option>)}
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-[#0d1220] border border-slate-800 rounded-lg px-3 py-2 min-h-[44px] text-xs text-slate-300">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-[#0d1220] border border-[var(--border)] rounded-lg px-3 py-2 min-h-[44px] text-xs text-[var(--text-secondary)]">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
           </div>
@@ -611,22 +611,22 @@ const api = useApi();
         {!loading && totalStudents > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* KPI strip */}
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 flex flex-col justify-between">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Total Students</div>
               <div className="mt-2 text-3xl font-bold text-white">{totalStudents.toLocaleString()}</div>
               <div className="mt-1 text-xs text-emerald-400">{activeCount.toLocaleString()} active ({totalStudents ? Math.round((activeCount / totalStudents) * 100) : 0}%)</div>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 flex flex-col justify-between">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">Largest Branch</div>
               <div className="mt-2 text-3xl font-bold text-emerald-400">{topBranch ? topBranch[0] : "—"}</div>
               <div className="mt-1 text-xs text-[var(--text-muted)]">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
             </div>
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Course (B.Tech / M.Tech)</div>
               <div className="space-y-1.5">
                 {byCourse.map(([c, n]) => (
                   <div key={c} className="flex items-center gap-2 text-xs">
-                    <div className="w-14 text-slate-300 text-right">{c}</div>
+                    <div className="w-14 text-[var(--text-secondary)] text-right">{c}</div>
                     <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                       <div className={`h-full rounded-full ${c === "M.Tech" ? "bg-purple-500" : "bg-sky-500"}`} style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
@@ -636,12 +636,12 @@ const api = useApi();
               </div>
             </div>
             {/* Branch distribution — canonical 5 branches decoded from roll */}
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 sm:col-span-2">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
               <div className="space-y-2">
                 {byBranchCanonical.entries.map(([b, n]) => (
                   <div key={b} className="flex items-center gap-2 text-xs">
-                    <div className="w-16 text-slate-300 truncate text-right">{b}</div>
+                    <div className="w-16 text-[var(--text-secondary)] truncate text-right">{b}</div>
                     <div className="flex-1 h-2 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
@@ -649,12 +649,12 @@ const api = useApi();
                   </div>
                 ))}
                 {byBranchCanonical.unassigned > 0 && (
-                  <div className="text-[10px] text-slate-600">{byBranchCanonical.unassigned} unassigned / non-canonical</div>
+                  <div className="text-[10px] text-[var(--text-muted)]">{byBranchCanonical.unassigned} unassigned / non-canonical</div>
                 )}
               </div>
             </div>
             {/* Year distribution */}
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">Year Distribution</div>
               <div className="flex items-end gap-2 h-20">
                 {(() => {
@@ -670,7 +670,7 @@ const api = useApi();
               </div>
             </div>
             {/* Batch → cohort spans with regular/lateral split + live year + graduation */}
-            <div className="rounded-xl border border-slate-800 bg-[#0d1220] p-4 sm:col-span-2">
+            <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 sm:col-span-2">
               <div className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider mb-3">
                 Batch Cohorts · Regular vs Lateral · Graduation Year
               </div>
@@ -690,7 +690,7 @@ const api = useApi();
                   </thead>
                   <tbody>
                     {cohorts.map((c, i) => (
-                      <tr key={`${c.admissionYear}-${c.course}`} className={i % 2 ? "text-[var(--text-muted)]" : "text-slate-300"}>
+                      <tr key={`${c.admissionYear}-${c.course}`} className={i % 2 ? "text-[var(--text-muted)]" : "text-[var(--text-secondary)]"}>
                         <td className="pr-3 py-1 font-mono">{String(c.admissionYear).slice(2)}</td>
                         <td className="pr-3 py-1">
                           <span className={c.course === "M.Tech" ? "text-purple-400" : "text-sky-400"}>{c.course}</span>
@@ -706,7 +706,7 @@ const api = useApi();
                   </tbody>
                 </table>
               </div>
-              <div className="mt-2 text-[10px] text-slate-600">
+              <div className="mt-2 text-[10px] text-[var(--text-muted)]">
                 B.Tech = 4 yrs · M.Tech = 2 yrs · Lateral (5A) joins 2nd year of the same batch → same graduation as regulars
               </div>
             </div>
@@ -734,8 +734,8 @@ const api = useApi();
                     <span className="font-semibold text-white">{s.name}</span>
                     <span className="ml-2 font-mono text-emerald-400">{s.roll || s.uniqueId}</span>
                   </div>
-                  <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-slate-700 text-emerald-400" title={`Enrollment ${s.name}`}><KeyRound className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-slate-700 text-blue-400" title={`Edit ${s.name}`}>
+                  <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-emerald-400" title={`Enrollment ${s.name}`}><KeyRound className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-blue-400" title={`Edit ${s.name}`}>
                     <Edit className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -745,7 +745,7 @@ const api = useApi();
         )}
 
         {/* Table */}
-        <div className="border border-slate-800 rounded-xl overflow-hidden bg-[#0d1220]">
+        <div className="border border-[var(--border)] rounded-xl overflow-hidden bg-[#0d1220]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[700px]">
               <thead>
@@ -767,7 +767,7 @@ const api = useApi();
                     <td colSpan={7} className="px-4 py-12 text-center text-[var(--text-muted)]">
                       No students found.
                       {students.length === 0 && !search && !loadError && (
-                                        <div className="mt-2 text-xs text-slate-600 max-w-md mx-auto">
+                                        <div className="mt-2 text-xs text-[var(--text-muted)] max-w-md mx-auto">
                       The database has 0 student rows. Add students via the bulk import (admin → Users → Import) — this page reflects live DB state, not a permissions or RLS issue.
                     </div>
                       )}
@@ -783,8 +783,8 @@ const api = useApi();
                           {courseOf(s)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-300 text-xs font-semibold">{branchOf(s)}</td>
-                      <td className="px-4 py-3 text-slate-300 text-xs">{s.year ? `Year ${s.year}` : "—"}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)] text-xs font-semibold">{branchOf(s)}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">{s.year ? `Year ${s.year}` : "—"}</td>
                       <td className="px-4 py-3">
                         <select
                           value={s.status}
@@ -798,11 +798,11 @@ const api = useApi();
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-700 text-emerald-400" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
-                          <button onClick={() => openLinkParentModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-700 text-violet-400" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
-                          <button onClick={() => handleResetPassword(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-700 text-amber-400" title="Reset Password"><Lock className="w-4 h-4" /></button>
-                          <button onClick={() => openEditModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-700 text-blue-400" title="Edit"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteStudent(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-slate-700 text-red-400" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-emerald-400" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
+                          <button onClick={() => openLinkParentModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-violet-400" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
+                          <button onClick={() => handleResetPassword(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-amber-400" title="Reset Password"><Lock className="w-4 h-4" /></button>
+                          <button onClick={() => openEditModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-blue-400" title="Edit"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteStudent(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-elevated)] text-red-400" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -825,8 +825,8 @@ const api = useApi();
 
       {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+            <div className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-lg shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
                 <h2 className="text-lg font-bold text-white">Add New Student</h2>
                 <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]"><X className="w-5 h-5" /></button>
               </div>
@@ -834,40 +834,40 @@ const api = useApi();
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Roll Number <span className="text-[var(--text-muted)] font-normal">(legacy — optional if Custom Unique ID set)</span></label>
-                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
+                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="22CS101" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Unique ID <span className="text-[var(--text-muted)] font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
-                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ucej-s-0042 (overrides auto)" />
+                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="e.g. ucej-s-0042 (overrides auto)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Full Name *</label>
-                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Email</label>
-                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Phone</label>
-                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Branch <span className="text-[var(--text-muted)] font-normal">(optional — auto-detected from roll when blank)</span></label>
-                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll (e.g. CSE)" />
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="Auto from roll (e.g. CSE)" />
                   {createForm.roll && getDepartmentFromRoll(createForm.roll) && (
                     <div className="mt-1 text-[11px] text-emerald-400">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
                   )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--text-secondary)] focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold hover:bg-[var(--bg-elevated)]">Cancel</button>
                   <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50">{busy ? "Creating..." : "Create Student"}</button>
                 </div>
               </form>
@@ -879,8 +879,8 @@ const api = useApi();
         {/* Edit Modal */}
         {editingStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+            <div className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-lg shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
                 <h2 className="text-lg font-bold text-white">Edit Student — {editingStudent.roll || editingStudent.uniqueId}</h2>
                 <button onClick={() => setEditingStudent(null)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]"><X className="w-5 h-5" /></button>
               </div>
@@ -888,38 +888,38 @@ const api = useApi();
               <UserRolesPanel userId={editingStudent.id} />
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Full Name</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Email</label>
-                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Phone</label>
-                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Branch</label>
-                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
+                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[var(--bg-surface)]/60 border border-slate-800 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[var(--bg-surface)]/60 border border-[var(--border)] rounded-xl">
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Password (Optional)</label>
-                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-amber-400 block mb-1">Reset Kiosk PIN (Optional)</label>
-                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500" />
+                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--text-secondary)] focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold hover:bg-[var(--bg-elevated)]">Cancel</button>
                   <button type="submit" disabled={busy} className="px-4 py-2 min-h-[44px] rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
                 </div>
               </form>
@@ -930,8 +930,8 @@ const api = useApi();
         {/* Link Parent Modal */}
         {linkStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-[#0d1220] border border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+            <div className="bg-[#0d1220] border border-[var(--border)] rounded-2xl w-full max-w-sm shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <LinkIcon className="w-4 h-4 text-violet-400" />
                   Link Guardian — {linkStudent.roll || linkStudent.uniqueId || linkStudent.name}
@@ -948,7 +948,7 @@ const api = useApi();
                   <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
-                    className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
+                    className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl text-sm text-white focus:outline-none focus:border-violet-500"
                   >
                     <option value="">Select guardian…</option>
                     {parents.map((p) => (
@@ -959,7 +959,7 @@ const api = useApi();
                   </select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-semibold hover:bg-[var(--bg-elevated)]">Cancel</button>
                   <button
                     onClick={handleLinkParent}
                     disabled={linkBusy || !selectedParentId}

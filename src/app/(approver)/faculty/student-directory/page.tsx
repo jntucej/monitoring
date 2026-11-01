@@ -61,7 +61,7 @@ function FacultyStudentDirectoryInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/faculty"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-slate-300 transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Faculty Overview
       </Link>
@@ -69,7 +69,7 @@ function FacultyStudentDirectoryInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-slate-300">{role}</span> · tier {tier}
+            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -92,8 +92,8 @@ function FacultyStudentDirectoryInner() {
       )}
 
       <WidgetBoundary title="Student Directory">
-        <div className="rounded-xl border border-slate-800 bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Student Directory</span>
@@ -108,14 +108,14 @@ function FacultyStudentDirectoryInner() {
             </div>
           ) : students.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
               <p className="text-sm text-[var(--text-muted)]">No students match your department scope.</p>
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-slate-800 text-left text-xs text-[var(--text-muted)]">
+                  <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--text-muted)]">
                     <th className="py-2 pr-4 px-4">Name</th>
                     <th className="py-2 pr-4 px-4">Roll</th>
                     <th className="py-2 pr-4 px-4">Department</th>
@@ -125,8 +125,8 @@ function FacultyStudentDirectoryInner() {
                 <tbody className="divide-y divide-slate-800/50">
                   {students.map((s) => (
                     <tr key={s.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                      <td className="py-2.5 pr-4 px-4 text-slate-200">{s.name}</td>
-                      <td className="py-2.5 pr-4 px-4 font-mono text-xs text-slate-300">{s.roll ?? s.uniqueId ?? "—"}</td>
+                      <td className="py-2.5 pr-4 px-4 text-[var(--text-secondary)]">{s.name}</td>
+                      <td className="py-2.5 pr-4 px-4 font-mono text-xs text-[var(--text-secondary)]">{s.roll ?? s.uniqueId ?? "—"}</td>
                       <td className="py-2.5 pr-4 px-4 text-[var(--text-muted)]">{s.department ?? "—"}</td>
                       <td className="py-2.5 px-4 text-[var(--text-muted)]">
                         {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
