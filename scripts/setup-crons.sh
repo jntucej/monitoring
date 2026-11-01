@@ -87,8 +87,15 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # retention_policies table: api_metrics 30d, sessions 30d, notifications
 # 90d, mess_reviews 7d, email_queue 30d. audit_logs auto_delete=FALSE,
 # so it is retained — legal obligation under CERT-In Directions 2022.)
-30 4 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+30 4 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/admin/retention/run >> /var/log/gate-cron.log 2>&1
+
+# Alert-rule evaluation + webhook dispatch — every 5 min. Evaluates every
+# enabled alert_rules row; on breach persists an alerts row and POSTs to
+# every enabled endpoint in system_settings id='webhooks' (closes the
+# "webhooks configured but nothing fires" gap).
+*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/alerts-eval >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

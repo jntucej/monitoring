@@ -35,6 +35,13 @@ if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
         --no-acl --no-owner \
         2>/dev/null | gzip > "$DB_DUMP"
     log "✓ DB dump: $(ls -lh "$DB_DUMP" | awk '{print $5}')"
+    # Integrity sidecar: verify-backup.sh re-checks this before trusting a
+    # restore. The .sha256 file holds "<digest>  <filename>" (sha256sum -c form).
+    DB_DUMP_SHA="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz.sha256"
+    sha256sum "$DB_DUMP" | awk '{print $1}' > /tmp/.sha256.$$
+    printf '%s  %s\n' "$(cat /tmp/.sha256.$$)" "$(basename "$DB_DUMP")" > "$DB_DUMP_SHA"
+    rm -f /tmp/.sha256.$$
+    log "✓ DB dump checksum written"
     
     # Also dump migration tracking table
     MIGRATION_LOG="$BACKUP_ROOT/migrations-state-$TIMESTAMP.txt"

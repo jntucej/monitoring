@@ -102,6 +102,10 @@ export function TrafficAnalytics() {
   const [dataset, setDataset] = useState<TrafficDataset>(() => sampleTrafficDataset());
   const [loading, setLoading] = useState(true);
   const [retraining, setRetraining] = useState(false);
+  // Set when the API reports it is not implemented in this environment
+  // (HTTP 501 ALLOW_DEMO_ANALYTICS gate). The seed dataset below is then
+  // labeled DEMO explicitly so nobody mistakes it for measured traffic.
+  const [demoOnly, setDemoOnly] = useState(false);
 
   // Hero chart type + per-card types keyed by spec id
   const [heroType, setHeroType] = useState<ChartType>("composed");
@@ -117,6 +121,7 @@ export function TrafficAnalytics() {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
       const res = await fetch("/api/analytics/traffic", { headers });
+      if (res.status === 501) { setDemoOnly(true); throw new Error("demo-only mode"); }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       const payload = json.data ?? json;
@@ -206,6 +211,14 @@ export function TrafficAnalytics() {
   /* ── Render ── */
   return (
     <div className="space-y-6 p-4 md:p-6">
+      {demoOnly && (
+        <div role="status" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-amber-300">
+          DEMO DATA — traffic analytics is not enabled in this environment.
+          The figures below are a synthetic sample, not measured gate traffic.
+          Enable <code className="font-mono">ALLOW_DEMO_ANALYTICS=true</code> or
+          point at a live data source to replace them.
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">

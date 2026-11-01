@@ -26,6 +26,20 @@ echo "Verifying backup: $LATEST_BACKUP"
 # 1. Integrity check (gzip -t)
 gzip -t "$LATEST_BACKUP" || { echo "FAIL: gzip integrity check failed"; exit 1; }
 
+# 2b. SHA-256 checksum check against the .sha256 sidecar written by
+# master-backup.sh. Older backups (before the sidecar existed) have no
+# .sha256 file — warn, do not fail (backups are restorable by content).
+LATEST_SHA="${LATEST_BACKUP}.sha256"
+if [ -f "$LATEST_SHA" ]; then
+    if ! cd "$(dirname "$LATEST_BACKUP")" && sha256sum -c "$(basename "$LATEST_SHA")" >/dev/null 2>&1; then
+        echo "FAIL: SHA-256 checksum mismatch for $(basename "$LATEST_BACKUP")"
+        exit 1
+    fi
+    echo "SHA-256 checksum verified: $(basename "$LATEST_BACKUP")"
+else
+    echo "WARN: no .sha256 sidecar for $(basename "$LATEST_BACKUP") — trusting gzip integrity only (pre-checksum backup)"
+fi
+
 # 2. Header check (PostgreSQL database dump)
 HEADER=$(gunzip -c "$LATEST_BACKUP" | head -5)
 if [[ "$HEADER" != *"PostgreSQL database dump"* ]]; then

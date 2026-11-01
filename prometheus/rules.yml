@@ -1,0 +1,66 @@
+# Prometheus alert rules for the Gate Monitor stack.
+# Mounted into the prometheus container via prometheus.yml `rule_files`.
+# No Alertmanager in this stack — alert_for windows make Prometheus fire
+# natively; wire an Alertmanager receive path later if delivery beyond
+# "Prometheus knows" is needed.
+groups:
+  - name: gate-monitor-availability
+    rules:
+      - alert: web_process_down
+        expr: absent(process_start_time_seconds{job="cadvisor", container="gate_web"})
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "gate_web process not visible in cAdvisor"
+          description: "The web container has exited or is not exposing process metrics — the public app is down."
+
+      - alert: container_oom_killed
+        expr: increase(container_oom_events_total{name=~"gate_.*"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.name }} was OOM-killed in the last 5 minutes"
+          description: "Container {{ $labels.name }} exceeded its memory limit and was killed. Check the compose resource limit."
+
+      - alert: postgres_high_memory
+        expr: container_memory_usage_bytes{name="gate_postgres"} / container_spec_memory_limit_bytes{name="gate_postgres"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "gate_postgres is above 85% of its memory limit"
+          description: "Sustained high memory on the database container — watch for OOM kills and query spikes."
+
+  - name: gate-monitor-disk
+    rules:
+      - alert: volume_fill_ratio_high
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint=~"/|/var/lib/docker"} / node_filesystem_size_bytes{mountpoint=~"/|/var/lib/docker"})) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host volume above 85% full"
+          description: "Disk filling up (backups land on this host). Check /opt/monitoring/backups and docker system df."
+
+  - name: gate-monitor-app
+    rules:
+      - alert: web_5xx_rate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5% of HTTP requests returning 5xx"
+          description: "Web container error rate above 5% over 5 minutes."
+
+      - alert: worker_process_down
+        expr: absent(process_start_time_seconds{job="cadvisor", container="gate_worker"})
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+            summary: "gate_worker process not visible in cAdvisor"
+            description: "The worker container has exited or is not exposing process metrics — notification/SMS dispatch is halted."
+
