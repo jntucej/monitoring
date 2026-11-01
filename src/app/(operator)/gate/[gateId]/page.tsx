@@ -7,6 +7,9 @@ import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Wrench, Moon } from "lucide-react";
+// The two-decision rule: the bottom bar carries only IN / OUT. Manual entry
+// is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
+// row — no duplicate "Manual entry" button here (removed in this pass).
 import { useOperatorStore } from "@/stores/operatorStore";
 import type { Student } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
@@ -623,14 +626,6 @@ function OperatorPageInner() {
               OUT
             </button>
           </div>
-          <button
-            type="button"
-            disabled={state !== "idle" || manualOpen}
-            onClick={() => { primeAudioOnGesture(); setManualOpen((o) => !o); }}
-            className="min-h-[44px] px-5 py-1.5 rounded-full bg-[var(--bg-surface)]/85 backdrop-blur border border-[var(--border)] text-[11px] font-bold tracking-wide text-[var(--text-secondary)] flex items-center gap-2 disabled:opacity-40 transition-colors"
-          >
-            <KeyRound className="w-3.5 h-3.5" /> Manual entry
-          </button>
         </div>
       )}
     </div>
