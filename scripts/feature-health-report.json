@@ -20,8 +20,8 @@
   {
     "feature": "principal.see-inbox",
     "role": "principal",
-    "ok": true,
-    "detail": "approval inbox visible on /principal"
+    "ok": false,
+    "detail": "no inbox content on /principal"
   },
   {
     "feature": "hod.see-approvals",

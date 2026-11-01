@@ -8,17 +8,16 @@ import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Wrench, Moon } from "lucide-react";
 import { useOperatorStore } from "@/stores/operatorStore";
-import type { Scan as ScanRecord, Student } from "@/lib/types";
+import type { Student } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
-import { ScanDetailModal } from "@/components/operator/ScanDetailModal";
 import { GateConfirmCard } from "@/components/operator/GateConfirmCard";
 import { GatePickerScreen } from "@/components/operator/GatePickerScreen";
 import { OfflineBanner } from "@/components/operator/OfflineBanner";
 import { primeAudio } from "@/lib/sound";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 
 /**
  * Option A gate desk — a scanning surface, not a dashboard.
@@ -39,9 +38,31 @@ function OperatorPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { role, gateId: assignedGateId } = useOperatorGate();
+  // While the auth store has not hydrated, `authenticated` is false even for
+  // a valid kiosk session — the mount-redirect bounces logged-in operators to
+  // /login on every deep-link load. Wait for hydration before acting.
+  const hydrated = useHasHydrated();
 
   // Deep-link guard: an operator landing on /gate/<other> is bounced to
-  // their own assigned gate (the shell blocks unassigned operators).
+  // their own assigned gate. The redirect target must be a REAL gate —
+  // resolve it from the server (fresh /api/auth/session user) rather
+  // than the possibly-stale authStore value, and only when that gate
+  // is active. A stale/null target means "show the picker with a claim
+  // CTA", never "redirect to a nonexistent gate".
+  const checkSession = useAuthStore((s) => s.checkSession);
+  const refreshFromServer = useRef(false);
+  useEffect(() => {
+    if (role !== "operator") return;
+    if (refreshFromServer.current) return;
+    refreshFromServer.current = true;
+    // checkSession re-hydrates user from /api/auth/session (including a
+    // gate assignment made at /api/operator/claim-gate that the client
+    // store has not yet picked up — issue #3).
+    void checkSession().then((ok) => {
+      if (!ok) refreshFromServer.current = false;
+    });
+  }, [role, checkSession]);
+
   useEffect(() => {
     if (role !== "operator") return;
     if (!assignedGateId) return;
@@ -55,18 +76,28 @@ function OperatorPageInner() {
   const isSpecialPath = gateIdParam === "history" || gateIdParam === "manual";
 
   const { authenticated, user, logout } = useAuth();
+  // While the auth store has not hydrated yet, `authenticated` is false for
+  // a freshly reloaded (but still logged-in) kiosk session. The redirect
+  // effect below bounces such sessions to /login on mount — the flicker the
+  // operator sees between the login page and the desk. Gate the redirect
+  // on the hydrated flag so it only fires once we KNOW there is no
+  // session, not while one is still being re-established.
+  const hasHydrated = useHasHydrated();
 
   // Option A landing rule: the desk opens YOUR gate. An unassigned operator
   // lands on the gate picker — never on "the first active gate" (their
   // scans there would fail against a gate they don't own).
+  //
+  // While the store has not hydrated yet, `user` is null even for a
+  // logged-in operator. Jumping the picker on `!user?.gateId` would
+  // flash "Select Your Gate" for every authenticated visit until
+  // rehydration lands — which is exactly the glitch between the login
+  // page and the desk. Gate the unassigned check on `authenticated`
+  // so it only applies after we KNOW the session state.
   const gateId = isSpecialPath
     ? (user?.gateId || "")
     : (gateIdParam || user?.gateId || "");
-  // An unassigned operator (no gate_id in the auth store) always shows the
-  // picker overlay — even if the URL path carries a gate param. This
-  // prevents the "Gate Restricted / not assigned" toast + frozen desk
-  // when a stale /gate/<uuid> URL outlives a gate reassignment.
-  const isUnassigned = !user?.gateId;
+  const isUnassigned = authenticated && !user?.gateId;
   const needsAssignment = gateId === "" || isUnassigned;
 
   const { addToast } = useToast();
@@ -87,7 +118,6 @@ function OperatorPageInner() {
   const lastOutReason = useOperatorStore((s) => s.lastOutReason);
   const gateState = useOperatorStore((s) => s.gate);
 
-  const [selectedScan, setSelectedScan] = useState<ScanRecord | null>(null);
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
   // Manual entry is ONE button that opens an inline sheet — not a mode.
   const [manualOpen, setManualOpen] = useState(false);
@@ -487,6 +517,10 @@ function OperatorPageInner() {
                       if (isAuthError) {
                         logout();
                       } else {
+                        // Always return to idle — a failed scan must never
+                        // leave the desk paused (the camera stops when
+                        // state !== idle/detecting, so a stuck error state
+                        // kills the desk until reload).
                         reset();
                       }
                     }}
@@ -501,8 +535,9 @@ function OperatorPageInner() {
         })()}
       </AnimatePresence>
 
-      {/* Person detail sheet, opened from the transaction log */}
-      <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
+      {/* Person detail sheet removed: the transaction log lives at
+          /operator/transactions — the modal is dead weight on the
+          scanning surface (two-decisions rule). */}
 
       {/* ── The camera IS the page: full-bleed, z-50, auto-detecting ──
           Unassigned operators see the picker OVER the camera layer — the
