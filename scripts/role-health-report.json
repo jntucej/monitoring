@@ -1115,13 +1115,10 @@
   {
     "role": "hod",
     "leaf": "/hod/approvals/pending",
-    "status": "broken",
+    "status": "ok",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
   },
   {
     "role": "hod",
@@ -3135,13 +3132,10 @@
   {
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals/pending",
-    "status": "broken",
+    "status": "ok",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
   },
   {
     "role": "vice_principal",

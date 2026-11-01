@@ -321,7 +321,7 @@ html.light {
   --bg-elevated: #f1f5f9;    /* Slate-100 High Contrast Sub-panel */
   --text-primary: #10151d;   /* Deepest Text for sharp contrast */
   --text-secondary: #334155; /* Slate-700 Text */
-  --text-muted: #64748b;     /* Slate-500 Text */
+  --text-muted: #475569;     /* Slate-500 Text */
   --border: #cbd5e1;        /* Slate-300 Crisp Border */
   --border-strong: #94a3b8; /* Slate-400 Strong Border */
 
@@ -402,7 +402,7 @@ html.glass {
   --bg-elevated: rgba(255, 255, 255, 0.92);
   --text-primary: #0f172a;
   --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --border: rgba(255, 255, 255, 0.85);
   --border-strong: rgba(255, 255, 255, 0.95);
 

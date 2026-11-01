@@ -6,12 +6,12 @@ export default function CinematicLoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh flex items-center justify-center bg-[#05070b] text-[var(--text-muted)]">
+        <div className="min-h-dvh flex items-center justify-center bg-[#05070b] text-[#a1a1aa]">
           Loading...
         </div>
       }
     >
-      <div className="min-h-[100dvh] w-full grid grid-cols-1 lg:grid-cols-12 bg-[#05070b] text-[var(--text-muted)] overflow-x-hidden relative">
+      <div className="min-h-[100dvh] w-full grid grid-cols-1 lg:grid-cols-12 bg-[#05070b] text-[#a1a1aa] overflow-x-hidden relative">
         <div className="absolute top-1/4 left-1/4 w-[32rem] h-[32rem] bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-[28rem] h-[28rem] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -20,7 +20,7 @@ export default function CinematicLoginPage() {
             <div className="h-9 w-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-400">
               GM
             </div>
-            <span className="font-semibold tracking-wide text-[var(--text-muted)]">JNTUH UCEJ Gate Monitor</span>
+            <span className="font-semibold tracking-wide text-[#a1a1aa]">JNTUH UCEJ Gate Monitor</span>
           </div>
           <div className="max-w-md space-y-4 my-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
@@ -29,11 +29,11 @@ export default function CinematicLoginPage() {
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
               Autonomous campus gate & entry control.
             </h1>
-            <p className="text-[var(--text-muted)] text-sm leading-relaxed">
+            <p className="text-[#a1a1aa] text-sm leading-relaxed">
               Real-time movement audits, role-based access control, and automated nightly backups secured on institutional encrypted storage.
             </p>
           </div>
-          <div className="text-xs text-[var(--text-muted)] flex items-center justify-between">
+          <div className="text-xs text-[#a1a1aa] flex items-center justify-between">
             <span>© JNTUH University College of Engineering Jagtial</span>
             <Link href="/bootstrap" prefetch={false} className="text-emerald-400 hover:underline">
               Account Setup
@@ -48,7 +48,7 @@ export default function CinematicLoginPage() {
                 GM
               </div>
               <h2 className="text-lg font-semibold text-white">JNTUH UCEJ Gate Monitor</h2>
-              <p className="text-xs text-[var(--text-muted)]">Sign in to your dashboard</p>
+              <p className="text-xs text-[#a1a1aa]">Sign in to your dashboard</p>
             </div>
 
             <div className="backdrop-blur-2xl bg-[var(--bg-surface)]/55 border border-[var(--border)]/40 rounded-2xl shadow-2xl shadow-black/80 p-8 relative overflow-hidden">
