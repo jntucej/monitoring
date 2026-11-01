@@ -55,6 +55,11 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   // mount extra listeners/canvases for no functional benefit. Guarded/role
   // consoles keep both.
   const isMarketing = pathname === "/" || pathname === "";
+  // The gate scanning kiosk (/gate/*) is a hands-free, zero-chrome surface:
+  // the circular floating bot button sits on top of the IN/OUT / Manual
+  // entry action bar and collides with the "Manual Entry" label — it
+  // must be suppressed there.
+  const isGateKiosk = pathname?.startsWith("/gate/") || pathname === "/gate";
 
   return (
     <ErrorBoundary>
@@ -64,7 +69,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           <ToastProvider>
             <SafeAreaAppShell>{children}</SafeAreaAppShell>
             {!isMarketing && <FloatingBot />}
-            {!isMarketing && <FloatableThemeCycler />}
+            {!isMarketing && !isGateKiosk && <FloatableThemeCycler />}
           </ToastProvider>
         </NavigationProvider>
       </GlassProvider>

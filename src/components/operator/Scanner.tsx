@@ -124,7 +124,13 @@ export function Scanner({
   const activeRef = useRef<boolean>(active);
   const rvfAvailableRef = useRef<boolean>(HAS_RVFC);
 
-  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">("idle");
+  const [cameraState, setCameraState] = useState<"idle" | "requesting" | "active" | "error">(
+    // Pre-seed "requesting" so the very first paint (before the mount
+    // effect fires startCamera a tick later) already shows the spinner.
+    // Without this, a 1-frame "idle" flash renders between mount and the
+    // effect, which reads as the camera "not opening at instant".
+    "requesting",
+  );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [mode, setMode] = useState<ScanMode>(initialMode);
@@ -765,8 +771,12 @@ export function Scanner({
             )}
           </div>
 
-          {/* Actions */}
-          <div className="p-4 bg-[var(--bg-surface)] border-t border-[var(--border)]">
+          {/* Actions — a clearly-separated "if the camera can't read it" row,
+              distinct from the page's IN/OUT decision bar. */}
+          <div className="p-4 pt-3 bg-[var(--bg-surface)] border-t-2 border-[var(--border)]">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              Can't see the code?
+            </p>
             <input
               type="file"
               ref={fileInputRef}
@@ -791,7 +801,7 @@ export function Scanner({
                     className="w-full sm:flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
                     <KeyRound className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                    <span className="truncate">Manual Entry</span>
+                    <span className="truncate">Enter Roll Manually</span>
                   </button>
                 )}
               </div>

@@ -122,6 +122,10 @@ function OperatorPageInner() {
   // Manual entry is ONE button that opens an inline sheet — not a mode.
   const [manualOpen, setManualOpen] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
+  // Scanner close (X): the Scanner's onClose just stops the camera; the page
+  // stays on the kiosk. Give the X a real destination — back to the operator
+  // dashboard — so it isn't a dead button.
+  const [scannerOpen, setScannerOpen] = useState(true);
 
 
   // Redirect unauthenticated users to operator login.
@@ -544,13 +548,42 @@ function OperatorPageInner() {
           camera keeps warm underneath so the desk activates instantly
           once a gate is claimed. */}
       <Scanner
-        isOpen
-        active={scannerActive && !needsAssignment}
-        onClose={() => {}}
+        isOpen={scannerOpen}
+        active={scannerActive && !needsAssignment && scannerOpen}
+        onClose={() => { setScannerOpen(false); router.push("/operator"); }}
         onScan={handleQRScanned}
         onManualEntryClick={() => { primeAudioOnGesture(); setManualOpen(true); }}
         gateId={gateId}
       />
+
+      {/* Scanner closed (X pressed): a single clear re-open action instead
+          of a frozen empty desk. */}
+      {!scannerOpen && !needsAssignment && (
+        <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
+            <p className="text-sm font-bold text-[var(--text-primary)]">Scanner paused</p>
+            <p className="text-xs text-[var(--text-muted)]">
+              Camera stopped. Re-open it to continue scanning, or go back to the dashboard.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => { setScannerOpen(true); setManualOpen(false); }}
+                className="min-h-[44px] rounded-xl bg-[var(--action-primary)] text-black font-bold text-sm"
+              >
+                Open scanner
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/operator")}
+                className="min-h-[44px] rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm"
+              >
+                Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Unassigned operators: the picker, never a first-active gate ── */}
       {needsAssignment && (
@@ -570,7 +603,7 @@ function OperatorPageInner() {
       )}
 
       {/* ── Two decisions, always in the same place ── */}
-      {!needsAssignment && (
+      {!needsAssignment && scannerOpen && (
         <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-2 px-4">
           <div className="w-full max-w-md grid grid-cols-2 gap-2">
             <button
