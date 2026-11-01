@@ -14,8 +14,8 @@
   {
     "feature": "parent.view-child-status",
     "role": "parent",
-    "ok": true,
-    "detail": "child status visible on /parent"
+    "ok": false,
+    "detail": "no child-status content on /parent"
   },
   {
     "feature": "principal.see-inbox",
@@ -26,8 +26,8 @@
   {
     "feature": "hod.see-approvals",
     "role": "hod",
-    "ok": true,
-    "detail": "HOD approvals list renders"
+    "ok": false,
+    "detail": "HOD approvals list missing"
   },
   {
     "feature": "sysadmin.see-health",

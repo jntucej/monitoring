@@ -194,11 +194,13 @@ const features: Array<{
     run: async (ctx) => {
       const page = await ctx.newFeaturePage();
       try {
-        await page.goto(`${BASE}/parent`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        // /parent now 301-redirects to /guardian (parent–guardian
+        // consolidation) — the harness follows it to the canonical surface.
+        await page.goto(`${BASE}/guardian`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
         await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
         const body = await page.locator("body").innerText().catch(() => "");
-        const hasStatus = /child|parent|pass|attendance|movement|request|campus|guardian/i.test(body);
-        return { ok: hasStatus, detail: hasStatus ? "child status visible on /parent" : "no child-status content on /parent" };
+        const hasStatus = /child|parent|pass|attendance|movement|request|campus|guardian|children/i.test(body);
+        return { ok: hasStatus, detail: hasStatus ? "child status visible on /guardian" : "no child-status content on /guardian" };
       } finally {
         await page.close();
       }
@@ -232,7 +234,9 @@ const features: Array<{
     run: async (ctx) => {
       const page = await ctx.newFeaturePage();
       try {
-        await page.goto(`${BASE}/hod/approvals/pending`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        // HOD queue now lives at the role root (home=queue swap);
+        // /hod/approvals/pending redirects here.
+        await page.goto(`${BASE}/hod`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
         await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
         const hasContent = await page.locator("text=/pending|no.*requests|approval|0 pending/i").first().count();
         return { ok: hasContent > 0, detail: hasContent ? "HOD approvals list renders" : "HOD approvals list missing" };

@@ -81,6 +81,12 @@ function validate() {
     errors.push('QR_TOKEN_SECRET contains an unconfigured placeholder value.');
   }
 
+  // Internal middleware signing secret — signTrustedHeaders throws without it.
+  const mwSecret = process.env.INTERNAL_MW_SECRET;
+  if (isProd && (!mwSecret || mwSecret.length < 32 || isPlaceholder(mwSecret))) {
+    errors.push('INTERNAL_MW_SECRET is required in production (32+ chars, e.g. openssl rand -hex 32) — signTrustedHeaders fails closed without it.');
+  }
+
   const mfaSecret = process.env.MFA_ENROLL_SECRET;
   if (isProd && (!mfaSecret || isPlaceholder(mfaSecret))) {
     errors.push('MFA_ENROLL_SECRET is required to be set and secure in production (sysadmin break-glass mechanism).');

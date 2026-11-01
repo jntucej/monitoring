@@ -449,9 +449,11 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
       }
       enforceOutScopeByEntryType(effectiveOutEntryType, input.reason);
 
-      // 9c. OUT-scan duration cap: reject if the student has been out longer
-      //     than the reason's cap (daily_outing: 1h, day_pass: 12h).
-      await enforceOutDurationCap(person.id, input.reason);
+      // 9c REMOVED (audit B2): the OUT-side cap rejected legitimate scans —
+      // a student on campus 2h could not take a 1h outing. The cap's real job
+      // (bounding time OUT) is done by enforceInReturnDurationCap on the
+      // matching IN-return scan (step 9d), which flags OVERDUE non-fatally.
+      // The function stays (dead) until a real outbound timer exists.
     }
 
     const flow = await validateStudentExitFlow(

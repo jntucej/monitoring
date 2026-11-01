@@ -63,7 +63,16 @@ export function DigestBoard({ source }: DigestBoardProps) {
 
   const tiles = useMemo(() => {
     if (!data?.data) return [];
-    return Object.entries(data.data).map(([key, value]) => ({ key, value }));
+    const payload = data.data as Record<string, unknown>;
+    // Bo1: some endpoints nest the digest one level under a wrapper key
+    // (e.g. { data: { dashboard: { pendingApprovals, ... } } }). Unwrap a
+    // single-object wrapper so the tiles show the real fields, not one
+    // "N fields" tile.
+    const entries = Object.entries(payload);
+    if (entries.length === 1 && typeof entries[0][1] === "object" && entries[0][1] !== null && !Array.isArray(entries[0][1])) {
+      return Object.entries(entries[0][1] as Record<string, unknown>).map(([key, value]) => ({ key, value }));
+    }
+    return entries.map(([key, value]) => ({ key, value }));
   }, [data]);
 
   return (
