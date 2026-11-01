@@ -67,7 +67,10 @@ async function handleGet(
       category: ev.category || "event",
       title: ev.title,
       date: ev.starts_at,
-      time: ev.ends_at ? `${ev.starts_at.slice(11, 16)}–${ev.ends_at.slice(11, 16)}` : null,
+      time:
+        ev.ends_at && typeof ev.starts_at === "string" && typeof ev.ends_at === "string"
+          ? `${ev.starts_at.slice(11, 16)}\u2013${ev.ends_at.slice(11, 16)}`
+          : null,
       location: ev.location || null,
       owner: ev.published_by || null,
     });

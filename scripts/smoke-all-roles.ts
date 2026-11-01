@@ -105,9 +105,10 @@ async function smokeRole(browser: Browser, c: Creds) {
     consoleErrors.push(t.slice(0, 200));
   });
   page.on("response", (res) => {
-    if (res.url().includes("/api/") && (res.status() === 401 || res.status() === 403)) {
-      badApis.push(`${res.status()} ${res.url().replace(BASE, "")}`);
-    }
+    const s = res.status();
+    const u = res.url().replace(BASE, "");
+    if (s === 401 || s === 403) badApis.push(`${s} ${u}`);
+    else if (s >= 500) badApis.push(`${s} ${u}`);
   });
 
   // 1) login
