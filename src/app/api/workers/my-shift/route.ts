@@ -21,11 +21,11 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       [auth.userId]
     );
 
-    // Work items assigned to this worker's own user id (assignment-scoped),
+    // Work items filed/owned by this worker's own user id (assignment-scoped),
     // plus a today snapshot of this worker's shift.
     const openWorkOrders = await query(
       `SELECT pr.* FROM permission_requests pr
-        WHERE pr.student_user_id = $1
+        WHERE pr.requester_user_id = $1
           AND pr.status = 'PENDING'
         ORDER BY pr.created_at DESC LIMIT 15`,
       [auth.userId]

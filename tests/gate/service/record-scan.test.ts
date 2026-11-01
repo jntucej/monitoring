@@ -322,21 +322,25 @@ describe('recordScan — pass enforcement', () => {
 
 // ─── OUT duration cap ─────────────────────────────────────────────────
 describe('recordScan — OUT duration cap', () => {
-  it('rejects a daily_outing OUT scan after 2h (cap = 1h)', async () => {
+  it('allows a daily_outing OUT scan even after 2h on-campus (OUT-side cap removed)', async () => {
+    // The inverted OUT-side cap was removed: duration bounding now happens
+    // at IN-return (enforceInReturnDurationCap flags OVERDUE). A student
+    // who has been on campus 2h may still take a 1h outing.
     m.findOccupancyByUserId.mockResolvedValueOnce({
       user_id: 'U-1', current_status: 'IN', last_gate_id: 'G-1', last_updated: 'x',
     });
-    // last IN was 2h ago
     m.findLastMovementByUserId.mockResolvedValueOnce({
       user_id: 'U-1', direction: 'IN', reason: null,
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     });
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'daily_outing' }),
-    ).rejects.toMatchObject({ code: 'DAILY_OUTING_OVERDUE' });
+    ).resolves.toBeDefined();
   });
 
-  it('rejects a day_pass OUT scan after 13h (cap = 12h)', async () => {
+  it('allows a day_pass OUT scan even after 13h on-campus (OUT-side cap removed)', async () => {
+    // Same as daily_outing: the OUT-side cap is a no-op now. The day_pass
+    // return window is enforced at IN-return via the OVERDUE flag.
     m.findOccupancyByUserId.mockResolvedValueOnce({
       user_id: 'U-1', current_status: 'IN', last_gate_id: 'G-1', last_updated: 'x',
     });
@@ -351,7 +355,7 @@ describe('recordScan — OUT duration cap', () => {
     });
     await expect(
       recordScan({ ...baseInput, direction: 'OUT', entryType: undefined, reason: 'day_pass' }),
-    ).rejects.toMatchObject({ code: 'DAY_PASS_OVERDUE' });
+    ).resolves.toBeDefined();
   });
 
   it('home_out has no cap — succeeds even after 72h', async () => {

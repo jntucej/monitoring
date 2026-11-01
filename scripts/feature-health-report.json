@@ -1,0 +1,50 @@
+[
+  {
+    "feature": "student.apply-leave",
+    "role": "student",
+    "ok": false,
+    "detail": "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('#perm-reason, select[name=\\'reason\\'], select').first() to be visible\n"
+  },
+  {
+    "feature": "operator.scan-gate",
+    "role": "operator",
+    "ok": true,
+    "detail": "gate desk IN button present"
+  },
+  {
+    "feature": "parent.view-child-status",
+    "role": "parent",
+    "ok": false,
+    "detail": "no child-status content on /parent/child-status"
+  },
+  {
+    "feature": "principal.see-inbox",
+    "role": "principal",
+    "ok": false,
+    "detail": "no inbox content on /principal"
+  },
+  {
+    "feature": "hod.see-approvals",
+    "role": "hod",
+    "ok": false,
+    "detail": "HOD approvals list missing"
+  },
+  {
+    "feature": "sysadmin.see-health",
+    "role": "admin",
+    "ok": false,
+    "detail": "no health status on /sysadmin/application-health"
+  },
+  {
+    "feature": "supervisor.see-gates",
+    "role": "supervisor",
+    "ok": true,
+    "detail": "supervisor live gate board renders"
+  },
+  {
+    "feature": "worker.see-work",
+    "role": "worker",
+    "ok": false,
+    "detail": "no work content on /worker"
+  }
+]

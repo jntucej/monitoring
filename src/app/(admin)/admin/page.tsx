@@ -1,20 +1,14 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 /**
- * Admin dashboard root page — now a redirect to /admin/overview.
+ * Admin dashboard root page — server-redirects to /admin/overview.
  *
- * Historically this page was `return null` with the manifest pointing
- * "Campus Dashboard" at `/admin`. The actual dashboard content lives at
- * `/admin/overview`. Rather than duplicating it, the root path simply
- * forwards the user there.
+ * Historically this was a client-side `router.replace` in a `"use client"`
+ * page that returned null, which flashed a blank page and broke when JS
+ * was slow or disabled. `redirect()` from next/navigation is a server
+ * 307 that sends the Location header before the page body, so the
+ * browser lands on /admin/overview with no intermediate render.
  */
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  useEffect(() => {
-    router.replace("/admin/overview");
-  }, [router]);
-  return null;
+  redirect("/admin/overview");
 }

@@ -18,11 +18,11 @@ ingress:
     service: http://caddy:80
   - hostname: hooks.cej.in
     service: http://web:3000
-  - service: http://status:3000
-
-# Fallthrough: everything else gets a 404 from cloudflared itself rather than
-# being forwarded. Prevents accidental exposure of internal hostnames.
-  - service: http://localhost:9999
+  # Catch-all: return a clean 404 from cloudflared itself rather than
+  # forwarding to a dead service. Prevents accidental exposure of
+  # internal hostnames and avoids the 502 that an unreachable
+  # service: would produce.
+  - service: http_status:404
 
 # Force TCP/443 outbound. Without this, cloudflared probes QUIC (UDP 7844)
 # first and flaps behind DPI-restricted ISPs. This is the single most

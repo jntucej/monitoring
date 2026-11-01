@@ -3,6 +3,16 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund --prefer-offline || npm ci --legacy-peer-deps --no-audit --no-fund --prefer-offline
+
+# Production-only dependencies for the runner stage. The builder stage uses
+# the full tree above (needs devDeps for next build), but the runner ships
+# only prod deps to avoid packaging jest/playwright/eslint/typescript.
+FROM node:20-alpine AS prod-deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev --no-audit --no-fund --prefer-offline || npm ci --omit=dev --legacy-peer-deps --no-audit --no-fund --prefer-offline
+
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -30,9 +40,10 @@ RUN adduser --system --uid 1001 --home /app nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Full deps for server.js (standalone output prunes node_modules; bcryptjs/pg
-# must be resolvable at runtime). Symlink-safe copy.
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+# Prod-only deps for server.js (standalone output prunes node_modules;
+# bcryptjs/pg must be resolvable at runtime). Prod deps exclude devDeps
+# (jest, playwright, eslint, typescript) — ~hundreds of MB smaller.
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Ensure cache/config/uploads dirs exist and are owned by nextjs before the USER switch
 RUN mkdir -p /app/.cache /app/.config /app/data/uploads && chown -R nextjs:nodejs /app

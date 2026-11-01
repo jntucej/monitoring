@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withAdminMutation } from "@/server/http/mutation-guard";
+import { withMessMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
+import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
 
 async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }) {
@@ -99,10 +100,10 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(
-  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: ["admin", "sysadmin"] }),
+  withAuthorization(async (req, ctx) => handleGet(req, ctx), { requiredRole: TIER.MESS_INCHARGE }),
   { keyPrefix: "mess_menu_items_get" }
 );
 
-export const POST = withAdminMutation(handlePost, {
+export const POST = withMessMutation(handlePost, {
   rateLimit: { windowMs: 60_000, maxRequests: 20 },
 });

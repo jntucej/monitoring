@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
 interface SuccessFlashProps {
+  /** Called when the operator taps the flash to reset immediately. */
+  onClick?: () => void;
+  /** Called when the auto-dismiss timer fires. */
   onDismiss?: () => void;
   autoDismissMs?: number;
   children?: React.ReactNode;
@@ -12,7 +15,7 @@ interface SuccessFlashProps {
   reason?: string;
 }
 
-export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, direction, reason }: SuccessFlashProps) {
+export function SuccessFlash({ onClick, onDismiss, autoDismissMs = 500, children, direction, reason }: SuccessFlashProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dismissedRef = useRef(false);
 
@@ -23,6 +26,7 @@ export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, directi
       if (dismissedRef.current) return;
       dismissedRef.current = true;
       onDismiss?.();
+      onClick?.();
     }, autoDismissMs);
 
     return () => {
@@ -40,12 +44,26 @@ export function SuccessFlash({ onDismiss, autoDismissMs = 500, children, directi
         ? "Exit Recorded"
         : "Scan Recorded!";
 
+  const handleTap = () => {
+    if (dismissedRef.current) return;
+    dismissedRef.current = true;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    onClick?.();
+    onDismiss?.();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-black select-none"
+      onClick={handleTap}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-black select-none cursor-pointer"
     >
       <motion.div
         initial={{ scale: 0 }}

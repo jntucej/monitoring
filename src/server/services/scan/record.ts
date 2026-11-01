@@ -42,15 +42,23 @@ import { setUserFlag, addNotification, getStudentGuardianLink } from "@/lib/db";
 import { sendSMS } from "@/lib/integrations/sms";
 
 /**
- * Duration caps for OUT-scan enforcement (hours from last IN to now).
- * daily_outing: 1 hour. day_pass: 12 hours. A student who has been out
- * longer than the cap is rejected (400) rather than warned, matching the
- * existing ConflictError/overdue pattern.
+ * OUT-scan duration caps.
+ *
+ * Historically this measured "hours since the last IN scan" and rejected
+ * the OUT when the student had been on campus longer than the cap. That
+ * was semantically inverted for daily_outing: a student who stayed on
+ * campus for 3 h and then took a 1 h outing was wrongly blocked, while
+ * the actual quantity the cap is meant to bound — time out on a
+ * daily_outing ticket — was enforced at the IN-return instead (via
+ * enforceInReturnDurationCap flagging OVERDUE).
+ *
+ * The OUT-side cap is now a no-op (kept as a hook so callers and the
+ * record-scan audit trail stay stable). All duration-bounding for
+ * daily_outing / day_pass exits happens at IN-return: a student who
+ * comes back late is flagged OVERDUE and the ticket's return window is
+ * enforced there.
  */
-const OUT_DURATION_CAPS_HOURS: Record<string, number> = {
-  daily_outing: 1,
-  day_pass: 12,
-};
+const OUT_DURATION_CAPS_HOURS: Record<string, number> = {};
 /** Duration caps for IN-return checks (hours from last OUT to now).
  *  daily_outing: 1h, day_pass: 12h, home_out: 48h, special_leave: 24h.
  *  Silently flags OVERDUE if exceeded — the scan is allowed but the student's flag_status is updated. */
@@ -148,12 +156,20 @@ function enforceOutScopeByEntryType(
 /**
  * Enforce OUT-scan duration caps.
  *
- * For a student's OUT scan, the OUT window starts from the last IN scan. If
- * the reason has a duration cap (daily_outing: 1h, day_pass: 12h) and the
- * elapsed time from last IN to now exceeds the cap, the scan is rejected
- * with a ConflictError carrying the OVERDUE code.
+ * Historically this rejected an OUT scan when "now − last IN" exceeded the
+ * cap — i.e. it bounded time spent ON CAMPUS before the exit. That was
+ * semantically inverted for daily_outing: a student who had been on campus
+ * 2 hours and then took a 30-minute outing was blocked, while the
+ * quantity the cap is actually meant to bound — time spent OUT on the
+ * outing ticket — was only checked at IN-return (via
+ * enforceInReturnDurationCap, which flags OVERDUE non-fatally).
  *
- * home_out and day_scholar_out have no cap and are skipped.
+ * OUT_DURATION_CAPS_HOURS is now empty: the OUT-side cap is a no-op, so
+ * legitimate exits are never blocked by on-campus time. The return-side
+ * cap (IN_RETURN_CAPS_HOURS) is the authoritative bound: a student who
+ * comes back late is flagged OVERDUE and the ticket's window is enforced
+ * there. The function is kept as a hook so callers, tests, and the
+ * record-scan audit trail stay stable.
  */
 async function enforceOutDurationCap(
   userId: string,

@@ -5,6 +5,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addNotification, addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
+import type { Role } from "@/lib/types";
 
 async function handlePost(
   req: NextRequest,
@@ -85,7 +86,10 @@ async function handlePost(
   });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
-  windowMs: 60_000,
-  maxRequests: 60,
-});
+export const POST = withRateLimit(
+  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "admin", "sysadmin"] as Role[] }),
+  {
+    windowMs: 60_000,
+    maxRequests: 60,
+  },
+);

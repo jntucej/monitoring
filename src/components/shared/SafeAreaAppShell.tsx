@@ -60,7 +60,27 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     // double-renders over the student layout.
     pathname?.startsWith("/student") ||
     pathname?.startsWith("/parent") ||
-    pathname?.startsWith("/guardian");
+    pathname?.startsWith("/guardian") ||
+    // Role consoles that mount their OWN RoleDesktopShell/RoleMobileShell
+    // (drawer + top bar) in their route layout. The shared global Sidebar
+    // must stay hidden for these, otherwise they double-render a second
+    // navigation chrome on top of the console's own shell.
+    pathname?.startsWith("/caretaker") ||
+    pathname?.startsWith("/deputy-warden") ||
+    pathname?.startsWith("/hostel-manager") ||
+    pathname?.startsWith("/oie") ||
+    pathname?.startsWith("/faculty") ||
+    pathname?.startsWith("/staff") ||
+    pathname?.startsWith("/emo") ||
+    pathname?.startsWith("/principal") ||
+    pathname?.startsWith("/vice-principal") ||
+    pathname?.startsWith("/supervisor") ||
+    pathname?.startsWith("/mess") ||
+    pathname?.startsWith("/exam-branch") ||
+    pathname?.startsWith("/exam/superintendent") ||
+    pathname?.startsWith("/visitor") ||
+    pathname?.startsWith("/worker") ||
+    pathname?.startsWith("/hod");
 
   // Initialize theme from localStorage on client-side mount
   useEffect(() => {

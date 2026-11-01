@@ -24,6 +24,9 @@ export interface PageHeaderProps {
  * On md+ the console chrome already identifies the page, so nothing renders.
  * Also owns the document-title side effect; all existing call sites keep
  * working unchanged.
+ *
+ * An <h1> is always emitted (visually hidden on md+) so every page has a
+ * single accessible heading for screen readers and deep-link clarity.
  */
 export function PageHeader({
   title,
@@ -44,12 +47,19 @@ export function PageHeader({
   // Keep unused-destructure lint clean without a no-op render.
   void [subtitle, onRefresh, refreshing, actions, breadcrumb, pathOverride];
 
-  if (!showMobileTitle || !title) return null;
+  if (!title) return null;
 
   return (
-    <div className="md:hidden -mx-4 px-4 pt-2 pb-1">
-      <h1 className="text-base font-bold text-[var(--text-primary)] truncate">{title}</h1>
-      {subtitle && <p className="text-xs text-[var(--text-muted)] truncate">{subtitle}</p>}
+    <div className="md:-mx-4 md:px-4 md:pt-2 md:pb-1">
+      {/* Desktop: visually-hidden h1 for a11y + document context. */}
+      <h1 className="sr-only">{title}</h1>
+      {/* Mobile: visible title bar (the shell chrome is hidden on small screens). */}
+      {showMobileTitle && (
+        <div className="md:hidden -mx-4 px-4 pt-2 pb-1">
+          <h2 className="text-base font-bold text-[var(--text-primary)] truncate">{title}</h2>
+          {subtitle && <p className="text-xs text-[var(--text-muted)] truncate">{subtitle}</p>}
+        </div>
+      )}
     </div>
   );
 }

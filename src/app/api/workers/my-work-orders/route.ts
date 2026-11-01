@@ -8,9 +8,13 @@ import type { AuthContext } from "@/lib/authContext";
  * Thin, assignment-scoped work-orders endpoint for the worker role.
  *
  * Returns { success, data: { open, recentlyClosed, totalOpen } } — the
- * worker's view of work items assigned to their own user id, plus
+ * worker's view of work items they filed/own (requester_user_id), plus
  * recently closed ones. Personal / assignment-scoped only: no
  * institutional records of other people.
+ *
+ * The view's student_user_id alias is requester_user_id — the same owner
+ * column; the previous student_user_id scoping was the same value but the
+ * intent (who filed the ticket) is clearer with requester_user_id.
  */
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
@@ -20,8 +24,8 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
               pr.updated_at AS updatedAt,
               u.name AS requesterName, u.unique_id AS requesterId
          FROM permission_requests pr
-         LEFT JOIN users u ON u.id = pr.student_user_id
-        WHERE pr.student_user_id = $1
+         LEFT JOIN users u ON u.id = pr.requester_user_id
+        WHERE pr.requester_user_id = $1
           AND pr.status = 'PENDING'
         ORDER BY pr.created_at DESC
         LIMIT 25`,
@@ -31,7 +35,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
     const recentlyClosed = await query(
       `SELECT pr.id, pr.ticket_number AS ticket, pr.status, pr.updated_at AS updatedAt
          FROM permission_requests pr
-        WHERE pr.student_user_id = $1
+        WHERE pr.requester_user_id = $1
           AND pr.status IN ('COMPLETED', 'APPROVED')
           AND pr.updated_at >= NOW() - INTERVAL '7 days'
         ORDER BY pr.updated_at DESC
@@ -41,7 +45,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
 
     const totalOpenRes = await query(
       `SELECT COUNT(*)::int AS c FROM permission_requests
-        WHERE student_user_id = $1 AND status = 'PENDING'`,
+        WHERE requester_user_id = $1 AND status = 'PENDING'`,
       [auth.userId]
     );
 

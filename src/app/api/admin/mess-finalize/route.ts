@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
-import { withAdminMutation } from "@/server/http/mutation-guard";
+import { withMessMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { getDayById } from "../../mess/_helpers";
 import type { AuthContext } from "@/lib/authContext";
@@ -75,6 +75,6 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const POST = withAdminMutation(handlePost, {
+export const POST = withMessMutation(handlePost, {
   rateLimit: { windowMs: 60_000, maxRequests: 10 },
 });

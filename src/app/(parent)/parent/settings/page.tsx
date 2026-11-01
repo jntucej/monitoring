@@ -1,12 +1,11 @@
-"use client";
+ "use client";
 
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Bell, User, Shield, Save, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function ParentSettingsPage() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, token } = useAuthStore();
   const [name, setName] = useState(user?.name || "Parent User");
   const [email, setEmail] = useState(user?.email || "parent@college.edu");
   const [phone, setPhone] = useState(user?.phone || "+91 98765 43210");
@@ -18,23 +17,67 @@ export default function ParentSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
+  // Load persisted notification preferences on mount.
   useEffect(() => {
-    if (user) {
-      if (user.name) setName(user.name);
-      if (user.email) setEmail(user.email);
-      if (user.phone) setPhone(user.phone);
+    let cancelled = false;
+    async function loadPrefs() {
+      try {
+        const res = await fetch("/api/notifications/preferences", {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (cancelled || !json?.data?.types) return;
+        const t = json.data.types;
+        // Map the three parent-facing toggles onto the server type keys:
+        // gate alerts → gate_offline/gate_online, pass updates →
+        // pass_approved/pass_rejected, emergency → emergency_broadcast.
+        setNotifyEntryExit(t.gate_offline === true || t.gate_online === true);
+        setNotifyPassUpdates(t.pass_approved === true || t.pass_rejected === true);
+        setNotifyEmergency(t.emergency_broadcast === true);
+      } catch {
+        // Offline / 401: keep the optimistic defaults.
+      }
     }
-  }, [user]);
+    loadPrefs();
+    return () => { cancelled = true; };
+  }, [token]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    if (user) {
-      setUser({ ...user, name, email, phone });
+    setStatusMessage(null);
+    if (user) setUser({ ...user, name, email, phone });
+
+    // Persist notification toggles to the server so they survive reload.
+    try {
+      const res = await fetch("/api/notifications/preferences", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          types: {
+            gate_offline: notifyEntryExit,
+            gate_online: notifyEntryExit,
+            pass_approved: notifyPassUpdates,
+            pass_rejected: notifyPassUpdates,
+            emergency_broadcast: notifyEmergency,
+          },
+        }),
+      });
+      if (res.ok) {
+        setStatusMessage("Settings updated successfully!");
+      } else {
+        setStatusMessage("Profile saved. Notification preferences could not be updated.");
+      }
+    } catch {
+      setStatusMessage("Profile saved. Notification preferences not synced (offline).");
     }
     setCurrentPin("");
     setNewPin("");
-    setStatusMessage("Settings updated successfully!");
     setSaving(false);
   };
 

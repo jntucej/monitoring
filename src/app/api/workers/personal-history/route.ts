@@ -36,7 +36,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     const completed = await query(
       `SELECT pr.id, pr.ticket_number AS ticket, pr.status, pr.updated_at AS updatedAt
          FROM permission_requests pr
-        WHERE pr.student_user_id = $1
+        WHERE pr.requester_user_id = $1
           AND pr.status IN ('COMPLETED','APPROVED')
         ORDER BY pr.updated_at DESC
         LIMIT 20`,

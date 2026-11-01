@@ -124,6 +124,10 @@ describe('Gate desk — full operator flow', () => {
       body: { success: true, data: { found: true, person: TEST_STUDENT } },
     }));
 
+    route('GET', `/api/permissions/approved?roll=${TEST_STUDENT.uniqueId}`, () => ({
+      status: 200,
+      body: { success: true, data: [] },
+    }));
     route('POST', '/api/gate/scan', () => ({
       status: 200,
       body: {
@@ -178,6 +182,10 @@ describe('Gate desk — full operator flow', () => {
     route('GET', `/api/operator/lookup?id=${TEST_STUDENT.uniqueId}`, () => ({
       status: 200,
       body: { success: true, data: { found: true, person: TEST_STUDENT } },
+    }));
+    route('GET', `/api/permissions/approved?roll=${TEST_STUDENT.uniqueId}`, () => ({
+      status: 200,
+      body: { success: true, data: [] },
     }));
 
     // Scan returns 409 duplicate

@@ -10,6 +10,8 @@ import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
+const EMERGENCY_RESOLVE_ROLES = ["operator", "caretaker", "deputy_warden", "hostel_manager", "principal", "supervisor", "admin", "sysadmin"] as Role[];
+
 function getId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
   return decodeURIComponent(segments[segments.length - 2] ?? "");
@@ -19,7 +21,7 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
 
-  if (!["caretaker", "deputy_warden", "hostel_manager", "principal", "supervisor", "admin", "sysadmin"].includes(auth.role)) {
+  if (!EMERGENCY_RESOLVE_ROLES.includes(auth.role)) {
     return fail("FORBIDDEN", "Not allowed", 403);
   }
 

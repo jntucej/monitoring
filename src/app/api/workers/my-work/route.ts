@@ -8,20 +8,26 @@ import type { AuthContext } from "@/lib/authContext";
  * Thin, assignment-scoped "my work" endpoint for the worker role.
  *
  * Returns { success, data: { tasks, completedLastWeek, todayShift } } — the
- * worker's open + recently completed maintenance work orders (from
- * permission_requests) and today's shift snapshot, all scoped to the
- * caller's own user id. No institutional movement records of others.
+ * worker's open + recently completed maintenance work orders and today's
+ * shift snapshot, all scoped to the caller's own user id.
+ *
+ * Work items are tracked as permission_requests filed BY the worker
+ * (requester_user_id = worker uuid). A maintenance duty is expressed as a
+ * permission request the worker raises (cleaning round, repair, etc.).
+ * The legacy student_user_id alias on the view points at the student who
+ * requested a hostel/exam pass and is NOT the worker, so it was wrong
+ * here; switched to requester_user_id, which is the authoritative owner
+ * column on the base table.
  */
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
-    // Assignment-scoped: work items assigned to the caller's user id only.
-    // Worker permissions are based on assigned duties — no institutional
-    // movement records of other persons.
+    // Assignment-scoped: work items filed/owned by the caller's user id only.
+    // No institutional movement records of other persons.
     const openTasks = await query(
       `SELECT id, ticket_number AS ticket, workflow_type AS type,
               current_stage AS stage, status, created_at AS createdAt
          FROM permission_requests
-        WHERE student_user_id = $1
+        WHERE requester_user_id = $1
           AND status = 'PENDING'
           AND created_at >= NOW() - INTERVAL '30 days'
         ORDER BY created_at DESC
@@ -31,7 +37,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
 
     const completed = await query(
       `SELECT COUNT(*)::int AS c FROM permission_requests
-        WHERE student_user_id = $1
+        WHERE requester_user_id = $1
           AND status IN ('COMPLETED','APPROVED')
           AND updated_at >= NOW() - INTERVAL '7 days'`,
       [auth.userId]

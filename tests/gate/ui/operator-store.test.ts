@@ -38,6 +38,12 @@ beforeEach(async () => {
       },
     },
   }));
+  // startScan fires this in parallel with the person fetch; without a
+  // handler the catch branch marks the scan as a network error.
+  route('GET', '/api/permissions/approved', () => ({
+    status: 200,
+    body: { success: true, data: [] },
+  }));
   await useOperatorStore.getState().reset();
 });
 

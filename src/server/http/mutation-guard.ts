@@ -19,6 +19,7 @@ import { withAuthorization, type AuthorizationOptions } from "@/middleware/autho
 import { withRateLimit, type RateLimitConfig, checkRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
+import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
 
 export interface MutationGuardOptions extends AuthorizationOptions {
@@ -132,6 +133,22 @@ export function withAdminMutation(
   return withMutationGuard(handler, {
     ...options,
     requiredRole: ["admin", "sysadmin"],
+  });
+}
+
+/**
+ * Convenience wrapper for mess-console mutating routes.
+ * Bakes in requiredRole [mess_incharge, principal, admin, sysadmin]
+ * (TIER.MESS_INCHARGE) plus the full mutation triad. Used by all
+ * POST/PATCH/DELETE endpoints the /mess console calls.
+ */
+export function withMessMutation(
+  handler: Handler,
+  options: Omit<MutationGuardOptions, "requiredRole"> = {},
+) {
+  return withMutationGuard(handler, {
+    ...options,
+    requiredRole: TIER.MESS_INCHARGE,
   });
 }
 

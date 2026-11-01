@@ -11,8 +11,15 @@ describe('policy/operator-recommend', () => {
     biometricReady: false,
   };
 
-  it('OUT + daily_outing → recommend "Return to Hostel" (IN)', () => {
+  it('OUT + daily_outing + hosteller → recommend "Home In" (type pinned)', () => {
     const r = recommend({ ...base, lastReason: 'daily_outing' });
+    expect(r.direction).toBe('IN');
+    expect(r.entryButton).toBe('home_in');
+    expect(r.confidence).toBeGreaterThanOrEqual(0.7);
+  });
+
+  it('OUT + daily_outing + unknown type → recommend "Return to Hostel"', () => {
+    const r = recommend({ ...base, lastReason: 'daily_outing', currentEntryType: null });
     expect(r.direction).toBe('IN');
     expect(r.entryButton).toBe('return_to_hostel');
     expect(r.confidence).toBeGreaterThanOrEqual(0.7);
