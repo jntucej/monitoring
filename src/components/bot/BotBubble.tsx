@@ -41,6 +41,7 @@ export const BotBubble = memo(function BotBubble({
   return (
     <motion.div
       layout="position"
+      data-msg-id={m.id}
       initial={{ opacity: 0, y: 6, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 380, damping: 30 }}

@@ -22,7 +22,7 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
     .select(`
       id, name, email, phone, role, status, unique_id,
       photo_url, department_id, login_identifier,
-      bot_lang, bot_voice_replies,
+      bot_lang, bot_voice_replies, bot_lang_prompted_at,
       password_must_change,
       created_at
     `)
@@ -72,6 +72,10 @@ async function handleGet(_req: NextRequest, context: { auth: AuthContext }) {
       loginIdentifier: user.login_identifier,
       botLang: user.bot_lang ?? "en",
       botVoiceReplies: Boolean(user.bot_voice_replies),
+      // One-time "choose your language" prompt state — the bot UI shows the
+      // prompt exactly once per user; this flag tells the client whether
+      // it already did.
+      botLangPromptedAt: user.bot_lang_prompted_at ?? null,
       twoFactorEnabled: false,
       // True when this credential was set by an admin/seed/bootstrap and the
       // user still has to rotate it. The client uses this to render a
@@ -121,6 +125,9 @@ async function handlePatch(req: NextRequest, context: { auth: AuthContext }) {
   // hard refresh re-hydrates instead of silently resetting to defaults.
   if (typeof body.bot_lang === "string" && ["en", "te"].includes(body.bot_lang)) {
     updates.bot_lang = body.bot_lang;
+    // Choosing a language is the moment the one-time prompt is considered
+    // "done" — record it so the bot UI never asks again.
+    updates.bot_lang_prompted_at = new Date().toISOString();
   }
   if (typeof body.bot_voice_replies === "boolean") {
     updates.bot_voice_replies = body.bot_voice_replies;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useBotStore } from "./store";
 import { useBotChat } from "./useBotChat";
@@ -47,6 +47,8 @@ export function BotPanel() {
   const setVoicePrompt = useBotStore((s) => s.setVoicePrompt);
   const voiceModeConfirmed = useBotStore((s) => s.voiceModeConfirmed);
   const setVoiceModeConfirmed = useBotStore((s) => s.setVoiceModeConfirmed);
+  const langPromptPending = useBotStore((s) => s.langPromptPending);
+  const setLangPromptPending = useBotStore((s) => s.setLangPromptPending);
   const requestVoiceMode = useBotStore((s) => s.requestVoiceMode);
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
@@ -236,6 +238,9 @@ export function BotPanel() {
           const s = useBotStore.getState();
           if (j.data?.botLang === "en" || j.data?.botLang === "te") s.setLang(j.data.botLang);
           if (typeof j.data?.botVoiceReplies === "boolean") s.setVoiceReplies(j.data.botVoiceReplies);
+          // First-open language prompt: only shown once, per user (the
+          // server column bot_lang_prompted_at is the source of truth).
+          s.setLangPromptPending(!j.data?.botLangPromptedAt);
         })
         .catch(() => {});
     }
@@ -246,6 +251,10 @@ export function BotPanel() {
         const s = useBotStore.getState();
         s.setMessages(j.data.messages);
         s.setConversationId(j.data.conversationId ?? null);
+        // Remember the pagination cursor so "load older" (scroll-up) can
+        // fetch the next page of history on demand.
+        oldestIdRef.current = j.data.oldestId ?? null;
+        hasMoreRef.current = !!j.data.hasMore;
       })
       .catch(() => {});
     const st = useBotStore.getState();
@@ -257,6 +266,58 @@ export function BotPanel() {
     }
     return () => { cancelled = true; };
   }, [open]);
+
+  // "Load older" — the panel opens with the newest 50 messages (the server
+  // default); scrolling to the top fetches the previous page (newest-first
+  // `before` cursor) and prepends it. Capped at 3 pages to keep the panel
+  // light; older history is still reachable via the API if needed.
+  const oldestIdRef = useRef<string | null>(null);
+  const hasMoreRef = useRef(false);
+  const loadingOlderRef = useRef(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const loadOlder = useCallback(async () => {
+    if (loadingOlderRef.current || !hasMoreRef.current || !oldestIdRef.current) return;
+    loadingOlderRef.current = true;
+    setLoadingOlder(true);
+    try {
+      const token = useAuthStore.getState().token;
+      const headers: Record<string, string> = { "content-type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(
+        `/api/bot/session/current?limit=50&before=${encodeURIComponent(oldestIdRef.current)}`,
+        { headers, cache: "no-store" },
+      );
+      const j = res.ok ? await res.json() : null;
+      if (!j?.success || !Array.isArray(j.data?.messages) || j.data.messages.length === 0) return;
+      const s = useBotStore.getState();
+      // Prepend: older page (newest-first from the API, reversed by the
+      // server to oldest-first) goes in front of the current messages.
+      const existing = new Set(s.messages.map((m: { id: string }) => m.id));
+      const fresh = j.data.messages.filter((m: { id: string }) => !existing.has(m.id));
+      if (fresh.length) s.setMessages([...fresh, ...s.messages].slice(-400));
+      oldestIdRef.current = j.data.oldestId ?? null;
+      hasMoreRef.current = !!j.data.hasMore;
+    } catch {
+      /* network failure — silently retry on the next scroll-up */
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  }, []);
+
+  // Persist a one-time language choice (from the first-open prompt) to the
+  // server; the profile PUT stamps bot_lang_prompted_at, so the prompt
+  // never reappears for this user.
+  const persistLangChoice = useCallback(async (l: "en" | "te") => {
+    const token = useAuthStore.getState().token;
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    await fetch("/api/profile", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ bot_lang: l }),
+    }).catch(() => {});
+  }, []);
 
   const handleClose = () => {
     if (stt.listening) stt.stop();
@@ -411,6 +472,47 @@ export function BotPanel() {
         </div>
       )}
 
+      {langPromptPending && messages.length === 0 && (
+        <div
+          role="group"
+          aria-label="Choose your language"
+          className="relative z-10 mx-3 my-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3"
+        >
+          <p className="text-xs font-medium text-[var(--text-primary)] mb-2">
+            Choose your language
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                setLang("en");
+                setLangPromptPending(false);
+                // Persist the choice (and mark the prompt as shown) via the
+                // profile PUT — one call covers both.
+                void persistLangChoice("en");
+              }}
+              className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs
+                         hover:bg-[var(--bg-base)] transition active:scale-[0.98]"
+            >
+              English
+            </button>
+            <button
+              onClick={() => {
+                setLang("te");
+                setLangPromptPending(false);
+                void persistLangChoice("te");
+              }}
+              className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs
+                         hover:bg-[var(--bg-base)] transition active:scale-[0.98]"
+            >
+              తెలుగు
+            </button>
+          </div>
+          <p className="text-[10px] text-[var(--text-muted)] mt-2">
+            You can change this anytime from the language icon above.
+          </p>
+        </div>
+      )}
+
       <BotMessages
         t={t}
         onFeedback={setFeedback}
@@ -418,6 +520,8 @@ export function BotPanel() {
         onChip={handleChip}
         interim={stt.interim}
         listening={stt.listening}
+        onScrollToTop={loadOlder}
+        loadingOlder={loadingOlder}
       />
 
       <BotComposer

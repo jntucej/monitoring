@@ -6,6 +6,10 @@ export async function* streamCompletion(messages: { role: "system" | "user" | "a
     return;
   }
 
+  // 30-second hard timeout: if the LLM proxy is down, hung, or slow,
+  // the fetch aborts and the stream closes with an error event instead of
+  // freezing the user's panel forever. The client renders that as a
+  // retryable error, not a silent hang.
   const res = await fetch(`${RAG.llm.url}/chat/completions`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${RAG.llm.key}` },
@@ -15,6 +19,7 @@ export async function* streamCompletion(messages: { role: "system" | "user" | "a
       temperature: 0.3,
       messages,
     }),
+    signal: AbortSignal.timeout(30_000),
   });
 
   if (!res.ok || !res.body) {

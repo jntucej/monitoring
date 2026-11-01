@@ -88,6 +88,13 @@ interface BotStore {
   voicePrompt: boolean;
   setVoicePrompt: (v: boolean) => void;
   clearVoicePrompt: () => void;
+  // Set true after the profile fetch reports botLangPromptedAt === null
+  // (a user who has never chosen a bot language). The panel then surfaces
+  // a one-time 2-option language card. Consumed on the user's pick,
+  // which calls setLang() and also flips the server column via the
+  // existing profile PUT.
+  langPromptPending: boolean;
+  setLangPromptPending: (v: boolean) => void;
   requestVoiceMode: () => void;
   clearVoiceMode: () => void;
 
@@ -124,6 +131,8 @@ export const useBotStore = create<BotStore>((set) => ({
   voicePrompt: false,
   setVoicePrompt: (v) => set({ voicePrompt: v }),
   clearVoicePrompt: () => set({ voicePrompt: false }),
+  langPromptPending: false,
+  setLangPromptPending: (v) => set({ langPromptPending: v }),
   requestVoiceMode: () => set({ open: true, voiceMode: true, voiceReplies: true }),
   clearVoiceMode: () => set({ voiceMode: false }),
 

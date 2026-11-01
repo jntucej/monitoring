@@ -13,10 +13,13 @@ interface Props {
   onChip: (prompt: string) => void;
   interim: string;
   listening: boolean;
+  /** Called when the user scrolls to the top and older pages exist. */
+  onScrollToTop?: () => void;
+  /** While a "load older" request is in flight — shows a spinner at the top. */
+  loadingOlder?: boolean;
 }
 
-function useStickToBottom(deps: unknown[]) {
-  const ref = useRef<HTMLDivElement>(null);
+function useStickToBottom(deps: unknown[], ref: React.RefObject<HTMLDivElement | null>) {
   const [pinned, setPinned] = useState(true);
 
   useEffect(() => {
@@ -29,13 +32,13 @@ function useStickToBottom(deps: unknown[]) {
     el.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [ref]);
 
   useEffect(() => {
     const el = ref.current;
     if (!el || !pinned) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [deps, pinned]);
+  }, [deps, pinned, ref]);
 
   const scrollToBottom = () => {
     const el = ref.current;
@@ -47,13 +50,14 @@ function useStickToBottom(deps: unknown[]) {
 }
 
 export const BotMessages = memo(function BotMessages({
-  t, onFeedback, onRetry, onChip, interim, listening,
+  t, onFeedback, onRetry, onChip, interim, listening, onScrollToTop, loadingOlder,
 }: Props) {
   const messages = useBotStore((s) => s.messages);
   const streaming = useBotStore((s) => s.streaming);
   const lastLen = messages.length;
   const lastContent = messages[messages.length - 1]?.content ?? "";
-  const { ref, pinned, scrollToBottom } = useStickToBottom([lastLen, lastContent, interim]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { pinned, scrollToBottom } = useStickToBottom([lastLen, lastContent, interim], scrollRef);
 
   const prevUserQuestion = (idx: number): string => {
     for (let i = idx - 1; i >= 0; i--) {
@@ -62,16 +66,54 @@ export const BotMessages = memo(function BotMessages({
     return "";
   };
 
+  // Prepend-older-pages: when the user reaches the top and older history
+  // still exists, fetch the previous page and re-anchor scroll so the view
+  // doesn't jump to the bottom.
+  const anchorEl = useRef<HTMLElement | null>(null);
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollTop < 40 && onScrollToTop && !loadingOlder) {
+      // Capture the current first visible message so we can restore
+      // relative position after the older page is prepended.
+      const first = el.querySelector("[data-msg-id]") as HTMLElement | null;
+      anchorEl.current = first;
+      onScrollToTop();
+    }
+  };
+  // After a prepend completes, the store's messages array grows — restore
+  // scroll position anchored to the previously-first message.
+  const [prevLen, setPrevLen] = useState(lastLen);
+  useEffect(() => {
+    if (lastLen > prevLen && anchorEl.current) {
+      const el = scrollRef.current;
+      if (!el) return;
+      const id = anchorEl.current.getAttribute("data-msg-id");
+      const prevEl = id ? document.getElementById(id) : null;
+      const prevTop = prevEl ? prevEl.offsetTop : 0;
+      requestAnimationFrame(() => {
+        el.scrollTop = prevTop - 10;
+      });
+      anchorEl.current = null;
+    }
+    setPrevLen(lastLen);
+  }, [lastLen, prevLen]);
+
   return (
     <div className="relative flex-1 min-h-0">
       <div
-        ref={ref}
+        ref={scrollRef}
+        onScroll={handleScroll}
         role="log"
         aria-live="polite"
         aria-relevant="additions"
         className="h-full overflow-y-auto overscroll-contain px-3 py-3 space-y-3
                    [scrollbar-width:thin] custom-scrollbar"
       >
+        {loadingOlder && (
+          <div className="flex justify-center py-1" role="status" aria-live="polite">
+            <span className="h-3.5 w-3.5 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin" />
+          </div>
+        )}
         {messages.length === 0 && (
           <BotWelcome t={t} onChip={onChip} disabled={streaming} />
         )}
