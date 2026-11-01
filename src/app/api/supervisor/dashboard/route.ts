@@ -35,7 +35,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
       sla_deadline: string | null;
       created_at: string;
     }>(
-      `(SELECT id, 'escalation' AS kind, ticket_number AS ticket,
+      `(SELECT p.id::text, 'escalation' AS kind, p.ticket_number AS ticket,
                COALESCE(u.name || ' · ' || COALESCE(p.reason, p.workflow_type), p.ticket_number) AS subject,
                p.sla_deadline, p.created_at
           FROM permissions p
@@ -45,12 +45,13 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
          ORDER BY p.sla_deadline ASC NULLS LAST, p.created_at ASC
          LIMIT 5)
        UNION ALL
-       (SELECT id::text, 'incident' AS kind, COALESCE(user_unique_id, id::text) AS ticket,
-               title || ' · ' || COALESCE(message, '') AS subject,
-               NULL::timestamptz, timestamp AS created_at
-          FROM alerts
-         WHERE resolved = FALSE AND severity IN ('critical','high')
-         ORDER BY timestamp DESC
+       (SELECT a.id::text, 'incident' AS kind,
+               COALESCE(a.user_unique_id, a.id::text) AS ticket,
+               a.title || ' · ' || COALESCE(a.message, '') AS subject,
+               NULL::timestamptz, a.timestamp AS created_at
+          FROM alerts a
+         WHERE a.resolved = FALSE AND a.severity IN ('critical','high')
+         ORDER BY a.timestamp DESC
          LIMIT 5)
        ORDER BY created_at DESC
        LIMIT 10`

@@ -36,6 +36,7 @@ const HOME_DEFAULT_ROUTE: Record<string, string> = {
   hod: '/hod',
   exam_superintendent: '/exam/superintendent',
   mess_incharge: '/mess',
+  emo: '/emo',
 };
 
 function decodeRoleFromJwt(
@@ -144,7 +145,7 @@ export async function proxy(req: NextRequest) {
     const PROTECTED_HTML_PREFIXES = [
       '/admin', '/sysadmin', '/student', '/operator', '/parent',
       '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
-      '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions',
+      '/hostel', '/hostel-manager', '/oic', '/oie', '/permissions', '/emo',
       '/principal', '/staff', '/vice-principal', '/supervisor',
       '/mess', '/exam', '/exam-branch', '/visitor', '/person',
       '/campus', '/onboarding', '/settings',
@@ -215,6 +216,7 @@ export const config = {
     '/hostel-manager', '/hostel-manager/:path*',
     '/oie', '/oie/:path*',
     '/permissions', '/permissions/:path*',
+    '/emo', '/emo/:path*',
     '/principal', '/principal/:path*',
     '/staff', '/staff/:path*',
     '/vice-principal', '/vice-principal/:path*',

@@ -42,7 +42,8 @@ async function handleGet(_req: NextRequest, _context?: { auth: AuthContext }) {
         rows: [{ pending: "0", escalated: "0", overdue: "0", today_decisions: "0" }],
       })),
 
-      // Priority items
+      // Priority items — permissions table has `status`, not `resolved`;
+      // qualify the column to avoid the "ambiguous" error when joined.
       query<{
         id: string;
         ticket_number: string;
@@ -58,8 +59,8 @@ async function handleGet(_req: NextRequest, _context?: { auth: AuthContext }) {
                 (COALESCE(p.priority, 'normal') = 'urgent' OR p.reason ILIKE '%emergency%') AS is_emergency
            FROM permissions p
            LEFT JOIN users u ON u.id = p.requester_user_id
-          WHERE p.current_stage = 'principal'
-            AND p.status IN ('PENDING','ESCALATED')
+          WHERE p.status IN ('PENDING','ESCALATED')
+            AND p.current_stage IN ('principal','warden_or_principal')
           ORDER BY
             (COALESCE(p.priority, 'normal') = 'urgent') DESC,
             p.sla_deadline ASC NULLS LAST,
@@ -130,7 +131,8 @@ async function handleGet(_req: NextRequest, _context?: { auth: AuthContext }) {
          WHERE workflow_type = 'exam'`
       ).catch(() => ({ rows: [{ pending_clearances: "0", today_candidates: "0" }] })),
 
-      // Legacy fallback support for alerts (PrincipalDashboardPanel, RoleConsole, etc.)
+      // Legacy fallback for alerts (PrincipalDashboardPanel, RoleConsole, etc.).
+      // alerts table has no gate_name column — join gates for the name.
       query<{
         id: string;
         severity: string;
@@ -141,10 +143,12 @@ async function handleGet(_req: NextRequest, _context?: { auth: AuthContext }) {
         timestamp: string;
         resolved: boolean;
       }>(
-        `SELECT id, severity, title, message, gate_id, gate_name, timestamp, resolved
-           FROM alerts
-          WHERE resolved = FALSE
-          ORDER BY timestamp DESC
+        `SELECT a.id, a.severity, a.title, a.message, a.gate_id,
+                g.name AS gate_name, a.timestamp, a.resolved
+           FROM alerts a
+           LEFT JOIN gates g ON g.id = a.gate_id
+          WHERE a.resolved = FALSE
+          ORDER BY a.timestamp DESC
           LIMIT 5`
       ).catch(() => ({ rows: [] as any[] })),
     ]);

@@ -37,18 +37,18 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
         today_decisions: string;
       }>(
         `SELECT
-           COUNT(*) FILTER (WHERE current_stage = 'hod' AND status = 'PENDING') AS pending,
-           COUNT(*) FILTER (WHERE current_stage = 'hod' AND status = 'ESCALATED') AS escalated,
+           COUNT(*) FILTER (WHERE p.current_stage = 'hod' AND p.status = 'PENDING') AS pending,
+           COUNT(*) FILTER (WHERE p.current_stage = 'hod' AND p.status = 'ESCALATED') AS escalated,
            COUNT(*) FILTER (
-             WHERE current_stage = 'hod'
-               AND status IN ('PENDING','ESCALATED')
+             WHERE p.current_stage = 'hod'
+               AND p.status IN ('PENDING','ESCALATED')
                AND sla_deadline IS NOT NULL
                AND sla_deadline < NOW()
            ) AS overdue,
            COUNT(*) FILTER (
-             WHERE current_stage = 'hod'
-               AND status IN ('APPROVED','REJECTED')
-               AND updated_at::date = CURRENT_DATE
+             WHERE p.current_stage = 'hod'
+               AND p.status IN ('APPROVED','REJECTED')
+               AND p.updated_at::date = CURRENT_DATE
            ) AS today_decisions
          FROM permissions p
          JOIN users u ON u.id = p.requester_user_id

@@ -183,12 +183,13 @@ async function handleGet(
     }
 
     // ── 4. Own unread notifications (capped at 10) ─────────────────────
+    // notifications has no `read` boolean — unread = read_at IS NULL.
     if (wanted.includes("notification")) {
       const { data: ntfRows, error: ntfErr } = await db
         .from("notifications")
         .select("id, type, title, message, created_at")
         .eq("recipient_id", userId)
-        .eq("read", false)
+        .is("read_at", null)
         .order("created_at", { ascending: false })
         .limit(10);
       if (ntfErr) throw ntfErr;

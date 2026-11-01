@@ -386,24 +386,24 @@ async function fetchWorkerItems(
   db: ReturnType<typeof getSupabaseServiceClient>,
   userId: string,
 ): Promise<AttentionItem[]> {
-  // Try work_orders table first; fall back to their own permission_requests.
+  // There is no work_orders table — worker work is tracked via
+  // permission_requests (maintenance workflow). Query the real table.
   const { data: wo, error: woErr } = await db
-    .from("work_orders")
-    .select("id, title, status, due_at")
-    .eq("assignee_user_id", userId)
-    .not("status", "in", ["completed", "closed"])
+    .from("permission_requests")
+    .select("id, ticket_number, status, updated_at")
+    .eq("requester_user_id", userId)
+    .in("status", ["PENDING", "IN_PROGRESS", "OPEN"])
     .limit(3);
 
   if (!woErr && wo && wo.length > 0) {
     return wo.map((o: Record<string, unknown>) => {
-      const isOverdue = !!o.due_at && new Date(String(o.due_at)).getTime() < Date.now();
       return {
         id: `work-order-${o.id}`,
         kind: "work_order",
-        title: String(o.title ?? "Work order"),
-        urgency: isOverdue ? ("overdue" as const) : ("due" as const),
+        title: `Ticket ${String(o.ticket_number ?? o.id)} — open`,
+        urgency: "due" as const,
         ctaHref: "/worker",
-        detail: isOverdue ? "Overdue — complete as soon as possible." : "Open work order assigned to you.",
+        detail: "Open work order assigned to you.",
       };
     });
   }

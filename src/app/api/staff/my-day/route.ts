@@ -105,10 +105,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     // row id is auth.userId; type is the caller's role.
     const notifRes = await service
       .from("notifications")
-      .select("id, title, message, type, read, created_at, data")
+      .select("id, title, message, type, read_at, created_at, data")
       .eq("recipient_type", "staff")
       .eq("recipient_id", auth.userId)
-      .eq("read", false)
+      .is("read_at", null)
       .order("created_at", { ascending: false })
       .limit(20);
     const notifications = notifRes.data ?? [];
