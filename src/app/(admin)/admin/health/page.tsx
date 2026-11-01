@@ -45,7 +45,7 @@ function HealthSnapshotBar() {
   const loadSnapshot = useCallback(async (isInitial: boolean) => {
     if (isInitial) setLoading(true);
     try {
-      const res = await fetch("/api/health", {
+      const res = await fetch("/api/admin/health/full", {
         headers: getAuthHeaders(),
         cache: "no-store",
       });

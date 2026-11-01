@@ -5,6 +5,8 @@
 import { create } from "zustand";
 import { playAudioFeedback } from "@/lib/sound";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import type { GateMode } from "@/lib/gate-operations";
+import type { LockdownInfo } from "@/components/operator/GateModeBanner";
 import type { Scan, Person, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { ToastData } from "@/components/ui/toast";
 import { useAuthStore } from "@/stores/authStore";
@@ -115,6 +117,13 @@ export interface OperatorStatusStrip {
   flagCount: number;
   /** Gate health: healthy when online + no flags, caution when flagged, critical when offline. */
   health: "healthy" | "caution" | "critical";
+  // NEW — consumed by GateModeBanner.
+  /** Live gate operating mode (OPEN | CURFEW | MAINTENANCE). */
+  mode: GateMode;
+  /** Live lockdown (null when none). */
+  lockdown: LockdownInfo | null;
+  /** True when mode === "OPEN" and no lockdown is active. */
+  scanningAllowed: boolean;
 }
 
 interface OperatorState {
@@ -176,6 +185,17 @@ interface OperatorState {
    * Pure read of existing store fields — no logic changes to the scan flow.
    */
   getStatusStrip: () => OperatorStatusStrip;
+
+  // Live gate mode + lockdown (A1 banner state) — refreshed on mount + every 10s
+  gateMode: GateMode;
+  lockdown: LockdownInfo | null;
+  /** True once the operator has dismissed the lockdown message this session.
+   *  Does NOT re-enable scans — only an admin lifting the lockdown does that. */
+  lockdownDismissed: boolean;
+  loadGateMode: () => Promise<void>;
+  loadLockdown: () => Promise<void>;
+  dismissLockdown: () => void;
+  overrideGateMode: (mode: GateMode, reason: string) => Promise<void>;
   /**
    * Lean recommendation for the current scanned student (principle 3: auto-
    * recommend). Pure read of store fields + a pass count passed in from the
@@ -222,6 +242,11 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
   gateId: null,
   _cachedPasses: [],
   _scanGeneration: 0,
+
+  // A1 banner state
+  gateMode: "OPEN",
+  lockdown: null,
+  lockdownDismissed: false,
 
   startScan: async (roll: string) => {
     let rawIdentifier = (roll || "").trim();
@@ -824,7 +849,75 @@ export const useOperatorStore = create<OperatorState>((set, get) => ({
       lastScanAgo,
       flagCount,
       health,
+      mode: s.gateMode,
+      lockdown: s.lockdown,
+      scanningAllowed: s.gateMode === "OPEN" && s.lockdown === null,
     };
+  },
+
+  // ── A1: live gate mode + lockdown (status-strip banner) ──────────────────
+  loadGateMode: async () => {
+    try {
+      const authStore = useAuthStore.getState();
+      const res = await fetchWithTimeout("/api/operator/mode", {
+        cache: "no-store",
+        headers: authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {},
+      }, 5000);
+      if (!res.ok) return; // transient — keep last-known value
+      const json = await res.json();
+      const mode: GateMode = json?.data?.mode ?? json?.mode ?? "OPEN";
+      if (get().gateMode !== mode) set({ gateMode: mode });
+    } catch {
+      // Network hiccup: keep the previous mode. A stale OPEN is safer than a
+      // false MAINTENANCE that would block the desk; the next tick corrects.
+    }
+  },
+
+  loadLockdown: async () => {
+    try {
+      const authStore = useAuthStore.getState();
+      const res = await fetchWithTimeout("/api/lockdown/active", {
+        cache: "no-store",
+        headers: authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {},
+      }, 5000);
+      if (!res.ok) return;
+      const json = await res.json();
+      const raw = json?.data ?? json ?? null;
+      const next: LockdownInfo | null = raw
+        ? { id: raw.id, scopes: raw.scopes ?? [], message: raw.message ?? null }
+        : null;
+      const wasActive = get().lockdown !== null;
+      if (!next) set({ lockdown: null, lockdownDismissed: false });
+      else if (!wasActive) set({ lockdown: next, lockdownDismissed: false });
+      else set({ lockdown: next }); // refresh scopes/message, keep dismissal
+    } catch {
+      // keep last-known lockdown state
+    }
+  },
+
+  dismissLockdown: () => {
+    if (get().lockdown) set({ lockdownDismissed: true });
+  },
+
+  overrideGateMode: async (mode, reason) => {
+    const authStore = useAuthStore.getState();
+    const res = await fetchWithTimeout(
+      "/api/operator/mode",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {}),
+        },
+        body: JSON.stringify({ mode, reason }),
+      },
+      5000,
+    );
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.error?.message ?? body?.message ?? `Override failed (HTTP ${res.status})`);
+    }
+    set({ gateMode: mode }); // optimistic; next loadGateMode poll confirms
   },
 
   // Auto-recommendation for the current scanned student (principle 3).

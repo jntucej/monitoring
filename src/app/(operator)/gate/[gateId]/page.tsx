@@ -22,6 +22,8 @@ import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { recommend } from "@/lib/operator-recommend";
 import { ConfirmSheet } from "@/components/operator/sheet/ConfirmSheet";
 import type { EntryButtonId } from "@/lib/operator-recommend";
+import { GateModeBanner } from "@/components/operator/GateModeBanner";
+import type { GateMode } from "@/lib/gate-operations";
 
 /**
  * Option A gate desk — a scanning surface, not a dashboard.
@@ -143,7 +145,6 @@ function OperatorPageInner() {
     });
   }, [currentStudent, currentCampusStatus, lastOutReason, entryType, cachedPasses]);
 
-  const [activeLockdown, setActiveLockdown] = useState<any>(null);
   // Manual entry is ONE button that opens an inline sheet — not a mode.
   const [manualOpen, setManualOpen] = useState(false);
   const [manualRollInput, setManualRollInput] = useState("");
@@ -159,24 +160,32 @@ function OperatorPageInner() {
     router.replace(`/login/operator?redirect=/gate/${gateId}`);
   }, [authenticated, gateId, router]);
 
-  // Check lockdown status (named profile R15: LOCKDOWN-5s → kept at 10s).
-  const checkLockdown = useCallback(async () => {
-    if (!authenticated) return;
-    try {
-      const res = await fetch("/api/lockdown/active");
-      const json = await res.json();
-      if (json.success && json.data) {
-        setActiveLockdown(json.data);
-      } else {
-        setActiveLockdown(null);
-      }
-    } catch {}
-  }, [authenticated]);
+  // A1: live gate mode + lockdown now live in the operator store so the
+  // status-strip banner (GateModeBanner) reads one source of truth.
+  const storeGateMode = useOperatorStore((s) => s.gateMode);
+  const storeLockdown = useOperatorStore((s) => s.lockdown);
+  const storeLockdownDismissed = useOperatorStore((s) => s.lockdownDismissed);
+  const dismissLockdown = useOperatorStore((s) => s.dismissLockdown);
+  const overrideGateMode = useOperatorStore((s) => s.overrideGateMode);
+  const loadGateMode = useOperatorStore((s) => s.loadGateMode);
+  const loadLockdown = useOperatorStore((s) => s.loadLockdown);
+  // Local state drives the banner + scanner gating; the store values are
+  // mirrored into them on poll so existing JSX is untouched.
+  const [activeLockdown, setActiveLockdown] = useState<any>(null);
+  const [gateMode, setGateMode] = useState<string>("OPEN");
 
   useEffect(() => {
-    checkLockdown();
-  }, [checkLockdown]);
-  usePolling(checkLockdown, { intervalMs: 10_000 /* R15: LOCKDOWN-10s profile */ });
+    void loadGateMode();
+    void loadLockdown();
+  }, [loadGateMode, loadLockdown]);
+  usePolling(() => { void loadGateMode(); void loadLockdown(); }, {
+    intervalMs: 10_000, /* R15: MODE/LOCKDOWN-10s profile */
+  });
+
+  useEffect(() => { setGateMode(storeGateMode); }, [storeGateMode]);
+  useEffect(() => {
+    setActiveLockdown(storeLockdown ? { ...storeLockdown, dismissed: storeLockdownDismissed } : null);
+  }, [storeLockdown, storeLockdownDismissed]);
 
   // Special routing shortcuts (/gate/history & /gate/manual) resolve to the
   // operator's own gate — or the desk (picker) when unassigned.
@@ -225,7 +234,6 @@ function OperatorPageInner() {
   }, [authenticated, gateId, setGate, reset]);
 
   const [gateName, setGateName] = useState("Loading...");
-  const [gateMode, setGateMode] = useState<string>("OPEN");
 
   useEffect(() => {
     if (!gateId) return;
@@ -242,23 +250,9 @@ function OperatorPageInner() {
       .catch(() => setGateName(gateState?.name || `Gate ${gateId}`));
   }, [gateId, gateState?.name]);
 
-  useEffect(() => {
-    // Poll gate operating mode (OPEN / CURFEW / MAINTENANCE) — the operator
-    // must be able to see it even while scanning.
-    const checkMode = () => {
-      fetch("/api/operator/mode")
-        .then((res) => res.json())
-        .then((res) => {
-          if (res.success && res.data?.mode) {
-            setGateMode(res.data.mode);
-          }
-        })
-        .catch(() => {});
-    };
-    checkMode();
-    const interval = setInterval(checkMode, 15_000);
-    return () => clearInterval(interval);
-  }, []);
+  // Gate mode + lockdown now poll through the operator store (A1) — the
+  // local `gateMode` / `activeLockdown` state above is populated from the
+  // store so the existing banner JSX is unchanged.
 
   // Camera decode → start a scan flow (lockdown blocks all scans).
   const handleQRScanned = useCallback((scannedPayload: string) => {
@@ -351,8 +345,12 @@ function OperatorPageInner() {
   };
 
   // The camera's decode loop only runs while idle or actively detecting —
-  // a scan in flight (confirming / success / error) pauses it.
-  const scannerActive = state === "idle" || state === "detecting";
+  // a scan in flight (confirming / success / error) pauses it. MAINTENANCE
+  // mode and an active lockdown also stop the camera (A1 gate).
+  const scannerActive =
+    (state === "idle" || state === "detecting") &&
+    gateMode !== "MAINTENANCE" &&
+    !activeLockdown;
   const canConfirm = state === "confirming" && currentStudent != null;
 
   return (
@@ -360,6 +358,15 @@ function OperatorPageInner() {
       {/* ── Operational status + confirmation card (above the camera layer) ── */}
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">
+          {/* A1: compact mode + lockdown banner (always visible, incl. OPEN). */}
+          <GateModeBanner
+            mode={gateMode as GateMode}
+            lockdown={activeLockdown}
+            scanningAllowed={gateMode === "OPEN" && !activeLockdown}
+            onOverrideMaintenance={(reason) => overrideGateMode("OPEN", reason)}
+            onDismissLockdown={dismissLockdown}
+          />
+
           {/* OfflineBanner removed: the desk has no offline queue — a scan
               failure surfaces via the standard error panel instead. The
               global NetworkStatusBanner in SafeAreaAppShell still shows a
