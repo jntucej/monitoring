@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NOINDEX_METADATA } from "@/lib/seo";
 import { OperatorShell } from "./OperatorShell";
+import { usePathname } from "next/navigation";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 
 export const metadata: Metadata = {
   ...NOINDEX_METADATA,
@@ -33,13 +35,15 @@ export default function OperatorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <GateAwareOperatorShell>{children}</GateAwareOperatorShell>;
+  return (
+    <GateAwareOperatorShell>
+      {children}
+    </GateAwareOperatorShell>
+  );
 }
 
-import { usePathname } from "next/navigation";
-import { AuthGuard } from "@/components/shared/AuthGuard";
-
 function GateAwareOperatorShell({ children }: { children: React.ReactNode }) {
+  "use client";
   const pathname = usePathname();
 
   if (pathname?.startsWith("/gate/")) {
