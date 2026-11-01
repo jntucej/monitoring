@@ -93,19 +93,21 @@ export const BotBubble = memo(function BotBubble({
             ) : !thanked ? (
               canGiveFeedback ? (
                 <>
-                  <button
-                    aria-label="Helpful"
+                <button
+                    aria-label="Good response"
+                    aria-pressed={m.feedback === 1}
                     onClick={() => give(1)}
                     className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
                   >
-                    <ThumbsUp className="h-3.5 w-3.5" />
+                    <ThumbsUp aria-hidden="true" className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    aria-label="Not helpful"
+                    aria-label="Poor response"
+                    aria-pressed={m.feedback === -1}
                     onClick={() => give(-1)}
                     className="text-[var(--text-muted)] hover:text-rose-500 transition active:scale-95"
                   >
-                    <ThumbsDown className="h-3.5 w-3.5" />
+                    <ThumbsDown aria-hidden="true" className="h-3.5 w-3.5" />
                   </button>
                 </>
               ) : (

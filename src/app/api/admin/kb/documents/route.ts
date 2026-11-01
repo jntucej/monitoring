@@ -35,13 +35,37 @@ async function handler(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const result = await ingestKbDocument({ title, source, content, roles: roles ?? ["all"] });
-  return NextResponse.json({
-    success: true,
-    documentId: result.documentId,
-    chunkCount: result.chunkCount,
-    deduped: result.deduped,
-  });
+  try {
+    const result = await ingestKbDocument({ title, source, content, roles: roles ?? ["all"] });
+    return NextResponse.json({
+      success: true,
+      documentId: result.documentId,
+      chunkCount: result.chunkCount,
+      deduped: result.deduped,
+    });
+  } catch (err) {
+    // Fail-closed: embedTexts now throws when the embedding service is
+    // unavailable instead of silently storing placeholder vectors that
+    // retrieval can never reach. Surface the specific reason to the admin
+    // (the document is already deactivated by the rollback in ingest.ts).
+    if ((err as { code?: string }).code === "RAG_EMBEDDING_UNAVAILABLE") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "EMBEDDING_UNAVAILABLE",
+            message: `Ingestion failed — embedding service unavailable: ${(err as Error).message}. The document was not stored.`,
+          },
+        },
+        { status: 503 },
+      );
+    }
+    console.error("KB ingestion failed:", err);
+    return NextResponse.json(
+      { success: false, error: { code: "INGESTION_FAILED", message: "KB ingestion failed." } },
+      { status: 500 },
+    );
+  }
 }
 
 export const POST = withAuthorization(handler, { requiredRole: ["admin", "sysadmin"] });

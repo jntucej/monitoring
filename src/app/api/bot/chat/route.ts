@@ -62,7 +62,29 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
     ? await translate(message, "te", "en")
     : message;
 
-  const ctx = await retrieve(retrievalQuery, auth.role as Role);
+  let ctx;
+  try {
+    ctx = await retrieve(retrievalQuery, auth.role as Role);
+  } catch (err) {
+    // Fail-closed: the retriever throws RagUnavailableError when the
+    // embedding service is down or unconfigured. Returning a 503 here
+    // prevents the LLM from answering with no retrieval context — which
+    // would be a confident hallucination presented as a campus fact.
+    if ((err as { code?: string }).code === "RAG_UNAVAILABLE") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RAG_UNAVAILABLE",
+            message:
+              "Knowledge base search is unavailable. Try again in a few minutes.",
+          },
+        },
+        { status: 503 },
+      );
+    }
+    throw err;
+  }
   const { messages, citations } = buildPrompt(message, ctx, history, lang);
 
   const encoder = new TextEncoder();

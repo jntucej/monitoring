@@ -64,7 +64,14 @@ export function BotPanel() {
           s.appendUser(evt.content);
           break;
         case "done":
-          s.setDraftStatus(evt.messageId, "done");
+          if (evt.content !== undefined) {
+            // Late-opening tab: it never saw the token stream, so insert
+            // the complete assistant message directly (not just the status
+            // flip, which would be a no-op against an unknown draft id).
+            s.upsertAssistantMessage(evt.messageId, evt.content, evt.citations ?? []);
+          } else {
+            s.setDraftStatus(evt.messageId, "done");
+          }
           break;
         case "feedback":
           s.setFeedback(evt.messageId, evt.v);

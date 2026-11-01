@@ -66,6 +66,9 @@ export const BotMessages = memo(function BotMessages({
     <div className="relative flex-1 min-h-0">
       <div
         ref={ref}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
         className="h-full overflow-y-auto overscroll-contain px-3 py-3 space-y-3
                    [scrollbar-width:thin] custom-scrollbar"
       >

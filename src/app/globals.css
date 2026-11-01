@@ -187,11 +187,11 @@
   --unit-c-soft: rgba(232, 121, 249, 0.12);
 }
 
-/* ===== DARK THEME — Deep High Contrast Developer & Security Aesthetic ===== */
+/* ===== DARK THEME — Obsidian Black + Chrome Silver ===== */
 :root[data-theme="dark"],
 [data-theme="dark"],
 html.dark {
-  --color-canvas: #0a0d13;
+  --color-canvas: #080808;
   --glass-bg: rgba(20, 26, 36, 0.52);
   --orb-cyan: hsl(213, 48%, 36%);
   --orb-magenta: hsl(248, 42%, 30%);
@@ -199,7 +199,7 @@ html.dark {
   --orb-secondary: hsl(248, 42%, 30%);
   --rim-top: rgba(255, 255, 255, 0.12);
   --rim-bottom: rgba(0, 0, 0, 0.55);
-  --text-primary: #eef1f6;
+  --text-primary: #CDCBCA;
 
   /* Typography - Technical/Data Heavy */
   --font-family: ui-monospace, SFMono-Regular, "Roboto Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -218,14 +218,24 @@ html.dark {
   --tracking-wide: 0.04em;
   --tracking-wider: 0.08em;
 
-  --bg-base: #0a0d13;        /* Deep Obsidian Black */
-  --bg-surface: #0f172a;     /* Slate-900 High Contrast Card Surface */
-  --bg-elevated: #1e293b;    /* Slate-800 High-Visibility Container */
-  --text-primary: #eef1f6;   /* Pure Crisp White Text */
-  --text-secondary: #cbd5e1; /* Slate-300 Readable Subtitle */
-  --text-muted: #94a3b8;     /* Slate-400 Soft Contrast */
-    --border: rgba(255, 255, 255, 0.14); /* Vivid border */
-  --border-strong: rgba(255, 255, 255, 0.28);
+  /* Base layers — warm-neutral to match silver text */
+  --bg-base: #080808;        /* Obsidian Black */
+  --bg-surface: #121110;     /* +4 units warm lift (cards) */
+  --bg-elevated: #1c1a18;    /* +8 units (elevated surfaces) */
+
+  /* Text — Chrome Silver family */
+  --text-primary: #CDCBCA;   /* Chrome Silver — 12.4:1 */
+  --text-secondary: #a8a6a3; /* darker silver — 8.4:1 */
+  --text-muted: #82807e;     /* muted silver — 5.0:1 AA */
+
+  /* Borders — derived from silver, not white */
+  --border: rgba(205, 203, 202, 0.14);
+  --border-strong: rgba(205, 203, 202, 0.28);
+
+  /* Chrome accent tokens (for cards, headers, specular effects) */
+  --chrome-light: #e8e6e4;   /* highlights */
+  --chrome-mid: #CDCBCA;     /* base chrome */
+  --chrome-dark: #8a8886;    /* shadowed chrome */
 
   --action-primary: #10b981; /* High-contrast Emerald Green */
   --action-danger: #f43f5e;  /* Vivid Crimson Red */

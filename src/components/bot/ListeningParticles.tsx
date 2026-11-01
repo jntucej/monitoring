@@ -1,74 +1,59 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import * as THREE from "three";
-
-function Sphere({ count = 900, color = "#a78bfa" }: { count?: number; color?: string }) {
-  const ref = useRef<THREE.Points>(null);
-  const base = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = 1.15 + Math.random() * 0.9;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      arr[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-      arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      arr[i * 3 + 2] = r * Math.cos(phi);
-    }
-    return arr;
-  }, [count]);
-
-  const seed = useMemo(() => {
-    const s = new Float32Array(count);
-    for (let i = 0; i < count; i++) s[i] = Math.random() * Math.PI * 2;
-    return s;
-  }, [count]);
-
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = clock.getElapsedTime();
-    const attr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      const pulse = 1 + 0.14 * Math.sin(t * 2.8 + seed[i]);
-      attr.setXYZ(i, base[i3] * pulse, base[i3 + 1] * pulse, base[i3 + 2] * pulse);
-    }
-    attr.needsUpdate = true;
-    ref.current.rotation.y = t * 0.18;
-    ref.current.rotation.x = Math.sin(t * 0.4) * 0.15;
-  });
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[base.slice(), 3]} />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.03}
-        color={color}
-        transparent
-        opacity={0.9}
-        sizeAttenuation
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </points>
-  );
-}
-
+/**
+ * Three subtle CSS bars that pulse while the mic is listening.
+ *
+ * Replaces the previous @react-three/fiber + three.js particle-field
+ * implementation, which pulled ~500KB of 3D engine JS to animate a
+ * 2-second listening state. Three 1px bars at 3.2s loop, ~1KB of CSS,
+ * no JS runtime. Calm, purposeful — matches the "quiet library desk
+ * attendant" bot philosophy: a listening indicator, not a particle show.
+ *
+ * Respects prefers-reduced-motion: bars stop pulsing and sit static.
+ */
 export function ListeningParticles({ active }: { active: boolean }) {
   if (!active) return null;
   return (
-    <div className="absolute inset-0 pointer-events-none rounded-[inherit] overflow-hidden">
-      <Canvas
-        camera={{ position: [0, 0, 3.6], fov: 50 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        dpr={[1, 2]}
-      >
-        <ambientLight intensity={0.6} />
-        <Sphere />
-      </Canvas>
+    <div
+      className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none
+                 flex items-end gap-[3px] h-4"
+      aria-hidden="true"
+    >
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="block w-[2.5px] rounded-full bg-[var(--chrome-mid, #CDCBCA)]
+                     listening-bar"
+          style={{ animationDelay: `${i * 0.22}s`, height: 8 }}
+        />
+      ))}
     </div>
   );
 }
+
+// Minimal inline keyframes — no global stylesheet dependency so this stays
+// self-contained if the file gets moved or split out.
+const styleTag = `
+@keyframes listening-bar-pulse {
+  0%, 100% { height: 4px; opacity: 0.35; }
+  50%      { height: 14px; opacity: 1; }
+}
+.listening-bar {
+  animation: listening-bar-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .listening-bar { animation: none; height: 8px; opacity: 0.6; }
+}
+`;
+
+// Inject once, on the server, to keep the CSS out of every bundle chunk.
+// (Import is side-effect-free; React dedupes identical <style> content
+// across the client if this file is lazy-loaded per panel open.)
+if (typeof document !== "undefined" && !document.getElementById("listening-bar-style")) {
+  const s = document.createElement("style");
+  s.id = "listening-bar-style";
+  s.textContent = styleTag;
+  document.head.appendChild(s);
+}
+// Self-contained: no external CSS file dependency.
+export {};

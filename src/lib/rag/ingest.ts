@@ -56,15 +56,24 @@ function sha256Hex(s: string): string {
   return createHash("sha256").update(s).digest("hex");
 }
 
-/** Zero-vector placeholder (retrieval degrades gracefully, never crashes). */
-function zeroVectors(n: number): number[][] {
-  return Array.from({ length: n }, () => new Array(RAG.embedding.dim).fill(0.01));
+// Fail-closed: a zero/placeholder vector makes chunks permanently
+// unreachable by retrieval (they get stored and counted but never
+// returned). Ingestion must abort instead of silently corrupting the KB.
+class EmbeddingUnavailableError extends Error {
+  code = "RAG_EMBEDDING_UNAVAILABLE";
+  constructor(detail: string) { super(`embedding service unavailable: ${detail}`); }
 }
 
+export { EmbeddingUnavailableError };
+
 async function embedTexts(texts: string[]): Promise<number[][]> {
-  if (!RAG.embedding.key || !texts.length) return zeroVectors(texts.length);
+  if (!RAG.embedding.key) {
+    throw new EmbeddingUnavailableError("no API key configured (RAG_EMBEDDING_API_KEY)");
+  }
+  if (!texts.length) return [];
+  let res: Response;
   try {
-    const res = await fetch(`${RAG.embedding.url}/embeddings`, {
+    res = await fetch(`${RAG.embedding.url}/embeddings`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -72,22 +81,19 @@ async function embedTexts(texts: string[]): Promise<number[][]> {
       },
       body: JSON.stringify({ model: RAG.embedding.model, input: texts }),
     });
-    if (!res.ok) {
-      console.warn("[kb] embedding API error, using fallback vectors:", res.status);
-      return zeroVectors(texts.length);
-    }
-    const json = (await res.json()) as { data: { embedding?: number[]; index?: number }[] };
-    const items = json.data ?? [];
-    const sorted = [...items].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-    if (sorted.length !== texts.length || sorted.some((d) => !d.embedding || !d.embedding.length)) {
-      console.warn("[kb] embedding response shape mismatch, using fallback vectors");
-      return zeroVectors(texts.length);
-    }
-    return sorted.map((d) => d.embedding as number[]);
   } catch (err) {
-    console.warn("[kb] embedding request failed, using fallback vectors:", err);
-    return zeroVectors(texts.length);
+    throw new EmbeddingUnavailableError((err as Error).message);
   }
+  if (!res.ok) {
+    throw new EmbeddingUnavailableError(`HTTP ${res.status}`);
+  }
+  const json = (await res.json()) as { data?: { embedding?: number[]; index?: number }[] };
+  const items = json.data ?? [];
+  const sorted = [...items].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+  if (sorted.length !== texts.length || sorted.some((d) => !d.embedding || !d.embedding.length)) {
+    throw new EmbeddingUnavailableError("response shape mismatch");
+  }
+  return sorted.map((d) => d.embedding as number[]);
 }
 
 export interface IngestResult {
@@ -152,10 +158,20 @@ export async function ingestKbDocument(input: {
   const chunks = splitIntoChunks(sanitizedContent);
 
   // Replace semantics: clear stale chunks, then insert fresh ones.
+  // If embedding fails AFTER the delete, the document would be left with
+  // zero chunks and still marked active — invisible to retrieval but
+  // visible to admins as "ingested". Roll that back by deactivating the
+  // doc so the admin sees a failed state, not a silent corruption.
   await query(`DELETE FROM public.kb_chunks WHERE document_id = $1`, [documentId]);
 
   if (chunks.length) {
-    const embeddings = await embedTexts(chunks);
+    let embeddings: number[][];
+    try {
+      embeddings = await embedTexts(chunks);
+    } catch (err) {
+      await query(`UPDATE public.kb_documents SET is_active = FALSE WHERE id = $1`, [documentId]);
+      throw err;
+    }
     for (let i = 0; i < chunks.length; i++) {
       await query(
         `INSERT INTO public.kb_chunks (document_id, content, embedding)

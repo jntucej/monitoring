@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
+
+// Security posture (audit F1–F4): withMutationGuard bakes in the canonical
+// chain withAuthorization → user-rate-limit → requireTrustedHeaders →
+// assertCsrf, closing the CSRF + brute-force hole on this POST mutation.
+// (The route previously only used withAuthorization — no CSRF, no rate
+// limit. A hijacked session could spam feedback or brute-force message ids.)
 
 async function post(req: NextRequest, { auth }: { auth: AuthContext }) {
   const body = await req.json().catch(() => null) as
@@ -23,4 +29,4 @@ async function post(req: NextRequest, { auth }: { auth: AuthContext }) {
   return NextResponse.json({ ok: true });
 }
 
-export const POST = withAuthorization(post);
+export const POST = withMutationGuard(post);

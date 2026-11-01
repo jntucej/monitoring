@@ -75,6 +75,7 @@ interface BotStore {
 
   appendUser: (content: string) => string;
   appendDraft: () => string;
+  upsertAssistantMessage: (id: string, content: string, citations: Citation[]) => void;
   setDraftContent: (id: string, content: string) => void;
   setDraftCitations: (id: string, c: Citation[]) => void;
   setDraftStatus: (id: string, status: BotMsg["status"]) => void;
@@ -123,6 +124,27 @@ export const useBotStore = create<BotStore>((set) => ({
       messages: [...s.messages, { id, role: "assistant" as BotRole, content: "", status: "streaming" as const }].slice(-200),
     }));
     return id;
+  },
+
+  upsertAssistantMessage: (id, content, citations) => {
+    // Insert or finalize an assistant message by id. Used by the cross-tab
+    // sync path when a late-opening tab receives a "done" event for a
+    // message it never saw streamed locally — we have to upsert rather
+    // than assume the draft already exists in the local store.
+    set((s) => {
+      const idx = s.messages.findIndex((m) => m.id === id);
+      if (idx === -1) {
+        return {
+          messages: [
+            ...s.messages,
+            { id, role: "assistant" as BotRole, content, citations, status: "done" as const },
+          ].slice(-200),
+        };
+      }
+      const next = s.messages.slice();
+      next[idx] = { ...next[idx], content, citations, status: "done" };
+      return { messages: next };
+    });
   },
 
   setDraftContent: (id, content) => {

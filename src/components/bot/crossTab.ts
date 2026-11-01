@@ -11,10 +11,21 @@
  * the store).
  */
 
+import type { Citation } from "./store";
+
 export type BotEvent =
   | { type: "reset" }
   | { type: "send"; content: string }
-  | { type: "done"; messageId: string }
+  | {
+      type: "done";
+      messageId: string;
+      // Carrying the full content + citations means a tab that opened
+      // mid-stream (and never saw the token events) can insert the
+      // complete assistant message in one shot instead of getting a
+      // `setDraftStatus` no-op and being stuck with an unanswered question.
+      content?: string;
+      citations?: Citation[];
+    }
   | { type: "feedback"; messageId: string; v: 1 | -1 };
 
 const CHANNEL_NAME = "mycampus-bot-sync";

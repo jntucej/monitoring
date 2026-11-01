@@ -11,24 +11,36 @@ export interface RetrievedChunk {
   score: number;
 }
 
+// Fail-closed: when the embedding service is unavailable we must NOT
+// return a plausible-but-wrong vector — the LLM would get random chunks
+// and answer confidently with fabricated context. Throw a typed error the
+// chat route maps to a 503 RAG_UNAVAILABLE (UI: "KB search is offline").
+class RagUnavailableError extends Error {
+  code = "RAG_UNAVAILABLE";
+  constructor() { super("RAG embedding service unavailable"); }
+}
+
 async function getEmbedding(text: string): Promise<number[]> {
   if (!RAG.embedding.key) {
-    // Return dummy vector of correct dimension if no key configured
-    return new Array(RAG.embedding.dim).fill(0.01);
+    throw new RagUnavailableError();
   }
-  try {
-    const res = await fetch(`${RAG.embedding.url}/embeddings`, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${RAG.embedding.key}` },
-      body: JSON.stringify({ model: RAG.embedding.model, input: text }),
-    });
-    if (!res.ok) return new Array(RAG.embedding.dim).fill(0.01);
-    const json = await res.json() as { data: { embedding: number[] }[] };
-    return json.data?.[0]?.embedding || new Array(RAG.embedding.dim).fill(0.01);
-  } catch {
-    return new Array(RAG.embedding.dim).fill(0.01);
+  const res = await fetch(`${RAG.embedding.url}/embeddings`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${RAG.embedding.key}` },
+    body: JSON.stringify({ model: RAG.embedding.model, input: text }),
+  });
+  if (!res.ok) {
+    throw new RagUnavailableError();
   }
+  const json = (await res.json()) as { data: { embedding: number[] }[] };
+  const vector = json.data?.[0]?.embedding;
+  if (!vector?.length) {
+    throw new RagUnavailableError();
+  }
+  return vector;
 }
+
+export { RagUnavailableError };
 
 export async function retrieve(text: string, userRole: Role): Promise<RetrievedChunk[]> {
   const vector = await getEmbedding(text);
@@ -49,6 +61,10 @@ export async function retrieve(text: string, userRole: Role): Promise<RetrievedC
     );
     return rows.map((r) => ({ ...r, score: Number(r.score) }));
   } catch (err) {
+    // Propagate the fail-closed signal (RAG_UNAVAILABLE) so the chat route
+    // returns a 503 instead of an empty-context hallucination. Other
+    // retrieval errors still degrade to no-context.
+    if (err instanceof RagUnavailableError) throw err;
     console.error("Retrieval error:", err);
     return [];
   }

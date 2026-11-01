@@ -134,7 +134,7 @@ export function useBotChat() {
       flush(true);
       setDraftCitations(draftId, cites);
       setDraftStatus(draftId, "done");
-      broadcastBot({ type: "done", messageId: draftId });
+      broadcastBot({ type: "done", messageId: draftId, content: acc || undefined, citations: cites.length ? cites : undefined });
 
       onDone?.(acc);
     } catch (err: any) {
