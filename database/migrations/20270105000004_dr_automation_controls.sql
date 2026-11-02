@@ -79,7 +79,7 @@ ALTER TABLE public.status_updates       ENABLE ROW LEVEL SECURITY;
 CREATE POLICY automation_controls_gate_app   ON public.automation_controls
   FOR ALL TO gate_app USING (true) WITH CHECK (true);
 CREATE POLICY escalation_contacts_gate_app   ON public.escalation_contacts
-  FOR SELECT, UPDATE TO gate_app USING (true) WITH CHECK (true);
+  FOR ALL TO gate_app USING (true) WITH CHECK (true);
 CREATE POLICY status_updates_gate_app        ON public.status_updates
   FOR ALL TO gate_app USING (true) WITH CHECK (true);
 
