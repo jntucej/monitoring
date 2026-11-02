@@ -60,7 +60,7 @@ function FacultyMyclassesInner() {
   const busy = loading && !data;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       {/* Back link */}
       <Link
         href="/faculty"

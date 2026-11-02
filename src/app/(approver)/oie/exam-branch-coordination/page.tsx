@@ -169,7 +169,7 @@ function ExamBranchCoordinationInner() {
   const total = data?.total ?? rows.length;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       <Link
         href="/oie"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"

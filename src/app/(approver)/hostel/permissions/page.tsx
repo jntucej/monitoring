@@ -176,7 +176,7 @@ function HostelPermissionsInner() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
+    <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       {/* header */}
       
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
