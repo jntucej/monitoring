@@ -20,4 +20,6 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Enforce first-load performance budget
+        env:
+          KIOSK_SESSION_REQUIRE_PIN: "true"
         run: bash scripts/verify-no-heavy-first-load.sh

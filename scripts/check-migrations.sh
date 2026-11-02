@@ -75,8 +75,15 @@ fi
 PSQL=""
 RUN_SCRATCH=0
 
+# In CI mode with the Supabase/Neon postgres image the `postgres` role is
+# NOT a superuser and the `public` schema is owned by `supabase_admin`.
+# The role bootstrap block below grants ALL on public/auth to the calling
+# role (extracted from DATABASE_URL), so it must run as a role that can
+# GRANT — i.e. `supabase_admin` (or `postgres` on a plain postgres:17 image).
 if [ -n "$DATABASE_URL" ]; then
-  echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container)."
+  # Derive the connecting user from the URL to detect which role we are.
+  _DB_USER=$(echo "$DATABASE_URL" | sed -n 's#.*//\([^:@/]*\)@.*#\1#p')
+  echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container); connecting as $_DB_USER."
   PSQL=(psql "$DATABASE_URL")
 else
   RUN_SCRATCH=1
@@ -98,10 +105,18 @@ else
   done
 
   PSQL=(docker exec "$CONTAINER_NAME" psql -U postgres)
+  _DB_USER=postgres
 fi
 
 # 3. Setup mock Supabase roles & auth schema and grant permissions on public
-"${PSQL[@]}" -v ON_ERROR_STOP=1 <<'SQL'
+# The GRANT targets the connecting role (extracted from DATABASE_URL in CI
+# mode, or `postgres` on a scratch container). In the Supabase/Neon image
+# the `postgres` role is NOT a superuser; `supabase_admin` owns the
+# `public` schema and has GRANT OPTION, so the workflow must connect as
+# `supabase_admin` (password in POSTGRES_PASSWORD env) for the bootstrap
+# to succeed. The connecting role also cannot grant to itself, so use
+# PUBLIC as the grant target for USAGE/CREATE.
+"***" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN
@@ -120,9 +135,6 @@ END
 $$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
-GRANT ALL ON DATABASE gate_monitor TO postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA auth TO postgres;
 GRANT USAGE, CREATE ON SCHEMA public TO PUBLIC;
 GRANT USAGE, CREATE ON SCHEMA auth TO PUBLIC;
 
@@ -130,6 +142,21 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
   SELECT null::uuid;
 $$ LANGUAGE sql;
 SQL
+
+# Grant the connecting role full DDL rights on public + auth so that the
+# schema.sql load and migration replay below can create/alter objects.
+# When connected as supabase_admin (Supabase/Neon image) this is a no-op
+# (already owns the schemas). When connected as postgres on a plain
+# postgres:17 image the GRANT succeeds because postgres is a superuser.
+"***" -v ON_ERROR_STOP=1 <<EOF
+DO $$
+BEGIN
+  EXECUTE format('GRANT ALL ON DATABASE gate_monitor TO %I', '$_DB_USER');
+  EXECUTE format('GRANT ALL ON SCHEMA public TO %I', '$_DB_USER');
+  EXECUTE format('GRANT ALL ON SCHEMA auth TO %I', '$_DB_USER');
+END
+$$;
+EOF
 
 # 4. Load baseline schema (minimal bootstrap, sufficient for the migration
 # chain to replay cleanly from scratch). Tolerate the one-off pre-existing

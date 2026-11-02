@@ -29,7 +29,12 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          # Supabase/Neon postgres image: the `postgres` role is NOT a
+          # superuser and cannot create objects in the public schema.
+          # `supabase_admin` owns public and has GRANT OPTION — connect as
+          # it so the schema.sql load and the check-migrations.sh bootstrap
+          # can create/alter objects.
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_supabase_admin_password@localhost:5432/gate_monitor
         run: |
           psql "$DATABASE_URL" -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict
@@ -39,7 +44,9 @@ jobs:
           # + Supabase-compat roles) and only needs schema.sql loaded.
       - name: Apply migrations
         env:
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          # Same supabase_admin role as the Bootstrap step — required for
+          # GRANT/CREATE in the Supabase/Neon postgres image.
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_supabase_admin_password@localhost:5432/gate_monitor
         run: bash scripts/check-migrations.sh
       - name: Role → workflow consistency
         run: npx tsx scripts/check-role-workflow.ts

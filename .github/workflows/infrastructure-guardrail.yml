@@ -29,9 +29,10 @@ jobs:
     name: Test Docker Compose Boot
     runs-on: ubuntu-latest
     env:
-      # ponytail: CI-only dummy secrets so `config`/`up` don't fail on required vars.
+      # CI-only dummy secrets so `config`/`up` don't fail on required vars.
       POSTGRES_PASSWORD: ci_dummy_postgres_password_123
       REDIS_PASSWORD: ci_dummy_redis_password_123
+      CRON_SECRET: ci_dummy_cron_secret_123
 
     steps:
       - name: Checkout Code
