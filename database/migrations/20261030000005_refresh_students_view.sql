@@ -9,8 +9,13 @@
 -- Columns that do not yet exist on student_details are emitted as NULL
 -- placeholders so the view is forward-compatible; once a migration adds the
 -- real column, the placeholder can be swapped for sd.<column>.
-
-CREATE OR REPLACE VIEW public.students AS
+--
+-- CREATE OR REPLACE VIEW cannot be used when the new column list has a
+-- different order or names than the existing view (PostgreSQL interprets
+-- column repositioning as a rename, which is not allowed under OR REPLACE).
+-- Drop and recreate explicitly instead.
+DROP VIEW IF EXISTS public.students;
+CREATE VIEW public.students AS
 SELECT
   u.id,
   u.unique_id AS roll,

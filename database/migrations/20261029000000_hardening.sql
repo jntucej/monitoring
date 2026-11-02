@@ -56,7 +56,8 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_sessions_active
   ON sessions (user_id) WHERE revoked_at IS NULL;
 
-CREATE OR REPLACE VIEW movement_logs_v AS
+DROP VIEW IF EXISTS movement_logs_v;
+CREATE VIEW movement_logs_v AS
   SELECT * FROM movement_logs WHERE corrected_by_scan_id IS NULL;
 
 CREATE TABLE IF NOT EXISTS idempotency_keys (
