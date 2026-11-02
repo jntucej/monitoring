@@ -16,33 +16,33 @@ const ROLES: Array<{
       { label: "mess", selector: 'a[href*="/student/mess"]' },
     ],
     interactions: [
-      { label: "permissions-new link", selector: 'a[href*="permissions/new"], button:has-text("New")', expect: "/student/permissions/new", expectType: "text" },
+      { label: "apply-permissions link", selector: 'a[href="/student/permissions/new"]', expect: "/student/permissions/new", expectType: "text" },
       { label: "attendance tab/section", selector: 'a[href*="attendance"], button:has-text("Attendance")', expect: "attendance", expectType: "text" },
-      { label: "mess-bill link", selector: 'a[href*="mess-bill"]', expect: "/student/mess-bill", expectType: "text" },
+      { label: "mess link", selector: 'a[href="/student/mess"]', expect: "/student/mess", expectType: "text" },
     ],
   },
   {
     role: "hod", login: "HOD", pass: "Hod@123", home: "/hod",
     nav: [
-      { label: "dashboard", selector: 'a[href*="/hod/dashboard"]' },
-      { label: "students", selector: 'a[href*="/hod/students"]' },
-      { label: "approvals", selector: 'a[href*="/hod/approvals"]' },
+      { label: "today", selector: 'a[href="/hod/home"]' },
+      { label: "students", selector: 'a[href="/hod/students"]' },
+      { label: "escalated", selector: 'a[href="/hod/approvals/escalated"]' },
     ],
     interactions: [
-      { label: "pending approvals link", selector: 'a[href*="pending"]', expect: "pending", expectType: "text" },
-      { label: "faculty link", selector: 'a[href*="faculty"]', expect: "faculty", expectType: "text" },
+      { label: "escalated approvals link", selector: 'a[href="/hod/approvals/escalated"]', expect: "/hod/approvals/escalated", expectType: "text" },
+      { label: "students link", selector: 'a[href="/hod/students"]', expect: "/hod/students", expectType: "text" },
     ],
   },
   {
     role: "principal", login: "PRINCIPAL", pass: "Principal@123", home: "/principal",
     nav: [
-      { label: "approvals", selector: 'a[href*="/principal/approvals"]' },
-      { label: "governance", selector: 'a[href*="/principal/governance"]' },
-      { label: "operations", selector: 'a[href*="/principal/operations"]' },
+      { label: "today", selector: 'a[href="/principal/home"]' },
+      { label: "examinations", selector: 'a[href="/principal/examinations"]' },
+      { label: "profile", selector: 'a[href="/principal/profile"]' },
     ],
     interactions: [
-      { label: "escalated approvals link", selector: 'a[href*="escalated"]', expect: "escalated", expectType: "text" },
-      { label: "people/attendance link", selector: 'a[href*="people/attendance"]', expect: "attendance", expectType: "text" },
+      { label: "examinations link", selector: 'a[href="/principal/examinations"]', expect: "/principal/examinations", expectType: "text" },
+      { label: "today link", selector: 'a[href="/principal/home"]', expect: "/principal/home", expectType: "text" },
     ],
   },
   {
@@ -52,8 +52,8 @@ const ROLES: Array<{
       { label: "students", selector: 'a[href*="/admin/students"]' },
     ],
     interactions: [
-      { label: "students link", selector: 'a[href*="students"]', expect: "students", expectType: "text" },
-      { label: "users link", selector: 'a[href*="users"]', expect: "users", expectType: "text" },
+      { label: "student roster link", selector: 'a[href="/admin/students"]', expect: "/admin/students", expectType: "text" },
+      { label: "bulk import link", selector: 'a[href="/admin/students/import"]', expect: "/admin/students/import", expectType: "text" },
     ],
   },
   {
@@ -165,14 +165,18 @@ for (const cfg of ROLES) {
         if (ix.expectType === "visible") {
           await expect(el).toBeVisible();
         } else {
-          // click and verify the result
+          // click and verify the result — wait for client-side nav to settle
           await el.click();
+          await page.waitForURL((u) => {
+            const p = new URL(u.toString()).pathname;
+            return ix.expect.startsWith("/") ? p.includes(ix.expect) : true;
+          }, { timeout: 8000 }).catch(() => {});
           await page.waitForLoadState("domcontentloaded").catch(() => {});
-          await page.waitForTimeout(400);
+          await page.waitForTimeout(600);
           const finalUrl = new URL(page.url()).pathname;
           const body = await page.locator("body").innerText();
           if (ix.expect.startsWith("/")) {
-            expect(finalUrl, `after clicking ${ix.label}`).toContain(ix.expect);
+            expect(finalUrl, `after clicking ${ix.label}, expected URL containing ${ix.expect}, got ${finalUrl}`).toContain(ix.expect);
           } else {
             expect(body.toLowerCase()).toContain(ix.expect.toLowerCase());
           }
