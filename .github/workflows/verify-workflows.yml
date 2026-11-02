@@ -36,7 +36,7 @@ jobs:
           # below grants postgres DDL rights on public + auth before loading
           # schema.sql; the check-migrations.sh bootstrap block does the same
           # grant idempotently for the migration replay step.
-          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
           # Grant postgres full DDL rights on public so schema.sql CREATE
           # statements succeed. Tolerate errors on a fresh DB where some
@@ -55,7 +55,7 @@ jobs:
         env:
           # Same postgres role as the Bootstrap step. check-migrations.sh
           # now grants DDL rights to the connecting role dynamically.
-          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: bash scripts/check-migrations.sh
       - name: Role → workflow consistency
         run: npx tsx scripts/check-role-workflow.ts
