@@ -29,12 +29,11 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          # Supabase/Neon postgres image: the `postgres` role is NOT a
-          # superuser and cannot create objects in the public schema.
-          # `supabase_admin` owns public and has GRANT OPTION — connect as
-          # it so the schema.sql load and the check-migrations.sh bootstrap
-          # can create/alter objects.
-          DATABASE_URL: postgres://supabase_admin:ci_dummy_supabase_admin_password@localhost:5432/gate_monitor
+          # Supabase/Neon postgres image: the `supabase_admin` role is
+          # created by the image init scripts with the same password as the
+          # POSTGRES_PASSWORD env var, and owns the public schema.
+          # Connect as it so CREATE/GRANT statements in schema.sql succeed.
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
           psql "$DATABASE_URL" -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict
