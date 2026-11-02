@@ -11,14 +11,23 @@
 # would wrongly succeed and the check fails.
 set -euo pipefail
 
-CONTAINER="${CONTAINER:-gate_postgres}"
-DB="${DB:-gate_monitor}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OWNER_MIG="$ROOT_DIR/database/migrations/20270101000014_audit_action_canonical_owner.sql"
 
+# psql invocation: use DATABASE_URL when provided (CI service containers are
+# reachable over TCP, not via docker exec), else fall back to docker exec
+# against the compose container (local dev).
+if [ -n "${DATABASE_URL:-}" ]; then
+  PSQL=(psql "$DATABASE_URL")
+else
+  CONTAINER="${CONTAINER:-gate_postgres}"
+  DB="${DB:-gate_monitor}"
+  PSQL=(docker exec -i "$CONTAINER" psql -U postgres -d "$DB")
+fi
+
 echo "=== Verifying audit_logs_action_known constraint ==="
 
-DEF=$(docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -tAc \
+DEF=$("${PSQL[@]}" -tAc \
   "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='audit_logs_action_known';" 2>/dev/null || echo "")
 
 if [ -z "$DEF" ]; then
@@ -26,7 +35,7 @@ if [ -z "$DEF" ]; then
   exit 1
 fi
 
-if ! echo "$DEF" | grep -q 'ARRAY\['; then
+if ! echo "$DEF" | grep -qF 'ARRAY['; then
   echo "FAIL: Constraint 'audit_logs_action_known' does not contain an ARRAY definition!" >&2
   echo "Definition: $DEF" >&2
   exit 1
@@ -67,7 +76,7 @@ while IFS= read -r a; do
   # Capture only the RETURNING value. psql appends the command tag
   # ("INSERT 0 1") as a second line; filter to the first line so the
   # comparison is exact.
-  OK=$(docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -tAc \
+  OK=$("${PSQL[@]}" -tAc \
     "INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address, user_agent, timestamp)
      VALUES (gen_random_uuid(), '$a', NULL, 'audit_check', 'audit_check', '{}', '127.0.0.1', 'audit_check', NOW()) RETURNING 'ok';" \
     2>/dev/null | head -n 1 || echo "err")
@@ -78,7 +87,7 @@ while IFS= read -r a; do
 done <<< "$ACTIONS"
 
 # 2) An unknown action must be rejected (constraint actually bites).
-BOGUS_OK=$(docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -tAc \
+BOGUS_OK=$("${PSQL[@]}" -tAc \
   "INSERT INTO audit_logs (id, action, user_id, user_name, user_role, details, ip_address, user_agent, timestamp)
    VALUES (gen_random_uuid(), 'ZZ_AUDIT_CHECK_BOGUS_ACTION', NULL, 'audit_check', 'audit_check', '{}', '127.0.0.1', 'audit_check', NOW()) RETURNING 'ok';" \
   2>/dev/null || echo "rejected")
