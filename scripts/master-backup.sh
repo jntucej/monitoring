@@ -150,3 +150,17 @@ find "$BACKUP_ROOT" -name "backup-*.log" -mtime +14 -delete 2>/dev/null || true
 TOTAL_SIZE=$(du -sh "$BACKUP_ROOT" 2>/dev/null | awk '{print $1}')
 log "✓ Backup complete. Total backup storage: $TOTAL_SIZE"
 echo "" >> "$LOG"
+
+# 6. Publish the backup-completion heartbeat to the shared status_data volume
+#    so the worker's infra-snapshot job can compute backup_age_hours from a
+#    container-visible file. The host path for the volume is the docker
+#    named-volume data dir; if it's not writable (permissions), skip silently
+#    — backup_age_hours degrades to null, never a backup failure.
+VOLUME_DIR=$(docker volume inspect compose_status_data --format '{{.Mountpoint}}' 2>/dev/null)
+if [ -n "$VOLUME_DIR" ] && [ -w "$VOLUME_DIR" ]; then
+  _hb_size_mb=$(( $(stat -c%s "$DB_DUMP" 2>/dev/null || echo 0) / 1048576 ))
+  printf '{"at":"%s","backupFile":"%s","sizeMB":%s}\n' \
+    "$(date -Iseconds)" "$(basename "$DB_DUMP" 2>/dev/null)" "${_hb_size_mb:-0}" \
+    > "$VOLUME_DIR/backup-heartbeat.json" 2>/dev/null || true
+  log "✓ Backup heartbeat published to status_data volume"
+fi

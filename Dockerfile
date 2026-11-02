@@ -72,6 +72,16 @@ RUN adduser --system --uid 1001 --home /app nextjs
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
+# The auto-exec path (operator_actions.js -> apply-operator-action.sh) and
+# the infra_snapshot_collector shell out to `bash`, `jq`, and `df`
+# (--output=pcent, a GNU coreutils flag). node:20-alpine is BusyBox-only:
+# no bash, no jq, no df --output. Without these the Tier-1 auto-actions
+# silently fail and disk_free_pct is never captured (the forecaster's
+# disk signal is blind). Add them to the worker image.
+RUN apk add --no-cache bash jq \
+    && apk add --no-cache --virtual .coreutils coreutils \
+    && rm -rf /var/cache/apk/*
+
 COPY --chown=nextjs:nodejs tsconfig.json ./tsconfig.json
 COPY --chown=nextjs:nodejs worker ./worker
 COPY --chown=nextjs:nodejs scripts ./scripts

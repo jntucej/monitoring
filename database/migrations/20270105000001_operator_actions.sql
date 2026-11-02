@@ -119,8 +119,9 @@ SET search_path = public
 AS $$
 DECLARE
   r RECORD;
-  out JSONB[];
+  out jsonb;
 BEGIN
+  out := '[]'::jsonb;
   -- 1. Expire pending rows past their deadline (safe: nothing ran).
   UPDATE public.operator_actions
      SET status = 'expired', decided_at = NOW()
@@ -128,7 +129,6 @@ BEGIN
      AND expires_at < NOW();
 
   -- 2. Auto-run 'low' risk rows whose window elapsed without a rejection.
-  out := ARRAY[]::jsonb[];
   FOR r IN
     SELECT id, kind, payload FROM public.operator_actions
      WHERE status = 'pending'
@@ -140,11 +140,11 @@ BEGIN
     UPDATE public.operator_actions
        SET status = 'auto_executed', decided_at = NOW(), source = 'worker'
      WHERE id = r.id;
-    out := out || jsonb_build_object(
-      'id', r.id,
+    out := out || jsonb_build_array(jsonb_build_object(
+      'id', r.id::text,
       'kind', r.kind,
       'payload', r.payload
-    );
+    ));
   END LOOP;
   RETURN out;
 END;

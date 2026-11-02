@@ -68,28 +68,46 @@ export default async function collectInfraSnapshot() {
     }
   } catch { /* no api_metrics — leave null */ }
 
-  // disk free % on the backup volume
+  // disk free % — `df -P /` in the container's root filesystem. The Capacity
+  // column is the *used* percentage, so free% = 100 - used. Use Available and
+  // 1024-blocks to compute it exactly rather than relying on the rounded
+  // Capacity column. Works in BusyBox and GNU coreutils alike.
   let diskFreePct = null;
-  const dfOut = shell('df --output=pcent /opt/monitoring/backups 2>/dev/null | tail -1 | tr -d \" %\"');
-  if (dfOut && dfOut !== '0') diskFreePct = Number(dfOut);
+  const dfLine = shell('df -P / 2>/dev/null | tail -1');
+  if (dfLine) {
+    const cols = dfLine.trim().split(/\s+/);
+    // df -P columns: Filesystem 1024-blocks Used Available Capacity Mounted
+    const blocks = Number(cols[1]);
+    const avail = Number(cols[3]);
+    if (blocks > 0) {
+      diskFreePct = Math.round((avail / blocks) * 100);
+    }
+  }
 
-  // backup age in hours
+  // backup age in hours — read the host-side backup heartbeat that
+  // master-backup.sh publishes to the shared status_data volume (mounted
+  // read-write at /usr/share/status). The container cannot see
+  // /opt/monitoring/backups directly; this file is the bridge.
   let backupAgeHours = null;
-  const newest = shell(
-    'newest=$(find /opt/monitoring/backups -name "gate-db-*.sql.gz" -printf "%T@\n" 2>/dev/null | sort -n | tail -1); ' +
-    '[ -n "$newest" ] && echo $(( ( $(date +%s) - ${newest%%.*} ) / 3600 ))'
-  );
-  if (newest !== null && newest !== '') backupAgeHours = Number(newest);
+  try {
+    const { readFileSync, existsSync } = await import('node:fs');
+    const heartbeatPath = process.env.STATUS_LAST_JSON
+      ? process.env.STATUS_LAST_JSON.replace(/\/[^/]+$/, '/backup-heartbeat.json')
+      : '/usr/share/status/backup-heartbeat.json';
+    if (existsSync(heartbeatPath)) {
+      const hb = JSON.parse(readFileSync(heartbeatPath, 'utf8'));
+      if (hb.at) {
+        const ageMs = Date.now() - new Date(hb.at).getTime();
+        if (ageMs >= 0) backupAgeHours = Math.round(ageMs / 3600000);
+      }
+    }
+  } catch { /* leave null */ }
 
-  // unhealthy gate_* containers
+  // unhealthy gate_* containers — the worker cannot call docker CLI from
+  // inside its container. The host-side auto-heal-watchdog.sh is the real
+  // container-health sensor; the worker's snapshot records what it can
+  // detect from the DB (a dead DB is visible; a dead container isn't).
   let containerUnhealthy = [];
-  const unhealthy = shell(
-    'for c in gate_postgres gate_redis gate_web gate_worker gate_caddy; do ' +
-    '  st=$(docker inspect --format \'{{.State.Health.Status}}\' "$c" 2>/dev/null || echo missing); ' +
-    '  [ "$st" = "unhealthy" ] && echo "$c"; ' +
-    'done'
-  );
-  if (unhealthy && unhealthy.trim()) containerUnhealthy = unhealthy.trim().split('\n').filter(Boolean);
 
   // SSE streams: not reachable from the worker (in-process web counter);
   // the web container's /api/sysadmin/health exposes it when polled.

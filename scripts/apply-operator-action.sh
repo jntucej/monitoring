@@ -74,6 +74,13 @@ run_payload() {
       # max_connections).
       new_size=$(echo "$PAYLOAD" | jq -r '.size')
       [ -n "$new_size" ] && [ "$new_size" != "null" ] || { echo "raise_pool_size missing .size" >&2; exit 2; }
+      # Autonomous SRE Phase 4 (ACT): the forecaster's auto/notify action for
+      # db_pool_used trending toward max_connections. Reversible Tier 2 —
+      # write the desired value to a staging file. The actual apply (edit the
+      # env file + force-recreate web) is host-side and must be done by an
+      # operator or CI step; the container cannot modify its own .env.
+      # Refuse if the new size would break the pool-budget check
+      # (web pool × replicas > 80% of max_connections).
       max_conn=$(psql "$DATABASE_URL" -tAc "SELECT setting::int FROM pg_settings WHERE name='max_connections'")
       replicas=${REPLICA_COUNT:-1}
       budget=$(( max_conn * 80 / 100 ))
@@ -81,16 +88,8 @@ run_payload() {
         echo "raise_pool_size refused: $new_size × $replicas replicas = $((new_size*replicas)) > pool budget $budget (Tier 3 — escalate, not auto)" >&2
         exit 4
       fi
-      # Edit the .env PG_MAX_POOL_SIZE and restart web to pick it up.
-      env_file="${ENV_FILE:-/opt/monitoring/compose/.env}"
-      if [ -f "$env_file" ]; then
-        sed -i "s/^PG_MAX_POOL_SIZE=.*/PG_MAX_POOL_SIZE=$new_size/" "$env_file"
-        docker compose -f /opt/monitoring/compose/docker-compose.yml \
-          up -d --force-recreate web 2>/dev/null || true
-        echo "[raise_pool_size] PG_MAX_POOL_SIZE -> $new_size (web force-recreated)"
-      else
-        echo "[raise_pool_size] .env not found at $env_file — staged: PG_MAX_POOL_SIZE=$new_size (manual apply required)"
-      fi
+      echo "PG_MAX_POOL_SIZE=$new_size" > /app/.cache/pool-size.staging
+      echo "[raise_pool_size] desired PG_MAX_POOL_SIZE=$new_size staged at /app/.cache/pool-size.staging (apply via docker compose env edit + force-recreate web, Tier 2, reversible)"
       ;;
     extend_disk)
       # Autonomous SRE Phase 4 (ACT): disk_free_pct trending toward 0.
