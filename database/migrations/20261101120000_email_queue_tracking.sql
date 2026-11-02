@@ -19,9 +19,9 @@ CREATE INDEX IF NOT EXISTS idx_email_queue_category_status
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM public.schema_migrations WHERE version = '20261030091615_email_queue_tracking'
+    SELECT 1 FROM public.schema_migrations WHERE version = '20261101120000'
   ) THEN
     INSERT INTO public.schema_migrations (version, applied_at)
-    VALUES ('20261030091615_email_queue_tracking', now());
+    VALUES ('20261101120000', now());
   END IF;
 END $$;

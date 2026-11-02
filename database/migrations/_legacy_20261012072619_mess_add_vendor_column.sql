@@ -81,11 +81,11 @@ BEGIN
   IF has_filename THEN
     IF has_checksum THEN
       INSERT INTO public.schema_migrations (version, filename, applied_at, checksum)
-      VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW(), md5('20261012072619_mess_add_vendor_column'))
+      VALUES ('20261012072619', '_legacy_20261012072619_mess_add_vendor_column.sql', NOW(), md5('_legacy_20261012072619_mess_add_vendor_column'))
       ON CONFLICT (version) DO NOTHING;
-    ELSE
+      ELSE
       INSERT INTO public.schema_migrations (version, filename, applied_at)
-      VALUES ('20261012072619', '20261012072619_mess_add_vendor_column.sql', NOW())
+      VALUES ('20261012072619', '_legacy_20261012072619_mess_add_vendor_column.sql', NOW())
       ON CONFLICT (version) DO NOTHING;
     END IF;
   ELSE

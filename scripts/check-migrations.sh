@@ -213,7 +213,11 @@ for fname in "${SORTED_NAMES[@]}"; do
     exit 1
   fi
 
-  ver="${fname%%_*}"
+  # Extract the 14-digit version prefix. Handles both the standard
+  # NNNNNNNNNNNNNN_name.sql and the legacy _legacy_NNNNNNNNNNNNNN_name.sql
+  # filename shapes (the latter would otherwise yield an empty version).
+  ver=$(echo "$fname" | grep -oE '[0-9]{14}' | head -1)
+  [ -z "$ver" ] && ver="${fname%%_*}"
   "${PSQL[@]}" -v ON_ERROR_STOP=1 -c \
     "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed') ON CONFLICT (version) DO NOTHING;" >/dev/null
   APPLIED_COUNT=$((APPLIED_COUNT + 1))
