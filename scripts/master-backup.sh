@@ -29,7 +29,21 @@ log "=== Starting master backup: $TIMESTAMP ==="
 #    big tables, and it thrashes the live DB's disk during a 6-hourly run.
 #    Plain SQL (COPY defaults) restores quickly and stays compact.
 if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
-    DB_DUMP="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz"
+    # Tier 1a: backup volume free-space guard. Before the dump, check free space
+# on the backup volume; if < 20% free, prune the oldest backups beyond the
+# retention floor (keeping at least 3 days), then re-check. If still < 5%,
+# refuse the dump and escalate — a full disk is Tier 3, not a silent failure.
+AVAIL_PCT=$(df --output=pcent "$BACKUP_ROOT" 2>/dev/null | tail -1 | tr -d ' %' || echo 0)
+if [ "$AVAIL_PCT" -gt 80 ]; then
+  find "$BACKUP_ROOT" -name "gate-db-*.sql.gz" -mtime +3 -delete 2>/dev/null || true
+  AVAIL_PCT=$(df --output=pcent "$BACKUP_ROOT" 2>/dev/null | tail -1 | tr -d ' %' || echo 0)
+fi
+if [ "$AVAIL_PCT" -gt 95 ]; then
+  echo "🚨 Backup volume ${AVAIL_PCT}% full after prune — backup skipped (Tier 3)" | tee -a "$LOG"
+  exit 1
+fi
+echo "{"job":"backup","status":"started","avail_pct":$AVAIL_PCT,"at":"$(date -Iseconds)"}" >> "$BACKUP_ROOT/.heartbeat.jsonl"
+DB_DUMP="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz"
     docker exec gate_postgres pg_dump -U postgres -d gate_monitor \
         --create --clean --if-exists \
         --no-acl --no-owner \
@@ -38,6 +52,7 @@ if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
     # Integrity sidecar: verify-backup.sh re-checks this before trusting a
     # restore. The .sha256 file holds "<digest>  <filename>" (sha256sum -c form).
     DB_DUMP_SHA="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz.sha256"
+echo "{\"job\":\"backup\",\"status\":\"dumped\",\"at\":\"$(date -Iseconds)\"}" >> "$BACKUP_ROOT/.heartbeat.jsonl"
     sha256sum "$DB_DUMP" | awk '{print $1}' > /tmp/.sha256.$$
     printf '%s  %s\n' "$(cat /tmp/.sha256.$$)" "$(basename "$DB_DUMP")" > "$DB_DUMP_SHA"
     rm -f /tmp/.sha256.$$

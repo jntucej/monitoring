@@ -447,6 +447,7 @@
         "/sysadmin/mess/items",
         "/sysadmin/mess/today",
         "/sysadmin/navigation",
+        "/sysadmin/actions",
         "/sysadmin/notifications",
         "/sysadmin/parents",
         "/sysadmin/people",

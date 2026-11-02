@@ -51,6 +51,7 @@ import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import sendSmsQueue from './jobs/send_sms.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
+import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
 
 /**
  * Job heartbeat sentinel: after each scheduled run, upsert a row in
@@ -135,7 +136,18 @@ const jobs = [
   { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
   { name: 'cleanup-movement-logs', ms: 24 * 60 * 60 * 1000, run: () => runJob('cleanup-movement-logs', cleanupMovementLogs) },
   { name: 'hard-delete-expired', ms: 60 * 60 * 1000, run: () => runJob('hard-delete-expired', hardDeleteExpired) },
+  { name: 'operator-action-maintenance', ms: 5 * 60 * 1000, run: () => runJob('operator-action-maintenance', async () => {
+    await runOperatorActionMaintenance();
+  }) },
 ];
+
+// The pg LISTEN channel for operator_action_pending is a dedicated client
+// (not a pooled connection) so a long-lived LISTEN never competes with the
+// jobs that share the 5-connection worker pool. Start it once; the loop
+// re-listens on disconnect.
+startOperatorActionListener().catch((err) => {
+  console.error('[worker] operator-actions listener failed to start:', err.message);
+});
 
 for (const job of jobs) {
   job.run(); // run once on start (idempotent); then repeat on interval

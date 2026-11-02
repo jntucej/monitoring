@@ -49,6 +49,7 @@ export function GovernanceModules() {
             { label: "Integration Hub (LDAP/LMS)", href: "/sysadmin/integrations" },
             { label: "Scheduled Jobs Engine", href: "/sysadmin/jobs" },
             { label: "Smart Shift Scheduling", href: "/sysadmin/scheduling" },
+            { label: "Automation Actions", href: "/sysadmin/actions" },
           ]}
         />
 

@@ -32,6 +32,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/sysadmin/audit": { title: "Audit Logs", description: "System audit trail and telemetry" },
   "/sysadmin/backup": { title: "Backup", description: "Database backup and restore operations" },
   "/sysadmin/compliance": { title: "Compliance", description: "Data compliance and retention policies" },
+  "/sysadmin/actions": { title: "Automation Actions", description: "Approval gate for automated and operator actions" },
   "/sysadmin/data": { title: "Data Management", description: "Data export, anonymization, and compliance" },
   "/sysadmin/departments": { title: "Departments", description: "Department and HOD management" },
   "/sysadmin/exit-reasons": { title: "Exit Reasons", description: "Exit reason and outpass configuration" },

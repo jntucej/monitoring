@@ -28,6 +28,32 @@ notify() {
 # 1. Check Docker daemon
 if ! systemctl is-active --quiet docker; then
   log "CRITICAL: Docker daemon inactive! Restarting..."
+
+# Tier 1b circuit breaker: if the same container restarts 3+ times within
+# 30 minutes, stop restarting and escalate — an infinite restart loop on a
+# bad image is a Tier 3 condition, not a Tier 1 fix. Resets when the
+# container has been healthy for 30+ minutes.
+CB_DIR="/var/lib/gate-monitor"
+mkdir -p "$CB_DIR" 2>/dev/null || CB_DIR="${TMPDIR:-/tmp}/gate-monitor-cb"
+cb_check() { # cb_check <container> -> returns 0 if restart allowed, 1 if tripped
+  local c="$1"
+  local f="$CB_DIR/restart-count-$c"
+  local now; now=$(date +%s)
+  # Reset counter if last reset was > 30 min ago.
+  if [ -f "$f" ]; then
+    local count ts; count=$(cut -d: -f1 "$f"); ts=$(cut -d: -f2 "$f")
+    if [ $((now - ts)) -gt 1800 ]; then
+      echo "0:$now" > "$f"; count=0
+    fi
+    if [ "$count" -ge 3 ]; then
+      return 1
+    fi
+  else
+    echo "0:$now" > "$f"; count=0
+  fi
+  echo "$((count+1)):$now" > "$f"
+  return 0
+}
   notify "🚨 *Docker Daemon Inactive* — Auto-restarting docker service..."
   systemctl restart docker
   sleep 5
@@ -43,19 +69,28 @@ for c in "${CONTAINERS[@]}"; do
   if [ "$STATUS" != "running" ]; then
     log "ALERT: Container $c is not running (status: $STATUS). Restarting..."
     notify "⚠️ *Container Down*: \`$c\` (status: $STATUS). Attempting auto-recovery..."
-    docker restart "$c" 2>/dev/null || docker compose -f /opt/monitoring/compose/docker-compose.yml up -d "$c" 2>/dev/null || true
-    sleep 3
-    NEW_STATUS=$(docker inspect --format '{{.State.Status}}' "$c" 2>/dev/null || echo "missing")
-    if [ "$NEW_STATUS" = "running" ]; then
-      notify "✅ *Container Recovered*: \`$c\` is now running."
+    if cb_check "$c"; then
+      docker restart "$c" 2>/dev/null || docker compose -f /opt/monitoring/compose/docker-compose.yml up -d "$c" 2>/dev/null || true
+      sleep 3
+      NEW_STATUS=$(docker inspect --format '{{.State.Status}}' "$c" 2>/dev/null || echo "missing")
+      if [ "$NEW_STATUS" = "running" ]; then
+        notify "✅ *Container Recovered*: \`$c\` is now running."
+      else
+        notify "❌ *Container Recovery Failed*: \`$c\` failed to start. Urgent attention required."
+      fi
     else
-      notify "❌ *Container Recovery Failed*: \`$c\` failed to start. Urgent attention required."
+      # Circuit breaker tripped: 3+ restarts in 30min — stop and escalate.
+      notify "🚨 *Circuit Breaker Open*: \`$c\` restarted 3x in 30min — not retrying, escalating (Tier 3)"
     fi
   elif [ "$HEALTH" = "unhealthy" ]; then
     log "ALERT: Container $c is UNHEALTHY. Restarting..."
-    notify "⚠️ *Container Unhealthy*: \`$c\`. Restarting container..."
-    docker restart "$c"
-    sleep 5
+    if cb_check "$c"; then
+      notify "⚠️ *Container Unhealthy*: \`$c\`. Restarting container..."
+      docker restart "$c"
+      sleep 5
+    else
+      notify "🚨 *Circuit Breaker Open*: \`$c\` (unhealthy) restarted 3x in 30min — escalating (Tier 3)"
+    fi
   fi
 done
 
