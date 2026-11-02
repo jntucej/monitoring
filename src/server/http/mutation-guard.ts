@@ -76,8 +76,12 @@ export function withMutationGuard(handler: Handler, options: MutationGuardOption
     }
     const response = await csrfGuard(req, ctx);
     response.headers.set("X-RateLimit-Limit", (effectiveRateLimit.maxRequests || 60).toString());
-    response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
-    response.headers.set("X-RateLimit-Reset", result.resetTime.toISOString());
+    if (result.remaining !== undefined) {
+      response.headers.set("X-RateLimit-Remaining", result.remaining.toString());
+    }
+    if (result.resetTime) {
+      response.headers.set("X-RateLimit-Reset", result.resetTime.toISOString());
+    }
     return response;
   };
 

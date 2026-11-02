@@ -5,6 +5,17 @@ jest.mock('@/middleware/authorization', () => ({
 
 jest.mock('@/lib/rate-limit', () => ({
   withRateLimit: (h: any) => h,
+  checkRateLimit: async () => ({ limited: false }),
+}));
+
+// withMutationGuard also enforces the trusted-header signature + CSRF,
+// both real crypto checks — exempt both so these route-logic tests reach
+// the handler with a plain request.
+jest.mock('@/server/http/trusted-headers', () => ({
+  requireTrustedHeaders: () => null,
+}));
+jest.mock('@/lib/csrf', () => ({
+  assertCsrf: () => null,
 }));
 
 jest.mock('@/lib/gate-operations', () => ({

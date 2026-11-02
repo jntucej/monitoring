@@ -22,6 +22,10 @@ jest.mock("@/components/shared/EmptyState", () => ({
   __esModule: true,
   EmptyState: ({ title }: { title: string }) => <div data-testid="empty">{title}</div>,
 }));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: (p: any) => <a href={p.href}>{p.children}</a>,
+}));
 jest.mock("@/components/ui/modal", () => ({
   __esModule: true,
   Modal: () => null,
@@ -59,21 +63,24 @@ describe("student notifications merge", () => {
     expect(screen.getByText("Notifications")).toBeInTheDocument();
   });
 
-  it("filters on the Alerts / Announcements tabs", async () => {
+  it("all-feed links to the standalone alerts/announcements routes", async () => {
     mockSources(
       [{ id: "a1", title: "Alert only", message: "m", created_at: NOW }],
       [{ id: "b1", title: "Announcement only", message: "m", created_at: NOW }],
     );
+    // No-tabs conversion: filtering moved to the /student/notifications/alerts
+    // and /announcements sub-routes; the merged feed shows both + nav links.
     render(<NotificationsPage />);
     await screen.findByText("Alert only");
-
-    fireEvent.click(screen.getByText("announcements"));
-    expect(screen.queryByText("Alert only")).not.toBeInTheDocument();
     expect(screen.getByText("Announcement only")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("alerts"));
-    expect(screen.getByText("Alert only")).toBeInTheDocument();
-    expect(screen.queryByText("Announcement only")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alerts" })).toHaveAttribute(
+      "href",
+      "/student/notifications/alerts",
+    );
+    expect(screen.getByRole("link", { name: "Announcements" })).toHaveAttribute(
+      "href",
+      "/student/notifications/announcements",
+    );
   });
 
   it("empty state when no items on either source", async () => {

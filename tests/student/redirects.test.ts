@@ -37,12 +37,21 @@ describe("student legacy redirects", () => {
     );
   });
 
-  it("notifications/alerts + announcements → merged /student/notifications", () => {
-    expect(redirectTarget("notifications/alerts/page.tsx")).toBe(
-      "/student/notifications",
+  it("notifications/alerts + announcements → standalone filtered routes", () => {
+    // The no-tabs gate converted the merged feed's client tab state into
+    // standalone sub-routes: /notifications is the "all" feed, and the two
+    // sub-routes are their own views (each links back to the all-feed).
+    const alerts = readFileSync(
+      resolve(root, "src/app/(student)/student/notifications/alerts/page.tsx"),
+      "utf8",
     );
-    expect(redirectTarget("notifications/announcements/page.tsx")).toBe(
-      "/student/notifications",
+    const announcements = readFileSync(
+      resolve(root, "src/app/(student)/student/notifications/announcements/page.tsx"),
+      "utf8",
     );
+    expect(alerts).toContain("/student/notifications");
+    expect(alerts).toContain("Alerts");
+    expect(announcements).toContain("/student/notifications");
+    expect(announcements).toContain("Announcements");
   });
 });
