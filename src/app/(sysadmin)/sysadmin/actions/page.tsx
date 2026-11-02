@@ -94,33 +94,42 @@ export default function OperatorActionsPage() {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-    try {
-      const [actionsRes, forecastRes] = await Promise.all([
-        request<{ actions: OperatorAction[] }>(
-          `/api/sysadmin/actions?status=${encodeURIComponent(filter)}`
-        ),
-        request<{ forecasts: Forecast[]; latestSnapshot: LiveHealth | null }>(
-          "/api/sysadmin/forecasts"
-        ),
-      ]);
-      const res = actionsRes;
-      setForecasts(forecastRes.data?.forecasts ?? []);
-      setHealth(forecastRes.data?.latestSnapshot ?? null);
-      const ctrlRes = await request<{ controls: AutomationControl[]; ladder: EscalationStep[] }>(
-        "/api/sysadmin/automation-controls"
-      );
-      setControls(ctrlRes.data?.controls ?? []);
-      setLadder(ctrlRes.data?.ladder ?? []);
-      if (res.success && res.data) {
-        setRows(res.data.actions ?? []);
-      } else {
-        setError(res.error ?? "load failed");
-      }
-    } catch (err) {
-      setError(String(err));
-    } finally {
-      setLoading(false);
-    }
+
+    // Each data source is fetched INDEPENDENTLY so that a 429 or transient
+    // failure on one endpoint cannot cascade-blank the other two panels.
+    // The previous Promise.all((actions, forecasts)) + sequential-controls
+    // layout meant a single 429 rejected the whole batch and every section
+    // (kill-switches, live health, escalation ladder, forecast cards) stayed
+    // hidden while the page silently showed "No pending operator actions".
+    const actionsP = request<{ actions: OperatorAction[] }>(
+      `/api/sysadmin/actions?status=${encodeURIComponent(filter)}`
+    )
+      .then((res) => {
+        if (res.success && res.data) setRows(res.data.actions ?? []);
+        else setError(res.error ?? "load failed");
+      })
+      .catch((err) => setError(String(err)))
+      .finally(() => setLoading(false));
+
+    const forecastsP = request<{ forecasts: Forecast[]; latestSnapshot: LiveHealth | null }>(
+      "/api/sysadmin/forecasts"
+    )
+      .then((res) => {
+        setForecasts(res.data?.forecasts ?? []);
+        setHealth(res.data?.latestSnapshot ?? null);
+      })
+      .catch(() => { /* non-fatal — forecasts panel stays empty */ });
+
+    const controlsP = request<{ controls: AutomationControl[]; ladder: EscalationStep[] }>(
+      "/api/sysadmin/automation-controls"
+    )
+      .then((res) => {
+        setControls(res.data?.controls ?? []);
+        setLadder(res.data?.ladder ?? []);
+      })
+      .catch(() => { /* non-fatal — kill-switch panel stays empty */ });
+
+    await Promise.allSettled([actionsP, forecastsP, controlsP]);
   }, [filter, request]);
 
   useEffect(() => {
