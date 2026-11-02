@@ -1,26 +1,19 @@
 -- ============================================================================
 -- Migration: 20261224000001_fix_is_admin_param_rename
--- Purpose: Re-create is_admin with a stable parameter name. The live DB has
---   is_admin(p_uid uuid) from 20260916000000; CREATE OR REPLACE cannot rename
---   a parameter (Postgres rejects "cannot change name of input parameter"),
---   so we DROP FUNCTION (without CASCADE — see note below) then CREATE.
---   CRITICAL: Never use CASCADE here — it drops every RLS policy that
---   references is_admin (users_select_admin, gates_select_admin,
---   sdetails_manage_admin, predictions, audit_logs, etc.) and those policies
---   are never recreated.
+-- Purpose: Ensure is_admin exists with correct body. The original parameter
+--   name is `p_uid` (from 20260916000000). CREATE OR REPLACE cannot rename
+--   a parameter, and DROP FUNCTION fails because RLS policies depend on it.
+--   So we use CREATE OR REPLACE keeping the original parameter name `p_uid`.
+--   The function body is identical — only the parameter label differs, and
+--   callers pass positional args so the label is not part of any signature.
 -- ============================================================================
--- Drop the old signature (parameter p_uid) without CASCADE so RLS policies
--- that reference is_admin are preserved (they keep working — the function
--- body is identical, only the parameter name changes, and parameter names
--- are not part of a policy's dependency chain).
-DROP FUNCTION IF EXISTS public.is_admin(uuid);
-CREATE FUNCTION public.is_admin(user_id uuid)
+CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = user_id AND role IN ('admin', 'sysadmin')
+    WHERE id = p_uid AND role IN ('admin', 'sysadmin')
   );
 $$;
 
