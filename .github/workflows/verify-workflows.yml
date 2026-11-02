@@ -29,11 +29,12 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          # Supabase/Neon postgres image: the `supabase_admin` role is
-          # created by the image init scripts with the same password as the
-          # POSTGRES_PASSWORD env var, and owns the public schema.
-          # Connect as it so CREATE/GRANT statements in schema.sql succeed.
-          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          # Supabase/Neon postgres image: `supabase_admin` owns the public
+          # schema and its password is set to the POSTGRES_PASSWORD env value
+          # during the image's initdb. Connect as supabase_admin so that
+          # CREATE/GRANT statements in schema.sql and the migration replay
+          # succeed.
+          DATABASE_URL: postgres://supabase_admin:***@localhost:5432/gate_monitor
         run: |
           psql "$DATABASE_URL" -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict

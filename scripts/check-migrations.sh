@@ -147,6 +147,24 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
 $$ LANGUAGE sql;
 SQL
 
+# In the Supabase/Neon image the `postgres` role (used by CI) does NOT own
+# the public schema, so the GRANT TO PUBLIC above is not sufficient —
+# postgres needs an explicit CREATE grant to create objects in public.
+# This grant is a no-op on a plain postgres:17 image (postgres is already
+# a superuser and owns all schemas).
+"${PSQL[@]}" -v ON_ERROR_STOP=1 <<SQL
+DO \$\$
+BEGIN
+  EXECUTE format('GRANT CREATE ON SCHEMA public TO %I', '$_DB_USER');
+EXCEPTION WHEN insufficient_privilege THEN
+  -- postgres cannot grant to itself in the Supabase image; fall back to
+  -- granting to PUBLIC (already done above) and rely on the fact that the
+  -- Supabase image's public schema is writable by PUBLIC.
+  NULL;
+END
+\$\$;
+SQL
+
 # In the Supabase image, supabase_admin already owns public/auth; in a plain
 # postgres:17 image, the connecting user is the postgres superuser. No
 # additional GRANT is needed — both roles already have full DDL rights.
