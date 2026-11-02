@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
 import type { Role } from "@/lib/types";
@@ -47,7 +46,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: { userId: string; 
   return NextResponse.json({ success: true, data: { frozen: enabled } });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin", "principal", "supervisor"] }),
-  { keyPrefix: "visitors_freeze", maxRequests: 10 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "principal", "supervisor"], rateLimit: { keyPrefix: "visitors_freeze", maxRequests: 10 }});

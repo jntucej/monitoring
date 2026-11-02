@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertLength, LIMITS } from "@/lib/validation";
 
@@ -73,5 +74,4 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"]});

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { verifyQrToken, verifyManualCode, serveToken, type VerifyResult, type VerifyFailure } from "@/lib/mess-event-token";
 import { addAudit } from "@/lib/db";
@@ -80,7 +79,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ result: served, served: true });
 }
 
-export const POST = withAuthorization(
-  withRateLimit(handlePost, { windowMs: 60_000, maxRequests: 120 }),
-  {},
-);
+export const POST = withMutationGuard(handlePost, { rateLimit: { windowMs: 60_000, maxRequests: 120 } });

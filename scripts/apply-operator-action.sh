@@ -46,8 +46,11 @@ KIND=$(row kind)
 PAYLOAD=$(row payload)
 
 mark() { # mark <final_status>
+  # P5 §27: state transitions go through the SECURITY DEFINER claim function
+  # (20270106000002) — gate_app is read-only on operator_actions now, so a
+  # direct UPDATE would fail even if it passed the app role's credentials.
   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
-    "UPDATE public.operator_actions SET status = '$1', decided_at = NOW() WHERE id = '$ACTION_ID' AND status IN ('approved','auto_executed')"
+    "SELECT public.claim_operator_action('$ACTION_ID', '$1', NULL)"
   echo "operator_action $ACTION_ID ($KIND) -> $1"
 }
 
@@ -73,7 +76,10 @@ run_payload() {
       # break the pool-budget check (web pool × replicas > 80% of
       # max_connections).
       new_size=$(echo "$PAYLOAD" | jq -r '.size')
-      [ -n "$new_size" ] && [ "$new_size" != "null" ] || { echo "raise_pool_size missing .size" >&2; exit 2; }
+      # S1: size must be a plain integer within operational bounds — it is
+      # multiplied into the pool-budget check and staged as an env value.
+      [[ "$new_size" =~ ^[0-9]+$ ]] || { echo "raise_pool_size refused: .size is not an integer ('$new_size')" >&2; exit 4; }
+      [ "$new_size" -ge 10 ] && [ "$new_size" -le 100 ] || { echo "raise_pool_size refused: .size out of bounds 10..100 ($new_size)" >&2; exit 4; }
       # Autonomous SRE Phase 4 (ACT): the forecaster's auto/notify action for
       # db_pool_used trending toward max_connections. Reversible Tier 2 —
       # write the desired value to a staging file. The actual apply (edit the
@@ -98,7 +104,12 @@ run_payload() {
       # expansion) is operator-specific; this branch records the intent and
       # triggers a backup prune to reclaim space as a stopgap.
       echo "[extend_disk] disk pressure signal — pruning backups older than 3d as stopgap; operator must extend volume (Tier 3)"
-      find /opt/monitoring/backups -name "gate-db-*.sql.gz" -mtime +3 -delete 2>/dev/null || true
+      # S9: the prune only runs when the operator explicitly approved this
+      # action row (that is the precondition for reaching this branch — the
+      # row is Tier 3 and only executes after human approval), and it is
+      # restricted to the backup directory via -maxdepth so a hostile or
+      # mis-set path can never reach rm on /opt/monitoring proper.
+      find /opt/monitoring/backups -maxdepth 2 -type f -name "gate-db-*.sql.gz" -mtime +3 -delete 2>/dev/null || true
       df -h /opt/monitoring 2>/dev/null | tail -1 || true
       ;;
     scale_pool)
@@ -123,13 +134,20 @@ run_payload() {
       ;;
     drop_table)
       table=$(echo "$PAYLOAD" | jq -r '.table')
+      # S1: validate the identifier BEFORE it touches SQL. A payload.table of
+      # "users; DROP TABLE audit_logs; --" would have executed two
+      # statements through psql. Strict identifier charset + existence
+      # check (to_regclass) so only a real public-schema table can drop.
+      [[ "$table" =~ ^[a-z_][a-z0-9_]*$ ]] || { echo "drop_table refused: invalid identifier '$table' (Tier 3 — payload rejected)" >&2; exit 4; }
+      exists=$(psql "$DATABASE_URL" -tAc "SELECT to_regclass('public.$table') IS NOT NULL")
+      [ "$exists" = "t" ] || { echo "drop_table refused: no such table public.$table (Tier 3 — payload rejected)" >&2; exit 4; }
       # Refuse to drop unless a fresh backup exists (<= 1h old).
       local newest; newest=$(find /opt/monitoring/backups -name "gate-db-*.sql.gz" -mmin -60 2>/dev/null | head -1 || true)
       if [ -z "$newest" ]; then
         echo "drop_table refused: no backup newer than 1h for $table (Tier 3 — run a backup first)" >&2
         exit 4
       fi
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c "DROP TABLE IF EXISTS $table CASCADE"
+      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c "DROP TABLE IF EXISTS public.\"$table\" CASCADE"
       ;;
     clear_email_queue)
       psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, updateUserRole, findUserById } from "@/lib/db";
+import { addAudit, updateUserRole, findUserById, withTransaction } from "@/lib/db";
 import { sendNotification } from "@/lib/notification-service";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import type { Role } from "@/lib/types";
 
@@ -116,21 +117,23 @@ async function handlePost(req: NextRequest) {
       );
     }
 
-    const { data: request, error: insertError } = await supabase
-      .from("role_change_requests")
-      .insert({
-        requester_id: actorId,
-        target_user_id: userId,
-        requested_role: requestedRole,
-        reason,
-        status: "PENDING",
-      })
-      .select()
-      .single();
+    // RLS write discipline: role_change_requests may carry RLS;
+    // write through withTransaction so the GUC context is set.
+    let request: any;
+    await withTransaction(async (client) => {
+      const r = await client.query(
+        `INSERT INTO public.role_change_requests
+           (requester_id, target_user_id, requested_role, reason, status)
+         VALUES ($1, $2, $3, $4, 'PENDING')
+         RETURNING *`,
+        [actorId, userId, requestedRole, reason]
+      );
+      request = r.rows[0];
+    });
 
-    if (insertError) {
+    if (!request) {
       return NextResponse.json(
-        { success: false, error: { code: "SERVER_ERROR", message: insertError.message } },
+        { success: false, error: { code: "SERVER_ERROR", message: "Insert failed" } },
         { status: 500 }
       );
     }
@@ -151,4 +154,4 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ADMIN_ROLES }));
-export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ADMIN_ROLES }));
+export const POST = withMutationGuard(handlePost, {requiredRole: ADMIN_ROLES});

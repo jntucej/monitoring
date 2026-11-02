@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getGraduationYearFromRoll, parseRollNumber } from "@/lib/rollNumber";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { invalidateAuthCache } from "@/lib/authContext";
 
 /**
@@ -179,4 +179,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: "sysadmin" });
+export const POST = withMutationGuard(handlePost, {requiredRole: "sysadmin"});

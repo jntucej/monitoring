@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit, withTransaction } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
@@ -133,7 +132,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePost(req, ctx), { requiredRole: TIER.MESS_INCHARGE }),
-  { keyPrefix: "mess_serve_post", maxRequests: 120 },
-);
+export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {requiredRole: TIER.MESS_INCHARGE, rateLimit: { keyPrefix: "mess_serve_post", maxRequests: 120 },});

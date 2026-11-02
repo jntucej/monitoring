@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -149,16 +150,6 @@ export const GET = withRateLimit(
   { keyPrefix: "exam_access_exceptions", maxRequests: 60 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, {
-    requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
-  }),
-  { keyPrefix: "exam_access_exceptions_post", maxRequests: 20 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"], rateLimit: { keyPrefix: "exam_access_exceptions_post", maxRequests: 20 }});
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, {
-    requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"],
-  }),
-  { keyPrefix: "exam_access_exceptions_patch", maxRequests: 20 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["exam_superintendent", "oie", "exam_branch", "admin", "sysadmin", "principal", "vice_principal"], rateLimit: { keyPrefix: "exam_access_exceptions_patch", maxRequests: 20 }});

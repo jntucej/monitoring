@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGateMode, setGateMode, type GateMode } from "@/lib/gate-operations";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import type { AuthContext } from "@/lib/authContext";
 
 export async function GET() {
@@ -46,10 +45,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, {
-    requiredRole: ["admin", "sysadmin", "supervisor"],
-  }),
-  { keyPrefix: "gate_mode_set", maxRequests: 30 },
-);
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "supervisor"], rateLimit: { keyPrefix: "gate_mode_set", maxRequests: 30 },});

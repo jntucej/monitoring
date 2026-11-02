@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { addAudit } from "@/lib/db";
@@ -198,7 +199,4 @@ export const GET = withRateLimit(
   { keyPrefix: "principal_delegations_get", maxRequests: 30 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["principal", "admin", "sysadmin"] }),
-  { keyPrefix: "principal_delegations_post", maxRequests: 10 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["principal", "admin", "sysadmin"], rateLimit: { keyPrefix: "principal_delegations_post", maxRequests: 10 }});

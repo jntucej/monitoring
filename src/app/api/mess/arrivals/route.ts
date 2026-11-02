@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -162,7 +163,4 @@ export const GET = withRateLimit(
   { keyPrefix: "mess_arrivals_get" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePost(req, ctx), { requiredRole: TIER.MESS_INCHARGE }),
-  { keyPrefix: "mess_arrivals_post", maxRequests: 60 }
-);
+export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {requiredRole: TIER.MESS_INCHARGE, rateLimit: { keyPrefix: "mess_arrivals_post", maxRequests: 60 }});

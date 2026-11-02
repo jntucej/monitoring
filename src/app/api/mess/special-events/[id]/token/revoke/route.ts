@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { revokeToken } from "@/lib/mess-event-token";
@@ -44,7 +43,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     : fail("CONFLICT", "Token already used or revoked", 409);
 }
 
-export const POST = withAuthorization(
-  withRateLimit(handlePost, { windowMs: 60_000, maxRequests: 60 }),
-  {},
-);
+export const POST = withMutationGuard(handlePost, { rateLimit: { windowMs: 60_000, maxRequests: 60 } });

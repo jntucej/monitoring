@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
 import { parseVoiceCommand } from "@/lib/voice";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 async function handlePost(req: NextRequest) {
   try {
@@ -17,4 +16,4 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? error.message : "Internal error").body, { status: 500 });
   }
 }
-export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin", "operator", "supervisor"] }), { keyPrefix: "voice_interpret", maxRequests: 60 });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "operator", "supervisor"], rateLimit: { keyPrefix: "voice_interpret", maxRequests: 60 }});

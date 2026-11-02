@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findGatePasses, createGatePass, getParentChildren } from "@/lib/db";
 import { supabase, getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { validatePassRequestPayload } from "@/lib/validation";
@@ -226,7 +227,4 @@ export const GET = withRateLimit(
   { keyPrefix: 'passes_list', maxRequests: 100 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator'] }),
-  { keyPrefix: 'passes_create', maxRequests: 10 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator'], rateLimit: { keyPrefix: 'passes_create', maxRequests: 10 }});

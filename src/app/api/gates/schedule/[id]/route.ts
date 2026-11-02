@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 function getIdFromPath(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -41,6 +41,6 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-export const PUT = withAuthorization(handlePut, { requiredRole: ["sysadmin", "admin"] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin", "admin"] });
+export const PUT = withMutationGuard(handlePut, {requiredRole: ["sysadmin", "admin"]});
 
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin", "admin"]});

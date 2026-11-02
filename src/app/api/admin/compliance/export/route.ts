@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { addAudit } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
+import { addAudit, withTransaction } from "@/lib/db";
 
 async function handlePost(req: NextRequest) {
   try {
@@ -25,12 +25,16 @@ async function handlePost(req: NextRequest) {
 
     // Audit log for the export
     const payloadHash = createHash("sha256").update(JSON.stringify(exportBundle)).digest("hex");
-    await supabase.from("data_compliance_logs").insert({
-      action: "USER_DATA_EXPORT",
-      target_user_id: userId,
-      performed_by: actorId,
-      details: JSON.stringify({ payloadHash }),
-      timestamp: new Date().toISOString(),
+    // RLS write discipline: data_compliance_logs is an RLS table;
+    // write through withTransaction.
+    const logId = `dcl_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO public.data_compliance_logs
+           (id, action, details)
+         VALUES ($1, 'USER_DATA_EXPORT', $2)`,
+        [logId, JSON.stringify({ payloadHash, target_user_id: userId, performed_by: actorId })]
+      );
     });
 
     await addAudit({
@@ -53,5 +57,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});

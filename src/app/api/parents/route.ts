@@ -6,6 +6,7 @@ import {
   generateUceJUniqueId,
   addAudit,
 } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -195,7 +196,4 @@ export const GET = withRateLimit(
   { keyPrefix: "parents_list", maxRequests: 60 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "parents_create", maxRequests: 30 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "parents_create", maxRequests: 30 }});

@@ -42,7 +42,7 @@ async function runFetch(signal?: AbortSignal) {
   }
 }
 
-export function useLiveData(pollMs = 25_000): LivePayload | null {
+export function useLiveData(pollMs = 60_000): LivePayload | null {
   const [data, setData] = useState<LivePayload | null>(cached);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { addAudit } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
+import { addAudit, withTransaction } from "@/lib/db";
 import { Role } from "@/lib/types";
 
 function getIdFromPath(req: NextRequest): string {
@@ -18,22 +18,22 @@ async function handlePost(req: NextRequest) {
     const { query } = await import('@/lib/postgres'); const logCountRes = await query('SELECT COUNT(*)::int as count FROM movement_logs WHERE timestamp >= NOW() - INTERVAL \'1 day\''); const recordsSynced = logCountRes.rows[0]?.count ?? 0;
     const timestamp = new Date().toISOString();
 
-    await supabase
-      .from("integration_configs")
-      .update({ last_sync: timestamp, status: "connected" })
-      .eq("id", id);
+    // RLS write discipline: integration_configs/integration_logs are RLS; write through withTransaction.
+    await withTransaction(async (client) => {
+      await client.query(
+        "UPDATE public.integration_configs SET last_sync = $1, status = 'connected' WHERE id = $2",
+        [timestamp, id]
+      );
+    });
 
     const logId = `log-${Date.now()}`;
-    await supabase.from("integration_logs").insert({
-      id: logId,
-      integration_id: id,
-      action: "SYNC",
-      status: "success",
-      details: {
-        type: id.replace("int-", ""),
-        records_synced: recordsSynced,
-      },
-      timestamp,
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO public.integration_logs
+           (id, integration_id, action, status, details)
+         VALUES ($1, $2, 'SYNC', 'success', $3)`,
+        [logId, id, JSON.stringify({ type: id.replace("int-", ""), records_synced: recordsSynced })]
+      );
     });
 
     const actorId = req.headers.get("x-user-id") || "admin";
@@ -62,6 +62,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin"]});

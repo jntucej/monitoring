@@ -1,20 +1,94 @@
+# P11: NetworkPolicies for the gate-monitor namespace.
+# The previous single-policy file targeted `namespace: default` while the
+# deployment runs in `namespace: gate-monitor` — so postgres in
+# gate-monitor had NO ingress restrictions and was reachable from any pod
+# in the cluster.
+#
+# This file ships four policies:
+#   1. gate-postgres-ingress — postgres accepts 5432 only from gate-web
+#      and gate-worker (same namespace).
+#   2. gate-redis-ingress — redis accepts 6379 only from gate-web and
+#      gate-worker.
+#   3. gate-web-ingress — web accepts 3000 only from the ingress-nginx
+#      namespace.
+#   4. gate-monitor-default-deny-ingress — default-deny for the whole
+#      namespace so any pod without an explicit allow policy gets nothing.
+#
+# Apply: kubectl apply -f k8s/network-policy.yaml
+# Verify: kubectl get networkpolicy -n gate-monitor   (expect 4, none in default)
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: gate-monitor-network-policy
-  namespace: default
+  name: gate-postgres-ingress
+  namespace: gate-monitor
 spec:
   podSelector:
     matchLabels:
       app: gate-postgres
+  policyTypes:
+    - Ingress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: gate-web
-    - podSelector:
-        matchLabels:
-          app: gate-worker
-    ports:
-    - protocol: TCP
-      port: 5432
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gate-web
+        - podSelector:
+            matchLabels:
+              app: gate-worker
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gate-redis-ingress
+  namespace: gate-monitor
+spec:
+  podSelector:
+    matchLabels:
+      app: gate-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gate-web
+        - podSelector:
+            matchLabels:
+              app: gate-worker
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gate-web-ingress
+  namespace: gate-monitor
+spec:
+  podSelector:
+    matchLabels:
+      app: gate-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gate-monitor-default-deny-ingress
+  namespace: gate-monitor
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress

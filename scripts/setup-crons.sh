@@ -59,6 +59,15 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # Restores the latest backup into a scratch DB, times it against the
 # 240-min RTO target. Writes a status_updates row.
 0 3 1 * 2    root  bash ${BASE_DIR}/scripts/quarterly-restore-drill.sh >> ${BASE_DIR}/backups/drill-cron.log 2>&1
+
+# P5 §5: off-host cold backup — 3-2-1-1-0. sync-cold-backup.sh exits 2
+# when no off-host destination is configured, so this cron line FAILS LOUD
+# (visible in cold-cron.log + the nightly verify) instead of silently
+# leaving every backup on the same disk as the DB.
+30 2 * * *    root  bash ${BASE_DIR}/scripts/sync-cold-backup.sh >> ${BASE_DIR}/backups/cold-cron.log 2>&1
+
+# Monthly readable (pg_dump + COPY) backup for the human-restorable copy.
+0 4 1 * *     root  bash ${BASE_DIR}/scripts/monthly-readable-backup.sh >> ${BASE_DIR}/backups/readable-cron.log 2>&1
 EOF
 chmod 644 /etc/cron.d/gate-backup
 echo "✓ Installed /etc/cron.d/gate-backup"

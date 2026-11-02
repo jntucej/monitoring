@@ -134,4 +134,5 @@ export const POST = withRateLimit(handlePost, {
   keyPrefix: "biometric_device_push",
   maxRequests: 300,
   windowMs: 60_000,
+
 });

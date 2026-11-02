@@ -5,8 +5,7 @@
 // Auth: admin or sysadmin only.
 
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -50,7 +49,4 @@ async function handlePost(req: NextRequest, _context: { auth: AuthContext }) {
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "admin_deployments_post", maxRequests: 30 },
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "admin_deployments_post", maxRequests: 30 },});

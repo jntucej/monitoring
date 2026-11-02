@@ -14,6 +14,7 @@ import {
 import { hash } from "@/server/lib/crypto";
 import { query } from "@/lib/postgres";
 import type { Role } from "@/lib/types";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -569,5 +570,6 @@ await addAudit({
 }
 
 export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_list', maxRequests: 600 });
-export const POST = withRateLimit(withAuthorization(handlePost, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_create', maxRequests: 120 });
-export const PATCH = withRateLimit(withAuthorization(handlePatch, { requiredRole: ['admin', 'sysadmin'] }), { keyPrefix: 'users_update', maxRequests: 120 });
+export const POST = withMutationGuard(handlePost, {requiredRole: ['admin', 'sysadmin'], rateLimit: { keyPrefix: 'users_create', maxRequests: 120 }});
+
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ['admin', 'sysadmin'], rateLimit: { keyPrefix: 'users_update', maxRequests: 120 }});

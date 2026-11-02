@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
+import { type RateLimitConfig } from "@/lib/rate-limit";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
 import { err } from "@/lib/api-response";
@@ -93,7 +93,4 @@ const verifyLimit: RateLimitConfig = {
   keyPrefix: "achievement_verify",
 };
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  verifyLimit
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: verifyLimit});

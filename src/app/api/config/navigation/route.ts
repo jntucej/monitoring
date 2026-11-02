@@ -4,6 +4,7 @@ import { withRateLimit } from '@/lib/rate-limit';
 import { withAuthorization } from '@/middleware/authorization';
 import { addAudit } from '@/lib/db';
 import { Role } from '@/lib/types';
+import { withMutationGuard } from '@/server/http/mutation-guard';
 
 async function handleGet(req: NextRequest) {
   try {
@@ -140,6 +141,8 @@ async function handleDelete(req: NextRequest) {
 }
 
 export const GET = withRateLimit(handleGet as any, { keyPrefix: 'config_navigation', maxRequests: 50 });
-export const POST = withAuthorization(handlePost, { requiredRole: ['sysadmin'] });
-export const PATCH = withAuthorization(handlePost, { requiredRole: ['sysadmin'] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ['sysadmin'] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ['sysadmin']});
+
+export const PATCH = withMutationGuard(handlePost, {requiredRole: ['sysadmin']});
+
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ['sysadmin']});

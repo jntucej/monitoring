@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 function getIdFromPath(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -73,4 +73,4 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin", "admin"] });
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin", "admin"]});

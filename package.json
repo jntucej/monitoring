@@ -16,9 +16,9 @@
     "verify:principal-independence": "bash scripts/check-principal-independence.sh",
     "verify:operator-independence": "bash scripts/check-operator-independence.sh",
     "verify:admin-layers": "npm run verify:admin-independence && npm run verify:phase2",
-    "test:ci": "bash scripts/check-gate-app-read-set.sh && bash scripts/check-gate-app-write-set.sh && bash scripts/check-rls-enforcement.sh && bash scripts/check-role-scoping.sh && bash scripts/check-migrations.sh && bash scripts/check-query-plans.sh && npm run typecheck && bash scripts/check-no-silent-catch.sh && bash scripts/check-unbounded-select.sh && bash scripts/check-tests-nonempty.sh",
+    "test:ci": "bash scripts/check-no-tabs.sh && bash scripts/check-no-mock-in-prod.sh && bash scripts/check-audit-constraint.sh && bash scripts/check-security.sh && bash scripts/check-csrf-coverage.sh && bash scripts/check-gate-app-read-set.sh && bash scripts/check-gate-app-write-set.sh && bash scripts/check-rls-enforcement.sh && bash scripts/check-role-scoping.sh && bash scripts/check-migrations.sh && bash scripts/check-query-plans.sh && npm run typecheck && bash scripts/check-no-silent-catch.sh && bash scripts/check-unbounded-select.sh && bash scripts/check-tests-nonempty.sh && bash scripts/check-dead-routes.sh",
     "test:unit": "npx tsx scripts/run_system_tests.ts",
-    "test": "npm run test:unit && npm run test:e2e",
+    "test": "npm run test:vitest && npm run test:unit && npm run test:gate:node && npm run test:e2e",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test tests/login-success.spec.ts",
     "test:e2e:smoke:auth": "SMOKE_USER=admin SMOKE_PASS=123456 playwright test tests/login-success.spec.ts",
@@ -38,7 +38,11 @@
     "test:gate:ui": "jest --config tests/gate/jest.config.mjs --selectProjects ui",
     "test:gate:e2e": "jest --config tests/gate/jest.config.mjs tests/gate/e2e",
     "test:gate:ci": "jest --config tests/gate/jest.config.mjs --ci --coverage",
-    "test:gate:watch": "jest --config tests/gate/jest.config.mjs --watch"
+    "test:gate:watch": "jest --config tests/gate/jest.config.mjs --watch",
+    "test:ci:deep": "npm run test:ci && npm run test:vitest && npm run test:gate:ci && bash scripts/verify-all-fixes.sh && npx tsx scripts/verify-permission-workflow.ts && bash scripts/verify-no-heavy-first-load.sh",
+    "test:vitest": "vitest run tests/unit",
+    "test:roles": "npx tsx scripts/verify-all-roles.ts",
+    "test:features": "npx tsx scripts/verify-feature-actions.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1160.0",
@@ -102,7 +106,8 @@
     "lighthouse": "^13.6.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=20.0.0"

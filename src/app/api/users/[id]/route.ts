@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit } from "@/lib/db";
+import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit, withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { hashPassword } from "@/lib/auth-token";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
 import { query } from "@/lib/postgres";
 import type { Role, AccountStatus } from "@/lib/types";
 import type { FlagStatus } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { invalidateAuthCache } from "@/lib/authContext";
 
 const VALID_ROLES: (Role | string)[] = ["operator", "admin", "sysadmin", "supervisor", "guardian", "parent", "hod", "student", "faculty", "staff", "worker", "visitor", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"];
@@ -132,8 +132,14 @@ async function handlePatch(req: NextRequest) {
               { status: 400 }
             );
           }
-          // Clear the flag from all other users first (single-flag invariant)
-          await supabase.from("users").update({ is_kiosk_default: false }).neq("id", id);
+          // Clear the flag from all other users first (single-flag invariant).
+          // RLS write discipline: users is an RLS table; write through withTransaction.
+          await withTransaction(async (client) => {
+            await client.query(
+              'UPDATE public.users SET is_kiosk_default = false WHERE id <> $1',
+              [id]
+            );
+          });
         }
         profileUpdates.is_kiosk_default = body.isKioskDefault;
       }
@@ -220,8 +226,15 @@ async function handlePatch(req: NextRequest) {
       }
 
       if (Object.keys(profileUpdates).length > 0) {
-        const { error } = await supabase.from("users").update(profileUpdates).eq("id", id);
-        if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        // RLS write discipline: users is an RLS table; write through withTransaction.
+        const puKeys = Object.keys(profileUpdates);
+        const puSets = puKeys.map((k, i) => `"${k}" = $${i + 1}`).join(", ");
+        await withTransaction(async (client) => {
+          await client.query(
+            `UPDATE public.users SET ${puSets} WHERE id = $${puKeys.length + 1}`,
+            [...puKeys.map((k) => profileUpdates[k]), id]
+          );
+        });
       }
 
       // Clear rate-limiting pin login attempts if password/pin updated or unlocked
@@ -342,8 +355,13 @@ async function handlePatch(req: NextRequest) {
       }
 
       if (isAdmin && (body.hostelScope === "boys" || body.hostelScope === "girls" || body.hostelScope === "both")) {
-      const db = getSupabaseServiceClient();
-      await db.from("users").update({ hostel_scope: body.hostelScope }).eq("id", id);
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET hostel_scope = $1 WHERE id = $2",
+          [body.hostelScope, id]
+        );
+      });
  }
 
     if (body.role && VALID_ROLES.includes(body.role as Role)) {
@@ -432,12 +450,18 @@ async function handleDelete(req: NextRequest) {
     const hasHistory = (passCount ?? 0) > 0 || (logCount ?? 0) > 0;
 
     if (hasHistory) {
-      await supabase
-        .from("users")
-        .update({ status: "DEPROVISIONED", updated_at: new Date().toISOString() })
-        .eq("id", id);
-
-      await supabase.from("sessions").update({ revoked_at: new Date().toISOString() }).eq("user_id", id).is("revoked_at", null);
+      // RLS write discipline: users & sessions are RLS tables;
+      // writes go through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET status = 'DEPROVISIONED', updated_at = NOW() WHERE id = $1",
+          [id]
+        );
+        await client.query(
+          "UPDATE public.sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+          [id]
+        );
+      });
 
       await addAudit({
         userId: actorId,
@@ -448,13 +472,10 @@ async function handleDelete(req: NextRequest) {
       return NextResponse.json({ success: true, mode: "soft_delete", message: `Staff member deactivated (has ${passCount} passes and ${logCount} movements).` });
     }
 
-    const { error } = await supabase.from("users").delete().eq("id", id);
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: { code: "SERVER_ERROR", message: error.message } },
-        { status: 500 }
-      );
-    }
+    // RLS write discipline: users is an RLS table; delete through withTransaction.
+    await withTransaction(async (client) => {
+      await client.query("DELETE FROM public.users WHERE id = $1", [id]);
+    });
 
     try {
       await supabase.auth.admin.deleteUser(id);
@@ -477,5 +498,6 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: "sysadmin" });
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"]});
+
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: "sysadmin"});

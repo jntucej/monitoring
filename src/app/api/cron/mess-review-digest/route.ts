@@ -3,31 +3,16 @@
 // fraction crosses the threshold. Idempotent per-day via mess_review_digest_log.
 
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
+import { requireCronAuth } from "@/server/http/cron-auth";
 import { query, addNotification, addAudit } from "@/lib/db";
 import { getIstDateString } from "@/server/policy/dates";
-
-function checkAuth(req: NextRequest): boolean {
-  const provided = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const expected = process.env.CRON_SECRET ?? "";
-  if (!expected || !provided) return false;
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  try {
-    return timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
 
 const THRESHOLD_BAD_PCT = 30; // 30% BAD+VERY_BAD triggers the alert
 const MIN_REVIEWS = 5;
 
 export async function POST(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const unauthorized = requireCronAuth(req);
+  if (unauthorized) return unauthorized;
 
   const today = getIstDateString();
 

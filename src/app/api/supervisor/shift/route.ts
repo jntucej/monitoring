@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { ok } from "@/server/http/response";
 import { query } from "@/lib/postgres";
@@ -94,6 +95,4 @@ export const GET = withAuthorization(handleGet, {
   requiredRole: ["supervisor", "principal", "admin", "sysadmin"],
 });
 
-export const POST = withAuthorization(handlePost, {
-  requiredRole: ["supervisor", "principal", "admin", "sysadmin"],
-});
+export const POST = withMutationGuard(handlePost, {requiredRole: ["supervisor", "principal", "admin", "sysadmin"],});

@@ -2,7 +2,7 @@
 // PATCH /api/notifications/[id] — mark a notification read for its recipient.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -47,4 +47,4 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }): P
   return ok({ id: rows[0].id, readAt: rows[0].read_at });
 }
 
-export const PATCH = withAuthorization(handlePatch);
+export const PATCH = withMutationGuard(handlePatch);

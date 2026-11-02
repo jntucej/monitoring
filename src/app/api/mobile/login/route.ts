@@ -132,4 +132,5 @@ export const POST = withRateLimit(handlePost, {
   keyPrefix: "mobile_login",
   maxRequests: 10,
   windowMs: 60 * 1000,
+
 });

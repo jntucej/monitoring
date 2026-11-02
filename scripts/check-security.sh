@@ -10,8 +10,8 @@ echo "=== Running Security Invariant Checks ==="
 # 1. No CRON_SECRET-less cron routes
 echo "Checking cron route authorization..."
 for cron_route in $(find src/app/api/cron -name 'route.ts' 2>/dev/null || true); do
-  if ! grep -qE "CRON_SECRET|withCronAuth|cronAuth" "$cron_route"; then
-    echo "❌ Cron route missing CRON_SECRET authorization: $cron_route"
+  if ! grep -qE 'requireCronAuth\s*\(' "$cron_route"; then
+    echo "❌ Cron route does not call requireCronAuth(): $cron_route"
     fail=1
   fi
 done

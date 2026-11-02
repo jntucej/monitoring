@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { getAlertRules, createAlertRule, toggleAlertRule, getAlertHistory } from "@/lib/alerting";
 import { addAudit } from "@/lib/db";
@@ -62,5 +63,6 @@ async function handlePatch(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});
+
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"]});

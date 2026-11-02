@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -49,4 +50,4 @@ const rateLimitedExport = withRateLimit(handleExport, {
 });
 
 export const GET = withAuthorization(rateLimitedExport);
-export const POST = withAuthorization(rateLimitedExport);
+export const POST = withMutationGuard(rateLimitedExport);

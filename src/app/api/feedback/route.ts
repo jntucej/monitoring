@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { err } from "@/lib/api-response";
 import { getDbClient } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertLength, LIMITS } from "@/lib/validation";
@@ -71,7 +72,6 @@ async function handleGet(req: NextRequest) {
   return NextResponse.json({ success: true, data: feedbackStore });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 });
+export const POST = withMutationGuard(handlePost, {rateLimit: { keyPrefix: "feedback_post", maxRequests: 10, windowMs: 60 * 1000 }});
+
 export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin"] }), { keyPrefix: "feedback_get", maxRequests: 30 });

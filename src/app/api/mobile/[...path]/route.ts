@@ -191,6 +191,7 @@ export const POST = withRateLimit(handlePost, {
   keyPrefix: "mobile",
   maxRequests: 10,
   windowMs: 60 * 1000,
+
 });
 
 export async function GET(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { addAudit } from "@/lib/db";
 
 async function handlePost(req: NextRequest) {
@@ -23,5 +23,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});

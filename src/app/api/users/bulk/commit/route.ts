@@ -3,7 +3,7 @@
 // LIVE: called by CsvBulkImporter and BulkUserImportModal (sysadmin console).
 // (The parallel /api/admin/users/bulk/* set is used by UserManagementPanel.)
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { runBulkImport, type BulkImportReport } from "@/lib/user-import";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -60,4 +60,4 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"]});

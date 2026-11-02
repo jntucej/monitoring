@@ -6,6 +6,7 @@
 
 import { NextRequest } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -229,4 +230,4 @@ async function handlePost(req: NextRequest, _ctx: { auth: AuthContext }): Promis
 const gateLimit = { windowMs: 60_000, maxRequests: 120 };
 
 export const GET = withRateLimit(withAuthorization(handleGet), gateLimit);
-export const POST = withRateLimit(withAuthorization(handlePost), gateLimit);
+export const POST = withMutationGuard(handlePost, {rateLimit: gateLimit});

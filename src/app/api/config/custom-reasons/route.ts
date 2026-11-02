@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
 import withAuthorization from "@/middleware/authorization";
@@ -210,12 +211,7 @@ export const GET = withRateLimit(handleGet, {
   maxRequests: 120,
 });
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, {
-    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
-  }),
-  {
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"], rateLimit: {
     keyPrefix: "custom_reasons_post",
     maxRequests: 60,
-  }
-);
+  }});

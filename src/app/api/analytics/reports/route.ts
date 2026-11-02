@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 
 async function handleGet() {
@@ -56,5 +57,4 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin"]});

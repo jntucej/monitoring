@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { AuthContext } from "@/lib/authContext";
 import { randomBytes } from "crypto";
-import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson } from "@/lib/db";
+import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson, withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { Person, PersonType } from "@/lib/types";
@@ -117,7 +119,7 @@ async function handleGet(req: NextRequest) {
   }
 }
 
-async function handlePost(req: NextRequest) {
+async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const authRole = req.headers.get("x-user-role");
     if (!["admin", "sysadmin"].includes(authRole || "")) {
@@ -165,10 +167,20 @@ async function handlePost(req: NextRequest) {
       metadata: metadata || {},
     };
 
-    const { data: newUser, error } = await service.from("users").insert(userRow).select().single();
-    if (error || !newUser) {
+    let newUser;
+    // RLS write discipline: users is an RLS table; insert through withTransaction.
+    await withTransaction(async (client) => {
+      const r = await client.query(
+        `INSERT INTO public.users (${Object.keys(userRow).join(", ")})
+         VALUES (${Object.keys(userRow).map((_, i) => "$" + (i + 1)).join(", ")})
+         RETURNING *`,
+        Object.values(userRow)
+      );
+      newUser = r.rows[0];
+    }, { currentUserId: auth.userId, currentRole: auth.role });
+    if (!newUser) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error?.message || "Database insert failed" } },
+        { success: false, error: { code: "DB_ERROR", message: "Database insert failed" } },
         { status: 500 }
       );
     }
@@ -198,7 +210,7 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-async function handlePatch(req: NextRequest) {
+async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const authRole = req.headers.get("x-user-role");
     if (!["admin", "sysadmin"].includes(authRole || "")) {
@@ -241,24 +253,37 @@ async function handlePatch(req: NextRequest) {
       }
     }
 
-    const service = getSupabaseServiceClient();
-    let query = service.from("users").update(userUpdates);
-    if (id) query = query.eq("id", id);
-    else query = query.eq("unique_id", uniqueId);
+    let updatedUser: any;
+    let dbError: string | null = null;
 
-    const { data: updatedUser, error } = await query.select().single();
-    if (error || !updatedUser) {
+    // RLS write discipline: users is an RLS table; write through withTransaction.
+    const uKeys = Object.keys(userUpdates);
+    const uSets = uKeys.map((k, i) => `"${k}" = $${i + 1}`).join(", ");
+    await withTransaction(async (client) => {
+      const whereClause = id ? "id = $" : "unique_id = $";
+      const whereVal = id ?? uniqueId;
+      const r = await client.query(
+        `UPDATE public.users SET ${uSets} WHERE ${whereClause}${uKeys.length + 1} RETURNING *`,
+        [...uKeys.map((k) => userUpdates[k]), whereVal]
+      );
+      if (r.rows[0]) {
+        updatedUser = r.rows[0];
+        if (updates.designation !== undefined) {
+          await client.query(
+            "UPDATE public.employee_details SET designation = $1 WHERE user_id = $2",
+            [updates.designation, updatedUser.id]
+          );
+        }
+      } else {
+        dbError = "User not found";
+      }
+    }, { currentUserId: auth.userId, currentRole: auth.role });
+
+    if (dbError || !updatedUser) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error?.message || "Database update failed" } },
+        { success: false, error: { code: "DB_ERROR", message: dbError || "Database update failed" } },
         { status: 500 }
       );
-    }
-
-    if (updates.designation !== undefined) {
-      await service
-        .from("employee_details")
-        .update({ designation: updates.designation })
-        .eq("user_id", updatedUser.id);
     }
 
     return NextResponse.json({ success: true, data: mPerson(updatedUser) });
@@ -271,7 +296,7 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-async function handleDelete(req: NextRequest) {
+async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const authRole = req.headers.get("x-user-role");
     if (!["admin", "sysadmin"].includes(authRole || "")) {
@@ -291,13 +316,10 @@ async function handleDelete(req: NextRequest) {
     }
 
     const service = getSupabaseServiceClient();
-    const { error } = await service.from("users").update({ status: "DISABLED" }).eq("id", id);
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error.message } },
-        { status: 500 }
-      );
-    }
+    // RLS write discipline: users is an RLS table; write through withTransaction.
+    await withTransaction(async (client) => {
+      await client.query("UPDATE public.users SET status = 'DISABLED' WHERE id = $1", [id]);
+    }, { currentUserId: auth.userId, currentRole: auth.role });
 
     return NextResponse.json({ success: true, message: "Person deactivated successfully" });
   } catch (error: unknown) {
@@ -314,17 +336,8 @@ export const GET = withRateLimit(
   { keyPrefix: "persons_get", maxRequests: 100 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "persons_post", maxRequests: 30 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "persons_post", maxRequests: 30 }});
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "persons_patch", maxRequests: 30 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "persons_patch", maxRequests: 30 }});
 
-export const DELETE = withRateLimit(
-  withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "persons_delete", maxRequests: 30 }
-);
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "persons_delete", maxRequests: 30 }});

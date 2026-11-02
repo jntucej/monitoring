@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withTransaction } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 /**
  * Extract the [id] dynamic segment from the request URL.
@@ -42,12 +42,11 @@ async function handleDelete(req: NextRequest) {
   try {
     const id = getId(req);
 
-    const service = getSupabaseServiceClient();
-    const { error } = await service.from('gates').delete().eq('id', id);
-
-    if (error) {
-      return NextResponse.json({ success: false, error: 'Failed to delete gate' }, { status: 500 });
-    }
+    // RLS write discipline: gates is an RLS table; delete goes through
+    // withTransaction (gate_app GUC context).
+    await withTransaction(async (client) => {
+      await client.query("DELETE FROM public.gates WHERE id = $1", [id]);
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -55,12 +54,6 @@ async function handleDelete(req: NextRequest) {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "gate_patch", maxRequests: 10 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "gate_patch", maxRequests: 10 }});
 
-export const DELETE = withRateLimit(
-  withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "gate_delete", maxRequests: 10 }
-);
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "gate_delete", maxRequests: 10 }});

@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 
@@ -57,7 +56,4 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   return ok({ updated: row });
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["sysadmin"] }),
-  { keyPrefix: "sysadmin_automation_controls_patch", maxRequests: 30 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"], rateLimit: { keyPrefix: "sysadmin_automation_controls_patch", maxRequests: 30 }});

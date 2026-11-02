@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -203,7 +204,4 @@ export const GET = withRateLimit(
   { keyPrefix: "mess_preference_get" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(async (req, ctx) => handlePost(req, ctx), { requiredRole: ["student", "admin", "sysadmin"] }),
-  { keyPrefix: "mess_preference_post", maxRequests: 20 }
-);
+export const POST = withMutationGuard(async (req, ctx) => handlePost(req, ctx), {requiredRole: ["student", "admin", "sysadmin"], rateLimit: { keyPrefix: "mess_preference_post", maxRequests: 20 }});

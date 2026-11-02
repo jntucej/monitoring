@@ -16,8 +16,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import withAuthorization from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { verifyPassword } from "@/lib/auth-token";
@@ -136,7 +136,4 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
   return NextResponse.json({ success: true, data: { setAt: nowIso } });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  { keyPrefix: "approval_password_set", maxRequests: 10, windowMs: 15 * 60 * 1000 },
-);
+export const POST = withMutationGuard(handlePost, {rateLimit: { keyPrefix: "approval_password_set", maxRequests: 10, windowMs: 15 * 60 * 1000 },});

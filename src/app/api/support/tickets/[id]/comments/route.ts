@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 
 function getIdFromPath(req: NextRequest): string {
@@ -62,8 +64,17 @@ async function handlePost(req: NextRequest) {
       created_at: new Date().toISOString(),
     };
 
-    await supabase.from("support_ticket_comments").insert(row);
-    await supabase.from("support_tickets").update({ updated_at: new Date().toISOString() }).eq("id", id);
+    await withTransaction(async (client) => {
+      await client.query(
+        `INSERT INTO public.support_ticket_comments
+           (id, ticket_id, user_id, user_name, user_role, comment, is_internal)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [row.id, id, actorId, userName, actorRole, comment.trim(), effectiveIsInternal]
+      );
+      await client.query(
+        "UPDATE public.support_tickets SET updated_at = NOW() WHERE id = $1", [id]
+      );
+    });
 
     return NextResponse.json({ success: true, data: row });
   } catch (error: any) {
@@ -72,5 +83,4 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff"]});

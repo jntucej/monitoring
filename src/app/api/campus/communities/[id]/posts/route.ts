@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { RATE_LIMITS } from "@/config/app-constants";
@@ -276,7 +277,4 @@ export const GET = withRateLimit(
   { ...RATE_LIMITS.read, keyPrefix: "community_posts" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: [...READ_ROLES] }),
-  { ...RATE_LIMITS.mutation, keyPrefix: "community_posts" }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: [...READ_ROLES], rateLimit: { ...RATE_LIMITS.mutation, keyPrefix: "community_posts" }});

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerThumbprint, clearThumbprint, hashThumbprint, addAudit, findUserById } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import type { Role } from "@/lib/types";
 
 async function handlePost(req: NextRequest) {
@@ -85,7 +84,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin", "operator"] }),
-  { keyPrefix: "register_thumbprint", maxRequests: 30 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "operator"], rateLimit: { keyPrefix: "register_thumbprint", maxRequests: 30 }});

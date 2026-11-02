@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
 import { RATE_LIMITS } from "@/config/app-constants";
@@ -149,11 +150,6 @@ export const GET = withRateLimit(
   withAuthorization(handleGet),
   readLimit
 );
-export const POST = withRateLimit(
-  withAuthorization(handlePost),
-  writeLimit
-);
-export const DELETE = withRateLimit(
-  withAuthorization(handleDelete),
-  writeLimit
-);
+export const POST = withMutationGuard(handlePost, {rateLimit: writeLimit});
+
+export const DELETE = withMutationGuard(handleDelete, {rateLimit: writeLimit});

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
@@ -122,7 +123,7 @@ export const GET = withRateLimit(withAuthorization(handleGet), {
   windowMs: 60_000,
   maxRequests: 30,
 });
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withMutationGuard(handlePost, {rateLimit: {
   windowMs: 60_000,
   maxRequests: 20,
-});
+}});

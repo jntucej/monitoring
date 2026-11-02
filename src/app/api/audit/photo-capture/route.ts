@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
@@ -50,6 +50,4 @@ async function handlePost(
   return NextResponse.json({ success: true });
 }
 
-export const POST = withAuthorization(handlePost, {
-  requiredRole: ["operator", "admin", "sysadmin"] as Role[],
-});
+export const POST = withMutationGuard(handlePost, {requiredRole: ["operator", "admin", "sysadmin"] as Role[],});

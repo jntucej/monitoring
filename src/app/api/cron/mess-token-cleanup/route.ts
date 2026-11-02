@@ -3,27 +3,13 @@
 // accumulate forever (M7). Idempotent: re-running only touches still-open rows.
 
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "crypto";
+import { requireCronAuth } from "@/server/http/cron-auth";
 import { query } from "@/lib/postgres";
 
-function checkAuth(req: NextRequest): boolean {
-  const provided = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  const expected = process.env.CRON_SECRET ?? "";
-  if (!expected || !provided) return false;
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  try {
-    return timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const unauthorized = requireCronAuth(req);
+  if (unauthorized) return unauthorized;
 
   const { rowCount: mealExpired } = await query(
     `UPDATE public.mess_tokens

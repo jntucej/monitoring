@@ -2,7 +2,7 @@
 // POST { messDayId, reason } — mess-incharge revokes every unused token for a meal day.
 
 import { NextRequest } from "next/server";
-import { withMessMutation } from "@/server/http/mutation-guard";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
@@ -41,4 +41,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ revoked: rowCount ?? 0 });
 }
 
-export const POST = withMessMutation(handlePost);
+export const POST = withMutationGuard(handlePost);

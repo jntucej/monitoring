@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -189,7 +190,7 @@ export const GET = withRateLimit(withAuthorization(handleGet), {
   maxRequests: 30,
 });
 
-export const POST = withRateLimit(withAuthorization(handlePost), {
+export const POST = withMutationGuard(handlePost, {rateLimit: {
   keyPrefix: "campus_extra_handover",
   maxRequests: 10,
-});
+}});

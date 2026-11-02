@@ -4,7 +4,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 import { getSupabaseServiceClient, invalidateAllUserSessions } from "@/lib/dbClient";
-import { addAudit, linkParentToStudent } from "@/lib/db";
+import { addAudit, linkParentToStudent, withTransaction } from "@/lib/db";
 import type { Role, AccountStatus } from "@/lib/types";
 
 const ALLOWED_STATUSES: AccountStatus[] = ["ACTIVE", "SUSPENDED"];
@@ -127,14 +127,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
         );
       }
       if (nextStatus !== target.status) {
-        const svc = getSupabaseServiceClient();
-        const { error } = await svc.from("users").update({ status: nextStatus }).eq("id", userId);
-        if (error) {
-          return NextResponse.json(
-            { success: false, error: { code: "DB_ERROR", message: error.message } },
-            { status: 400 }
+        // RLS write discipline: users is an RLS table; write through withTransaction.
+        await withTransaction(async (client) => {
+          await client.query(
+            "UPDATE public.users SET status = $1 WHERE id = $2",
+            [nextStatus, userId]
           );
-        }
+        }, { currentUserId: actorId });
         await invalidateAllUserSessions(userId);
         changes.push(`status ${target.status} -> ${nextStatus}`);
         if (nextStatus === "SUSPENDED") {
@@ -165,14 +164,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
           { status: 400 }
         );
       }
-      const svc = getSupabaseServiceClient();
-      const { error } = await svc.from("users").update({ name }).eq("id", userId);
-      if (error) {
-        return NextResponse.json(
-          { success: false, error: { code: "DB_ERROR", message: error.message } },
-          { status: 400 }
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET name = $1 WHERE id = $2",
+          [name, userId]
         );
-      }
+      }, { currentUserId: actorId });
       changes.push("name updated");
     }
 
@@ -186,14 +184,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
           { status: 403 }
         );
       }
-      const svc = getSupabaseServiceClient();
-      const { error } = await svc.from("users").update({ department_id: nextDept }).eq("id", userId);
-      if (error) {
-        return NextResponse.json(
-          { success: false, error: { code: "DB_ERROR", message: error.message } },
-          { status: 400 }
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET department_id = $1 WHERE id = $2",
+          [nextDept, userId]
         );
-      }
+      }, { currentUserId: actorId });
       changes.push("departmentId updated");
     }
 
@@ -242,11 +239,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
           );
         }
       }
-      const svc = getSupabaseServiceClient();
-      const { error } = await svc.from("users").update({ supervised_gates: ids === null ? null : ids }).eq("id", userId);
-      if (error) {
-        return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 400 });
-      }
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET supervised_gates = $1 WHERE id = $2",
+          [ids === null ? null : JSON.stringify(ids), userId]
+        );
+      }, { currentUserId: actorId });
       changes.push("supervisedGates updated");
     }
 
@@ -264,11 +263,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
           { status: 400 }
         );
       }
-      const svc = getSupabaseServiceClient();
-      const { error } = await svc.from("users").update({ assigned_hostel: val === null ? null : val }).eq("id", userId);
-      if (error) {
-        return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 400 });
-      }
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET assigned_hostel = $1 WHERE id = $2",
+          [val === null ? null : val, userId]
+        );
+      }, { currentUserId: actorId });
       changes.push("assignedHostel updated");
     }
 

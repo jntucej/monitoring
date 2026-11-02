@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
 import { err } from "@/lib/api-response";
-import { addAudit } from "@/lib/db";
+import { addAudit, withTransaction } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -180,11 +181,16 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }): Pro
   }
 
   // The creator joins as moderator of their own community.
-  await db.from("community_memberships").insert({
-    community_id: inserted.id,
-    user_id: context.auth.userId,
-    role_in_community: "moderator",
-  });
+  // RLS write discipline: community_memberships is an RLS table;
+// write through withTransaction so the GUC context is set.
+  await withTransaction(async (client) => {
+    await client.query(
+      `INSERT INTO public.community_memberships
+         (community_id, user_id, role_in_community)
+       VALUES ($1, $2, 'moderator')`,
+      [inserted.id, context.auth.userId]
+    );
+  }, { currentUserId: context.auth.userId, currentRole: context.auth.role });
 
   await addAudit({
     action: "community_created",
@@ -237,7 +243,4 @@ export const GET = withRateLimit(
   { ...RATE_LIMITS.read, keyPrefix: "communities" }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { ...RATE_LIMITS.mutation, keyPrefix: "communities" }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { ...RATE_LIMITS.mutation, keyPrefix: "communities" }});

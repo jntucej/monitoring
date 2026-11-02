@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, findUserById } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
+import { addAudit, findUserById, withTransaction } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import type { AuthContext } from "@/lib/authContext";
 
 function getIdFromPath(req: NextRequest): string {
@@ -25,20 +25,20 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       .select("session_version")
       .eq("id", targetUserId)
       .maybeSingle();
-    await supabase
-      .from("users")
-      .update({
-        handle: `user_${randomUUID()}`,
-        session_version: (cur?.session_version ?? 0) + 1,
-      })
-      .eq("id", targetUserId);
-
-    // Also delete any active sessions in sessions table if present
-    try {
-      await supabase.from("sessions").delete().eq("user_id", targetUserId);
-    } catch {
-      // Best effort
-    }
+    // RLS write discipline: users & sessions are RLS tables;
+    // all writes go through withTransaction.
+    const newHandle = `user_${randomUUID()}`;
+    const newVersion = (cur?.session_version ?? 0) + 1;
+    await withTransaction(async (client) => {
+      await client.query(
+        "UPDATE public.users SET handle = $1, session_version = $2 WHERE id = $3",
+        [newHandle, newVersion, targetUserId]
+      );
+      await client.query(
+        "DELETE FROM public.sessions WHERE user_id = $1",
+        [targetUserId]
+      );
+    }, { currentUserId: actorId });
 
     const targetUser = await findUserById(targetUserId);
 
@@ -60,4 +60,4 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin"]});

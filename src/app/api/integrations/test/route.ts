@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 async function handlePost(req: NextRequest) {
   try {
@@ -22,5 +22,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin"]});

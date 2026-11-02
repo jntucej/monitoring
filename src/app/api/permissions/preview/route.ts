@@ -3,7 +3,7 @@
 // given workflow type will walk through.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import {
   resolveInitialStage,
@@ -30,4 +30,4 @@ async function handlePost(
   });
 }
 
-export const POST = withAuthorization(handlePost);
+export const POST = withMutationGuard(handlePost);

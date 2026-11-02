@@ -1,0 +1,30 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "CI allowlist: repo base entries + documented false positives"
+paths = [
+    '''^\.next/''',
+    '''^\.env$''',
+    '''^\.env\.local$''',
+    '''^node_modules/''',
+    '''^dist/''',
+    '''^build/''',
+    '''^repomix-output\.xml$''',
+    '''^docs/repomix''',
+    '''^scripts/seed-data\.js$''',
+    '''^scripts/test-db\.js$''',
+    '''^scripts/test-session-invalidation\.js$''',
+    '''^tests/gate/lib/barcode\.test\.ts$''',
+    '''^tests/gate/routes/verify-pass-route\.test\.ts$''',
+    '''^\.continue/agents/new-config\.yaml$''',
+    '''^src/lib/supabaseClient\.ts$''',
+    '''^\.github/workflows/infrastructure-guardrail\.yml$''',
+    '''^README\.md$'''
+]
+regexes = [
+    '''identificationMarks[12]''',
+    '''AKIAIO...MPLE''',
+    '''AKIAIOSFODNN7EXAMPLE_CANARY''',
+    '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_CANARY'''
+]

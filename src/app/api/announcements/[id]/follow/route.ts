@@ -3,6 +3,7 @@
 // POST /api/announcements/[id]/follow { following } — follow or unfollow.
 
 import { NextRequest } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/db";
@@ -52,4 +53,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Pr
 }
 
 export const GET = withAuthorization(handleGet);
-export const POST = withAuthorization(handlePost);
+export const POST = withMutationGuard(handlePost);

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { matchFace, isFaceMatchConfigured } from "@/lib/face-match";
 import { logAuditEvent } from "@/lib/audit";
 import { isDeviceTypeEnabled } from "@/lib/device-settings";
@@ -149,7 +148,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "admin", "sysadmin"] }),
-  { keyPrefix: "verify_face", maxRequests: 60 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["operator", "admin", "sysadmin"], rateLimit: { keyPrefix: "verify_face", maxRequests: 60 }});

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, updateUserRole, findUserById } from "@/lib/db";
+import { addAudit, updateUserRole, findUserById, withTransaction } from "@/lib/db";
 import { sendNotification } from "@/lib/notification-service";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 function getIdFromPath(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -85,7 +85,13 @@ async function handlePatch(req: NextRequest) {
       }
 
       // Invalidate target user's active session handle
-      await supabase.from("users").update({ handle: `user_${randomUUID()}` }).eq("id", request.target_user_id);
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          "UPDATE public.users SET handle = $1 WHERE id = $2",
+          [`user_${randomUUID()}`, request.target_user_id]
+        );
+      }, { currentUserId: actorId });
     }
 
     // Send notifications
@@ -123,4 +129,4 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] });
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"]});

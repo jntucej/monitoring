@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { invalidateCache } from "@/lib/cache";
@@ -125,7 +126,4 @@ export const GET = withRateLimit(
   { keyPrefix: "sys_config_get", maxRequests: 60 }
 );
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "sys_config_patch", maxRequests: 20 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "sys_config_patch", maxRequests: 20 }});

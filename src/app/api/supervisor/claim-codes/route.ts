@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { addAudit } from "@/lib/db";
@@ -211,15 +212,10 @@ async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }): Promi
   return NextResponse.json({ success: true, data: { revoked: res.rows.length } });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["supervisor", "sysadmin"] }),
-  limit
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["supervisor", "sysadmin"], rateLimit: limit});
+
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["supervisor", "sysadmin"] }),
   limit
 );
-export const DELETE = withRateLimit(
-  withAuthorization(handleDelete, { requiredRole: ["supervisor", "sysadmin"] }),
-  limit
-);
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["supervisor", "sysadmin"], rateLimit: limit});

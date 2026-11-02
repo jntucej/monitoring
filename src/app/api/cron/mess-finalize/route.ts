@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireCronAuth } from "@/server/http/cron-auth";
 import { createHash, randomBytes } from "crypto";
 import { query, addAudit } from "@/lib/db";
 
@@ -24,23 +25,8 @@ function randomCode(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    return NextResponse.json(
-      { success: false, error: { message: "CRON_SECRET is not configured on server" } },
-      { status: 503 }
-    );
-  }
-
-  const authHeader = req.headers.get("authorization");
-  const secretHeader = req.headers.get("x-cron-secret");
-  const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
-  if (secretHeader !== cronSecret && bearerToken !== cronSecret) {
-    return NextResponse.json(
-      { success: false, error: { message: "Unauthorized cron request" } },
-      { status: 401 }
-    );
-  }
+  const unauthorized = requireCronAuth(req);
+  if (unauthorized) return unauthorized;
 
   try {
     // Days past their close window that have not been locked yet.

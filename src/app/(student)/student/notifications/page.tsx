@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -18,30 +19,26 @@ interface NotificationsPayload {
   data: NotificationRow[];
 }
 
-type Tab = "all" | "alerts" | "announcements";
-
 function Inner() {
-  const [tab, setTab] = useState<Tab>("all");
-  const { data: alerts } = useApiResource<NotificationsPayload>(
+  const { data: alertsData } = useApiResource<NotificationsPayload>(
     "/api/notifications",
     { ttlMs: 30_000 },
   );
+  const alerts: NotificationsPayload = alertsData ?? { data: [] };
   const { data: ann } = useApiResource<AnnouncementsResponse>(
     "/api/announcements/active",
     { ttlMs: 30_000 },
   );
 
-  const alertList = alerts?.data ?? [];
-  const annList = ann?.data ?? [];
   const all = [
-    ...alertList.map((a) => ({
+    ...alerts.data.map((a) => ({
       kind: "alert" as const,
       id: a.id,
       title: a.title,
       body: a.message,
       createdAt: a.created_at,
     })),
-    ...annList.map((a) => ({
+    ...(ann?.data ?? []).map((a) => ({
       kind: "announcement" as const,
       id: a.id,
       title: a.title,
@@ -50,32 +47,28 @@ function Inner() {
     })),
   ].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 
-  const filtered =
-    tab === "all"
-      ? all
-      : all.filter((x) => x.kind === (tab === "alerts" ? "alert" : "announcement"));
-
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
-        Notifications
-      </h1>
-      <div className="flex gap-1 rounded-lg border border-[var(--border)] p-1">
-        {(["all", "alerts", "announcements"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm capitalize ${
-              tab === t
-                ? "bg-[var(--action-primary)] text-white"
-                : "text-[var(--text-secondary)]"
-            }`}
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+          Notifications
+        </h1>
+        <nav className="flex gap-2 text-xs">
+          <Link
+            href="/student/notifications/alerts"
+            className="text-[var(--text-secondary)] underline"
           >
-            {t}
-          </button>
-        ))}
+            Alerts
+          </Link>
+          <Link
+            href="/student/notifications/announcements"
+            className="text-[var(--text-secondary)] underline"
+          >
+            Announcements
+          </Link>
+        </nav>
       </div>
-      {filtered.length === 0 ? (
+      {all.length === 0 ? (
         <EmptyState
           title="Nothing here"
           description="You're all caught up."
@@ -83,7 +76,7 @@ function Inner() {
         />
       ) : (
         <ul className="space-y-2">
-          {filtered.map((n) => (
+          {all.map((n) => (
             <li
               key={`${n.kind}:${n.id}`}
               className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
@@ -118,7 +111,7 @@ export default function StudentNotificationsPage() {
   return (
     <AuthGuard allowedRoles={["student"] as Role[]}>
       <Suspense fallback={<PageLoading />}>
-        <WidgetBoundary name="notifications">
+        <WidgetBoundary>
           <Inner />
         </WidgetBoundary>
       </Suspense>

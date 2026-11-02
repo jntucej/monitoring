@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { withMessMutation } from "@/server/http/mutation-guard";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
@@ -104,6 +104,6 @@ export const GET = withRateLimit(
   { keyPrefix: "mess_menu_items_get" }
 );
 
-export const POST = withMessMutation(handlePost, {
+export const POST = withMutationGuard(handlePost, {
   rateLimit: { windowMs: 60_000, maxRequests: 20 },
 });

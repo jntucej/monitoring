@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import type { AuthContext } from "@/lib/authContext";
 
 /**
@@ -161,10 +160,4 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, ctx: { auth: AuthContext }) => handlePost(req, ctx),
-    { requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff", "supervisor", "guardian", "worker"] }
-  ),
-  { keyPrefix: "campus_assistant", maxRequests: 30 }
-);
+export const POST = withMutationGuard(async (req: NextRequest, ctx: { auth: AuthContext }) => handlePost(req, ctx), {requiredRole: ["sysadmin", "admin", "operator", "faculty", "student", "parent", "principal", "staff", "supervisor", "guardian", "worker"], rateLimit: { keyPrefix: "campus_assistant", maxRequests: 30 }});

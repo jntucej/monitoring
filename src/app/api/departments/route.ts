@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withTransaction } from "@/lib/postgres";
 import { getDepartments, createDepartment, deleteDepartment, updateDepartment } from "@/lib/departments";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import { Role } from '@/lib/types';
@@ -171,8 +172,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-export const PATCH = withAuthorization(handlePost, { requiredRole: ["sysadmin", "admin"] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin"]});
+
+export const PATCH = withMutationGuard(handlePost, {requiredRole: ["sysadmin", "admin"]});
+
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin"]});
 
 export const GET = withAuthorization(handleGet);

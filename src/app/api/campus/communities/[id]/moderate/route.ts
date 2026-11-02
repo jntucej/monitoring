@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
 import { err } from "@/lib/api-response";
@@ -102,7 +101,4 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }): Pro
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin", "faculty", "student"] }),
-  { ...RATE_LIMITS.mutation, keyPrefix: "community_moderate" }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "faculty", "student"], rateLimit: { ...RATE_LIMITS.mutation, keyPrefix: "community_moderate" }});

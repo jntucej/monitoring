@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withAuthorization } from "@/middleware/authorization";
-import { addAudit } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
+import { addAudit, withTransaction } from "@/lib/db";
 import { query } from "@/lib/postgres";
 
 const TABLE_MAP = {
@@ -64,12 +64,18 @@ async function handlePost(req: NextRequest) {
     }
 
     if (!isDryRun) {
-      await supabase.from("data_compliance_logs").insert({
-        id: `cmp-${Date.now()}`,
-        action: "RETENTION_CLEANUP",
-        details: `Executed retention cleanup. Purged ${totalPurged} expired records across ${details.length} categories.`,
-        performed_by: actorId,
-        timestamp,
+      // RLS write discipline: data_compliance_logs is an RLS table;
+      // write through withTransaction.
+      await withTransaction(async (client) => {
+        await client.query(
+          `INSERT INTO public.data_compliance_logs
+             (id, action, details)
+           VALUES ($1, 'RETENTION_CLEANUP', $2)`,
+          [
+            `cmp-${Date.now()}`,
+            `Executed retention cleanup. Purged ${totalPurged} expired records across ${details.length} categories. Performed by ${actorId} at ${timestamp}.`,
+          ]
+        );
       });
 
       await addAudit({
@@ -98,4 +104,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});

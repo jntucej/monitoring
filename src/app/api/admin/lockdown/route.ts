@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveLockdown, createLockdown, liftLockdown } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { Role } from "@/lib/types";
@@ -62,5 +63,5 @@ export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "operator", "principal", "supervisor"] }),
   { keyPrefix: "lockdown_get", maxRequests: 120 }
 );
-export const POST   = withRateLimit(withAuthorization(handlePost,   adminOnly), rl);
-export const DELETE = withRateLimit(withAuthorization(handleDelete, adminOnly), rl);
+export const POST   = withMutationGuard(handlePost, { ...adminOnly, rateLimit: rl });
+export const DELETE = withMutationGuard(handleDelete, { ...adminOnly, rateLimit: rl });

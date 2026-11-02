@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { addAudit } from "@/lib/db";
 import { invalidateAuthCache } from "@/lib/authContext";
 import { RATE_LIMITS } from "@/config/app-constants";
@@ -122,7 +121,4 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
   });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "supervisor", "sysadmin"] }),
-  limit
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["operator", "supervisor", "sysadmin"], rateLimit: limit});

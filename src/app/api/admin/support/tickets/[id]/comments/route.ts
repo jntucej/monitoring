@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -83,7 +84,4 @@ export const GET = withRateLimit(
   { keyPrefix: "ticket_comments_get", maxRequests: 60 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin", "operator"] }),
-  { keyPrefix: "ticket_comments_post", maxRequests: 30 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "operator"], rateLimit: { keyPrefix: "ticket_comments_post", maxRequests: 30 }});

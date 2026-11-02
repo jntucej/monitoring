@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -42,4 +43,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin", "admin"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});

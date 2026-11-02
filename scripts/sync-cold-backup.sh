@@ -41,6 +41,10 @@ elif [ -n "${COLD_BACKUP_REMOTE_HOST:-}" ]; then
   scp -o StrictHostKeyChecking=accept-new "$ENCRYPTED_OUT" "${COLD_BACKUP_REMOTE_HOST}:/backups/cold/"
   echo "[cold-backup] ✓ Remote scp sync completed."
 else
-  echo "[cold-backup] Note: Set COLD_BACKUP_S3_BUCKET or COLD_BACKUP_REMOTE_HOST to ship off-host automatically."
-  echo "[cold-backup] ✓ Encrypted cold archive prepared at: ${ENCRYPTED_OUT}"
+  # P5 §5: a backup that lives only on the source host is not a backup.
+  # Fail loud (exit 2) so the cron line that schedules this script is
+  # visible in cold-cron.log instead of quietly confirming nothing was
+  # shipped off-host.
+  echo "[cold-backup] ERROR: no off-host destination configured (COLD_BACKUP_S3_BUCKET / COLD_BACKUP_REMOTE_HOST). Encrypted archive is only on the source host — this is NOT a backup." >&2
+  exit 2
 fi

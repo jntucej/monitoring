@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createVisitor, checkInVisitor, checkOutVisitor } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -118,12 +119,6 @@ export const GET = withRateLimit(
   { keyPrefix: "visitors_get", maxRequests: 100 }
 );
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["operator", "admin", "sysadmin"] }),
-  { keyPrefix: "visitors_post", maxRequests: 30 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["operator", "admin", "sysadmin"], rateLimit: { keyPrefix: "visitors_post", maxRequests: 30 }});
 
-export const PUT = withRateLimit(
-  withAuthorization(handlePut, { requiredRole: ["operator", "admin", "sysadmin"] }),
-  { keyPrefix: "visitors_put", maxRequests: 30 }
-);
+export const PUT = withMutationGuard(handlePut, {requiredRole: ["operator", "admin", "sysadmin"], rateLimit: { keyPrefix: "visitors_put", maxRequests: 30 }});

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { verifyLatestBackup, listBackupVerifications } from "@/lib/backup";
 import { addAudit } from "@/lib/db";
@@ -34,4 +35,4 @@ async function handlePost(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin"] });
-export const POST = withAuthorization(handlePost, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {requiredRole: ["sysadmin"]});

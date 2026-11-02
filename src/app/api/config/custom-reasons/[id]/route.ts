@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { withRateLimit } from "@/lib/rate-limit";
 import withAuthorization from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
 import type { WorkflowType } from "@/lib/types";
@@ -165,16 +165,6 @@ async function handleDelete(req: NextRequest): Promise<Response> {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, {
-    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
-  }),
-  { keyPrefix: "custom_reasons_patch", maxRequests: 60 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"], rateLimit: { keyPrefix: "custom_reasons_patch", maxRequests: 60 }});
 
-export const DELETE = withRateLimit(
-  withAuthorization(handleDelete, {
-    requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"],
-  }),
-  { keyPrefix: "custom_reasons_delete", maxRequests: 60 }
-);
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin", "admin", "principal", "hod", "principal", "oie"], rateLimit: { keyPrefix: "custom_reasons_delete", maxRequests: 60 }});

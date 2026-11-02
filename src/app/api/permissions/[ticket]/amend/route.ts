@@ -8,7 +8,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
-import { addAudit, addNotification } from "@/lib/db";
+import { addAudit, addNotification, withTransaction } from "@/lib/db";
 import { checkStepupPassword } from "@/lib/permission-forward";
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import type { AuthContext } from "@/lib/authContext";
@@ -95,20 +95,32 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Pr
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await db
-    .from("permissions")
-    .update(update)
-    .eq("id", row.id);
-  if (error) return fail("DB_ERROR", error.message, 500);
-
-  await db.from("permission_amendments").insert({
-    permission_id: row.id,
-    actor_id: auth.userId,
-    actor_role: auth.role,
-    before_data: { from: row.from_date, to: row.to_date },
-    after_data: updates,
-    reason: body.reason ?? null,
-  });
+  // RLS write discipline: permissions is an RLS table; write through
+  // withTransaction so the GUC context is set for the row policies.
+  await withTransaction(
+    async (client) => {
+      const setKeys = Object.keys(update);
+      const sets = setKeys.map((k, i) => `"${k}" = $${i + 1}`).join(", ");
+      await client.query(
+        `UPDATE public.permissions SET ${sets} WHERE id = $${setKeys.length + 1}`,
+        [...setKeys.map((k) => update[k]), row.id]
+      );
+      await client.query(
+        `INSERT INTO public.permission_amendments
+           (permission_id, actor_id, actor_role, before_data, after_data, reason)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          row.id,
+          auth.userId,
+          auth.role,
+          JSON.stringify({ from: row.from_date, to: row.to_date }),
+          JSON.stringify(updates),
+          body.reason ?? null,
+        ]
+      );
+    },
+    { currentUserId: auth.userId, currentRole: auth.role }
+  );
 
   await addAudit({
     action: "PERMISSION_AMENDED",

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findPass, approvePass, rejectPass } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
@@ -153,7 +154,4 @@ export const GET = withRateLimit(
   { keyPrefix: "passes_get", maxRequests: 100 }
 );
 
-export const PUT = withRateLimit(
-  withAuthorization(handlePut, { requiredRole: ["admin", "sysadmin", "principal"] }),
-  { keyPrefix: "passes_update", maxRequests: 20 }
-);
+export const PUT = withMutationGuard(handlePut, {requiredRole: ["admin", "sysadmin", "principal"], rateLimit: { keyPrefix: "passes_update", maxRequests: 20 }});

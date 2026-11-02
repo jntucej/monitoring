@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { linkParentToStudent } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 /**
  * POST /api/parents/link
@@ -53,7 +52,4 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "parents_link", maxRequests: 60 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "parents_link", maxRequests: 60 }});

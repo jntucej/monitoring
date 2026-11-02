@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotificationPreferences, updateNotificationPreferences } from "@/lib/notification-service";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
@@ -37,5 +38,6 @@ async function handlePut(req: NextRequest, context: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(withAuthorization(handleGet), { keyPrefix: "notif_pref_get", maxRequests: 60 });
-export const PUT = withRateLimit(withAuthorization(handlePut), { keyPrefix: "notif_pref_put", maxRequests: 30 });
-export const POST = PUT;
+export const PUT = withMutationGuard(handlePut, {rateLimit: { keyPrefix: "notif_pref_put", maxRequests: 30 }});
+
+export const POST = withRateLimit(PUT, { keyPrefix: "ip_ip", maxRequests: 30, windowMs: 60_000 });

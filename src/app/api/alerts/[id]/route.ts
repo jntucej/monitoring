@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveAlert } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 
 function getAlertId(req: NextRequest): string {
   const url = new URL(req.url);
@@ -49,7 +48,4 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-export const PATCH = withRateLimit(
-  withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin", "principal"] }),
-  { keyPrefix: "resolve_alert", maxRequests: 30 }
-);
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin", "principal"], rateLimit: { keyPrefix: "resolve_alert", maxRequests: 30 }});

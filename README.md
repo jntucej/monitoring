@@ -1,466 +1,655 @@
-UCEJ Monitoring System
+# Gitleaks
 
-## Overview
-A production-grade monitoring system with role-based access control, scheduling, AI intelligence, and real-time data visualization.
-
-## Features
-
-### 🧠 AI Intelligence
-- **Smart Scheduling** – AI-driven job optimization and conflict detection
-- **Hint System** – Contextual suggestions and recommendations
-- **Confidence Scoring** – AI reliability metrics and confidence levels
-
-### 📊 Real-Time Visualization
-- **Responsive Charts** – 12+ chart types, dark mode ready, a11y compliant
-- **Live Data** – WebSocket/realtime updates with fallback polling
-- **Timeline Views** – Schedule timelines and job execution history
-
-### 🔐 Security & Access Control
-- **Role-Based Gates** – Multi-tier access control with hierarchical permissions
-- **Service Accounts** – Elevated access for internal services
-- **Audit Trail** – Complete logging of all operations
-
-### ⚡ Performance Optimized
-- **Virtual Scrolling** – Efficient large dataset handling
-- **Lazy Loading** – On-demand component loading
-- **Compression** – Optimized assets and real-time data streams
-
-## Technology Stack
-
-### Frontend
-- **Next.js 16** – React framework with server-side rendering
-- **TypeScript** – Type-safe development
-- **Tailwind CSS** – Utility-first styling
-- **Recharts** – Production-ready charting library
-- **WebSocket** – Real-time data synchronization
-
-### Backend
-- **Supabase** – PostgreSQL with Row Level Security
-- **Node.js** – Server-side runtime
-- **REST APIs** – RESTful API design
-
-## Project Structure
-
-### Core Components
 ```
-├── src/
-│   ├── app/                    # Next.js pages
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Home page
-│   ├── components/             # UI components
-│   ├── lib/                    # Core utilities
-│   ├── hooks/                  # React hooks
-│   └── styles/                 # CSS files
-├── scripts/                    # Automation scripts
-├── packages/                   # Shared packages
-└── docs/                       # Documentation
+┌─○───┐
+│ │╲  │
+│ │ ○ │
+│ ○ ░ │
+└─░───┘
 ```
 
-### AI Scheduler Kit
+[license]: ./LICENSE
+[badge-license]: https://img.shields.io/github/license/gitleaks/gitleaks.svg
+[go-docs-badge]: https://pkg.go.dev/badge/github.com/gitleaks/gitleaks/v8?status
+[go-docs]: https://pkg.go.dev/github.com/zricethezav/gitleaks/v8
+[badge-build]: https://github.com/gitleaks/gitleaks/actions/workflows/test.yml/badge.svg
+[build]: https://github.com/gitleaks/gitleaks/actions/workflows/test.yml
+[go-report-card-badge]: https://goreportcard.com/badge/github.com/gitleaks/gitleaks/v8
+[go-report-card]: https://goreportcard.com/report/github.com/gitleaks/gitleaks/v8
+[dockerhub]: https://hub.docker.com/r/zricethezav/gitleaks
+[dockerhub-badge]: https://img.shields.io/docker/pulls/zricethezav/gitleaks.svg
+[gitleaks-action]: https://github.com/gitleaks/gitleaks-action
+[gitleaks-badge]: https://img.shields.io/badge/protected%20by-gitleaks-blue
+[gitleaks-playground-badge]: https://img.shields.io/badge/gitleaks%20-playground-blue
+[gitleaks-playground]: https://gitleaks.io/playground
+
+
+[![GitHub Action Test][badge-build]][build]
+[![Docker Hub][dockerhub-badge]][dockerhub]
+[![Gitleaks Playground][gitleaks-playground-badge]][gitleaks-playground]
+[![Gitleaks Action][gitleaks-badge]][gitleaks-action]
+[![GoDoc][go-docs-badge]][go-docs]
+[![GoReportCard][go-report-card-badge]][go-report-card]
+[![License][badge-license]][license]
+
+Gitleaks is a tool for **detecting** secrets like passwords, API keys, and tokens in git repos, files, and whatever else you wanna throw at it via `stdin`. If you wanna learn more about how the detection engine works check out this blog: [Regex is (almost) all you need](https://lookingatcomputer.substack.com/p/regex-is-almost-all-you-need).
+
 ```
-├── packages/ai-scheduler-kit/    # Chart primitives and components
-│   ├── src/
-│   │   ├── charts/            # Chart components
-│   │   ├── hooks/             # Custom hooks
-│   │   ├── lib/               # Data layer
-│   │   ├── primitives/        # UI primitives
-│   │   └── panels/            # Dashboard panels
-│   ├── templates/             # Generator templates
-│   └── plopfile.mjs           # Plop generator configuration
-└── ...                        # Python cookiecutter.json
+➜  ~/code(master) gitleaks git -v
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+
+Finding:     "export BUNDLE_ENTERPRISE__CONTRIBSYS__COM=cafebabe:deadbeef",
+Secret:      cafebabe:deadbeef
+RuleID:      sidekiq-secret
+Entropy:     2.609850
+File:        cmd/generate/config/rules/sidekiq.go
+Line:        23
+Commit:      cd5226711335c68be1e720b318b7bc3135a30eb2
+Author:      John
+Email:       john@users.noreply.github.com
+Date:        2022-08-03T12:31:40Z
+Fingerprint: cd5226711335c68be1e720b318b7bc3135a30eb2:cmd/generate/config/rules/sidekiq.go:sidekiq-secret:23
 ```
+
+### GitHub Sponsors
+
+Sponsor [@zricethezav on GitHub](https://github.com/sponsors/zricethezav/) to get
+featured on this README.
 
 ## Getting Started
 
-### Development Environment
+Gitleaks can be installed using Homebrew, Docker, or Go. Gitleaks is also available in binary form for many popular platforms and OS types on the [releases page](https://github.com/gitleaks/gitleaks/releases). In addition, Gitleaks can be implemented as a pre-commit hook directly in your repo or as a GitHub action using [Gitleaks-Action](https://github.com/gitleaks/gitleaks-action).
+
+### Installing
+
 ```bash
-# Install dependencies
-npm install
+# MacOS
+brew install gitleaks
 
-# Start development server
-npm run dev
+# Docker (DockerHub)
+docker pull zricethezav/gitleaks:latest
+docker run -v ${path_to_host_folder_to_scan}:/path zricethezav/gitleaks:latest [COMMAND] [OPTIONS] [SOURCE_PATH]
 
-# Build for production
-npm run build
+# Docker (ghcr.io)
+docker pull ghcr.io/gitleaks/gitleaks:latest
+docker run -v ${path_to_host_folder_to_scan}:/path ghcr.io/gitleaks/gitleaks:latest [COMMAND] [OPTIONS] [SOURCE_PATH]
 
-# Run tests
-npm test
+# From Source (make sure `go` is installed)
+git clone https://github.com/gitleaks/gitleaks.git
+cd gitleaks
+make build
 ```
 
-### AI Scheduler Kit Development
-```bash
-# Navigate to the package
-cd packages/ai-scheduler-kit
+### GitHub Action
 
-# Install dependencies
-npm install
+Check out the official [Gitleaks GitHub Action](https://github.com/gitleaks/gitleaks-action)
 
-# Generate a new component
-npm run generate chart
-npm run generate panel  
-npm run generate dashboard
+```
+name: gitleaks
+on: [pull_request, push, workflow_dispatch]
+jobs:
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}} # Only required for Organizations, not personal accounts.
 ```
 
-### Key Commands
-```bash
-# Initialize new project with AI Scheduler
-python3 -m pip install cookiecutter
-cookiecutter --template packages/ai-scheduler-kit .
+### Pre-Commit
 
-# Start live data streaming
-npm run realtime
+1. Install pre-commit from https://pre-commit.com/#install
+2. Create a `.pre-commit-config.yaml` file at the root of your repository with the following content:
 
-# Generate UI audit report
-npm run audit
+   ```
+   repos:
+     - repo: https://github.com/gitleaks/gitleaks
+       rev: v8.24.2
+       hooks:
+         - id: gitleaks
+   ```
+
+   for a [native execution of gitleaks](https://github.com/gitleaks/gitleaks/releases) or use the [`gitleaks-docker` pre-commit ID](https://github.com/gitleaks/gitleaks/blob/master/.pre-commit-hooks.yaml) for executing gitleaks using the [official Docker images](#docker)
+
+3. Auto-update the config to the latest repos' versions by executing `pre-commit autoupdate`
+4. Install with `pre-commit install`
+5. Now you're all set!
+
 ```
+➜ git commit -m "this commit contains a secret"
+Detect hardcoded secrets.................................................Failed
+```
+
+Note: to disable the gitleaks pre-commit hook you can prepend `SKIP=gitleaks` to the commit command
+and it will skip running gitleaks
+
+```
+➜ SKIP=gitleaks git commit -m "skip gitleaks check"
+Detect hardcoded secrets................................................Skipped
+```
+
+## Usage
+
+```
+Gitleaks scans code, past or present, for secrets
+
+Usage:
+  gitleaks [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  dir         scan directories or files for secrets
+  git         scan git repositories for secrets
+  help        Help about any command
+  stdin       detect secrets from stdin
+  version     display gitleaks version
+
+Flags:
+  -b, --baseline-path string          path to baseline with issues that can be ignored
+  -c, --config string                 config file path
+                                      order of precedence:
+                                      1. --config/-c
+                                      2. env var GITLEAKS_CONFIG
+                                      3. env var GITLEAKS_CONFIG_TOML with the file content
+                                      4. (target path)/.gitleaks.toml
+                                      If none of the four options are used, then gitleaks will use the default config
+      --diagnostics string            enable diagnostics (http OR comma-separated list: cpu,mem,trace). cpu=CPU prof, mem=memory prof, trace=exec tracing, http=serve via net/http/pprof
+      --diagnostics-dir string        directory to store diagnostics output files when not using http mode (defaults to current directory)
+      --enable-rule strings           only enable specific rules by id
+      --exit-code int                 exit code when leaks have been encountered (default 1)
+  -i, --gitleaks-ignore-path string   path to .gitleaksignore file or folder containing one (default ".")
+  -h, --help                          help for gitleaks
+      --ignore-gitleaks-allow         ignore gitleaks:allow comments
+  -l, --log-level string              log level (trace, debug, info, warn, error, fatal) (default "info")
+      --max-archive-depth int         allow scanning into nested archives up to this depth (default "0", no archive traversal is done)
+      --max-decode-depth int          allow recursive decoding up to this depth (default "0", no decoding is done)
+      --max-target-megabytes int      files larger than this will be skipped
+      --no-banner                     suppress banner
+      --no-color                      turn off color for verbose output
+      --redact uint[=100]             redact secrets from logs and stdout. To redact only parts of the secret just apply a percent value from 0..100. For example --redact=20 (default 100%)
+  -f, --report-format string          output format (json, csv, junit, sarif, template)
+  -r, --report-path string            report file
+      --report-template string        template file used to generate the report (implies --report-format=template)
+      --timeout int                   set a timeout for gitleaks commands in seconds (default "0", no timeout is set)
+  -v, --verbose                       show verbose output from scan
+      --version                       version for gitleaks
+
+Use "gitleaks [command] --help" for more information about a command.
+```
+
+### Commands
+
+⚠️ v8.19.0 introduced a change that deprecated `detect` and `protect`. Those commands are still available but
+are hidden in the `--help` menu. Take a look at this [gist](https://gist.github.com/zricethezav/b325bb93ebf41b9c0b0507acf12810d2) for easy command translations.
+If you find v8.19.0 broke an existing command (`detect`/`protect`), please open an issue.
+
+There are three scanning modes: `git`, `dir`, and `stdin`.
+
+#### Git
+
+The `git` command lets you scan local git repos. Under the hood, gitleaks uses the `git log -p` command to scan patches.
+You can configure the behavior of `git log -p` with the `log-opts` option.
+For example, if you wanted to run gitleaks on a range of commits you could use the following
+command: `gitleaks git -v --log-opts="--all commitA..commitB" path_to_repo`. See the [git log](https://git-scm.com/docs/git-log) documentation for more information.
+If there is no target specified as a positional argument, then gitleaks will attempt to scan the current working directory as a git repo.
+
+#### Dir
+
+The `dir` (aliases include `files`, `directory`) command lets you scan directories and files. Example: `gitleaks dir -v path_to_directory_or_file`.
+If there is no target specified as a positional argument, then gitleaks will scan the current working directory.
+
+#### Stdin
+
+You can also stream data to gitleaks with the `stdin` command. Example: `cat some_file | gitleaks -v stdin`
+
+### Creating a baseline
+
+When scanning large repositories or repositories with a long history, it can be convenient to use a baseline. When using a baseline,
+gitleaks will ignore any old findings that are present in the baseline. A baseline can be any gitleaks report. To create a gitleaks report, run gitleaks with the `--report-path` parameter.
+
+```
+gitleaks git --report-path gitleaks-report.json # This will save the report in a file called gitleaks-report.json
+```
+
+Once as baseline is created it can be applied when running the detect command again:
+
+```
+gitleaks git --baseline-path gitleaks-report.json --report-path findings.json
+```
+
+After running the detect command with the --baseline-path parameter, report output (findings.json) will only contain new issues.
+
+## Pre-Commit hook
+
+You can run Gitleaks as a pre-commit hook by copying the example `pre-commit.py` script into
+your `.git/hooks/` directory.
+
+## Load Configuration
+
+The order of precedence is:
+
+1. `--config/-c` option:
+      ```bash
+      gitleaks git --config /home/dev/customgitleaks.toml .
+      ```
+2. Environment variable `GITLEAKS_CONFIG` with the file path:
+      ```bash
+      export GITLEAKS_CONFIG="/home/dev/customgitleaks.toml"
+      gitleaks git .
+      ```
+3. Environment variable `GITLEAKS_CONFIG_TOML` with the file content:
+      ```bash
+      export GITLEAKS_CONFIG_TOML=`cat customgitleaks.toml`
+      gitleaks git .
+      ```
+4. A `.gitleaks.toml` file within the target path:
+      ```bash
+      gitleaks git .
+      ```
+
+If none of the four options are used, then gitleaks will use the default config.
 
 ## Configuration
 
-### Environment Variables
-```env
-# Application configuration
-NEXT_PUBLIC_API_URL=https://api.ucej.in
-NEXT_PUBLIC_WS_URL=wss://api.ucej.in/realtime
+Gitleaks offers a configuration format you can follow to write your own secret detection rules:
 
-# Authentication
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```toml
+# Title for the gitleaks configuration file.
+title = "Custom Gitleaks configuration"
 
-# AI/ML configuration
-AI_MODEL_ENDPOINT=https://ai.ucej.in/v1/chat
-AI_MODEL_KEY=your-ai-model-key
+# You have basically two options for your custom configuration:
+#
+# 1. define your own configuration, default rules do not apply
+#
+#    use e.g., the default configuration as starting point:
+#    https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+#
+# 2. extend a configuration, the rules are overwritten or extended
+#
+#    When you extend a configuration the extended rules take precedence over the
+#    default rules. I.e., if there are duplicate rules in both the extended
+#    configuration and the default configuration the extended rules or
+#    attributes of them will override the default rules.
+#    Another thing to know with extending configurations is you can chain
+#    together multiple configuration files to a depth of 2. Allowlist arrays are
+#    appended and can contain duplicates.
 
-# Monitoring configuration
-SENTRY_DSN=your-sentry-dsn
-LOGGING_LEVEL=info
+# useDefault and path can NOT be used at the same time. Choose one.
+[extend]
+# useDefault will extend the default gitleaks config built in to the binary
+# the latest version is located at:
+# https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+# or you can provide a path to a configuration to extend from.
+# The path is relative to where gitleaks was invoked,
+# not the location of the base config.
+# path = "common_config.toml"
+# If there are any rules you don't want to inherit, they can be specified here.
+disabledRules = [ "generic-api-key"]
+
+# An array of tables that contain information that define instructions
+# on how to detect secrets
+[[rules]]
+# Unique identifier for this rule
+id = "awesome-rule-1"
+
+# Short human-readable description of the rule.
+description = "awesome rule 1"
+
+# Golang regular expression used to detect secrets. Note Golang's regex engine
+# does not support lookaheads.
+regex = '''one-go-style-regex-for-this-rule'''
+
+# Int used to extract secret from regex match and used as the group that will have
+# its entropy checked if `entropy` is set.
+secretGroup = 3
+
+# Float representing the minimum shannon entropy a regex group must have to be considered a secret.
+entropy = 3.5
+
+# Golang regular expression used to match paths. This can be used as a standalone rule or it can be used
+# in conjunction with a valid `regex` entry.
+path = '''a-file-path-regex'''
+
+# Keywords are used for pre-regex check filtering. Rules that contain
+# keywords will perform a quick string compare check to make sure the
+# keyword(s) are in the content being scanned. Ideally these values should
+# either be part of the identiifer or unique strings specific to the rule's regex
+# (introduced in v8.6.0)
+keywords = [
+  "auth",
+  "password",
+  "token",
+]
+
+# Array of strings used for metadata and reporting purposes.
+tags = ["tag","another tag"]
+
+    # ⚠️ In v8.21.0 `[rules.allowlist]` was replaced with `[[rules.allowlists]]`.
+    # This change was backwards-compatible: instances of `[rules.allowlist]` still  work.
+    #
+    # You can define multiple allowlists for a rule to reduce false positives.
+    # A finding will be ignored if _ANY_ `[[rules.allowlists]]` matches.
+    [[rules.allowlists]]
+    description = "ignore commit A"
+    # When multiple criteria are defined the default condition is "OR".
+    # e.g., this can match on |commits| OR |paths| OR |stopwords|.
+    condition = "OR"
+    commits = [ "commit-A", "commit-B"]
+    paths = [
+      '''go\.mod''',
+      '''go\.sum'''
+    ]
+    # note: stopwords targets the extracted secret, not the entire regex match
+    # like 'regexes' does. (stopwords introduced in 8.8.0)
+    stopwords = [
+      '''client''',
+      '''endpoint''',
+    ]
+
+    [[rules.allowlists]]
+    # The "AND" condition can be used to make sure all criteria match.
+    # e.g., this matches if |regexes| AND |paths| are satisfied.
+    condition = "AND"
+    # note: |regexes| defaults to check the _Secret_ in the finding.
+    # Acceptable values for |regexTarget| are "secret" (default), "match", and "line".
+    regexTarget = "match"
+    regexes = [ '''(?i)parseur[il]''' ]
+    paths = [ '''package-lock\.json''' ]
+
+# You can extend a particular rule from the default config. e.g., gitlab-pat
+# if you have defined a custom token prefix on your GitLab instance
+[[rules]]
+id = "gitlab-pat"
+# all the other attributes from the default rule are inherited
+
+    [[rules.allowlists]]
+    regexTarget = "line"
+    regexes = [ '''MY-glpat-''' ]
+
+
+# ⚠️ In v8.25.0 `[allowlist]` was replaced with `[[allowlists]]`.
+#
+# Global allowlists have a higher order of precedence than rule-specific allowlists.
+# If a commit listed in the `commits` field below is encountered then that commit will be skipped and no
+# secrets will be detected for said commit. The same logic applies for regexes and paths.
+[[allowlists]]
+description = "global allow list"
+commits = [ "commit-A", "commit-B", "commit-C"]
+paths = [
+  '''gitleaks\.toml''',
+  '''(.*?)(jpg|gif|doc)'''
+]
+# note: (global) regexTarget defaults to check the _Secret_ in the finding.
+# Acceptable values for regexTarget are "match" and "line"
+regexTarget = "match"
+regexes = [
+  '''219-09-9999''',
+  '''078-05-1120''',
+  '''(9[0-9]{2}|666)-\d{2}-\d{4}''',
+]
+# note: stopwords targets the extracted secret, not the entire regex match
+# like 'regexes' does. (stopwords introduced in 8.8.0)
+stopwords = [
+  '''client''',
+  '''endpoint''',
+]
+
+# ⚠️ In v8.25.0, `[[allowlists]]` have a new field called |targetRules|.
+#
+# Common allowlists can be defined once and assigned to multiple rules using |targetRules|.
+# This will only run on the specified rules, not globally.
+[[allowlists]]
+targetRules = ["awesome-rule-1", "awesome-rule-2"]
+description = "Our test assets trigger false-positives in a couple rules."
+paths = ['''tests/expected/._\.json$''']
 ```
 
-### Feature Flags
-```typescript
-// src/config/feature-flags.ts
-export const featureFlags = {
-  // AI/ML features
-  enableAIModel: process.env.NEXT_PUBLIC_ENABLE_AI_MODEL === 'true',
-  enableSmartSuggestions: process.env.NEXT_PUBLIC_ENABLE_SMART_SUGGESTIONS === 'true',
-  
-  // Real-time features
-  enableWebSocket: process.env.NEXT_PUBLIC_ENABLE_WEBSOCKET === 'true',
-  enableRealtimeUpdates: process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true',
-  
-  // UI features
-  enableDarkMode: process.env.NEXT_PUBLIC_ENABLE_DARK_MODE === 'true',
-  enableReducedMotion: process.env.NEXT_PUBLIC_ENABLE_REDUCED_MOTION === 'true',
-};
+Refer to the default [gitleaks config](https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml) for examples or follow the [contributing guidelines](https://github.com/gitleaks/gitleaks/blob/master/CONTRIBUTING.md) if you would like to contribute to the default configuration. Additionally, you can check out [this gitleaks blog post](https://blog.gitleaks.io/stop-leaking-secrets-configuration-2-3-aeed293b1fbf) which covers advanced configuration setups.
+
+### Additional Configuration
+
+#### Composite Rules (Multi-part or `required` Rules)
+In v8.28.0 Gitleaks introduced composite rules, which are made up of a single "primary" rule and one or more auxiliary or `required` rules. To create a composite rule, add a `[[rules.required]]` table to the primary rule specifying an `id` and optionally `withinLines` and/or `withinColumns` proximity constraints. A fragment is a chunk of content that Gitleaks processes at once (typically a file, part of a file, or git diff), and proximity matching instructs the primary rule to only report a finding if the auxiliary `required` rules also find matches within the specified area of the fragment.
+
+**Proximity matching:** Using the `withinLines` and `withinColumns` fields instructs the primary rule to only report a finding if the auxiliary `required` rules also find matches within the specified proximity. You can set:
+
+- **`withinLines: N`** - required findings must be within N lines (vertically)
+- **`withinColumns: N`** - required findings must be within N characters (horizontally)
+- **Both** - creates a rectangular search area (both constraints must be satisfied)
+- **Neither** - fragment-level matching (required findings can be anywhere in the same fragment)
+
+Here are diagrams illustrating each proximity behavior:
+
+```
+p = primary captured secret
+a = auxiliary (required) captured secret
+fragment = section of data gitleaks is looking at
+
+
+    *Fragment-level proximity*
+    Any required finding in the fragment
+          ┌────────┐
+   ┌──────┤fragment├─────┐
+   │      └──────┬─┤     │ ┌───────┐
+   │             │a│◀────┼─│✓ MATCH│
+   │          ┌─┐└─┘     │ └───────┘
+   │┌─┐       │p│        │
+   ││a│    ┌─┐└─┘        │ ┌───────┐
+   │└─┘    │a│◀──────────┼─│✓ MATCH│
+   └─▲─────┴─┴───────────┘ └───────┘
+     │    ┌───────┐
+     └────│✓ MATCH│
+          └───────┘
+
+
+   *Column bounded proximity*
+   `withinColumns = 3`
+          ┌────────┐
+   ┌────┬─┤fragment├─┬───┐
+   │      └──────┬─┤     │ ┌───────────┐
+   │    │        │a│◀┼───┼─│+1C ✓ MATCH│
+   │          ┌─┐└─┘     │ └───────────┘
+   │┌─┐ │     │p│    │   │
+┌──▶│a│  ┌─┐  └─┘        │ ┌───────────┐
+│  │└─┘ ││a│◀────────┼───┼─│-2C ✓ MATCH│
+│  │       ┘             │ └───────────┘
+│  └── -3C ───0C─── +3C ─┘
+│  ┌─────────┐
+│  │ -4C ✗ NO│
+└──│  MATCH  │
+   └─────────┘
+
+
+   *Line bounded proximity*
+   `withinLines = 4`
+         ┌────────┐
+   ┌─────┤fragment├─────┐
+  +4L─ ─ ┴────────┘─ ─ ─│
+   │                    │
+   │              ┌─┐   │ ┌────────────┐
+   │         ┌─┐  │a│◀──┼─│+1L ✓ MATCH │
+   0L  ┌─┐   │p│  └─┘   │ ├────────────┤
+   │   │a│◀──┴─┴────────┼─│-1L ✓ MATCH │
+   │   └─┘              │ └────────────┘
+   │                    │ ┌─────────┐
+  -4L─ ─ ─ ─ ─ ─ ─ ─┌─┐─│ │-5L ✗ NO │
+   │                │a│◀┼─│  MATCH  │
+   └────────────────┴─┴─┘ └─────────┘
+
+
+   *Line and column bounded proximity*
+   `withinLines = 4`
+   `withinColumns = 3`
+         ┌────────┐
+   ┌─────┤fragment├─────┐
+  +4L   ┌└────────┴ ┐   │
+   │            ┌─┐     │ ┌───────────────┐
+   │    │       │a│◀┼───┼─│+2L/+1C ✓ MATCH│
+   │         ┌─┐└─┘     │ └───────────────┘
+   0L   │    │p│    │   │
+   │         └─┘        │
+   │    │           │   │ ┌────────────┐
+  -4L    ─ ─ ─ ─ ─ ─┌─┐ │ │-5L/+3C ✗ NO│
+   │                │a│◀┼─│   MATCH    │
+   └───-3C────0L───+3C┴─┘ └────────────┘
 ```
 
-## Development Guide
+<details><summary>Some final quick thoughts on composite rules.</summary>This is an experimental feature! It's subject to change so don't go sellin' a new B2B SaaS feature built ontop of this feature. Scan type (git vs dir) based context is interesting. I'm monitoring the situation. Composite rules might not be super useful for git scans because gitleaks only looks at additions in the git history. It could be useful to scan non-additions in git history for `required` rules. Oh, right this is a readme, I'll shut up now.</details>
 
-### 1. Adding New Charts
-Use the Plop generator to create new chart components:
+#### gitleaks:allow
 
-```bash
-npx plop chart
-# Follow prompts to create new chart
+If you are knowingly committing a test secret that gitleaks will catch you can add a `gitleaks:allow` comment to that line which will instruct gitleaks
+to ignore that secret. Ex:
+
+```
+class CustomClass:
+    discord_client_secret = '8dyfuiRyq=vVc3RRr_edRk-fK__JItpZ'  #gitleaks:allow
+
 ```
 
-### 2. Adding New Panels
-Use the Plop generator to create new dashboard panels:
+#### .gitleaksignore
 
-```bash
-npx plop panel
-# Follow prompts to create new panel
+You can ignore specific findings by creating a `.gitleaksignore` file at the root of your repo. In release v8.10.0 Gitleaks added a `Fingerprint` value to the Gitleaks report. Each leak, or finding, has a Fingerprint that uniquely identifies a secret. Add this fingerprint to the `.gitleaksignore` file to ignore that specific secret. See Gitleaks' [.gitleaksignore](https://github.com/gitleaks/gitleaks/blob/master/.gitleaksignore) for an example. Note: this feature is experimental and is subject to change in the future.
+
+#### Decoding
+
+Sometimes secrets are encoded in a way that can make them difficult to find
+with just regex. Now you can tell gitleaks to automatically find and decode
+encoded text. The flag `--max-decode-depth` enables this feature (the default
+value "0" means the feature is disabled by default).
+
+Recursive decoding is supported since decoded text can also contain encoded
+text.  The flag `--max-decode-depth` sets the recursion limit. Recursion stops
+when there are no new segments of encoded text to decode, so setting a really
+high max depth doesn't mean it will make that many passes. It will only make as
+many as it needs to decode the text. Overall, decoding only minimally increases
+scan times.
+
+The findings for encoded text differ from normal findings in the following
+ways:
+
+- The location points the bounds of the encoded text
+  - If the rule matches outside the encoded text, the bounds are adjusted to
+    include that as well
+- The match and secret contain the decoded value
+- Two tags are added `decoded:<encoding>` and `decode-depth:<depth>`
+
+Currently supported encodings:
+
+- **percent** - Any printable ASCII percent encoded values
+- **hex** - Any printable ASCII hex encoded values >= 32 characters
+- **base64** - Any printable ASCII base64 encoded values >= 16 characters
+
+#### Archive Scanning
+
+Sometimes secrets are packaged within archive files like zip files or tarballs,
+making them difficult to discover. Now you can tell gitleaks to automatically
+extract and scan the contents of archives. The flag `--max-archive-depth`
+enables this feature for both `dir` and `git` scan types. The default value of
+"0" means this feature is disabled by default.
+
+Recursive scanning is supported since archives can also contain other archives.
+The `--max-archive-depth` flag sets the recursion limit. Recursion stops when
+there are no new archives to extract, so setting a very high max depth just
+sets the potential to go that deep. It will only go as deep as it needs to.
+
+The findings for secrets located within an archive will include the path to the
+file inside the archive. Inner paths are separated with `!`.
+
+Example finding (shortened for brevity):
+
+```
+Finding:     DB_PASSWORD=8ae31cacf141669ddfb5da
+...
+File:        testdata/archives/nested.tar.gz!archives/files.tar!files/.env.prod
+Line:        4
+Commit:      6e6ee6596d337bb656496425fb98644eb62b4a82
+...
+Fingerprint: 6e6ee6596d337bb656496425fb98644eb62b4a82:testdata/archives/nested.tar.gz!archives/files.tar!files/.env.prod:generic-api-key:4
+Link:        https://github.com/leaktk/gitleaks/blob/6e6ee6596d337bb656496425fb98644eb62b4a82/testdata/archives/nested.tar.gz
 ```
 
-### 3. Adding New Dashboards
-Use the Plop generator to create new dashboard pages:
+This means a secret was detected on line 4 of `files/.env.prod.` which is in
+`archives/files.tar` which is in `testdata/archives/nested.tar.gz`.
 
-```bash
-npx plop dashboard
-# Follow prompts to create new dashboard
+Currently supported formats:
+
+The [compression](https://github.com/mholt/archives?tab=readme-ov-file#supported-compression-formats)
+and [archive](https://github.com/mholt/archives?tab=readme-ov-file#supported-archive-formats)
+formats supported by mholt's [archives package](https://github.com/mholt/archives)
+are supported.
+
+#### Reporting
+
+Gitleaks has built-in support for several report formats: [`json`](https://github.com/gitleaks/gitleaks/blob/master/testdata/expected/report/json_simple.json), [`csv`](https://github.com/gitleaks/gitleaks/blob/master/testdata/expected/report/csv_simple.csv?plain=1), [`junit`](https://github.com/gitleaks/gitleaks/blob/master/testdata/expected/report/junit_simple.xml), and [`sarif`](https://github.com/gitleaks/gitleaks/blob/master/testdata/expected/report/sarif_simple.sarif).
+
+If none of these formats fit your need, you can create your own report format with a [Go `text/template` .tmpl file](https://www.digitalocean.com/community/tutorials/how-to-use-templates-in-go#step-4-writing-a-template) and the `--report-template` flag. The template can use [extended functionality from the `Masterminds/sprig` template library](https://masterminds.github.io/sprig/).
+
+For example, the following template provides a custom JSON output:
+```gotemplate
+# jsonextra.tmpl
+[{{ $lastFinding := (sub (len . ) 1) }}
+{{- range $i, $finding := . }}{{with $finding}}
+    {
+        "Description": {{ quote .Description }},
+        "StartLine": {{ .StartLine }},
+        "EndLine": {{ .EndLine }},
+        "StartColumn": {{ .StartColumn }},
+        "EndColumn": {{ .EndColumn }},
+        "Line": {{ quote .Line }},
+        "Match": {{ quote .Match }},
+        "Secret": {{ quote .Secret }},
+        "File": "{{ .File }}",
+        "SymlinkFile": {{ quote .SymlinkFile }},
+        "Commit": {{ quote .Commit }},
+        "Entropy": {{ .Entropy }},
+        "Author": {{ quote .Author }},
+        "Email": {{ quote .Email }},
+        "Date": {{ quote .Date }},
+        "Message": {{ quote .Message }},
+        "Tags": [{{ $lastTag := (sub (len .Tags ) 1) }}{{ range $j, $tag := .Tags }}{{ quote . }}{{ if ne $j $lastTag }},{{ end }}{{ end }}],
+        "RuleID": {{ quote .RuleID }},
+        "Fingerprint": {{ quote .Fingerprint }}
+    }{{ if ne $i $lastFinding }},{{ end }}
+{{- end}}{{ end }}
+]
 ```
 
-### 4. Contributing
-1. Fork the repository
-2. Create a new branch
-3. Implement your changes
-4. Run tests
-5. Submit a pull request
-
-### 5. Testing
-```bash
-# Run unit tests
-npm test
-
-# Run integration tests
-npm run test:integration
-
-# Run end-to-end tests
-npm run test:e2e
+Usage:
+```sh
+$ gitleaks dir ~/leaky-repo/ --report-path "report.json" --report-format template --report-template testdata/report/jsonextra.tmpl
 ```
 
-## Performance
+## Sponsorships
 
-### Key Metrics
-- **Initial Load Time**: < 2.5s (Lighthouse performance)
-- **First Contentful Paint**: < 1.2s
-- **Largest Contentful Paint**: < 2.8s
-- **Cumulative Layout Shift**: < 0.05
+<p align="left">
+	<h3><a href="https://coderabbit.ai/?utm_source=oss&utm_medium=sponsorship&utm_campaign=gitleaks">coderabbit.ai</h3>
+	  <a href="https://coderabbit.ai/?utm_source=oss&utm_medium=sponsorship&utm_campaign=gitleaks">
+		  <img alt="CodeRabbit.ai Sponsorship" src="https://github.com/gitleaks/gitleaks/assets/15034943/76c30a85-887b-47ca-9956-17a8e55c6c41" width=200>
+	  </a>
+</p>
 
-### Optimizations
-- **Code Splitting**: Automatic chunking with Next.js
-- **Image Optimization**: Next.js Image component
-- **Bundle Analysis**: Webpack bundle analyzer
-- **Caching**: Edge caching with CDN
 
-## Security
+## Exit Codes
 
-### Access Control
-- **Role-Based Access Control**: Multi-tier permissions
-- **Service Accounts**: Elevated access for internal services
-- **API Rate Limiting**: Prevent abuse
-- **Input Validation**: All inputs validated
+You can always set the exit code when leaks are encountered with the --exit-code flag. Default exit codes below:
 
-### Data Protection
-- **Encryption**: All sensitive data encrypted
-- **Audit Logging**: Complete operation logging
-- **Backup**: Regular automated backups
-- **Recovery**: Disaster recovery procedures
-
-## Monitoring
-
-### Health Checks
-```javascript
-// src/monitoring/health-check.js
-export async function performHealthCheck() {
-  const checks = [
-    { name: 'Database', check: () => checkDatabaseConnection() },
-    { name: 'API', check: () => checkApiHealth() },
-    { name: 'Cache', check: () => checkCacheHealth() },
-    { name: 'Storage', check: () => checkStorageHealth() },
-  ];
-  
-  const results = await Promise.allSettled(
-    checks.map(async ({ name, check }) => {
-      const result = await check();
-      return { name, status: result ? 'healthy' : 'unhealthy', result };
-    })
-  );
-  
-  return results;
-}
+```
+0 - no leaks present
+1 - leaks or error encountered
+126 - unknown flag
 ```
 
-### Alerting
-```typescript
-// src/monitoring/alerting.ts
-export interface Alert {
-  id: string;
-  severity: 'critical' | 'warning' | 'info';
-  title: string;
-  message: string;
-  timestamp: Date;
-  metadata?: Record<string, any>;
-}
-
-export class AlertManager {
-  private subscribers: ((alert: Alert) => void)[] = [];
-  
-  async send(alert: Alert): Promise<void> {
-    // Send to monitoring system
-    await this.sendToMonitoring(alert);
-    
-    // Notify subscribers
-    this.notify(alert);
-    
-    // Handle critical alerts
-    if (alert.severity === 'critical') {
-      await this.handleCriticalAlert(alert);
-    }
-  }
-  
-  subscribe(callback: (alert: Alert) => void): () => void {
-    this.subscribers.push(callback);
-    return () => {
-      this.subscribers = this.subscribers.filter(cb => cb !== callback);
-    };
-  }
-  
-  private notify(alert: Alert): void {
-    this.subscribers.forEach(callback => callback(alert));
-  }
-}
-```
-
-## API Reference
-
-### Authentication
-```http
-POST /api/auth/login
-{
-  "email": "user@example.com",
-  "password": "password"
-}
-
-Response: { "token": "jwt-token", "refreshToken": "refresh-token" }
-```
-
-### Jobs API
-```http
-GET /api/jobs
-Query Parameters:
-- status: "success" | "failure" | "running" | "queued" | "skipped" (optional)
-- limit: number (optional, default: 100)
-- offset: number (optional, default: 0)
-
-Response: Array of Job objects
-
-POST /api/jobs
-{
-  "name": "Job name",
-  "schedule": "cron-expression",
-  "config": {}
-}
-
-Response: Created job object
-```
-
-## Examples
-
-### Example Dashboard
-```typescript
-// src/components/example-dashboard.tsx
-export function ExampleDashboard() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <MetricCard title="Total Jobs" value="142" trend="up" />
-      <MetricCard title="Success Rate" value="98.7%" trend="up" />
-      <MetricCard title="Active Conflicts" value="3" trend="down" />
-      <MetricCard title="AI Confidence" value="91%" trend="up" />
-    </div>
-  );
-}
-```
-
-### Example Chart
-```typescript
-// src/components/example-chart.tsx
-export function ExampleChart({ data }: { data: ChartData[] }) {
-  return (
-    <ChartFrame title="System Performance" height={300} loading={loading} error={error}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Area dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </ChartFrame>
-  );
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-#### Issue: Charts not loading
-1. Check browser console for JavaScript errors
-2. Ensure Recharts is properly installed
-3. Verify the chart container has dimensions
-4. Check browser compatibility
-
-#### Issue: Real-time updates not working
-1. Verify WebSocket server is running
-2. Check firewall settings
-3. Ensure the client is authenticated
-4. Verify network connectivity
-
-#### Issue: Authentication failures
-1. Check if the token is expired
-2. Verify the authentication server is running
-3. Check if the user has the required permissions
-4. Ensure the authentication configuration is correct
-
-### Getting Help
-
-If you encounter issues:
-
-1. **Check the logs**: `tail -f /var/log/ucej/monitoring.log`
-2. **Run diagnostics**: `npm run diagnose`
-3. **Check status**: `curl https://status.ucej.in/health`
-4. **Report issues**: File an issue on GitHub
-
-## Support
-
-### Documentation
-- [API Reference](/docs/api.md)
-- [Development Guide](/docs/development.md)
-- [Deployment Guide](/docs/deployment.md)
-
-### Community
-- **GitHub**: https://github.com/jntucej/monitoring
-- **Discord**: https://discord.gg/jntucej
-- **Twitter**: @jntucej
-
-### Contact
-- **Email**: support@jntucej.in
-- **Phone**: +91-XXXXXXXXXX
-- **Hours**: 24/7/365
-
----
-
-*Last updated: $(date -u +%Y-%m-%dT%H:%M:%SZ)*
-*This documentation is auto-generated. For the latest updates, check the main repository.*
-
-## AI Scheduler Dashboard — Cookiecutter
-
-A **stampable, reusable scaffold** that can generate any number of dashboards/panels/charts with a single command.
-
-### Two Layers:
-
-1. **The Kit** (`packages/ai-scheduler-kit`) — primitives, charts, hooks, adapters
-2. **The Generator** (`plop`) — stamps out new charts, panels, or full dashboards
-
-### Example Commands:
-
-```bash
-# Generate a new chart
-npx plop chart
-#   → Chart name: OvertimeTrend
-#   → Chart shape: area
-#   ✓ created src/charts/OvertimeTrend.tsx
-
-# Generate a new panel
-npx plop panel
-#   → Panel name: CapacityForecast
-#   → Panel title: Predicted Capacity
-#   ✓ created src/panels/CapacityForecast.tsx
-
-# Generate a full dashboard
-npx plop dashboard
-#   → Route name: scheduler-v2
-#   ✓ created app/scheduler-v2/page.tsx
-```
-
-### Installation:
-```bash
-# Use Python cookiecutter
-python3 -m pip install cookiecutter
-cookiecutter --template packages/ai-scheduler-kit .
-
-# Or use Node.js generator
-cd packages/ai-scheduler-kit
-npm install
-npx plop
-```
-
-See the full implementation in `packages/ai-scheduler-kit/` for complete details.
-
-
-
-## 🔑 Role Credentials
-
-All provisioned role login credentials (operator kiosk, principal, exam, hostel,
-parent, mess-in-charge, warden, supervisor, student, plus supporting roles) are
-documented in **[README_CREDENTIALS.md](./README_CREDENTIALS.md)**.
+### Join the Discord! [![Discord](https://img.shields.io/discord/1102689410522284044.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/8Hzbrnkr7E)

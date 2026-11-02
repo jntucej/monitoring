@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -50,4 +50,4 @@ async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }) {
   }
 }
 
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["admin", "sysadmin"] });
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["admin", "sysadmin"]});

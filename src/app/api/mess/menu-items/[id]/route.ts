@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, addAudit } from "@/lib/db";
-import { withMessMutation } from "@/server/http/mutation-guard";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -104,10 +104,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const PATCH = withMessMutation(handlePatch, {
+export const PATCH = withMutationGuard(handlePatch, {
   rateLimit: { windowMs: 60_000, maxRequests: 20 },
 });
 
-export const DELETE = withMessMutation(handleDelete, {
+export const DELETE = withMutationGuard(handleDelete, {
   rateLimit: { windowMs: 60_000, maxRequests: 20 },
 });

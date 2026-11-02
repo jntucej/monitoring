@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
-import { addAudit } from "@/lib/db";
+import { addAudit, withTransaction } from "@/lib/db";
 import { Role } from "@/lib/types";
 
 async function handleGet() {
@@ -40,7 +41,18 @@ async function handlePatch(req: NextRequest) {
     if (typeof retention_days === "number") updateFields.retention_days = retention_days;
     if (typeof auto_delete === "boolean") updateFields.auto_delete = auto_delete;
 
-    const { data } = await supabase.from("retention_policies").update(updateFields).eq("id", id).select("*").single();
+    // RLS write discipline: retention_policies is an RLS table;
+    // write through withTransaction.
+    const rpKeys = Object.keys(updateFields);
+    const rpSets = rpKeys.map((k, i) => `"${k}" = $${i + 1}`).join(", ");
+    let data: any;
+    await withTransaction(async (client) => {
+      const r = await client.query(
+        `UPDATE public.retention_policies SET ${rpSets} WHERE id = $${rpKeys.length + 1} RETURNING *`,
+        [...rpKeys.map((k) => updateFields[k]), id]
+      );
+      data = r.rows[0];
+    });
 
     await addAudit({
       action: "RETENTION_POLICY_UPDATED",
@@ -57,5 +69,4 @@ async function handlePatch(req: NextRequest) {
 }
 
 export const GET = withAuthorization(handleGet, { requiredRole: ["sysadmin"] });
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["sysadmin"] });
-
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"]});

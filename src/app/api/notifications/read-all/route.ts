@@ -2,7 +2,7 @@
 // POST /api/notifications/read-all — mark every notification for the caller read.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok } from "@/server/http/response";
 import { query } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -18,4 +18,4 @@ async function handlePost(_req: NextRequest, { auth }: { auth: AuthContext }): P
   return ok({ markedRead: rowCount ?? 0 });
 }
 
-export const POST = withAuthorization(handlePost);
+export const POST = withMutationGuard(handlePost);

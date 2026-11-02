@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { findStudentByRoll, getStudentHistory, getStudentStatus } from "@/lib/db";
+import { findStudentByRoll, getStudentHistory, getStudentStatus, withTransaction } from "@/lib/db";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -91,7 +92,15 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     if (Object.keys(userUpdates).length > 0) {
       userUpdates.updated_at = new Date().toISOString();
-      await supabase.from("users").update(userUpdates).eq("id", student.id);
+      // RLS write discipline: users is an RLS table; write through withTransaction.
+      const uKeys = Object.keys(userUpdates);
+      const uSets = uKeys.map((k, i) => `"${k}" = $${i + 1}`).join(", ");
+      await withTransaction(async (client) => {
+        await client.query(
+          `UPDATE public.users SET ${uSets} WHERE id = $${uKeys.length + 1}`,
+          [...uKeys.map((k) => userUpdates[k]), student.id]
+        );
+      }, { currentUserId: auth.userId, currentRole: auth.role });
     }
 
     // 2. Update student_details
@@ -199,7 +208,10 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // 3. Hard delete
     if (user.id === '80eb29e3-7e71-48cb-a44c-6e0caa7f83f5') return NextResponse.json({ success: false, error: { message: "System core account cannot be deleted" } }, { status: 403 });
-    const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
+    // RLS write discipline: users is an RLS table; delete through withTransaction.
+    await withTransaction(async (client) => {
+      await client.query("DELETE FROM public.users WHERE id = $1", [user.id]);
+    }, { currentUserId: auth.userId, currentRole: auth.role });
 
     await addAudit({
       action: "USER_DELETED",
@@ -216,5 +228,6 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
 }
 
 export const GET = withRateLimit(withAuthorization(handleGet, { requiredRole: ["admin", "sysadmin", "student"] }), { keyPrefix: "student_details", maxRequests: 100 });
-export const PATCH = withAuthorization(handlePatch, { requiredRole: ["admin", "sysadmin"] });
-export const DELETE = withAuthorization(handleDelete, { requiredRole: ["sysadmin"] });
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"]});
+
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: ["sysadmin"]});

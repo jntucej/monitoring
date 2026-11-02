@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { sampleWebhooksDataset } from "@/lib/webhooks-analytics";
 
 async function handlePost() {
@@ -16,7 +15,4 @@ async function handlePost() {
   }
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["admin", "sysadmin"] }),
-  { keyPrefix: "webhooks_retrain", maxRequests: 20 }
-);
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin"], rateLimit: { keyPrefix: "webhooks_retrain", maxRequests: 20 }});
