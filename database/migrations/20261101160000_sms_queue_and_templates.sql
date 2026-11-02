@@ -14,7 +14,6 @@ ALTER TABLE public.notification_sms_queue
   ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS failed_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS tracking_id UUID DEFAULT gen_random_uuid(),
-  ADD COLUMN IF NOT EXISTS provider_message_id TEXT,
   ADD COLUMN IF NOT EXISTS sender_id VARCHAR(6),
   ADD COLUMN IF NOT EXISTS dlt_template_id TEXT,
   ADD COLUMN IF NOT EXISTS template_code TEXT,

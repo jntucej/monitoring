@@ -368,7 +368,6 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'enrollment_codes' AND policyname = 'service_role_all_enrollment_codes'
   ) THEN
-DROP POLICY IF EXISTS "service_role_all_enrollment_codes" ON "public.enrollment_codes";
     CREATE POLICY "service_role_all_enrollment_codes" ON public.enrollment_codes FOR ALL TO service_role USING (true) WITH CHECK (true);
   END IF;
 END $$;
@@ -766,31 +765,20 @@ END; $$;
 -- SECTION 5: TRIGGERS
 -- ============================================================================
 -- Supabase auth-sync trigger removed; user creation handled by API layer.
--- All CREATE TRIGGER statements are preceded by DROP TRIGGER IF EXISTS so
--- the baseline loads idempotently on top of the Supabase image's initdb
--- triggers and alongside the migration replay chain.
-DROP TRIGGER IF EXISTS trg_occupancy_on_movement ON movement_logs;
 CREATE TRIGGER trg_occupancy_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_campus_occupancy_on_movement();
-DROP TRIGGER IF EXISTS trg_daily_stats_on_movement ON movement_logs;
 CREATE TRIGGER trg_daily_stats_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_daily_stats_on_movement();
-DROP TRIGGER IF EXISTS trg_audit_on_movement ON movement_logs;
 CREATE TRIGGER trg_audit_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_movement();
-DROP TRIGGER IF EXISTS trg_audit_on_pass_insert ON gate_passes;
 CREATE TRIGGER trg_audit_on_pass_insert
   AFTER INSERT ON gate_passes FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_pass_insert();
-DROP TRIGGER IF EXISTS trg_audit_on_pass_update ON gate_passes;
 CREATE TRIGGER trg_audit_on_pass_update
   AFTER UPDATE ON gate_passes FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_pass_update();
-DROP TRIGGER IF EXISTS trg_audit_on_user_change ON users;
 CREATE TRIGGER trg_audit_on_user_change
   AFTER INSERT OR UPDATE ON users FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_user_change();
-DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
 CREATE TRIGGER trg_users_updated_at
   BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-DROP TRIGGER IF EXISTS trg_notif_prefs_updated_at ON notification_preferences;
 CREATE TRIGGER trg_notif_prefs_updated_at
   BEFORE UPDATE ON notification_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
@@ -818,148 +806,100 @@ ALTER TABLE system_alerts             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backups                   ENABLE ROW LEVEL SECURITY;
 
 -- 6.1 USERS (self + admin scope)
-DROP POLICY IF EXISTS "users_select_own" ON "users";
 CREATE POLICY users_select_own   ON users FOR SELECT TO authenticated USING (id = current_setting('app.current_user_id', true)::uuid);
-DROP POLICY IF EXISTS "users_select_admin" ON "users";
 CREATE POLICY users_select_admin ON users FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "users_update_own" ON "users";
 CREATE POLICY users_update_own   ON users FOR UPDATE TO authenticated USING (id = current_setting('app.current_user_id', true)::uuid) WITH CHECK (id = current_setting('app.current_user_id', true)::uuid);
-DROP POLICY IF EXISTS "users_update_admin" ON "users";
 CREATE POLICY users_update_admin ON users FOR UPDATE TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "users_update_roles" ON "users";
 CREATE POLICY users_update_roles ON users FOR UPDATE TO authenticated USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.2 GATES (broad authenticated read of active gates; admin manages; service all)
-DROP POLICY IF EXISTS "gates_select_active" ON "gates";
 CREATE POLICY gates_select_active ON gates FOR SELECT TO authenticated USING (is_active = TRUE);
-DROP POLICY IF EXISTS "gates_select_admin" ON "gates";
 CREATE POLICY gates_select_admin  ON gates FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "gates_all_service" ON "gates";
 CREATE POLICY gates_all_service   ON gates FOR ALL TO service_role USING (true) WITH CHECK (true);
 -- 6.3 STUDENT DETAILS (broad read; warden scoped; admin manage)
-DROP POLICY IF EXISTS "sdetails_select_auth" ON "student_details";
 CREATE POLICY sdetails_select_auth    ON student_details FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "sdetails_select_owner" ON "student_details";
 CREATE POLICY sdetails_select_owner   ON student_details FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
-DROP POLICY IF EXISTS "sdetails_select_warden" ON "student_details";
 CREATE POLICY sdetails_select_warden  ON student_details FOR SELECT TO authenticated
   USING (is_warden(current_setting('app.current_user_id', true)::uuid) AND hostel_block = get_warden_hostel(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "sdetails_manage_admin" ON "student_details";
 CREATE POLICY sdetails_manage_admin   ON student_details FOR ALL TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.4 EMPLOYEE DETAILS (broad read; admin manage)
-DROP POLICY IF EXISTS "edetails_select_auth" ON "employee_details";
 CREATE POLICY edetails_select_auth    ON employee_details FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "edetails_select_owner" ON "employee_details";
 CREATE POLICY edetails_select_owner   ON employee_details FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
-DROP POLICY IF EXISTS "edetails_manage_admin" ON "employee_details";
 CREATE POLICY edetails_manage_admin   ON employee_details FOR ALL TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.5 MOVEMENT LOGS (operator scope = own gate; admin broad; self = own trail; insert by operator/admin/warden)
-DROP POLICY IF EXISTS "mlog_select_operator" ON "movement_logs";
 CREATE POLICY mlog_select_operator ON movement_logs FOR SELECT TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "mlog_select_staff" ON "movement_logs";
 CREATE POLICY mlog_select_staff  ON movement_logs FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "mlog_select_own" ON "movement_logs";
 CREATE POLICY mlog_select_own    ON movement_logs FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
-DROP POLICY IF EXISTS "mlog_insert_staff" ON "movement_logs";
 CREATE POLICY mlog_insert_staff  ON movement_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.5b DAILY STATS (operator own gate; staff broad; admin read all; service writes/backfills)
-DROP POLICY IF EXISTS "dstats_select_operator" ON "daily_stats";
 CREATE POLICY dstats_select_operator ON daily_stats FOR SELECT TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "dstats_select_staff" ON "daily_stats";
 CREATE POLICY dstats_select_staff ON daily_stats FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "dstats_select_own" ON "daily_stats";
 CREATE POLICY dstats_select_own   ON daily_stats FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "dstats_all_service" ON "daily_stats";
 CREATE POLICY dstats_all_service ON daily_stats FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 6.6 CAMPUS OCCUPANCY (operator own gate; staff broad; self)
-DROP POLICY IF EXISTS "occ_select_operator" ON "campus_occupancy";
 CREATE POLICY occ_select_operator ON campus_occupancy FOR SELECT TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND last_gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "occ_select_staff" ON "campus_occupancy";
 CREATE POLICY occ_select_staff   ON campus_occupancy FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "occ_select_own" ON "campus_occupancy";
 CREATE POLICY occ_select_own     ON campus_occupancy FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid);
 
 -- 6.7 VISITOR LOGS (broad authenticated; inserts by operators/admin)
-DROP POLICY IF EXISTS "vlogs_select_auth" ON "visitor_logs";
 CREATE POLICY vlogs_select_auth ON visitor_logs FOR SELECT TO authenticated USING (true);
-DROP POLICY IF EXISTS "vlogs_insert_auth" ON "visitor_logs";
 CREATE POLICY vlogs_insert_auth ON visitor_logs FOR INSERT TO authenticated
   WITH CHECK (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "vlogs_update_auth" ON "visitor_logs";
 CREATE POLICY vlogs_update_auth ON visitor_logs FOR UPDATE TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) OR is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.8 GATE PASSES (owner + guardian of wards + staff approvers)
-DROP POLICY IF EXISTS "passes_select_own" ON "gate_passes";
 CREATE POLICY passes_select_own ON gate_passes FOR SELECT TO authenticated
   USING (user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)));
-DROP POLICY IF EXISTS "passes_select_staff" ON "gate_passes";
 CREATE POLICY passes_select_staff ON gate_passes FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "passes_insert_own" ON "gate_passes";
 CREATE POLICY passes_insert_own ON gate_passes FOR INSERT TO authenticated WITH CHECK (
   user_id = current_setting('app.current_user_id', true)::uuid OR user_id = ANY(get_guardian_wards(current_setting('app.current_user_id', true)::uuid)) OR is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "passes_update_approvers" ON "gate_passes";
 CREATE POLICY passes_update_approvers ON gate_passes FOR UPDATE TO authenticated USING (
   is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid))
   WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid) OR is_warden(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.9 ALERTS (admin; operators own gate)
-DROP POLICY IF EXISTS "alerts_select_admin" ON "alerts";
 CREATE POLICY alerts_select_admin ON alerts FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
 
-DROP POLICY IF EXISTS "alerts_select_op" ON "alerts";
 CREATE POLICY alerts_select_op   ON alerts FOR SELECT TO authenticated
   USING (is_operator(current_setting('app.current_user_id', true)::uuid) AND (gate_id = (SELECT gate_id FROM users WHERE id = current_setting('app.current_user_id', true)::uuid) OR gate_id IS NULL));
-DROP POLICY IF EXISTS "alerts_resolve_admin" ON "alerts";
 CREATE POLICY alerts_resolve_admin ON alerts FOR UPDATE TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.10 AUDIT LOGS (READ = sysadmin/admin)
-DROP POLICY IF EXISTS "audit_select_sysadmin" ON "audit_logs";
 CREATE POLICY audit_select_sysadmin ON audit_logs FOR SELECT TO authenticated
   USING (is_sysadmin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "audit_select_admin" ON "audit_logs";
 CREATE POLICY audit_select_admin ON audit_logs FOR SELECT TO authenticated
   USING (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.11 MONITORING + BACKUPS (admin only)
-DROP POLICY IF EXISTS "metrics_select_admin" ON "api_metrics";
 CREATE POLICY metrics_select_admin  ON api_metrics FOR SELECT TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "sysalerts_all_admin" ON "system_alerts";
 CREATE POLICY sysalerts_all_admin   ON system_alerts FOR ALL TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
-DROP POLICY IF EXISTS "backups_all_admin" ON "backups";
 CREATE POLICY backups_all_admin     ON backups FOR ALL TO authenticated USING (is_admin(current_setting('app.current_user_id', true)::uuid)) WITH CHECK (is_admin(current_setting('app.current_user_id', true)::uuid));
 
 -- 6.12 NOTIFICATIONS
-DROP POLICY IF EXISTS "notif_select_own" ON "notifications";
 CREATE POLICY notif_select_own ON notifications FOR SELECT TO authenticated
   USING (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT OR recipient_type = 'all');
-DROP POLICY IF EXISTS "notif_update_own" ON "notifications";
 CREATE POLICY notif_update_own ON notifications FOR UPDATE TO authenticated
   USING (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT) WITH CHECK (recipient_id = current_setting('app.current_user_id', true)::uuid::TEXT);
-DROP POLICY IF EXISTS "prefs_select_own" ON "notification_preferences";
 CREATE POLICY prefs_select_own ON notification_preferences FOR SELECT TO authenticated USING (user_id = current_setting('app.current_user_id', true)::uuid::TEXT);
-DROP POLICY IF EXISTS "prefs_update_own" ON "notification_preferences";
 CREATE POLICY prefs_update_own ON notification_preferences FOR UPDATE TO authenticated
   USING (user_id = current_setting('app.current_user_id', true)::uuid::TEXT) WITH CHECK (user_id = current_setting('app.current_user_id', true)::uuid::TEXT);
-DROP POLICY IF EXISTS "queues_service" ON "notification_push_queue";
 CREATE POLICY queues_service ON notification_push_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
-DROP POLICY IF EXISTS "smsq_service" ON "notification_sms_queue";
 CREATE POLICY smsq_service   ON notification_sms_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
-DROP POLICY IF EXISTS "emailq_service" ON "notification_email_queue";
 CREATE POLICY emailq_service ON notification_email_queue FOR ALL TO service_role USING (true) WITH CHECK (true);
 -- ============================================================================
 -- SECTION 7: INDEXES
@@ -1124,7 +1064,6 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'login_attempts' AND policyname = 'service_role_all_login_attempts'
   ) THEN
-DROP POLICY IF EXISTS "service_role_all_login_attempts" ON "public.login_attempts";
     CREATE POLICY "service_role_all_login_attempts" ON public.login_attempts FOR ALL TO service_role USING (true) WITH CHECK (true);
   END IF;
 END $$;

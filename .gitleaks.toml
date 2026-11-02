@@ -2,29 +2,14 @@
 useDefault = true
 
 [allowlist]
-description = "Global allowlists for build artifacts, local env files, CI dummies, and known test fixtures"
+description = "Global allowlists for build artifacts, local env files, and false positives"
 paths = [
     '''^\.next/''',
     '''^\.env$''',
     '''^\.env\.local$''',
     '''^node_modules/''',
     '''^dist/''',
-    '''^build/''',
-    # CI-only dummy values in workflow env blocks, never real credentials
-    '''^\.github/workflows/''',
-    # Test fixture files (intentional fake values for test assertions)
-    '''^tests/''',
-    '''^scripts/''',
-    # Documentation dumps / build tool output
-    '''^docs/repomix''',
-    '''^repomix-output''',
-    # Continue-dev agent config (local dev tool, not a production credential)
-    '''^\.continue/''',
-    # Legacy Supabase client module: env-var references (SUPABASE_ANON_KEY /
-    # SUPABASE_SERVICE_ROLE_KEY) with a || "placeholder" fallback — gitleaks
-    # flags the placeholder string as a JWT. The module has been replaced by
-    # the local-DB stack; these two lines are the only remaining false positive.
-    '''^src/lib/supabaseClient\.ts'''
+    '''^build/'''
 ]
 regexes = [
     '''identificationMarks[12]''',

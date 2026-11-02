@@ -58,12 +58,10 @@ GRANT EXECUTE ON FUNCTION public.issue_enrollment_code(UUID, TEXT) TO service_ro
 -- index is created on the base table permissions, not the view.
 ALTER TABLE public.permissions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
 -- Recreate the compatibility view over the base table so the new deleted_at
--- column is carried through. CREATE OR REPLACE fails when the base table's
--- column set has changed (SELECT * now includes deleted_at, changing the
--- view's column mapping) — drop and recreate explicitly. Keep the
--- student_user_id alias that the OIE queue and other consumers rely on.
-DROP VIEW IF EXISTS public.permission_requests;
-CREATE VIEW public.permission_requests AS
+-- column is carried through. Keep the student_user_id alias that the OIE
+-- queue and other consumers rely on: CREATE OR REPLACE cannot drop the
+-- aliased column, so it must be re-declared explicitly here.
+CREATE OR REPLACE VIEW public.permission_requests AS
   SELECT *, requester_user_id AS student_user_id FROM public.permissions;
 CREATE INDEX IF NOT EXISTS idx_permission_requests_deleted 
   ON public.permissions(deleted_at) 

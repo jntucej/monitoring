@@ -27,10 +27,7 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app')
      AND EXISTS (SELECT 1 FROM pg_tables
-                 WHERE schemaname = 'public' AND tablename = 'permissions')
-     AND EXISTS (SELECT 1 FROM information_schema.columns
-                 WHERE table_schema = 'public' AND table_name = 'permissions'
-                   AND column_name = 'requester_user_id') THEN
+                 WHERE schemaname = 'public' AND tablename = 'permissions') THEN
 
     -- gate_app is NOINHERIT + NOBYPASSRLS. It must not rely on service_role
     -- inheritance. Instead, give gate_app direct, least-privilege grants and
@@ -57,15 +54,12 @@ BEGIN
       );
 
     -- INSERT: allow the app role to insert rows only for the acting user.
-    -- RLS policy expressions do NOT support the NEW pseudo-record — that is
-    -- only valid in trigger functions. Reference the new row's columns via
-    -- the table-qualified column name instead.
     DROP POLICY IF EXISTS permissions_gate_app_insert ON public.permissions;
     CREATE POLICY permissions_gate_app_insert ON public.permissions
       FOR INSERT TO gate_app
       WITH CHECK (
         current_setting('app.current_user_id', true) IS NOT NULL
-        AND public.permissions.requester_user_id = current_setting('app.current_user_id', true)::uuid
+        AND NEW.requester_user_id = current_setting('app.current_user_id', true)::uuid
       );
 
     -- UPDATE: allow the app role to update only rows it can read.

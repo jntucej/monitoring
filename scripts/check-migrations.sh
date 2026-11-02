@@ -75,19 +75,8 @@ fi
 PSQL=""
 RUN_SCRATCH=0
 
-# In CI mode with the Supabase/Neon postgres image the `postgres` role is
-# NOT a superuser and the `public` schema is owned by `supabase_admin`.
-# The role bootstrap block below grants ALL on public/auth to the calling
-# role (extracted from DATABASE_URL), so it must run as a role that can
-# GRANT — i.e. `supabase_admin` (or `postgres` on a plain postgres:17 image).
 if [ -n "$DATABASE_URL" ]; then
-  # Derive the connecting user from the URL (user segment before @, after the
-  # scheme and host). The Supabase/Neon image URL is
-  # postgres://supabase_admin:password@localhost:5432/gate_monitor — the
-  # sed captures "supabase_admin". Fallback: postgres.
-  _DB_USER=$(echo "$DATABASE_URL" | sed -n 's#postgresql\?://\([^:@/]*\)@.*#\1#p' | head -1)
-  [ -z "$_DB_USER" ] && _DB_USER=postgres
-  echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container); connecting as $_DB_USER."
+  echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container)."
   PSQL=(psql "$DATABASE_URL")
 else
   RUN_SCRATCH=1
@@ -109,17 +98,9 @@ else
   done
 
   PSQL=(docker exec "$CONTAINER_NAME" psql -U postgres)
-  _DB_USER=postgres
 fi
 
 # 3. Setup mock Supabase roles & auth schema and grant permissions on public
-# The GRANT targets the connecting role (extracted from DATABASE_URL in CI
-# mode, or `postgres` on a scratch container). In the Supabase/Neon image
-# the `postgres` role is NOT a superuser; `supabase_admin` owns the
-# `public` schema and has GRANT OPTION, so the workflow must connect as
-# `supabase_admin` (password in POSTGRES_PASSWORD env) for the bootstrap
-# to succeed. The connecting role also cannot grant to itself, so use
-# PUBLIC as the grant target for USAGE/CREATE.
 "${PSQL[@]}" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$
 BEGIN
@@ -139,6 +120,9 @@ END
 $$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
+GRANT ALL ON DATABASE gate_monitor TO postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA auth TO postgres;
 GRANT USAGE, CREATE ON SCHEMA public TO PUBLIC;
 GRANT USAGE, CREATE ON SCHEMA auth TO PUBLIC;
 
@@ -146,28 +130,6 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
   SELECT null::uuid;
 $$ LANGUAGE sql;
 SQL
-
-# In the Supabase/Neon image the `postgres` role (used by CI) does NOT own
-# the public schema, so the GRANT TO PUBLIC above is not sufficient —
-# postgres needs an explicit CREATE grant to create objects in public.
-# This grant is a no-op on a plain postgres:17 image (postgres is already
-# a superuser and owns all schemas).
-"${PSQL[@]}" -v ON_ERROR_STOP=1 <<SQL
-DO \$\$
-BEGIN
-  EXECUTE format('GRANT CREATE ON SCHEMA public TO %I', '$_DB_USER');
-EXCEPTION WHEN insufficient_privilege THEN
-  -- postgres cannot grant to itself in the Supabase image; fall back to
-  -- granting to PUBLIC (already done above) and rely on the fact that the
-  -- Supabase image's public schema is writable by PUBLIC.
-  NULL;
-END
-\$\$;
-SQL
-
-# In the Supabase image, supabase_admin already owns public/auth; in a plain
-# postgres:17 image, the connecting user is the postgres superuser. No
-# additional GRANT is needed — both roles already have full DDL rights.
 
 # 4. Load baseline schema (minimal bootstrap, sufficient for the migration
 # chain to replay cleanly from scratch). Tolerate the one-off pre-existing
@@ -213,11 +175,7 @@ for fname in "${SORTED_NAMES[@]}"; do
     exit 1
   fi
 
-  # Extract the 14-digit version prefix. Handles both the standard
-  # NNNNNNNNNNNNNN_name.sql and the legacy _legacy_NNNNNNNNNNNNNN_name.sql
-  # filename shapes (the latter would otherwise yield an empty version).
-  ver=$(echo "$fname" | grep -oE '[0-9]{14}' | head -1)
-  [ -z "$ver" ] && ver="${fname%%_*}"
+  ver="${fname%%_*}"
   "${PSQL[@]}" -v ON_ERROR_STOP=1 -c \
     "INSERT INTO schema_migrations (version, filename, checksum) VALUES ('$ver', '$fname', 'replayed') ON CONFLICT (version) DO NOTHING;" >/dev/null
   APPLIED_COUNT=$((APPLIED_COUNT + 1))

@@ -1,19 +1,22 @@
 -- ============================================================================
 -- Migration: 20261224000001_fix_is_admin_param_rename
--- Purpose: Ensure is_admin exists with correct body. The original parameter
---   name is `p_uid` (from 20260916000000). CREATE OR REPLACE cannot rename
---   a parameter, and DROP FUNCTION fails because RLS policies depend on it.
---   So we use CREATE OR REPLACE keeping the original parameter name `p_uid`.
---   The function body is identical — only the parameter label differs, and
---   callers pass positional args so the label is not part of any signature.
+-- Purpose: Re-create is_admin with a stable parameter name. The live DB has
+--   is_admin(user_id) from an older baseline; renaming the parameter would
+--   break CREATE OR REPLACE (Postgres rejects "cannot change name of input
+--   parameter"). So we keep the parameter name `user_id` and rely on CREATE
+--   OR REPLACE which is idempotent.
+--   CRITICAL: Never use CASCADE here — it drops every RLS policy that
+--   references is_admin (users_select_admin, gates_select_admin,
+--   sdetails_manage_admin, predictions, audit_logs, etc.) and those policies
+--   are never recreated.
 -- ============================================================================
-CREATE OR REPLACE FUNCTION public.is_admin(p_uid uuid)
+CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid)
 RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
-    WHERE id = p_uid AND role IN ('admin', 'sysadmin')
+    WHERE id = user_id AND role IN ('admin', 'sysadmin')
   );
 $$;
 
