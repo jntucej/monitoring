@@ -14,8 +14,21 @@ CREATE INDEX IF NOT EXISTS idx_movement_logs_user_ts
   ON movement_logs (user_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_movement_logs_correction
   ON movement_logs (corrected_by_scan_id) WHERE corrected_by_scan_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_permreq_status_sla
-  ON permission_requests (status, sla_deadline);
+-- Guard the SLA index with a column-existence check: sla_deadline is added
+-- by 20261026000001_permission_workflow_reconciliation.sql which runs AFTER
+-- this file in the replay chain; when the column is not yet present the
+-- index is skipped (20261026000001 creates it idempotently).
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'permission_requests'
+      AND column_name = 'sla_deadline'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_permreq_status_sla
+             ON public.permission_requests (status, sla_deadline)';
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_sessions_active
   ON sessions (user_id) WHERE revoked_at IS NULL;
 

@@ -11,6 +11,7 @@ jobs:
       postgres:
         image: supabase/postgres:17.6.1.136
         env:
+          POSTGRES_USER: supabase_admin
           POSTGRES_PASSWORD: ci_dummy_postgres_password_123
           POSTGRES_DB: gate_monitor
         ports: ["5432:5432"]
@@ -29,14 +30,12 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          # Supabase/Neon postgres image: the `postgres` role is the only role
-          # whose password is known (POSTGRES_PASSWORD). The `public` schema
-          # is owned by `supabase_admin` (unknown generated password), so a
-          # bare `postgres` user lacks CREATE on public. The bootstrap step
-          # below grants postgres DDL rights on public + auth before loading
-          # schema.sql; the check-migrations.sh bootstrap block does the same
-          # grant idempotently for the migration replay step.
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          # The Supabase postgres image creates the `public` schema owned by
+          # `supabase_admin` with an unknown generated password. Setting
+          # POSTGRES_USER=supabase_admin in the service env makes the image's
+          # initdb create supabase_admin with the known POSTGRES_PASSWORD,
+          # so we can connect as it and create objects in public directly.
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
           # Grant postgres full DDL rights on public so schema.sql CREATE
           # statements succeed. Tolerate errors on a fresh DB where some
@@ -55,7 +54,7 @@ jobs:
         env:
           # Same postgres role as the Bootstrap step. check-migrations.sh
           # now grants DDL rights to the connecting role dynamically.
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: bash scripts/check-migrations.sh
       - name: Role → workflow consistency
         run: npx tsx scripts/check-role-workflow.ts
