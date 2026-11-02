@@ -186,7 +186,7 @@ export async function runOperatorActionMaintenance() {
       const { promisify } = await import('node:util');
       const run = promisify(execFile);
       await run('bash', [
-        '/opt/monitoring/compose/scripts/apply-operator-action.sh',
+        '/app/scripts/apply-operator-action.sh',
         row.id,
       ], { timeout: 60_000 });
       // Phase 5 LEARN: record the outcome so the forecaster's incident memory
