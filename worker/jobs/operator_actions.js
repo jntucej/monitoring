@@ -160,6 +160,14 @@ export async function runOperatorActionMaintenance() {
   const poolMax = pool.max ?? 5;
   void poolMax;
 
+  // Kill switch (DR §4): if auto_response_enabled is FALSE, skip all
+  // auto-execution. The function still expires stale rows — expiry is
+  // non-destructive — but no auto-actions are taken.
+  const kill = await pool.query(
+    `SELECT enabled FROM public.automation_controls WHERE name = 'auto_response_enabled'`
+  ).catch(() => ({ rows: [] }));
+  const autoResponseEnabled = kill.rows[0]?.enabled !== false;
+
   const res = await pool.query(
     `SELECT public.expire_and_auto_run_operator_actions() AS rows`
   );
@@ -167,6 +175,20 @@ export async function runOperatorActionMaintenance() {
   // Empty result = '[]' / [] -> no auto-execution needed.
   const raw = res.rows?.[0]?.rows;
   const autoRows = Array.isArray(raw) ? raw : (typeof raw === 'string' ? JSON.parse(raw || '[]') : []);
+
+  if (!autoResponseEnabled) {
+    if (autoRows.length) {
+      console.log(`[operator-actions] kill switch auto_response_enabled=FALSE — skipping ${autoRows.length} auto-exec row(s)`);
+      // Roll back to pending so a human can approve them manually.
+      for (const row of autoRows) {
+        await pool.query(
+          `UPDATE public.operator_actions SET status='pending' WHERE id=$1::uuid AND status='auto_executed'`,
+          [row.id]
+        ).catch(() => {});
+      }
+    }
+    return 0;
+  }
 
   for (const row of autoRows) {
     // Phase 4 guardrails: circuit breaker + cooldown before any auto action.
@@ -190,9 +212,7 @@ export async function runOperatorActionMaintenance() {
         row.id,
       ], { timeout: 60_000 });
       // Phase 5 LEARN: record the outcome so the forecaster's incident memory
-      // grows. outcome='resolved' when the script exited 0; the signal_after
-      // snapshot is the infra row 5 min later (best-effort, null on failure).
-      const startedAt = Date.now();
+      // grows. outcome='resolved' when the script exited 0.
       await recordActionOutcome(pool, row.id, 'resolved');
       console.log(`[operator-actions] auto-executed ${row.kind} (${row.id})`);
     } catch (err) {

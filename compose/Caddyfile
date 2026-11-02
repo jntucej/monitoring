@@ -33,11 +33,28 @@
         -X-Forwarded-Host
     }
 
-    reverse_proxy web:3000 {
-        flush_interval -1
-        header_up X-Client-IP {remote_host}
-        header_up X-Real-IP   {remote_host}
-        header_up X-Forwarded-Proto https
-        header_up X-Forwarded-Host {host}
+    # DR §7: /status is the one page that must NEVER depend on Next.js.
+    # Caddy serves the static fallback page directly. The page fetches
+    # /api/status (live) and falls back to /status-last.json (last known
+    # good, written by the worker's infra-snapshot job every 60s).
+    handle /status {
+        root * /usr/share/status
+        try_files /status.html
+        file_server
+    }
+
+    handle /status-last.json {
+        root * /usr/share/status
+        file_server
+    }
+
+    handle {
+        reverse_proxy web:3000 {
+            flush_interval -1
+            header_up X-Client-IP {remote_host}
+            header_up X-Real-IP   {remote_host}
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Host {host}
+        }
     }
 }

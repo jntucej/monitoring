@@ -47,6 +47,26 @@ if [[ "$HEADER" != *"PostgreSQL database dump"* ]]; then
     exit 1
 fi
 
+# 2c. Schema-staleness check (DR §3): compare the table count in the backup
+# against the live schema. If the backup was taken BEFORE a migration ran,
+# restoring it loses that migration. This is a warning, not a hard fail —
+# the backup is still valid for its point-in-time — but the operator must
+# know.
+BACKUP_TABLES=$(gunzip -c "$LATEST_BACKUP" 2>/dev/null | grep -c "CREATE TABLE" || echo 0)
+LIVE_TABLES=$(docker exec "$PG_CONTAINER" psql -U postgres -d "$DB" -tAc \
+  "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null || echo 0)
+LATEST_MIGRATION=$(docker exec "$PG_CONTAINER" psql -U postgres -d "$DB" -tAc \
+  "SELECT filename FROM public.schema_migrations ORDER BY version DESC LIMIT 1;" 2>/dev/null || echo "unknown")
+echo "Backup contains ${BACKUP_TABLES} CREATE TABLE statements; live DB has ${LIVE_TABLES} public tables."
+echo "Latest applied migration: ${LATEST_MIGRATION}"
+if [ "$BACKUP_TABLES" -lt "$LIVE_TABLES" ]; then
+    echo "⚠️  Backup has ${BACKUP_TABLES} tables, live has ${LIVE_TABLES} — backup may be stale."
+    echo "   This backup cannot restore a deploy that added tables since it was taken."
+    echo "   The restore below still validates the dump's integrity, but a live deploy"
+    echo "   will require a backup taken AFTER migration ${LATEST_MIGRATION}."
+fi
+echo ""
+
 # 3. Create scratch DB with template = template1 (which has extensions allowed)
 SCRATCH_DB="restore_test_$(date +%Y%m%d_%H%M%S)"
 echo "Creating scratch database: $SCRATCH_DB..."

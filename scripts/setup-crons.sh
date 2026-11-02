@@ -38,8 +38,10 @@ cat > /etc/cron.d/gate-backup <<EOF
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-# Full backup every 6 hours (matches master-backup.sh's 6h cadence comment).
-0 */6 * * *  root  bash ${BASE_DIR}/scripts/master-backup.sh >> ${BASE_DIR}/backups/cron.log 2>&1
+# Full backup every hour — RPO target is 1h (RUNBOOK.md). The 6h cadence
+# gave RPO of up to 6h; hourly dumps close that gap. master-backup.sh's
+# free-space pre-check keeps the volume from filling up.
+0 * * * *     root  bash ${BASE_DIR}/scripts/master-backup.sh >> ${BASE_DIR}/backups/cron.log 2>&1
 
 # Restore-test the latest backup nightly at 03:15. On a non-zero exit
 # (failed restore drill) notify the operator directly — a failed backup
@@ -47,6 +49,16 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # restore attempt, so the failure is pushed to Telegram (when configured)
 # instead of waiting for the log to be read.
 15 3 * * *   root  bash -c 'LOG='${BASE_DIR}'/backups/verify.log; bash '${BASE_DIR}'/scripts/verify-backup.sh >> "$LOG" 2>&1; RC=$?; if [ $RC -ne 0 ]; then TAIL=$(tail -n 20 "$LOG" 2>/dev/null || true); MSG="⚠️ Backup restore drill FAILED (exit $RC) at $(date -Iseconds)\\nLast log lines:\\n$TAIL"; TELEGRAM_BOT_TOKEN='${CRON_TELEGRAM_TOKEN}' bash '${BASE_DIR}'/scripts/telegram-notify.sh "$MSG" 2>/dev/null || true; fi; exit $RC'
+
+# Monthly chaos test (DR §6): Sunday 2am. Stops gate_worker + gate_web,
+# confirms auto-heal restarts them, verifies the kill switch holds, then
+# re-enables. Writes a status_updates row.
+0 2 * * 0    root  bash ${BASE_DIR}/scripts/monthly-chaos-test.sh >> ${BASE_DIR}/backups/chaos-cron.log 2>&1
+
+# Quarterly DR restore drill (DR §6): first Tuesday of the month at 3am.
+# Restores the latest backup into a scratch DB, times it against the
+# 240-min RTO target. Writes a status_updates row.
+0 3 1 * 2    root  bash ${BASE_DIR}/scripts/quarterly-restore-drill.sh >> ${BASE_DIR}/backups/drill-cron.log 2>&1
 EOF
 chmod 644 /etc/cron.d/gate-backup
 echo "✓ Installed /etc/cron.d/gate-backup"

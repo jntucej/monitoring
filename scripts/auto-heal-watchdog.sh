@@ -11,10 +11,21 @@ set -uo pipefail
 
 TELEGRAM_SCRIPT="/root/monitoring/scripts/telegram-notify.sh"
 LOG_FILE="/var/log/gate-auto-heal.log"
+DB_URL="${DATABASE_URL:-postgres://gate_app:***@${POSTGRES_HOST:-127.0.0.1}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}}"
 
 log() {
   local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
   echo "$msg" | tee -a "$LOG_FILE"
+}
+
+# Kill switch (DR §4): read the auto_heal_enabled row from automation_controls.
+# If a sysadmin has disabled auto-heal, this script does nothing — detection
+# and alerting still run, but no restarts, no state changes.
+auto_heal_enabled() {
+  local val
+  val=$(docker exec gate_postgres psql -U postgres -d gate_monitor -tAc \
+    "SELECT enabled FROM automation_controls WHERE name='auto_heal_enabled'" 2>/dev/null || echo "t")
+  [ "$val" = "t" ]
 }
 
 notify() {
@@ -65,6 +76,14 @@ CONTAINERS=("gate_postgres" "gate_redis" "gate_llm_proxy" "gate_web" "gate_worke
 for c in "${CONTAINERS[@]}"; do
   STATUS=$(docker inspect --format '{{.State.Status}}' "$c" 2>/dev/null || echo "missing")
   HEALTH=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$c" 2>/dev/null || echo "none")
+
+  # Kill switch: skip all restart actions if auto-heal is disabled.
+  if ! auto_heal_enabled; then
+    if [ "$STATUS" != "running" ]; then
+      notify "⚠️ *Auto-Heal Disabled*: \`$c\` is down — not restarting (kill switch active). Manual intervention required."
+    fi
+    continue
+  fi
 
   if [ "$STATUS" != "running" ]; then
     log "ALERT: Container $c is not running (status: $STATUS). Restarting..."

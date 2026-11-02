@@ -36,6 +36,19 @@ interface Forecast {
   recommendedAction: string;
   evidence: Record<string, unknown>;
 }
+interface AutomationControl {
+  name: string;
+  enabled: boolean;
+  reason: string | null;
+  disabledBy: string | null;
+  disabledAt: string | null;
+}
+interface EscalationStep {
+  level: number;
+  role: string;
+  notifyAtMin: number;
+  channels: string[];
+}
 interface LiveHealth {
   capturedAt: string | null;
   dbPoolUsed: number | null;
@@ -59,8 +72,24 @@ export default function OperatorActionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [forecasts, setForecasts] = useState<Forecast[]>([]);
   const [health, setHealth] = useState<LiveHealth | null>(null);
+  const [controls, setControls] = useState<AutomationControl[]>([]);
+  const [ladder, setLadder] = useState<EscalationStep[]>([]);
+  const [toggling, setToggling] = useState<string | null>(null);
   const { request } = useApi();
   const user = useAuthStore((s) => s.user);
+
+  async function toggleControl(name: string, enabled: boolean, reason: string) {
+    setToggling(name);
+    try {
+      await request(
+        "/api/sysadmin/automation-controls/" + encodeURIComponent(name),
+        { method: "PATCH", body: JSON.stringify({ enabled, reason }) }
+      );
+      await refresh();
+    } catch {
+      setToggling(null);
+    }
+  }
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -77,6 +106,11 @@ export default function OperatorActionsPage() {
       const res = actionsRes;
       setForecasts(forecastRes.data?.forecasts ?? []);
       setHealth(forecastRes.data?.latestSnapshot ?? null);
+      const ctrlRes = await request<{ controls: AutomationControl[]; ladder: EscalationStep[] }>(
+        "/api/sysadmin/automation-controls"
+      );
+      setControls(ctrlRes.data?.controls ?? []);
+      setLadder(ctrlRes.data?.ladder ?? []);
       if (res.success && res.data) {
         setRows(res.data.actions ?? []);
       } else {
@@ -160,6 +194,47 @@ export default function OperatorActionsPage() {
               {(f.confidence * 100).toFixed(0)}%) → <code>{f.recommendedAction}</code>
             </div>
           ))}
+        </div>
+      )}
+
+      {controls.length > 0 && (
+        <div className="mb-4 rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+          <div className="mb-2 text-sm font-semibold">Automation Kill Switches</div>
+          <div className="flex flex-col gap-2">
+            {controls.map((c) => (
+              <div key={c.name} className="flex items-center justify-between gap-3 text-xs">
+                <span className="flex-1">
+                  <code>{c.name.replace("_enabled", "")}</code>
+                  {c.reason && <span style={{ opacity: 0.6 }}> — {c.reason}</span>}
+                </span>
+                <button
+                  type="button"
+                  disabled={toggling === c.name}
+                  onClick={() => toggleControl(c.name, !c.enabled, c.enabled ? "Re-enabled via dashboard" : "Disabled via dashboard")}
+                  className="rounded px-2 py-1 text-xs font-medium"
+                  style={{
+                    background: c.enabled ? "var(--action-danger)" : "var(--action-success, #1a7f37)",
+                    color: "#fff",
+                    opacity: toggling === c.name ? 0.5 : 1,
+                  }}
+                >
+                  {c.enabled ? "ENABLED — click to stop" : "STOPPED — click to resume"}
+                </button>
+              </div>
+            ))}
+          </div>
+          {ladder.length > 0 && (
+            <div className="mt-3 text-xs" style={{ opacity: 0.7 }}>
+              <div className="font-medium">Escalation ladder</div>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                {ladder.map((s) => (
+                  <span key={s.level}>
+                    {s.level}. {s.role} @ {s.notifyAtMin}m ({s.channels.join("/")})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

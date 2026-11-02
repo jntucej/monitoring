@@ -104,4 +104,25 @@ export default async function collectInfraSnapshot() {
     [dbPoolUsed, dbPoolMax, queueDepth, sseStreams, sseCapacity,
      diskFreePct, scanP95Ms, errorRate, backupAgeHours, containerUnhealthy]
   );
+
+  // DR §7: write a last-known-good snapshot JSON so Caddy's static /status
+  // page can render it when the web container is down. The Caddy container
+  // reads /usr/share/status/status-last.json (mounted from status_data).
+  try {
+    const { writeFileSync } = await import('node:fs');
+    const statusLastPath = process.env.STATUS_LAST_JSON || '/usr/share/status/status-last.json';
+    writeFileSync(statusLastPath, JSON.stringify({
+      capturedAt: new Date().toISOString(),
+      dbPoolUsed,
+      dbPoolMax,
+      queueDepth,
+      diskFreePct,
+      scanP95Ms,
+      errorRate,
+      unhealthyContainers: containerUnhealthy,
+    }));
+  } catch {
+    // The Caddy fallback is best-effort; never crash the snapshot job
+    // because the status file couldn't be written.
+  }
 }

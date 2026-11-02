@@ -270,6 +270,11 @@ services:
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for worker}
+      # DR §7: write the last-known-good status snapshot to a named volume
+      # shared with Caddy's /status static page. The Caddy container mounts
+      # this volume read-only at /usr/share/status; the worker writes to
+      # /usr/share/status/status-last.json every 60s.
+      - STATUS_LAST_JSON=/usr/share/status/status-last.json
     depends_on:
       postgres:
         condition: service_healthy
@@ -285,6 +290,11 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    # DR §7: the worker writes the last-known-good status snapshot here every
+    # 60s. Caddy serves it read-only at /status as the fallback when web is
+    # down. Without this mount the static page can only show the seed value.
+    volumes:
+      - status_data:/usr/share/status
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
@@ -300,6 +310,7 @@ services:
       - "127.0.0.1:443:443"
     volumes:
       - ./compose/Caddyfile:/etc/caddy/Caddyfile:ro
+      - status_data:/usr/share/status:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -336,6 +347,10 @@ volumes:
   caddy_data:
   caddy_config:
   uploads_data:
+  # DR §7: shared between gate_worker (read-write, writes status-last.json
+  # every 60s) and gate_caddy (read-only, serves it at /status). Seeded
+  # with status.html + status-last.json at first deploy.
+  status_data:
   prometheus_data:
 
 networks:

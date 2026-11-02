@@ -41,6 +41,15 @@ function linreg(points) {
 
 export default async function runInfraForecaster() {
   const pool = getWorkerDbPool();
+
+  // Kill switch (DR §4): if auto_scale_enabled is FALSE, the forecaster still
+  // records forecasts (observation is free) but does NOT create operator_actions
+  // rows. A human can still read infra_forecasts and act manually.
+  const kill = await pool.query(
+    `SELECT enabled FROM public.automation_controls WHERE name = 'auto_scale_enabled'`
+  ).catch(() => ({ rows: [] }));
+  const autoScaleEnabled = kill.rows[0]?.enabled !== false;
+
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
   const forecastRows = [];
@@ -128,7 +137,7 @@ export default async function runInfraForecaster() {
     const mode = policy.rows[0]?.execution_mode ?? 'approve';
     const minConf = Number(policy.rows[0]?.min_confidence ?? 0.8);
 
-    if (confidence >= minConf && mode !== 'approve') {
+    if (autoScaleEnabled && confidence >= minConf && mode !== 'approve') {
       // auto or notify -> create a low-risk operator_actions row (auto-executes
       // after its window if no one rejects).
       const orow = await pool.query(
