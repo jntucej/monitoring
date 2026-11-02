@@ -38,27 +38,21 @@ psql_live() {
   docker exec gate_postgres psql -U postgres -d gate_monitor -tAc "$1" 2>/dev/null
 }
 psql_gate_app() {
-  # Run as gate_app over TCP (the app's real path). The .env has the
-  # POSTGRES_PASSWORD; construct the URL the same way compose does.
-  local pw host port db
+  # Run as gate_app over TCP (the app's real path).
+  local pw
   pw=$(grep '^POSTGRES_PASSWORD=' /opt/monitoring/compose/.env 2>/dev/null | cut -d= -f2- || true)
-  host="${POSTGRES_HOST:-postgres}"; port="${POSTGRES_PORT:-5432}"; db="${POSTGRES_DB:-gate_monitor}"
-  # Fall back to the container's own connection if env is not set.
-  docker exec gate_web node -e "
-    const { Pool } = require('pg');
-    const p = new Pool({ connectionString: process.env.DATABASE_URL });
-    p.query(process.argv[1]).then(r => {
-      const v = r.rows[0] ? (typeof r.rows[0] === 'object' ? JSON.stringify(r.rows[0]) : r.rows[0]) : '';
-      console.log(v); p.end();
-    }).catch(e => { console.error(e.message); process.exit(1); });
-  " "$1" 2>/dev/null
+  docker exec -e PGPASSWORD="$pw" gate_postgres psql -U gate_app -d gate_monitor -h 127.0.0.1 -tAc "$1" 2>/dev/null
 }
 
-# ── L1: all containers running ──────────────────────────────────────────
-NOT_UP=$(docker ps --format '{{.Names}}\t{{.Status}}' | grep -E 'gate_' | grep -vE 'Up.*healthy|Up.*\(' | wc -l)
-# docker ps only shows running ones; count the gate_ ones that are NOT "Up"
-ALL_UP_CHECK=$(docker ps -a --filter "name=gate_" --format '{{.State}}' 2>/dev/null | grep -vc "running")
-check 1 "All gate containers running" "0" "$ALL_UP_CHECK"
+# ── L1: all containers running (ignore one-shot/expected non-running) ──
+# gate_migrate exits by design (one-shot migration). gate_cloudflared sits
+# in "created" when TUNNEL_TOKEN is unset (the placeholder in .env is OK).
+# Count only the core 5 that MUST be running: postgres, redis, web, worker,
+# caddy. The extra gate_* sidecar containers (prometheus, cadvisor,
+# llm_proxy) are not part of the core liveness check.
+CORE_NOT_UP=$(docker ps -a --filter "name=gate_" --format '{{.Names}}\t{{.State}}' 2>/dev/null \
+  | awk -F'\t' '$1 ~ /^gate_(postgres|redis|web|worker|caddy)$/ && $2 != "running" {print}' | wc -l)
+check 1 "All core gate containers running" "0" "$CORE_NOT_UP"
 
 # ── L2: /api/health returns 200 through Caddy ───────────────────────────
 HTTP=$(curl -sS -o /dev/null -w "%{http_code}" -m 5 "$BASE/api/health" 2>/dev/null || echo "000")
@@ -98,7 +92,7 @@ check 6 "Read route responds" "true" "$L6_OK"
 TICKET=$(curl -sS -X POST "$BASE/api/permissions" \
   -H "Authorization: Bearer $TOKEN" -H "Origin: $BASE" -H "Content-Type: application/json" \
   -d '{"workflowType":"hostel","reason":"home_out","fromDate":"2026-11-10T00:00:00Z","toDate":"2026-11-12T00:00:00Z","description":"RECOVERY_PROBE"}' \
-  2>/dev/null | jq -r '.data.ticket_number // "null")')
+  2>/dev/null | jq -r '.data.ticket_number // "null"' || echo "null")
 L7_OK="false"
 if [ "$TICKET" != "null" ] && [ -n "$TICKET" ]; then
   ROWS=$(psql_live "SELECT count(*) FROM permissions WHERE description = 'RECOVERY_PROBE';")
@@ -114,8 +108,9 @@ L8_OK="false"; [ "${HB_AGE:-99999}" -lt 120 ] && L8_OK="true"
 check 8 "Worker heartbeat < 120s" "true" "$L8_OK"
 
 # ── L9: an SSE stream actually sends data within 10s ────────────────────
-SSE_DATA=$(timeout 10 curl -sN "$BASE/api/gate/stream" -H "Authorization: Bearer $TOKEN" 2>/dev/null | grep -c "^data:" || echo 0)
-L9_OK="false"; [ "${SSE_DATA:-0}" -gt 0 ] && L9_OK="true"
+SSE_DATA=$(timeout 10 curl -sN "$BASE/api/gate/stream" -H "Authorization: Bearer $TOKEN" 2>/dev/null | grep -c "^data:" )
+SSE_DATA=${SSE_DATA:-0}
+L9_OK="false"; [ "$SSE_DATA" -gt 0 ] && L9_OK="true"
 check 9 "SSE streams data" "true" "$L9_OK"
 
 # ── L10: cron endpoint is reachable with the right secret ───────────────
