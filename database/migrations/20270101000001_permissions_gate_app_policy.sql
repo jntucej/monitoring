@@ -27,7 +27,10 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app')
      AND EXISTS (SELECT 1 FROM pg_tables
-                 WHERE schemaname = 'public' AND tablename = 'permissions') THEN
+                 WHERE schemaname = 'public' AND tablename = 'permissions')
+     AND EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = 'permissions'
+                   AND column_name = 'requester_user_id') THEN
 
     -- gate_app is NOINHERIT + NOBYPASSRLS. It must not rely on service_role
     -- inheritance. Instead, give gate_app direct, least-privilege grants and
