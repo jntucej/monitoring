@@ -8,15 +8,32 @@
 --
 -- Fix: backfill `read_at` from `read`, then drop the `read` column entirely.
 -- All queries must switch from `read = TRUE/FALSE` to `read_at IS NOT NULL/NULL`.
+-- The `read` column only exists in pre-reconciliation DBs; it was never in
+-- the schema.sql baseline (which uses `read_at` from the start). Guard every
+-- step with column/table existence checks so the replay chain stays clean.
 
--- 1. Backfill read_at for any rows that were marked read but have no timestamp
-UPDATE public.notifications
-SET read_at = COALESCE(read_at, created_at)
-WHERE read = TRUE AND read_at IS NULL;
+DO $$
+BEGIN
+  -- 1. Backfill read_at for any rows that were marked read but have no timestamp
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'notifications'
+      AND column_name = 'read'
+  ) THEN
+    UPDATE public.notifications
+    SET read_at = COALESCE(read_at, created_at)
+    WHERE read = TRUE AND read_at IS NULL;
 
--- 2. Drop the redundant `read` column
-ALTER TABLE public.notifications DROP COLUMN IF EXISTS read;
+    -- 2. Drop the redundant `read` column
+    ALTER TABLE public.notifications DROP COLUMN read;
+  END IF;
 
--- 3. Update index: replace idx_notif_read (on `read`) with one on `read_at`
-DROP INDEX IF EXISTS public.idx_notif_read;
-CREATE INDEX IF NOT EXISTS idx_notif_read_at ON public.notifications(read_at);
+  -- 3. Update index: replace idx_notif_read (on `read`) with one on `read_at`
+  DROP INDEX IF EXISTS public.idx_notif_read;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND indexname = 'idx_notif_read_at'
+  ) THEN
+    CREATE INDEX idx_notif_read_at ON public.notifications(read_at);
+  END IF;
+END $$;
