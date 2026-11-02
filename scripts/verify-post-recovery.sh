@@ -65,8 +65,20 @@ WRITE_OK=$(psql_gate_app "BEGIN; INSERT INTO audit_logs (id, action, details) VA
 check 3 "gate_app can write audit_logs" "1" "$WRITE_OK"
 
 # ── L4: login returns a token ────────────────────────────────────────────
-SMOKE_USER="${SMOKE_USER:-sysadmin}"
-SMOKE_PASS="${SMOKE_PASS:-$(grep '^SYSADMIN_PASSWORD=' /opt/monitoring/compose/.env 2>/dev/null | cut -d= -f2- || echo 'Sysadmin@123')}"
+# L9 (SSE gate stream) only works with a gate-capable role (admin); a bare
+# sysadmin token returns UNAUTHORIZED and the stream check always fails.
+# Passwords are hardcoded test defaults (the playwright suite uses the same
+# values inline in tests/ui-all-roles-full.spec.ts); override via SMOKE_PASS.
+SMOKE_USER="${SMOKE_USER:-admin}"
+SMOKE_PASS="${SMOKE_PASS:-Admin@123}"
+if ! curl -sS -X POST "$BASE/api/auth/login" \
+  -H "Origin: $BASE" -H "Content-Type: application/json" \
+  -d "{\"login\":\"$SMOKE_USER\",\"password\":\"$SMOKE_PASS\"}" 2>/dev/null \
+  | jq -e '.data.token // .token' >/dev/null 2>&1; then
+  # admin creds drifted — fall back to sysadmin
+  SMOKE_USER="${SMOKE_USER_FALLBACK:-sysadmin}"
+  SMOKE_PASS="${SMOKE_PASS_FALLBACK:-Sysadmin@123}"
+fi
 TOKEN=$(curl -sS -X POST "$BASE/api/auth/login" \
   -H "Origin: $BASE" -H "Content-Type: application/json" \
   -d "{\"login\":\"$SMOKE_USER\",\"password\":\"$SMOKE_PASS\"}" \
