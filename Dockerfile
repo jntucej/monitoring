@@ -84,4 +84,8 @@ ENV HOME=/app
 ENV XDG_CACHE_HOME=/app/.cache
 ENV XDG_CONFIG_HOME=/app/.config
 
+# DR §7: the worker (nextjs user) writes status-last.json into the status_data
+# volume every 60s so Caddy's static /status page can serve last-known-good
+# when web is down. The status_data volume is chowned to nextjs:nextjs (1001)
+# on first deploy via `docker run --rm -v compose_status_data:/s alpine chown -R 1001:1001 /s`.
 CMD ["node", "worker/index.mjs"]

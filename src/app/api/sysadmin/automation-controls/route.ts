@@ -31,8 +31,8 @@ interface ControlRow {
 
 async function handleGet(_req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
   const controls = await query<ControlRow>(
-    `SELECT name, enabled, reason,
-            u.login AS disabled_by, disabled_at
+    `SELECT c.name, c.enabled, c.reason,
+            u.login_identifier AS disabled_by, c.disabled_at
        FROM public.automation_controls c
        LEFT JOIN public.users u ON u.id = c.disabled_by
       ORDER BY c.name`
@@ -70,13 +70,13 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
 
   const userId = ctx.auth.userId;
   const res = await query(
-    `UPDATE public.automation_controls
+    `UPDATE public.automation_controls AS c
         SET enabled = $2,
-            reason = COALESCE($3, reason),
+            reason = COALESCE($3, c.reason),
             disabled_by = CASE WHEN $2::boolean THEN NULL ELSE $4::uuid END,
             disabled_at = CASE WHEN $2::boolean THEN NULL ELSE NOW() END
-      WHERE name = $1
-      RETURNING name, enabled, reason, disabled_by, disabled_at`,
+      WHERE c.name = $1
+      RETURNING c.name, c.enabled, c.reason, c.disabled_by, c.disabled_at`,
     [name, enabled, reason ?? null, userId]
   );
 
