@@ -29,13 +29,22 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          # Supabase/Neon postgres image: `supabase_admin` owns the public
-          # schema and its password is set to the POSTGRES_PASSWORD env value
-          # during the image's initdb. Connect as supabase_admin so that
-          # CREATE/GRANT statements in schema.sql and the migration replay
-          # succeed.
-          DATABASE_URL: postgres://supabase_admin:***@localhost:5432/gate_monitor
+          # Supabase/Neon postgres image: the `postgres` role is the only role
+          # whose password is known (POSTGRES_PASSWORD). The `public` schema
+          # is owned by `supabase_admin` (unknown generated password), so a
+          # bare `postgres` user lacks CREATE on public. The bootstrap step
+          # below grants postgres DDL rights on public + auth before loading
+          # schema.sql; the check-migrations.sh bootstrap block does the same
+          # grant idempotently for the migration replay step.
+          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
         run: |
+          # Grant postgres full DDL rights on public so schema.sql CREATE
+          # statements succeed. Tolerate errors on a fresh DB where some
+          # objects may not exist yet (ON_ERROR_STOP=0).
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT CREATE, USAGE ON SCHEMA public TO postgres;" || true
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT ALL ON DATABASE gate_monitor TO postgres;" || true
           psql "$DATABASE_URL" -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict
           # schema_migrations (NOT NULL filename/checksum) would clash with
@@ -44,9 +53,9 @@ jobs:
           # + Supabase-compat roles) and only needs schema.sql loaded.
       - name: Apply migrations
         env:
-          # Same supabase_admin role as the Bootstrap step — required for
-          # GRANT/CREATE in the Supabase/Neon postgres image.
-          DATABASE_URL: postgres://supabase_admin:ci_dummy_supabase_admin_password@localhost:5432/gate_monitor
+          # Same postgres role as the Bootstrap step. check-migrations.sh
+          # now grants DDL rights to the connecting role dynamically.
+          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
         run: bash scripts/check-migrations.sh
       - name: Role → workflow consistency
         run: npx tsx scripts/check-role-workflow.ts

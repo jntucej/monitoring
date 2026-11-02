@@ -1,5 +1,11 @@
 -- ── Hardening migration for runtime envelope and critical security items ──────
 
+-- corrected_by_scan_id was referenced by indexes/views in this migration but
+-- never added to movement_logs (schema.sql baseline lacks it and no earlier
+-- migration creates it). Add it here before the index/view that depend on it.
+ALTER TABLE movement_logs
+  ADD COLUMN IF NOT EXISTS corrected_by_scan_id UUID;
+
 CREATE INDEX IF NOT EXISTS idx_movement_logs_ts
   ON movement_logs (timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_movement_logs_gate_ts
