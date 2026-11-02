@@ -57,18 +57,16 @@ BEGIN
       );
 
     -- INSERT: allow the app role to insert rows only for the acting user.
-    -- NEW.requester_user_id must be inside a string because NEW is not a
-    -- valid PL/pgSQL identifier inside a DO block — it is only recognised
-    -- as the SQL pseudo-record in a plain-SQL CREATE POLICY context.
+    -- RLS policy expressions do NOT support the NEW pseudo-record — that is
+    -- only valid in trigger functions. Reference the new row's columns via
+    -- the table-qualified column name instead.
     DROP POLICY IF EXISTS permissions_gate_app_insert ON public.permissions;
-    EXECUTE $pol$
-      CREATE POLICY permissions_gate_app_insert ON public.permissions
-        FOR INSERT TO gate_app
-        WITH CHECK (
-          current_setting('app.current_user_id', true) IS NOT NULL
-          AND NEW.requester_user_id = current_setting('app.current_user_id', true)::uuid
-        )
-    $pol$;
+    CREATE POLICY permissions_gate_app_insert ON public.permissions
+      FOR INSERT TO gate_app
+      WITH CHECK (
+        current_setting('app.current_user_id', true) IS NOT NULL
+        AND public.permissions.requester_user_id = current_setting('app.current_user_id', true)::uuid
+      );
 
     -- UPDATE: allow the app role to update only rows it can read.
     DROP POLICY IF EXISTS permissions_gate_app_update ON public.permissions;
