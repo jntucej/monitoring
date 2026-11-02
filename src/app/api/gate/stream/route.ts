@@ -20,7 +20,14 @@ import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ri
 import type { AuthContext } from "@/lib/authContext";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
+// Self-hosted standalone runtime (node server.js) — not Vercel serverless,
+// so no 45s cutoff applies. Long-lived SSE streams are correct: kiosk
+// operators keep the tab open for a shift. The ring buffer still handles
+// reconnects, and req.signal cleanup prevents orphaned streams on close.
+// Cap at 1h so a browser that loses its tab silently still gets garbage
+// collected server-side; the client EventSource auto-reconnects with
+// Last-Event-ID within ~10s, replaying any missed events from the ring.
+export const maxDuration = 3600;
 
 const RING_KEY = "gate-stream";
 

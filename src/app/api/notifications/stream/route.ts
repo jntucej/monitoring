@@ -7,6 +7,11 @@ import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ri
 // SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
 // Reconnect semantics: per-user ring buffer (keyed by userId) so a reconnect
 // replays only events the caller is authorized to see — no cross-user leak.
+
+export const dynamic = "force-dynamic";
+// Self-hosted standalone runtime — long-lived SSE is correct here. 1h cap:
+// client reconnects with Last-Event-ID within ~10s, ring buffer replays.
+export const maxDuration = 3600;
 async function handleGet(req: NextRequest) {
   const callerId = req.headers.get("x-user-id");
   const callerRole = req.headers.get("x-user-role") || "user";

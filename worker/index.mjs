@@ -50,6 +50,33 @@ import dispatchNotifications from './jobs/dispatch_notifications.js';
 import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import sendSmsQueue from './jobs/send_sms.js';
+import hardDeleteExpired from './jobs/hard_delete_expired.js';
+
+/**
+ * Job heartbeat sentinel: after each scheduled run, upsert a row in
+ * worker_job_heartbeats so an external checker (sysadmin jobs API, a
+ * Prometheus alert, or a host-level cron) can detect a job that silently
+ * stopped running. The dead-man's-switch pattern: a stale heartbeat is the
+ * failure signal, not a successful run.
+ */
+async function writeJobHeartbeat(name, ok, err) {
+  try {
+    const pool = getWorkerDbPool();
+    await pool.query(
+      `INSERT INTO public.worker_job_heartbeats (job_name, last_run_at, last_status, last_error, runs_total)
+       VALUES ($1, NOW(), $2, $3, 1)
+       ON CONFLICT (job_name) DO UPDATE SET
+         last_run_at = NOW(),
+         last_status = $2,
+         last_error  = $3,
+         runs_total  = public.worker_job_heartbeats.runs_total + 1`,
+      [name, ok ? 'ok' : 'error', ok ? null : (err?.message ?? String(err)).slice(0, 500)]
+    );
+  } catch (hbErr) {
+    // Heartbeat write failure must not take down the job run.
+    console.error(`[worker] heartbeat write failed for ${name}:`, hbErr);
+  }
+}
 
 // Periodic maintenance jobs run as cron-style intervals in the worker.
 // Each job is idempotent and fail-safe: a single failure logs and continues.
@@ -73,12 +100,23 @@ async function runJob(name, fn) {
       console.log(`[worker] ${name} skipped — another worker holds the lock`);
       return;
     }
+    const startedAt = Date.now();
+    let jobError = null;
     try {
       await fn();
-    } finally {
-      await pool.query("SELECT pg_advisory_unlock(hashtext($1))", [`worker:${name}`]);
+    } catch (err) {
+      jobError = err;
+    }
+    await writeJobHeartbeat(name, !jobError, jobError);
+    console.log(`[worker] ${name} finished in ${Date.now() - startedAt}ms${jobError ? ` (error: ${jobError.message})` : ''}`);
+    await pool.query("SELECT pg_advisory_unlock(hashtext($1))", [`worker:${name}`]);
+    if (jobError) {
+      // Re-throw so the caller's catch (if any) logs it; the heartbeat
+      // already recorded it, so this is purely for the structured log.
+      console.error(`[worker] ${name} failed:`, jobError);
     }
   } catch (err) {
+    await writeJobHeartbeat(name, false, err);
     console.error(`[worker] ${name} lock/run error:`, err);
   }
 }
@@ -96,6 +134,7 @@ const jobs = [
   { name: 'cleanup-ephemeral', ms: 15 * 60 * 1000, run: () => runJob('cleanup-ephemeral', cleanupEphemeral) },
   { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
   { name: 'cleanup-movement-logs', ms: 24 * 60 * 60 * 1000, run: () => runJob('cleanup-movement-logs', cleanupMovementLogs) },
+  { name: 'hard-delete-expired', ms: 60 * 60 * 1000, run: () => runJob('hard-delete-expired', hardDeleteExpired) },
 ];
 
 for (const job of jobs) {

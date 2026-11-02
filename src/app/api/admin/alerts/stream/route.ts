@@ -7,7 +7,9 @@ import type { Alert } from "@/lib/types";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 45;
+// Self-hosted standalone runtime — long-lived SSE is correct here. 1h cap:
+// client reconnects with Last-Event-ID within ~10s, ring buffer replays.
+export const maxDuration = 3600;
 
 // §5 alert-tier visibility. The stream previously pushed every unresolved
 // alert row to every connected client. Now each alert is filtered by the

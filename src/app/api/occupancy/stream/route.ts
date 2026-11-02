@@ -4,7 +4,9 @@ import { getCurrentOccupancy } from "@/server/services/occupancy/occupancy";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 45; // ponytail: limit lifetime to 45s for serverless execution
+// Self-hosted standalone runtime — long-lived SSE is correct here. 1h cap:
+// client reconnects with Last-Event-ID within ~10s, ring buffer replays.
+export const maxDuration = 3600;
 
 const RING_KEY = "occupancy-stream";
 

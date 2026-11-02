@@ -4,6 +4,11 @@ services:
     container_name: gate_postgres
     restart: always
     cpu_shares: 1024
+    # Long-run resilience: per-container memory caps so one runaway service
+    # cannot OOM-kill the whole stack (see paste #7 month-six failure mode).
+    # Postgres shared_buffers is 25% of RAM; give it the largest slice.
+    mem_limit: 2g
+    mem_reservation: 512m
     env_file:
       - path: .env
         required: false
@@ -29,6 +34,10 @@ services:
     container_name: gate_redis
     restart: always
     cpu_shares: 768
+    # Long-run resilience: Redis is a hot-path cache/queue; cap it so a
+    # key-bloat or unbounded list cannot OOM the host.
+    mem_limit: 512m
+    mem_reservation: 64m
     env_file:
       - path: .env
         required: false
@@ -140,6 +149,10 @@ services:
       args:
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
+    # Long-run resilience: cap Next.js so a runaway RSC payload or memory
+    # leak in an SSE route cannot consume the whole host and OOM the stack.
+    mem_limit: 1g
+    mem_reservation: 256m
     container_name: gate_web
     restart: always
     env_file:
@@ -236,6 +249,10 @@ services:
     container_name: gate_worker
     restart: always
     cpu_shares: 256
+    # Long-run resilience: worker holds a PG pool + cron jobs; cap it so a
+    # leaky job or unbounded queue backlog cannot OOM the host.
+    mem_limit: 512m
+    mem_reservation: 128m
     env_file:
       - path: .env
         required: false
@@ -244,6 +261,11 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - DATABASE_URL=postgres://gate_app:${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD:?POSTGRES_PASSWORD or GATE_APP_PASSWORD must be set}}@${POSTGRES_HOST:-postgres}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-gate_monitor}
+      # Long-run resilience: the worker keeps its own PG pool, so its pool
+      # size must stay within max_connections alongside the web container's
+      # pool (web: PG_MAX_POOL_SIZE=20, worker: PG_MAX_POOL_SIZE=10 → 30 total,
+      # well under the default max_connections=100).
+      - PG_MAX_POOL_SIZE=10
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-http://prometheus:9090}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}

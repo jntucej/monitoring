@@ -41,6 +41,24 @@ const TABLES = [
     table: "sessions",
     where: "revoked_at IS NOT NULL AND revoked_at < NOW() - INTERVAL '30 days'",
   },
+  {
+    // Long-run resilience: meal tokens are the highest-volume write path
+    // (one row per student per meal per day). Purge expired tokens that are
+    // no longer serviceable so GET /api/mess/my-token stays an indexed
+    // lookup instead of a full-table scan.
+    key: "mess_tokens",
+    table: "mess_tokens",
+    where: "expires_at IS NOT NULL AND expires_at < NOW() - INTERVAL '7 days'",
+  },
+  {
+    // Long-run resilience: closed/irrevocable complaints older than 90 days
+    // are archived to cold storage, not kept in the live table. A campus of
+    // 5,000 students generates ~100 complaints/month; without this the
+    // admin complaint queue scans an ever-growing table.
+    key: "complaints",
+    table: "complaints",
+    where: "status IN ('resolved', 'closed') AND closed_at IS NOT NULL AND closed_at < NOW() - INTERVAL '90 days'",
+  },
 ];
 
 export default async function cleanupEphemeral() {
