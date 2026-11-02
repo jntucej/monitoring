@@ -39,7 +39,7 @@ jobs:
         run: |
           # Grant postgres full DDL rights on public so schema.sql CREATE
           # statements succeed. Tolerate errors on a fresh DB where some
-          # objects may not exist yet (ON_ERROR_STOP=0).
+          # objects may not exist yet; ON_ERROR_STOP=1 so a real schema bug fails loudly.
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
             -c "GRANT CREATE, USAGE ON SCHEMA public TO postgres;" || true
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
