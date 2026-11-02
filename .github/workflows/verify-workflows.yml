@@ -40,11 +40,11 @@ jobs:
           # Grant postgres full DDL rights on public so schema.sql CREATE
           # statements succeed. Tolerate errors on a fresh DB where some
           # objects may not exist yet (ON_ERROR_STOP=0).
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
             -c "GRANT CREATE, USAGE ON SCHEMA public TO postgres;" || true
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
             -c "GRANT ALL ON DATABASE gate_monitor TO postgres;" || true
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 -f database/schema.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict
           # schema_migrations (NOT NULL filename/checksum) would clash with
           # the looser shape check-migrations.sh expects and create; check-
