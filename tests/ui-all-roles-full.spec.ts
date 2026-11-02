@@ -216,7 +216,14 @@ for (const cfg of ROLES) {
           }
           expect(finalUrl.pathname, `redirected to ${finalUrl.pathname} after 3 settle passes`).not.toBe("/login");
           expect(finalUrl.pathname, `redirected to ${finalUrl.pathname}`).not.toMatch(/^\/not-found/);
-          const body = await page.locator("body").innerText();
+          // Under parallel-suite load the client bundle can still be booting
+          // when innerText is first read (empty body, page still at the target
+          // URL). Retry the read briefly before calling it a crash.
+          let body = await page.locator("body").innerText();
+          for (let i = 0; body.length <= 20 && i < 3; i++) {
+            await page.waitForTimeout(800 * (i + 1));
+            body = await page.locator("body").innerText();
+          }
           expect(body.length, "page appears empty").toBeGreaterThan(20);
           const width = await page.evaluate(() => document.body.clientWidth);
           expect(width).toBeGreaterThanOrEqual(320);
