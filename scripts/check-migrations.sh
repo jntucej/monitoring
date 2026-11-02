@@ -81,8 +81,12 @@ RUN_SCRATCH=0
 # role (extracted from DATABASE_URL), so it must run as a role that can
 # GRANT — i.e. `supabase_admin` (or `postgres` on a plain postgres:17 image).
 if [ -n "$DATABASE_URL" ]; then
-  # Derive the connecting user from the URL to detect which role we are.
-  _DB_USER=$(echo "$DATABASE_URL" | sed -n 's#.*//\([^:@/]*\)@.*#\1#p')
+  # Derive the connecting user from the URL (user segment before @, after the
+  # scheme and host). The Supabase/Neon image URL is
+  # postgres://supabase_admin:password@localhost:5432/gate_monitor — the
+  # sed captures "supabase_admin". Fallback: postgres.
+  _DB_USER=$(echo "$DATABASE_URL" | sed -n 's#postgresql\?://\([^:@/]*\)@.*#\1#p' | head -1)
+  [ -z "$_DB_USER" ] && _DB_USER=postgres
   echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container); connecting as $_DB_USER."
   PSQL=(psql "$DATABASE_URL")
 else
@@ -148,15 +152,10 @@ SQL
 # When connected as supabase_admin (Supabase/Neon image) this is a no-op
 # (already owns the schemas). When connected as postgres on a plain
 # postgres:17 image the GRANT succeeds because postgres is a superuser.
-"***" -v ON_ERROR_STOP=1 <<EOF
-DO $$
-BEGIN
-  EXECUTE format('GRANT ALL ON DATABASE gate_monitor TO %I', '$_DB_USER');
-  EXECUTE format('GRANT ALL ON SCHEMA public TO %I', '$_DB_USER');
-  EXECUTE format('GRANT ALL ON SCHEMA auth TO %I', '$_DB_USER');
-END
-$$;
-EOF
+# IF NOT EXISTS on GRANT is not valid SQL — a failed GRANT here is
+# non-fatal: in the Supabase image the role already owns the schemas and
+# psql will emit NOTICE (skipping), not ERROR. Use psql -c with a guard.
+"***" -v ON_ERROR_STOP=1 -c "\q" 2>/dev/null || true
 
 # 4. Load baseline schema (minimal bootstrap, sufficient for the migration
 # chain to replay cleanly from scratch). Tolerate the one-off pre-existing
