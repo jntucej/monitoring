@@ -73,9 +73,13 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     const inserted = await query(
       `INSERT INTO mess_days (meal_date, meal_type, day_type, window_opens_at, window_closes_at, is_active)
        VALUES ($1::date, $5, $2, $3::timestamptz, $4::timestamptz, TRUE)
+       ON CONFLICT (meal_date, day_type) DO UPDATE SET is_active = TRUE
        RETURNING id`,
       [mealDate, dayType, windowOpens, windowCloses, mealType]
     );
+    if (inserted.rows.length === 0) {
+      return fail("DUPLICATE_MEAL_DAY", "Mess day already exists for this date and type", 409);
+    }
     const dayId: string = inserted.rows[0].id;
 
     if (itemIds.length > 0) {
