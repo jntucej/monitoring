@@ -21,9 +21,22 @@ CREATE INDEX IF NOT EXISTS idx_movement_logs_correction
 -- (reconciliation already ran) create the index on permissions instead,
 -- otherwise skip (20261026000001 creates it idempotently when the
 -- column first appears).
+-- The reconciliation migration (20261026000001) renames permission_requests
+-- to permissions and creates a back-compat VIEW permission_requests.
+-- information_schema.columns lists view columns too, so the first branch
+-- matches the VIEW (not the base table) and tries to index the view, which
+-- fails. Fix: check pg_class.relkind = 'r' (regular table, not view) for
+-- permission_requests, or check permissions directly as the base table.
 DO $$
 BEGIN
+  -- Base table still named permission_requests (reconciliation not yet run)
   IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'permission_requests'
+      AND c.relkind = 'r'
+  ) AND EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'permission_requests'
       AND column_name = 'sla_deadline'
@@ -35,6 +48,7 @@ BEGIN
     WHERE table_schema = 'public' AND table_name = 'permissions'
       AND column_name = 'sla_deadline'
   ) THEN
+    -- Reconciliation already renamed the base table to permissions
     EXECUTE 'CREATE INDEX IF NOT EXISTS idx_permissions_status_sla
              ON public.permissions (status, sla_deadline)';
   END IF;
