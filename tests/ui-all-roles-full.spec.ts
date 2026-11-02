@@ -115,6 +115,11 @@ const ROLES: Array<{
     pages: ["/guardian"],
     apis: ["/api/permissions"],
   },
+  {
+    role: "sysadmin", login: "sysadmin", pass: "Sysadmin@123", console: "/sysadmin",
+    pages: ["/sysadmin","/sysadmin/actions","/sysadmin/runbooks"],
+    apis: ["/api/sysadmin/forecasts","/api/sysadmin/automation-controls"],
+  },
 ];
 
 for (const cfg of ROLES) {
