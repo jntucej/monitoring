@@ -153,9 +153,20 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
 
   const config = useMemo(() => getConsoleConfig(role), [role]);
 
-  // All hooks MUST run before any early return (rules-of-hooks). The early
-  // return for unknown roles is moved below the hook block so React's hook
-  // order stays stable. `config` is nullable-safe everywhere via `config?.`.
+  // Unknown roles (e.g. "student") have no console config. Rendering the
+  // operator shell chrome for them leaks the "Ops Console" header and the
+  // "Gate not set" operator status strip. The parent layout owns navigation
+  // chrome, so render only the caller's children.
+  if (!config) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[RoleConsole] No console config for role="${role}". ` +
+          `Rendering children only. Add a CONSOLES entry or pass bare={true} ` +
+          `if the parent shell already owns the chrome.`
+      );
+    }
+    return <>{children}</>;
+  }
 
   const isKanban = config?.board?.kind === "kanban";
   const isGrid = config?.board?.kind === "grid";
@@ -921,22 +932,6 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
   }, [roleRoot]);
 
   const roleLabel = config?.role ?? role;
-
-  // Unknown roles (e.g. "student") have no console config. All hooks above
-  // have already run unconditionally; this early return only skips the
-  // operator shell chrome (IconRail, top bar, status strip, command bar).
-  // The parent layout owns navigation chrome, so render only the caller's
-  // children.
-  if (!config) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn(
-        `[RoleConsole] No console config for role="${role}". ` +
-          `Rendering children only. Add a CONSOLES entry or pass bare={true} ` +
-          `if the parent shell already owns the chrome.`
-      );
-    }
-    return <>{children}</>;
-  }
 
   return (
     <div className="flex flex-col min-h-dvh w-full min-w-0">

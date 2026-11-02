@@ -47,34 +47,12 @@ export function useSectionParallax(): {
     offset: ["start start", "end end"],
   });
   const smoothed = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 1 });
-  // layer/fade are plain factory closures, NOT hooks — calling useTransform
-  // inside them violates react-hooks/rules-of-hooks. A ref-based cache memoises
-  // each rate/arg combination so repeated calls with the same inputs reuse the
-  // same MotionValue instead of creating new transforms every render.
-  // The eslint-disable covers the useTransform calls inside these closures:
-  // the cache-ref guard makes the call conditional, which the rule rejects,
-  // but hook order IS stable across renders (Map lookup is deterministic).
-  /* eslint-disable react-hooks/rules-of-hooks */
-  const layerCache = useRef<Map<string, MotionValue<number>>>(new Map());
-  const layer = (rate: number, _axis: "y" | "x" = "y") => {
-    const key = `layer:${rate}`;
-    const existing = layerCache.current.get(key);
-    if (existing) return existing;
+  const layer = (rate: number, axis: "y" | "x" = "y") => {
     const values = [rate * 1.35 * 100, rate * 1.35 * -100];
-    const mv = useTransform(smoothed, [0, 1], values);
-    layerCache.current.set(key, mv);
-    return mv;
+    return useTransform(smoothed, [0, 1], values);
   };
-  const fadeCache = useRef<Map<string, MotionValue<number>>>(new Map());
-  const fade = (inStart: number, inEnd: number, outStart: number, outEnd: number) => {
-    const key = `fade:${inStart}:${inEnd}:${outStart}:${outEnd}`;
-    const existing = fadeCache.current.get(key);
-    if (existing) return existing;
-    const mv = useTransform(smoothed, [inStart, inEnd, outStart, outEnd], [0, 1, 1, 0]);
-    fadeCache.current.set(key, mv);
-    return mv;
-  };
-  /* eslint-enable react-hooks/rules-of-hooks */
+  const fade = (inStart: number, inEnd: number, outStart: number, outEnd: number) =>
+    useTransform(smoothed, [inStart, inEnd, outStart, outEnd], [0, 1, 1, 0]);
   return { ref, progress: smoothed, layer, fade };
 }
 
