@@ -5,6 +5,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Alert } from "@/lib/types";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
+import { registerSse, unregisterSse, SseCapacityError } from "@/lib/sse-registry";
 
 export const dynamic = "force-dynamic";
 // Self-hosted standalone runtime — long-lived SSE is correct here. 1h cap:
@@ -43,6 +44,15 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
 
   const stream = new ReadableStream({
     async start(controller) {
+      try {
+        registerSse("alerts-stream", controller);
+      } catch (err) {
+        if (err instanceof SseCapacityError) {
+          try { controller.close(); } catch { /* already closed */ }
+          return;
+        }
+        throw err;
+      }
       let lastSignature = "";
       let heartbeatAt = Date.now();
 
@@ -107,6 +117,7 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<
       const interval = setInterval(sendSnapshot, 2_000);
 
       req.signal.addEventListener("abort", () => {
+        unregisterSse("alerts-stream", controller);
         clearInterval(interval);
         try {
           controller.close();

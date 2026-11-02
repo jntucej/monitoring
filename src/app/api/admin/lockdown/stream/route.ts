@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getActiveLockdown } from "@/lib/db";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
+import { registerSse, unregisterSse, SseCapacityError } from "@/lib/sse-registry";
 
 export const dynamic = "force-dynamic";
 // Self-hosted standalone runtime — long-lived SSE is correct here. 1h cap:
@@ -21,6 +22,15 @@ async function handleGet(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      try {
+        registerSse(ringKey, controller);
+      } catch (err) {
+        if (err instanceof SseCapacityError) {
+          try { controller.close(); } catch { /* already closed */ }
+          return;
+        }
+        throw err;
+      }
       let lastId: string | null = null;
       let lastActiveStatus = false;
 
@@ -85,6 +95,7 @@ async function handleGet(req: NextRequest) {
       }, 45000);
 
       req.signal.addEventListener("abort", () => {
+        unregisterSse(ringKey, controller);
         clearInterval(interval);
         clearInterval(pingInterval);
         clearTimeout(timeout);

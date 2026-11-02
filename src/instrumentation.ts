@@ -36,4 +36,46 @@ export async function register() {
   // reads). Detect a regression at boot and log it loudly.
   const { assertRlsPosture } = await import("@/lib/rls-posture-guard");
   assertRlsPosture();
+
+  // P1-pool: fail-closed connection pool budget check. If the configured
+  // per-replica pool size × replica count would exceed 80% of the server's
+  // max_connections, a misconfigured deploy should refuse to start rather
+  // than fall over under exam-day traffic. Non-fatal by default (log only)
+  // so a single-replica dev box does not break; set GATE_POOL_STRICT=true
+  // to make it a hard exit in CI / blue-green deploys.
+  await checkPoolBudget();
+}
+
+async function checkPoolBudget(): Promise<void> {
+  const { getPostgresPool } = await import("@/lib/postgres");
+  const configuredMax = parseInt(process.env.PG_MAX_POOL_SIZE || "20", 10);
+  const replicaCount = parseInt(process.env.REPLICA_COUNT || "1", 10);
+  try {
+    const pool = await getPostgresPool();
+    const res = await pool.query("SHOW max_connections");
+    const serverMax = parseInt(res.rows[0].max_connections, 10);
+    const budget = Math.floor(serverMax * 0.8);
+    if (configuredMax * replicaCount > budget) {
+      const msg =
+        `[pool-budget] OVER-PROVISIONED: PG_MAX_POOL_SIZE=${configuredMax} x ` +
+        `REPLICA_COUNT=${replicaCount} = ${configuredMax * replicaCount} connections > ` +
+        `budget ${budget} (max_connections=${serverMax} x 0.8). ` +
+        `Lower PG_MAX_POOL_SIZE or raise max_connections.`;
+      if (process.env.GATE_POOL_STRICT === "true") {
+        console.error(msg);
+        process.exit(1);
+      }
+      console.error(msg);
+    } else {
+      console.log(
+        `[pool-budget] ok: ${configuredMax} x ${replicaCount} replicas = ` +
+        `${configuredMax * replicaCount} <= budget ${budget} (max_connections=${serverMax})`
+      );
+    }
+  } catch (err) {
+    console.warn(
+      "[pool-budget] check skipped (DB unreachable at boot):",
+      (err as Error).message
+    );
+  }
 }

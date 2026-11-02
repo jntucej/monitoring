@@ -14,9 +14,11 @@
  */
 
 import { NextRequest } from "next/server";
+import type { ReadableStreamDefaultController } from "stream/web";
 import { withAuthorization } from "@/middleware/authorization";
 import { getDbClient } from "@/lib/db";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
+import { registerSse, unregisterSse, SseCapacityError } from "@/lib/sse-registry";
 import type { AuthContext } from "@/lib/authContext";
 
 export const dynamic = "force-dynamic";
@@ -49,8 +51,25 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
     scopedGateIds = null; // admin / sysadmin / oie — campus-wide
   }
 
+  // Long-run resilience: cap open streams per replica. A kiosk tablet that
+  // keeps reconnecting (sleep/wake, tab leaks) otherwise accumulates
+  // ReadableStream controllers in memory until the web container OOMs.
+  // When the cap is hit, return 503 before opening the stream; the client
+  // EventSource backs off and retries with Last-Event-ID.
   const stream = new ReadableStream({
     async start(controller) {
+      try {
+        registerSse(RING_KEY, controller);
+      } catch (err) {
+        if (err instanceof SseCapacityError) {
+          // Close the stream; the route-level response cannot be replaced
+          // mid-stream, so the client sees the connection drop and the
+          // EventSource reconnect loop retries after the backoff delay.
+          try { controller.close(); } catch { /* already closed */ }
+          return;
+        }
+        throw err;
+      }
       const sendEvent = (data: any, event?: string) => {
         try {
           // Record in the shared ring buffer so a reconnecting client can
@@ -221,6 +240,7 @@ async function handleGet(req: NextRequest, ctx: { auth: AuthContext }) {
       }, 45000);
 
       req.signal.addEventListener("abort", () => {
+        unregisterSse(RING_KEY, controller);
         clearInterval(interval);
         clearInterval(pingInterval);
         clearTimeout(timeout);

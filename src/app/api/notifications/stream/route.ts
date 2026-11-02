@@ -3,6 +3,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { getNotifications } from "@/lib/db";
 import { err } from "@/lib/api-response";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";
+import { registerSse, unregisterSse, SseCapacityError } from "@/lib/sse-registry";
 
 // SSE stream: securely streams user notifications with ping keepalive and session IDOR guards
 // Reconnect semantics: per-user ring buffer (keyed by userId) so a reconnect
@@ -42,6 +43,15 @@ async function handleGet(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      try {
+        registerSse(ringKey, controller);
+      } catch (err) {
+        if (err instanceof SseCapacityError) {
+          try { controller.close(); } catch { /* already closed */ }
+          return;
+        }
+        throw err;
+      }
       const sendEvent = (data: any, event?: string) => {
         try {
           const id = recordSseEvent(ringKey, data, event);
@@ -101,6 +111,7 @@ async function handleGet(req: NextRequest) {
       }, 45000);
 
       req.signal.addEventListener("abort", () => {
+        unregisterSse(ringKey, controller);
         clearInterval(interval);
         clearInterval(pingInterval);
         clearTimeout(timeout);

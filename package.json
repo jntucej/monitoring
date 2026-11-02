@@ -16,7 +16,7 @@
     "verify:principal-independence": "bash scripts/check-principal-independence.sh",
     "verify:operator-independence": "bash scripts/check-operator-independence.sh",
     "verify:admin-layers": "npm run verify:admin-independence && npm run verify:phase2",
-    "test:ci": "bash scripts/check-tests-nonempty.sh",
+    "test:ci": "bash scripts/check-gate-app-read-set.sh && bash scripts/check-gate-app-write-set.sh && bash scripts/check-rls-enforcement.sh && bash scripts/check-role-scoping.sh && bash scripts/check-migrations.sh && bash scripts/check-query-plans.sh && npm run typecheck && bash scripts/check-no-silent-catch.sh && bash scripts/check-unbounded-select.sh && bash scripts/check-tests-nonempty.sh",
     "test:unit": "npx tsx scripts/run_system_tests.ts",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "playwright test",
