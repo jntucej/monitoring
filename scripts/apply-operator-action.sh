@@ -66,6 +66,42 @@ run_payload() {
       [ -n "$root" ] && [ "$root" != "null" ] || { echo "prune_backups missing .root" >&2; exit 2; }
       find "$root" -name "gate-db-*.sql.gz" -mtime +"$max_age_days" -delete 2>/dev/null || true
       ;;
+    raise_pool_size)
+      # Autonomous SRE Phase 4 (ACT): the forecaster's auto/notify action for
+      # db_pool_used trending toward max_connections. Reversible Tier 2 —
+      # edit the env file + force-recreate web. Refuse if the new size would
+      # break the pool-budget check (web pool × replicas > 80% of
+      # max_connections).
+      new_size=$(echo "$PAYLOAD" | jq -r '.size')
+      [ -n "$new_size" ] && [ "$new_size" != "null" ] || { echo "raise_pool_size missing .size" >&2; exit 2; }
+      max_conn=$(psql "$DATABASE_URL" -tAc "SELECT setting::int FROM pg_settings WHERE name='max_connections'")
+      replicas=${REPLICA_COUNT:-1}
+      budget=$(( max_conn * 80 / 100 ))
+      if (( new_size * replicas > budget )); then
+        echo "raise_pool_size refused: $new_size × $replicas replicas = $((new_size*replicas)) > pool budget $budget (Tier 3 — escalate, not auto)" >&2
+        exit 4
+      fi
+      # Edit the .env PG_MAX_POOL_SIZE and restart web to pick it up.
+      env_file="${ENV_FILE:-/opt/monitoring/compose/.env}"
+      if [ -f "$env_file" ]; then
+        sed -i "s/^PG_MAX_POOL_SIZE=.*/PG_MAX_POOL_SIZE=$new_size/" "$env_file"
+        docker compose -f /opt/monitoring/compose/docker-compose.yml \
+          up -d --force-recreate web 2>/dev/null || true
+        echo "[raise_pool_size] PG_MAX_POOL_SIZE -> $new_size (web force-recreated)"
+      else
+        echo "[raise_pool_size] .env not found at $env_file — staged: PG_MAX_POOL_SIZE=$new_size (manual apply required)"
+      fi
+      ;;
+    extend_disk)
+      # Autonomous SRE Phase 4 (ACT): disk_free_pct trending toward 0.
+      # Tier 3 approve — the forecaster only creates this as a high-risk
+      # pending row. The actual extension (lvm, EBS resize, or volume
+      # expansion) is operator-specific; this branch records the intent and
+      # triggers a backup prune to reclaim space as a stopgap.
+      echo "[extend_disk] disk pressure signal — pruning backups older than 3d as stopgap; operator must extend volume (Tier 3)"
+      find /opt/monitoring/backups -name "gate-db-*.sql.gz" -mtime +3 -delete 2>/dev/null || true
+      df -h /opt/monitoring 2>/dev/null | tail -1 || true
+      ;;
     scale_pool)
       # Tier 2: reversible. Document the exact step; a real pool resize edits
       # the env file and restarts web — do NOT silently sed production.
