@@ -52,3 +52,8 @@ async function handleGet(_req: NextRequest, ctx: { auth: AuthContext }): Promise
 
   return ok({ controls: controls.rows, ladder: ladder.rows });
 }
+
+export const GET = withRateLimit(
+  withAuthorization(handleGet, { requiredRole: ["sysadmin"] }),
+  { keyPrefix: "sysadmin_automation_controls", maxRequests: 120 }
+);
