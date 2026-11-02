@@ -147,15 +147,9 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
 $$ LANGUAGE sql;
 SQL
 
-# Grant the connecting role full DDL rights on public + auth so that the
-# schema.sql load and migration replay below can create/alter objects.
-# When connected as supabase_admin (Supabase/Neon image) this is a no-op
-# (already owns the schemas). When connected as postgres on a plain
-# postgres:17 image the GRANT succeeds because postgres is a superuser.
-# IF NOT EXISTS on GRANT is not valid SQL — a failed GRANT here is
-# non-fatal: in the Supabase image the role already owns the schemas and
-# psql will emit NOTICE (skipping), not ERROR. Use psql -c with a guard.
-"***" -v ON_ERROR_STOP=1 -c "\q" 2>/dev/null || true
+# In the Supabase image, supabase_admin already owns public/auth; in a plain
+# postgres:17 image, the connecting user is the postgres superuser. No
+# additional GRANT is needed — both roles already have full DDL rights.
 
 # 4. Load baseline schema (minimal bootstrap, sufficient for the migration
 # chain to replay cleanly from scratch). Tolerate the one-off pre-existing

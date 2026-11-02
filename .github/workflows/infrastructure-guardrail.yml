@@ -33,6 +33,10 @@ jobs:
       POSTGRES_PASSWORD: ci_dummy_postgres_password_123
       REDIS_PASSWORD: ci_dummy_redis_password_123
       CRON_SECRET: ci_dummy_cron_secret_123
+      # cloudflared service uses a required-var interpolation; the guardrail
+      # job only tests postgres/redis boot — a dummy value satisfies the
+      # syntax check without requiring a real tunnel token.
+      CLOUDFLARE_TUNNEL_TOKEN: ci_dummy_tunnel_token
 
     steps:
       - name: Checkout Code
