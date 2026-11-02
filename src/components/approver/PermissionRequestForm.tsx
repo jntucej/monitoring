@@ -61,7 +61,7 @@ export function PermissionRequestForm({
         toDatetime: toDatetime || undefined,
         documentRequired: isExamMemo ? true : documentRequired,
       };
-      const res = await post("/api/permissions", payload);
+      const res = await post<{ ticket_number: string }>("/api/permissions", payload);
       if (res.success && res.data?.ticket_number) {
         setTicketNumber(res.data.ticket_number);
         if (onSubmitted) onSubmitted(res.data.ticket_number);

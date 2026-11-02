@@ -156,12 +156,12 @@ export function useApi() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const get = (url: string) => request(url, { method: "GET" });
-  const post = (url: string, body: any) =>
-    request(url, { method: "POST", body: JSON.stringify(body) });
-  const put = (url: string, body: any) =>
-    request(url, { method: "PUT", body: JSON.stringify(body) });
-  const del = (url: string) => request(url, { method: "DELETE" });
+  const get = <T = unknown>(url: string) => request<T>(url, { method: "GET" });
+  const post = <T = unknown>(url: string, body: unknown) =>
+    request<T>(url, { method: "POST", body: JSON.stringify(body) });
+  const put = <T = unknown>(url: string, body: unknown) =>
+    request<T>(url, { method: "PUT", body: JSON.stringify(body) });
+  const del = <T = unknown>(url: string) => request<T>(url, { method: "DELETE" });
 
   return { request, get, post, put, del, getHeaders };
   }
