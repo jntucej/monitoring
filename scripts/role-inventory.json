@@ -79,7 +79,6 @@
       "root": "/caretaker",
       "leaves": [
         "/caretaker",
-        "/caretaker/buildings",
         "/caretaker/complaints",
         "/caretaker/maintenance",
         "/caretaker/workers"
@@ -100,7 +99,6 @@
         "/deputy-warden/gate-movement",
         "/deputy-warden/incident-reporting",
         "/deputy-warden/leave-requests",
-        "/deputy-warden/outpass-queue",
         "/deputy-warden/shift-handover"
       ]
     },
@@ -124,7 +122,6 @@
         "/exam-branch/docs",
         "/exam-branch/oie-approval-requests",
         "/exam-branch/oie-handoff",
-        "/exam-branch/pass-queue",
         "/exam-branch/records",
         "/exam-branch/reports",
         "/exam-branch/verification"
@@ -136,7 +133,6 @@
       "root": "/exam/superintendent",
       "leaves": [
         "/exam/superintendent",
-        "/exam/superintendent/access",
         "/exam/superintendent/incidents",
         "/exam/superintendent/reports",
         "/exam/superintendent/schedule"
@@ -209,8 +205,7 @@
         "/hostel-manager/maintenance",
         "/hostel-manager/residents",
         "/hostel-manager/resource-management",
-        "/hostel-manager/rooms",
-        "/hostel-manager/tickets"
+        "/hostel-manager/rooms"
       ]
     },
     {
@@ -381,7 +376,6 @@
       "root": "/supervisor",
       "leaves": [
         "/supervisor",
-        "/supervisor/approvals",
         "/supervisor/gates",
         "/supervisor/gates/activity",
         "/supervisor/gates/live",
