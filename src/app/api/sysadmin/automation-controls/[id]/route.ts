@@ -15,12 +15,9 @@ import { query } from "@/lib/postgres";
  * Records who disabled it and why (disabled_by + disabled_at + reason).
  * This is the "red button" — one tap, the automation stops.
  */
-async function handlePatch(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-  ctx: { auth: AuthContext }
-): Promise<Response> {
-  const name = decodeURIComponent(params.id);
+async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
+  const url = new URL(req.url);
+  const name = decodeURIComponent(url.pathname.split("/").pop() || "");
   if (!name) return fail("BAD_REQUEST", "missing control name in path");
 
   let body: unknown;
