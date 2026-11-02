@@ -4,6 +4,7 @@
  */
 "use client";
 
+import { useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { singleFlightRefresh } from "@/lib/auth-refresh";
 import type { ApiResponse } from "@/lib/types";
@@ -26,16 +27,28 @@ export function useApi() {
     return headers;
   }
 
-  const request = async <T = any>(
-    input: string | URL,
-    init?: RequestInit
-  ): Promise<ApiResponse<T>> => {
+  // Stable ref so the `request` callback below (and anything memoized on it,
+  // e.g. a page's `refresh`) keeps a constant identity across renders. An
+  // unstable `request` made the actions page's useEffect([refresh]) re-fire on
+  // every render — an infinite fetch loop that drove /api/sysadmin/* into 429
+  // rate-limit storms (120 req/min observed in api_metrics) and left the page
+  // stuck on its loading skeleton.
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
+  const logoutRef = useRef(logout);
+  logoutRef.current = logout;
+
+  const request = useCallback(
+    async <T = unknown>(
+      input: string | URL,
+      init?: RequestInit
+    ): Promise<ApiResponse<T>> => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...(init?.headers as Record<string, string>),
     };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    if (tokenRef.current) {
+      headers["Authorization"] = `Bearer ${tokenRef.current}`;
     }
     const sessionToken = useAuthStore.getState().user?.currentSessionToken;
     if (sessionToken) {
@@ -83,12 +96,12 @@ export function useApi() {
           ...(init?.headers as Record<string, string>),
         };
         retryHeaders["Authorization"] = `Bearer ${refreshedToken}`;
-        const sessionToken = useAuthStore.getState().user?.currentSessionToken;
-        if (sessionToken) retryHeaders["X-Session-Token"] = sessionToken;
+        const st = useAuthStore.getState().user?.currentSessionToken;
+        if (st) retryHeaders["X-Session-Token"] = st;
 
         const retryRes = await fetch(input, { ...init, headers: retryHeaders });
         if (retryRes.status === 401) {
-          logout();
+          logoutRef.current();
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }
@@ -98,7 +111,7 @@ export function useApi() {
         res = retryRes;
       } else {
         // No refreshed token available — hard logout.
-        logout();
+        logoutRef.current();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
@@ -140,7 +153,8 @@ export function useApi() {
     // Fallback: return raw text
     const text = await res.text();
     return { success: true, data: text as any };
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const get = (url: string) => request(url, { method: "GET" });
   const post = (url: string, body: any) =>
