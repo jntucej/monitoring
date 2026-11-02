@@ -52,6 +52,8 @@ import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import sendSmsQueue from './jobs/send_sms.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
+import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
+import runInfraForecaster from './jobs/infra_forecaster.js';
 
 /**
  * Job heartbeat sentinel: after each scheduled run, upsert a row in
@@ -139,6 +141,8 @@ const jobs = [
   { name: 'operator-action-maintenance', ms: 5 * 60 * 1000, run: () => runJob('operator-action-maintenance', async () => {
     await runOperatorActionMaintenance();
   }) },
+  { name: 'infra-snapshot', ms: 60 * 1000, run: () => runJob('infra-snapshot', collectInfraSnapshot) },
+  { name: 'infra-forecaster', ms: 5 * 60 * 1000, run: () => runJob('infra-forecaster', runInfraForecaster) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

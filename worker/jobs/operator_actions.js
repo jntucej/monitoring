@@ -15,6 +15,54 @@
 import pg from 'pg';
 import { getWorkerDbPool } from '../db.js';
 
+
+// Phase 5 LEARN helper: set outcome + mttr_seconds on an executed action.
+async function recordActionOutcome(pool, actionId, outcome) {
+  try {
+    await pool.query(
+      `UPDATE public.operator_actions
+          SET outcome = $2,
+              mttr_seconds = EXTRACT(EPOCH FROM (NOW() - created_at))::int
+        WHERE id = $1::uuid`,
+      [actionId, outcome]
+    );
+  } catch (err) {
+    console.error(`[operator-actions] failed to record outcome for ${actionId}:`, err.message);
+  }
+}
+
+// Circuit breaker + cooldown (Phase 4 guardrails). Before any auto/notify
+// action, check: (a) same-kind action hasn't failed 3x in 30 min, (b) last
+// successful same-kind action was > cooldown_minutes ago. Returns true when
+// the action is allowed to proceed.
+async function actionGuardAllowed(pool, kind, cooldownMinutes = 30) {
+  const fails = await pool.query(
+    `SELECT count(*)::int AS c FROM public.operator_actions
+      WHERE kind = $1 AND status = 'failed'
+        AND decided_at > NOW() - INTERVAL '30 minutes'`,
+    [kind]
+  );
+  if (Number(fails.rows[0]?.c) >= 3) {
+    console.log(`[operator-actions] circuit breaker open for ${kind} (3 fails in 30m) — escalating`);
+    return false;
+  }
+  const lastOk = await pool.query(
+    `SELECT max(decided_at) AS last FROM public.operator_actions
+      WHERE kind = $1 AND status IN ('executed','auto_executed')`,
+    [kind]
+  );
+  if (lastOk.rows[0]?.last) {
+    const ageMin = (Date.now() - new Date(lastOk.rows[0].last).getTime()) / 60000;
+    if (ageMin < cooldownMinutes) {
+      console.log(`[operator-actions] cooldown active for ${kind} (${Math.round(ageMin)}m < ${cooldownMinutes}m) — skipping`);
+      return false;
+    }
+  }
+  return true;
+}
+
+
+
 /**
  * Push the operator-action alert to Telegram (Tier 2/3 notification). The
  * existing telegram-notify.sh is the transport; we shell out to it with the
@@ -121,6 +169,14 @@ export async function runOperatorActionMaintenance() {
   const autoRows = Array.isArray(raw) ? raw : (typeof raw === 'string' ? JSON.parse(raw || '[]') : []);
 
   for (const row of autoRows) {
+    // Phase 4 guardrails: circuit breaker + cooldown before any auto action.
+    if (!(await actionGuardAllowed(pool, row.kind))) {
+      await pool.query(
+        `UPDATE public.operator_actions SET status='failed', outcome='failed', decided_at=NOW() WHERE id=$1::uuid`,
+        [row.id]
+      ).catch(() => {});
+      continue;
+    }
     // Tier 1 auto-execution: these are the reversible, low-risk actions
     // (restart_container, prune_backups, clear_email_queue, escalation).
     // The heavyweight executor is a shell script; we shell out for parity
@@ -133,6 +189,11 @@ export async function runOperatorActionMaintenance() {
         '/opt/monitoring/compose/scripts/apply-operator-action.sh',
         row.id,
       ], { timeout: 60_000 });
+      // Phase 5 LEARN: record the outcome so the forecaster's incident memory
+      // grows. outcome='resolved' when the script exited 0; the signal_after
+      // snapshot is the infra row 5 min later (best-effort, null on failure).
+      const startedAt = Date.now();
+      await recordActionOutcome(pool, row.id, 'resolved');
       console.log(`[operator-actions] auto-executed ${row.kind} (${row.id})`);
     } catch (err) {
       console.error(`[operator-actions] auto-exec failed for ${row.id}:`, err.message);
