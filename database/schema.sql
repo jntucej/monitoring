@@ -765,20 +765,31 @@ END; $$;
 -- SECTION 5: TRIGGERS
 -- ============================================================================
 -- Supabase auth-sync trigger removed; user creation handled by API layer.
+-- All CREATE TRIGGER statements are preceded by DROP TRIGGER IF EXISTS so
+-- the baseline loads idempotently on top of the Supabase image's initdb
+-- triggers and alongside the migration replay chain.
+DROP TRIGGER IF EXISTS trg_occupancy_on_movement ON movement_logs;
 CREATE TRIGGER trg_occupancy_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_campus_occupancy_on_movement();
+DROP TRIGGER IF EXISTS trg_daily_stats_on_movement ON movement_logs;
 CREATE TRIGGER trg_daily_stats_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION update_daily_stats_on_movement();
+DROP TRIGGER IF EXISTS trg_audit_on_movement ON movement_logs;
 CREATE TRIGGER trg_audit_on_movement
   AFTER INSERT ON movement_logs FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_movement();
+DROP TRIGGER IF EXISTS trg_audit_on_pass_insert ON gate_passes;
 CREATE TRIGGER trg_audit_on_pass_insert
   AFTER INSERT ON gate_passes FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_pass_insert();
+DROP TRIGGER IF EXISTS trg_audit_on_pass_update ON gate_passes;
 CREATE TRIGGER trg_audit_on_pass_update
   AFTER UPDATE ON gate_passes FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_pass_update();
+DROP TRIGGER IF EXISTS trg_audit_on_user_change ON users;
 CREATE TRIGGER trg_audit_on_user_change
   AFTER INSERT OR UPDATE ON users FOR EACH ROW EXECUTE FUNCTION create_audit_log_on_user_change();
+DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
 CREATE TRIGGER trg_users_updated_at
   BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS trg_notif_prefs_updated_at ON notification_preferences;
 CREATE TRIGGER trg_notif_prefs_updated_at
   BEFORE UPDATE ON notification_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 

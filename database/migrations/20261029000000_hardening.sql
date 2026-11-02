@@ -14,10 +14,13 @@ CREATE INDEX IF NOT EXISTS idx_movement_logs_user_ts
   ON movement_logs (user_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_movement_logs_correction
   ON movement_logs (corrected_by_scan_id) WHERE corrected_by_scan_id IS NOT NULL;
--- Guard the SLA index with a column-existence check: sla_deadline is added
--- by 20261026000001_permission_workflow_reconciliation.sql which runs AFTER
--- this file in the replay chain; when the column is not yet present the
--- index is skipped (20261026000001 creates it idempotently).
+-- Guard the SLA index with a table + column existence check: the
+-- reconciliation migration renames permission_requests -> permissions
+-- and creates a back-compat VIEW permission_requests. A composite index
+-- on a VIEW cannot be created; if the base table is now `permissions`
+-- (reconciliation already ran) create the index on permissions instead,
+-- otherwise skip (20261026000001 creates it idempotently when the
+-- column first appears).
 DO $$
 BEGIN
   IF EXISTS (
@@ -27,6 +30,13 @@ BEGIN
   ) THEN
     EXECUTE 'CREATE INDEX IF NOT EXISTS idx_permreq_status_sla
              ON public.permission_requests (status, sla_deadline)';
+  ELSIF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'permissions'
+      AND column_name = 'sla_deadline'
+  ) THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_permissions_status_sla
+             ON public.permissions (status, sla_deadline)';
   END IF;
 END $$;
 CREATE INDEX IF NOT EXISTS idx_sessions_active
