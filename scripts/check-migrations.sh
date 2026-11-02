@@ -120,7 +120,7 @@ fi
 # `supabase_admin` (password in POSTGRES_PASSWORD env) for the bootstrap
 # to succeed. The connecting role also cannot grant to itself, so use
 # PUBLIC as the grant target for USAGE/CREATE.
-"***" -v ON_ERROR_STOP=1 <<'SQL'
+"${PSQL[@]}" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'admin') THEN
