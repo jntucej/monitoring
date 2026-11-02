@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withTransaction, query } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
 import { addAudit } from "@/lib/db";
 import { RATE_LIMITS } from "@/config/app-constants";
@@ -18,10 +18,9 @@ async function handleGet(
   _ctx: { auth: AuthContext },
 ): Promise<Response> {
   const id = getIdFromPath(req);
-  const supabase = getSupabaseServiceClient();
-  const { data, error } = await supabase.from("announcements").select("*").eq("id", id).single();
-  if (error) return fail("NOT_FOUND", "announcement not found", 404);
-  return ok(data);
+  const res = await query("SELECT * FROM public.announcements WHERE id = $1 LIMIT 1", [id]);
+  if (res.rows.length === 0) return fail("NOT_FOUND", "announcement not found", 404);
+  return ok(res.rows[0]);
 }
 
 export const GET = withRateLimit(
@@ -43,13 +42,8 @@ async function handlePatch(
   if (!body || typeof body !== "object") return fail("INVALID_BODY", "body must be an object", 400);
   const payload = body as Record<string, unknown>;
 
-  const supabase = getSupabaseServiceClient();
-  const { data: existing, error: fetchErr } = await supabase
-    .from("announcements")
-    .select("*")
-    .eq("id", id)
-    .single();
-  if (fetchErr || !existing) return fail("NOT_FOUND", "announcement not found", 404);
+  const fetchRes = await query("SELECT * FROM public.announcements WHERE id = $1 LIMIT 1", [id]);
+  if (fetchRes.rows.length === 0) return fail("NOT_FOUND", "announcement not found", 404);
 
   const updateFields: Record<string, unknown> = {};
   if (typeof payload.title === "string" && payload.title) updateFields.title = payload.title;
@@ -67,13 +61,22 @@ async function handlePatch(
 
   if (Object.keys(updateFields).length === 1) return fail("NO_FIELDS", "no updatable fields provided", 400);
 
-  const { data: updated, error: dbErr } = await supabase
-    .from("announcements")
-    .update(updateFields)
-    .eq("id", id)
-    .select("*")
-    .single();
-  if (dbErr) return fail("DB_ERROR", dbErr.message, 500);
+  const setClauses = Object.entries(updateFields)
+    .map(([k, v]) => `${k} = $${Number(Object.keys(updateFields).indexOf(k)) + 1}`)
+    .join(", ");
+  const updateRes = await withTransaction(
+    async (tx) => {
+      const res = await tx.query(
+        `UPDATE public.announcements SET ${setClauses} WHERE id = $${Object.keys(updateFields).length + 1} RETURNING *`,
+        [...Object.values(updateFields), id],
+      );
+      if (res.rowCount === 0) throw new Error("announcement update returned 0 rows (RLS)");
+      return res.rows[0];
+    },
+    { currentRole: auth.role, currentUserId: auth.userId },
+  );
+  const updated = updateRes;
+  if (!updated) return fail("DB_ERROR", "Announcement update returned no row", 500);
 
   const willPublishNow = payload.publishNow === true || payload.is_published === true;
   const settingFuture = typeof payload.publishAt === "string" && new Date(payload.publishAt) > new Date();
@@ -102,9 +105,16 @@ async function handleDelete(
   { auth }: { auth: AuthContext },
 ): Promise<Response> {
   const id = getIdFromPath(req);
-  const supabase = getSupabaseServiceClient();
-  const { error: dbErr } = await supabase.from("announcements").delete().eq("id", id);
-  if (dbErr) return fail("DB_ERROR", dbErr.message, 500);
+  await withTransaction(
+    async (tx) => {
+      const res = await tx.query(
+        `DELETE FROM public.announcements WHERE id = $1 RETURNING id`,
+        [id],
+      );
+      if (res.rowCount === 0) throw new Error("announcement delete returned 0 rows (RLS or not found)");
+    },
+    { currentRole: auth.role, currentUserId: auth.userId },
+  );
 
   try {
     await addAudit({

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+import { withTransaction } from "@/lib/postgres";
 import { ok, fail } from "@/server/http/response";
 import { addAudit } from "@/lib/db";
 import { assertLength, LIMITS } from "@/lib/validation";
@@ -93,9 +93,23 @@ async function handlePost(
     updated_at: now,
   };
 
-  const supabase = getSupabaseServiceClient();
-  const { error: dbError } = await supabase.from("announcements").insert(row);
-  if (dbError) return fail("DB_ERROR", dbError.message, 500);
+  const inserted = await withTransaction(
+    async (tx) => {
+      const res = await tx.query(
+        `INSERT INTO public.announcements
+           (id, title, message, priority, audience, is_published, scheduled_at, expires_at, created_by, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::timestamptz, $8::timestamptz, $9, $10::timestamptz, $11::timestamptz)
+         RETURNING *`,
+        [row.id, row.title, row.message, row.priority, row.audience,
+         row.is_published, row.scheduled_at, row.expires_at, row.created_by,
+         row.created_at, row.updated_at],
+      );
+      if (res.rowCount === 0) throw new Error("announcements insert returned 0 rows (RLS)");
+      return res.rows[0];
+    },
+    { currentRole: auth.role, currentUserId: auth.userId },
+  );
+  if (!inserted) return fail("DB_ERROR", "Announcement write returned no row", 500);
 
   const action = scheduledAt ? "ANNOUNCEMENT_SCHEDULED" : "ANNOUNCEMENT_CREATED";
   try {
@@ -107,7 +121,7 @@ async function handlePost(
     });
   } catch {}
 
-  return ok(row, 201);
+  return ok(inserted, 201);
 }
 
 export const POST = withAdminMutation(handlePost, { rateLimit: RATE_LIMITS.mutation });

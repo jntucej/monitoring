@@ -34,11 +34,20 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => null);
     const mealDate: string = (body?.mealDate ?? "").toString().trim();
-    const dayType: string = (body?.dayType ?? "WEEKDAY").toString().trim();
-    const windowOpens: string | null =
-      typeof body?.windowOpens === "string" && body.windowOpens.trim() ? body.windowOpens.trim() : null;
-    const windowCloses: string | null =
-      typeof body?.windowCloses === "string" && body.windowCloses.trim() ? body.windowCloses.trim() : null;
+    const mealType: string = ["BREAKFAST","LUNCH","DINNER"].includes((body?.mealType ?? "").toString())
+      ? (body?.mealType as string)
+      : "BREAKFAST";
+    const dayType: string = ["SUNDAY","WEDNESDAY"].includes((body?.dayType ?? "").toString().toUpperCase())
+      ? (body?.dayType as string).toUpperCase()
+      : "WEDNESDAY";
+    const windowOpens: string =
+      typeof body?.windowOpens === "string" && body.windowOpens.trim()
+        ? body.windowOpens.trim()
+        : `${mealDate}T07:00:00Z`;
+    const windowCloses: string =
+      typeof body?.windowCloses === "string" && body.windowCloses.trim()
+        ? body.windowCloses.trim()
+        : `${mealDate}T21:00:00Z`;
     const items: unknown[] = Array.isArray(body?.items) ? body.items : [];
 
     if (!mealDate || isNaN(Date.parse(mealDate))) {
@@ -63,9 +72,9 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     const inserted = await query(
       `INSERT INTO mess_days (meal_date, meal_type, day_type, window_opens_at, window_closes_at, is_active)
-       VALUES ($1::date, 'MIXED', $2, $3::timestamptz, $4::timestamptz, TRUE)
+       VALUES ($1::date, $5, $2, $3::timestamptz, $4::timestamptz, TRUE)
        RETURNING id`,
-      [mealDate, dayType, windowOpens, windowCloses]
+      [mealDate, dayType, windowOpens, windowCloses, mealType]
     );
     const dayId: string = inserted.rows[0].id;
 
@@ -80,7 +89,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     await addAudit({
-      action: "MESS_DAY_CREATED",
+      action: "MESS_PREFERENCE_UPDATED",
       userId: auth.userId,
       role: auth.role,
       details: { dayId, mealDate, dayType, windowOpens, windowCloses, items: itemIds },

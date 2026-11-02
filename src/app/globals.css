@@ -646,6 +646,12 @@ html.dark .glass-card,
 :root[data-theme="dark"] .glass-card {
   position: relative;
   overflow: hidden; /* clips the ::before specular edge */
+}
+/* Cards that contain a .safe-x scrollable region must not clip — otherwise
+   wide tables inside the card are destroyed on dark theme. */
+html.dark .glass-card:has(.safe-x),
+:root[data-theme="dark"] .glass-card:has(.safe-x) {
+  overflow: visible;
   background-color: rgba(18, 17, 16, 0.85); /* warm lift (#121110) matching the base scale */
   border-color: rgba(205, 203, 202, 0.14);
   box-shadow:

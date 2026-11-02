@@ -1674,8 +1674,25 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
     return false;
   }
 
-  const { error } = await db.from('users').update({ role: newRole }).eq('id', userId);
-  if (error) return false;
+  // Use withTransaction with actor role context so the GUCs are set when
+  // trg_sync_primary_role fires on the UPDATE — the trigger's INSERT into
+  // user_roles has a WITH CHECK (app.current_role IN sysadmin/admin) policy
+  // that fails silently without the GUC.
+  const res = await withTransaction(
+    async (tx) => {
+      const r = await tx.query(
+        `UPDATE public.users SET role = $1, updated_at = NOW() WHERE id = $2::uuid RETURNING id`,
+        [newRole, userId],
+      );
+      if (r.rowCount === 0) throw new Error('user not found or role update failed');
+      return r.rowCount;
+    },
+    { currentRole: actor?.role ?? 'admin', currentUserId: actorId },
+  ).catch((err) => {
+    console.error('[updateUserRole] RLS update failed:', err?.message ?? err);
+    return 0;
+  });
+  if (!res) return false;
 
   await addAudit({
     action: 'USER_ROLE_UPDATED',
