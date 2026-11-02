@@ -1,5 +1,6 @@
 import http from "node:http";
 import sendEmails from './jobs/send_emails.js';
+import { handleFalcoWebhook } from './webhooks/falco_receiver.js';
 
 // Worker health probe: the compose healthcheck (and any orchestrator) hits
 // /health on 3001. Keep the process alive and report readiness. The rate-limit
@@ -14,12 +15,33 @@ const worker = http.createServer((req, res) => {
     res.end(JSON.stringify({ status: "healthy", uptime: process.uptime() }));
     return;
   }
+
+  // SOAR webhook: Falcosidekick POSTs critical Falco alerts here. The
+  // handler isolates the container, locks the account, records the action
+  // in operator_actions, and alerts on Telegram.
+  if (req.url === "/falco-webhook" && req.method === "POST") {
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        handleFalcoWebhook(payload, res).catch((err) => {
+          console.error("[worker] falco webhook handler error:", err.message);
+          res.writeHead(500).end("handler error");
+        });
+      } catch {
+        res.writeHead(400).end("invalid JSON");
+      }
+    });
+    return;
+  }
+
   res.writeHead(404, { "Content-Type": "application/json" });
   res.end(JSON.stringify({ error: "not found" }));
 });
 
 worker.listen(WORKER_PORT, () => {
-  console.log(`[worker] health listener on :${WORKER_PORT}`);
+  console.log(`[worker] health + SOAR listener on :${WORKER_PORT}`);
 });
 
 async function postCronEndpoint(path) {
@@ -74,6 +96,15 @@ async function writeJobHeartbeat(name, ok, err) {
          last_error  = $3,
          runs_total  = public.worker_job_heartbeats.runs_total + 1`,
       [name, ok ? 'ok' : 'error', ok ? null : (err?.message ?? String(err)).slice(0, 500)]
+    );
+    // Paste #15 Level 8: also write an audit_logs row so the post-recovery
+    // verification script (verify-post-recovery.sh) can check
+    // `SELECT max(created_at) FROM audit_logs WHERE action='WORKER_HEARTBEAT'`
+    // without depending on the worker_job_heartbeats table.
+    await pool.query(
+      `INSERT INTO public.audit_logs (action, details)
+       VALUES ('WORKER_HEARTBEAT', $1::jsonb)`,
+      [JSON.stringify({ job: name, status: ok ? 'ok' : 'error' })]
     );
   } catch (hbErr) {
     // Heartbeat write failure must not take down the job run.
