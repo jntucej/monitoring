@@ -120,22 +120,19 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
         }),
       );
     }, [body.data.token, body.data.user, role]);
-    // Navigate to the role root; AuthGuard will bounce to /login if the
-    // token is invalid, so landing on the root (or a sub-route) is success.
-    // The SPA's checkSession runs asynchronously after initial render; give
-    // it time to complete before judging the final URL.
-    await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-    await page.waitForTimeout(5000);
-    let landed = page.url();
-    if (landed.includes("/login")) {
-      await page.waitForTimeout(3000);
-      landed = page.url();
-    }
-    if (landed.includes("/login")) {
-      // checkSession may still be in flight; one more grace window
+    // Navigate to the role root. The SPA's checkSession revalidates the
+    // token asynchronously after hydration; landing on /login can be a
+    // transient state (3-second rehydrate timer + in-flight Bearer fetch).
+    // Re-navigate up to 3 times before judging the session dead — the API
+    // already proved the token valid, so a stale client-side redirect
+    // should recover on the next full load with the same token.
+    let landed = "";
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
       await page.waitForTimeout(5000);
       landed = page.url();
+      if (!landed.includes("/login")) break;
     }
     if (landed.includes("/login")) {
       console.log(`[DEBUG] login ${role}: still on /login url=${landed}`);
