@@ -1,11 +1,38 @@
 import { query } from '../db.js';
 
 /**
+ * Reads the automation_controls row for the named switch.
+ * The worker has no access to the TS lib — this is the minimal inline
+ * equivalent of isAutomationEnabled from src/lib/kill-switch.ts.
+ *
+ * Fail-open: if the row is absent (upgrade race) or the query fails,
+ * the job runs. A locked DB should not silently stop audit rotation —
+ * the staleness alert on worker_job_heartbeats will surface it.
+ */
+async function automationEnabled(name) {
+  try {
+    const { rows } = await query(
+      "SELECT enabled FROM public.automation_controls WHERE name = $1",
+      [name]
+    );
+    return rows[0]?.enabled ?? true;
+  } catch {
+    return true;
+  }
+}
+
+/**
  * Scheduled Job: Audit Log Rotation and Retention Enforcement.
  * Automatically archives/purges historical audit logs, expired integration logs,
  * and old resolved alerts beyond retention windows.
  */
 export default async function auditLogRotation() {
+  // Batch I5: audit-rotation kill switch.
+  if (!(await automationEnabled("auto_audit_rotation_enabled"))) {
+    console.log('[Worker Job] auto_audit_rotation_enabled is OFF — skipping rotation (kill switch).');
+    return { recordsAffected: 0, details: 'audit rotation disabled (kill switch)' };
+  }
+
   console.log('[Worker Job] Starting audit log rotation...');
   const retentionDays = parseInt(process.env.AUDIT_LOG_RETENTION_DAYS || '180', 10);
   const integrationLogRetentionDays = parseInt(process.env.INTEGRATION_LOG_RETENTION_DAYS || '30', 10);

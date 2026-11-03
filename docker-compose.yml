@@ -175,6 +175,13 @@ services:
       - MONITORING_PROM_URL=${MONITORING_PROM_URL:-http://prometheus:9090}
       - MONITORING_LOKI_URL=${MONITORING_LOKI_URL:-}
       - MONITORING_GRAFANA_URL=${MONITORING_GRAFANA_URL:-}
+      # Batch I1: Alertmanager → Telegram bridge. The webhook token is the
+      # same value alertmanager.yml sends as the Bearer credential; both
+      # resolve from .env.
+      - ALERTMANAGER_WEBHOOK_TOKEN=${ALERTMANAGER_WEBHOOK_TOKEN:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - TELEGRAM_CRITICAL_CHAT_ID=${TELEGRAM_CRITICAL_CHAT_ID:-}
       # RAG / campus assistant (bot chat + RAG memory) — OpenAI-compatible LLM.
       # By default the web container reaches the LLM via the llm-proxy sidecar
       # (which uses host network mode to bridge UFW). Override RAG_LLM_API_URL
@@ -213,6 +220,12 @@ services:
       prometheus:
         condition: service_started
       cadvisor:
+        condition: service_started
+      # Batch I1: Alertmanager starts independently of web (the web hook
+      # is the *receiver*, not a dependency for the container to boot).
+      # Starting it here just guarantees the target is up before prometheus
+      # fires the first alert; web stays the same as before.
+      alertmanager:
         condition: service_started
 
   # ---------------------------------------------------------------------------
@@ -343,6 +356,26 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: gate_alertmanager
+    restart: always
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=:9093'
+    ports:
+      - "127.0.0.1:9093:9093"
+    networks: [monitoring-net, gate-net]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9093/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 volumes:
   pgdata:
   redisdata:
@@ -354,6 +387,8 @@ volumes:
   # with status.html + status-last.json at first deploy.
   status_data:
   prometheus_data:
+  # Batch I1: Alertmanager durable state (firing/resolved alert groups).
+  alertmanager_data:
 
 networks:
   gate-net:

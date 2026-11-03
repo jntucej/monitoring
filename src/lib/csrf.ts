@@ -100,7 +100,7 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
 export function assertCsrf(req: NextRequest): NextResponse | null {
   const result = validateCsrf(req);
   if (!result.valid) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       {
         success: false,
         error: {
@@ -110,6 +110,11 @@ export function assertCsrf(req: NextRequest): NextResponse | null {
       },
       { status: 403 }
     );
+    // Batch I4: the metrics middleware reads x-csrf-result to populate
+    // api_metrics.csrf_result — the forensic column that makes
+    // "who triggered the CSRF rejection in the last 24h" a one-line query.
+    res.headers.set("x-csrf-result", "fail");
+    return res;
   }
   return null;
 }

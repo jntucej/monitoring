@@ -1,0 +1,34 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: telegram
+  group_by: [alertname, severity]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers: [ severity="critical" ]
+      receiver: telegram-critical
+      repeat_interval: 15m
+    - matchers: [ severity="warning" ]
+      receiver: telegram
+
+receivers:
+  # Both receivers hit the same web hook; the receiver label is what
+  # Alertmanager carries in the payload (payload.receiver), and the web
+  # hook routes critical vs warning to the correct Telegram chat
+  # (TELEGRAM_CRITICAL_CHAT_ID vs TELEGRAM_CHAT_ID).
+  - name: telegram
+    webhook_configs:
+      - url: 'http://web:3000/api/webhooks/alertmanager'
+        send_resolved: true
+        http_config:
+          follow_redirects: false
+
+  - name: telegram-critical
+    webhook_configs:
+      - url: 'http://web:3000/api/webhooks/alertmanager'
+        send_resolved: true
+        http_config:
+          follow_redirects: false

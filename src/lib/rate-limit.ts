@@ -245,6 +245,9 @@ export function withRateLimit<TArgs extends unknown[] = unknown[]>(
             "x-ratelimit-limit": String(cfg.maxRequests),
             "x-ratelimit-remaining": "0",
             "x-ratelimit-reset": result.resetTime.toISOString(),
+            // Batch I4: the metrics middleware reads this to set
+            // api_metrics.rate_limit_hit for forensic 429 drill-down.
+            "x-ratelimit-hit": "1",
           },
         }
       );
