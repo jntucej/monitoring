@@ -101,6 +101,8 @@ else
 fi
 
 # 3. Setup mock Supabase roles & auth schema and grant permissions on public
+# (runs in both CI mode and local-docker mode — the constraint gate that
+# follows only works if the Supabase mock roles + schema.sql DDL are present)
 "${PSQL[@]}" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$
 BEGIN
@@ -130,6 +132,13 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid AS $$
   SELECT null::uuid;
 $$ LANGUAGE sql;
 SQL
+
+# 3b. In CI mode (DATABASE_URL), the Supabase mock-role GRANTs above reference
+#     `postgres` (the CI service role) but the constraint owner migration
+#     (20270101000014) runs later; check-audit-constraint.sh only finds the
+#     constraint if it was created by the migration replay in step 6. This
+#     step is a no-op placeholder so the script structure stays uniform
+#     between modes.
 
 # 4. Load baseline schema (minimal bootstrap, sufficient for the migration
 # chain to replay cleanly from scratch). Tolerate the one-off pre-existing
