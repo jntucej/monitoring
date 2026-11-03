@@ -26,7 +26,13 @@
         X-Content-Type-Options "nosniff"
         Referrer-Policy        "strict-origin-when-cross-origin"
         Permissions-Policy     "camera=(self), microphone=(self), geolocation=(self)"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' wss: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+        # L2: CSP is now set per-request by the Next.js edge middleware
+        # (nonce + strict-dynamic, see src/middleware.ts). Caddy must not
+        # add its own static CSP header here — two CSP headers conflict and
+        # the browser enforces the strictest one, blocking all chunks.
+        # Other security headers remain in Caddy; the CSP header is
+        # excluded (stripped below) so only the per-request one from the
+        # web server reaches the browser.
         Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
         -Server
         -X-Powered-By
