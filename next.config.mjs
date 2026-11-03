@@ -93,9 +93,13 @@ const nextConfig = {
               "base-uri 'self'",
               "object-src 'none'",
               "frame-ancestors 'none'",
-              process.env.NODE_ENV === "production"
-                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:"
-                : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // L2: 'strict-dynamic' lets nonce-scoped script tags (stamped by
+              // the edge middleware via the x-nonce header) pull in
+              // dynamically-imported chunks without 'unsafe-inline'.
+              // 'unsafe-inline' is NOT in script-src. style-src keeps it —
+              // Next.js injects inline styles and CSS injection is not an
+              // XSS vector.
+              "script-src 'self' 'strict-dynamic' https:",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data:",

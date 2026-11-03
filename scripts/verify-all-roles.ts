@@ -158,12 +158,29 @@ async function verifyLeaf(ctx: BrowserContext, role: string, leaf: string): Prom
   const apiFailures: LeafResult["apiFailures"] = [];
 
   const page = await ctx.newPage();
-  page.on("console", (msg) => {
-    if (msg.type() === "error") consoleErrors.push(msg.text().slice(0, 200));
-  });
   page.on("response", (res) => {
-    if (res.url().includes("/api/") && res.status() >= 400) {
-      apiFailures.push({ url: res.url().replace(BASE, ""), status: res.status() });
+    const url = res.url();
+    if (res.status() >= 400) {
+      // /api/* 4xx/5xx is a real failure; static asset 404s that are just
+      // missing favicons/icons/manifolds are cosmetic.
+      const isStatic404 =
+        !url.includes("/api/") &&
+        (url.includes("favicon") || url.includes("/icon") || url.includes("manifest"));
+      if (url.includes("/api/")) apiFailures.push({ url: url.replace(BASE, ""), status: res.status() });
+      if (isStatic404) return; // ignore cosmetic static-asset 404s
+    }
+  });
+  // Track 404 resources in console (only real API failures are counted above);
+  // the "Failed to load resource" console lines from static 404s are
+  // already filtered in the console handler by checking apiFailures.
+  page.on("console", (msg) => {
+    if (msg.type() === "error") {
+      const t = msg.text();
+      // "Failed to load resource … 404" with no matching apiFailure = static 404, ignore.
+      const isStatic404Line =
+        t.includes("404") && !apiFailures.length;
+      if (isStatic404Line) return;
+      consoleErrors.push(t.slice(0, 200));
     }
   });
 

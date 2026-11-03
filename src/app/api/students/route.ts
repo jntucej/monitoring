@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findAllStudents, searchStudents, getParentChildren } from "@/lib/db";
+import { findAllStudents, searchStudents, getParentChildren, query } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { mPerson } from "@/lib/db";
 import type { Person, Student } from "@/lib/types";
+import type { Role } from "@/lib/roles";
 
 const HOSTEL_CODES = ["CSE", "IT", "ECE", "EEE", "ME"];
 const WARDEN_ROLES = ["principal", "supervisor"];
 const PRINCIPAL_ROLES = ["principal", "vice_principal", "hod"];
+const FACULTY_ROLES = ["faculty"] as Role[];
 
 /**
  * Warden/supervisor scoped roster query, via the Postgres service client:
@@ -91,6 +93,50 @@ async function handleGet(req: NextRequest) {
       return NextResponse.json({ success: true, data });
     }
 
+    // Faculty see only students in their assigned classes (scoped query)
+    if (FACULTY_ROLES.includes(authRole as Role)) {
+      const { rows: classRows } = await query(
+        `SELECT DISTINCT sd.user_id
+           FROM public.student_details sd
+           JOIN public.classes c ON c.department_id::text = sd.department
+                                 AND c.year = sd.year
+                                 AND c.section = sd.section
+           WHERE (
+                c.class_teacher_id = $1
+             OR EXISTS (
+                  SELECT 1 FROM public.faculty_assignments fa
+                   WHERE fa.class_id = c.id
+                     AND fa.faculty_id = $1
+                     AND fa.is_active
+                )
+           )`,
+        [authUserId],
+      );
+      const ids = classRows.map((r: { user_id: string }) => r.user_id);
+      if (ids.length === 0) {
+        return NextResponse.json({ success: true, data: [] });
+      }
+      const service = getSupabaseServiceClient();
+      const { data: userRows, error: uErr } = await service
+        .from("users")
+        .select("*")
+        .in("id", ids);
+      if (uErr) throw uErr;
+      const { data: sRows } = await service
+        .from("student_details")
+        .select("*")
+        .in("user_id", ids);
+      const sMap = new Map((sRows || []).map((s: { user_id: string }) => [s.user_id, s]));
+      const result = (userRows || []).map((u: Record<string, unknown>) =>
+        mPerson({
+          ...u,
+          student_details: sMap.get(u.id as string) || null,
+          employee_details: null,
+        }),
+      );
+      return NextResponse.json({ success: true, data: result });
+    }
+
     // Only admins/sysadmins may list the full roster
     if (authRole !== "admin" && authRole !== "sysadmin") {
       return NextResponse.json(
@@ -112,7 +158,7 @@ async function handleGet(req: NextRequest) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, {
-    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "vice_principal", "supervisor", "hod"],
+    requiredRole: ["admin", "sysadmin", "parent", "guardian", "principal", "vice_principal", "supervisor", "hod", "faculty"],
   }),
   { keyPrefix: "students_list", maxRequests: 100 }
 );

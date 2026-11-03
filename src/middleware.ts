@@ -226,6 +226,7 @@ export const config = {
   // for the HTML shell, never for the operator's kiosk API calls.
   matcher: [
     '/api/:path*',
+    '/', '/login',
     '/admin', '/admin/:path*',
     '/sysadmin', '/sysadmin/:path*',
     '/student', '/student/:path*',

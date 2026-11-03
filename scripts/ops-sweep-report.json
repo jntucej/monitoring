@@ -1,6 +1,6 @@
 {
-  "base": "http://127.0.0.1:80",
-  "at": "2026-11-01T15:46:19.234Z",
+  "base": "https://monitor.ucej.in",
+  "at": "2026-11-03T14:31:55.779Z",
   "public": {
     "health": 200,
     "loginPage": 200,
@@ -11,8 +11,8 @@
       "role": "student",
       "login": "23JJ1A0599",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "student",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/student",
@@ -57,7 +57,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -66,8 +66,8 @@
       "role": "parent",
       "login": "PARENT",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "parent",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/guardian",
@@ -97,7 +97,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -106,8 +106,8 @@
       "role": "oie",
       "login": "oie",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "oie",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/oie",
@@ -143,7 +143,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -151,55 +151,19 @@
     {
       "role": "staff",
       "login": "admin",
-      "loggedIn": true,
+      "loggedIn": false,
       "sessionRole": null,
       "sessionOk": false,
-      "pages": [
-        {
-          "path": "/staff",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/staff/my-day",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/staff/requests",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        }
-      ],
-      "apis": [
-        {
-          "label": "my day",
-          "method": "GET",
-          "path": "/api/staff/my-day",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        }
-      ],
-      "negatives": [
-        {
-          "label": "supervisor shift (must 403)",
-          "path": "/api/supervisor/shift",
-          "status": 401,
-          "enforced": true
-        }
-      ]
+      "pages": [],
+      "apis": [],
+      "negatives": []
     },
     {
       "role": "operator",
       "login": "OPERATOR",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "operator",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/operator",
@@ -244,7 +208,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -253,8 +217,8 @@
       "role": "supervisor",
       "login": "SUPERVISOR",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "supervisor",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/supervisor",
@@ -299,8 +263,8 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
-          "enforced": true
+          "status": 200,
+          "enforced": false
         }
       ]
     },
@@ -308,8 +272,8 @@
       "role": "mess_incharge",
       "login": "MESS_INCHARGE",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "mess_incharge",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/mess",
@@ -345,7 +309,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -354,8 +318,8 @@
       "role": "exam_superintendent",
       "login": "EXAM_SUPERINTENDENT",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "exam_superintendent",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/exam/superintendent",
@@ -391,7 +355,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -400,8 +364,8 @@
       "role": "exam_branch",
       "login": "EXAM_BRANCH",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "exam_branch",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/exam-branch",
@@ -437,7 +401,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -446,8 +410,8 @@
       "role": "deputy_warden",
       "login": "DEPUTY_WARDEN",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "deputy_warden",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/deputy-warden",
@@ -483,7 +447,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -491,55 +455,19 @@
     {
       "role": "hostel_manager",
       "login": "HOSTEL_MANAGER",
-      "loggedIn": true,
+      "loggedIn": false,
       "sessionRole": null,
       "sessionOk": false,
-      "pages": [
-        {
-          "path": "/hostel-manager",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/hostel-manager/residents",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/hostel-manager/rooms",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        }
-      ],
-      "apis": [
-        {
-          "label": "hostel summary",
-          "method": "GET",
-          "path": "/api/hostel-manager/summary",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        }
-      ],
-      "negatives": [
-        {
-          "label": "supervisor shift (must 403)",
-          "path": "/api/supervisor/shift",
-          "status": 401,
-          "enforced": true
-        }
-      ]
+      "pages": [],
+      "apis": [],
+      "negatives": []
     },
     {
       "role": "caretaker",
       "login": "caretaker",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "caretaker",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/caretaker",
@@ -575,7 +503,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -584,8 +512,8 @@
       "role": "subject_faculty",
       "login": "SUBJECT_FACULTY",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "faculty",
+      "sessionOk": true,
       "pages": [],
       "apis": [],
       "negatives": []
@@ -594,8 +522,8 @@
       "role": "worker",
       "login": "WORKER",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "worker",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/worker",
@@ -631,7 +559,7 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
           "enforced": true
         }
       ]
@@ -639,110 +567,29 @@
     {
       "role": "vice_principal",
       "login": "VICE_PRINCIPAL",
-      "loggedIn": true,
+      "loggedIn": false,
       "sessionRole": null,
       "sessionOk": false,
-      "pages": [
-        {
-          "path": "/vice-principal",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/vice-principal/pending-approvals",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/vice-principal/examinations",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        }
-      ],
-      "apis": [
-        {
-          "label": "VP queue",
-          "method": "GET",
-          "path": "/api/permissions?stage=vice_principal&status=PENDING",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        }
-      ],
-      "negatives": [
-        {
-          "label": "HOD queue (must 403)",
-          "path": "/api/permissions?stage=hod",
-          "status": 401,
-          "enforced": true
-        }
-      ]
+      "pages": [],
+      "apis": [],
+      "negatives": []
     },
     {
       "role": "principal",
       "login": "PRINCIPAL",
-      "loggedIn": true,
+      "loggedIn": false,
       "sessionRole": null,
       "sessionOk": false,
-      "pages": [
-        {
-          "path": "/principal",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/principal/approvals",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/principal/home",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        }
-      ],
-      "apis": [
-        {
-          "label": "pending queue",
-          "method": "GET",
-          "path": "/api/permissions?stage=principal&status=PENDING",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        },
-        {
-          "label": "overdue queue",
-          "method": "GET",
-          "path": "/api/permissions?stage=principal&overdue=true",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        }
-      ],
-      "negatives": [
-        {
-          "label": "operator last-scan (must 403)",
-          "path": "/api/operator/last-scan",
-          "status": 401,
-          "enforced": true
-        }
-      ]
+      "pages": [],
+      "apis": [],
+      "negatives": []
     },
     {
       "role": "hod",
       "login": "HOD",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "hod",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/hod",
@@ -778,72 +625,27 @@
         {
           "label": "principal queue (must 403)",
           "path": "/api/permissions?stage=principal",
-          "status": 401,
-          "enforced": true
+          "status": 200,
+          "enforced": false
         }
       ]
     },
     {
       "role": "admin",
       "login": "admin",
-      "loggedIn": true,
+      "loggedIn": false,
       "sessionRole": null,
       "sessionOk": false,
-      "pages": [
-        {
-          "path": "/admin",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/admin/dashboard",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        },
-        {
-          "path": "/admin/alerts",
-          "status": 200,
-          "redirected": false,
-          "note": ""
-        }
-      ],
-      "apis": [
-        {
-          "label": "rich health snapshot",
-          "method": "GET",
-          "path": "/api/admin/health/full",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        },
-        {
-          "label": "occupancy",
-          "method": "GET",
-          "path": "/api/admin/dashboard",
-          "status": 200,
-          "ok": true,
-          "expected": "<500",
-          "detail": ""
-        }
-      ],
-      "negatives": [
-        {
-          "label": "sysadmin cron (must 403)",
-          "path": "/api/sysadmin/cron",
-          "status": 404,
-          "enforced": true
-        }
-      ]
+      "pages": [],
+      "apis": [],
+      "negatives": []
     },
     {
       "role": "emo",
       "login": "EMO",
       "loggedIn": true,
-      "sessionRole": null,
-      "sessionOk": false,
+      "sessionRole": "emo",
+      "sessionOk": true,
       "pages": [
         {
           "path": "/emo",
@@ -873,7 +675,83 @@
         {
           "label": "supervisor shift (must 403)",
           "path": "/api/supervisor/shift",
-          "status": 401,
+          "status": 403,
+          "enforced": true
+        }
+      ]
+    },
+    {
+      "role": "faculty",
+      "login": "FACULTY",
+      "loggedIn": true,
+      "sessionRole": "faculty",
+      "sessionOk": true,
+      "pages": [],
+      "apis": [],
+      "negatives": []
+    },
+    {
+      "role": "sysadmin",
+      "login": "SYSADMIN",
+      "loggedIn": false,
+      "sessionRole": null,
+      "sessionOk": false,
+      "pages": [],
+      "apis": [],
+      "negatives": []
+    },
+    {
+      "role": "visitor",
+      "login": "VISITOR",
+      "loggedIn": true,
+      "sessionRole": "visitor",
+      "sessionOk": true,
+      "pages": [],
+      "apis": [],
+      "negatives": []
+    },
+    {
+      "role": "guardian",
+      "login": "GUARDIAN",
+      "loggedIn": true,
+      "sessionRole": "guardian",
+      "sessionOk": true,
+      "pages": [
+        {
+          "path": "/guardian",
+          "status": 200,
+          "redirected": false,
+          "note": ""
+        },
+        {
+          "path": "/guardian/child-status",
+          "status": 200,
+          "redirected": false,
+          "note": ""
+        },
+        {
+          "path": "/guardian/child-requests",
+          "status": 200,
+          "redirected": false,
+          "note": ""
+        }
+      ],
+      "apis": [
+        {
+          "label": "guardian view",
+          "method": "GET",
+          "path": "/api/parents/me",
+          "status": 200,
+          "ok": true,
+          "expected": "<500",
+          "detail": ""
+        }
+      ],
+      "negatives": [
+        {
+          "label": "supervisor shift (must 403)",
+          "path": "/api/supervisor/shift",
+          "status": 403,
           "enforced": true
         }
       ]
