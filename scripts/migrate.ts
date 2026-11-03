@@ -330,6 +330,15 @@ async function main() {
         } else {
           const selfTx = /^\s*BEGIN\s*;/im.test(sql) && /^\s*COMMIT\s*;/im.test(sql);
           if (!selfTx) await client.query("BEGIN");
+          // 20261010120000_create_app_role reads gate.app_password via
+          // current_setting() — set it transactionally before running SQL so
+          // the gate_app credential is GATE_APP_PASSWORD (not the fallback
+          // 'postgres').
+          if (version === "20261010120000") {
+            const appPass =
+              process.env.GATE_APP_PASSWORD || process.env.POSTGRES_PASSWORD || "postgres";
+            await client.query("SELECT set_config('gate.app_password', $1, true)", [appPass]);
+          }
           await client.query(sql);
           if (!selfTx) await client.query("COMMIT");
           if (selfRecords) {

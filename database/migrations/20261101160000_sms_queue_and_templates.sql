@@ -4,6 +4,12 @@ BEGIN;
 ALTER TABLE public.notification_sms_queue
   ALTER COLUMN notification_id DROP NOT NULL;
 
+-- 1b. The gate schema.sql ships notification_sms_queue WITHOUT
+--     provider_message_id (used by the MSG91 webhook for delivery receipts).
+--     Add it idempotently so the partial index below can be created.
+ALTER TABLE public.notification_sms_queue
+  ADD COLUMN IF NOT EXISTS provider_message_id TEXT;
+
 -- 2. Add the fields the UI + worker + MSG91 webhook need
 ALTER TABLE public.notification_sms_queue
   ADD COLUMN IF NOT EXISTS priority TEXT NOT NULL DEFAULT 'normal'

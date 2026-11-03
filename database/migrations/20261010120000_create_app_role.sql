@@ -1,23 +1,24 @@
 -- 20261010120000_create_app_role.sql
 -- Idempotent app role + credential. Fresh installs that run ONLY the migration
--- path (not database/bootstrap.sql) still get a working gate_app login:
--- if the role has no password, we set it from the GUC `gate.app_password`
--- (passed by the runner / scripts/migrate.ts) or the superuser password.
-DO $$BEGIN
+-- path (not database/bootstrap.sql) still get a working gate_app login.
+--
+-- Password strategy (kept strictly simple for psql):
+--   psql -v "gate.app_password='...'" -f ...   -> explicit password wins
+--   psql -f ...                                 -> gate_app password = 'postgres'
+-- (The earlier multi-argument coalesce with current_setting('app.password')
+-- broke the DO block at parse time; see CHANGES 2026-11-03.)
+DO $$
+DECLARE
+  app_pass TEXT;
+  psw_clause TEXT;
+BEGIN
+  app_pass := coalesce(nullif(current_setting('gate.app_password', true), ''), 'postgres');
+  psw_clause := 'PASSWORD ' || quote_literal(app_pass);
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app') THEN
-    CREATE ROLE gate_app
-      NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT LOGIN;
+    EXECUTE 'CREATE ROLE gate_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT LOGIN ' || psw_clause;
   ELSE
     ALTER ROLE gate_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
-  END IF;
-  -- Always ensure a non-NULL password so postgres://gate_app:*** can connect.
-  IF (SELECT rolpassword IS NULL FROM pg_authid WHERE rolname = 'gate_app')
-     OR coalesce(nullif(current_setting('gate.app_password', true), ''), '') <> '' THEN
-    ALTER ROLE gate_app WITH LOGIN PASSWORD coalesce(
-      nullif(current_setting('gate.app_password', true), ''),
-      current_setting('app.password', true),
-      'postgres'
-    );
+    EXECUTE 'ALTER ROLE gate_app WITH LOGIN ' || psw_clause;
   END IF;
   EXECUTE format('GRANT CONNECT ON DATABASE %I TO gate_app', current_database());
 END $$;

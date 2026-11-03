@@ -1471,7 +1471,13 @@ CREATE TABLE IF NOT EXISTS public.onboarding_progress (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 -- 4. Compatibility view students over users + student_details
-CREATE OR REPLACE VIEW students AS
+-- 2026-11-03: migration 20261030000005 re-created this view with additional
+-- columns (father_name, landline_number, dob, current_entry_type, course,
+-- branch, semester, regulation, deleted_at). CREATE OR REPLACE cannot
+-- remove or rename columns, so drop and re-create to keep schema.sql
+-- idempotent with the post-migration schema.
+DROP VIEW IF EXISTS public.students;
+CREATE VIEW public.students AS
 SELECT
   u.id                          AS id,
   u.unique_id                   AS roll,
@@ -1483,6 +1489,9 @@ SELECT
   u.photo_url                   AS photo,
   u.email                       AS email,
   u.phone                       AS phone,
+  NULL::TEXT                    AS father_name,
+  NULL::TEXT                    AS landline_number,
+  NULL::DATE                    AS dob,
   NULL::TEXT                    AS parent_name,
   NULL::TEXT                    AS parent_phone,
   sd.guardian_id                AS parent_id,
@@ -1490,11 +1499,17 @@ SELECT
   NULL::TIMESTAMPTZ             AS id_valid_until,
   u.status                      AS status,
   sd.student_type               AS student_type,
+  NULL::TEXT                    AS current_entry_type,
   sd.gender                     AS gender,
   sd.hostel_block               AS hostel_block,
   sd.room_number                AS room_number,
   sd.hostel_curfew_time         AS hostel_curfew_time,
-  sd.warden_id                  AS warden_id
+  sd.warden_id                  AS warden_id,
+  NULL::TEXT                    AS course,
+  NULL::TEXT                    AS branch,
+  NULL::TEXT                    AS semester,
+  NULL::TEXT                    AS regulation,
+  u.deleted_at                  AS deleted_at
 FROM users u
 LEFT JOIN student_details sd ON sd.user_id = u.id
 WHERE u.role = 'student';

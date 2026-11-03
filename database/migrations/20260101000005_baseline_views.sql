@@ -11,7 +11,12 @@ END $$;
 CREATE OR REPLACE VIEW public.system_config AS
 SELECT id AS key, value, value AS data, updated_at FROM public.system_settings;
 
-CREATE OR REPLACE VIEW public.students AS
+-- 2026-11-03: migration 20261030000005 re-creates the students view with
+-- additional columns (father_name, landline_number, dob, current_entry_type,
+-- course, branch, semester, regulation, deleted_at). CREATE OR REPLACE
+-- cannot remove columns, so drop and re-create to stay idempotent.
+DROP VIEW IF EXISTS public.students;
+CREATE VIEW public.students AS
 SELECT u.id, u.unique_id AS roll, u.name, u.department_id AS department,
        COALESCE(sd.year,1) AS year, COALESCE(sd.section,'A') AS section,
        COALESCE(sd.batch,'') AS batch, u.photo_url AS photo, u.email, u.phone,

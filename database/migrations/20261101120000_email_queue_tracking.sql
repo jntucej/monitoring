@@ -15,13 +15,16 @@ CREATE INDEX IF NOT EXISTS idx_email_queue_pending
 CREATE INDEX IF NOT EXISTS idx_email_queue_category_status
   ON public.notification_email_queue (category, status);
 
--- Self-record migration (adaptive DO $$ pattern from prior migrations).
+-- Self-record migration: the version recorded in schema_migrations must
+-- match the filename's 14-digit prefix (20261101120000). The original
+-- (20261030091615_email_queue_tracking) was a draft name that never
+-- shipped; the file was renamed to the canonical 20261101120000 timestamp.
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM public.schema_migrations WHERE version = '20261030091615_email_queue_tracking'
+    SELECT 1 FROM public.schema_migrations WHERE version = '20261101120000'
   ) THEN
-    INSERT INTO public.schema_migrations (version, applied_at)
-    VALUES ('20261030091615_email_queue_tracking', now());
+    INSERT INTO public.schema_migrations (version, filename, applied_at)
+    VALUES ('20261101120000', '20261101120000_email_queue_tracking', now());
   END IF;
 END $$;

@@ -6,6 +6,8 @@
 -- TRUNCATE audit_logs or create triggers.
 BEGIN;
 DO $$
+DECLARE
+  r TEXT;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app') THEN
     RAISE NOTICE 'gate_app role missing; skipping';
@@ -20,7 +22,7 @@ BEGIN
      WHERE n.nspname = 'public'
        AND c.relkind IN ('r','v','m')
   LOOP
-    EXECUTE format('REVOKE TRUNCATE, REFERENCES, TRIGGER ON public.%I FROM gate_app', r.relname);
+    EXECUTE format('REVOKE TRUNCATE, REFERENCES, TRIGGER ON public.%I FROM gate_app', r);
   END LOOP;
 
   -- Reset default privileges so future tables don't inherit ALL.

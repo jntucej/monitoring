@@ -1,4 +1,4 @@
--- 20261030000000_refresh_students_view.sql
+-- 20261030000005_refresh_students_view.sql
 -- Refresh the public.students view to include soft-delete filtering and
 -- full student metadata columns (some added as NULL placeholders for
 -- columns that will be backfilled by later migrations).
@@ -6,11 +6,12 @@
 -- Fixes R3-12: the students view was stale — missing soft-delete filter,
 -- missing fields added after the baseline, and never updated by later migrations.
 --
--- Columns that do not yet exist on student_details are emitted as NULL
--- placeholders so the view is forward-compatible; once a migration adds the
--- real column, the placeholder can be swapped for sd.<column>.
-
-CREATE OR REPLACE VIEW public.students AS
+-- 2026-11-03: CREATE OR REPLACE cannot rename or add columns that don't
+-- already exist on the view — the baseline view had no father_name,
+-- landline_number, dob, current_entry_type, course, branch, semester,
+-- regulation or deleted_at. DROP and re-create cleanly.
+DROP VIEW IF EXISTS public.students;
+CREATE VIEW public.students AS
 SELECT
   u.id,
   u.unique_id AS roll,

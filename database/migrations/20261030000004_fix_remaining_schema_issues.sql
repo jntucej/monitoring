@@ -57,11 +57,21 @@ GRANT EXECUTE ON FUNCTION public.issue_enrollment_code(UUID, TEXT) TO service_ro
 -- and the view is re-created to carry the new column through. The partial
 -- index is created on the base table permissions, not the view.
 ALTER TABLE public.permissions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
--- Recreate the compatibility view over the base table so the new deleted_at
--- column is carried through. Keep the student_user_id alias that the OIE
--- queue and other consumers rely on: CREATE OR REPLACE cannot drop the
--- aliased column, so it must be re-declared explicitly here.
-CREATE OR REPLACE VIEW public.permission_requests AS
+-- Recreate the compatibility view over the base table so new base-table
+-- columns (deleted_at, used_at, etc.) are carried through. CREATE OR REPLACE
+-- cannot drop or rename an existing aliased column — it can only ADD new
+-- aliases — so drop and re-create the view cleanly on every run. The alias
+-- (requester_user_id AS student_user_id) must be re-declared explicitly
+-- after DROP+CREATE because the OIE queue and other consumers depend on it.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relname = 'permission_requests' AND c.relkind = 'v') THEN
+    DROP VIEW public.permission_requests;
+  END IF;
+END $$;
+CREATE VIEW public.permission_requests AS
   SELECT *, requester_user_id AS student_user_id FROM public.permissions;
 CREATE INDEX IF NOT EXISTS idx_permission_requests_deleted 
   ON public.permissions(deleted_at) 

@@ -54,7 +54,7 @@ BEGIN
 
   EXECUTE 'ALTER TABLE public.audit_logs DROP CONSTRAINT audit_logs_action_known';
   EXECUTE 'ALTER TABLE public.audit_logs ADD CONSTRAINT audit_logs_action_known ' || newdef;
-  RAISE NOTICE 'audit_logs_action_known: appended complaint audit actions', extra;
+  RAISE NOTICE 'audit_logs_action_known: appended complaint audit actions: %', extra;
 END $$;
 
 -- Self-record (adaptive to 2-col or 4-col schema_migrations)

@@ -59,10 +59,12 @@ BEGIN
       FOR INSERT TO gate_app
       WITH CHECK (
         current_setting('app.current_user_id', true) IS NOT NULL
-        AND NEW.requester_user_id = current_setting('app.current_user_id', true)::uuid
+        AND current_setting('app.current_user_id', true)::uuid = requester_user_id
       );
 
     -- UPDATE: allow the app role to update only rows it can read.
+    -- USING sees the OLD row (bare column names resolve from the FROM
+    -- context); WITH CHECK for FOR UPDATE also uses bare names (NEW row).
     DROP POLICY IF EXISTS permissions_gate_app_update ON public.permissions;
     CREATE POLICY permissions_gate_app_update ON public.permissions
       FOR UPDATE TO gate_app
