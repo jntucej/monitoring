@@ -41,9 +41,9 @@ jobs:
           # it ownership of public, so schema DDL resolves in its context.
           DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
-          # supabase_admin is not the DB superuser (the image creates a
-          # `postgres` superuser with an unknown password); grant it DDL
-          # rights on public so schema.sql CREATE statements succeed.
+          # supabase_admin is not the DB superuser (the image also creates a
+          # `postgres` superuser with an unknown generated password), so
+          # grant it DDL rights on public + database first.
           psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
             -c "GRANT CREATE, USAGE ON SCHEMA public TO supabase_admin;" || true
           psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
