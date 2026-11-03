@@ -193,6 +193,14 @@ services:
       - RAG_EMBEDDING_API_KEY=${RAG_EMBEDDING_API_KEY:-}
       - CRON_SECRET=${CRON_SECRET:?CRON_SECRET must be set for web}
       - KIOSK_SESSION_REQUIRE_PIN=${KIOSK_SESSION_REQUIRE_PIN:-true}
+      # Batch J: drill evidence dir (J5). The host runs the drills; the web
+      # container reads their signed JSON evidence. The env_file above
+      # already carries DRILL_* / SYSADMIN_INTERNAL_TOKEN from .env.
+      - DRILL_MODE=${DRILL_MODE:-}
+      - DRILL_SECRET=${DRILL_SECRET:-}
+      - DRILL_EVIDENCE_DIR=${DRILL_EVIDENCE_DIR:-/opt/monitoring/drills/evidence}
+      - SYSADMIN_INTERNAL_TOKEN=${SYSADMIN_INTERNAL_TOKEN:-}
+      - INTERNAL_BASE_URL=${INTERNAL_BASE_URL:-http://localhost:3000}
     networks:
       gate-net:
         aliases:
@@ -202,6 +210,9 @@ services:
       llm-net:
     volumes:
       - uploads_data:/app/data/uploads
+      # Batch J5: read-only mount of the host-side drill evidence dir so
+      # /api/sysadmin/drills can enumerate the latest run per drill.
+      - ${DRILL_EVIDENCE_DIR:-/opt/monitoring/drills/evidence}:/opt/monitoring/drills/evidence:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000/api/health > /dev/null || exit 1"]
       interval: 10s

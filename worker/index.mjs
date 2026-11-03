@@ -77,6 +77,7 @@ import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
+import completeRearmRequests from './jobs/rearm_automation_controls.js';
 
 /**
  * Job heartbeat sentinel: after each scheduled run, upsert a row in
@@ -178,6 +179,9 @@ const jobs = [
   // Batch I3: SLO snapshot — evaluate each active SLO's PromQL query and
   // record availability/burn_rate into public.slo_snapshots.
   { name: 'slo-snapshot', ms: 5 * 60 * 1000, run: () => runJob('slo-snapshot', sloSnapshot) },
+  // Batch J2: dual-control re-arm — complete rearm requests that have two
+  // distinct approvals and flip the auto_* automation_controls back on.
+  { name: 'rearm-automation-controls', ms: 60 * 1000, run: () => runJob('rearm-automation-controls', completeRearmRequests) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

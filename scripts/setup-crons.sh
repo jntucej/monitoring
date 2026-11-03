@@ -125,6 +125,32 @@ else
 fi
 
 # ----------------------------------------------------------------------------
+# J6 — Security-chaos drill rotation: weekly non-destructive suite on
+# staging, quarterly restore-to-separate-host drill. Destructive drills
+# (audit-tamper, kill-switch) run on demand by named humans only.
+# Safe on hosts without docker: set DRILL_SKIP_DOCKER=1 to skip the
+# container-injection drills.
+# ----------------------------------------------------------------------------
+cat > /etc/cron.d/gate-drills <<EOF
+# Security-chaos drills (Batch J):
+#   weekly 03:00 — full non-destructive suite
+#   quarterly 04:00 — restore-to-separate-host (pulls postgres:17, decrypts
+#                      the latest .enc cold backup into a disposable
+#                      container, validates data, records RTO)
+# DRILL_ENV=staging: the production-gate inside _lib.sh refuses
+# destructive drills without DRILL_PROD_OK=1, so this file is safe on
+# production hosts as well (non-destructive drills still run).
+0 3 * * 0    root  cd ${BASE_DIR}/compose && DRILL_ENV=staging DRILL_SKIP_DOCKER=0 \
+  env \$(cat ${BASE_DIR}/compose/env/production.env 2>/dev/null | xargs) \
+  bash scripts/drills/run-all.sh >> /var/log/gate-drills.log 2>&1
+0 4 1 */3 *   root  cd ${BASE_DIR}/compose && DRILL_ENV=staging \
+  env \$(cat ${BASE_DIR}/compose/env/production.env 2>/dev/null | xargs) \
+  bash scripts/drills/drill-restore-to-separate-host.sh >> /var/log/gate-drills.log 2>&1
+EOF
+chmod 600 /etc/cron.d/gate-drills
+echo "✓ Installed /etc/cron.d/gate-drills (mode 600)"
+
+# ----------------------------------------------------------------------------
 # Ensure cron is running (idempotent; no-op if already active).
 # ----------------------------------------------------------------------------
 if command -v systemctl >/dev/null 2>&1; then

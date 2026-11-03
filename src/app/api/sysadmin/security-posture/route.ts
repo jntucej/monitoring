@@ -292,6 +292,57 @@ async function checkSloHealth(): Promise<Check> {
   }
 }
 
+// J5 — Drill evidence: the latest security-chaos drill run per drill (from
+// /api/sysadmin/drills, which reads DRILL_EVIDENCE_DIR). A drill that has
+// never run is "warn" (nothing to prove yet), a run older than 30 days is
+// "warn" (stale proof), and a FAILING drill is "fail" (a control regressed).
+async function checkDrills(): Promise<Check> {
+  const base = process.env.INTERNAL_BASE_URL ?? "http://localhost:3000";
+  const token = process.env.SYSADMIN_INTERNAL_TOKEN;
+  if (!token) {
+    return unknown("drills", "Security drills (30d)", "J", "SYSADMIN_INTERNAL_TOKEN not set", "runbook.md#drill-stale");
+  }
+  try {
+    const res = await fetch(`${base}/api/sysadmin/drills`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return unknown("drills", "Security drills (30d)", "J", `drills API ${res.status}`, "runbook.md#drill-stale");
+    }
+    const j = (await res.json()) as {
+      data: {
+        drills: Array<{ drill: string; status: string; ageHours: number; skipped?: boolean }>;
+        total: number;
+        passing: number;
+        failing: number;
+      };
+    };
+    const d = j.data;
+    const active = d.drills.filter((x) => !x.skipped);
+    const failing = active.filter((x) => x.status === "fail").length;
+    const stale = active.filter((x) => x.ageHours > 24 * 30).length;
+    const neverRun = active.length === 0;
+    return {
+      id: "drills",
+      batch: "J",
+      label: "Security drills (30d)",
+      status: failing > 0 ? "fail" : neverRun ? "unknown" : stale > 0 ? "warn" : "ok",
+      detail:
+        failing > 0
+          ? `${failing} drill(s) failing`
+          : neverRun
+            ? "no drill has run yet — run scripts/drills/run-all.sh"
+            : stale > 0
+              ? `${stale} drill(s) >30d old`
+              : `${d.passing}/${active.length} drill(s) passing within 30d`,
+      runbook: "runbook.md#drill-stale",
+    };
+  } catch (e) {
+    return unknown("drills", "Security drills", "J", e, "runbook.md#drill-stale");
+  }
+}
+
 async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }) {
   const checks = await Promise.all([
     checkRlsForce(),
@@ -305,6 +356,7 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }) {
     checkCsrfViolations(),
     checkAutomationKillSwitches(),
     checkSloHealth(),
+    checkDrills(),
   ]);
 
   const score = checks.filter((c) => c.status === "ok").length / checks.length;

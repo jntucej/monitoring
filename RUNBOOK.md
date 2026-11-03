@@ -296,3 +296,58 @@ Immediate actions, in this order:
 | SEV-4 | Ticket | cosmetic, single user affected |
 
 Contacts: see the `escalation_contacts` table (the ladder it defines is live data, not a PDF).
+
+## drill-stale — security-chaos drill evidence is missing or stale
+
+The posture endpoint (Batch J5) reads the latest evidence per drill from
+`DRILL_EVIDENCE_DIR` (host default `/opt/monitoring/drills/evidence`,
+bind-mounted read-only into the web container). States:
+
+| posture status | meaning |
+| --- | --- |
+| `ok` | every non-skipped drill has a PASS within 30 days |
+| `warn` | at least one drill's last PASS is >30 days old (stale proof) |
+| `fail` | a drill's latest evidence says `fail` — a control regressed |
+| `unknown` | no drill has ever run, or the evidence dir is unreadable |
+
+Fix (in order):
+
+```bash
+# 1. Confirm the host cron is actually running the suite:
+tail -50 /var/log/gate-drills.log
+
+# 2. Force a run now (staging):
+cd /opt/monitoring/compose
+DRILL_ENV=staging bash scripts/drills/run-all.sh
+
+# 3. The kill-switch drill (J2) is NOT in run-all — it needs two distinct
+#    sysadmin tokens and is run on demand:
+DRILL_ENV=staging \
+DRILL_SYSADMIN_TOKEN_1=… DRILL_SYSADMIN_TOKEN_2=… \
+DRILL_USER_TOKEN=… DRILL_ADMIN_TOKEN=… DRILL_OPERATOR_TOKEN=… \
+bash scripts/drills/drill-kill-switch.sh
+
+# 4. Check the evidence the API will see:
+ls -lt /opt/monitoring/drills/evidence | head
+# The web container must be restarted (or the mount re-created) after
+# the first run so the new files are visible:
+docker compose restart web
+```
+
+Drill-to-claim mapping (the "what this proves" table, for the auditor):
+
+| drill | claim it proves |
+| --- | --- |
+| `audit-writer-failclosed` | an audit failure rejects the write, never silently commits it |
+| `jwt-expiry-mid-scan` | an expired JWT forces re-auth (401), never a stale session |
+| `disk-full-backup-refusal` | disk pressure never silently prunes a sub-3d backup |
+| `postgres-down` | DB down → 503 health, no write returns 200 |
+| `llm-down-fast-fail` | an upstream outage fails fast, does not block the request pool |
+| `audit-tamper-detect` | UPDATE/DELETE on audit_logs is physically blocked by the trigger |
+| `kill-switch` | engage flips every actuation seam to denied; governance stays readable; re-enable needs two distinct humans |
+| `restore-separate-host` | the latest encrypted cold backup restores into a clean host within RTO |
+| `nextjs-cve-regression` | the four Next.js CVE probes are refused on this build |
+
+Cadence: `run-all.sh` weekly (03:00 Sunday), `drill-restore-to-separate-host.sh`
+quarterly (first day of Jan/Apr/Jul/Oct, 04:00). The Next.js CVE battery
+re-runs on every deploy — a minor Next upgrade can re-open a closed class.
