@@ -141,9 +141,9 @@
   {
    "role": "faculty",
    "login": "FACULTY",
-   "root": "/faculty",
+   "root": "/faculty/permissions",
    "leaves": [
-    "/faculty",
+    "/faculty/permissions",
     "/faculty/attendance",
     "/faculty/class",
     "/faculty/correction-requests",
@@ -271,7 +271,7 @@
   {
    "role": "parent",
    "login": "PARENT",
-   "root": "/parent",
+   "root": "/guardian",
    "leaves": [
     "/guardian",
     "/guardian/child-status",

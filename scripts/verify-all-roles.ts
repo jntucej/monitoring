@@ -96,22 +96,45 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     const { user } = body.data;
     void user;
 
-    // Establish the browser session: the login response sets an httpOnly
-    // `access_token` cookie (and the token is also returned in the body for
-    // the SPA's sessionStorage store). Inject the token into sessionStorage
-    // so AuthGuard rehydrates without the form flow.
+    // Establish the browser session: the zustand auth store persists to
+    // localStorage under "mycampus-auth" (token in sessionStorage "auth.token").
+    // The persisted state must carry the token so checkSession's Bearer
+    // fetch uses it; without it zustand rehydration leaves state.token
+    // undefined and the session probe degrades to the cookie path, which
+    // fails for the Bearer-token flow and bounces the user to /login.
     const roleRoot = roleRootParam ?? `/${role}`;
     await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.evaluate((tok) => {
-      sessionStorage.setItem("auth.token", tok);
-    }, body.data.token as string);
+    await page.evaluate(([tok, u, r]) => {
+      sessionStorage.setItem("auth.token", tok as string);
+      localStorage.setItem(
+        "mycampus-auth",
+        JSON.stringify({
+          state: {
+            user: u,
+            role: r,
+            authenticated: true,
+            _hasHydrated: true,
+            token: tok,
+          },
+          version: 0,
+        }),
+      );
+    }, [body.data.token, body.data.user, role]);
     // Navigate to the role root; AuthGuard will bounce to /login if the
     // token is invalid, so landing on the root (or a sub-route) is success.
+    // The SPA's checkSession runs asynchronously after initial render; give
+    // it time to complete before judging the final URL.
     await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(5000);
     let landed = page.url();
     if (landed.includes("/login")) {
       await page.waitForTimeout(3000);
+      landed = page.url();
+    }
+    if (landed.includes("/login")) {
+      // checkSession may still be in flight; one more grace window
+      await page.waitForTimeout(5000);
       landed = page.url();
     }
     if (landed.includes("/login")) {
