@@ -73,6 +73,7 @@ import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
 import sendSmsQueue from './jobs/send_sms.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
+import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
 import collectInfraSnapshot from './jobs/infra_snapshot_collector.js';
 import runInfraForecaster from './jobs/infra_forecaster.js';
@@ -174,6 +175,9 @@ const jobs = [
   }) },
   { name: 'infra-snapshot', ms: 60 * 1000, run: () => runJob('infra-snapshot', collectInfraSnapshot) },
   { name: 'infra-forecaster', ms: 5 * 60 * 1000, run: () => runJob('infra-forecaster', runInfraForecaster) },
+  // Batch I3: SLO snapshot — evaluate each active SLO's PromQL query and
+  // record availability/burn_rate into public.slo_snapshots.
+  { name: 'slo-snapshot', ms: 5 * 60 * 1000, run: () => runJob('slo-snapshot', sloSnapshot) },
 ];
 
 // The pg LISTEN channel for operator_action_pending is a dedicated client

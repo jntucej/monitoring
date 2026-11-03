@@ -24,6 +24,17 @@ log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG"; }
 
 log "=== Starting master backup: $TIMESTAMP ==="
 
+# Batch I5: backup kill switch. A skipped backup is not a successful
+# backup — exit 3 so the cron / auto-heal layer sees a failure and can
+# page someone. 0 would mean "backup ran and succeeded."
+PG_DOCKER="${PG_DOCKER_NAME:-gate_postgres}"
+DISABLED=$(docker exec "$PG_DOCKER" psql -U postgres -d gate_monitor -tAc \
+  "SELECT NOT enabled FROM public.automation_controls WHERE name='auto_backup_enabled'" 2>/dev/null || echo "f")
+if [ "$DISABLED" = "t" ]; then
+  log "auto_backup_enabled is FALSE — backup SKIPPED (kill switch). Exiting 3."
+  exit 3
+fi
+
 # 1. PostgreSQL full dump (COPY-friendly, NOT --inserts).
 #    --inserts writes one INSERT per row — 10–50x larger and far slower for
 #    big tables, and it thrashes the live DB's disk during a 6-hourly run.

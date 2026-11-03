@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { EmailMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
 import { AppError } from "@/server/http/errors";
+import { isAutomationEnabled } from "@/lib/kill-switch";
 
 // Configuration
 const EMAIL_CONFIG = {
@@ -44,6 +45,13 @@ export async function sendEmail(params: {
     }
 
     if (EMAIL_CONFIG.enabled) {
+      // Batch I5: email kill switch. When auto_email_enabled=FALSE the row
+      // stays in notification_email_queue for later dispatch; no provider call.
+      const emailSwitchOn = await isAutomationEnabled("auto_email_enabled");
+      if (!emailSwitchOn) {
+        console.log("[email] auto_email_enabled kill switch is OFF — leaving row 'pending' for later dispatch.");
+        return null;
+      }
       if (!EMAIL_CONFIG.apiKey) {
         if (process.env.NODE_ENV === "production") {
           throw new AppError("EMAIL_NOT_CONFIGURED", "Email service is not configured in production environment", 500);

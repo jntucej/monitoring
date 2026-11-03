@@ -64,3 +64,35 @@ groups:
             summary: "gate_worker process not visible in cAdvisor"
             description: "The worker container has exited or is not exposing process metrics — notification/SMS dispatch is halted."
 
+  # Batch I3: SLO error-budget burn-rate alerts.
+  # The SLO snapshot job (worker/jobs/slo_snapshot.js) records the actual
+  # availability/burn values into public.slo_snapshots every 5 minutes;
+  # these rules fire when the live burn rate exceeds thresholds relative
+  # to the 30-day 99.9% budget (14× → warning, 100× → critical).
+  - name: gate-monitor-slo
+    rules:
+      - alert: SloBudgetBurnHigh
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            / clamp_min(sum(rate(http_requests_total[1h])), 0.001)
+          ) > 14.4 * 0.001
+        for: 1h
+        labels: { severity: warning }
+        annotations:
+          summary: "5xx burn rate is >14× the 99.9% budget"
+          description: "At this rate the 30-day error budget will exhaust in <2 days."
+
+      - alert: SloBudgetBurnCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            / clamp_min(sum(rate(http_requests_total[5m])), 0.001)
+          ) > 100 * 0.001
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "5xx burn rate is >100× the 99.9% budget"
+          description: "The SLO is being consumed fast enough to exhaust the 30-day budget in hours."
+
+

@@ -8,6 +8,7 @@ import { retrieve } from "@/lib/rag/retriever";
 import { buildPrompt, type Turn } from "@/lib/rag/prompt";
 import { streamCompletion } from "@/lib/rag/llm";
 import { translate } from "@/lib/rag/translate";
+import { requireEnabled, KillSwitchDisabledError } from "@/lib/kill-switch";
 import type { BotLang } from "@/lib/rag/config";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
@@ -15,6 +16,21 @@ import type { Role } from "@/lib/types";
 async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promise<Response> {
   const csrf = assertCsrf(req);
   if (csrf) return csrf;
+
+  // Batch I5: LLM kill switch. When a sysadmin sets auto_llm_enabled=FALSE
+  // the route returns a clean 503 instead of streaming — the RAG/LLM
+  // subsystem is stopped in one SQL UPDATE, no deploy required.
+  try {
+    await requireEnabled("auto_llm_enabled");
+  } catch (e) {
+    if (e instanceof KillSwitchDisabledError) {
+      return NextResponse.json(
+        { success: false, error: { code: "LLM_DISABLED", message: "LLM subsystem is disabled by the operator." } },
+        { status: 503 },
+      );
+    }
+    throw e;
+  }
 
   const body = await req.json().catch(() => null) as
     { conversationId?: string; message?: string; lang?: BotLang; sourceLang?: BotLang | "auto" } | null;

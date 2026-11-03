@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { SMSMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
 import { AppError } from "@/server/http/errors";
+import { isAutomationEnabled } from "@/lib/kill-switch";
 
 // Configuration. Mirrors the worker's dispatch job (worker/jobs/
 // dispatch_notifications.js): the real transport is the Twilio REST API,
@@ -70,6 +71,13 @@ export async function sendSMS(params: {
     }
 
     if (SMS_CONFIG.enabled) {
+      // Batch I5: SMS kill switch. When auto_sms_enabled=FALSE the row stays
+      // in the notification_sms_queue for later dispatch; no provider call.
+      const smsSwitchOn = await isAutomationEnabled("auto_sms_enabled");
+      if (!smsSwitchOn) {
+        console.log("[SMS] auto_sms_enabled kill switch is OFF — leaving row 'pending' for later dispatch.");
+        return null;
+      }
       if (!SMS_CONFIG.accountSid || !SMS_CONFIG.authToken) {
         if (process.env.NODE_ENV === "production") {
           throw new AppError("SMS_NOT_CONFIGURED", "SMS service is not configured in production environment", 500);

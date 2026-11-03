@@ -111,6 +111,24 @@ if [ -n "$LATEST_UPLOADS" ]; then
     echo "✓ Uploads archive is valid and readable."
 fi
 
+# 7. I6: cold-backup freshness — the off-host copy (.enc) must exist and
+# be within 26 hours. master-backup.sh writes the local .sql.gz;
+# sync-cold-backup.sh encrypts and ships it; a stale .enc means the
+# off-host copy has not been updated since the last daily cycle.
+echo "── I6: cold-backup freshness check ──"
+COLD_DIR="${COLD_BACKUP_DIR:-$DAILY_DIR}"
+LATEST_ENC=$(find "$COLD_DIR" -name 'gate-*.sql.gz.enc' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
+if [ -z "$LATEST_ENC" ]; then
+    echo "❌ FAIL: no .enc cold backup found in $COLD_DIR — off-host copy missing." >&2
+    exit 1
+fi
+AGE_H=$(( ( $(date +%s) - $(stat -c %Y "$LATEST_ENC") ) / 3600 ))
+if [ "$AGE_H" -gt 26 ]; then
+    echo "❌ FAIL: cold backup is ${AGE_H}h old (limit 26h): $LATEST_ENC" >&2
+    exit 1
+fi
+echo "✓ cold backup is fresh (${AGE_H}h old): $LATEST_ENC"
+
 echo "================================================================="
 echo "✅ RESTORE VERIFICATION PASSED SUCCESSFULLY."
 echo "================================================================="
