@@ -81,7 +81,7 @@ export const SUPERVISOR_NAV: SupervisorEntry[] = [
     label: "Oversight",
     icon: BarChart3,
     children: [
-      { href: "/supervisor/approvals", label: "Approvals" },
+      { href: "/supervisor/response/escalations", label: "Approvals" },
       { href: "/supervisor/reports", label: "Reports" },
     ],
   },

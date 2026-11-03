@@ -20,18 +20,39 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OWNER_MIG="$ROOT_DIR/database/migrations/20270101000014_audit_action_canonical_owner.sql"
 
 # Helper: run psql, preferring DATABASE_URL (CI) over docker exec (local).
+# NOTE: on the host DATABASE_URL points at the compose-service host
+# `postgres`, which only resolves inside the docker network — from the host
+# `psql` fails with "could not translate host name". The docker-exec branch
+# is therefore ALWAYS used on this host even when DATABASE_URL is set; the
+# CI branch (a real host-resolvable DATABASE_URL, e.g. a github services
+# `postgres:15-alpine`) is preferred when its host DOES resolve.
 psql_exec() {
+  local sql="$1"
   if [ -n "${DATABASE_URL:-}" ]; then
-    psql "$DATABASE_URL" -tAc "$1"
-  else
-    docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -tAc "$1"
+    local _host="${DATABASE_URL#*://}"
+    _host="${_host%%/*}"; _host="${_host%%@*}"; _host="${_host##*:}"
+    if getent hosts "$_host" >/dev/null 2>&1; then
+      psql "$DATABASE_URL" -tAc "$sql"
+      return
+    fi
+    # Host doesn't resolve (host-side DATABASE_URL pointing at a compose
+    # service name): fall through to docker exec against the running
+    # gate_postgres container, which is where the live schema actually is.
   fi
+  docker exec -i "$CONTAINER" psql -U postgres -d "$DB" -tAc "$sql"
 }
 
 echo "=== Verifying audit_logs_action_known constraint ==="
 
+# Prefer the JOIN form (schema-scoped, no ambiguous-column error when other
+# tables carry same-named constraints); fall back to the bare conname lookup
+# so a partial index or view rename in the future still finds it.
 DEF=$(psql_exec \
-  "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname='audit_logs_action_known';" 2>/dev/null || echo "")
+  "SELECT pg_get_constraintdef(c.oid) FROM pg_constraint c JOIN pg_class t ON t.oid = c.conrelid WHERE t.relname = 'audit_logs' AND c.conname = 'audit_logs_action_known';" 2>/dev/null | head -n 1 || echo "")
+if [ -z "$DEF" ]; then
+  DEF=$(psql_exec \
+    "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'audit_logs_action_known';" 2>/dev/null | head -n 1 || echo "")
+fi
 
 if [ -z "$DEF" ]; then
   echo "FAIL: Constraint 'audit_logs_action_known' is missing on table audit_logs!" >&2
@@ -75,9 +96,15 @@ echo "Running one-row-per-action insertability test against $COUNT canonical act
 # test is only meaningful when the migration chain has been replayed.
 # The constraint existence check above is the primary gate; the insert test
 # below is skipped in CI mode where the schema may not be complete.
+# The host-side psql_exec now probes host resolvability before using
+# DATABASE_URL, so CI mode (real Postgres service) still skips; the
+# host-side docker-exec path (local host) runs the full insert test.
 if [ -n "${DATABASE_URL:-}" ]; then
-  echo "NOTE: CI mode — skipping one-row-per-action insert test (constraint existence verified above)."
-  exit 0
+  _cihost="${DATABASE_URL#*://}"; _cihost="${_cihost%%/*}"; _cihost="${_cihost%%@*}"; _cihost="${_cihost##*:}"
+  if getent hosts "$_cihost" >/dev/null 2>&1; then
+    echo "NOTE: CI mode — skipping one-row-per-action insert test (constraint existence verified above)."
+    exit 0
+  fi
 fi
 
 INSERT_FAILS=0

@@ -140,7 +140,7 @@
     },
     {
       "role": "faculty",
-      "login": null,
+      "login": "FACULTY",
       "root": "/faculty",
       "leaves": [
         "/faculty",
@@ -160,7 +160,7 @@
     },
     {
       "role": "guardian",
-      "login": null,
+      "login": "GUARDIAN",
       "root": "/guardian",
       "leaves": [
         "/guardian",
@@ -273,15 +273,16 @@
       "login": "PARENT",
       "root": "/parent",
       "leaves": [
-        "/parent",
-        "/parent/child",
-        "/parent/child-attendance",
-        "/parent/child-movement",
-        "/parent/child-requests",
-        "/parent/contact-info",
-        "/parent/pass-leave-submission",
-        "/parent/passes",
-        "/parent/settings"
+        "/guardian",
+        "/guardian/child-status",
+        "/guardian/child-attendance",
+        "/guardian/child-requests",
+        "/guardian/contact-info",
+        "/guardian/movement-info",
+        "/guardian/notifications",
+        "/guardian/pass-leave-submission",
+        "/guardian/request-status",
+        "/guardian/visit-schedule"
       ]
     },
     {
@@ -398,7 +399,7 @@
     },
     {
       "role": "sysadmin",
-      "login": null,
+      "login": "SYSADMIN",
       "root": "/sysadmin",
       "leaves": [
         "/sysadmin",
@@ -505,7 +506,7 @@
     },
     {
       "role": "visitor",
-      "login": null,
+      "login": "VISITOR",
       "root": "/visitor",
       "leaves": [
         "/visitor",

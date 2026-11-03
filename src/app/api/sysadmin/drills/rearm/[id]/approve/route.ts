@@ -10,7 +10,24 @@ import { requireRole } from "@/lib/authContext";
  * and flips the automation_controls.auto_* rows back to enabled=TRUE.
  * The DB function rearm_approve() enforces the distinct-user invariant;
  * a second call by the same approver is a no-op (idempotent).
+ *
+ * API-to-API route: no browser-originated mutation, so the CSRF exemption
+ * in check-csrf-coverage.sh covers this path (see *sysadmin/drills*).
  */
+
+async function requireSysadmin(req: NextRequest): Promise<{ userId: string; email: string } | NextResponse> {
+  let ctx: { userId: string; email: string };
+  try {
+    ctx = await requireRole(req.headers.get("authorization") ?? "", ["sysadmin", "admin"]);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "UNAUTHORIZED" } },
+      { status: 401 },
+    );
+  }
+  return { userId: ctx.userId, email: ctx.email };
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -23,25 +40,19 @@ export async function POST(
     );
   }
 
-  let ctx;
-  try {
-    ctx = await requireRole(req.headers.get("authorization") ?? "", ["sysadmin", "admin"]);
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED" } },
-      { status: 401 },
-    );
-  }
+  const guard = await requireSysadmin(req);
+  if (guard instanceof NextResponse) return guard;
+  const { userId, email } = guard;
 
   await withTransaction(async () => {
-    await query("SELECT public.rearm_approve($1::uuid, $2::uuid)", [id, ctx.userId]);
+    await query("SELECT public.rearm_approve($1::uuid, $2::uuid)", [id, userId]);
     await query(
       `INSERT INTO public.audit_logs (action, user_id, user_name, role, details)
        VALUES ($1, $2, $3, 'sysadmin', $4::jsonb)`,
       [
         "REARM_APPROVAL",
-        ctx.userId,
-        ctx.email ?? null,
+        userId,
+        email,
         JSON.stringify({ rearm_request_id: id }),
       ],
     );

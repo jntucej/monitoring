@@ -208,13 +208,17 @@ async function main() {
         localStorage.setItem("mycampus-auth", JSON.stringify({ state: { user: us, role: us.role, authenticated: true }, version: 0 }));
       }, [token, user]);
 
-      // 2. session endpoint
+      // 2. session endpoint — response shape: { success, user: { role } }
       const sess = await ctx.request.get(`${BASE}/api/auth/session`);
       if (sess.ok()) {
         const sb = await sess.json().catch(() => ({}));
         const su = sb.data ?? sb;
-        row.sessionRole = su?.role ?? null;
-        row.sessionOk = true;
+        // The app returns { success, user: { role, ... } } (no .data envelope).
+        // The old test read su.role, which is undefined — hence sessionOk was
+        // false for every role even though the endpoint was working.
+        const roleVal = su?.user?.role ?? su?.role ?? null;
+        row.sessionRole = roleVal;
+        row.sessionOk = roleVal !== null && roleVal !== undefined;
       }
 
       // 3. pages

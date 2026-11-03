@@ -13,6 +13,19 @@ set -euo pipefail
 CONTAINER="${CONTAINER:-gate_postgres}"
 DB="${DB:-gate_monitor}"
 
+# CI mode = a host-resolvable DATABASE_URL (e.g. GitHub Actions `services:
+# postgres`). On the host DATABASE_URL points at the compose service name
+# `postgres`, which only resolves inside the docker network — from the host
+# psql fails with "could not translate host name". The docker-exec path is
+# therefore still the right choice on this host even when DATABASE_URL is set.
+if [ -n "${DATABASE_URL:-}" ]; then
+  _cihost="${DATABASE_URL#*://}"; _cihost="${_cihost%%/*}"; _cihost="${_cihost%%@*}"; _cihost="${_cihost##*:}"
+  if ! getent hosts "$_cihost" >/dev/null 2>&1; then
+    echo "NOTE: DATABASE_URL host '$_cihost' does not resolve on this host — using docker exec against $CONTAINER."
+    unset DATABASE_URL
+  fi
+fi
+
 if [ -n "${DATABASE_URL:-}" ]; then
   echo "=== RLS Cross-Role Enforcement Checks ==="
   echo "NOTE: CI mode (DATABASE_URL set) — gate_app role not available; skipping."

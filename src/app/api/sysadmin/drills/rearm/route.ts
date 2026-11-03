@@ -11,12 +11,18 @@ import { requireRole } from "@/lib/authContext";
  * before the re-arm worker flips the switches back on. This route records
  * the request and the approvals; rearm_approve() (SECURITY DEFINER)
  * enforces the distinct-user invariant inside the DB.
+ *
+ * POST is the only state-changing verb and uses the manual requireRole
+ * guard (the withAdminMutation wrapper's requireAuthUser path is only
+ * safe against paths that are NOT behind a nested admin path — this
+ * route lives under /api/sysadmin/ and the guard chain double-authenticates
+ * when combined with requireRole, so the explicit requireRole call is the
+ * canonical single-authentication pattern used across the rest of
+ * /api/sysadmin/).
  */
 
-type Sysadmin = { userId: string; name?: string };
-
-async function requireSysadmin(req: NextRequest): Promise<Sysadmin | NextResponse> {
-  let ctx: { userId: string };
+async function requireSysadmin(req: NextRequest): Promise<{ userId: string; email?: string } | NextResponse> {
+  let ctx: { userId: string; email?: string };
   try {
     ctx = await requireRole(req.headers.get("authorization") ?? "", ["sysadmin", "admin"]);
   } catch {
@@ -25,19 +31,14 @@ async function requireSysadmin(req: NextRequest): Promise<Sysadmin | NextRespons
       { status: 401 },
     );
   }
-  return { userId: ctx.userId };
+  return { userId: ctx.userId, email: ctx.email };
 }
 
 export async function POST(req: NextRequest) {
-  let ctx;
-  try {
-    ctx = await requireRole(req.headers.get("authorization") ?? "", ["sysadmin", "admin"]);
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED" } },
-      { status: 401 },
-    );
-  }
+  const guard = await requireSysadmin(req);
+  if (guard instanceof NextResponse) return guard;
+  const { userId, email } = guard;
+
   const body = (await req.json().catch(() => ({}))) as { reason?: string };
   const reason = typeof body.reason === "string" ? body.reason.slice(0, 512) : "";
 
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
     `INSERT INTO public.automation_controls_rearm_requests (requested_by, reason)
      VALUES ($1, $2)
      RETURNING id`,
-    [ctx.userId, reason],
+    [userId, reason],
   );
   const id = rows[0]?.id ?? null;
   if (!id) {
@@ -62,8 +63,8 @@ export async function POST(req: NextRequest) {
        VALUES ($1, $2, $3, 'sysadmin', $4::jsonb)`,
       [
         "REARM_REQUESTED",
-        ctx.userId,
-        ctx.email ?? null,
+        userId,
+        email ?? null,
         JSON.stringify({ rearm_request_id: id, reason }),
       ],
     );
@@ -77,15 +78,9 @@ export async function POST(req: NextRequest) {
  * so operators can see which subsystems are waiting on the second approval.
  */
 export async function GET(req: NextRequest) {
-  let ctx;
-  try {
-    ctx = await requireRole(req.headers.get("authorization") ?? "", ["sysadmin", "admin"]);
-  } catch {
-    return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED" } },
-      { status: 401 },
-    );
-  }
+  const guard = await requireSysadmin(req);
+  if (guard instanceof NextResponse) return guard;
+
   const { rows } = await query<{
     id: string;
     requested_by: string;
@@ -99,6 +94,5 @@ export async function GET(req: NextRequest) {
       WHERE completed_at IS NULL
       ORDER BY requested_at DESC LIMIT 50`,
   );
-  void ctx;
   return NextResponse.json({ success: true, data: rows });
 }

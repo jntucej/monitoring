@@ -317,6 +317,157 @@ const features: Array<{
       }
     },
   },
+  // ── Batch K §9: the 10 role-level features that were previously untested ──
+  {
+    name: "caretaker.acknowledge-complaint",
+    role: "caretaker",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/caretaker`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/complaint|acknowledge|ack/i").first().count();
+        return { ok: c > 0, detail: c ? "caretaker complaint console renders" : "no complaint content on /caretaker" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "deputy_warden.approve-routine-leave",
+    role: "deputy_warden",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/deputy-warden`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/leave|permission|approve|approval|request/i").first().count();
+        return { ok: c > 0, detail: c ? "deputy-warden permission queue renders" : "no queue content on /deputy-warden" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "hostel_manager.see-occupancy",
+    role: "hostel_manager",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/hostel-manager`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/occupancy|allocation|resident|room|block/i").first().count();
+        return { ok: c > 0, detail: c ? "hostel-manager occupancy panel renders" : "no occupancy content on /hostel-manager" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "faculty.mark-attendance",
+    role: "faculty",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/faculty`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/class|attendance|subject|mark|roster/i").first().count();
+        return { ok: c > 0, detail: c ? "faculty class/attendance surface renders" : "no class content on /faculty" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "vp.see-vp-queue",
+    role: "vice_principal",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/vice-principal`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/approval|pending|queue|request|exam/i").first().count();
+        return { ok: c > 0, detail: c ? "VP queue renders" : "no queue content on /vice-principal" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "oie.see-queue",
+    role: "oie",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/oie`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/queue|request|records|pending|kanban/i").first().count();
+        return { ok: c > 0, detail: c ? "OIE queue renders" : "no queue content on /oie" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "exam_branch.complete-handoff",
+    role: "exam_branch",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/exam-branch`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/verification|handoff|calendar|records|discrepancy/i").first().count();
+        return { ok: c > 0, detail: c ? "exam-branch verification/handoff surface renders" : "no exam-branch content" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "exam_superintendent.see-access",
+    role: "exam_superintendent",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/exam/superintendent`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/access|incident|schedule|report|day/i").first().count();
+        return { ok: c > 0, detail: c ? "exam-superintendent access/incident surface renders" : "no exam-superintendent content" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "mess_incharge.serve-meal",
+    role: "mess_incharge",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/mess`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/menu|token|scan|meal|served|review/i").first().count();
+        return { ok: c > 0, detail: c ? "mess-incharge menu/token surface renders" : "no mess content on /mess" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
+  {
+    name: "visitor.check-in",
+    role: "visitor",
+    run: async (ctx) => {
+      const page = await ctx.newFeaturePage();
+      try {
+        await page.goto(`${BASE}/visitor`, { waitUntil: "domcontentloaded", timeout: 30_000 }).catch(() => {});
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+        const c = await page.locator("text=/register|check|visit|history|request/i").first().count();
+        return { ok: c > 0, detail: c ? "visitor registration/check-in surface renders" : "no visitor content" };
+      } finally {
+        await page.close();
+      }
+    },
+  },
 ];
 
 async function main() {

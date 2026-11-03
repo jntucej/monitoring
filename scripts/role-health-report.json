@@ -521,25 +521,11 @@
   },
   {
     "role": "caretaker",
-    "leaf": "/caretaker/buildings",
-    "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "caretaker",
     "leaf": "/caretaker/complaints",
-    "status": "broken",
+    "status": "ok",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
   },
   {
     "role": "caretaker",
@@ -647,17 +633,6 @@
   },
   {
     "role": "deputy_warden",
-    "leaf": "/deputy-warden/outpass-queue",
-    "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "deputy_warden",
     "leaf": "/deputy-warden/shift-handover",
     "status": "ok",
     "errors": [],
@@ -691,120 +666,118 @@
   {
     "role": "exam_branch",
     "leaf": "/exam-branch",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/calendar",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/discrepancies",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/docs",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/oie-approval-requests",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/oie-handoff",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
-    "leaf": "/exam-branch/pass-queue",
-    "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "exam_branch",
     "leaf": "/exam-branch/records",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/reports",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "exam_branch",
     "leaf": "/exam-branch/verification",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "exam_superintendent",
-    "leaf": "/exam/superintendent",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "exam_superintendent",
-    "leaf": "/exam/superintendent",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "exam_superintendent",
-    "leaf": "/exam/superintendent/access",
     "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent",
+    "status": "ok",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
+  },
+  {
+    "role": "exam_superintendent",
+    "leaf": "/exam/superintendent",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
     "role": "exam_superintendent",
@@ -835,7 +808,7 @@
     "leaf": "/faculty",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -845,7 +818,7 @@
     "leaf": "/faculty",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -855,7 +828,7 @@
     "leaf": "/faculty/attendance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -865,7 +838,7 @@
     "leaf": "/faculty/class",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -875,7 +848,7 @@
     "leaf": "/faculty/correction-requests",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -885,7 +858,7 @@
     "leaf": "/faculty/my-classes",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -895,7 +868,7 @@
     "leaf": "/faculty/notifications",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -905,7 +878,7 @@
     "leaf": "/faculty/permissions",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -915,7 +888,7 @@
     "leaf": "/faculty/reports",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -925,7 +898,7 @@
     "leaf": "/faculty/request-history",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -935,7 +908,7 @@
     "leaf": "/faculty/student-directory",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -945,7 +918,7 @@
     "leaf": "/faculty/subject",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -955,7 +928,7 @@
     "leaf": "/faculty/subject/attendance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -965,7 +938,7 @@
     "leaf": "/faculty/subject/classes",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -975,7 +948,7 @@
     "leaf": "/guardian",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -985,7 +958,7 @@
     "leaf": "/guardian",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -995,7 +968,7 @@
     "leaf": "/guardian/child-attendance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1005,7 +978,7 @@
     "leaf": "/guardian/child-requests",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1015,7 +988,7 @@
     "leaf": "/guardian/child-status",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1025,7 +998,7 @@
     "leaf": "/guardian/contact-info",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1035,7 +1008,7 @@
     "leaf": "/guardian/movement-info",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1045,7 +1018,7 @@
     "leaf": "/guardian/notifications",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1055,7 +1028,7 @@
     "leaf": "/guardian/pass-leave-submission",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1065,7 +1038,7 @@
     "leaf": "/guardian/request-status",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1075,7 +1048,7 @@
     "leaf": "/guardian/visit-schedule",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -1083,96 +1056,120 @@
   {
     "role": "hod",
     "leaf": "/hod",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/approvals",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/approvals/escalated",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/approvals/pending",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/classes",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty/attendance",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/faculty/directory",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/profile",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/reports",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "hod",
     "leaf": "/hod/students",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1247,17 +1244,6 @@
     "errors": [],
     "apiFailures": [],
     "consoleErrors": []
-  },
-  {
-    "role": "hostel_manager",
-    "leaf": "/hostel-manager/tickets",
-    "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
   },
   {
     "role": "mess_incharge",
@@ -1478,214 +1464,262 @@
   {
     "role": "operator",
     "leaf": "/operator",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/announcements",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/claim",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/exceptions",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/kiosk-pin",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/lookup",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/manual-entry",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/mode",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/notifications",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/pass-verification",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/password",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/profile",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/stats",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "operator",
     "leaf": "/operator/transactions",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "parent",
     "leaf": "/parent",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent/child",
     "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent/child-attendance",
-    "status": "ok",
-    "errors": [],
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "parent",
-    "leaf": "/parent/child-movement",
+    "leaf": "/guardian",
     "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent/child-requests",
-    "status": "ok",
-    "errors": [],
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "parent",
-    "leaf": "/parent/contact-info",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent/pass-leave-submission",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "parent",
-    "leaf": "/parent/passes",
+    "leaf": "/guardian/child-status",
     "status": "broken",
-    "errors": [],
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
   },
   {
     "role": "parent",
-    "leaf": "/parent/settings",
+    "leaf": "/guardian/child-attendance",
     "status": "broken",
-    "errors": [],
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/child-requests",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/contact-info",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/movement-info",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/notifications",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/pass-leave-submission",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/request-status",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "parent",
+    "leaf": "/guardian/visit-schedule",
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
     "role": "principal",
@@ -1738,13 +1772,10 @@
   {
     "role": "principal",
     "leaf": "/principal/approvals/pending",
-    "status": "broken",
+    "status": "ok",
     "errors": [],
     "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
+    "consoleErrors": []
   },
   {
     "role": "principal",
@@ -2204,17 +2235,6 @@
   },
   {
     "role": "supervisor",
-    "leaf": "/supervisor/approvals",
-    "status": "broken",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 404 ()",
-      "Failed to load resource: the server responded with a status of 404 ()"
-    ]
-  },
-  {
-    "role": "supervisor",
     "leaf": "/supervisor/gates",
     "status": "ok",
     "errors": [],
@@ -2362,7 +2382,7 @@
     "leaf": "/sysadmin",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2372,7 +2392,7 @@
     "leaf": "/sysadmin",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2382,7 +2402,7 @@
     "leaf": "/sysadmin/access",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2392,7 +2412,7 @@
     "leaf": "/sysadmin/access-keys",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2402,7 +2422,7 @@
     "leaf": "/sysadmin/achievements",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2412,7 +2432,7 @@
     "leaf": "/sysadmin/alerts",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2422,7 +2442,7 @@
     "leaf": "/sysadmin/alerts/rules",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2432,7 +2452,7 @@
     "leaf": "/sysadmin/alumni",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2442,7 +2462,7 @@
     "leaf": "/sysadmin/alumni/auto",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2452,7 +2472,7 @@
     "leaf": "/sysadmin/alumni/deprovisioned",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2462,7 +2482,7 @@
     "leaf": "/sysadmin/alumni/graduated",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2472,7 +2492,7 @@
     "leaf": "/sysadmin/analytics",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2482,7 +2502,7 @@
     "leaf": "/sysadmin/announcements",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2492,7 +2512,7 @@
     "leaf": "/sysadmin/application-health",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2502,7 +2522,7 @@
     "leaf": "/sysadmin/attendance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2512,7 +2532,7 @@
     "leaf": "/sysadmin/audit",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2522,7 +2542,7 @@
     "leaf": "/sysadmin/backup",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2532,7 +2552,7 @@
     "leaf": "/sysadmin/classes",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2542,7 +2562,7 @@
     "leaf": "/sysadmin/communities",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2552,7 +2572,7 @@
     "leaf": "/sysadmin/compliance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2562,7 +2582,7 @@
     "leaf": "/sysadmin/consent",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2572,7 +2592,7 @@
     "leaf": "/sysadmin/cron",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2582,7 +2602,7 @@
     "leaf": "/sysadmin/data",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2592,7 +2612,7 @@
     "leaf": "/sysadmin/database-health",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2602,7 +2622,7 @@
     "leaf": "/sysadmin/departments",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2612,7 +2632,7 @@
     "leaf": "/sysadmin/deployments",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2622,7 +2642,7 @@
     "leaf": "/sysadmin/devices",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2632,7 +2652,7 @@
     "leaf": "/sysadmin/docker-services",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2642,7 +2662,7 @@
     "leaf": "/sysadmin/events",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2652,7 +2672,7 @@
     "leaf": "/sysadmin/exam-day",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2662,7 +2682,7 @@
     "leaf": "/sysadmin/exit-reasons",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2672,7 +2692,7 @@
     "leaf": "/sysadmin/faculty-assignments",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2682,7 +2702,7 @@
     "leaf": "/sysadmin/feature-flags",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2692,7 +2712,7 @@
     "leaf": "/sysadmin/gate-schedule",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2702,7 +2722,7 @@
     "leaf": "/sysadmin/gates",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2712,7 +2732,7 @@
     "leaf": "/sysadmin/health",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2722,7 +2742,7 @@
     "leaf": "/sysadmin/hostel-tickets",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2732,7 +2752,7 @@
     "leaf": "/sysadmin/infrastructure",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2742,7 +2762,7 @@
     "leaf": "/sysadmin/integrations",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2752,7 +2772,7 @@
     "leaf": "/sysadmin/jobs",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2762,7 +2782,7 @@
     "leaf": "/sysadmin/maintenance",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2772,7 +2792,7 @@
     "leaf": "/sysadmin/mess",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2782,7 +2802,7 @@
     "leaf": "/sysadmin/mess/analytics",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2792,7 +2812,7 @@
     "leaf": "/sysadmin/mess/days",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2802,7 +2822,7 @@
     "leaf": "/sysadmin/mess/items",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2812,7 +2832,7 @@
     "leaf": "/sysadmin/mess/today",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2822,7 +2842,17 @@
     "leaf": "/sysadmin/navigation",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin/actions",
+    "status": "broken",
+    "errors": [
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2832,7 +2862,7 @@
     "leaf": "/sysadmin/notifications",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2842,7 +2872,7 @@
     "leaf": "/sysadmin/parents",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2852,7 +2882,7 @@
     "leaf": "/sysadmin/people",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2862,7 +2892,7 @@
     "leaf": "/sysadmin/profile",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2872,7 +2902,7 @@
     "leaf": "/sysadmin/promotions",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2882,7 +2912,7 @@
     "leaf": "/sysadmin/reasons",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2892,7 +2922,7 @@
     "leaf": "/sysadmin/redis-worker",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2902,7 +2932,7 @@
     "leaf": "/sysadmin/reports",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2912,7 +2942,7 @@
     "leaf": "/sysadmin/retention-policies",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2922,7 +2952,7 @@
     "leaf": "/sysadmin/roles",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2932,7 +2962,7 @@
     "leaf": "/sysadmin/runbooks",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2942,7 +2972,7 @@
     "leaf": "/sysadmin/safety",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2952,7 +2982,7 @@
     "leaf": "/sysadmin/scheduled-jobs",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2962,7 +2992,7 @@
     "leaf": "/sysadmin/scheduling",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2972,7 +3002,7 @@
     "leaf": "/sysadmin/security",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2982,7 +3012,7 @@
     "leaf": "/sysadmin/sessions",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2992,7 +3022,7 @@
     "leaf": "/sysadmin/sms/templates",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3002,7 +3032,7 @@
     "leaf": "/sysadmin/staff",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3012,7 +3042,7 @@
     "leaf": "/sysadmin/students",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3022,7 +3052,7 @@
     "leaf": "/sysadmin/subjects",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3032,7 +3062,7 @@
     "leaf": "/sysadmin/support",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3042,7 +3072,7 @@
     "leaf": "/sysadmin/system",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3052,7 +3082,7 @@
     "leaf": "/sysadmin/webhooks",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3254,7 +3284,7 @@
     "leaf": "/visitor",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3264,7 +3294,7 @@
     "leaf": "/visitor",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3274,7 +3304,7 @@
     "leaf": "/visitor/approval-status",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3284,7 +3314,7 @@
     "leaf": "/visitor/checkin-out",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3294,7 +3324,7 @@
     "leaf": "/visitor/history",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3304,7 +3334,7 @@
     "leaf": "/visitor/host-info",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3314,7 +3344,7 @@
     "leaf": "/visitor/registration",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3324,7 +3354,7 @@
     "leaf": "/visitor/request",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3334,7 +3364,7 @@
     "leaf": "/visitor/visit-details",
     "status": "broken",
     "errors": [
-      "no-creds"
+      "login-failed"
     ],
     "apiFailures": [],
     "consoleErrors": []

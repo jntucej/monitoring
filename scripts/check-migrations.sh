@@ -75,7 +75,19 @@ fi
 PSQL=""
 RUN_SCRATCH=0
 
-if [ -n "$DATABASE_URL" ]; then
+if [ -n "${DATABASE_URL:-}" ]; then
+  # Same host-resolution probe as check-rls-enforcement.sh: a DATABASE_URL
+  # pointing at a compose service name (`postgres`) doesn't resolve from the
+  # host — fall back to the scratch-container path so the migration replay
+  # runs against a real, isolated Postgres.
+  _cihost="${DATABASE_URL#*://}"; _cihost="${_cihost%%/*}"; _cihost="${_cihost%%@*}"; _cihost="${_cihost##*:}"
+  if ! getent hosts "$_cihost" >/dev/null 2>&1; then
+    echo "NOTE: DATABASE_URL host '$_cihost' does not resolve on this host — falling back to scratch container."
+    unset DATABASE_URL
+  fi
+fi
+
+if [ -n "${DATABASE_URL:-}" ]; then
   echo "Using pre-provisioned DATABASE_URL (CI mode, no scratch container)."
   PSQL=(psql "$DATABASE_URL")
 else

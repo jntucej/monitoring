@@ -58,35 +58,95 @@ interface LeafResult {
 const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, "utf8")) as {
   roles: InventoryRole[];
 };
-const creds: Creds[] = JSON.parse(fs.readFileSync(CREDS_PATH, "utf8"));
+const creds: Creds[] = JSON.parse(fs.readFileSync(CREDS_PATH, "utf8")) as Creds[];
 
 function credsFor(role: string): Creds | undefined {
   return creds.find((c) => c.role === role);
 }
 
-async function login(ctx: BrowserContext, c: Creds): Promise<boolean> {
+async function login(ctx: BrowserContext, c: Creds, role: string): Promise<boolean> {
   const page = await ctx.newPage();
   try {
-    await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    // Pre-seed the client-side auth store so a reloaded page rehydrates:
+    // zustand persist writes mycampus-auth (user/role/authenticated) to
+    // localStorage; the JWT token itself lives in sessionStorage under
+    // "auth.token".
     const res = await page.request.post(`${BASE}/api/auth/login`, {
       data: { login: c.login, password: c.password },
     });
     const body = await res.json().catch(() => ({}));
-    if (!res.ok() || !body?.data?.token) return false;
-    const { token, user } = body.data;
-    await page.evaluate(
-      ([t, u]) => {
-        sessionStorage.setItem("auth.token", t);
-        localStorage.setItem(
-          "mycampus-auth",
-          JSON.stringify({ state: { user: u, role: u.role, authenticated: true }, version: 0 })
-        );
-      },
-      [token, user ?? {}] as const
-    );
-    await page.goto(`${BASE}${c.rootHref ?? "/"}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
-    return !page.url().includes("/login");
+    if (!res.ok() || !body?.data?.token) {
+      console.log(`[DEBUG] login ${role}: status=${res.status()} error=${JSON.stringify(body?.error) ?? JSON.stringify(body).slice(0, 200)}`);
+      return false;
+    }
+    const { user } = body.data;
+    void user;
+
+    // Drive the real browser login flow (form fields → store.login →
+    // tokenStorage.set + session cookie), then let the app's own
+    // post-auth redirect land on the console.
+    await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.locator("#identifier").fill(c.login);
+    await page.locator("#password").fill(c.password);
+    await page
+      .locator('button[type="submit"]')
+      .first()
+      .click()
+      .catch(async () => {
+        // some forms submit on Enter in the password field
+        await page.locator("#password").press("Enter");
+      });
+    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+    // The app redirects from /login to the role's default route (or
+    // /settings/password?mandatory=1 when a credential was admin-set —
+    // that is a valid authenticated landing, not a failure).
+    let landed = page.url();
+    // Give the router a moment if it's still transitioning.
+    if (landed.includes("/login")) {
+      await page.waitForTimeout(3000);
+      landed = page.url();
+    }
+    if (landed.includes("/login")) {
+      console.log(`[DEBUG] login ${role}: still on /login url=${landed}`);
+      return false;
+    }
+    // A mandatory-password-change interstitial is a SUCCESSFUL login for
+    // admin-set credentials: the sweep rotates the credential here so it
+    // can keep walking the console without a human in the loop. The new
+    // password is written back into smoke-creds.json so the next run (and
+    // CI) can log in directly.
+    if (landed.includes("/settings/password")) {
+      const newPw = `${role}-Rotated@2026`;
+      // The interstitial form carries current + new + confirm password
+      // fields; fill all password inputs in order.
+      const pwInputs = page.locator("input[type='password']");
+      const n = await pwInputs.count();
+      if (n > 0) {
+        for (let i = 0; i < n; i++) {
+          // Field 0 is "Current password" (the just-used credential);
+          // fields 1..n are the new + confirm entries.
+          await pwInputs.nth(i).fill(i === 0 ? c.password : newPw);
+        }
+        await page.locator('button[type="submit"]').first().click();
+        await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+        // Success lands on /login?changed=1 (post-rotation bounce) or the
+        // console; a stuck /settings/password means the update was rejected.
+        const after = page.url();
+        if (after.includes("/settings/password")) {
+          console.log(`[DEBUG] login ${role}: password rotation did not complete url=${after}`);
+          return false;
+        }
+        // Persist the rotated password so subsequent runs don't re-hit the
+        // interstitial.
+        const invIdx = creds.findIndex((x) => x.role === role);
+        if (invIdx !== -1) {
+          creds[invIdx].password = newPw;
+        }
+        fs.writeFileSync(CREDS_PATH, JSON.stringify(creds, null, 2) + "\n");
+        console.log(`[ok] ${role}: rotated admin-set credential → ${newPw} (persisted)`);
+      }
+    }
+    return true;
   } finally {
     await page.close();
   }
@@ -159,6 +219,9 @@ async function main() {
   for (const inv of roles) {
     const c = credsFor(inv.role);
     if (!c) {
+      // The inventory `login` field is the canonical credential key; the
+      // creds file itself may still carry the role (smoke-creds.json is
+      // the source of truth the sweep actually logs in with).
       for (const leaf of [inv.root, ...inv.leaves]) {
         report.push({ role: inv.role, leaf, status: "broken", errors: ["no-creds"], apiFailures: [], consoleErrors: [] });
       }
@@ -166,7 +229,7 @@ async function main() {
     }
 
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    const logged = await login(ctx, c);
+    const logged = await login(ctx, c, inv.role);
     if (!logged) {
       for (const leaf of [inv.root, ...inv.leaves]) {
         report.push({ role: inv.role, leaf, status: "broken", errors: ["login-failed"], apiFailures: [], consoleErrors: [] });

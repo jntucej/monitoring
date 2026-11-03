@@ -104,13 +104,13 @@ BEGIN
   END IF;
   v_missing := ARRAY[]::text[];
   IF v_def NOT LIKE '%REARM_REQUESTED%' THEN
-    v_missing := v_missing || 'REARM_REQUESTED';
+    v_missing := v_missing || ARRAY['REARM_REQUESTED'];
   END IF;
   IF v_def NOT LIKE '%REARM_APPROVAL%' THEN
-    v_missing := v_missing || 'REARM_APPROVAL';
+    v_missing := v_missing || ARRAY['REARM_APPROVAL'];
   END IF;
   IF v_def NOT LIKE '%REARM_COMPLETED%' THEN
-    v_missing := v_missing || 'REARM_COMPLETED';
+    v_missing := v_missing || ARRAY['REARM_COMPLETED'];
   END IF;
   IF array_length(v_missing, 1) IS NULL THEN
     RETURN;
@@ -125,7 +125,7 @@ BEGIN
           regexp_replace(regexp_replace(v_def, '^(.*)CHECK \(\w+ IN \(\s*', '', 's'), '\s*\)\s*$', '', 's'),
           ',\s*')) AS vv
       ) AS x WHERE trim(vv) <> ''
-    ) || (
+    ) || ',' || (
       SELECT string_agg(quote_literal(v), ', ')
       FROM unnest(v_missing) AS v
     )

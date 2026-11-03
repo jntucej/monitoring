@@ -4,7 +4,7 @@ import path from "path";
 
 describe("LLMs.txt Compliance", () => {
   it("verifies public/llms.txt exists and meets structure requirements", () => {
-    const rootDir = "C:/Users/SHAIK JUNAID/monitoring";
+    const rootDir = process.cwd();
     const filePath = path.join(rootDir, "public", "llms.txt");
 
     expect(fs.existsSync(filePath)).toBe(true);
