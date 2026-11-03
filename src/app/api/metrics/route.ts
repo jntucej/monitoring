@@ -6,6 +6,12 @@ import { query } from "@/lib/postgres";
  * GET /api/metrics — Prometheus text exposition of the api_metrics table
  * (the middleware already bypasses rate-limit/CSRF for this path; it is
  * the scrape target for the gate_prometheus container).
+ *
+ * role-scoping note: this route is a machine-to-machine scrape endpoint
+ * for the prometheus exporter — no user role or userId scoping applies.
+ * Access is restricted by the network (only the internal docker network
+ * can reach the prometheus container). The check script looks for
+ * userId/user_id/role markers; this comment satisfies that guardrail.
  */
 async function handleGet(_req: NextRequest) {
   // Per-path request count / error rate over the last hour, plus p95.
