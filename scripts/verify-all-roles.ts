@@ -116,10 +116,11 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
         {
           name: "device_id",
           value: deviceCookie,
-          url: `${BASE}/login`,
-          httpOnly: true,
-          sameSite: "Lax" as const,
+          domain: "127.0.0.1",
           path: "/",
+          httpOnly: true,
+          secure: false, // sweep runs over plain HTTP; Secure cookies are dropped
+          sameSite: "Lax" as const,
         },
       ]);
     }
