@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import { COLLEGE } from "@/lib/college-config";
 import { organizationJsonLd } from "@/lib/seo";
@@ -84,6 +85,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // L2: Force dynamic rendering so Next.js extracts the per-request CSP
+  // nonce from the x-nonce request header set by the edge middleware.
+  // Without this, static/prerendered pages ship a fixed nonce and
+  // 'strict-dynamic' blocks every dynamically-imported chunk.
+  await headers();
   const theme = await getServerTheme();
   return (
     <html

@@ -6,6 +6,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 import { retrieve } from "@/lib/rag/retriever";
 import { buildPrompt, type Turn } from "@/lib/rag/prompt";
+import { sanitizeModelOutput } from "@/lib/rag/guards";
 import { streamCompletion } from "@/lib/rag/llm";
 import { translate } from "@/lib/rag/translate";
 import { requireEnabled, KillSwitchDisabledError } from "@/lib/kill-switch";
@@ -123,10 +124,13 @@ async function handler(req: NextRequest, { auth }: { auth: AuthContext }): Promi
       } catch (err) {
         send("error", { message: err instanceof Error ? err.message : "llm_error" });
       } finally {
+        // L5: sanitize accumulated LLM output before persisting — strips
+        // remote image-markdown (exfiltration vector) and long base64 blobs.
+        const safeFull = full ? sanitizeModelOutput(full) : "(no response)";
         await query(
           `INSERT INTO public.bot_messages (conversation_id, role, content, citations, lang)
            VALUES ($1,'assistant',$2,$3::jsonb,$4)`,
-          [conv, full || "(no response)", JSON.stringify(citations), lang],
+          [conv, safeFull, JSON.stringify(citations), lang],
         );
         await query(`UPDATE public.bot_conversations SET updated_at=NOW() WHERE id=$1 AND user_id=$2`, [conv, userId]);
         send("done", {});

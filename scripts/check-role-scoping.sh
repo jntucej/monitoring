@@ -55,7 +55,7 @@ readers=$(grep -rEl "(FROM|from)[[:space:]]+(public\\\\.)?(${SENSITIVE_TABLES})[
 if [ -n "$readers" ]; then
   while IFS= read -r f; do
     case "$f" in
-      src/app/api/mess/_helpers.ts|src/app/api/home/*|src/app/api/auth/reset-password/*|src/app/api/cron/*) continue ;;
+      src/app/api/mess/_helpers.ts|src/app/api/home/*|src/app/api/auth/reset-password/*|src/app/api/auth/passkeys/authenticate/*|src/app/api/cron/*) continue ;;
     esac
     if ! grep -q "auth\.\|getAuthenticatedUser\|withAuthorization\|req\.headers" "$f"; then
       echo "  FLAG  $f  reads a sensitive table but has no auth wiring"

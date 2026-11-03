@@ -387,6 +387,34 @@ services:
       timeout: 5s
       retries: 3
 
+  # L8 — Falco runtime security detection (modern eBPF driver, no legacy
+  # kernel module required). falcosecurity/falco-no-driver:0.41.0 uses the
+  # modern eBPF probe — works across kernels ≥ 5.8 without per-host
+  # compilation. Alerts POST to the worker's falco-webhook listener
+  # (worker/webhooks/falco_receiver.js — see L8b).
+  falco:
+    image: falcosecurity/falco-no-driver:0.41.0
+    container_name: gate_falco
+    restart: always
+    privileged: true
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock:ro
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - ./compose/security/falco-rules.yaml:/etc/falco/rules.d/gate.yaml:ro
+    command:
+      - /usr/bin/falco
+      - -K /host/boot
+      - -m eBPF
+      - --rules-file /etc/falco/rules.d/gate.yaml
+      - --output-stdout
+      - --json
+      - --webhook.url http://worker:3001/falco-webhook
+    environment:
+      HOST_ROOT: /host
+    networks: [gate-net]
+
 volumes:
   pgdata:
   redisdata:

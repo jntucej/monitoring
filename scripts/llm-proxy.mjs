@@ -22,7 +22,31 @@ function isPathAllowed(urlPath) {
   return ALLOWED_PATH_PREFIXES.some((p) => clean === p || clean.startsWith(`${p}/`));
 }
 
+// L6a — Zero-trust: strip X-Forwarded-For / X-Forwarded-* headers so the
+// proxy never trusts a client-supplied source address. The backend receives
+// only headers it can verify; origin pinning is enforced by the allowlist
+// above (no query-string passthrough, fixed host:port, no wildcard paths).
+const UNSAFE_INBOUND_HEADERS = new Set([
+  'x-forwarded-for',
+  'x-forwarded-proto',
+  'x-forwarded-host',
+  'x-real-ip',
+  'x-client-ip',
+]);
+
 const server = http.createServer((req, res) => {
+  // L6a: reject requests with unsafe client-supplied forwarding headers.
+  // A client that sets X-Forwarded-For is attempting to spoof its origin —
+  // the proxy must not forward that to the backend.
+  for (const h of UNSAFE_INBOUND_HEADERS) {
+    if (req.headers[h]) {
+      console.warn(`[llm-proxy] blocked request with client-supplied ${h}: ${req.headers[h]}`);
+      res.writeHead(403, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: { code: 'UNSAFE_HEADER', message: 'Client-supplied forwarding headers are not permitted.' } }));
+      return;
+    }
+  }
+
   if (!isPathAllowed(req.url)) {
     console.warn(`[llm-proxy] blocked forbidden path: ${req.method} ${req.url}`);
     res.writeHead(403, { 'content-type': 'application/json' });

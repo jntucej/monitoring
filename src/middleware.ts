@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildCspHeader } from '@/lib/csp';
 import { validateCsrf } from './lib/csrf';
 
 /**
@@ -86,20 +87,35 @@ export async function proxy(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
   const { pathname } = req.nextUrl;
 
+  // L2: Per-request CSP nonce. Generated in the edge middleware so Next.js
+  // SSR can extract it via the x-nonce request header and stamp it on the
+  // nonce-scoped script tags. 'strict-dynamic' makes nonce-scoped scripts
+  // implicitly trust dynamically-imported chunks — no 'unsafe-inline' needed.
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const csp = buildCspHeader({ nonce, isDev: process.env.NODE_ENV === 'development' });
+
   // Home landing page: redirect authenticated visitors to their role
   // console. Runs for everyone hitting `/` (no rate-limit / CSRF needed).
   if (pathname === '/') {
     const redirect = homeAuthRedirect(req);
-    if (redirect) return redirect;
-    return NextResponse.next();
+    if (redirect) {
+      redirect.headers.set('Content-Security-Policy', csp);
+      return redirect;
+    }
+    const res = NextResponse.next();
+    res.headers.set('Content-Security-Policy', csp);
+    return res;
   }
 
   const BYPASS_PATHS = ['/api/health', '/metrics', '/api/metrics'];
   if (BYPASS_PATHS.some(p => pathname.startsWith(p))) {
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-request-id', requestId);
+    requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('Content-Security-Policy', csp);
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
+    res.headers.set('Content-Security-Policy', csp);
     return res;
   }
 
@@ -166,6 +182,7 @@ export async function proxy(req: NextRequest) {
   if (!pathname.startsWith('/api')) {
     const res = NextResponse.next();
     res.headers.set('x-request-id', requestId);
+    res.headers.set('Content-Security-Policy', csp);
     return res;
   }
 
@@ -180,16 +197,23 @@ export async function proxy(req: NextRequest) {
       { status: 403 }
     );
     res.headers.set('x-request-id', requestId);
+    res.headers.set('Content-Security-Policy', csp);
     return res;
   }
 
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-request-id', requestId);
+  requestHeaders.set('x-nonce', nonce);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.headers.set('x-request-id', requestId);
+  res.headers.set('Content-Security-Policy', csp);
   return res;
 }
 
+// Next.js REQUIRES the export name `middleware`. The previous file exported
+// only `proxy` as default, which worked via the default-export convention, but
+// adding the named alias makes the contract explicit and future-proof.
+export { proxy as middleware };
 export default proxy;
 
 export const config = {

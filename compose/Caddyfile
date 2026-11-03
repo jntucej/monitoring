@@ -12,12 +12,21 @@
         format json
     }
 
+    # L3 — CVE-2025-29927 belt-and-braces: strip any client-supplied
+    # middleware-subrequest header before it reaches Next.js. Next.js sets
+    # this header internally to bypass its own middleware on sub-requests;
+    # a client must NEVER be able to set it. Next 14.2.25+/15.2.3+ patched
+    # the framework, but defense-in-depth strips it at the proxy layer so
+    # a future middleware variant can't be walked past by a future client.
+    @bypass_hdr header x-middleware-subrequest *
+    respond @bypass_hdr "Bad Request" 400
+
     header {
         X-Frame-Options        "DENY"
         X-Content-Type-Options "nosniff"
         Referrer-Policy        "strict-origin-when-cross-origin"
         Permissions-Policy     "camera=(self), microphone=(self), geolocation=(self)"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' wss: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
         Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
         -Server
         -X-Powered-By
@@ -27,6 +36,8 @@
         -X-Auth-User
         -X-Auth-Timestamp
         -X-Auth-Signature
+        # L3: strip the middleware bypass header (case-insensitive)
+        -X-Middleware-Subrequest
         # Strip client-supplied forwarding headers so a malicious client over
         # HTTP cannot forge X-Forwarded-Proto and leak Secure-flag cookies.
         -X-Forwarded-Proto

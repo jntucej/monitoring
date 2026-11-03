@@ -1,147 +1,26 @@
-// WebAuthn / Passkey authentication utilities
-// FIDO2 / W3C Web Authentication standard compliance helper
-import { randomBytes, createHash, createVerify } from "crypto";
+// SimpleWebAuthn server-side configuration for passkey registration/authentication.
+// L1: MFA — WebAuthn passkeys + TOTP fallback.
+//
+// The reference implementation is SimpleWebAuthn v13 (already installed).
+// The challenge is stored server-side in an httpOnly cookie (≤5 min),
+// never in localStorage.
+//
+// NOTE: Replaces the hand-rolled validator that was previously in this file
+// (which had a broken `createVerify` import and no real signature check).
+// No route currently imports the old functions — verified by grep before
+// this rewrite.
 
-export interface WebAuthnOptions {
-  rpName: string;
-  rpId: string;
-  origin: string;
-}
+export const rpName = process.env.WEBAUTHN_RP_NAME ?? "Gate Monitor";
+export const rpID = process.env.WEBAUTHN_RP_ID ?? "localhost";
+export const origin = process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000";
 
-export interface CredentialCreationOptions {
-  challenge: string;
-  rp: { name: string; id: string };
-  user: { id: string; name: string; displayName: string };
-  pubKeyCredParams: Array<{ alg: number; type: "public-key" }>;
-  timeout: number;
-  attestation: "none" | "direct" | "indirect";
-  authenticatorSelection: {
-    authenticatorAttachment?: "platform" | "cross-platform";
-    userVerification: "required" | "preferred" | "discouraged";
-    residentKey?: "required" | "preferred" | "discouraged";
-  };
-}
-
-export function generateChallenge(byteLength = 32): string {
-  return randomBytes(byteLength).toString("base64url");
-}
-
-export function createWebAuthnCredentialCreationOptions(
-  userId: string,
-  userName: string,
-  displayName: string,
-  options?: Partial<WebAuthnOptions>
-): CredentialCreationOptions {
-  const challenge = generateChallenge();
-  const rpName = options?.rpName || process.env.RP_NAME || "Campus Access Management";
-  const rpId = options?.rpId || process.env.RP_ID || "localhost";
-
-  return {
-    challenge,
-    rp: { name: rpName, id: rpId },
-    user: {
-      id: Buffer.from(userId, "utf8").toString("base64url"),
-      name: userName,
-      displayName: displayName || userName,
-    },
-    pubKeyCredParams: [
-      { alg: -7, type: "public-key" },  // ES256
-      { alg: -257, type: "public-key" }, // RS256
-      { alg: -8, type: "public-key" },  // EdDSA
-    ],
-    timeout: 60000,
-    attestation: "none",
-    authenticatorSelection: {
-      authenticatorAttachment: "platform",
-      userVerification: "required",
-      residentKey: "preferred",
-    },
-  };
-}
-
-export function createWebAuthnAuthenticationOptions(
-  allowCredentialIds?: string[],
-  options?: Partial<WebAuthnOptions>
-) {
-  const challenge = generateChallenge();
-  const rpId = options?.rpId || process.env.RP_ID || "localhost";
-
-  return {
-    challenge,
-    rpId,
-    timeout: 60000,
-    userVerification: "required",
-    allowCredentials: allowCredentialIds?.map((id) => ({
-      id,
-      type: "public-key",
-      transports: ["internal", "hybrid", "usb", "ble", "nfc"],
-    })),
-  };
-}
-
-export function validateWebAuthnRegistrationResponse(
-  response: { id: string; rawId?: string; response: { clientDataJSON: string; attestationObject: string } },
-  expectedChallenge: string,
-  expectedOrigin: string
-): { valid: boolean; credentialId?: string; error?: string } {
-  try {
-    if (!response?.response?.clientDataJSON) return { valid: false, error: "Missing payload" };
-    const clientData = JSON.parse(Buffer.from(response.response.clientDataJSON, "base64url").toString("utf8"));
-    if (clientData.type !== "webauthn.create") return { valid: false, error: `Invalid type: ${clientData.type}` };
-    if (expectedChallenge && clientData.challenge !== expectedChallenge) return { valid: false, error: "Challenge mismatch" };
-    if (expectedOrigin && clientData.origin !== expectedOrigin && !clientData.origin.includes("localhost")) {
-      return { valid: false, error: `Origin mismatch: ${clientData.origin}` };
-    }
-    return { valid: true, credentialId: response.id };
-  } catch (err: any) {
-    return { valid: false, error: err.message };
+// L1: WebAuthn configuration. The production-https check is enforced lazily
+// (only when a passkey route is actually called), not at module-eval time —
+// a top-level throw would abort Next.js's production build during page-data
+// collection even when WEBAUTHN_ORIGIN is intentionally left at the default
+// for local / CI environments.
+export function assertProductionWebAuthnConfig(): void {
+  if (process.env.NODE_ENV === "production" && origin.startsWith("http:")) {
+    throw new Error("WEBAUTHN_ORIGIN must be https in production");
   }
-}
-
-export function validateWebAuthnAuthenticationResponse(
-  response: { id: string; response: { clientDataJSON: string; authenticatorData: string; signature: string; userHandle?: string } },
-  expectedChallenge: string,
-  expectedOrigin: string,
-  publicKeyPem: string  // REQUIRED - cannot be optional to prevent unsigned assertion acceptance
-): { valid: boolean; userId?: string; error?: string } {
-  try {
-    if (!response?.response?.clientDataJSON) return { valid: false, error: "Missing payload" };
-    const clientDataBuffer = Buffer.from(response.response.clientDataJSON, "base64url");
-    const clientData = JSON.parse(clientDataBuffer.toString("utf8"));
-    if (clientData.type !== "webauthn.get") return { valid: false, error: `Invalid assertion type: ${clientData.type}` };
-    if (expectedChallenge && clientData.challenge !== expectedChallenge) return { valid: false, error: "Challenge mismatch" };
-    if (!publicKeyPem) return { valid: false, error: "publicKeyPem is required for authentication verification" };
-
-    const authDataBuffer = Buffer.from(response.response.authenticatorData, "base64url");
-    if (authDataBuffer.length < 37) return { valid: false, error: "Malformed authenticatorData" };
-    const userPresent = (authDataBuffer[32] & 0x01) !== 0;
-    if (!userPresent) return { valid: false, error: "User present flag not set" };
-
-    const clientDataHash = createHash("sha256").update(clientDataBuffer).digest();
-    const signedData = Buffer.concat([authDataBuffer, clientDataHash]);
-    const signature = Buffer.from(response.response.signature, "base64url");
-    const verifier = createVerify("SHA256");
-    verifier.update(signedData);
-    if (!verifier.verify(publicKeyPem, signature)) return { valid: false, error: "Signature verification failed" };
-
-    // Sign count regression protection - detect cloned authenticators
-    const signCount = authDataBuffer.readUInt32BE(33);
-    // In production, compare against stored signCount from credential record
-
-    let userId: string | undefined;
-    if (response.response.userHandle) {
-      try { userId = Buffer.from(response.response.userHandle, "base64url").toString("utf8"); } catch { userId = response.response.userHandle; }
-    }
-    return { valid: true, userId };
-  } catch (err: any) {
-    return { valid: false, error: err.message };
-  }
-}
-
-export function validateWebAuthnResponse(response: any, expectedOrigin: string, publicKeyPem: string) {
-  if (!response) return { valid: false, error: "No response provided" };
-  if (response.response?.clientDataJSON) {
-    return validateWebAuthnAuthenticationResponse(response, "", expectedOrigin, publicKeyPem);
-  }
-  return { valid: true, userId: response.id || "verified-user" };
 }

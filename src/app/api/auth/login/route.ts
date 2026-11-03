@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
 import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
@@ -160,6 +160,51 @@ async function handleLoginInner(req: NextRequest) {
     }
 
     await clearLockout(identifier);
+
+    // L1g: if the user is MFA-required, do NOT issue a session token.
+    // Return a short-lived one-use challenge that the passkey/TOTP verify
+    // handler consumes atomically (mfa_challenges table). An attacker who
+    // has the password still cannot mint a session without the second factor.
+    if (user.mfa_required === true || user.mfa_required === "true" || user.mfa_required === "t") {
+      const pkRes = await query("SELECT 1 FROM user_passkeys WHERE user_id = $1 LIMIT 1", [user.id]);
+      if (pkRes.rows.length === 0 && !user.totp_secret_hash) {
+        // First login with MFA required but not enrolled → force enrollment.
+        // The registration options route is reachable (withAuthorization, not
+        // the MFA-gated session), so the user can enroll and complete login.
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "MFA_ENROLMENT_REQUIRED",
+              message: "Set up a passkey to continue.",
+            },
+          },
+          { status: 403 },
+        );
+      }
+      const challenge = randomUUID();
+      await query(
+        `INSERT INTO mfa_challenges (id, user_id, method, expires_at)
+         VALUES ($1, $2, 'webauthn', NOW() + INTERVAL '5 min')`,
+        [challenge, user.id],
+      );
+      await addAudit({
+        action: "MFA_CHALLENGE_CREATED",
+        userId: user.id,
+        userName: user.name || user.email,
+        role: user.role as Role,
+        details: { identifier, ip: extractClientIp(req) },
+      });
+      return NextResponse.json({
+        success: true,
+        data: {
+          mfa_required: true,
+          mfaChallenge: challenge,
+          userId: user.id,
+          methods: ["passkey", ...(user.totp_secret_hash ? ["totp"] : [])],
+        },
+      });
+    }
 
     const rolesRes = await query<{ role: string }>(`SELECT role FROM user_roles WHERE user_id = $1`, [user.id]);
     const roles = rolesRes.rows.map(r => r.role);
