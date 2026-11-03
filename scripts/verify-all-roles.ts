@@ -71,6 +71,13 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     // zustand persist writes mycampus-auth (user/role/authenticated) to
     // localStorage; the JWT token itself lives in sessionStorage under
     // "auth.token".
+    //
+    // M4 device binding: clear the browser cookie jar BEFORE the login so
+    // the server mints a fresh device_id and returns it in Set-Cookie. A
+    // stale device_id in the jar makes the server reuse it
+    // (shouldSetDeviceCookie=false → no Set-Cookie in the response) and
+    // the page context is left without the cookie the dh claim hashes to.
+    await ctx.clearCookies();
     const res = await page.request.post(`${BASE}/api/auth/login`, {
       data: { login: c.login, password: c.password },
     });
@@ -99,18 +106,20 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     // M4 device binding: extract the device_id cookie from the login
     // response and seed it into the page context so subsequent Bearer
     // requests present the same cookie the dh JWT claim was derived from.
-    // Playwright's APIResponse.headers() returns a plain object; set-cookie
-    // may carry multiple values joined by ", " — split on a comma that is
-    // followed by a non-space to avoid breaking cookie values that contain
-    // commas (device_id is base64url so this is safe in practice).
-    const setCookieHeader: string =
-      (res.headers() as Record<string, string>)["set-cookie"] ?? "";
-    const deviceCookie = setCookieHeader
-      .split(/,(?=\S)/)
-      .map((c: string) => c.trim())
-      .find((c: string) => c.startsWith("device_id="))
-      ?.split(";")[0]
-      ?.replace("device_id=", "");
+    // Playwright's API context holds its own cookie jar, so a device_id
+    // left over from a previous login makes the server reuse it
+    // (shouldSetDeviceCookie=false → no Set-Cookie in the response).
+    // Parse the header first; if absent, clear the jar, re-login, and
+    // force a fresh cookie issuance.
+    const parseDeviceCookie = (h: Record<string, string | undefined>): string | undefined =>
+      (h["set-cookie"] ?? "")
+        .split(/,(?=\S)/)
+        .map((c: string) => c.trim())
+        .find((c: string) => c.startsWith("device_id="))
+        ?.split(";")[0]
+        ?.replace("device_id=", "");
+
+    let deviceCookie = parseDeviceCookie(res.headers() as Record<string, string | undefined>);
     if (deviceCookie) {
       await ctx.addCookies([
         {
