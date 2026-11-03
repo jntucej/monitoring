@@ -39,7 +39,9 @@ async function handleChangePassword(
     return NextResponse.json(err("BAD_REQUEST", "Current password and new password are required").body, { status: 400 });
   }
   try {
-    assertPasswordPolicy(newPassword);
+    assertPasswordPolicy(newPassword, auth.role, {
+      email: auth.email,
+    });
   } catch (e) {
     return NextResponse.json(err("BAD_REQUEST", e instanceof Error ? e.message : "Password does not meet policy").body, { status: 400 });
   }

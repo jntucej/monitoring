@@ -12,9 +12,9 @@ const SUCCESS_RESPONSE = {
   message: "If the email address exists in the system, a password reset link has been dispatched.",
 };
 
-function passwordPolicyError(password: string): NextResponse | null {
+function passwordPolicyError(password: string, role = "student", context?: { email?: string; name?: string }): NextResponse | null {
   try {
-    assertPasswordPolicy(password);
+    assertPasswordPolicy(password, role, context);
     return null;
   } catch (e) {
     return NextResponse.json(
@@ -43,9 +43,6 @@ async function handleResetPassword(req: NextRequest) {
 
     // Case 1: Submitting new password with a reset token
     if (token && newPassword) {
-      const policyErr = passwordPolicyError(newPassword);
-      if (policyErr) return policyErr;
-
       const payload = await verifyPasswordResetToken(token);
       if (!payload || !payload.sub) {
         return NextResponse.json(
@@ -59,8 +56,8 @@ async function handleResetPassword(req: NextRequest) {
 
       // Reject re-using the current password (audit trail shows which user,
       // but the response is uniform so token holders can't probe it).
-      const userRes = await query<{ password_hash: string | null }>(
-        "SELECT password_hash FROM users WHERE id = $1 LIMIT 1",
+      const userRes = await query<{ password_hash: string | null; role: string; name: string | null; email: string | null }>(
+        "SELECT password_hash, role, name, email FROM users WHERE id = $1 LIMIT 1",
         [payload.sub]
       );
       if (userRes.rows.length === 0) {
@@ -69,6 +66,17 @@ async function handleResetPassword(req: NextRequest) {
           { status: 404 }
         );
       }
+
+      // M3: enforce the target user's role-specific policy (privileged users
+      // get ≥ 20 chars + symbol; standard users ≥ 12 chars).
+      const targetUser = userRes.rows[0];
+      const policyErr = passwordPolicyError(
+        newPassword,
+        targetUser.role ?? "student",
+        { email: targetUser.email ?? undefined, name: targetUser.name ?? undefined },
+      );
+      if (policyErr) return policyErr;
+
       const currentHash = userRes.rows[0].password_hash;
       if (currentHash && (await verifyPassword(newPassword, currentHash))) {
         return NextResponse.json(

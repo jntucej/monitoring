@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
-import { signAccessToken, signRefreshToken, verifyPassword } from "@/lib/auth-token";
+import { signAccessToken, signRefreshToken, verifyPassword, signPasswordResetToken } from "@/lib/auth-token";
 import { verifyDPoPProof } from "@/lib/dpop";
 import { isHoneytokenIdentifier, triggerDeceptionAlert } from "@/lib/deception";
 import { secureCookieOptions } from "@/lib/cookies";
@@ -11,6 +11,10 @@ import { log, getRequestId } from "@/lib/log";
 import { assertCsrf } from "@/lib/csrf";
 import type { Role } from "@/lib/types";
 import { checkLockout, recordFailedAttempt, clearLockout } from "@/lib/login-lockout";
+import { isPrivilegedRole, sendPrivilegedLoginAlert } from "@/lib/privileged-alert";
+import { passwordIsExpired, passwordAgeDays } from "@/lib/password-policy";
+import { ipAllowed } from "@/lib/ip-allowlist";
+import { newDeviceId, deviceCookieOptions } from "@/lib/device-binding";
 
 const GENERIC_FAILURE = {
   success: false,
@@ -133,6 +137,24 @@ async function handleLoginInner(req: NextRequest) {
       );
     }
 
+    // M6: per-user IP allowlist. Enforced only when IP_ALLOWLIST_ENFORCED=true
+    // and the user has a non-empty allowed_cidrs. Same INVALID_CREDENTIALS
+    // response as a wrong password — no account/IP oracle.
+    if (process.env.IP_ALLOWLIST_ENFORCED === "true") {
+      const srcIp = extractClientIp(req);
+      const cidrs = user.allowed_cidrs as string[] | null;
+      if (!ipAllowed(srcIp, cidrs)) {
+        await addAudit({
+          action: "IP_BLOCKED",
+          userId: user.id,
+          userName: user.email,
+          role: user.role as Role,
+          details: { ip: srcIp, cidrs: cidrs ?? null, identifier },
+        });
+        return NextResponse.json(GENERIC_FAILURE, { status: 401 });
+      }
+    }
+
     let passwordValid = false;
     if (user.password_hash) {
       passwordValid = await verifyPassword(rawPassword, user.password_hash);
@@ -160,6 +182,32 @@ async function handleLoginInner(req: NextRequest) {
     }
 
     await clearLockout(identifier);
+
+    // M3: force password rotation for privileged roles whose password is
+    // older than the policy max (90 days). A short-lived reset token lets
+    // the user set a new password immediately without being locked out.
+    if (passwordIsExpired(user.last_password_change, user.role)) {
+      const ageDays = passwordAgeDays(user.last_password_change);
+      await addAudit({
+        action: "PASSWORD_CHANGE_REQUIRED",
+        userId: user.id,
+        userName: user.email,
+        role: user.role as Role,
+        details: { ageDays, endpoint: "/api/auth/login" },
+      });
+      const resetToken = await signPasswordResetToken(user.id, user.email);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PASSWORD_EXPIRED",
+            message: "Your password has expired. Set a new one to continue.",
+            resetToken,
+          },
+        },
+        { status: 403 },
+      );
+    }
 
     // L1g: if the user is MFA-required, do NOT issue a session token.
     // Return a short-lived one-use challenge that the passkey/TOTP verify
@@ -210,6 +258,14 @@ async function handleLoginInner(req: NextRequest) {
     const roles = rolesRes.rows.map(r => r.role);
     if (!roles.includes(user.role)) roles.push(user.role);
 
+    // M4: device binding — mint a fresh device-id cookie (or reuse the one
+    // the client already presented) and embed its SHA-256 in the access JWT
+    // as the `dh` claim. The auth layer verifies the presented cookie
+    // against the claim on every request; kiosk tokens carry no dh claim.
+    const existingDeviceCookie = req.cookies.get("device_id")?.value;
+    const deviceId = existingDeviceCookie ?? newDeviceId().raw;
+    const shouldSetDeviceCookie = !existingDeviceCookie;
+
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
@@ -218,7 +274,22 @@ async function handleLoginInner(req: NextRequest) {
       account_status: user.status,
       name: user.name,
       session_version: user.session_version ?? 0,
+      device_id: deviceId, // → dh claim (SHA-256 hex) in the token
     });
+
+    // M2: privileged login alert — fire-and-forget, never blocks the response.
+    const clientIp = extractClientIp(req);
+    if (isPrivilegedRole(user.role)) {
+      void sendPrivilegedLoginAlert({
+        userId: user.id,
+        email: user.email,
+        name: user.name ?? user.email,
+        role: user.role,
+        sessionId: user.id, // user id is the session identifier (stateless JWT)
+        ip: clientIp,
+        userAgent: req.headers.get("user-agent") ?? null,
+      });
+    }
 
     // Optional RFC 9449 DPoP proof binding for interactive human sessions
     const dpopHeader = req.headers.get("dpop");
@@ -262,6 +333,11 @@ async function handleLoginInner(req: NextRequest) {
     response.cookies.set("access_token", access_token, secureCookieOptions(req, { maxAge: 3600 }));
 
     response.cookies.set("refresh_token", refresh_token, secureCookieOptions(req, { maxAge: 7 * 24 * 3600 }));
+
+    // M4: set the device-id cookie when this login minted a new one.
+    if (shouldSetDeviceCookie) {
+      response.cookies.set(deviceCookieOptions(deviceId, req));
+    }
 
     return response;
   } catch (error: unknown) {

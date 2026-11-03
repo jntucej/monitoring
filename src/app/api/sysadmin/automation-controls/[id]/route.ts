@@ -56,4 +56,4 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   return ok({ updated: row });
 }
 
-export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"], rateLimit: { keyPrefix: "sysadmin_automation_controls_patch", maxRequests: 30 }});
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin"], rateLimit: { keyPrefix: "sysadmin_automation_controls_patch", maxRequests: 30 }, requiresStepUp: true});

@@ -96,6 +96,34 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     const { user } = body.data;
     void user;
 
+    // M4 device binding: extract the device_id cookie from the login
+    // response and seed it into the page context so subsequent Bearer
+    // requests present the same cookie the dh JWT claim was derived from.
+    // Playwright's APIResponse.headers() returns a plain object; set-cookie
+    // may carry multiple values joined by ", " — split on a comma that is
+    // followed by a non-space to avoid breaking cookie values that contain
+    // commas (device_id is base64url so this is safe in practice).
+    const setCookieHeader: string =
+      (res.headers() as Record<string, string>)["set-cookie"] ?? "";
+    const deviceCookie = setCookieHeader
+      .split(/,(?=\S)/)
+      .map((c: string) => c.trim())
+      .find((c: string) => c.startsWith("device_id="))
+      ?.split(";")[0]
+      ?.replace("device_id=", "");
+    if (deviceCookie) {
+      await ctx.addCookies([
+        {
+          name: "device_id",
+          value: deviceCookie,
+          url: `${BASE}/login`,
+          httpOnly: true,
+          sameSite: "Lax" as const,
+          path: "/",
+        },
+      ]);
+    }
+
     // Establish the browser session: the zustand auth store persists to
     // localStorage under "mycampus-auth" (token in sessionStorage "auth.token").
     // The persisted state must carry the token so checkSession's Bearer

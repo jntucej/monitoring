@@ -182,7 +182,11 @@ async function handlePatch(req: NextRequest) {
           );
         }
         try {
-          assertPasswordPolicy(body.password);
+          // M3: enforce the target user's role-specific policy.
+          assertPasswordPolicy(body.password, target.role, {
+            email: target.email,
+            name: target.name,
+          });
         } catch (e) {
           return NextResponse.json(
             { success: false, error: { message: e instanceof Error ? e.message : "Password does not meet policy." } },
@@ -410,7 +414,10 @@ async function handlePatch(req: NextRequest) {
   }
 }
 
-/** DELETE /api/users/[id] deprovision user (sysadmin only). */
+/** DELETE /api/users/[id] deprovision user (sysadmin only). M5: hard
+ *  delete now creates a pending operator_action; a different sysadmin
+ *  must approve it before the executor removes the user. Soft delete
+ *  (user has history) still executes directly — it is reversible. */
 async function handleDelete(req: NextRequest) {
   try {
     const id = getIdFromPath(req);
@@ -449,6 +456,33 @@ async function handleDelete(req: NextRequest) {
 
     const hasHistory = (passCount ?? 0) > 0 || (logCount ?? 0) > 0;
 
+    if (!hasHistory) {
+      // M5: hard delete is destructive and irreversible — route through
+      // the two-human approval gate. The executor (apply-operator-action.sh)
+      // runs the actual DELETE after a different sysadmin approves.
+      const insertRes = await query<{ id: string }>(
+        `INSERT INTO public.operator_actions
+           (kind, title, payload, risk, status, approver_role, source)
+         VALUES ('delete_user',
+                 'Delete user',
+                 $1::jsonb, 'high', 'pending', 'sysadmin', 'human')
+         RETURNING id`,
+        [JSON.stringify({ requested_by: actorId, target_user_id: id })],
+      );
+      const actionId = insertRes.rows[0]?.id ?? "";
+      await addAudit({
+        userId: actorId,
+        action: "OPERATOR_ACTION_PENDING_CREATED",
+        details: { kind: "delete_user", actionId, targetId: id },
+      });
+      return NextResponse.json({
+        success: true,
+        pending: true,
+        actionId,
+        message: "Delete created. A different sysadmin must approve it.",
+      });
+    }
+
     if (hasHistory) {
       // RLS write discipline: users & sessions are RLS tables;
       // writes go through withTransaction.
@@ -472,27 +506,16 @@ async function handleDelete(req: NextRequest) {
       return NextResponse.json({ success: true, mode: "soft_delete", message: `Staff member deactivated (has ${passCount} passes and ${logCount} movements).` });
     }
 
-    // RLS write discipline: users is an RLS table; delete through withTransaction.
-    await withTransaction(async (client) => {
-      await client.query("DELETE FROM public.users WHERE id = $1", [id]);
-    });
-
-    try {
-      await supabase.auth.admin.deleteUser(id);
-    } catch {
-      // Ignore if auth user doesn't exist
-    }
-
-    await addAudit({
-      userId: actorId,
-      action: "USER_DELETED",
-      details: { timestamp: new Date().toISOString(), targetId: id, mode: "hard_delete" },
-    });
-
-    return NextResponse.json({ success: true, message: "User deleted successfully" });
-  } catch (error: any) {
+    // Unreachable: the !hasHistory and hasHistory branches above cover all
+    // paths. Present so TypeScript's control-flow analysis sees a Response.
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: "Unexpected delete path" } },
+      { status: 500 }
+    );
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { success: false, error: { code: "SERVER_ERROR", message: msg } },
       { status: 500 }
     );
   }
@@ -500,4 +523,4 @@ async function handleDelete(req: NextRequest) {
 
 export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["admin", "sysadmin"]});
 
-export const DELETE = withMutationGuard(handleDelete, {requiredRole: "sysadmin"});
+export const DELETE = withMutationGuard(handleDelete, {requiredRole: "sysadmin", requiresStepUp: true});

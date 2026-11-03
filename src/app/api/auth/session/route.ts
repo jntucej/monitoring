@@ -58,6 +58,7 @@ async function handleSessionCheck(req: NextRequest) {
           role: row.role,
           account_status: row.status,
           session_version: row.session_version ?? 0,
+          device_id: req.cookies.get("device_id")?.value, // M4: carry device binding
         });
         newRefreshToken = await signRefreshToken({
           sub: refreshPayload.sub,

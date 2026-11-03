@@ -45,4 +45,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   });
 }
 
-export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "supervisor"], rateLimit: { keyPrefix: "gate_mode_set", maxRequests: 30 },});
+export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "supervisor"], rateLimit: { keyPrefix: "gate_mode_set", maxRequests: 30 }, requiresStepUp: true});

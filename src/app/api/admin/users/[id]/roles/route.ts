@@ -3,6 +3,7 @@ import { getSupabaseServiceClient, invalidateAllUserSessions } from "@/lib/dbCli
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { addAudit } from "@/lib/db";
+import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -35,6 +36,41 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   }
   if (role === "sysadmin" && ctx.auth.role !== "sysadmin") {
     return NextResponse.json({ success: false, error: { code: "FORBIDDEN", message: "Only sysadmin can grant sysadmin." } }, { status: 403 });
+  }
+
+  // M5 (grant_sysadmin): granting the highest role creates a pending
+  // operator_action that a different sysadmin must approve. The role is
+  // NOT written to user_roles here; the apply-operator-action.sh executor
+  // performs the grant after the second human approves.
+  if (action === "grant" && role === "sysadmin") {
+    const insertRes = await query<{ id: string }>(
+      `INSERT INTO public.operator_actions
+         (kind, title, payload, risk, status, approver_role, source)
+       VALUES ('grant_sysadmin',
+               'Grant sysadmin role',
+               $1::jsonb, 'high', 'pending', 'sysadmin', 'human')
+       RETURNING id`,
+      [JSON.stringify({
+        requested_by: ctx.auth.userId,
+        target_user_id: userId,
+        role: "sysadmin",
+        scope: scope || null,
+      })],
+    );
+    const actionId = insertRes.rows[0]?.id ?? "";
+    await addAudit({
+      action: "OPERATOR_ACTION_PENDING_CREATED",
+      userId: ctx.auth.userId,
+      userName: ctx.auth.email,
+      role: ctx.auth.role as Role,
+      details: { kind: "grant_sysadmin", actionId, targetUserId: userId, scope: scope || null },
+    });
+    return NextResponse.json({
+      success: true,
+      pending: true,
+      actionId,
+      message: "Grant created. A different sysadmin must approve it.",
+    });
   }
 
   const svc = getSupabaseServiceClient();

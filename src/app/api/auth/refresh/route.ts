@@ -197,6 +197,7 @@ async function handleRefresh(req: NextRequest) {
       account_status: user.status,
       name: user.name,
       session_version: user.session_version ?? 0,
+      device_id: req.cookies.get("device_id")?.value, // M4: carry device binding through refresh
     });
 
     const refresh_token = await signRefreshToken({

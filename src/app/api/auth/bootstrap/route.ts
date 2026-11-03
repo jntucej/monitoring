@@ -50,13 +50,13 @@ async function handlePost(req: NextRequest) {
   // Resolve the target user by ID or roll.
   let user: any = null;
   if (targetUserId) {
-    const { rows: idRows } = await query("SELECT id, name, status, unique_id, onboarded_at FROM users WHERE id = $1 LIMIT 1", [targetUserId]);
+    const { rows: idRows } = await query("SELECT id, name, status, role, email, unique_id, onboarded_at FROM users WHERE id = $1 LIMIT 1", [targetUserId]);
     user = idRows[0] ?? null;
   }
   if (!user && normId) {
     const sanitizePostgrestParam = (val: string) => val.replace(/,/g, "%2C");
     const { rows: lookupRows } = await query(
-      `SELECT id, name, status, unique_id, onboarded_at FROM users WHERE upper(unique_id) = $1 OR email = lower($1) OR login_identifier = $1 LIMIT 1`,
+      `SELECT id, name, status, role, unique_id, email, onboarded_at FROM users WHERE upper(unique_id) = $1 OR email = lower($1) OR login_identifier = $1 LIMIT 1`,
       [normId]
     );
     user = lookupRows[0] ?? null;
@@ -65,7 +65,10 @@ async function handlePost(req: NextRequest) {
     return NextResponse.json({ success: false, error: { code: "INVALID_CODE", message: "User not found." } }, { status: 404 });
   }
   try {
-    assertPasswordPolicy(newPassword);
+    assertPasswordPolicy(newPassword, user.role, {
+      email: user.email,
+      name: user.name,
+    });
   } catch (e) {
     return NextResponse.json({ success: false, error: { code: "WEAK_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." } }, { status: 400 });
   }

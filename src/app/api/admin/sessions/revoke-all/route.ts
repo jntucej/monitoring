@@ -2,59 +2,71 @@ import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { invalidateAuthCache } from "@/lib/authContext";
 import type { AuthContext } from "@/lib/authContext";
 
 /**
- * Batch D: POST /api/admin/sessions/revoke-all — sysadmin-only fleet-wide
- * session revocation (Meta's "invalidate everything" runbook). Bumps
- * users.session_version for everyone (every live JWT dies) and revokes
- * every unrevoked session row. keepSelf=true spares the caller's own
- * sessions so the admin doesn't lock themselves out mid-incident.
+ * M5: POST /api/admin/sessions/revoke-all — creates a pending
+ * operator_action for a fleet-wide session revocation. A different
+ * sysadmin (not the requester) must approve it via
+ * PATCH /api/sysadmin/actions/[id] before it executes. The executor
+ * (apply-operator-action.sh) performs the actual version bump + session
+ * revocation after approval.
+ *
+ * The route is guarded with `requiresStepUp: true` (M1) — the caller
+ * must have re-entered their password within the last 5 minutes.
  */
-async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Promise<Response> {
-  const body = (await req.json().catch(() => ({}))) as { reason?: string; keepSelf?: boolean };
+async function handlePost(
+  req: NextRequest,
+  { auth }: { auth: AuthContext },
+): Promise<Response> {
+  const body = (await req.json().catch(() => ({}))) as {
+    reason?: string;
+    keepSelf?: boolean;
+  };
   const reason = String(body.reason ?? "manual").slice(0, 500);
   const keepSelf = body.keepSelf === true;
-  const keepId = keepSelf ? auth.userId : null;
 
-  const bumped = await query<{ count: number }>(
-    `UPDATE public.users
-        SET session_version = session_version + 1, updated_at = NOW()
-      WHERE deleted_at IS NULL
-        AND ($1::uuid IS NULL OR id <> $1)`,
-    [keepId],
+  const insertRes = await query<{ id: string }>(
+    `INSERT INTO public.operator_actions
+       (kind, title, payload, risk, status, approver_role, source)
+     VALUES ('revoke_all_sessions',
+             'Revoke all sessions',
+             $1::jsonb, 'high', 'pending', 'sysadmin', 'human')
+     RETURNING id`,
+    [
+      JSON.stringify({
+        requested_by: auth.userId,
+        reason,
+        keep_self: keepSelf,
+      }),
+    ],
   );
+  const actionId = insertRes.rows[0]?.id ?? "";
 
-  await query(
-    `UPDATE public.sessions
-        SET revoked_at = NOW()
-      WHERE revoked_at IS NULL
-        AND ($1::uuid IS NULL OR user_id <> $1)`,
-    [keepId],
-  );
-
-  // Invalidate every cached auth entry — the version bump alone is
-  // picked up on the next verify, but a warm cache would serve the old
-  // (now-revoked) identity for its TTL.
-  invalidateAuthCache("*");
-
-  try {
-    await addAudit({
-      action: "SESSION_FORCE_REVOKED",
-      userId: auth.userId,
-      userName: "admin",
-      role: auth.role,
-      details: { scope: keepSelf ? "all-except-self" : "all", reason },
-    });
-  } catch {
-    /* audit is best-effort — the revocation already happened */
-  }
+  await addAudit({
+    action: "OPERATOR_ACTION_PENDING_CREATED",
+    userId: auth.userId,
+    userName: auth.email,
+    role: auth.role,
+    details: {
+      kind: "revoke_all_sessions",
+      actionId,
+      reason,
+      keepSelf,
+    },
+  }).catch(() => undefined);
 
   return NextResponse.json({
     success: true,
-    data: { revoked: bumped.rowCount ?? 0, keepSelf, reason },
+    data: {
+      pending: true,
+      actionId,
+      message: "Action created. A different sysadmin must approve it.",
+    },
   });
 }
 
-export const POST = withMutationGuard(handlePost, { requiredRole: ["sysadmin"] });
+export const POST = withMutationGuard(handlePost, {
+  requiredRole: ["sysadmin"],
+  requiresStepUp: true,
+});

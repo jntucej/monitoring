@@ -29,15 +29,48 @@ export interface MutationGuardOptions extends AuthorizationOptions {
   csrf?: boolean;
   /** Set false ONLY when the route genuinely cannot be trusted-header signed. Default true. */
   trustedHeaders?: boolean;
+  /**
+   * M1 — Step-up re-authentication. When true, the handler is only invoked
+   * after a fresh password step-up (< 5 min). A stolen cookie alone cannot
+   * trigger the route; 401 + code STEP_UP_REQUIRED tells the UI to prompt.
+   */
+  requiresStepUp?: boolean;
 }
 
 type Handler = (req: NextRequest, ctx: { auth: AuthContext }) => Promise<Response>;
 
 export function withMutationGuard(handler: Handler, options: MutationGuardOptions = {}) {
-  const { rateLimit, csrf = true, trustedHeaders = true, ...authOptions } = options;
+  const { rateLimit, csrf = true, trustedHeaders = true, requiresStepUp, ...authOptions } = options;
   const effectiveRateLimit: RateLimitConfig = rateLimit ?? { windowMs: 60_000, maxRequests: 60 };
 
-  // Chain: withAuthorization → user-rate-limit → requireTrustedHeaders → assertCsrf → handler
+  // M1: step-up guard runs inside the auth boundary (needs ctx.auth.userId),
+  // just before the CSRF/trusted-header guards. Lazy import so the module
+  // loads only when a route actually declares requiresStepUp.
+  const stepUpGuard: Handler = async (req, ctx) => {
+    if (requiresStepUp) {
+      const { assertFreshStepUp } = await import("@/lib/step-up");
+      try {
+        await assertFreshStepUp(ctx.auth.userId);
+      } catch (err) {
+        if (err instanceof Error && err.name === "StepUpRequiredError") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "STEP_UP_REQUIRED",
+                message: "Re-enter your password to continue.",
+              },
+            },
+            { status: 401 },
+          );
+        }
+        throw err;
+      }
+    }
+    return handler(req, ctx);
+  };
+
+  // Chain: withAuthorization → user-rate-limit → requireTrustedHeaders → assertCsrf → step-up → handler
   const csrfGuard: Handler = async (req, ctx) => {
     if (trustedHeaders) {
       const untrusted = requireTrustedHeaders(req);
@@ -47,7 +80,7 @@ export function withMutationGuard(handler: Handler, options: MutationGuardOption
       const blocked = assertCsrf(req);
       if (blocked) return blocked;
     }
-    return handler(req, ctx);
+    return stepUpGuard(req, ctx);
   };
 
   const rateLimited: Handler = async (req, ctx) => {

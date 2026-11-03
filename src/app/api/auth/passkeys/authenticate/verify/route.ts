@@ -7,6 +7,7 @@ import { rpID, origin, assertProductionWebAuthnConfig } from "@/lib/webauthn";
 import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { secureCookieOptions } from "@/lib/cookies";
 import { addAudit } from "@/lib/db";
+import { newDeviceId, deviceCookieOptions } from "@/lib/device-binding";
 import { randomUUID } from "crypto";
 
 async function handlePost(req: NextRequest) {
@@ -101,12 +102,15 @@ async function handlePost(req: NextRequest) {
     details: { method: "webauthn", credentialId: dbCred.credential_id },
   });
 
+  const existingDeviceCookie = req.cookies.get("device_id")?.value;
+  const deviceId = existingDeviceCookie ?? newDeviceId().raw;
   const access = await signAccessToken({
     sub: u.id,
     email: u.email,
     role: u.role,
     name: u.name,
     mfa: true,
+    device_id: deviceId, // M4: device binding
   });
   const refresh = await signRefreshToken({ sub: u.id, email: u.email, role: u.role });
   const res = NextResponse.json({
@@ -127,6 +131,10 @@ async function handlePost(req: NextRequest) {
     refresh,
     secureCookieOptions(req, { httpOnly: true, sameSite: "strict", maxAge: 604800 }),
   );
+  // M4: set the device-id cookie when this verification minted a new one.
+  if (!existingDeviceCookie) {
+    res.cookies.set(deviceCookieOptions(deviceId, req));
+  }
   store.delete("auth_challenge");
   return res;
 }

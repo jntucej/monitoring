@@ -26,17 +26,25 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
 
   const body = await req.json().catch(() => ({}));
   const password = typeof body.password === "string" ? body.password : "";
+
+  const actorId = ctx.auth.userId;
+  const actorRole = ctx.auth.role as Role;
+
   try {
-    assertPasswordPolicy(password);
+    // M3: fetch the target's role first so the target's role-specific
+    // password policy is enforced (privileged target → ≥ 20 chars + symbol).
+    const targetRes = await query<{ id: string; role: string; email: string | null }>(
+      "SELECT id, role, email FROM users WHERE id = $1::uuid LIMIT 1",
+      [userId]
+    );
+    const targetRole = targetRes.rows[0]?.role ?? "student";
+    assertPasswordPolicy(password, targetRole, { email: targetRes.rows[0]?.email ?? undefined });
   } catch (e) {
     return NextResponse.json(
       { success: false, error: { code: "INVALID_PASSWORD", message: e instanceof Error ? e.message : "Password does not meet policy." } },
       { status: 400 }
     );
   }
-
-  const actorId = ctx.auth.userId;
-  const actorRole = ctx.auth.role as Role;
 
   try {
     // Department scoping: if the caller's users row carries a department_id,
@@ -139,4 +147,5 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
 
 export const POST = withAdminMutation(handlePost, {
   rateLimit: { keyPrefix: "admin_user_reset_pw", maxRequests: 20, windowMs: 60_000 },
+  requiresStepUp: true,
 });

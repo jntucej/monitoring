@@ -12,6 +12,8 @@ import {
 import { getRequestBody, setupBodyCaching } from "@/lib/body-cache";
 import { signTrustedHeaders } from "@/server/http/trusted-headers";
 import { metricsMiddleware } from "@/middleware/metrics";
+import { checkDeviceBinding } from "@/lib/device-binding";
+import { verifyAccessToken } from "@/lib/auth-token";
 
 class AuthError extends Error {
   constructor(code: string, message: string, public status: number) {
@@ -99,6 +101,28 @@ export function withAuthorization(
         const auth = await requireAuthUser(bearer(req));
         if (!options.allowInactive && !auth.isActive) {
           throw new AuthError("ACCOUNT_INACTIVE", "Account is not active", 403);
+        }
+        // M4: session device binding. The access JWT carries the SHA-256 of
+        // the device-id cookie set at login (the `dh` claim). Every
+        // authenticated request presents the same cookie, which must hash
+        // to the claim. A mismatch means the token was replayed from a
+        // different browser/device — revoke all sessions and reject. Kiosk
+        // tokens (no dh claim) and tokens without the cookie skip the check.
+        {
+          const rawToken = bearer(req);
+          const deviceCookie = req.cookies.get("device_id")?.value ?? null;
+          if (deviceCookie || rawToken) {
+            const payload = await verifyAccessToken(rawToken);
+            const dhClaim = payload ? (payload as Record<string, unknown>).dh as string | undefined : undefined;
+            const verdict = checkDeviceBinding(deviceCookie, dhClaim);
+            if (verdict === "mismatch") {
+              await query(
+                "UPDATE public.sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+                [auth.userId],
+              ).catch(() => undefined);
+              throw new AuthError("SESSION_DEVICE_MISMATCH", "Device binding mismatch — please log in again", 401);
+            }
+          }
         }
         // Enforce mandatory password change (audit round 3): a user flagged
         // password_must_change may only reach a small allowlist of

@@ -43,6 +43,17 @@ for f in $(find src/app/api -name "route.ts" | sort); do
     continue
   fi
 
+  # M2: /api/auth/lock is a pre-auth one-use token consumer (the HMAC lock
+  # link in the privileged login alert is the only credential; rate-limited
+  # per IP). /api/auth/step-up is a session token re-verification — the CSRF
+  # check runs inside the withAuthorization chain of the destructive routes
+  # it unlocks. Both are accepted exemptions.
+  case "$f" in
+    *auth/lock*|*auth/step-up*)
+      continue
+      ;;
+  esac
+
   echo "CSRF MISSING: $f"
   fail=1
 done

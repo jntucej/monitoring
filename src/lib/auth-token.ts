@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 import { requireSecret } from "@/lib/env";
 
 interface SigningKey {
@@ -91,20 +91,34 @@ export async function signAccessToken(claims: {
   role: string;
   account_status?: string;
   name?: string;
+  jti?: string;
+  kiosk?: boolean;
+  mfa?: boolean;
+  device_id?: string;
   [key: string]: unknown;
 }): Promise<string> {
   const key = getAuthSigningKey();
   const issuedAt = Math.floor(Date.now() / 1000);
   const expiry = issuedAt + 3600; // 1 hour
 
-  return await new SignJWT({
+  // M4: device binding — if a device_id raw value is provided, embed its
+  // SHA-256 as the `dh` claim so the auth layer can verify the presented
+  // cookie against it on every request. Kiosk sessions pass no device_id
+  // (headless consoles have no cookie) → no dh claim → check is skipped.
+  const body: Record<string, unknown> = {
     ...claims,
     id: claims.sub,
     token_type: "access",
-  })
+  };
+  if (claims.device_id) {
+    body.dh = createHash("sha256").update(claims.device_id).digest("hex");
+  }
+  delete body.device_id; // raw value must not enter the token
+
+  return await new SignJWT(body)
     .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: getAuthSigningKid() })
     .setSubject(claims.sub)
-    .setJti(randomUUID())
+    .setJti(claims.jti ?? randomUUID())
     .setIssuedAt(issuedAt)
     .setExpirationTime(expiry)
     .sign(key);

@@ -153,6 +153,59 @@ run_payload() {
       psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
         "UPDATE public.notification_email_queue SET status='cancelled' WHERE status='pending'"
       ;;
+    revoke_all_sessions)
+      # M5: fleet-wide session revocation. Bumps users.session_version for
+      # everyone and revokes all live session rows. .keep_self (bool) spares
+      # the requester's own sessions so the admin doesn't lock themselves out.
+      local keep_self; keep_self=$(echo "$PAYLOAD" | jq -r '.keep_self // false')
+      if [ "$keep_self" = "true" ]; then
+        local requester; requester=$(echo "$PAYLOAD" | jq -r '.requested_by')
+        [ -n "$requester" ] && [ "$requester" != "null" ] || { echo "revoke_all_sessions keep_self=true but .requested_by missing" >&2; exit 2; }
+        psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
+          "UPDATE public.users SET session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE deleted_at IS NULL AND id <> '$requester'; UPDATE public.sessions SET revoked_at = NOW() WHERE revoked_at IS NULL AND user_id <> '$requester'"
+      else
+        psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
+          "UPDATE public.users SET session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE deleted_at IS NULL; UPDATE public.sessions SET revoked_at = NOW() WHERE revoked_at IS NULL"
+      fi
+      echo "[revoke_all_sessions] fleet-wide session revocation complete (keep_self=$keep_self)"
+      ;;
+    delete_user)
+      # M5: hard user delete. The executor performs the actual DELETE after
+      # the two-human approval gate. Soft-deleted users with history are
+      # handled by the hard-delete-expired worker job (30-day DPDP grace);
+      # this path is for clean hard deletes.
+      local target_user_id; target_user_id=$(echo "$PAYLOAD" | jq -r '.target_user_id')
+      [ -n "$target_user_id" ] && [ "$target_user_id" != "null" ] || { echo "delete_user missing .target_user_id" >&2; exit 2; }
+      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
+        "UPDATE public.sessions SET revoked_at = NOW() WHERE user_id = '$target_user_id' AND revoked_at IS NULL; DELETE FROM public.users WHERE id = '$target_user_id'"
+      echo "[delete_user] user $target_user_id deleted (two-human approval)"
+      ;;
+    change_user_role)
+      # M5: role change via the approval gate. .target_user_id + .role.
+      local target_id new_role; target_id=$(echo "$PAYLOAD" | jq -r '.target_user_id'); new_role=$(echo "$PAYLOAD" | jq -r '.role')
+      [ -n "$target_id" ] && [ "$target_id" != "null" ] && [ -n "$new_role" ] && [ "$new_role" != "null" ] || { echo "change_user_role missing .target_user_id or .role" >&2; exit 2; }
+      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
+        "UPDATE public.users SET role = '$new_role', session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE id = '$target_id'"
+      echo "[change_user_role] user $target_id → $new_role (two-human approval)"
+      ;;
+    grant_sysadmin)
+      # M5: highest-privilege grant. Requires two different sysadmins.
+      local target_user_id; target_user_id=$(echo "$PAYLOAD" | jq -r '.target_user_id')
+      [ -n "$target_user_id" ] && [ "$target_user_id" != "null" ] || { echo "grant_sysadmin missing .target_user_id" >&2; exit 2; }
+      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -c \
+        "UPDATE public.users SET role = 'sysadmin', session_version = COALESCE(session_version, 0) + 1, updated_at = NOW() WHERE id = '$target_user_id'"
+      echo "[grant_sysadmin] user $target_user_id → sysadmin (two-human approval)"
+      ;;
+    disable_kill_switch)
+      # M5: disabling the DR kill switch. Records intent; the actual flag
+      # flip is in automation_controls (a dedicated worker job owns the write).
+      echo "[disable_kill_switch] kill-switch disable request recorded; automation-controls worker owns the write"
+      ;;
+    rotate_db_credentials)
+      # M5: DB credential rotation via the approval gate.
+      bash /app/scripts/rotate-db-creds.sh || exit 1
+      echo "[rotate_db_credentials] credential rotation complete"
+      ;;
     escalation|*)
       # Tier 3: nothing to execute locally. The pg_notify trigger already
       # pushed the Telegram alert; record it as executed (the action WAS

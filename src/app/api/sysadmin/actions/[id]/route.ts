@@ -98,4 +98,4 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }): Promis
   });
 }
 
-export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin", "admin"], rateLimit: { keyPrefix: "sysadmin_actions_decide", maxRequests: 60 }});
+export const PATCH = withMutationGuard(handlePatch, {requiredRole: ["sysadmin", "admin"], rateLimit: { keyPrefix: "sysadmin_actions_decide", maxRequests: 60 }, requiresStepUp: true});
