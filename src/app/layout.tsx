@@ -91,6 +91,13 @@ export default async function RootLayout({
   // 'strict-dynamic' blocks every dynamically-imported chunk.
   await headers();
   const theme = await getServerTheme();
+  // L2: The edge middleware stamps a per-request CSP nonce on the x-nonce
+  // request header. Next.js SSR reads it back here so the theme-flash
+  // inline script in <head> carries the matching nonce attribute;
+  // 'strict-dynamic' in the CSP header then permits it (and every
+  // dynamically-imported chunk it enables) without 'unsafe-inline'.
+  const h = await headers();
+  const nonce = h.get("x-nonce") ?? "";
   return (
     <html
       lang="en-IN"
@@ -99,6 +106,7 @@ export default async function RootLayout({
     >
       <head>
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
 try {
@@ -113,6 +121,8 @@ try {
 `,
           }}
         />
+        {/* JSON-LD blocks are data islands, not executable scripts: they are
+          not affected by script-src, so no nonce is required. */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
