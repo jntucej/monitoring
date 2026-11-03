@@ -10,6 +10,12 @@ jobs:
     services:
       postgres:
         image: supabase/postgres:17.6.1.136
+        # supabase/postgres (NixOS variant) quirks:
+        #  1. Its entrypoint wrapper mis-parses any `command:` override, so
+        #     POSTGRES_USER cannot be swapped in the service env.
+        #  2. The built-in init hook (migrate.sh) hardcodes supabase_admin,
+        #     which the image always creates — so we keep the service env as
+        #     the image default and connect as supabase_admin instead.
         env:
           POSTGRES_USER: supabase_admin
           POSTGRES_PASSWORD: ci_dummy_postgres_password_123
@@ -30,20 +36,18 @@ jobs:
       - run: npm ci
       - name: Bootstrap DB
         env:
-          # The Supabase postgres image creates the `public` schema owned by
-          # `supabase_admin` with an unknown generated password. Setting
-          # POSTGRES_USER=supabase_admin in the service env makes the image's
-          # initdb create supabase_admin with the known POSTGRES_PASSWORD,
-          # so we can connect as it and create objects in public directly.
+          # The supabase/postgres image bootstraps the POSTGRES_USER role
+          # (supabase_admin here) with the known POSTGRES_PASSWORD and gives
+          # it ownership of public, so schema DDL resolves in its context.
           DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
         run: |
-          # Grant postgres full DDL rights on public so schema.sql CREATE
-          # statements succeed. Tolerate errors on a fresh DB where some
-          # objects may not exist yet; ON_ERROR_STOP=1 so a real schema bug fails loudly.
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "GRANT CREATE, USAGE ON SCHEMA public TO postgres;" || true
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "GRANT ALL ON DATABASE gate_monitor TO postgres;" || true
+          # supabase_admin is not the DB superuser (the image creates a
+          # `postgres` superuser with an unknown password); grant it DDL
+          # rights on public so schema.sql CREATE statements succeed.
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT CREATE, USAGE ON SCHEMA public TO supabase_admin;" || true
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT ALL ON DATABASE gate_monitor TO supabase_admin;" || true
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/schema.sql
           # NOTE: do NOT run database/bootstrap.sql here. Its strict
           # schema_migrations (NOT NULL filename/checksum) would clash with
