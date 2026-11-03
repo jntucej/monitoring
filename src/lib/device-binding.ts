@@ -15,7 +15,7 @@
 // tokens.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { createHash, randomBytes, timingSafeEqual } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { isRequestSecure } from "@/lib/cookies";
 
 const COOKIE = "device_id";
@@ -68,7 +68,8 @@ export function deviceCookieOptions(
 
 /**
  * Verify a presented device-id cookie value against the `dh` JWT claim.
- * Both sides are hashed with SHA-256 before the constant-time compare.
+ * The claim is the SHA-256 hex digest of the raw cookie value, so the
+ * compare is a plain hex-string equality.
  *
  * @returns "ok" | "mismatch" | "skip"
  *   - ok:       cookie present and matches the claim
@@ -80,9 +81,6 @@ export function checkDeviceBinding(
   jwtDhClaim: string | undefined | null,
 ): "ok" | "mismatch" | "skip" {
   if (!presentedCookie || !jwtDhClaim) return "skip";
-  const presented = Buffer.from(hashDeviceId(presentedCookie));
-  const expected = Buffer.from(jwtDhClaim, "hex");
-  if (presented.length !== expected.length) return "mismatch";
-  if (!timingSafeEqual(presented, expected)) return "mismatch";
-  return "ok";
+  if (!/^[0-9a-f]{64}$/.test(jwtDhClaim)) return "mismatch";
+  return hashDeviceId(presentedCookie) === jwtDhClaim ? "ok" : "mismatch";
 }

@@ -3,7 +3,9 @@
     "role": "admin",
     "leaf": "/admin",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -11,7 +13,9 @@
     "role": "admin",
     "leaf": "/admin",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -19,7 +23,9 @@
     "role": "admin",
     "leaf": "/admin/alerts",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -27,7 +33,9 @@
     "role": "admin",
     "leaf": "/admin/alumni",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -35,7 +43,9 @@
     "role": "admin",
     "leaf": "/admin/analytics",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -43,7 +53,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/advanced",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -51,7 +63,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/occupancy",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -59,7 +73,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/predictive",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -67,7 +83,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/sustainability",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -75,7 +93,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/traffic",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -83,7 +103,9 @@
     "role": "admin",
     "leaf": "/admin/analytics/users",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -91,7 +113,9 @@
     "role": "admin",
     "leaf": "/admin/announcements",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -99,7 +123,9 @@
     "role": "admin",
     "leaf": "/admin/anti-ragging-config",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -107,7 +133,9 @@
     "role": "admin",
     "leaf": "/admin/attendance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -115,7 +143,9 @@
     "role": "admin",
     "leaf": "/admin/attendance/bulk-import",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -123,7 +153,9 @@
     "role": "admin",
     "leaf": "/admin/audit-logs",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -131,7 +163,9 @@
     "role": "admin",
     "leaf": "/admin/classes",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -139,7 +173,9 @@
     "role": "admin",
     "leaf": "/admin/complaints/categories",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -147,7 +183,9 @@
     "role": "admin",
     "leaf": "/admin/complaints/chains",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -155,7 +193,9 @@
     "role": "admin",
     "leaf": "/admin/dashboard",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -163,7 +203,9 @@
     "role": "admin",
     "leaf": "/admin/departments",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -171,7 +213,9 @@
     "role": "admin",
     "leaf": "/admin/events",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -179,7 +223,9 @@
     "role": "admin",
     "leaf": "/admin/faculty",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -187,7 +233,9 @@
     "role": "admin",
     "leaf": "/admin/faculty-assignments",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -195,7 +243,9 @@
     "role": "admin",
     "leaf": "/admin/gate-device-configuration",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -203,7 +253,9 @@
     "role": "admin",
     "leaf": "/admin/gates",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -211,7 +263,9 @@
     "role": "admin",
     "leaf": "/admin/gates/schedule",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -219,7 +273,9 @@
     "role": "admin",
     "leaf": "/admin/health",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -227,7 +283,9 @@
     "role": "admin",
     "leaf": "/admin/institutional-configuration",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -235,7 +293,9 @@
     "role": "admin",
     "leaf": "/admin/kb",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -243,7 +303,9 @@
     "role": "admin",
     "leaf": "/admin/lockdown",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -251,7 +313,9 @@
     "role": "admin",
     "leaf": "/admin/mess",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -259,7 +323,9 @@
     "role": "admin",
     "leaf": "/admin/mess/analytics",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -267,7 +333,9 @@
     "role": "admin",
     "leaf": "/admin/mess/days",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -275,7 +343,9 @@
     "role": "admin",
     "leaf": "/admin/mess/items",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -283,7 +353,9 @@
     "role": "admin",
     "leaf": "/admin/mess/today",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -291,7 +363,9 @@
     "role": "admin",
     "leaf": "/admin/notification-settings",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -299,7 +373,9 @@
     "role": "admin",
     "leaf": "/admin/occupancy",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -307,7 +383,9 @@
     "role": "admin",
     "leaf": "/admin/overview",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -315,7 +393,9 @@
     "role": "admin",
     "leaf": "/admin/parents",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -323,7 +403,9 @@
     "role": "admin",
     "leaf": "/admin/passes",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -331,7 +413,9 @@
     "role": "admin",
     "leaf": "/admin/permission-policies",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -339,7 +423,9 @@
     "role": "admin",
     "leaf": "/admin/profile",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -347,7 +433,9 @@
     "role": "admin",
     "leaf": "/admin/profile/appearance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -355,7 +443,9 @@
     "role": "admin",
     "leaf": "/admin/profile/personal",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -363,7 +453,9 @@
     "role": "admin",
     "leaf": "/admin/profile/security",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -371,7 +463,9 @@
     "role": "admin",
     "leaf": "/admin/reports",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -379,7 +473,9 @@
     "role": "admin",
     "leaf": "/admin/roles",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -387,7 +483,9 @@
     "role": "admin",
     "leaf": "/admin/sessions",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -395,7 +493,9 @@
     "role": "admin",
     "leaf": "/admin/settings",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -403,7 +503,9 @@
     "role": "admin",
     "leaf": "/admin/sms/compose",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -411,7 +513,9 @@
     "role": "admin",
     "leaf": "/admin/sms/queue",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -419,7 +523,9 @@
     "role": "admin",
     "leaf": "/admin/staff",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -427,7 +533,9 @@
     "role": "admin",
     "leaf": "/admin/student-representatives",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -435,7 +543,9 @@
     "role": "admin",
     "leaf": "/admin/students",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -443,7 +553,9 @@
     "role": "admin",
     "leaf": "/admin/students/import",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -451,7 +563,9 @@
     "role": "admin",
     "leaf": "/admin/subjects",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -459,7 +573,9 @@
     "role": "admin",
     "leaf": "/admin/support",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -467,7 +583,9 @@
     "role": "admin",
     "leaf": "/admin/sustainability",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -475,7 +593,9 @@
     "role": "admin",
     "leaf": "/admin/users",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -483,7 +603,9 @@
     "role": "admin",
     "leaf": "/admin/visitors",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -491,7 +613,9 @@
     "role": "admin",
     "leaf": "/admin/workers",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -499,167 +623,209 @@
     "role": "admin",
     "leaf": "/admin/workflow-configuration",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker/complaints",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker/maintenance",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "caretaker",
     "leaf": "/caretaker/workers",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/complaints",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/curfew",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/curfew-oversight",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/daily-overview",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/decision-history",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/delegated-approvals",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/gate-movement",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/incident-reporting",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/leave-requests",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "deputy_warden",
     "leaf": "/deputy-warden/shift-handover",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "emo",
     "leaf": "/emo",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "emo",
     "leaf": "/emo",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "emo",
     "leaf": "/emo/complaints",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -805,7 +971,7 @@
   },
   {
     "role": "faculty",
-    "leaf": "/faculty",
+    "leaf": "/faculty/permissions",
     "status": "broken",
     "errors": [
       "login-failed"
@@ -815,7 +981,7 @@
   },
   {
     "role": "faculty",
-    "leaf": "/faculty",
+    "leaf": "/faculty/permissions",
     "status": "broken",
     "errors": [
       "login-failed"
@@ -946,110 +1112,88 @@
   {
     "role": "guardian",
     "leaf": "/guardian",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/child-attendance",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/child-requests",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/child-status",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/contact-info",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/movement-info",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/notifications",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/pass-leave-submission",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/request-status",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "guardian",
     "leaf": "/guardian/visit-schedule",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1177,7 +1321,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1185,7 +1331,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1193,7 +1341,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/allocation",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1201,7 +1351,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/complaints",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1209,7 +1361,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/housekeeping-tasks",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1217,7 +1371,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/maintenance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1225,7 +1381,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/residents",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1233,7 +1391,9 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/resource-management",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1241,379 +1401,568 @@
     "role": "hostel_manager",
     "leaf": "/hostel-manager/rooms",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/consumption-reports",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/daily-meal-counts",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/default",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/inventory-stock",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/meal-attendance",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/menu-management",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/mess-issues",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/operational-requests",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/reviews",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/scan",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/special-events",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "mess_incharge",
     "leaf": "/mess/verify-token",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "oie",
     "leaf": "/oie",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/access-exceptions",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/candidate-attendance",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/decision-history",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/exam-branch-coordination",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/examination-day-access",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/examination-reports",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/queue",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/queue/escalated",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/queue/history",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/queue/pending",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "oie",
     "leaf": "/oie/records",
-    "status": "ok",
+    "status": "broken",
     "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
+    ],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/announcements",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/claim",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/exceptions",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/kiosk-pin",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/lookup",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/manual-entry",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/mode",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/notifications",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/pass-verification",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/password",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/profile",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/stats",
     "status": "broken",
-    "errors": [
-      "login-failed"
+    "errors": [],
+    "apiFailures": [
+      {
+        "url": "http://127.0.0.1/api/gate/stream",
+        "status": 401
+      }
     ],
-    "apiFailures": [],
-    "consoleErrors": []
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    ]
   },
   {
     "role": "operator",
     "leaf": "/operator/transactions",
-    "status": "broken",
-    "errors": [
-      "login-failed"
-    ],
+    "status": "ok",
+    "errors": [],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "parent",
-    "leaf": "/parent",
+    "leaf": "/guardian",
     "status": "broken",
     "errors": [
       "login-failed"
@@ -1725,7 +2074,9 @@
     "role": "principal",
     "leaf": "/principal",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1733,7 +2084,9 @@
     "role": "principal",
     "leaf": "/principal",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1741,7 +2094,9 @@
     "role": "principal",
     "leaf": "/principal/approvals",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1749,7 +2104,9 @@
     "role": "principal",
     "leaf": "/principal/approvals/delegated",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1757,7 +2114,9 @@
     "role": "principal",
     "leaf": "/principal/approvals/escalated",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1765,7 +2124,9 @@
     "role": "principal",
     "leaf": "/principal/approvals/overdue",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1773,7 +2134,9 @@
     "role": "principal",
     "leaf": "/principal/approvals/pending",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1781,7 +2144,9 @@
     "role": "principal",
     "leaf": "/principal/examinations",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1789,7 +2154,9 @@
     "role": "principal",
     "leaf": "/principal/governance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1797,7 +2164,9 @@
     "role": "principal",
     "leaf": "/principal/governance/analytics",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1805,7 +2174,9 @@
     "role": "principal",
     "leaf": "/principal/governance/audit",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1813,7 +2184,9 @@
     "role": "principal",
     "leaf": "/principal/governance/delegations",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1821,7 +2194,9 @@
     "role": "principal",
     "leaf": "/principal/governance/reports",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1829,7 +2204,9 @@
     "role": "principal",
     "leaf": "/principal/operations",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1837,7 +2214,9 @@
     "role": "principal",
     "leaf": "/principal/operations/gates",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1845,7 +2224,9 @@
     "role": "principal",
     "leaf": "/principal/operations/hostel",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1853,7 +2234,9 @@
     "role": "principal",
     "leaf": "/principal/operations/incidents",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1861,7 +2244,9 @@
     "role": "principal",
     "leaf": "/principal/people",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1869,7 +2254,9 @@
     "role": "principal",
     "leaf": "/principal/people/attendance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1877,7 +2264,9 @@
     "role": "principal",
     "leaf": "/principal/people/departments",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -1885,7 +2274,9 @@
     "role": "principal",
     "leaf": "/principal/profile",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -2188,198 +2579,236 @@
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject/attendance",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "subject_faculty",
     "leaf": "/faculty/subject/classes",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/gates",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/gates/activity",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/gates/live",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/gates/wall",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/profile",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/reports",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/response",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/response/escalations",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/response/exceptions",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/response/incidents",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/shift",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/shift/handover",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/shift/history",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/shift/live",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/team",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/team/curfew",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/team/shifts",
-    "status": "ok",
-    "errors": [],
+    "status": "broken",
+    "errors": [
+      "login-failed"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
   {
     "role": "supervisor",
     "leaf": "/supervisor/team/workers",
-    "status": "ok",
-    "errors": [],
-    "apiFailures": [],
-    "consoleErrors": []
-  },
-  {
-    "role": "sysadmin",
-    "leaf": "/sysadmin",
     "status": "broken",
     "errors": [
       "login-failed"
@@ -2390,9 +2819,19 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
+    ],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "sysadmin",
+    "leaf": "/sysadmin",
+    "status": "ok",
+    "errors": [
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2400,9 +2839,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/access",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2410,9 +2849,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/access-keys",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2420,9 +2859,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/achievements",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2430,9 +2869,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alerts",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2440,9 +2879,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alerts/rules",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2450,9 +2889,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alumni",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2460,9 +2899,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alumni/auto",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2470,9 +2909,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alumni/deprovisioned",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2480,9 +2919,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/alumni/graduated",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2490,9 +2929,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/analytics",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2500,9 +2939,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/announcements",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2510,9 +2949,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/application-health",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2520,9 +2959,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/attendance",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2530,9 +2969,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/audit",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2540,9 +2979,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/backup",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2550,9 +2989,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/classes",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2560,9 +2999,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/communities",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2570,9 +3009,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/compliance",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2580,9 +3019,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/consent",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2590,9 +3029,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/cron",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2600,9 +3039,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/data",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2610,9 +3049,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/database-health",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2620,9 +3059,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/departments",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2630,9 +3069,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/deployments",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2640,9 +3079,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/devices",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2650,9 +3089,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/docker-services",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2660,9 +3099,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/events",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2670,9 +3109,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/exam-day",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2680,9 +3119,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/exit-reasons",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2690,9 +3129,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/faculty-assignments",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2700,9 +3139,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/feature-flags",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2710,9 +3149,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/gate-schedule",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2720,9 +3159,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/gates",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2730,9 +3169,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/health",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2740,9 +3179,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/hostel-tickets",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2750,9 +3189,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/infrastructure",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2760,9 +3199,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/integrations",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2770,9 +3209,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/jobs",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2780,9 +3219,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/maintenance",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2790,9 +3229,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/mess",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2800,9 +3239,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/mess/analytics",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2810,9 +3249,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/mess/days",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2820,9 +3259,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/mess/items",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2830,9 +3269,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/mess/today",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2840,9 +3279,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/navigation",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2850,9 +3289,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/actions",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2860,9 +3299,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/notifications",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2870,9 +3309,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/parents",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2880,9 +3319,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/people",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2890,9 +3329,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/profile",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2900,9 +3339,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/promotions",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2910,9 +3349,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/reasons",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2920,9 +3359,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/redis-worker",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2930,9 +3369,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/reports",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2940,9 +3379,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/retention-policies",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2950,9 +3389,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/roles",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2960,9 +3399,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/runbooks",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2970,9 +3409,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/safety",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2980,9 +3419,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/scheduled-jobs",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -2990,9 +3429,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/scheduling",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3000,9 +3439,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/security",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3010,9 +3449,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/sessions",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3020,9 +3459,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/sms/templates",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3030,9 +3469,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/staff",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3040,9 +3479,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/students",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3050,9 +3489,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/subjects",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3060,9 +3499,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/support",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3070,9 +3509,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/system",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3080,9 +3519,9 @@
   {
     "role": "sysadmin",
     "leaf": "/sysadmin/webhooks",
-    "status": "broken",
+    "status": "ok",
     "errors": [
-      "login-failed"
+      "mfa-verified"
     ],
     "apiFailures": [],
     "consoleErrors": []
@@ -3091,7 +3530,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3099,7 +3540,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3107,7 +3550,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/academics",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3115,7 +3560,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/academics/departments",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3123,7 +3570,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/academics/exceptions",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3131,7 +3580,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/analytics",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3139,7 +3590,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3147,7 +3600,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals/all",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3155,7 +3610,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals/escalated",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3163,7 +3620,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/approvals/pending",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3171,7 +3630,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/attendance-exceptions",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3179,7 +3640,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/decision-history",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3187,7 +3650,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/delegated-responsibilities",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3195,7 +3660,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/department-performance",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3203,7 +3670,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/escalated-requests",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3211,7 +3680,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/examination-coordination",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3219,7 +3690,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/examinations",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3227,7 +3700,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/history",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3235,7 +3710,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/history/30-days",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3243,7 +3720,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/history/7-days",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3251,7 +3730,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/history/90-days",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3259,7 +3740,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/hostel-security-summaries",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3267,7 +3750,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/pending-approvals",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },
@@ -3275,7 +3760,9 @@
     "role": "vice_principal",
     "leaf": "/vice-principal/profile",
     "status": "ok",
-    "errors": [],
+    "errors": [
+      "mfa-verified"
+    ],
     "apiFailures": [],
     "consoleErrors": []
   },

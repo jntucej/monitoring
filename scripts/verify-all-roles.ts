@@ -120,6 +120,17 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
         ?.replace("device_id=", "");
 
     let deviceCookie = parseDeviceCookie(res.headers() as Record<string, string | undefined>);
+    if (!deviceCookie) {
+      // Playwright's API context stores Set-Cookie headers in the context's
+      // own jar; when the server reused an existing device_id cookie the
+      // response has no Set-Cookie: device_id line — read it back from the
+      // jar instead of re-logging in.
+      const jar = await ctx.cookies(`${BASE}/login`);
+      const jarCookie = jar.find((c) => c.name === "device_id");
+      if (jarCookie) {
+        deviceCookie = jarCookie.value;
+      }
+    }
     if (deviceCookie) {
       await ctx.addCookies([
         {
@@ -135,38 +146,68 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     }
 
     // Establish the browser session: the zustand auth store persists to
-    // localStorage under "mycampus-auth" (token in sessionStorage "auth.token").
-    // The persisted state must carry the token so checkSession's Bearer
-    // fetch uses it; without it zustand rehydration leaves state.token
-    // undefined and the session probe degrades to the cookie path, which
-    // fails for the Bearer-token flow and bounces the user to /login.
+    // localStorage under "mycampus-auth"; the JWT lives in sessionStorage
+    // under "auth.token" (plus "auth.refresh" for the refresh token,
+    // which tokenStorage reads). Seeding the store is only safe AFTER the
+    // app's first boot has settled, because any boot overwrites the
+    // localStorage key with the in-memory (logged-out) shape.
+    //
+    // Sequence: boot the role root once (empty store — the guard may
+    // bounce the URL to /login, which is fine), let that boot finish,
+    // then re-seed the settled store, then reload. The reload's first
+    // paint hydrates from the seeded localStorage, so checkSession()
+    // runs its Bearer path and confirms the token.
     const roleRoot = roleRootParam ?? `/${role}`;
-    await page.goto(`${BASE}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.evaluate(([tok, u, r]) => {
-      sessionStorage.setItem("auth.token", tok as string);
-      localStorage.setItem(
-        "mycampus-auth",
-        JSON.stringify({
-          state: {
-            user: u,
-            role: r,
-            authenticated: true,
-            _hasHydrated: true,
-            token: tok,
-          },
-          version: 0,
-        }),
-      );
-    }, [body.data.token, body.data.user, role]);
-    // Navigate to the role root. The SPA's checkSession revalidates the
-    // token asynchronously after hydration; landing on /login can be a
-    // transient state (3-second rehydrate timer + in-flight Bearer fetch).
-    // Re-navigate up to 3 times before judging the session dead — the API
-    // already proved the token valid, so a stale client-side redirect
-    // should recover on the next full load with the same token.
+    const seedStore = async () => {
+      // Storage access throws a SecurityError when the page is mid-redirect
+      // or on a cross-origin URL; seed only when the document is the app's
+      // own origin (or fall back to the login route's document).
+      const origin = new URL(BASE).origin;
+      let seedable = false;
+      try {
+        seedable = page.url().startsWith(origin);
+      } catch {
+        seedable = false;
+      }
+      if (!seedable) {
+        // Navigate back to the app origin so storage is reachable, then seed.
+        await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      }
+      await page.evaluate(([tok, ref, u, r]) => {
+        sessionStorage.setItem("auth.token", tok as string);
+        if (ref) sessionStorage.setItem("auth.refresh", ref as string);
+        localStorage.setItem(
+          "mycampus-auth",
+          JSON.stringify({
+            state: {
+              user: u,
+              role: r,
+              authenticated: true,
+              _hasHydrated: true,
+              token: tok,
+            },
+            version: 0,
+          }),
+        );
+      }, [body.data.token, body.data.refreshToken ?? body.data.refresh_token ?? null, body.data.user, role]);
+    };
+    await seedStore();
+    // First boot so the app's zustand rehydrate + persist cycle completes
+    // against a live page (the store settles to its post-rehydrate shape).
+    await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    // Re-seed over whatever the first boot wrote (logged-out shape).
+    await seedStore();
     let landed = "";
     for (let attempt = 0; attempt < 3; attempt++) {
-      await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      if (attempt === 0) {
+        // Reload boots the app with the freshly seeded store.
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
+      } else {
+        await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+        await seedStore();
+      }
       await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
       await page.waitForTimeout(5000);
       landed = page.url();
