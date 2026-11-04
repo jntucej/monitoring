@@ -163,7 +163,7 @@ export async function proxy(req: NextRequest) {
       '/caretaker', '/deputy-warden', '/faculty', '/guardian', '/hod',
       '/hostel', '/hostel-manager', '/oie', '/permissions', '/emo',
       '/principal', '/staff', '/vice-principal', '/supervisor',
-      '/mess', '/exam', '/exam-branch', '/visitor', '/person',
+      '/mess', '/exam', '/exam-branch', '/gate', '/visitor', '/person',
       '/campus', '/onboarding', '/settings',
     ];
     if (PROTECTED_HTML_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
@@ -256,6 +256,7 @@ export const config = {
     '/mess', '/mess/:path*',
     '/exam', '/exam/:path*',
     '/exam-branch', '/exam-branch/:path*',
+    '/gate', '/gate/:path*',
     '/visitor', '/visitor/:path*',
     '/person', '/person/:path*',
     '/campus', '/campus/:path*',
