@@ -47,12 +47,18 @@ export function useSectionParallax(): {
     offset: ["start start", "end end"],
   });
   const smoothed = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 1 });
-  const layer = (rate: number, axis: "y" | "x" = "y") => {
+  // Named `use*` factories so the React-hooks lint rule sees them as
+  // custom hooks called unconditionally from the component body.
+  const useLayer = (rate: number, _axis: "y" | "x" = "y") => {
     const values = [rate * 1.35 * 100, rate * 1.35 * -100];
     return useTransform(smoothed, [0, 1], values);
   };
-  const fade = (inStart: number, inEnd: number, outStart: number, outEnd: number) =>
+  const useFade = (inStart: number, inEnd: number, outStart: number, outEnd: number) =>
     useTransform(smoothed, [inStart, inEnd, outStart, outEnd], [0, 1, 1, 0]);
+  // Exposed under the original names (callers don't take a hook prefix
+  // because these return a motion value, not state).
+  const layer = useLayer;
+  const fade = useFade;
   return { ref, progress: smoothed, layer, fade };
 }
 

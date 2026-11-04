@@ -14,7 +14,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, helper, error, icon, type, id, ...props }, ref) => {
     // WCAG 3.3.1: associate the error/helper text with the input via
     // aria-describedby so screen readers announce it when the field has focus.
-    const uid = id ?? React.useId();
+    // useId must be called unconditionally — fall back to a generated
+    // identifier when the caller supplies its own `id`.
+    const generatedId = React.useId();
+    const uid = id ?? generatedId;
     const errorId = error ? `${uid}-error` : undefined;
     const helperId = helper && !error ? `${uid}-helper` : undefined;
     const describedBy = [errorId, helperId].filter(Boolean).join(" ") || undefined;

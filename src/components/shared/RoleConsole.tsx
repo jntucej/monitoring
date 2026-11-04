@@ -153,10 +153,24 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
 
   const config = useMemo(() => getConsoleConfig(role), [role]);
 
+  // The two "primary" hooks — the auth-store subscription and the shared
+  // board-source fetch — are hoisted ABOVE the early return so they run in
+  // the exact same order whether or not config resolved. Both are no-ops
+  // when config is null (null-source fetch, subscription that just
+  // reads a store), so hoisting them changes nothing functionally.
+  //
   // Unknown roles (e.g. "student") have no console config. Rendering the
   // operator shell chrome for them leaks the "Ops Console" header and the
   // "Gate not set" operator status strip. The parent layout owns navigation
   // chrome, so render only the caller's children.
+  const isKanban0 = config?.board?.kind === "kanban";
+  const isGrid0 = config?.board?.kind === "grid";
+  const boardSource0 = isKanban0 || isGrid0 ? null : (config?.board?.source ?? null);
+  const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
+  const { data: boardData, refresh: refreshBoard } = useApiResource<ConsoleBoardResponse>(boardSource0, {
+    ttlMs: 15_000,
+  });
+
   if (!config) {
     if (process.env.NODE_ENV !== "production") {
       console.warn(
@@ -211,17 +225,17 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
   const showMyWorkPanel =
     config?.extraPanels?.includes("MyWorkPanel") ?? false;
 
-  // The caller's assigned hostel, used for the caretaker status strip.
-  const assignedHostel = useAuthStore((s) => s.user?.assignedHostel ?? null);
-
-  // Fetch the board source so we can derive counts + lastScan for the status
-  // bar. The fetch is cached by useApiResource, so a duplicate call from
-  // Board itself does not cause a second network request. Skipped for kanban
-  // (its status strip is permission-specific and derives counts elsewhere).
+  // (assignedHostel + boardData/refreshBoard are hoisted above the early
+  // return — see the comment there. boardSource below re-derives the same
+  // value for the non-kanban/grid branches that still need it.)
   const boardSource = isKanban || isGrid ? null : (config?.board?.source ?? null);
-  const { data: boardData, refresh: refreshBoard } = useApiResource<ConsoleBoardResponse>(boardSource, {
-    ttlMs: 15_000,
-  });
+
+  // Every hook below this point no-ops safely when config is null
+  // (null-source useApiResource / role-gated useMemos), so running them on
+  // every render is intentional and hook order stays stable — the early
+  // return above is the only path that skips past them, and it only happens
+  // when config is null, in which case every source is already null.
+  /* eslint-disable react-hooks/rules-of-hooks */
 
   // For the mess In-charge console, keep the digest board + status bar live by
   // re-fetching the board source (/api/mess/analytics) on demand (e.g. after

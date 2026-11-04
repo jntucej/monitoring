@@ -21,7 +21,7 @@ function currentMonth(): string {
 // deferred: attendance_records has no subject_code (decision: ship
 // overall only).
 export default function AttendancePage() {
-  const month = useMemo(currentMonth, []);
+  const month = useMemo(() => currentMonth(), []);
   const { data, loading } = useApiResource<CalendarPayload>(
     `/api/student/attendance-calendar?month=${month}`,
     { ttlMs: 60_000 },
