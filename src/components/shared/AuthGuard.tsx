@@ -23,7 +23,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const authenticated = useAuthStore((s) => s.authenticated);
   const checkSession = useAuthStore((s) => s.checkSession);
   const [isChecking, setIsChecking] = useState(true);
-  const [timedOut, setTimedOut] = useState(false);
+  const [timedOut] = useState(false);
   const redirectCountRef = useRef(0);
   const handledRef = useRef(false);
 
