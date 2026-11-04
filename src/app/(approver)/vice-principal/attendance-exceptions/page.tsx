@@ -45,7 +45,7 @@ function VpAttendanceExceptionsInner() {
     error,
     refresh,
   } = useApiResource<AttendanceExceptionsResponse>(
-    "/api/staff/attendance-exceptions",
+    "/api/staff/my-day-exceptions",
     { ttlMs: 30_000 }
   );
 

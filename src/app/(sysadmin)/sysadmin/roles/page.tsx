@@ -62,7 +62,7 @@ interface PickedUser {
 const ROLE_ACCESS_MATRIX: { label: string; path: string; roles: string[] }[] = [
   { label: "Sysadmin Console", path: "/sysadmin", roles: ["sysadmin"] },
   { label: "Admin Dashboard", path: "/admin", roles: ["admin", "sysadmin"] },
-  { label: "Principal / Approvals", path: "/principal/permissions", roles: ["principal", "vice_principal", "admin", "sysadmin"] },
+  { label: "Principal / Approvals", path: "/principal/approvals", roles: ["principal", "vice_principal", "admin", "sysadmin"] },
   { label: "HOD Workspace", path: "/hod", roles: ["hod", "principal", "vice_principal", "admin", "sysadmin"] },
   { label: "Principal / Gate Ops", path: "/principal", roles: ["principal", "supervisor", "admin", "sysadmin"] },
   { label: "Supervisor Dashboard", path: "/supervisor", roles: ["supervisor", "principal", "admin", "sysadmin"] },

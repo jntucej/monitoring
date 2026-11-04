@@ -20,7 +20,7 @@ import type { User } from "@/lib/types";
  *
  * One page covering the staff / faculty / worker roles. KPI + role facets
  * come from the live `/api/staff/stats` (which reports byGroup/byDepartment
- * for the staff-scoped roles). The table rows come from `/api/staff/attendance`
+ * for the staff-scoped roles). The table rows come from `/api/staff/my-day`
  * (the staff tracking feed) when present, with a graceful fallback.
  */
 
@@ -82,7 +82,7 @@ async function fetchStats(): Promise<StaffStats | null> {
 async function fetchRows(): Promise<StaffRow[]> {
   // Staff attendance feed provides the richest per-person records.
   try {
-    const res = await fetch("/api/staff/attendance", { headers: getAuthHeaders() });
+    const res = await fetch("/api/staff/my-day", { headers: getAuthHeaders() });
     if (res.ok) {
       const body = await res.json();
       const records = (body?.records ?? body?.data ?? []) as Array<Record<string, unknown>>;

@@ -47,17 +47,17 @@ const APPROVER_ROLES = new Set([
 /** Canonical home + approvals inbox per approver role. */
 const APPROVER_HOMES: Record<string, { home: string; inbox: string; escalated?: string }> = {
   principal: { home: "/principal", inbox: "/principal/approvals", escalated: "/principal/approvals?status=ESCALATED" },
-  admin: { home: "/admin", inbox: "/admin/permissions", escalated: "/admin/permissions?status=ESCALATED" },
+  admin: { home: "/admin", inbox: "/admin/permission-policies", escalated: "/admin/permission-policies" },
   sysadmin: { home: "/sysadmin", inbox: "/sysadmin", escalated: "/sysadmin?tab=approvals" },
   faculty: { home: "/faculty", inbox: "/faculty/permissions", escalated: "/faculty/permissions?status=ESCALATED" },
   hod: { home: "/hod", inbox: "/hod/approvals/pending", escalated: "/hod/approvals/escalated" },
   vice_principal: { home: "/vice-principal", inbox: "/vice-principal/approvals", escalated: "/vice-principal/approvals?status=ESCALATED" },
-  oie: { home: "/oie", inbox: "/oie/permissions", escalated: "/oie/permissions?status=ESCALATED" },
+  oie: { home: "/oie", inbox: "/oie/queue/pending", escalated: "/oie/queue/escalated" },
   exam_branch: { home: "/exam-branch", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },
   exam_superintendent: { home: "/exam/superintendent", inbox: "/exam/permissions", escalated: "/exam/permissions?status=ESCALATED" },
   caretaker: { home: "/hostel/permissions", inbox: "/hostel/permissions", escalated: "/hostel/permissions?status=ESCALATED" },
-  deputy_warden: { home: "/deputy-warden", inbox: "/deputy-warden/permissions", escalated: "/deputy-warden/permissions?status=ESCALATED" },
-  hostel_manager: { home: "/hostel-manager", inbox: "/hostel-manager/permissions", escalated: "/hostel-manager/permissions?status=ESCALATED" },
+  deputy_warden: { home: "/deputy-warden", inbox: "/deputy-warden/delegated-approvals", escalated: "/deputy-warden/delegated-approvals?status=ESCALATED" },
+  hostel_manager: { home: "/hostel-manager", inbox: "/hostel-manager/complaints", escalated: "/hostel-manager/complaints?status=ESCALATED" },
 };
 
 function actionsForRole(role: string | null, userGateId?: string | null): QuickAction[] {
@@ -69,7 +69,7 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
     return [
       { label: "Open Approval Inbox", icon: Inbox, href: target.inbox },
       { label: "View Escalated", icon: ArrowUpRight, href: target.escalated ?? target.inbox },
-      { label: "New Request", icon: FilePlus2, href: role === "admin" ? "/admin/permissions/new" : target.inbox },
+      { label: "New Request", icon: FilePlus2, href: role === "admin" ? "/admin/permission-policies" : target.inbox },
       { label: "All Pending", icon: Ticket, href: target.inbox },
       { label: "Dashboard", icon: LayoutDashboard, href: target.home },
     ];

@@ -56,6 +56,17 @@ for (const cfg of ROLES) {
 
   for (const target of targets) {
     test(`[${cfg.role}] no horizontal overflow at 375px on ${target}`, async ({ browser }: any) => {
+      // MFA-gated roles (mfa_required=TRUE in the DB) cannot complete the
+      // passkey ceremony headlessly — they land on the passkey interstitial
+      // after the password submit and never leave /login. Skip them with a
+      // clear signal rather than waiting out the 20s login timeout. This is
+      // not a UI defect; the gate firing is the production-correct behavior.
+      const mfaGated = ["principal", "vice_principal", "hostel_manager"];
+      if (mfaGated.includes(cfg.role)) {
+        console.log(`[SKIP ${cfg.role}] mfa-gated — cannot complete passkey headlessly`);
+        test.skip();
+        return;
+      }
       const page = await loginAs(browser, cfg.login, cfg.pass);
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto(BASE + target, { waitUntil: "domcontentloaded" });

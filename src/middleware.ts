@@ -180,7 +180,14 @@ export async function proxy(req: NextRequest) {
   }
 
   if (!pathname.startsWith('/api')) {
-    const res = NextResponse.next();
+    // The layout reads x-nonce to stamp the per-request CSP nonce on its
+    // inline theme-flash <script>; 'strict-dynamic' then unlocks every
+    // dynamically-imported chunk. Without the header the layout renders
+    // nonce="" and strict-dynamic blocks every chunk load.
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-request-id', requestId);
+    requestHeaders.set('x-nonce', nonce);
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
     res.headers.set('Content-Security-Policy', csp);
     return res;

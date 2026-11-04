@@ -10,7 +10,7 @@
  *   reject <ticket> [reason]  PATCH /api/permissions/<ticket> { action: REJECT, comment }
  *   day-access open|close  POST /api/exam/access { open: boolean }
  *   incident <hall> <severity>  POST /api/exam/access-exceptions
- *   candidates             navigate to /exam/superintendent/access
+ *   candidates             navigate to /exam/superintendent/schedule
  *
  * Keyboard: up/down to navigate, Enter to execute, Escape to close.
  */
@@ -165,7 +165,7 @@ export function ExamSuperintendentCommandBar({ role, open, onClose }: ExamSuperi
     async (parsed: ParsedCommand) => {
       // ── candidates: navigate to the candidate access list ──
       if (parsed.action === "CANDIDATES") {
-        window.location.href = "/exam/superintendent/access";
+        window.location.href = "/exam/superintendent/schedule";
         onClose();
         return;
       }

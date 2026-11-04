@@ -55,16 +55,16 @@ const getPriorityItems = (role: Role, items: NavItem[]): NavItem[] => {
   const priorityMap: Record<string, string[]> = {
     admin: ['/admin', '/admin/students', '/admin/alerts', '/admin/reports'],
     sysadmin: ['/sysadmin', '/sysadmin/analytics', '/sysadmin/security', '/sysadmin/audit'],
-    operator: ['/gate', '/gate/history', '/admin/alerts', '/gate/manual'],
+    operator: ['/gate', '/admin/alerts', '/worker/shifts'],
     supervisor: ['/supervisor', '/supervisor?tab=approvals', '/supervisor?tab=alerts', '/supervisor?tab=curfew'],
     principal: ['/principal', '/principal/approvals'],
     student: ['/student', '/student/history', '/student/passes', '/student/profile'],
     parent: ['/guardian', '/guardian/child-requests', '/guardian/child-attendance', '/guardian/child-status'],
     guardian: ['/guardian', '/guardian/child-requests', '/guardian/child-attendance', '/guardian/child-status'],
-    faculty: ['/faculty', '/faculty/classes', '/admin/alerts', '/faculty/profile'],
-    staff: ['/staff', '/staff/attendance', '/admin/alerts', '/staff/profile'],
-    worker: ['/worker', '/worker/schedule', '/admin/alerts', '/worker/profile'],
-    visitor: ['/visitor', '/visitor/passes', '/visitor/status', '/visitor/profile'],
+    faculty: ['/faculty', '/faculty/my-classes', '/admin/alerts', '/faculty/permissions'],
+    staff: ['/staff', '/staff/my-day', '/admin/alerts', '/staff/my-profile'],
+    worker: ['/worker', '/worker/shifts', '/admin/alerts', '/worker/history'],
+    visitor: ['/visitor', '/visitor/approval-status', '/visitor/history', '/visitor/request'],
     mess_incharge: ['/mess', '/mess/scan'],
   };
   const priority = priorityMap[role] || [];

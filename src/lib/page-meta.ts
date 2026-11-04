@@ -56,7 +56,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/faculty": { title: "Faculty Dashboard", description: "Faculty attendance and approvals" },
   "/hod": { title: "HOD Dashboard", description: "Department head approvals and reports" },
   "/principal": { title: "Principal Command Center", description: "Campus command center: occupancy, alerts and pending passes" },
-  "/principal/attendance": { title: "Institutional Attendance", description: "Staff attendance summary and breakdown" },
+  "/principal/people/attendance": { title: "Institutional Attendance", description: "Staff attendance summary and breakdown" },
   "/principal/operations/gates": { title: "Gate Activity Overview", description: "Live gate presence and gate-level activity" },
   "/principal/people/departments": { title: "Department Performance", description: "Per-department student population and performance" },
   "/principal/operations/incidents": { title: "Incident Oversight", description: "Open campus incidents sorted by severity" },

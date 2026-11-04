@@ -1,15 +1,2 @@
-import { Skeleton } from "@/components/ui/skeleton";
-
-export interface ListSkeletonProps {
-  rows?: number;
-}
-
-export function ListSkeleton({ rows = 5 }: ListSkeletonProps) {
-  return (
-    <div className="space-y-3" role="status" aria-label="Loading...">
-      {Array.from({ length: rows }).map((_, i) => (
-        <Skeleton key={i} className="h-16 w-full rounded-xl" />
-      ))}
-    </div>
-  );
-}
+// Re-export: single shared source of truth (UI-audit fix 8)
+export { ListSkeleton } from "@/components/shared/ListSkeleton";
