@@ -35,12 +35,17 @@ export const SNIFFED_CONTENT_TYPES: Record<SniffedExt, string> = {
 
 const HEIC_BRANDS = ["heic", "heix", "hevc", "mif1", "mif2", "msf1", "msf2"];
 
+function unsupportedFile(errMsg: string): never {
+  // BadRequestError constructor signature: (message, code?, details?)
+  // — pass the code and status through the AppError base properly.
+  const e = new BadRequestError(errMsg, "UNSUPPORTED_FILE_TYPE");
+  e.status = 415;
+  return e;
+}
+
 export function sniffExtension(buf: Buffer): SniffedExt {
   if (buf.length < 12) {
-    throw Object.assign(new BadRequestError("file too small"), {
-      code: "UNSUPPORTED_FILE_TYPE",
-      status: 415,
-    });
+    throw unsupportedFile("file too small");
   }
 
   // %PDF
@@ -87,8 +92,5 @@ export function sniffExtension(buf: Buffer): SniffedExt {
     if (brand === "webm" || brand === "matr") return "webm";
   }
 
-  throw Object.assign(
-    new BadRequestError("unsupported file type"),
-    { code: "UNSUPPORTED_FILE_TYPE", status: 415 },
-  );
+  throw unsupportedFile("unsupported file type");
 }

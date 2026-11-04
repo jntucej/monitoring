@@ -252,7 +252,7 @@ async function handleRefresh(req: NextRequest) {
       // Distinguish "we already did the security-critical family revoke"
       // from "the rotation itself failed" so the client gets the right
       // 401 semantics in both cases.
-      const msg = String(err?.message ?? "");
+      const msg = String(err instanceof Error ? err.message : null);
       if (msg.includes("REFRESH_REUSE_DETECTED") || msg.includes("family")) {
         return NextResponse.json(
           {
