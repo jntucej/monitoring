@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 "use client";
+import { useRouter } from "next/navigation";
 
 /**
  * OieCommandBar — Cmd/Ctrl+K command palette for the OIE exam-desk console.

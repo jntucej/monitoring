@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { query } from "@/lib/postgres";
 
 export type DeviceStage = "hostel" | "gate";

@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 "use client";
+import { useRouter } from "next/navigation";
 
 /**
  * MessInchargeCommandBar — Cmd/Ctrl+K command palette for the mess In-charge

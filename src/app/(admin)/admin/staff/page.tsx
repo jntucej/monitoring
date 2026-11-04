@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 "use client";
+import { useRouter } from "next/navigation";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
@@ -145,6 +145,7 @@ function initials(name: string) {
 }
 
 function AdminStaffInner() {
+  const router = useRouter();
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -367,7 +368,7 @@ function AdminStaffInner() {
                   {filtered.map((r) => (
                     <tr
                       key={r.id}
-                      onClick={() => window.location.href = `/admin/staff/${r.id}`}
+                      onClick={() => router.push(`/admin/staff/${r.id}`)}
                       className="border-t border-[var(--border)] hover:bg-[var(--bg-surface)]/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">

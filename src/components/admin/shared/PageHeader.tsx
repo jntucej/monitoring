@@ -34,7 +34,6 @@ export function PageHeader({ title }: PageHeaderProps): null {
   return null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _refreshIcon = RefreshCw;
 
 export default PageHeader;

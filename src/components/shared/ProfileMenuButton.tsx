@@ -124,6 +124,7 @@ export function ProfileMenuButton({
         router.push("/login");
       }
     } catch {
+/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */ // last-resort hard nav if the SPA router itself failed
       if (typeof window !== "undefined") window.location.href = "/login";
     }
   };

@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 "use client";
+import { useRouter } from "next/navigation";
 
 /**
  * ExamSuperintendentCommandBar — Cmd/Ctrl+K command palette for the exam

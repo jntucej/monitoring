@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
 "use client";
+import { useRouter } from "next/navigation";
 
 // src/components/operator/profile/OperatorProfile.tsx
 // Operator-specific copy of @/components/shared/UserProfileTab
