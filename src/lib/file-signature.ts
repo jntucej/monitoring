@@ -37,10 +37,9 @@ const HEIC_BRANDS = ["heic", "heix", "hevc", "mif1", "mif2", "msf1", "msf2"];
 
 function unsupportedFile(errMsg: string): never {
   // BadRequestError constructor signature: (message, code?, details?)
-  // — pass the code and status through the AppError base properly.
   const e = new BadRequestError(errMsg, "UNSUPPORTED_FILE_TYPE");
   e.status = 415;
-  return e;
+  throw e;
 }
 
 export function sniffExtension(buf: Buffer): SniffedExt {
