@@ -86,30 +86,14 @@ const nextConfig = {
             key: "Cross-Origin-Resource-Policy",
             value: "same-origin",
           },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "base-uri 'self'",
-              "object-src 'none'",
-              "frame-ancestors 'none'",
-              // L2: 'strict-dynamic' lets nonce-scoped script tags (stamped by
-              // the edge middleware via the x-nonce header) pull in
-              // dynamically-imported chunks without 'unsafe-inline'.
-              // 'unsafe-inline' is NOT in script-src. style-src keeps it —
-              // Next.js injects inline styles and CSS injection is not an
-              // XSS vector.
-              "script-src 'self' 'strict-dynamic' https:",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https:",
-              "font-src 'self' data:",
-              "connect-src 'self' https: wss:",
-              "worker-src 'self' blob:",
-              "manifest-src 'self'",
-              "form-action 'self'",
-              "upgrade-insecure-requests",
-            ].join("; "),
-          },
+          // L2: CSP is set per-request by the edge middleware (src/middleware.ts),
+          // which stamps a per-request nonce so 'strict-dynamic' can unlock
+          // dynamically-imported chunks without 'unsafe-inline'. A static CSP
+          // header here would arrive alongside the middleware's nonce-bearing
+          // header; the browser enforces the UNION of both, and the nonce-less
+          // static policy's 'strict-dynamic' without a matching nonce blocks
+          // every chunk load. The middleware is the single CSP source of
+          // truth — do not add a second static CSP header here.
         ],
       },
       {
