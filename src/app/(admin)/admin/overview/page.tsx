@@ -22,6 +22,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { QuickActions } from "@/components/admin/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { LiveEventsPanel } from "@/components/shared/LiveEventsPanel";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
@@ -249,6 +250,9 @@ function AdminOverviewInner() {
       </WidgetBoundary>
       <WidgetBoundary name="NotificationCenter" title="Notification Center">
         <NotificationCenter />
+      </WidgetBoundary>
+      <WidgetBoundary name="LiveEvents" title="Live Events">
+        <LiveEventsPanel />
       </WidgetBoundary>
 
       {/* Info Strip */}
