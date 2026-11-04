@@ -26,7 +26,7 @@ function AdminParentsInner() {
   const [rows, setRows] = useState<ParentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  const [searching, setSearching] = useState(false);
+  const setSearching = Statefalse);
 
   const load = useCallback(async () => {
     setLoading(true);

@@ -82,7 +82,7 @@ function ScanPageInner() {
   const [showScanner, setShowScanner] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualCode, setManualCode] = useState("");
-  const [manualChecking, setManualChecking] = useState(false);
+  const manualChecking = Statefalse);
   const [state, setState] = useState<ScanState>({ kind: "idle" });
 
   const lookup = useCallback(async (code: string) => {

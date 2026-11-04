@@ -19,7 +19,7 @@ interface ManualEntrySheetProps {
 export function ManualEntrySheet({ isOpen, onClose, onScan, gateId, workflowType = "hostel" }: ManualEntrySheetProps) {
   const [rollInput, setRollInput] = useState("");
   const [reasonCode, setReasonCode] = useState("");
-  const [reasonLabel, setReasonLabel] = useState("");
+  const setReasonLabel = State"");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(() => {

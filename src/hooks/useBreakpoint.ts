@@ -59,8 +59,8 @@ export const useIsMobile = () => {
  * and don't react to resize events.
  */
 export function useResponsive() {
-  const [isMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
-  const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
+  const isMobile useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches);
+  const isTouch useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
 
   // Track responsive state without triggering re-renders on every resize
   // (only for one-off checks during initialization)

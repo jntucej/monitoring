@@ -60,7 +60,7 @@ const api = useApi();
   const { addToast } = useUIStore();
 
   const [gates, setGates] = useState<Gate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const setLoading = Statetrue);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Gate | null>(null);
   const [assigningGate, setAssigningGate] = useState<Gate | null>(null);

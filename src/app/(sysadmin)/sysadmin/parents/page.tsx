@@ -106,7 +106,7 @@ export default function SysAdminParentsPage() {
 
   const [parents, setParents] = useState<ParentRow[]>([]);
   const [unlinkedStudents, setUnlinkedStudents] = useState<StudentOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const setLoading = Statetrue);
   const [query, setQuery] = useState("");
 
   const [showCreate, setShowCreate] = useState(false);

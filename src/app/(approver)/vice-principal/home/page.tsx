@@ -70,7 +70,7 @@ function KpiTile({ label, value, tone = "ok" }: { label: string; value: string |
 export default function VPTodayPage() {
   const [focusOpen, setFocusOpen] = useState(false);
 
-  const { data, loading, refresh } = useApiResource<VPOverview>("/api/vp/dashboard", {
+  const {data, _loading, refresh} = useApiResource<VPOverview>("/api/vp/dashboard", {
     ttlMs: 15_000,
   });
   usePolling(refresh, { intervalMs: 15_000 });
