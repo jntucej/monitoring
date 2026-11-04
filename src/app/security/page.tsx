@@ -54,8 +54,8 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
 
 export default function SecurityPage() {
   const router = useRouter();
-  const { role, user, token } = useAuthStore();
-  const { securityMode, wsConnected, activeAlerts, gateTraffic } = useGlass();
+  const {role, user} = useAuthStore();
+  const {securityMode, wsConnected, gateTraffic} = useGlass();
   const [rechecking, setRechecking] = useState(false);
 
   const mode = securityMode in POSTURE ? securityMode : "secure";

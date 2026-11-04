@@ -4,7 +4,7 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 
 async function handlePost(req: NextRequest) {
   try {
-    const { id, config } = await req.json();
+    const {id} = await req.json();
     const responseTime = randomInt(20, 100);
 
     return NextResponse.json({
