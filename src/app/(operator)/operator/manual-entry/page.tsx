@@ -529,7 +529,7 @@ function ManualEntryInner() {
                   </button>
                 </div>
                 <p className="mt-1.5 text-xs text-[var(--text-muted)]">
-                  Defaults to the student's stored entry type; change only if
+                  Defaults to the student&#39;s stored entry type; change only if
                   they are explicitly arriving as the other type today.
                 </p>
               </div>

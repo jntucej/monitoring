@@ -128,7 +128,7 @@ export default function StudentPassesPage() {
           <AlertCircle className="w-12 h-12 text-[var(--text-muted)] mx-auto" />
           <h3 className="text-base font-bold text-[var(--text-primary)]">No passes found</h3>
           <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
-            You haven&apos;t requested any gate passes yet. Tap "Apply Gate Pass" to create one.
+            You haven&apos;t requested any gate passes yet. Tap &quot;Apply Gate Pass&quot; to create one.
           </p>
         </div>
       ) : (

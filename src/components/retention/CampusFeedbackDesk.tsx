@@ -148,7 +148,7 @@ export function CampusFeedbackDesk() {
 
         {submitSuccess && (
           <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-300">
-            Report submitted. You'll see status updates here.
+            Report submitted. You&#39;ll see status updates here.
           </div>
         )}
 

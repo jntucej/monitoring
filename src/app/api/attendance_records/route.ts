@@ -35,7 +35,9 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (!records) return fail("INVALID_BODY", "records[] required", 400);
   // RLS write discipline: movement_logs is an RLS table — all writes must
   // go through withTransaction (GUC context) so role-based policies apply.
-  let created = 0, skipped = 0, failed = 0;
+  let created = 0;
+  const skipped = 0;
+  let failed = 0;
   for (const r of records) {
     await withTransaction(
       async (client) => {

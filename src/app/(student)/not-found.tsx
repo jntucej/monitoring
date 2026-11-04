@@ -10,7 +10,7 @@ export default function StudentNotFound() {
         </div>
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Not found</h2>
         <p className="text-sm text-[var(--text-secondary)]">
-          This page doesn't exist in the student workspace.
+          This page doesn&#39;t exist in the student workspace.
         </p>
         <Link
           href="/student"

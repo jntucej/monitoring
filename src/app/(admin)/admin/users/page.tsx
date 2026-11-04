@@ -215,7 +215,7 @@ export default function AdminUsersPage() {
               <p className="mt-1 text-xs text-[var(--text-muted)]">
                 Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
                 escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-emerald-400 hover:underline">view the role hierarchy</Link>{" "}
-                for the assignment map. If an account's role looks out of date, contact the platform team.
+                for the assignment map. If an account&#39;s role looks out of date, contact the platform team.
               </p>
             </div>
           </div>

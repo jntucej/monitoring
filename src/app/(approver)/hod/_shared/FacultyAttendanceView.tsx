@@ -47,7 +47,7 @@ export function FacultyAttendanceView() {
       <header>
         <h1 className="text-lg font-semibold text-[var(--text-primary)]">Faculty Attendance</h1>
         <p className="text-xs text-[var(--text-muted)]">
-          Today's check-in status, punctuality, and exceptions
+          Today&#39;s check-in status, punctuality, and exceptions
         </p>
       </header>
 

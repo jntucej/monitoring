@@ -141,7 +141,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
           )
         ) : (
           <div className="text-center py-6 text-[var(--text-muted)] text-xs">
-            No gate scans registered for filter "{filter}".
+            No gate scans registered for filter &quot;{filter}&quot;.
           </div>
         )}
       </div>

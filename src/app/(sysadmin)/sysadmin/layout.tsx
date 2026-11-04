@@ -48,7 +48,7 @@ export default function SysadminConsoleLayout({
   // envelope is ok(payload) but we tolerate a bare payload too.
   useEffect(() => {
     let alive = true;
-    let timer: ReturnType<typeof setInterval> | undefined;
+
 
     const fetchOnce = () => {
       fetch(OVERVIEW_URL, { credentials: "include" })
@@ -63,7 +63,7 @@ export default function SysadminConsoleLayout({
     };
 
     fetchOnce();
-    timer = setInterval(fetchOnce, OVERVIEW_POLL_MS);
+    const timer = setInterval(fetchOnce, OVERVIEW_POLL_MS);
     return () => {
       alive = false;
       if (timer) clearInterval(timer);

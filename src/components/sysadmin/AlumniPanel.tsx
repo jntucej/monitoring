@@ -378,7 +378,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                         </div>
                         <p className="text-[var(--text-secondary)] text-sm mb-4">
                           These students will be removed from all active rosters, gate logs, and mess eligibility.
-                          Their historical data is preserved. This action can be reversed via the "Re-activate" button.
+                          Their historical data is preserved. This action can be reversed via the &quot;Re-activate&quot; button.
                         </p>
                         <div className="flex gap-3">
                           <button onClick={() => setConfirmBulk(false)} className="flex-1 px-4 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-sm transition">Cancel</button>

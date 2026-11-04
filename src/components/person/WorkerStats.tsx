@@ -105,7 +105,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
           <Clock className="w-3.5 h-3.5 text-purple-400" />
-          Today's Gate Entry
+          Today&#39;s Gate Entry
         </div>
         <div className="text-xl font-bold text-[var(--text-primary)] font-mono">{data.todayEntry ?? "—"}</div>
         <p className="text-[10px] text-[var(--text-muted)] font-mono">

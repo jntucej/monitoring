@@ -61,7 +61,7 @@ export function DevMessagesPanel() {
         <p className="text-xs text-[var(--text-muted)]">Loading…</p>
       ) : messages.length === 0 ? (
         <p className="text-xs text-[var(--text-muted)]">
-          No direct messages yet. Users can send one from any dashboard's
+          No direct messages yet. Users can send one from any dashboard&#39;s
           “Developer” card or the Support page.
         </p>
       ) : (

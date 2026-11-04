@@ -116,7 +116,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
 
         {transcript && (
           <div className="text-xs space-y-1">
-            <span className="font-mono text-purple-300">"{transcript}"</span>
+            <span className="font-mono text-purple-300">&ldquo;{transcript}&rdquo;</span>
             {parsedCommand && (
               <Badge variant="success" className="ml-2 text-[10px]">
                 {parsedCommand.action} {parsedCommand.roll_number ? `[${parsedCommand.roll_number}]` : ""}

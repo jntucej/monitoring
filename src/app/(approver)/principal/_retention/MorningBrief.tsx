@@ -63,7 +63,7 @@ export function MorningBrief({
       {target > 0 && (
         <div className="mt-3">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[var(--text-muted)]">Today's progress</span>
+            <span className="text-[var(--text-muted)]">Today&#39;s progress</span>
             <span className="font-medium text-[var(--text-primary)] tabular-nums">
               {cleared} / {target}
             </span>

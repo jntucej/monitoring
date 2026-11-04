@@ -775,7 +775,7 @@ export function Scanner({
               distinct from the page's IN/OUT decision bar. */}
           <div className="p-4 pt-3 bg-[var(--bg-surface)] border-t-2 border-[var(--border)]">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              Can't see the code?
+              Can&#39;t see the code?
             </p>
             <input
               type="file"

@@ -216,7 +216,7 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
             className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--border)] py-12 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
           >
             <Camera className="h-8 w-8" />
-            Tap to open the camera and scan the student's QR token
+            Tap to open the camera and scan the student&#39;s QR token
           </button>
         )}
 

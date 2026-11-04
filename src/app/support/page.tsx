@@ -133,7 +133,7 @@ export default function UserSupportPage() {
           <Send className="w-4 h-4 text-emerald-500" /> Developer
         </h3>
         <p className="text-xs text-[var(--text-muted)] dark:text-[var(--text-muted)] mb-3">
-          Suggestion, improvement, or anything that doesn't fit a ticket? Write it here.
+          Suggestion, improvement, or anything that doesn&#39;t fit a ticket? Write it here.
           It goes straight to the developer with your name and role attached.
         </p>
         <form onSubmit={sendDevMessage} className="space-y-3">

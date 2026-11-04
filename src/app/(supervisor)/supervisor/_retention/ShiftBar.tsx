@@ -26,7 +26,7 @@ export function ShiftBar({
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
         <p className="text-sm font-medium text-[var(--text-primary)]">No active shift</p>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Your shift hasn't started yet.
+          Your shift hasn&#39;t started yet.
         </p>
       </section>
     );

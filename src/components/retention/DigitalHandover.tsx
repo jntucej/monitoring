@@ -325,7 +325,7 @@ export function DigitalHandover() {
                     <div className="mt-3 space-y-1.5">
                       {ho.notes && (
                         <p className="text-[11px] text-[var(--text-muted)] italic">
-                          "{ho.notes}"
+                          &ldquo;{ho.notes}&rdquo;
                         </p>
                       )}
                       {ho.items.map((item, i) => (

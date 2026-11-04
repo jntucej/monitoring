@@ -10,7 +10,7 @@ export default function SupervisorNotFound() {
         </div>
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Not found</h2>
         <p className="text-sm text-[var(--text-secondary)]">
-          This page doesn't exist in the supervisor workspace.
+          This page doesn&#39;t exist in the supervisor workspace.
         </p>
         <Link
           href="/"

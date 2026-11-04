@@ -49,7 +49,7 @@ export default function AdminConsoleLayout({
   // envelope is ok(payload) but we tolerate a bare payload too.
   useEffect(() => {
     let alive = true;
-    let timer: ReturnType<typeof setInterval> | undefined;
+
 
     const fetchOnce = () => {
       fetch(OVERVIEW_URL, {
@@ -68,7 +68,7 @@ export default function AdminConsoleLayout({
     };
 
     fetchOnce();
-    timer = setInterval(fetchOnce, OVERVIEW_POLL_MS);
+    const timer = setInterval(fetchOnce, OVERVIEW_POLL_MS);
     return () => {
       alive = false;
       if (timer) clearInterval(timer);

@@ -472,7 +472,7 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
             {parsedPreview.action === "HANDOVER" ? (
               parsedPreview.handoverText ? (
                 <span className="ml-1.5 text-[var(--text-muted)] italic truncate">
-                  "{parsedPreview.handoverText}"
+                  &ldquo;{parsedPreview.handoverText}&rdquo;
                 </span>
               ) : (
                 <span className="ml-1.5 text-[var(--text-muted)] italic">[shift note]</span>
