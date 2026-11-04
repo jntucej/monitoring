@@ -38,7 +38,7 @@ export function HostelDashboard() {
   const api = useApi();
   const [data, setData] = useState<HostelDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const refreshKey = State0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);

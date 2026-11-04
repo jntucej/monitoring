@@ -109,7 +109,7 @@ export function SchedulingPanel() {
   const addSuccess = useUIStore((s) => s.success);
 
   const [categoryFilter, setCategoryFilter] = useState<CategoryKey | "all">("all");
-  const minImpact = State0);
+  const [minImpact, setMinImpact] = useState(0);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [pendingApply, setPendingApply] = useState<SchedulingItem | null>(null);
   const [applying, setApplying] = useState<string | null>(null);

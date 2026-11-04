@@ -91,7 +91,7 @@ function ManualEntryInner() {
 
   // O12: voice-assisted manual entry — prefill the lookup form on
   // high-confidence voice recognition so the operator confirms the roll.
-  const setVoiceOpen = Statefalse);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const handleVoiceCommand = useCallback((cmd: VoiceCommand) => {
     if (cmd.roll_number) {
       setIdNumber(cmd.roll_number);

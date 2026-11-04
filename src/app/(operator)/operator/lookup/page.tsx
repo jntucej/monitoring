@@ -87,7 +87,7 @@ function OperatorLookupInner() {
 
   // O12: voice-assisted lookup — prefill the id field on high-confidence
   // recognition so the operator confirms before searching.
-  const setVoiceOpen = Statefalse);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const handleVoiceCommand = useCallback((cmd: VoiceCommand) => {
     if (cmd.roll_number) {
       setIdNumber(cmd.roll_number);

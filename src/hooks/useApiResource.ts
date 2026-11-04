@@ -107,7 +107,7 @@ export function useApiResource<T>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {_deps, enabled, ttlMs} = options;
+  const { deps, enabled, ttlMs } = options;
   const hasLoadedRef = useRef(false);
 
   const refresh = useCallback(async () => {

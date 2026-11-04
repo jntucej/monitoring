@@ -23,8 +23,8 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const { authenticated } = useAuthStore();
 
   // Auth shell + global loading overlay (first paint + route transition)
-
-  const {_theme, setTheme, isSidebarCollapsed} = useUIStore();
+  const showApp = _hasHydrated;
+  const { theme, setTheme, isSidebarCollapsed } = useUIStore();
   const { performanceTier } = useGlass();
   const pathname = usePathname();
 

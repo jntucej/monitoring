@@ -14,7 +14,7 @@ import type { Role } from "@/lib/types";
  * POST /api/admin/gates — create a gate (admin/sysadmin, audit GATE_CREATED).
  */
 
-
+const SENTINEL_GATE_ID = "00000000-0000-0000-0000-000000000000";
 
 const readLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "admin_gates_list" };
 

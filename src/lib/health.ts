@@ -115,7 +115,7 @@ export async function checkSystemHealth() {
   try {
     const dbStart = Date.now();
     const dbClient = getClient();
-    const {_data, error } = await dbClient.from('users').select('id', { count: 'exact', head: true}).limit(1);
+    const { data, error } = await dbClient.from('users').select('id', { count: 'exact', head: true }).limit(1);
     health.components.database.latency = Date.now() - dbStart;
     if (error) {
       health.components.database.status = 'unhealthy';

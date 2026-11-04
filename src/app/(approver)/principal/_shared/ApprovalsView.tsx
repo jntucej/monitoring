@@ -27,7 +27,7 @@ export function ApprovalsView({
 
   // ?ticket= deep link (retention widgets / notification emails open a specific
   // ticket's DetailSheet on the matching view).
-  const ticketParam useState(() =>
+  const [ticketParam] = useState(() =>
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("ticket")
       : null
