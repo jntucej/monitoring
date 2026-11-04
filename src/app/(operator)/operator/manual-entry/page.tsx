@@ -37,10 +37,10 @@ interface LookupPerson {
   onCampus: boolean;
 }
 
-interface LookupResponse {
-  success: boolean;
-  data: { found: boolean; id: string; person?: LookupPerson };
-}
+
+
+
+
 
 type LookupState = "idle" | "loading" | "found" | "notfound" | "error";
 

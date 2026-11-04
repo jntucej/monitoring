@@ -17,7 +17,7 @@ const SENSITIVE_FIELDS = [
   "income_per_annum",
 ] as const;
 
-type SensitiveRole = "admin" | "sysadmin";
+
 
 export function redactSensitiveDetails<T extends Record<string, unknown>>(
   details: T,

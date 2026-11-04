@@ -30,7 +30,7 @@ const ToastContext = React.createContext<ToastContextValue | undefined>(undefine
 // of useUIStore().addToast get visible toasts too — one queue, one renderer.
 
 // Fix 7: limit toasts to max 3 in the store to prevent overflow
-const MAX_TOASTS = 3;
+
 
 const toastIcons: Record<ToastVariant, React.ReactNode> = {
   success: <CheckCircle className="w-5 h-5" />,

@@ -36,10 +36,10 @@ interface LookupPerson {
   onCampus: boolean;
 }
 
-interface LookupResponse {
-  success: boolean;
-  data: { found: boolean; id: string; person?: LookupPerson };
-}
+
+
+
+
 
 interface LastScan {
   id: string;

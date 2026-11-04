@@ -130,7 +130,7 @@ function DeputyWardenDailyOverviewInner() {
   }, [refreshPresence, refreshOutpass]);
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
-  const busy = (presenceLoading && !presence) || (outpassLoading && !outpassQueue);
+
 
   const matrix = presence?.data?.matrix ?? {};
   const gates = presence?.data?.gates ?? [];

@@ -53,7 +53,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   if (!gateId) {
     return NextResponse.json(err("BAD_REQUEST", "id required").body, { status: 400 });
   }
-  const svc = getSupabaseServiceClient();
+
   const patch: Record<string, any> = {};
   if (body.name) patch.name = body.name;
   if (body.location !== undefined) patch.location = body.location;

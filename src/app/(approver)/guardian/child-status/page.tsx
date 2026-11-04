@@ -29,9 +29,9 @@ interface PersonStatus {
   lastScan: { timestamp: string; gateName: string } | null;
 }
 
-interface ChildStatusInnerProps {
-  wards: Person[];
-}
+
+
+
 
 /* ── live status per ward ── */
 

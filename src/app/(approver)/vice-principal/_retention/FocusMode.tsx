@@ -68,7 +68,7 @@ export function FocusMode({
     async (action: "APPROVE" | "REJECT" | "ESCALATE") => {
       if (!current || busy) return;
       setBusy(true);
-      const startedAt = Date.now();
+
 
       try {
         const res = await fetch(`/api/permissions/${current.ticket_number}`, {

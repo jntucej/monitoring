@@ -122,7 +122,7 @@ export default function PrivacyPage() {
           {Object.entries(SCOPES).map(([scope, meta]) => {
             const c = consents.find((x) => x.scope === scope);
             const isGranted = !!c?.granted;
-            const isKnownScope = SCOPES[scope];
+
             return (
               <div key={scope} className="p-4 flex items-start justify-between gap-3">
                 <div className="flex-1">

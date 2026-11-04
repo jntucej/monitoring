@@ -29,10 +29,10 @@ interface PresenceMatrixData {
   lastUpdated: string;
 }
 
-interface PresenceMatrixResponse {
-  success: boolean;
-  data: PresenceMatrixData;
-}
+
+
+
+
 
 interface PermissionRequestRow {
   id: string;

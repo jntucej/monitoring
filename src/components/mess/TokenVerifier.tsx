@@ -21,11 +21,11 @@ interface VerifyResult {
   method: "QR" | "MANUAL";
   expiresAt: string;
 }
-interface VerifyFailure {
-  ok: false;
-  code: string;
-  message: string;
-}
+
+
+
+
+
 type Step =
   | { kind: "idle" }
   | { kind: "scanning" }

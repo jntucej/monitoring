@@ -143,7 +143,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   };
 
   const details = getCategoryDetails(category);
-  const Icon = details.icon;
+
 
   return (
     <AuthGuard>

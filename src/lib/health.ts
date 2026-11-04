@@ -34,7 +34,7 @@ async function getRedis() {
 }
 
 export async function checkSystemHealth() {
-  const startTime = Date.now();
+
   const health: SystemHealth = {
     status: 'healthy',
     timestamp: new Date().toISOString(),

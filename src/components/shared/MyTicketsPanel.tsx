@@ -24,16 +24,16 @@ type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 const FILTERS: StatusFilter[] = ["ALL", "PENDING", "APPROVED", "REJECTED", "COMPLETED"];
 
-interface PermissionsResponse {
-  success: boolean;
-  data: PermissionItem[];
-  total?: number;
-}
 
-interface CountsResponse {
-  success: boolean;
-  data: TicketCounts;
-}
+
+
+
+
+
+
+
+
+
 
 export interface MyTicketsPanelProps {
   title?: string;

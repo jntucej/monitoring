@@ -54,7 +54,7 @@ async function handlePost(req: NextRequest) {
     user = idRows[0] ?? null;
   }
   if (!user && normId) {
-    const sanitizePostgrestParam = (val: string) => val.replace(/,/g, "%2C");
+
     const { rows: lookupRows } = await query(
       `SELECT id, name, status, role, unique_id, email, onboarded_at FROM users WHERE upper(unique_id) = $1 OR email = lower($1) OR login_identifier = $1 LIMIT 1`,
       [normId]
