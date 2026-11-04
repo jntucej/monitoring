@@ -3,7 +3,7 @@
 /* ── PrincipalNotifications ── */
 
 import { memo } from "react";
-import { Bell, BellOff } from "lucide-react";
+import { Bell } from "lucide-react";
 
 export interface NotificationItem {
   id: string;

@@ -10,7 +10,7 @@ import {
   Check,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { useEngagementStore } from "@/stores/engagementStore";
+
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import {

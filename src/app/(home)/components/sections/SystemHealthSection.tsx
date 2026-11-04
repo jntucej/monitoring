@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Activity, Database, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Activity, CheckCircle2 } from "lucide-react";
 
 const AUDIT_METRICS = [
   { label: "Audit Log Integrity", status: "Verified 100%", desc: "Append-only cryptographic chain with actor context" },

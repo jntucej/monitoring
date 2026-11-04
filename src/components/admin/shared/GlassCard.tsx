@@ -10,7 +10,7 @@ import { useGlass, GateStatus } from "@/context/GlassContext";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 import { WordByWordText } from "./WordByWordText";
-import { GlossyFloatingContainer } from "./GlossyFloatingContainer";
+
 
 export interface GlassCardProps {
   id: string;

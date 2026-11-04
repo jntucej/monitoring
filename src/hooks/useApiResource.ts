@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
-import { useAuthStore } from "@/stores/authStore";
+
 import { singleFlightRefresh } from "@/lib/auth-refresh";
 
 interface CachedEntry<T> {
@@ -133,7 +133,7 @@ export function useApiResource<T>(
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [url, enabled, ttlMs]);
 
   useEffect(() => {

@@ -6,11 +6,7 @@ import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EnrollmentCodeModal } from "@/components/sysadmin/EnrollmentCodeModal";
 import { UserRolesPanel } from "@/components/sysadmin/UserRolesPanel";
-import {
-  GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2,
-  Ban, CheckCircle2, X, Upload, Phone, Mail, SlidersHorizontal, Lock, KeyRound,
-  Link as LinkIcon, Loader2,
-} from "lucide-react";
+import {GraduationCap, Search, RefreshCw, UserPlus, Edit, Trash2, X, Upload, SlidersHorizontal, Lock, KeyRound, Link as LinkIcon, Loader2}  from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";

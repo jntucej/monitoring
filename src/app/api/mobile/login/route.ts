@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hash, compare, genSalt } from "@/server/lib/crypto";
+import { compare } from "@/server/lib/crypto";
 import { findPersonByUniqueId, addAudit } from "@/lib/db";
 import { generateMobileToken } from "@/lib/mobile-auth";
 import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";

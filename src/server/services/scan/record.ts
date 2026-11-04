@@ -20,7 +20,7 @@ import {
   findStudentDetailsByUserId,
   updateEntryType,
 } from "@/server/repositories/studentDetails/findByUserId";
-import { createScan, type CreateScanResult } from "@/server/repositories/scans/create";
+import { createScan } from "@/server/repositories/scans/create";
 import { withSameDirectionGuard } from "@/server/services/scan/same-direction-guard";
 import { findScanById } from "@/server/repositories/scans/findById";
 import { findLastMovementByUserId } from "@/server/repositories/scans/findLastByUserId";

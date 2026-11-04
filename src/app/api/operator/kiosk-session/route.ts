@@ -4,12 +4,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import crypto from "crypto";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
-import {
-  findKioskDefaultOperators,
-  resolveKioskGateId,
-  resolveKioskGateIdForOperator,
-  verifyKioskPin,
-} from "@/lib/kiosk-operator";
+import {findKioskDefaultOperators, resolveKioskGateIdForOperator, verifyKioskPin}  from "@/lib/kiosk-operator";
 import type { Role } from "@/lib/types";
 
 /**

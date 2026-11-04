@@ -7,9 +7,9 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
-import { Loader2, Inbox, CheckCircle2, XCircle, ArrowUpRight, ShieldCheck } from "lucide-react";
+import { Inbox, CheckCircle2, XCircle, ArrowUpRight, ShieldCheck } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 /* ── response shapes ── */
 

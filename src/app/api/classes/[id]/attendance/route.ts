@@ -8,7 +8,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
+
 
 const FACULTY_ROLES = ["faculty", "hod", "admin", "sysadmin"];
 

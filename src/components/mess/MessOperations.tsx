@@ -1,28 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  UtensilsCrossed,
-  Plus,
-  Pencil,
-  Trash2,
-  Save,
-  X,
-  Loader2,
-  RefreshCw,
-  CalendarDays,
-  Ban,
-  BarChart3,
-  Check,
-  Clock,
-  AlertTriangle,
-  Leaf,
-  Beef,
-  Lock,
-  Users,
-  Ticket,
-} from "lucide-react";
-import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import {Plus, Pencil, Trash2, Save, X, Loader2, RefreshCw, Ban, Check, AlertTriangle, Leaf, Beef, Lock, Users, Ticket}  from "lucide-react";
+
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";

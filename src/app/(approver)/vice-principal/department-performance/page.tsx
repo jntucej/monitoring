@@ -7,7 +7,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { Loader2, Inbox, Building2, TrendingUp, Users, School } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 interface DepartmentRow {
   code: string;

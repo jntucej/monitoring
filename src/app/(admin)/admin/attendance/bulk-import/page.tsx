@@ -5,7 +5,7 @@ import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
-import type { Role } from "@/lib/types";
+
 
 /**
  * Admin → Attendance → Bulk Import.

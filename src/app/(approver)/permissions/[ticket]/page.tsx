@@ -8,7 +8,7 @@ import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPan
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
-import type { Role } from "@/lib/types";
+
 
 function PermissionTicketInner() {
   const params = useParams();

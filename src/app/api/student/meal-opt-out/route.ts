@@ -10,7 +10,7 @@ import { ok, fail } from "@/server/http/response";
 import { getIstDateString } from "@/server/policy/dates";
 import { query, withTransaction } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { isMessBillExempt } from "@/lib/delegation";
+
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 

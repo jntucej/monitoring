@@ -2,14 +2,7 @@
 
 
 import React, { Suspense, useEffect, useState } from "react";
-import {
-  Check,
-  Loader2,
-  RefreshCw,
-  Save,
-  SlidersHorizontal,
-  UtensilsCrossed,
-} from "lucide-react";
+import {Check, Loader2, RefreshCw, Save, UtensilsCrossed}  from "lucide-react";
 import { GuardedPage } from "@/components/shared/GuardedPage";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 

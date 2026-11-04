@@ -14,13 +14,13 @@ import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { ok, fail } from "@/server/http/response";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
-import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
+import { type RateLimitConfig } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { addAudit } from "@/lib/db";
 import { assertLength } from "@/lib/validation";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
+
 
 const rateLimitConfig: RateLimitConfig = RATE_LIMITS.mutation;
 void rateLimitConfig; // reserved for withRateLimit when enabled per-route

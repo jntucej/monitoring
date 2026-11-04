@@ -10,7 +10,7 @@ import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Wrench, Moon } from "luc
 // The two-decision rule: the bottom bar carries only IN / OUT. Manual entry
 // is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
 // row — no duplicate "Manual entry" button here (removed in this pass).
-import { useOperatorStore } from "@/stores/operatorStore";
+
 import { useScanStore } from "@/stores/scanStore";
 import { useGateStore } from "@/stores/gateStore";
 import type { Student } from "@/lib/types";

@@ -4,7 +4,7 @@
  */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { ToastData, ToastVariant } from "@/components/ui/toast";
+import type { ToastData } from "@/components/ui/toast";
 
 // Fix 7: limit toasts to max 3 in the store
 const MAX_TOASTS = 3;

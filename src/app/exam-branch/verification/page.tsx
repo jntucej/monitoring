@@ -10,15 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import {
-  Clock,
-  Loader2,
-  ShieldCheck,
-  AlertTriangle,
-  ArrowRight,
-  BadgeCheck,
-  SearchCheck,
-} from "lucide-react";
+import {AlertTriangle, ArrowRight, BadgeCheck, SearchCheck}  from "lucide-react";
 
 /* /api/occupancy/presence-matrix response shape */
 interface PresenceMatrixResponse {

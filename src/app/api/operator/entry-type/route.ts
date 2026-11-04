@@ -3,7 +3,7 @@ import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import type { AuthContext } from "@/lib/authContext";
-import { query, withTransaction } from "@/lib/postgres";
+import { withTransaction } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import {
   assertOperatorHasGate,

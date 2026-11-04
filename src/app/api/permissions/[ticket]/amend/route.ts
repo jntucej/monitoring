@@ -9,7 +9,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";
 import { addAudit, addNotification, withTransaction } from "@/lib/db";
-import { checkStepupPassword } from "@/lib/permission-forward";
+
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";

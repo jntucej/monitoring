@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { DoorOpen, PlusCircle, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { DoorOpen, PlusCircle, Loader2, XCircle } from "lucide-react";
 import type { Gate } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
 

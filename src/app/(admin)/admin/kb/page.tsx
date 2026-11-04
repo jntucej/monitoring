@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   BookOpen, Loader2, Plus,
 } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { getAuthHeaders } from "@/lib/utils";
 
 interface IngestResult {

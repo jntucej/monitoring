@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentFrame, useVideoConfig, interpolate, AbsoluteFill } from 'remotion';
+import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import { COMPOSITION_DURATIONS } from './durations';
 
 export interface GlossyGateScanCompositionProps {

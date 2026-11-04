@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, updateUserRole, findUserById, withTransaction } from "@/lib/db";
-import { sendNotification } from "@/lib/notification-service";
+import { addAudit, withTransaction } from "@/lib/db";
+
 import { withRateLimit } from "@/lib/rate-limit";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";

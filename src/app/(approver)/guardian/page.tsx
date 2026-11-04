@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import {
@@ -28,7 +28,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
 import type { GatePass, Person } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 /* ── response shapes ── */
 

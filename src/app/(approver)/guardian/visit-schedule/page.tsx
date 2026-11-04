@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";

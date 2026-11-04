@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { X, AlertCircle, RefreshCw, Inbox } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+
+
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
-import { clearCache } from "@/hooks/useApiResource";
+
 
 export interface InboxDetailSheetProps {
   ticket: string | null;

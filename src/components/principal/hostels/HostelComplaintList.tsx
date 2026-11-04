@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Building2 } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { usePolling } from "@/hooks/usePolling";
 import { useState, useCallback } from "react";

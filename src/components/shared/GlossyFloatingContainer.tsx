@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
 import { useGlass } from "@/context/GlassContext";
-import { glossyFloatAnimation } from "@/lib/animations";
+
 import { cn } from "@/lib/utils";
 
 export interface GlossyFloatingContainerProps {

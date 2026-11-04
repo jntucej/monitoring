@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+
 import { query } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { ok, fail } from "@/server/http/response";
+import { ok } from "@/server/http/response";
 import { getNextActiveDay, getMyStudentDetails } from "../_helpers";
 import type { AuthContext } from "@/lib/authContext";
 import type { StudentType } from "@/lib/types";

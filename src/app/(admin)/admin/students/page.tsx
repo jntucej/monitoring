@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Search, X, Users, Home, Building2,
-  TrendingUp, ChevronRight, Mail, Phone, User,
-} from "lucide-react";
+import {Search, X, Home, Building2, ChevronRight, Mail, Phone}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";

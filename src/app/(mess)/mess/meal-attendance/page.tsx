@@ -10,14 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import {
-  Users,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2,
-  Inbox,
-  Building2,
-} from "lucide-react";
+import {Users, AlertTriangle, Loader2, Inbox, Building2}  from "lucide-react";
 
 interface AttendanceBlockRow {
   hostelBlock: string;

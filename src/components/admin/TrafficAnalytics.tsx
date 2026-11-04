@@ -2,7 +2,7 @@
 // SCAFFOLD:ANALYTICS — Traffic dashboard.
 // Regenerate with: node scripts/scaffold-analytics.mjs new traffic --force
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,14 +15,7 @@ import {
   Brain, AlertTriangle, RefreshCw, Activity, TrendingUp, CheckCircle,
   Target, Clock, Download, Sparkles, Zap,
 } from "lucide-react";
-import {
-  sampleTrafficDataset,
-  buildForecastSeries,
-  TRAFFIC_CHARTS,
-  type TrafficDataset,
-  type TrafficPrediction,
-  type TrafficAnomaly,
-} from "@/lib/traffic-analytics";
+import {sampleTrafficDataset, buildForecastSeries, TRAFFIC_CHARTS, type TrafficDataset}  from "@/lib/traffic-analytics";
 
 /* ─── Severity colours ───────────────────────────────────────────────────── */
 const SEVERITY_COLORS: Record<string, string> = {

@@ -4,7 +4,7 @@ import { query } from "@/lib/postgres";
 import { validateImport } from "@/lib/user-import";
 import { getDepartmentFromRoll } from "@/lib/rollNumber";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
+
 
 /**
  * POST /api/admin/users/bulk/validate

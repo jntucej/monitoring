@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useUIStore } from "@/stores/uiStore";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, ShieldAlert, Lock, Globe, RefreshCw } from "lucide-react";
+
+import { ShieldAlert, Lock, Globe, RefreshCw } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 interface SecurityStats {

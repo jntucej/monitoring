@@ -3,8 +3,8 @@
 // src/components/operator/shared/OperatorConfirm.tsx
 // Operator-specific copy of @/components/shared/ConfirmDialog
 
-import { useState } from "react";
-import { AlertTriangle, CheckCircle, X } from "lucide-react";
+
+import { AlertTriangle, CheckCircle } from "lucide-react";
 
 export interface OperatorConfirmDialogProps {
   open: boolean;

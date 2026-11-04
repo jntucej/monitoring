@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { AlertTriangle, CheckCircle, X } from "lucide-react";
+
+import { AlertTriangle, CheckCircle } from "lucide-react";
 
 export interface ConfirmDialogProps {
   open: boolean;

@@ -12,10 +12,7 @@ import { cn } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { HeatMatrix } from "@/components/sysadmin/kit/viz";
 import { MiniSparkline } from "@/components/sysadmin/kit/sidebar";
-import type {
-  PeopleData,
-  PersonRow,
-} from "@/components/sysadmin/domains/identity/types";
+import type {PeopleData} from "@/components/sysadmin/domains/identity/types";
 
 interface Props {
   data: PeopleData | null;

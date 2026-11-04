@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Clock, ShieldCheck, UserCheck, Loader2 } from "lucide-react";
+import { Clock, ShieldCheck, UserCheck } from "lucide-react";
 
 interface WorkerStatsProps {
   loading?: boolean;

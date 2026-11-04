@@ -2,7 +2,7 @@
 import { POLL_INTERVALS } from "@/config/app-constants";
 
 import React, { useState, useCallback } from "react";
-import { ClipboardList, Plus, Inbox, AlertCircle, ArrowUpRight, Check, X } from "lucide-react";
+import { ClipboardList, Plus, Inbox, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PermissionTicketCard } from "@/components/student/PermissionTicketCard";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { usePolling } from "@/hooks/usePolling";
-import { useUIStore } from "@/stores/uiStore";
+
 
 type StatusFilter = "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 

@@ -38,15 +38,7 @@ import { POLL_INTERVALS } from "@/config/app-constants";
 import { getAuthHeaders } from "@/lib/utils";
 import { fmtInt } from "@/lib/formatters";
 import { getRoleTier } from "@/lib/alert-hierarchy";
-import {
-  type AcademicDepartmentRow,
-  type AcademicsDepartmentPayload,
-  SEED_DEPARTMENTS,
-  computeRatio,
-  ratioLabel,
-  summarize,
-  isAcademicsPayload,
-} from "@/lib/academics-department-data";
+import {type AcademicDepartmentRow, type AcademicsDepartmentPayload, SEED_DEPARTMENTS, computeRatio, ratioLabel, summarize}  from "@/lib/academics-department-data";
 
 interface AcademicsDepartmentPanelProps {
   /** Optional title override (defaults to the panel heading). */

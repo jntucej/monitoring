@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { db, query, authAdmin } from './postgres';
+import { db, query } from './postgres';
 
 let serviceClient: any = null;
 

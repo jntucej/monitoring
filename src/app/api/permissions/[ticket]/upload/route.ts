@@ -6,7 +6,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import { addAudit, addNotification } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
-import type { Role } from "@/lib/types";
+
 import {
   ensureTicketDir,
   documentPath,

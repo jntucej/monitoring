@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { assertCsrf } from "@/lib/csrf";
 import { fail } from "@/server/http/response";
 import { addAudit, addNotification, getLinkedPersons, getStudentGuardianLink } from "@/lib/db";
 import { query, withTransaction } from "@/lib/postgres";
-import {
-  resolveInitialStageForRequester,
-  generateTicketNumber,
-  WORKFLOW_STAGES,
-  type WorkflowType,
-} from "@/lib/permission-workflow";
+import {resolveInitialStageForRequester, generateTicketNumber, type WorkflowType}  from "@/lib/permission-workflow";
 import { RATE_LIMITS } from "@/config/app-constants";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
+
 
 // Maps each role to the permission workflow stages it may act upon when
 // assigned_to_me=true is requested. The principal/warden consolidation means

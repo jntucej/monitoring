@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import { AlertDefinition, ALERT_CATALOGUE } from "@/lib/alert-hierarchy";
 import type { AlertContext } from "@/lib/alert-hierarchy";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface ConditionalAlertProps {
   ctx: AlertContext;

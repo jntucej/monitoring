@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { RefreshCw, UserCog, Plus, AlertTriangle, CheckCircle } from "lucide-react";
+import { Plus, AlertTriangle, CheckCircle } from "lucide-react";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { usePolling } from "@/hooks/usePolling";
-import { useApiResource } from "@/hooks/useApiResource";
+
 import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";

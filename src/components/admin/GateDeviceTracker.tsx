@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Cpu, Activity, Clock, ArrowDownLeft, ArrowUpRight, Wifi, User } from "lucide-react";
+import { Cpu, Activity, ArrowDownLeft, ArrowUpRight, Wifi, User } from "lucide-react";
 
 export interface GateDevice {
   id: string;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertCsrf } from "@/lib/csrf";
-import { query, withTransaction } from "@/lib/postgres";
+import { withTransaction } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { WifiOff, AlertTriangle } from "lucide-react";
+import { WifiOff } from "lucide-react";
 
 export function NetworkStatusBanner() {
   const [isOffline, setIsOffline] = useState(false);

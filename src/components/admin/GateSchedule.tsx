@@ -6,7 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Plus, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
+import { Plus, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 
 export function GateSchedule() {
   const { user, token } = useAuthStore();

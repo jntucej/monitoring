@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { User, Search } from "lucide-react";
-import type { Person, PersonType } from "@/lib/types";
+import type { Person } from "@/lib/types";
 import { PersonBadge } from "@/components/shared/PersonBadge";
 
 export function PersonList() {

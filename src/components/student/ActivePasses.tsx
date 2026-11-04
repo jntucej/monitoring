@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { Ticket, Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";

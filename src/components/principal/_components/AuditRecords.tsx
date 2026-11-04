@@ -6,7 +6,7 @@ import { memo } from "react";
 import { FileText } from "lucide-react";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import type { AuditRecord } from "./types";
-import { fmtDate, fmtTime, fmtDetails } from "./types";
+import { fmtDate, fmtTime } from "./types";
 
 export const AuditRecords = memo(function AuditRecords({
   auditRecords,

@@ -1,8 +1,6 @@
 import type { NavEntry, NavGroup } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
-import {
-  LayoutDashboard, CalendarClock, FileBarChart, DoorOpen, Siren,
-} from "lucide-react";
+import {LayoutDashboard, CalendarClock, FileBarChart, DoorOpen}  from "lucide-react";
 
 export const EXAM_SUPER_NAV: NavEntry[] = [
   { kind: "link", href: "/exam/superintendent", label: "Access desk", icon: DoorOpen },

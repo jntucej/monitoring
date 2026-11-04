@@ -3,18 +3,9 @@
 /* ── Hostel panels: Occupancy, ResidentDirectory, Attendance, OutpassLeave ── */
 
 import { memo } from "react";
-import {
-  Building2,
-  CheckCircle2,
-  ClipboardCheck,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import {Building2, CheckCircle2, ShieldCheck, Users}  from "lucide-react";
 import { PrincipalWidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
-import type {
-  OutpassRow,
-  PresenceMatrixData,
-} from "./types";
+import type {PresenceMatrixData} from "./types";
 
 function PlaceholderBadge({ note }: { note: string }) {
   return (

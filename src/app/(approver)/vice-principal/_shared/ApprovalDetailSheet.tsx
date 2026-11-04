@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 

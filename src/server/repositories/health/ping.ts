@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 
 export async function pingDatabase() {

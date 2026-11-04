@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface RadialMeterProps {
   /** 0..100 */

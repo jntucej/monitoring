@@ -10,7 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Inbox, Loader2, UserCheck, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, UserCheck, AlertTriangle, ArrowRight } from "lucide-react";
 
 /* response shapes */
 

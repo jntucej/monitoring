@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Bell, Plus, RefreshCw, History, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Bell, Plus, RefreshCw, AlertTriangle, ShieldAlert } from "lucide-react";
 
 interface AlertRule {
   id: string;

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
-import { addAudit, updateUserRole, findUserById, withTransaction } from "@/lib/db";
+import { addAudit, updateUserRole, withTransaction } from "@/lib/db";
 import { sendNotification } from "@/lib/notification-service";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 

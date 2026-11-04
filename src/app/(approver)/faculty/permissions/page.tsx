@@ -6,7 +6,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { PermissionList } from "@/components/approver/PermissionList";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 function FacultyPermissionsInner() {
   return (

@@ -9,7 +9,7 @@ import { InboxBatchBar } from "./InboxBatchBar";
 import { useInboxData, useInboxBatch } from "./useInboxData";
 import { filtersFromParams } from "./InboxFilters";
 import type { InboxFilters } from "./useInboxData";
-import type { PermissionItem } from "@/components/approver/PermissionRow";
+
 import { clearCache } from "@/hooks/useApiResource";
 
 export interface InboxListProps {

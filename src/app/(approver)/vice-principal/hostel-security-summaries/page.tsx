@@ -8,7 +8,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { useProbe } from "../_probe";
 import { Loader2, Inbox, Building2, Siren, ShieldCheck, Users } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 interface PresenceMatrixData {
   gates: Array<{ id: string; name: string; code: string }>;

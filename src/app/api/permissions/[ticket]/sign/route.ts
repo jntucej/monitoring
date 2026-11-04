@@ -6,13 +6,8 @@ import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { appendStageHistory, getScopedTicket } from "@/lib/permission-workflow";
 import { addAudit, addNotification } from "@/lib/db";
-import type { Role } from "@/lib/types";
-import {
-  documentPath,
-  signedDocumentPath,
-  readDocument,
-  computeSignatureHash,
-} from "@/lib/permission-document";
+
+import {signedDocumentPath, readDocument, computeSignatureHash}  from "@/lib/permission-document";
 import { assertSafeTicket } from "@/lib/safe-path";
 
 function getTicketParam(req: NextRequest): string {

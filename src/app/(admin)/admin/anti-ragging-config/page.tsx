@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
-import { SectionCard } from "@/components/admin/shared/SectionCard";
+
 import { useUIStore } from "@/stores/uiStore";
 
 export default function AntiRaggingConfigPage() {

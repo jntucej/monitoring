@@ -1,4 +1,4 @@
-import { GateStatus } from "@/context/GlassContext";
+
 import { MockDataGenerator, GateStatusChangePayload, AlertPayload } from "./mockData";
 
 type TrafficCallback = (traffic: number) => void;

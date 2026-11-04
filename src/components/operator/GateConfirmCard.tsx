@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, LogOut, Flag, ShieldAlert, X, KeyRound } from "lucide-react";
+import { motion } from "framer-motion";
+import { LogIn, LogOut, ShieldAlert, X, KeyRound } from "lucide-react";
 import { ExitReason, ScanDirection, Student } from "@/lib/types";
 import { getAvatarPlaceholder } from "@/lib/utils";
 

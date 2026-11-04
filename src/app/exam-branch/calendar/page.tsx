@@ -10,7 +10,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Loader2, CalendarDays, AlertTriangle, ArrowRight, Building2 } from "lucide-react";
+import { CalendarDays, AlertTriangle, ArrowRight, Building2 } from "lucide-react";
 
 /* /api/campus-extra/calendar response shape */
 interface CalendarResponse {

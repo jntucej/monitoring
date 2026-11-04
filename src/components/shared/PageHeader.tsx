@@ -2,8 +2,8 @@
 
 import { RefreshCw } from "lucide-react";
 import { ReactNode, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { metaFor } from "@/lib/page-meta";
+
+
 
 export interface PageHeaderProps {
   title: string;

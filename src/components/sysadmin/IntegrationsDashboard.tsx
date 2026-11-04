@@ -5,7 +5,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, Zap, Server, Activity, Database, Mail } from "lucide-react";
+import { RefreshCw, CheckCircle2, Zap, Server, Activity, Database } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 export function IntegrationsDashboard() {

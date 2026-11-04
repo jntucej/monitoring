@@ -4,7 +4,7 @@ import { constants as fsConstants } from "fs";
 import { createHash, randomUUID } from "crypto";
 import { tmpdir } from "os";
 
-import { isS3Configured, s3PutObject, s3GetObject, s3ObjectExists } from "@/lib/s3-storage";
+import { isS3Configured, s3PutObject, s3GetObject } from "@/lib/s3-storage";
 import { safeJoin } from "@/lib/safe-path";
 import { sniffExtension, SNIFFED_CONTENT_TYPES } from "@/lib/file-signature";
 

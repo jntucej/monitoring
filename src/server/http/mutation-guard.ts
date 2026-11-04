@@ -16,7 +16,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { withAuthorization, type AuthorizationOptions } from "@/middleware/authorization";
-import { withRateLimit, type RateLimitConfig, checkRateLimit } from "@/lib/rate-limit";
+import { type RateLimitConfig, checkRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { requireTrustedHeaders } from "@/server/http/trusted-headers";
 import { TIER } from "@/server/policy/roles";

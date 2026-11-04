@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { GateDeviceTracker, GateDevice } from "@/components/admin/GateDeviceTracker";
-import { AlertCircle, Plus, CheckCircle2, Lock, Wrench, Moon, Check, Shield } from "lucide-react";
+import { AlertCircle, Plus, CheckCircle2, Lock, Wrench, Moon, Check } from "lucide-react";
 import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";

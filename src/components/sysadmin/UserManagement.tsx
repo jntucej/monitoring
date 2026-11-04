@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { UserPlus, User, Loader2, XCircle, Fingerprint, ShieldCheck, Upload } from "lucide-react";
 import type { User as UserType } from "@/lib/types";
 import { BulkUserImportModal } from "./BulkUserImportModal";

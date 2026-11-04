@@ -11,7 +11,7 @@
  * grants, denies or re-scales any data access: every widget still
  * calls the same permission-checked API routes.
  */
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Layout,
   GripVertical,

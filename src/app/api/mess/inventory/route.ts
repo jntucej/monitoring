@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { ok, fail } from "@/server/http/response";
+import { ok } from "@/server/http/response";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
 

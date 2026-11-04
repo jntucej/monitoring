@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hash, compare, genSalt } from "@/server/lib/crypto";
+import { hash, compare } from "@/server/lib/crypto";
 import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+
 import { hashPassword } from "@/lib/auth-token";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";

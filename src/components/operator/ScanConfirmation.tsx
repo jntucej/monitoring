@@ -26,7 +26,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogIn, LogOut, Check, X, Home, Clock } from "lucide-react";
+import { LogOut, Check, Home, Clock } from "lucide-react";
 import { ExitReason, ScanDirection, Student } from "@/lib/types";
 import { getAvatarPlaceholder } from "@/lib/utils";
 import { useScanStore } from "@/stores/scanStore";

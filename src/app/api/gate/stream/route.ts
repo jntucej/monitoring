@@ -14,7 +14,7 @@
  */
 
 import { NextRequest } from "next/server";
-import type { ReadableStreamDefaultController } from "stream/web";
+
 import { withAuthorization } from "@/middleware/authorization";
 import { getDbClient } from "@/lib/db";
 import { recordSseEvent, replaySince, highestSseId, sseWire } from "@/lib/sse-ring-buffer";

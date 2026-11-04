@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
-import { ok } from "@/server/http/response";
-import { listGateSchedules } from "@/server/services/gate-schedules/list";
+
+
 
 // Re-using original handleGet logic as it fetches MORE than just schedules (rules + holidays)
 // Only replacing the scheduling part if it was isolated, but it is integrated.

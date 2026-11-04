@@ -3,20 +3,7 @@
 
 import React, { useState, use } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ShieldCheck,
-  UserCheck,
-  Lock,
-  KeyRound,
-  Database,
-  Globe2,
-  QrCode,
-  CheckCircle2,
-  RefreshCw,
-  Shield,
-  Activity,
-} from "lucide-react";
+import {ArrowLeft, UserCheck, Lock, KeyRound, Database, Globe2, QrCode}  from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuthStore } from "@/stores/authStore";
 import { useGlass } from "@/context/GlassContext";

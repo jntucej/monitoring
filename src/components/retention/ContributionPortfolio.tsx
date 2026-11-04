@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  Award,
-  Share,
-  Download,
-  CheckCircle,
-  Calendar,
-  ChevronRight,
-  ShieldCheck,
-  FileText,
-  Copy,
-} from "lucide-react";
+import {Award, Share, CheckCircle, Calendar, ShieldCheck, FileText}  from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getContributionPortfolio, type PortfolioItem } from "@/lib/retention";

@@ -7,28 +7,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
-import {
-  User as UserIcon,
-  Mail,
-  Shield,
-  KeyRound,
-  Lock,
-  Save,
-  Loader2,
-  CheckCircle2,
-  Bell,
-  Eye,
-  EyeOff,
-  Palette,
-  Sparkles,
-  Moon,
-  Sun,
-  Droplet,
-  Check,
-  Activity,
-  ScrollText,
-  type LucideIcon,
-} from "lucide-react";
+import {User as UserIcon, Mail, Shield, KeyRound, Lock, Save, Loader2, Bell, Eye, EyeOff, Palette, Sparkles, Moon, Sun, Droplet, Check, Activity, ScrollText, type LucideIcon}  from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tab = "personal" | "security" | "appearance";

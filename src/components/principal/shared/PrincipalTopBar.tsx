@@ -4,7 +4,7 @@
 
 import { memo } from "react";
 import { Crown, Bell, Menu } from "lucide-react";
-import type { NotificationItem } from "./PrincipalNotifications";
+
 
 interface PrincipalTopBarProps {
   role?: string;

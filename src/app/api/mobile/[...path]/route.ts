@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
-import { hash, compare, genSalt } from "@/server/lib/crypto";
+import { compare } from "@/server/lib/crypto";
 import { findPersonByUniqueId, getPersonHistory, addAudit } from "@/lib/db";
 import { generateMobileToken, validateMobileToken } from "@/lib/mobile-auth";
 import { withRateLimit, checkRateLimit } from "@/lib/rate-limit";

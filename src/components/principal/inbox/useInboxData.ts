@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
-import { useApiResource, clearCache, cachedFetch } from "@/hooks/useApiResource";
+import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 
 export interface InboxFilters {

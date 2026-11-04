@@ -5,9 +5,7 @@ import Link from "next/link";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
-import {
-  User, KeyRound, Bell, ArrowRight, Lock, Shield, Eye, CheckCircle2,
-} from "lucide-react";
+import {User, KeyRound, Bell, ArrowRight, Lock, Eye}  from "lucide-react";
 
 /* ── security overview cards (static status; link to real settings pages) ── */
 

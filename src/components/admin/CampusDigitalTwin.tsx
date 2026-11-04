@@ -7,7 +7,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/authStore";
-import { Radio, Flame, Users, TrendingUp, X, Activity } from "lucide-react";
+import { Radio, Flame, TrendingUp, X, Activity } from "lucide-react";
 
 interface DigitalTwinData {
   timestamp: string;

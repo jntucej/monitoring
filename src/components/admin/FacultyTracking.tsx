@@ -2,24 +2,7 @@
 
 import React, { useState } from "react";
 import { CountUp } from "@/components/admin/shared/CountUp";
-import {
-  Users,
-  CheckCircle2,
-  Building2,
-  Clock,
-  UserX,
-  Search,
-  Filter,
-  ArrowRightLeft,
-  MapPin,
-  Mail,
-  Phone,
-  Calendar,
-  Activity,
-  AlertTriangle,
-  Info,
-  ChevronRight,
-} from "lucide-react";
+import {Users, CheckCircle2, Building2, Clock, UserX, Search, Filter, ArrowRightLeft, MapPin, Mail, Phone, Calendar, Activity, AlertTriangle, ChevronRight}  from "lucide-react";
 import type { FacultyMemberAttendance, DepartmentAttendanceSummary, HeatmapDay } from "@/lib/types";
 import { Modal } from "@/components/ui/modal";
 

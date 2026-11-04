@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, AlertTriangle, Clock, AlertCircle } from "lucide-react";
+import { X, ShieldAlert, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Student } from "@/lib/types";
 import type { ExitReason } from "@/lib/types";

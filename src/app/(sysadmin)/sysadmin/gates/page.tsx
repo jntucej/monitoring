@@ -6,10 +6,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
-import {
-  DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog,
-  Building2, ShieldCheck, X, KeyRound, Monitor,
-} from "lucide-react";
+import {DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog, X, Monitor}  from "lucide-react";
 import { GateClaimCodePanel } from "@/components/supervisor/GateClaimCodePanel";
 
 interface Gate {

@@ -11,7 +11,7 @@
 // admin-scoped: requiredRole ['sysadmin','admin']. Every read is guarded so a
 // missing table/column degrades to a safe default instead of 500-ing.
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";

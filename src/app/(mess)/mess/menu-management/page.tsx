@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   UtensilsCrossed,

@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  FileBadge, Search, CheckCircle2, XCircle, Clock, QrCode,
-} from "lucide-react";
+import {Search, CheckCircle2, XCircle, Clock, QrCode}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";

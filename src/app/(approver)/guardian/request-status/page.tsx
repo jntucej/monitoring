@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+
 import { PageLoading } from "@/components/shared/LoadingStates";
 import {
   Loader2,
@@ -14,7 +14,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 /* ── shapes ── */
 

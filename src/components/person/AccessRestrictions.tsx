@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Clock, ShieldAlert, CheckCircle2, Calendar, AlertTriangle } from "lucide-react";
-import { checkTimeBasedAccess, DEFAULT_WORKER_ACCESS_RULE } from "@/lib/access-control";
+import { checkTimeBasedAccess } from "@/lib/access-control";
 
 interface AccessRestrictionsProps {
   personType?: string;

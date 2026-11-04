@@ -5,11 +5,11 @@
 // and, when outside the allowed radius, shows a warning dialog with a
 // "Continue anyway" escape hatch that records the deviation in the audit.
 
-import { useState } from "react";
-import { MapPinOff, AlertTriangle } from "lucide-react";
+
+import { MapPinOff } from "lucide-react";
 import { getClientLocation } from "@/lib/geo";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/ui/modal";
+
 
 export type GeoFenceWarningProps = {
   distanceMeters: number;

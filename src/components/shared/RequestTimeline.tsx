@@ -1,21 +1,10 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import {
-  Ticket,
-  Loader2,
-  CheckCircle2,
-  XCircle,
-  ArrowUpRight,
-  Forward,
-  FileText,
-  Send,
-  Circle,
-  Inbox,
-} from "lucide-react";
+import { useMemo } from "react";
+import {Ticket, CheckCircle2, XCircle, ArrowUpRight, Forward, FileText, Send, Circle, Inbox}  from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
-import { getAuthHeaders, getTimeAgo, formatDateTime } from "@/lib/utils";
+import { getTimeAgo, formatDateTime } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 

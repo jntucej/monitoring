@@ -5,7 +5,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useUIStore } from "@/stores/uiStore";
-import { BookOpen, RefreshCw, Settings, Save } from "lucide-react";
+import { BookOpen, RefreshCw } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 export function LMSIntegration() {

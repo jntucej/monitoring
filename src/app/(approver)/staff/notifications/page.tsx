@@ -12,7 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { Loader2, Bell, AlertTriangle, ArrowRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { StaffMyDayResponse } from "../types";
+
 
 interface NotificationRow {
   id: string;

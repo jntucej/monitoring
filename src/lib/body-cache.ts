@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { createHash } from "crypto";
 
 const GLOBAL_BODY_CACHE = new Map<string, unknown>();

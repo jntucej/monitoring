@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getActiveLockdown, createLockdown, liftLockdown } from "@/lib/db";
 

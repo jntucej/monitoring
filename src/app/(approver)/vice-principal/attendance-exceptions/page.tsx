@@ -5,9 +5,9 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import { Loader2, Inbox, UserX, Clock4, Flag, AlertTriangle } from "lucide-react";
+import { Inbox, UserX, Clock4, Flag, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 interface ExceptionRecord {
   id: string;

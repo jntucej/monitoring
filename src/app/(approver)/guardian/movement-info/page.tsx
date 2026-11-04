@@ -1,12 +1,12 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import { getAuthHeaders } from "@/lib/utils";
+
 import type { Person, Scan } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {

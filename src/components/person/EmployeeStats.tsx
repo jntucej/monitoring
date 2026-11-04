@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Calendar, CheckCircle2, Clock, ShieldCheck, AlertCircle } from "lucide-react";
+import { Calendar, Clock, ShieldCheck } from "lucide-react";
 
 interface EmployeeStatsProps {
   stats?: {

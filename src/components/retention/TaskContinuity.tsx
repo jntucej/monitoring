@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  RotateCw,
-  FileEdit,
-  Clock,
-  ChevronRight,
-  X,
-  ListPlus,
-} from "lucide-react";
+import {RotateCw, Clock, ChevronRight, X, ListPlus}  from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useTaskDraftStore, hydrateTaskDraftsFromServer, type TaskDraftEntry } from "@/stores/taskDraftStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { getTaskDrafts, saveTaskDraft, deleteTaskDraft } from "@/lib/retention";
+import { getTaskDrafts } from "@/lib/retention";
 
 /* ------------------------------------------------------------------ */
 /* Draft type labels                                                   */

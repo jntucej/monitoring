@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
-import { randomBytes } from "crypto";
+
 import { findAllPersons, searchPersons, findPersonByUniqueId, findPersonsByType, getLinkedPersons, mPerson, withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import type { Person, PersonType } from "@/lib/types";
+import type { PersonType } from "@/lib/types";
 
 function extractToken(req: NextRequest): string | null {
   const authHeader = req.headers.get("authorization");

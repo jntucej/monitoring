@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
-import { ok, fail } from "@/server/http/response";
+import { ok } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 

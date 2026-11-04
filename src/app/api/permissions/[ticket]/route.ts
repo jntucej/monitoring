@@ -1,18 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
-import {
-  canApproveAtStage,
-  canApproveAtStageWithBranch,
-  resolveNextStage,
-  appendStageHistory,
-  getScopedTicket,
-  requiresStepup,
-  WORKFLOW_STAGES,
-} from "@/lib/permission-workflow";
+import {canApproveAtStageWithBranch, resolveNextStage, appendStageHistory, getScopedTicket, requiresStepup}  from "@/lib/permission-workflow";
 import {
   prepareHostelForward,
   applyHostelForward,
@@ -24,7 +16,7 @@ import { addAudit, addNotification, getStudentGuardianLink } from "@/lib/db";
 import { enqueueTemplatedSms } from "@/lib/sms-templates";
 import { query, withTransaction } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
-import type { WorkflowType, Role } from "@/lib/types";
+import type { WorkflowType } from "@/lib/types";
 
 type Action = "APPROVE" | "REJECT" | "FORWARD" | "ESCALATE";
 interface PatchBody {

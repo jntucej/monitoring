@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  BarChart3,
-  TrendingUp,
-  Clock,
-  AlertTriangle,
-  Users,
-  Filter,
-} from "lucide-react";
+import {BarChart3, TrendingUp, Clock, AlertTriangle, Filter}  from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { ChartRenderer, CHART_PALETTE, type ChartType } from "@/components/shared/ChartRenderer";

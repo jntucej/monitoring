@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 

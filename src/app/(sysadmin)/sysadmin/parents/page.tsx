@@ -5,10 +5,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
-import {
-  Users, Plus, Search, Trash2, Link as LinkIcon, Unlink,
-  Check, Copy, KeyRound, ShieldAlert, X, Loader2, UserCheck,
-} from "lucide-react";
+import {Users, Plus, Search, Link as LinkIcon, Unlink, Check, Copy, KeyRound, X, Loader2, UserCheck}  from "lucide-react";
 
 interface ParentRow {
   id: string;

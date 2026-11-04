@@ -5,20 +5,7 @@
    bg-[var(--action-${tone})] Tailwind-var interpolation issue. */
 
 import { useEffect, useState, memo } from "react";
-import {
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  UserCheck,
-  Inbox,
-  AlertTriangle,
-  ShieldCheck,
-  Calendar,
-  Activity,
-  CheckCircle2,
-  XCircle,
-  Zap,
-} from "lucide-react";
+import {Clock, UserCheck, Inbox, AlertTriangle, ShieldCheck, Calendar, Activity, Zap}  from "lucide-react";
 import { cn, getTimeAgo } from "@/lib/utils";
 import { fetchJson, type Resp } from "@/components/principal/_components/fetchJson";
 

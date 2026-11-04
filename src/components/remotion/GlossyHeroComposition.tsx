@@ -1,6 +1,6 @@
 "use client";
 
-import { useCurrentFrame, interpolate } from "remotion";
+import { useCurrentFrame } from "remotion";
 
 export interface GlossyHeroCompositionProps {
   title?: string;

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FileText, Download, BarChart3, Loader2, ClipboardList, Clock } from "lucide-react";
+import { FileText, Download, BarChart3, ClipboardList, Clock } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import type { DashboardData } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";

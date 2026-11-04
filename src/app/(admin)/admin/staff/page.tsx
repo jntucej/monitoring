@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Search, X, Briefcase, ShieldCheck, ShieldAlert, Mail,
-  ChevronRight, GraduationCap, Wrench,
-} from "lucide-react";
+import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +10,7 @@ import {
 } from "@/components/admin/kit";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
-import type { User } from "@/lib/types";
+
 
 /**
  * Admin Staff & Faculty — merged roster view.

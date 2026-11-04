@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { Suspense, useEffect, useState } from "react";
+
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { useAuthStore } from "@/stores/authStore";

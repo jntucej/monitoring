@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { requireSecret } from '@/lib/env';
-import { randomUUID, createHmac } from 'crypto';
+import { createHmac } from 'crypto';
 import { Person } from "@/lib/types";
 import { findPersonByUniqueId } from "@/lib/db";
 import { getCached, setCached } from './cache';

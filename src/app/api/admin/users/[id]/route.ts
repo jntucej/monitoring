@@ -3,7 +3,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
-import { getSupabaseServiceClient, invalidateAllUserSessions } from "@/lib/dbClient";
+import { invalidateAllUserSessions } from "@/lib/dbClient";
 import { addAudit, linkParentToStudent, withTransaction } from "@/lib/db";
 import type { Role, AccountStatus } from "@/lib/types";
 

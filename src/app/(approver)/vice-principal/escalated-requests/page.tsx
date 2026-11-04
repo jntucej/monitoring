@@ -6,9 +6,9 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { RequestTimeline } from "@/components/shared/RequestTimeline";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import { Loader2, Inbox, ChevronDown, ChevronUp } from "lucide-react";
+import { Inbox, ChevronDown, ChevronUp } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
-import type { Role } from "@/lib/types";
+
 
 interface PermissionRequestRow {
   id: string;

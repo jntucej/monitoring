@@ -8,7 +8,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/auth-token";
 import { secureCookieOptions } from "@/lib/cookies";
 import { addAudit } from "@/lib/db";
 import { newDeviceId, deviceCookieOptions } from "@/lib/device-binding";
-import { randomUUID } from "crypto";
+
 
 async function handlePost(req: NextRequest) {
   assertProductionWebAuthnConfig();

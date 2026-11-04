@@ -9,7 +9,7 @@ import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
-import { createHash, randomBytes, randomInt } from "crypto";
+import { createHash, randomInt } from "crypto";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 

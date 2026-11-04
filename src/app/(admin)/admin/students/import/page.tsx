@@ -7,7 +7,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { CsvValidationPreview } from "@/components/admin/CsvValidationPreview";
 import { useApi } from "@/hooks/useApi";
 import { getAuthHeaders } from "@/lib/utils";
-import type { Role } from "@/lib/types";
+
 
 /**
  * Admin → Students → Bulk Import.

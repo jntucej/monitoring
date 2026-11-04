@@ -1,6 +1,6 @@
 "use client";
 
-import { Lightbulb, TrendingUp } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 
 function formatMs(ms: number | null): string {
   if (ms === null) return "—";

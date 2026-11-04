@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-import {
-  User as UserIcon, Mail, Loader2, Save,
-} from "lucide-react";
+import {User as UserIcon, Loader2, Save}  from "lucide-react";
 import { ParticleField } from "@/components/cinematic/ParticleField";
 import { AmbientGlow } from "@/components/cinematic/AmbientGlow";
 

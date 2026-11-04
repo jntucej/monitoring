@@ -3,7 +3,7 @@
 // DELETE — delete delegation rule.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";

@@ -12,15 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
-import {
-  Wrench,
-  Send,
-  Loader2,
-  AlertTriangle,
-  Inbox,
-  CheckCircle2,
-  Plus,
-} from "lucide-react";
+import {Wrench, Send, Loader2, AlertTriangle, Inbox, Plus}  from "lucide-react";
 
 interface OperationalRequest {
   id: string;

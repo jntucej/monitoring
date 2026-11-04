@@ -1,5 +1,5 @@
 
-import type { Role } from "@/lib/types";
+
 
 export type RoleTier = "super" | "admin" | "hostel" | "academic" | "staff" | "operator" | "end_user";
 

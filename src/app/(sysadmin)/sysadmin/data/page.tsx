@@ -2,7 +2,7 @@
 
 
 import Link from "next/link";
-import { Database, ShieldCheck, Clock, Archive, ArrowUpRight, HardDrive, FileCheck2 } from "lucide-react";
+import { ShieldCheck, Clock, ArrowUpRight } from "lucide-react";
 import { BackupManagement } from "@/components/sysadmin/BackupManagement";
 
 export default function DataManagementHubPage() {

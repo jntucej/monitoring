@@ -2,7 +2,7 @@
 // SCAFFOLD:ANALYTICS — Live Occupancy dashboard.
 // Regenerate with: node scripts/scaffold-analytics.mjs new occupancy --force
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,14 +15,7 @@ import {
   Brain, AlertTriangle, RefreshCw, Activity, TrendingUp, CheckCircle,
   Target, Clock, Download, Sparkles, Zap,
 } from "lucide-react";
-import {
-  sampleOccupancyDataset,
-  buildForecastSeries,
-  OCCUPANCY_CHARTS,
-  type OccupancyDataset,
-  type OccupancyPrediction,
-  type OccupancyAnomaly,
-} from "@/lib/occupancy-analytics";
+import {sampleOccupancyDataset, buildForecastSeries, OCCUPANCY_CHARTS, type OccupancyDataset}  from "@/lib/occupancy-analytics";
 
 /* ─── Severity colours ───────────────────────────────────────────────────── */
 const SEVERITY_COLORS: Record<string, string> = {

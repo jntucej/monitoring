@@ -4,18 +4,13 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { addAudit, addNotification } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
-import {
-  directGeneratePass,
-  generateTicketNumber,
-  requiresStepup,
-  maxDurationForReason,
-} from "@/lib/permission-workflow";
+import {generateTicketNumber, requiresStepup, maxDurationForReason}  from "@/lib/permission-workflow";
 import { checkStepupPassword, DIRECT_GENERATE_ROLES } from "@/lib/permission-forward";
 import { normalizeExitReason } from "@/lib/student-exit-flow";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
-import type { Role } from "@/lib/types";
+
 
 type DirectGenReason = "home_out" | "day_pass" | "emergency" | "special_leave";
 

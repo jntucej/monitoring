@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft, User, Mail, Phone, Building2, Clock, Briefcase, BookOpen,
-} from "lucide-react";
+import {ArrowLeft, User, Phone, Building2, Clock, Briefcase, BookOpen}  from "lucide-react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { EmptyState } from "@/components/admin/shared/EmptyState";

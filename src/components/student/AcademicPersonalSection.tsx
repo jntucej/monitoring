@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/stores/authStore";
-import { GraduationCap, User, Phone, Mail, MapPin, CalendarDays, IdCard } from "lucide-react";
+import { GraduationCap, User, Phone, MapPin, IdCard } from "lucide-react";
 
 /**
  * "Academic & Personal" detail section for the student profile.

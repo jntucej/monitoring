@@ -2,7 +2,7 @@
 
 
 import Link from "next/link";
-import { UserCheck, Lock, Users, ArrowUpRight, ShieldCheck } from "lucide-react";
+import { UserCheck, Lock, Users, ArrowUpRight } from "lucide-react";
 
 export default function AccessHubPage() {
   return (

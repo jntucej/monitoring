@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { QrCode, X, AlertCircle, Clock, CheckCircle2, ShieldCheck, Download, Loader2 } from "lucide-react";
+import { QrCode, X, AlertCircle, ShieldCheck, Download, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
 export interface PassQrModalProps {

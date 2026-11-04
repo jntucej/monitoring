@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Upload, X, CheckCircle2, AlertTriangle, FileText, Loader2, ScrollText, Download,
-} from "lucide-react";
+import {Upload, X, FileText, Loader2, ScrollText, Download}  from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 
 interface BulkUserImportModalProps {

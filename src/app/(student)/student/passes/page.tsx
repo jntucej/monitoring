@@ -7,8 +7,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { QrCode, Plus, CheckCircle2, Clock, XCircle, ArrowLeft, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useUIStore } from "@/stores/uiStore";
-import { usePassTypes, getPassTypeName } from "@/hooks/usePassTypes";
+
+import { getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
 import { PassQrModal } from "@/components/student/PassQrModal";

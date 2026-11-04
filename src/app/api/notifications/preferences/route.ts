@@ -4,7 +4,7 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { AuthContext } from "@/lib/authContext";
-import type { NotificationPreferences } from "@/lib/notification-types";
+
 
 async function handleGet(req: NextRequest, context: { auth: AuthContext }) {
   const userId = context.auth.userId;
