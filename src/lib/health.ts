@@ -142,7 +142,7 @@ export async function checkSystemHealth() {
         health.components.gateways.status = 'degraded';
         if (health.status === 'healthy') health.status = 'degraded';
       }
-    } catch (error) {
+    } catch {
       health.components.gateways.status = 'unhealthy';
       health.status = 'unhealthy';
     }

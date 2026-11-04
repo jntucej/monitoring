@@ -186,7 +186,7 @@ export function getAuthHeaders(): Record<string, string> {
     }
 
     return headers;
-  } catch (e) {
+  } catch {
     return headers;
   }
 }

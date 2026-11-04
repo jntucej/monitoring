@@ -23,7 +23,7 @@ async function handleGet(req: NextRequest) {
 
     const qrToken = await generateQrToken(user.studentDetails.roll, user.id);
     return NextResponse.json({ success: true, data: { qrToken } });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to generate QR token" } },
       { status: 500 }

@@ -10,7 +10,7 @@ async function handleGet(req: NextRequest) {
   try {
     const data = await getAllGatesLive();
     return NextResponse.json({ success: true, data });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Failed to fetch gates' }, { status: 500 });
   }
 }
@@ -42,7 +42,7 @@ async function handlePost(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 import { useGlossyMotion, fadeInUp, cardHover } from "@/lib/animations";
 import { motion, useMotionValue, useSpring, useTransform, Transition } from "framer-motion";

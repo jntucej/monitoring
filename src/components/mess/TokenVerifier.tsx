@@ -103,7 +103,7 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
         }
       };
       rafRef.current = requestAnimationFrame(tick);
-    } catch (e) {
+    } catch {
       addToast({ message: "Camera unavailable — use manual code", variant: "error" });
       stopCamera();
     }

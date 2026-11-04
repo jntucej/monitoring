@@ -33,7 +33,7 @@ async function handleGet(req: NextRequest, context: { auth: any }) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error) {
+  } catch {
     return NextResponse.json(err("INTERNAL_ERROR", "Internal server error").body, { status: 500 });
   }
 }

@@ -16,7 +16,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
-import withAuthorization from "@/middleware/authorization";
+
 import type { AuthContext } from "@/lib/authContext";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { verifyPassword } from "@/lib/auth-token";

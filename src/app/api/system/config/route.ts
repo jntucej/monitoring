@@ -44,7 +44,7 @@ async function handleGetInner(_req: NextRequest) {
       success: true,
       data: toConfig((data as any)?.data ?? (data as any)?.value),
     });
-  } catch (_err) {
+  } catch {
     return NextResponse.json({ success: true, data: defaultConfig });
   }
 }

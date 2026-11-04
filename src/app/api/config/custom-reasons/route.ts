@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
-import withAuthorization from "@/middleware/authorization";
+
 import { addAudit } from "@/lib/db";
 import type { WorkflowType } from "@/lib/types";
 

@@ -37,7 +37,7 @@ async function handleGet(req: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     let dbJobs = null; let jobsErr = null;
-    try { const res = await supabase.from("scheduled_jobs").select("*"); dbJobs = res.data; jobsErr = res.error; } catch(e) { jobsErr = true; }
+    try { const res = await supabase.from("scheduled_jobs").select("*"); dbJobs = res.data; jobsErr = res.error; } catch { jobsErr = true; }
     const { data: dbRuns, error: runsErr } = await supabase
       .from("job_runs")
       .select("*")

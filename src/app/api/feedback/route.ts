@@ -66,7 +66,7 @@ async function handleGet(req: NextRequest) {
     if (!error && data && data.length > 0) {
       return NextResponse.json({ success: true, data });
     }
-  } catch (e) {
+  } catch {
     // fallback
   }
   return NextResponse.json({ success: true, data: feedbackStore });

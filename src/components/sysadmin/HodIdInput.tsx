@@ -53,7 +53,7 @@ export function HodIdInput({
         if (cancelled) return;
         setState({ kind: "ready", result: json });
         onResolved(json.found && json.eligible ? json.id! : null);
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setState({ kind: "error", message: "Lookup failed" });
           onResolved(null);

@@ -583,13 +583,13 @@ export function Scanner({
           video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } },
           audio: false,
         });
-      } catch (e1) {
+      } catch {
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" },
             audio: false,
           });
-        } catch (e2) {
+        } catch {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false,
