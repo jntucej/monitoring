@@ -58,7 +58,7 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
   if (!scan) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" role="presentation" onClick={onClose}>
       <div
         className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[85dvh] overflow-y-auto p-5 space-y-4"
         onClick={(e) => e.stopPropagation()}

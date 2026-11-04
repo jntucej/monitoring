@@ -50,11 +50,14 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
       {cards.map((card, i) => (
         <GlossyFloatingContainer key={card.label} floatDelay={i * 0.3} floatDistance={-7}>
           <motion.div
+            role="button"
+            tabIndex={0}
+            aria-label={`View full ${card.label} page`}
             whileHover={{ scale: 1.03, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => router.push(card.href)}
-            className={`bg-[var(--bg-surface)] border border-[var(--border)] hover:border-indigo-500/40 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 group shadow-sm ${card.glow}`}
-            title={`Click to view full dedicated page for ${card.label}`}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(card.href); } }}
+            className={`bg-[var(--bg-surface)] border border-[var(--border)] hover:border-indigo-500/40 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 group shadow-sm ${card.glow} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent,#6366f1)]`}
           >
             <div className="flex items-center justify-between gap-1 mb-1">
               <p className="text-xs font-semibold text-[var(--text-muted)] uppercase truncate">

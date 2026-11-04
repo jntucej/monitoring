@@ -80,3 +80,9 @@ export function OperatorLoadingStates() {
     </div>
   );
 }
+
+// UI-audit fix 7: delegate to the shared skeleton system. The local
+// definitions above are kept so existing call sites keep compiling, but
+// new code should use PageSkeleton / WidgetSkeleton / TableSkeleton from
+// @/components/shared/Spinner.
+export { PageSkeleton, WidgetSkeleton, TableSkeleton, Spinner } from "@/components/shared/Spinner";

@@ -861,6 +861,14 @@ body {
   .glass-nav-dock { padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 4px) !important; }
 }
 
+/* UI-audit mobile §4: coarse-pointer touch targets (44px min, WCAG 2.5.8) */
+@media (pointer: coarse) {
+  button, a, [role="button"], .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 :root {
   --glass-blur: 24px;
   --glass-saturate: 220%; /* Bump saturation boost for deeper richness */

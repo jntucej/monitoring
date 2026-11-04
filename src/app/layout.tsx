@@ -4,6 +4,7 @@ import "./globals.css";
 import { COLLEGE } from "@/lib/college-config";
 import { organizationJsonLd } from "@/lib/seo";
 import { ClientProviders } from "./ClientProviders";
+import { PwaInstallPrompt } from "@/components/shared/PwaInstallPrompt";
 import { getServerTheme } from "@/lib/theme-cookie";
 
 export const metadata: Metadata = {
@@ -144,6 +145,7 @@ try {
           Skip to main content
         </a>
         <ClientProviders>{children}</ClientProviders>
+        <PwaInstallPrompt />
       </body>
     </html>
   );

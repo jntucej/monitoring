@@ -42,7 +42,10 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           whileHover={{ y: -4, scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 350, damping: 25 }}
+          role="button"
+          tabIndex={0}
           onClick={handleClick}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
           className="group relative overflow-hidden bg-[var(--bg-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] hover:border-indigo-500/50 p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10"
           title={`Click to view context & breakdown for ${label}`}
         >

@@ -29,7 +29,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogIn, LogOut, Check, X, Home, Clock } from "lucide-react";
 import { ExitReason, ScanDirection, Student } from "@/lib/types";
 import { getAvatarPlaceholder } from "@/lib/utils";
-import { useOperatorStore, EntryButtonId } from "@/stores/operatorStore";
+import { useScanStore } from "@/stores/scanStore";
+import { EntryButtonId } from "@/stores/operatorStore";
 import type { Recommendation as OperatorRecommendation } from "@/lib/operator-recommend";
 
 export type Recommendation = OperatorRecommendation;
@@ -56,9 +57,10 @@ export function ScanConfirmation({
   campusStatus,
   currentEntryType,
 }: ScanConfirmationProps) {
-  const store = useOperatorStore();
+  // Part 6: narrow subscription — getRecommendation lives on the scan store
+  const getRecommendation = useScanStore((s) => s.getRecommendation);
   const recommendation =
-    recommendationProp ?? store.getRecommendation?.(student, 0) ?? null;
+    recommendationProp ?? getRecommendation(student, 0) ?? null;
 
   // 2-second photo-verification countdown: the confirm button stays
   // disabled until the operator has had a moment to compare the

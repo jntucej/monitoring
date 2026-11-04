@@ -108,7 +108,10 @@ export async function saveAttachment(input: SaveInput): Promise<Saved> {
   // (an attacker-controlled path segment would defeat every regex filter).
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(input.complaintId)) {
-    throw Object.assign(new Error("invalid complaint id"), { code: "INVALID_COMPLAINT_ID", status: 400 });
+    const e = new Error("invalid complaint id");
+    (e as { code?: string; status?: number }).code = "INVALID_COMPLAINT_ID";
+    (e as { code?: string; status?: number }).status = 400;
+    throw e;
   }
   // Part 6: stored extension is derived from the file's actual bytes, never
   // from the client Content-Type or original filename. SVG / HTML are not in

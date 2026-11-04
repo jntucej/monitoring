@@ -10,7 +10,7 @@
  */
 
 import { MapPin, Clock, ArrowDownLeft, ArrowUpRight, Timer } from "lucide-react";
-import { useOperatorStore } from "@/stores/operatorStore";
+import { useGateStore } from "@/stores/gateStore";
 
 export interface StatusBarProps {
   counts: {
@@ -25,7 +25,7 @@ export interface StatusBarProps {
 }
 
 export function StatusBar({ counts, lastScan }: StatusBarProps) {
-  const gate = useOperatorStore((s) => s.gate);
+  const gate = useGateStore((s) => s.gate);
 
   const shiftWindow = (() => {
     const now = new Date();

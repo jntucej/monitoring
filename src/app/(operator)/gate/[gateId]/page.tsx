@@ -11,6 +11,8 @@ import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Wrench, Moon } from "luc
 // is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
 // row — no duplicate "Manual entry" button here (removed in this pass).
 import { useOperatorStore } from "@/stores/operatorStore";
+import { useScanStore } from "@/stores/scanStore";
+import { useGateStore } from "@/stores/gateStore";
 import type { Student } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
@@ -117,21 +119,21 @@ function OperatorPageInner() {
   // Subscribe via individual selectors, NOT the whole store object (a full
   // useOperatorStore() call re-renders this page on every store field
   // change and drives the "too many re-renders" React #310 loop).
-  const state = useOperatorStore((s) => s.state);
-  const currentStudent = useOperatorStore((s) => s.currentStudent);
-  const currentCampusStatus = useOperatorStore((s) => s.currentCampusStatus);
-  const lastScan = useOperatorStore((s) => s.lastScan);
-  const error = useOperatorStore((s) => s.error);
-  const startScan = useOperatorStore((s) => s.startScan);
-  const cancelScan = useOperatorStore((s) => s.cancelScan);
-  const reset = useOperatorStore((s) => s.reset);
-  const setGate = useOperatorStore((s) => s.setGate);
-  const confirmScan = useOperatorStore((s) => s.confirmScan);
-  const lastOutReason = useOperatorStore((s) => s.lastOutReason);
-  const gateState = useOperatorStore((s) => s.gate);
-  const entryType = useOperatorStore((s) => s.entryType);
-  const cachedPasses = useOperatorStore((s) => s._cachedPasses);
-const recentScans = useOperatorStore((s) => s.recentScans);
+  const state = useScanStore((s) => s.state);
+  const currentStudent = useScanStore((s) => s.currentStudent);
+  const currentCampusStatus = useScanStore((s) => s.currentCampusStatus);
+  const lastScan = useScanStore((s) => s.lastScan);
+  const error = useScanStore((s) => s.error);
+  const startScan = useScanStore((s) => s.startScan);
+  const cancelScan = useScanStore((s) => s.cancelScan);
+  const reset = useScanStore((s) => s.reset);
+  const setGate = useGateStore((s) => s.setGate);
+  const confirmScan = useScanStore((s) => s.confirmScan);
+  const lastOutReason = useScanStore((s) => s.lastOutReason);
+  const gateState = useGateStore((s) => s.gate);
+  const entryType = useScanStore((s) => s.entryType);
+  const cachedPasses = useScanStore((s) => s._cachedPasses);
+const recentScans = useScanStore((s) => s.recentScans);
 const shift = useOperatorShiftClock();
 
   // Pure derivation — `recommend()` reads the scanned student's state and
@@ -170,13 +172,13 @@ const shift = useOperatorShiftClock();
 
   // A1: live gate mode + lockdown now live in the operator store so the
   // status-strip banner (GateModeBanner) reads one source of truth.
-  const storeGateMode = useOperatorStore((s) => s.gateMode);
-  const storeLockdown = useOperatorStore((s) => s.lockdown);
-  const storeLockdownDismissed = useOperatorStore((s) => s.lockdownDismissed);
-  const dismissLockdown = useOperatorStore((s) => s.dismissLockdown);
-  const overrideGateMode = useOperatorStore((s) => s.overrideGateMode);
-  const loadGateMode = useOperatorStore((s) => s.loadGateMode);
-  const loadLockdown = useOperatorStore((s) => s.loadLockdown);
+  const storeGateMode = useGateStore((s) => s.gateMode);
+  const storeLockdown = useGateStore((s) => s.lockdown);
+  const storeLockdownDismissed = useGateStore((s) => s.lockdownDismissed);
+  const dismissLockdown = useGateStore((s) => s.dismissLockdown);
+  const overrideGateMode = useGateStore((s) => s.overrideGateMode);
+  const loadGateMode = useGateStore((s) => s.loadGateMode);
+  const loadLockdown = useGateStore((s) => s.loadLockdown);
   // Local state drives the banner + scanner gating; the store values are
   // mirrored into them on poll so existing JSX is untouched.
   const [activeLockdown, setActiveLockdown] = useState<any>(null);
@@ -305,7 +307,7 @@ const shift = useOperatorShiftClock();
       // O8: show the pass preview for OUT scans; IN scans don't need one.
       if (dir === "OUT" && currentStudent) {
         const reasonLabel = reason ?? "home_out";
-        setPassPreview({ roll: currentStudent.roll ?? "", reason: reasonLabel, ticketNumber: cachedPasses.find((p: any) => p?.roll === currentStudent?.roll)?.ticket_number });
+        setPassPreview({ roll: currentStudent.roll ?? "", reason: reasonLabel, ticketNumber: cachedPasses.find((p) => p?.roll === currentStudent?.roll)?.id });
         // O10: high-risk OUT = home_out with an approved pass.
         if (reasonLabel === "home_out" && cachedPasses.length > 0) setBiometricPending(true);
       } else {
