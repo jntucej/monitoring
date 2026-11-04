@@ -211,6 +211,11 @@ async function handleRefresh(req: NextRequest) {
               WHERE id = $1`,
             [row.user_id]
           );
+          // The security-critical family revoke + session_version bump
+          // are already done. The audit row is best-effort: if it throws
+          // (e.g. the table is being rotated, or the pool is saturated)
+          // we swallow it — the session is already dead and returning
+          // 401 is the correct client response regardless.
           try {
             await addAudit({
               action: "REFRESH_REUSE_DETECTED",
@@ -223,16 +228,7 @@ async function handleRefresh(req: NextRequest) {
               },
             });
           } catch (auditErr) {
-            // The family revoke already committed inside the transaction
-            // above; only the audit write is best-effort. Propagate a
-            // marker error so the outer catch returns 401 TOKEN_REVOKED
-            // rather than a 503 SERVER_ERROR to a client whose session
-            // is already dead.
-            const markerErr = new Error(
-              "REFRESH_REUSE_DETECTED audit write failed (family already revoked)"
-            );
-            markerErr.cause = auditErr;
-            throw markerErr;
+            console.warn("[refresh] REFRESH_REUSE_DETECTED audit write failed (family already revoked):", auditErr);
           }
           return {
             kind: "reuse" as const,
@@ -247,21 +243,6 @@ async function handleRefresh(req: NextRequest) {
       });
     } catch (err) {
       console.error("[refresh] rotation transaction failed:", err);
-      // The reuse path above already revoked the family before addAudit
-      // (which is outside the transaction and can throw on a DB blip).
-      // Distinguish "we already did the security-critical family revoke"
-      // from "the rotation itself failed" so the client gets the right
-      // 401 semantics in both cases.
-      const msg = String(err instanceof Error ? err.message : null);
-      if (msg.includes("REFRESH_REUSE_DETECTED") || msg.includes("family")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: { code: "TOKEN_REVOKED", message: "Session family revoked — sign in again." },
-          },
-          { status: 401 }
-        );
-      }
       return NextResponse.json(
         {
           success: false,
