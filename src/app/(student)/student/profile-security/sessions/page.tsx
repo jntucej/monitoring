@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,11 +25,12 @@ export default function SessionsPage() {
   }, []);
 
   const signOutAll = async () => {
+  const router = useRouter();
     setSigningOut(true);
     try {
       await fetch("/api/auth/logout-all", { method: "POST", headers: getAuthHeaders() });
     } finally {
-      window.location.href = "/login";
+      router.push("/login");
     }
   };
 

@@ -121,7 +121,7 @@ export function ProfileMenuButton({
       // logout() already sets window.location.href = "/login"; guard the hard
       // redirect in case a future change to the store drops it.
       if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
-        window.location.href = "/login";
+        router.push("/login");
       }
     } catch {
       if (typeof window !== "undefined") window.location.href = "/login";

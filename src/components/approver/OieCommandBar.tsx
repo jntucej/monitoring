@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 "use client";
 
 /**
@@ -171,9 +172,10 @@ export function OieCommandBar({ role, open, onClose }: OieCommandBarProps) {
 
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
+  const router = useRouter();
       // ── exceptions: navigate to the access-exceptions page ──
       if (parsed.action === "EXCEPTIONS") {
-        window.location.href = "/oie/access-exceptions";
+        router.push("/oie/access-exceptions");
         onClose();
         return;
       }

@@ -103,6 +103,7 @@ export function useApi() {
         if (retryRes.status === 401) {
           logoutRef.current();
           if (typeof window !== "undefined") {
+            /* eslint-disable-next-line @next/next/no-location-assign-relative-destination */
             window.location.href = "/login";
           }
           throw new Error("UNAUTHORIZED");
@@ -113,6 +114,7 @@ export function useApi() {
         // No refreshed token available — hard logout.
         logoutRef.current();
         if (typeof window !== "undefined") {
+          /* eslint-disable-next-line @next/next/no-location-assign-relative-destination */
           window.location.href = "/login";
         }
         throw new Error("UNAUTHORIZED");

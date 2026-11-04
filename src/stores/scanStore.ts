@@ -252,6 +252,7 @@ export const useScanStore = create<ScanStore>((set, get) => ({
       if (res.status === 401 || result?.error?.code === "SESSION_EXPIRED" || result?.error?.code === "UNAUTHORIZED") {
         authStore.logout();
         if (typeof window !== "undefined") {
+          /* eslint-disable-next-line @next/next/no-location-assign-relative-destination */
           window.location.href = "/login";
         }
         return;
@@ -511,6 +512,7 @@ export const useScanStore = create<ScanStore>((set, get) => ({
           const authStore = useAuthStore.getState();
           authStore.logout();
           if (typeof window !== "undefined") {
+            /* eslint-disable-next-line @next/next/no-location-assign-relative-destination */
             window.location.href = "/login";
           }
           return null;

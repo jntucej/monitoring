@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 "use client";
 
 import React from "react";
@@ -14,6 +15,7 @@ export function UserProfileTab() {
   const { theme, setTheme, addToast } = useUIStore();
 
   const handleLogout = async () => {
+  const router = useRouter();
     try {
       await logout();
       addToast({
@@ -21,7 +23,7 @@ export function UserProfileTab() {
         message: "You have been successfully signed out.",
         variant: "success",
       });
-      window.location.href = "/login";
+      router.push("/login");
     } catch (err: any) {
       addToast({
         title: "Error Signing Out",

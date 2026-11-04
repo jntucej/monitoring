@@ -68,4 +68,5 @@ export function ok<T = unknown>(data?: T, message?: string, status: number = 200
   return { body, status };
 }
 
-export default { err, errResponse, ok };
+const apiResponse = { err, errResponse, ok };
+export default apiResponse;

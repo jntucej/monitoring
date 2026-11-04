@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 "use client";
 
 /**
@@ -163,9 +164,10 @@ export function ExamSuperintendentCommandBar({ role, open, onClose }: ExamSuperi
 
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
+  const router = useRouter();
       // ── candidates: navigate to the candidate access list ──
       if (parsed.action === "CANDIDATES") {
-        window.location.href = "/exam/superintendent/schedule";
+        router.push("/exam/superintendent/schedule");
         onClose();
         return;
       }

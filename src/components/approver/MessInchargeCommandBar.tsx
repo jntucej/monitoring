@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 "use client";
 
 /**
@@ -167,19 +168,20 @@ export function MessInchargeCommandBar({ role, open, onClose }: MessInchargeComm
 
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
+  const router = useRouter();
       if (parsed.action === "UNKNOWN") {
         addToast({ variant: "error", message: "Unknown command. Type a command from the list below." });
         return;
       }
       if (parsed.action === "COUNT") {
         setBusy(true);
-        window.location.href = "/mess/daily-meal-counts";
+        router.push("/mess/daily-meal-counts");
         onClose();
         return;
       }
       if (parsed.action === "MENU") {
         setBusy(true);
-        window.location.href = "/mess/menu-management";
+        router.push("/mess/menu-management");
         onClose();
         return;
       }

@@ -72,6 +72,7 @@ export default function GlobalError({
           onClick={() => {
             // A hard navigate to home + reload clears the stale chunk map.
             localStorage.removeItem("gate-monitor-chunk-recover");
+            /* eslint-disable-next-line @next/next/no-location-assign-relative-destination */
             window.location.href = "/";
           }}
           style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
