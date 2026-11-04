@@ -42,7 +42,7 @@ export function buildPrompt(
     content: sanitizeRetrieved(c.content),
   }));
 
-  const numbered = safeCtx.length
+  const _numbered = safeCtx.length
     ? safeCtx.map((c, i) => `[${i + 1}] ${c.title}${c.source ? ` (${c.source})` : ""}\n${c.content}`).join("\n\n---\n\n")
     : "(no matching documents)";
 

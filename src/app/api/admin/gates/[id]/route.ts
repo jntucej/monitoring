@@ -21,7 +21,7 @@ function getId(req: NextRequest): string {
   return decodeURIComponent(segments[segments.length - 1]);
 }
 
-async function handleGet(req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
+async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> {
   try {
     const id = getId(req);
     const res = await query<{

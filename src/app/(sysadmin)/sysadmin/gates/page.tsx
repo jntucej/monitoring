@@ -60,13 +60,13 @@ const api = useApi();
   const { addToast } = useUIStore();
 
   const [gates, setGates] = useState<Gate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Gate | null>(null);
   const [assigningGate, setAssigningGate] = useState<Gate | null>(null);
 
   const [form, setForm] = useState({ gateCode: "", name: "", location: "", type: "main", audience: "all" });
-  const [users, setUsers] = useState<AssignableUser[]>([]);
+  const [users] = useState<AssignableUser[]>([]);
   const [userQuery, setUserQuery] = useState("");
   const [userResults, setUserResults] = useState<AssignableUser[]>([]);
 

@@ -39,7 +39,7 @@ interface RecentAuditItem {
 }
 
 export default function SysAdminProfilePage() {
-const api = useApi();
+const _api = useApi();
 
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>
@@ -71,7 +71,7 @@ const api = useApi();
   const [showPassword, setShowPassword] = useState(false);
 
   // Telemetry & audit
-  const [recentAudits, setRecentAudits] = useState<RecentAuditItem[]>([]);
+  const [setRecentAudits] = useState<RecentAuditItem[]>([]);
   const [activeSessionsCount, setActiveSessionsCount] = useState<number | null>(null);
 
   const loadProfile = useCallback(async () => {

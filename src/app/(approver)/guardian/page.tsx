@@ -173,7 +173,7 @@ function GuardianOverviewInner() {
     (p) => p.finalStatus === "APPROVED" || p.finalStatus === "APPROVED_ADMIN"
   );
 
-  const loading = personsLoading || passesLoading || pendingLoading;
+  const _loading = personsLoading || passesLoading || pendingLoading;
 
   return (
     <div className="min-w-0 space-y-6">

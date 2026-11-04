@@ -23,7 +23,7 @@ Arjun Kumar,arjun.kumar@college.edu,student,24JJ1A0501,CSE,M Raj Kumar,2006-02-1
 Meera Nair,meera.nair@college.edu,student,24JJ2B0774,BIOE,M S Nair,2005-11-02,+919****8821,Female`;
 
 export default function AdminStudentsImportPage() {
-  const api = useApi();
+  const _api = useApi();
   const [csvText, setCsvText] = useState("");
   const [validating, setValidating] = useState(false);
   const [committing, setCommitting] = useState(false);

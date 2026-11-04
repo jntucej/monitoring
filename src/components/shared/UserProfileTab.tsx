@@ -31,7 +31,7 @@ export function UserProfileTab() {
     }
   };
 
-  const toggleTheme = () => {
+  const _toggleTheme = () => {
     const nextTheme = theme === "dark" ? "glass" : theme === "glass" ? "light" : "dark";
     setTheme(nextTheme);
     addToast({

@@ -90,7 +90,7 @@ export function FloatingBot() {
     if (d.moved) clearPress();      // drag cancels hold
   };
 
-  const onPointerUp = (e: React.PointerEvent) => {
+  const onPoint_erUp = (e: React.PointerEvent) => {
     const d = dragRef.current;
     dragRef.current = null;
     clearPress();

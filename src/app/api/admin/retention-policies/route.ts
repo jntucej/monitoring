@@ -35,7 +35,7 @@ async function handlePatch(req: NextRequest) {
     const { id, retention_days, auto_delete } = await req.json();
     const actorId = req.headers.get("x-user-id") || "sysadmin";
     const actorRole = (req.headers.get("x-user-role") || "sysadmin") as Role;
-    const supabase = getSupabaseServiceClient();
+    const _supabase = getSupabaseServiceClient();
 
     const updateFields: Record<string, any> = { updated_at: new Date().toISOString() };
     if (typeof retention_days === "number") updateFields.retention_days = retention_days;

@@ -13,7 +13,7 @@ function getIdFromPath(req: NextRequest): string {
 async function handlePost(req: NextRequest) {
   try {
     const id = getIdFromPath(req);
-    const supabase = getSupabaseServiceClient();
+    const _supabase = getSupabaseServiceClient();
 
     const { query } = await import('@/lib/postgres'); const logCountRes = await query('SELECT COUNT(*)::int as count FROM movement_logs WHERE timestamp >= NOW() - INTERVAL \'1 day\''); const recordsSynced = logCountRes.rows[0]?.count ?? 0;
     const timestamp = new Date().toISOString();

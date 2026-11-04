@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { syncLMSRosters } from "@/lib/integrations/lms";
 
-async function handlePost(req: NextRequest) {
+async function handlePost(_req: NextRequest) {
   try {
     const result = await syncLMSRosters();
     return NextResponse.json({

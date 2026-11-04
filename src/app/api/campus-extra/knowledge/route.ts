@@ -22,7 +22,7 @@ async function handleGet(
   context: { auth: AuthContext }
 ) {
   const supabase = getSupabaseServiceClient();
-  const role = context.auth.role;
+  const _role = context.auth.role;
 
   const category = req.nextUrl.searchParams.get("category");
   const search = req.nextUrl.searchParams.get("search")?.trim();

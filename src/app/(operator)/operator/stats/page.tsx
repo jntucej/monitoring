@@ -68,7 +68,7 @@ function OperatorStatsInner() {
     return Object.values(freq).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [rows]);
 
-  const fmtTime = (iso: string | null | undefined) =>
+  const _fmtTime = (iso: string | null | undefined) =>
     iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
 
   return (

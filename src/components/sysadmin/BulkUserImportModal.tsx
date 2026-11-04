@@ -80,7 +80,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
   /** B7: per-row enrollment codes for freshly imported students (from the commit response). */
   const [reportBootstrapCodes, setReportBootstrapCodes] = useState<Array<{ row: number; roll: string | null; code: string }> | null>(null);
 
-  const runValidate = async (): Promise<PreviewState | null> => {
+  const _runValidate = async (): Promise<PreviewState | null> => {
     const res = await fetch("/api/users/bulk/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...api.getHeaders() },

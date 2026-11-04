@@ -115,7 +115,7 @@ function ExaminationReportsInner() {
   const metrics = data?.data?.metrics ?? [];
   const seriesData = data?.data?.seriesData ?? [];
 
-  const metricValue = useMemo(
+  const _metricValue = useMemo(
     () => (key: string) => metrics.find((m) => m.key === key)?.value ?? 0,
     [metrics]
   );

@@ -27,7 +27,7 @@ export function getIstDateString(now: Date = new Date()): string {
 export function lastIstDayStrings(n: number, now: Date = new Date()): string[] {
   // Anchor on today's IST date (NOT on now - n days in UTC), then walk
   // backwards n-1 days in local calendar arithmetic.
-  const today = getIstDateString(now);
+  const _today = getIstDateString(now);
   const out: string[] = [];
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(now);

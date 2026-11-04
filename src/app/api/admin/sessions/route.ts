@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { withAuthorization } from "@/middleware/authorization";
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const { query } = await import("@/lib/postgres");
 
@@ -34,7 +34,7 @@ async function handleGet(req: NextRequest) {
     }));
 
     return NextResponse.json({ success: true, data: activeSessions });
-  } catch (err: any) {
+  } catch (_err: any) {
     return NextResponse.json({ success: true, data: [] });
   }
 }

@@ -11,7 +11,7 @@ import type { AuthContext } from "@/lib/authContext";
  * - cells: array of { stage, total, withinSla, breached, rate }
  * - byWorkflowType: heatmap keyed by workflow_type → stage → { total, withinSla, breached }
  */
-async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { _auth }: { auth: AuthContext }) {
   try {
     // For all pending tickets, compute whether they are within SLA
     const { rows: stageRows } = await query(

@@ -20,7 +20,7 @@ export function useParallax(
   ref: React.RefObject<HTMLDivElement | null>;
   value: MotionValue<number>;
 } {
-  const { axis = "y", range = 120 } = options;
+  const { _axis = "y", range = 120 } = options;
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,

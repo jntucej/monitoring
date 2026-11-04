@@ -47,7 +47,7 @@ export default function MessBillPage() {
     }
   };
 
-  const cancelOptOut = async (id: string) => {
+  const _cancelOptOut = async (id: string) => {
     const r = await fetch(`/api/student/meal-opt-out/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),

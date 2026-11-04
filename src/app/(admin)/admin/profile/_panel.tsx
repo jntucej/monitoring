@@ -135,7 +135,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
     finally { setSavingPassword(false); }
   };
 
-  const changePin = async (_e: React.FormEvent) => {
+  const _changePin = async (_e: React.FormEvent) => {
     // PIN removed — password-only auth model
   };
 

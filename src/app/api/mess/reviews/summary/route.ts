@@ -75,7 +75,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const revealIdentity = IDENTITY_REVEAL.has(auth.role);
   const recentComments = revealIdentity
     ? comments
-    : comments.map(({ user_name, unique_id, ...rest }) => ({
+    : comments.map(({ user_name, _unique_id, ...rest }) => ({
         ...rest,
         user_name: "Anonymous",
         unique_id: "—",

@@ -14,7 +14,7 @@ import type { AuthContext } from "@/lib/authContext";
  * - byWorkflowType: counts per workflow_type
  * - byDay: day-by-day activity (for sparkline)
  */
-async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { _auth }: { auth: AuthContext }) {
   try {
     const { rows: pending } = await query(
       `SELECT COUNT(*)::int AS count FROM permissions WHERE status = 'PENDING'`

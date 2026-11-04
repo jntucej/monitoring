@@ -40,7 +40,7 @@ function slaBreached(row: PermissionRequestRow): boolean {
 
 function VpPendingApprovalsInner() {
   const user = useAuthStore((s) => s.user);
-  const role = (user?.role ?? "vice_principal") as string;
+  const _role = (user?.role ?? "vice_principal") as string;
 
   const {
     data: vpQueue,

@@ -108,7 +108,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
   notifications = [],
   unreadCount = 0,
 }: PrincipalSidebarProps) {
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   return (
     <>

@@ -6,7 +6,7 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const data = await getAllGatesLive();
     return NextResponse.json({ success: true, data });
@@ -53,7 +53,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   if (!gateId) {
     return NextResponse.json(err("BAD_REQUEST", "id required").body, { status: 400 });
   }
-  const svc = getSupabaseServiceClient();
+  const _svc = getSupabaseServiceClient();
   const patch: Record<string, any> = {};
   if (body.name) patch.name = body.name;
   if (body.location !== undefined) patch.location = body.location;

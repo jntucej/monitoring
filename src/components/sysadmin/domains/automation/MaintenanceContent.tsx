@@ -101,7 +101,7 @@ export function MaintenanceContent(
     onRowClick?: (entity: MaintenanceEntity) => void;
   },
 ) {
-  const { data: externalData, onRowClick: _onRowClick } = _props ?? {};
+  const { data: externalData, onRowClick: __onRowClick } = _props ?? {};
   const { data, loading, error } = useDashboardData<MaintenanceData>(
     "/api/admin/maintenance/overview",
     { ttlMs: 180_000, pollMs: 60_000, enabled: externalData == null },

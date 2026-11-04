@@ -94,7 +94,7 @@ export async function verifyDPoPProof(
       return { valid: false, error: "DPOP_JTI_MISSING" };
     }
 
-    const now = Date.now();
+    const _now = Date.now();
     const valid = await checkAndConsumeNonce(payload.jti);
     if (!valid) {
       return { valid: false, error: "DPOP_REPLAY_DETECTED" };

@@ -541,7 +541,7 @@ export async function runBulkImport(
         || pick(raw, "htno", "HTNO", "HT NO", "HTNO NO", "HALL TICKET NO");
       return (rawRoll ? String(rawRoll).toUpperCase() : "") === roll;
     });
-    const sheetRow = rowNum === -1 ? 0 : rowNum + 1;
+    const _sheetRow = rowNum === -1 ? 0 : rowNum + 1;
     if (roll && existing.has(roll)) {
       const rep = reportRows.find((x) => x.roll && String(x.roll).toUpperCase() === roll);
       if (rep) { rep.status = "skipped"; rep.reason = `roll '${roll}' already exists in the database`; }

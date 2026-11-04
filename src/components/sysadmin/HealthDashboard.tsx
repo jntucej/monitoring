@@ -20,7 +20,7 @@ import { getAuthHeaders } from "@/lib/utils";
 export function HealthDashboard() {
   const router = useRouter();
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 

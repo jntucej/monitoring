@@ -209,7 +209,7 @@ export async function applyEscalateUp(args: {
   authUserEmail?: string;
   reason?: string;
 }) {
-  const supabase = getSupabaseServiceClient();
+  const _supabase = getSupabaseServiceClient();
   const { appendStageHistory } = await import("@/lib/permission-workflow");
   const history = appendStageHistory(
     args.ticket.stage_history,

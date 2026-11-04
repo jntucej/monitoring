@@ -4,7 +4,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { EnhancedAnalytics } from "@/lib/analytics-types";
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
     const todayStart = new Date();

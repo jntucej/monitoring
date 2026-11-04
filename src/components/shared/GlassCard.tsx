@@ -42,7 +42,7 @@ export function GlassCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const isGlossyMotion = useGlossyMotion();
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handl_eCardClick = (e: React.MouseEvent) => {
     if (onClick) onClick();
     else if (href) router.push(href);
   };

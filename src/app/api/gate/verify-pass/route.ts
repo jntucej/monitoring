@@ -15,7 +15,7 @@ import { requireSecret } from "@/lib/env";
 import { validateQrToken } from "@/lib/qr-token";
 import type { AuthContext } from "@/lib/authContext";
 
-const GATE_ROLES = [
+const _GATE_ROLES = [
   "operator",
   "supervisor",
   "caretaker",
