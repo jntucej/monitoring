@@ -222,8 +222,17 @@ async function handleRefresh(req: NextRequest) {
                 presentedHash: oldTokenHash.slice(0, 16),
               },
             });
-          } catch {
-            // best-effort
+          } catch (auditErr) {
+            // The family revoke already committed inside the transaction
+            // above; only the audit write is best-effort. Propagate a
+            // marker error so the outer catch returns 401 TOKEN_REVOKED
+            // rather than a 503 SERVER_ERROR to a client whose session
+            // is already dead.
+            const markerErr = new Error(
+              "REFRESH_REUSE_DETECTED audit write failed (family already revoked)"
+            );
+            markerErr.cause = auditErr;
+            throw markerErr;
           }
           return {
             kind: "reuse" as const,
@@ -238,6 +247,21 @@ async function handleRefresh(req: NextRequest) {
       });
     } catch (err) {
       console.error("[refresh] rotation transaction failed:", err);
+      // The reuse path above already revoked the family before addAudit
+      // (which is outside the transaction and can throw on a DB blip).
+      // Distinguish "we already did the security-critical family revoke"
+      // from "the rotation itself failed" so the client gets the right
+      // 401 semantics in both cases.
+      const msg = String(err?.message ?? "");
+      if (msg.includes("REFRESH_REUSE_DETECTED") || msg.includes("family")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "TOKEN_REVOKED", message: "Session family revoked — sign in again." },
+          },
+          { status: 401 }
+        );
+      }
       return NextResponse.json(
         {
           success: false,
