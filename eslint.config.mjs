@@ -8,7 +8,20 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          // `_`-prefixed names (params, catch bindings, destructure fields,
+          // locals) are the idiomatic "intentionally unused" marker — accept them.
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          // rest siblings (`const { a, ...rest } = obj` where only `rest` is
+          // consumed) should not be flagged — they exist to exclude `a` from
+          // the spread, so the named destructuring is the whole point.
+          ignoreRestSiblings: true,
+        },
+      ],
       "@next/next/no-img-element": "off",
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/purity": "warn",
