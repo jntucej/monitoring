@@ -24,7 +24,7 @@ interface MobileGroupsDrawerProps {
  * This is the mobile counterpart of the IconRail flyout — on desktop the
  * rail + flyout handles it, here the drawer + accordion does.
  */
-export function MobileGroupsDrawer({ groups, roleRoot }: MobileGroupsDrawerProps) {
+export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroupsDrawerProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);

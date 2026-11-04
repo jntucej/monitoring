@@ -11,7 +11,7 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
   outpasses,
   leaves,
   loading,
-  error,
+  error: _error,
 }: {
   outpasses: OutpassRow[] | null;
   leaves: OutpassRow[] | null;

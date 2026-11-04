@@ -18,7 +18,7 @@ import {
 type GateMode = "OPEN" | "CURFEW" | "MAINTENANCE";
 
 function ModeCard({
-  mode,
+
   label,
   description,
   icon: Icon,

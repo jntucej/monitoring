@@ -16,7 +16,7 @@ import {
 } from "./nav";
 
 export function VPSidebar({
-  mode,
+
   onNavigate,
 }: {
   mode: "expanded" | "drawer";

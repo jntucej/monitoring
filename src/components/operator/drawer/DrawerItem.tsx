@@ -13,7 +13,7 @@ interface DrawerItemProps {
   active?: boolean;
 }
 
-export function DrawerItem({ href, label, icon: Icon, active = false }: DrawerItemProps) {
+export function DrawerItem({ href, label, icon: Icon, active: _active = false }: DrawerItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || pathname?.startsWith(href + "/");
 

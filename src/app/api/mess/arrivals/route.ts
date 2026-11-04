@@ -8,7 +8,7 @@ import { getDayById, getNextActiveDay } from "../_helpers";
 import { TIER } from "@/server/policy/roles";
 import type { AuthContext } from "@/lib/authContext";
 
-async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     const dayIdParam = req.nextUrl.searchParams.get("dayId");
     const day = dayIdParam ? await getDayById(dayIdParam) : await getNextActiveDay();

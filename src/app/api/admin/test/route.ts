@@ -31,7 +31,7 @@ void rateLimitConfig; // reserved for withRateLimit when enabled per-route
  */
 async function handleGet(
   _req: NextRequest,
-  { auth }: { auth: AuthContext },
+  { auth: _auth }: { auth: AuthContext },
 ): Promise<Response> {
   // Defence in depth: reject if middleware signature is missing/stale.
   const untrusted = requireTrustedHeaders(_req);

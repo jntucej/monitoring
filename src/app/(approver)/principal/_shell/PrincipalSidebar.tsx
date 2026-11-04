@@ -16,7 +16,7 @@ import {
 } from "./nav";
 
 export function PrincipalSidebar({
-  mode,
+
   onNavigate,
 }: {
   mode: "expanded" | "drawer";

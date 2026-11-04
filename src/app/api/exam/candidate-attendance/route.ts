@@ -19,7 +19,7 @@ import type { AuthContext } from "@/lib/authContext";
  */
 async function handleGet(
   req: NextRequest,
-  { auth }: { auth: AuthContext }
+  { auth: _auth }: { auth: AuthContext }
 ) {
   try {
     const limit = Math.min(

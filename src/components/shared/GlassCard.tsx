@@ -33,7 +33,7 @@ export function GlassCard({
   children,
   className,
   onDragEnd,
-  index = 0,
+  index: _index = 0,
   href,
   onClick,
 }: GlassCardProps) {

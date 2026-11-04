@@ -121,7 +121,7 @@ function ReleaseRail({ rows }: { rows: DeploymentRow[] }) {
       </svg>
       {/* tooltip row */}
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {visible.map((d, i) => (
+        {visible.map((d, _i) => (
           <div
             key={d.id}
             className="shrink-0 text-[9px] text-[var(--text-muted)] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border)] w-[28px] text-center"

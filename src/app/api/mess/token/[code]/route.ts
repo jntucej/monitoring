@@ -12,7 +12,7 @@ function getTokenCode(req: NextRequest): string {
   return decodeURIComponent(segments[segments.length - 1] ?? "");
 }
 
-async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     const code = getTokenCode(req);
     if (!code) return fail("MISSING_CODE", "Token code is required", 400);

@@ -16,7 +16,7 @@ import {
 import { StreakBadge } from "../_retention/StreakBadge";
 
 export function HodSidebar({
-  mode,
+
   onNavigate,
 }: {
   mode: "expanded" | "drawer";

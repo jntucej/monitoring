@@ -14,7 +14,7 @@ import type { AuthContext } from "@/lib/authContext";
  * - activeDelegations: delegation_rules currently in force for this principal
  * - quickWins: up to 3 tickets that are simple quick wins (single-stage, <24h SLA)
  */
-async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     // Pending approvals since last 7 days
     const { rows: pendingSince } = await query(

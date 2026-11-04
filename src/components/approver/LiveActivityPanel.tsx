@@ -58,7 +58,7 @@ interface LiveActivityPanelProps {
   onRefresh?: () => void;
 }
 
-export function LiveActivityPanel({ onRefresh }: LiveActivityPanelProps) {
+export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelProps) {
   const { data, loading, refresh } = useApiResource<EscalationsResponse>(
     "/api/supervisor/escalations",
     { ttlMs: 15_000 }

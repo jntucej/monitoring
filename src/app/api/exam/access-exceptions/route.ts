@@ -20,7 +20,7 @@ import type { AuthContext } from "@/lib/authContext";
  */
 async function handleGet(
   req: NextRequest,
-  { auth }: { auth: AuthContext }
+  { auth: _auth }: { auth: AuthContext }
 ) {
   try {
     const limit = Math.min(
@@ -90,7 +90,7 @@ async function handleGet(
  * Create a new access exception (incident) for the current exam day.
  * Body: { severity: "critical"|"warning"|"info", candidate?, roll?, hall?, description? }
  */
-async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handlePost(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => ({}));
     const severity = ["critical", "warning", "info"].includes(body.severity) ? body.severity : "info";
@@ -120,7 +120,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
  * Mark an access exception as resolved.
  * Body: { id: string, resolved: true }
  */
-async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
+async function handlePatch(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => ({}));
     if (typeof body.id !== "string" || body.id.length === 0) {

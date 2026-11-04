@@ -10,7 +10,7 @@ export interface GlossyGateScanCompositionProps {
 
 export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps> = ({
   status = "entry",
-  primaryColor = "#10b981",
+  primaryColor: _primaryColor = "#10b981",
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();

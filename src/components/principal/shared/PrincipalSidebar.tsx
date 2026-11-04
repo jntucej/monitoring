@@ -105,7 +105,7 @@ function NavItem({ href, label, icon: Icon }: { href: string; label: string; ico
 export const PrincipalSidebar = memo(function PrincipalSidebar({
   open = false,
   onClose,
-  notifications = [],
+  notifications: _notifications = [],
   unreadCount = 0,
 }: PrincipalSidebarProps) {
   const pathname = usePathname();

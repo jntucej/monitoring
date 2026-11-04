@@ -80,7 +80,7 @@ export function SineWaveLoader({ className = "" }: { className?: string }) {
 
 export function CountUp({
   value,
-  duration = 0.8,
+  duration: _duration = 0.8,
   delay = 0,
   className = "",
   prefix = "",

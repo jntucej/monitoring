@@ -28,8 +28,8 @@ export function ConfirmSheet({
   onConfirm,
   onCancel,
   autoConfirmMs = null,
-  currentEntryType,
-  lastOutReason,
+  currentEntryType: _currentEntryType,
+  lastOutReason: _lastOutReason,
   isOpen = true,
 }: ConfirmSheetProps) {
   const [selectedDirection, setSelectedDirection] = useState<"IN" | "OUT">(
