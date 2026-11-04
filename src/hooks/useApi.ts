@@ -153,7 +153,7 @@ export function useApi() {
     // Fallback: return raw text
     const text = await res.text();
     return { success: true, data: text as any };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const get = <T = unknown>(url: string) => request<T>(url, { method: "GET" });

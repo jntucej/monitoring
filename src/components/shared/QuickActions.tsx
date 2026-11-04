@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { RoleFlash } from "@/components/shared/RoleFlash";
 
 /**
  * QuickActions — a compact set of role-aware quick-action buttons.
@@ -134,21 +135,31 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
 
   const grid = (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {actions.map((a) => (
-        <button
-          key={a.label}
-          type="button"
-          onClick={() => navigate(a.href)}
-          className="group flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 text-left transition-all hover:border-[var(--text-muted)] hover:bg-[var(--bg-elevated)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] active:scale-[0.98]"
-        >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)]">
-            <a.icon className="h-4 w-4" />
-          </span>
-          <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
-            {a.label}
-          </span>
-        </button>
-      ))}
+      {actions.map((a, i) =>
+        i === 0 ? (
+          <RoleFlash
+            key={a.label}
+            role={role ?? "unknown"}
+            onNavigate={() => navigate(a.href)}
+            label={a.label}
+            icon={a.icon}
+          />
+        ) : (
+          <button
+            key={a.label}
+            type="button"
+            onClick={() => navigate(a.href)}
+            className="group flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 text-left transition-all hover:border-[var(--text-muted)] hover:bg-[var(--bg-elevated)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] active:scale-[0.98]"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)]">
+              <a.icon className="h-4 w-4" />
+            </span>
+            <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
+              {a.label}
+            </span>
+          </button>
+        )
+      )}
     </div>
   );
 

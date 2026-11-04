@@ -260,8 +260,8 @@ async function handlePost(req: NextRequest): Promise<Response> {
   }, { currentUserId: actor.id });
 
   const results = txResults.out;
-  let succeeded = txResults.txSucceeded;
-  let failed = txResults.txFailed;
+  const succeeded = txResults.txSucceeded;
+  const failed = txResults.txFailed;
 
   return NextResponse.json({
     success: true,
