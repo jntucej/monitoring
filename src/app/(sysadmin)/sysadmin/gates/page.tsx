@@ -66,7 +66,7 @@ const api = useApi();
   const [assigningGate, setAssigningGate] = useState<Gate | null>(null);
 
   const [form, setForm] = useState({ gateCode: "", name: "", location: "", type: "main", audience: "all" });
-  const [users, setUsers] = useState<AssignableUser[]>([]);
+
   const [userQuery, setUserQuery] = useState("");
   const [userResults, setUserResults] = useState<AssignableUser[]>([]);
 
