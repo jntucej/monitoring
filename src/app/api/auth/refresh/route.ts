@@ -135,6 +135,7 @@ async function handleRefresh(req: NextRequest) {
       | { kind: "expired" };
 
     let outcome: Outcome;
+    const reuseAuditRef: { current: { userId: string; familyId: string; presentedHash: string } | null } = { current: null };
     try {
       outcome = await withTransaction(async (client) => {
         // 1. Atomic consume — only one caller can win the rotation.
@@ -211,25 +212,15 @@ async function handleRefresh(req: NextRequest) {
               WHERE id = $1`,
             [row.user_id]
           );
-          // The security-critical family revoke + session_version bump
-          // are already done. The audit row is best-effort: if it throws
-          // (e.g. the table is being rotated, or the pool is saturated)
-          // we swallow it — the session is already dead and returning
-          // 401 is the correct client response regardless.
-          try {
-            await addAudit({
-              action: "REFRESH_REUSE_DETECTED",
-              userId: row.user_id,
-              userName: "(refresh)",
-              role: "system" as Role,
-              details: {
-                familyId: row.family_id,
-                presentedHash: oldTokenHash.slice(0, 16),
-              },
-            });
-          } catch (auditErr) {
-            console.warn("[refresh] REFRESH_REUSE_DETECTED audit write failed (family already revoked):", auditErr);
-          }
+          // Defer the audit write until AFTER the transaction commits:
+          // addAudit goes through the Supabase service client which is
+          // slow enough to trip idle_in_transaction_session_timeout (10s)
+          // when it runs while the tx is still open.
+          reuseAuditRef.current = {
+            userId: row.user_id,
+            familyId: row.family_id,
+            presentedHash: oldTokenHash,
+          };
           return {
             kind: "reuse" as const,
             familyId: row.family_id,
@@ -250,6 +241,24 @@ async function handleRefresh(req: NextRequest) {
         },
         { status: 503 }
       );
+    }
+
+    // Deferred reuse audit — fresh pool connection, tx already committed.
+    if (reuseAuditRef.current) {
+      try {
+        await addAudit({
+          action: "REFRESH_REUSE_DETECTED",
+          userId: reuseAuditRef.current.userId,
+          userName: "(refresh)",
+          role: "system" as Role,
+          details: {
+            familyId: reuseAuditRef.current.familyId,
+            presentedHash: reuseAuditRef.current.presentedHash.slice(0, 16),
+          },
+        });
+      } catch (auditErr) {
+        console.warn("[refresh] deferred REFRESH_REUSE_DETECTED audit write failed:", auditErr);
+      }
     }
 
     if (outcome.kind === "unknown" || outcome.kind === "expired") {
