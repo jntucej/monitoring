@@ -35,7 +35,7 @@ export function OperatorProfile() {
     }
   };
 
-  const _toggleTheme = () => {
+  const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "glass" : theme === "glass" ? "light" : "dark";
     setTheme(nextTheme);
     addToast({

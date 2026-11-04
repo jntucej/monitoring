@@ -22,7 +22,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
 
   const duration = durationInFrames ?? COMPOSITION_DURATIONS.scanEntry;
 
-  const _sweep = interpolate(
+  const sweep = interpolate(
     frame,
     [0, duration - 1],
     [0, 100],

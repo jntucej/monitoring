@@ -125,7 +125,7 @@ function getRecommendedActions(
 export function PersonalizedCampusHome() {
   const { user, role } = useAuthStore();
   const engagementState = useEngagementStore();
-  const _widgetOrder = useMemo(
+  const widgetOrder = useMemo(
     () => resolveWidgetOrder(engagementState),
     [engagementState]
   );

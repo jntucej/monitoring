@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSustainabilityHistory } from "@/lib/sustainability";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const data = await getSustainabilityHistory();
     return NextResponse.json({ success: true, data });

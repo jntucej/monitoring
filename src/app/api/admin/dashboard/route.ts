@@ -3,7 +3,7 @@ import { dashboard } from "@/lib/db";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const data = await dashboard();
     return NextResponse.json({ success: true, data });

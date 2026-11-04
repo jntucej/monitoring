@@ -11,7 +11,7 @@ const DEFAULT_PASS_TYPES = [
   { code: "home_out", name: "Home Out", description: "Weekend or overnight home leave", defaultDurationHours: 48, requiresApproval: true, approvalFlow: "principal" },
 ];
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
     const { data, error } = await service

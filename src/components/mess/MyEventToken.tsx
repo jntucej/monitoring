@@ -83,7 +83,7 @@ export function MyEventToken({ eventId }: { eventId: string }) {
     }
   };
 
-  const _downloadQr = () => {
+  const downloadQr = () => {
     // QR removed — showing only manual code now.
   };
 

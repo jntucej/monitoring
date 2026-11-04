@@ -71,7 +71,7 @@ const Row = memo(function Row({
 });
 
 export function RecentScans({ scans, onSelect }: RecentScansProps) {
-  const _isGlossyMotion = useGlossyMotion();
+  const isGlossyMotion = useGlossyMotion();
   const [filter, setFilter] = useState<ScanFilter>("ALL");
 
   const filteredScans = (scans || []).filter((scan) => {

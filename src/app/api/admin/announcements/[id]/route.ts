@@ -62,7 +62,7 @@ async function handlePatch(
   if (Object.keys(updateFields).length === 1) return fail("NO_FIELDS", "no updatable fields provided", 400);
 
   const setClauses = Object.entries(updateFields)
-    .map(([k, _v]) => `${k} = $${Number(Object.keys(updateFields).indexOf(k)) + 1}`)
+    .map(([k, v]) => `${k} = $${Number(Object.keys(updateFields).indexOf(k)) + 1}`)
     .join(", ");
   const updateRes = await withTransaction(
     async (tx) => {

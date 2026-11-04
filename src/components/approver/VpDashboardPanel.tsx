@@ -43,7 +43,7 @@ interface VpDashboardPanelProps {
   onRefresh?: () => void;
 }
 
-export function VpDashboardPanel({ _onRefresh }: VpDashboardPanelProps) {
+export function VpDashboardPanel({ onRefresh }: VpDashboardPanelProps) {
   const { data, loading, refresh } = useApiResource<PrincipalDashboardResponse>(
     "/api/principal/dashboard",
     { ttlMs: 15_000 },

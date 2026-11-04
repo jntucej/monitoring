@@ -20,7 +20,7 @@ const PROFANITY_TERMS: readonly string[] = [
   "scam", "fraud",
 ];
 
-const _BLOCKLIST = new Set(
+const BLOCKLIST = new Set(
   PROFANITY_TERMS.map((t) => t.toLowerCase()),
 );
 

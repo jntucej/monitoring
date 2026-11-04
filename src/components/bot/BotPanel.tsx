@@ -33,7 +33,7 @@ export function BotPanel() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastSpokenRef = useRef<string | null>(null);
   const lastUserQuestionRef = useRef("");
-  const _confirmPendingRef = useRef(false);
+  const confirmPendingRef = useRef(false);
 
   const open = useBotStore((s) => s.open);
   const setOpen = useBotStore((s) => s.setOpen);

@@ -11,7 +11,7 @@ import { withRateLimit } from "@/lib/rate-limit";
  */
 const ONLINE_WINDOW_MS = 5 * 60 * 1000;
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const service = getSupabaseServiceClient();
     const now = Date.now();

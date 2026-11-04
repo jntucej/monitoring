@@ -25,7 +25,7 @@ export const ALL_ROLES: Role[] = [
   "emo",
 ];
 
-export function getDefaultRouteForRole(role: Role | string, _gateId?: string): string {
+export function getDefaultRouteForRole(role: Role | string, gateId?: string): string {
   const routes: Record<string, string> = {
     // The operator dashboard is the home surface; the gate desk (/gate/<id>)
     // is a tool the operator opens from it, not the post-login destination.

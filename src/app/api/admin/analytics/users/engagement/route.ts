@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getUserEngagementMetrics } from "@/lib/user-analytics";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const data = await getUserEngagementMetrics();
     return NextResponse.json({ success: true, data });

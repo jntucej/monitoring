@@ -4,7 +4,7 @@ import { ok } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 
-async function handleGet(_req: NextRequest, { _auth }: { auth: AuthContext }) {
+async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   const [winsRes, insightsRes] = await Promise.all([
     query<{
       ticket_number: string;

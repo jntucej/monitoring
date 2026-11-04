@@ -56,7 +56,7 @@ export function ContributionPortfolio() {
   }, [load]);
 
   // Group by type
-  const _grouped = useMemo(() => {
+  const grouped = useMemo(() => {
     const map: Record<string, PortfolioItem[]> = {};
     for (const item of items) {
       if (!map[item.type]) map[item.type] = [];

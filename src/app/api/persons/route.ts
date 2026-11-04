@@ -315,7 +315,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       );
     }
 
-    const _service = getSupabaseServiceClient();
+    const service = getSupabaseServiceClient();
     // RLS write discipline: users is an RLS table; write through withTransaction.
     await withTransaction(async (client) => {
       await client.query("UPDATE public.users SET status = 'DISABLED' WHERE id = $1", [id]);

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { generateScheduleSuggestions } from "@/lib/scheduling-assistant";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const suggestions = await generateScheduleSuggestions();
     return NextResponse.json({ success: true, data: suggestions });

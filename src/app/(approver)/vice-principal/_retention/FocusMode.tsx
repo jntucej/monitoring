@@ -42,7 +42,7 @@ export function FocusMode({
   const addToast = useUIStore((s) => s.success);
   const errorToast = useUIStore((s) => s.error);
   const recordWin = useVPRetention((s) => s.recordWin);
-  const _sessionWins = useVPRetention((s) => s.sessionWins);
+  const sessionWins = useVPRetention((s) => s.sessionWins);
   const sessionDecisions = useVPRetention((s) => s.sessionDecisions);
 
   const [index, setIndex] = useState(0);
@@ -68,7 +68,7 @@ export function FocusMode({
     async (action: "APPROVE" | "REJECT" | "ESCALATE") => {
       if (!current || busy) return;
       setBusy(true);
-      const _startedAt = Date.now();
+      const startedAt = Date.now();
 
       try {
         const res = await fetch(`/api/permissions/${current.ticket_number}`, {

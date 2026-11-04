@@ -22,7 +22,7 @@ const api = useApi();
   });
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-
+  const [showConfig, setShowConfig] = useState(false);
 
   const fetchStatus = async () => {
     setLoading(true);

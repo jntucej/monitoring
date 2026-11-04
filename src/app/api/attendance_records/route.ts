@@ -9,7 +9,7 @@ import type { AuthContext } from "@/lib/authContext";
 
 export const dynamic = "force-dynamic";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();                
     const { data, error } = await supabase

@@ -139,7 +139,7 @@ export default function RolesManagementPage() {
   // ---- role hierarchy state ----
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [countLoading, setCountLoading] = useState(false);
-  const [setUserCounts] = useState<Record<string, number>>({});
+  const [userCounts, setUserCounts] = useState<Record<string, number>>({});
 
   // ---- grant / revoke state ----
   const [grantRoleCode, setGrantRoleCode] = useState<string | null>(null);

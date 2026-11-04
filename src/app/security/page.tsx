@@ -54,9 +54,9 @@ const ROLE_DISPLAY_NAMES: Record<string, string> = {
 
 export default function SecurityPage() {
   const router = useRouter();
-  const { role, user, _token } = useAuthStore();
-  const { securityMode, wsConnected, _activeAlerts, gateTraffic } = useGlass();
-  const [setRechecking] = useState(false);
+  const { role, user, token } = useAuthStore();
+  const { securityMode, wsConnected, activeAlerts, gateTraffic } = useGlass();
+  const [rechecking, setRechecking] = useState(false);
 
   const mode = securityMode in POSTURE ? securityMode : "secure";
   const p = POSTURE[mode];
@@ -66,14 +66,14 @@ export default function SecurityPage() {
   const displayRoleName = ROLE_DISPLAY_NAMES[userRole] || userRole.toUpperCase();
   const isSysadmin = userRole === "sysadmin";
 
-  const _handleRecheck = () => {
+  const handleRecheck = () => {
     setRechecking(true);
     setTimeout(() => {
       setRechecking(false);
     }, 800);
   };
 
-  const _getGatePassSecurityParams = (r: Role | string) => {
+  const getGatePassSecurityParams = (r: Role | string) => {
     switch (r) {
       case "student":
         return {

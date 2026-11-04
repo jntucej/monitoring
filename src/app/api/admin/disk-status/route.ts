@@ -55,7 +55,7 @@ async function handleGet(req: NextRequest) {
     const databaseSize = dbSizeResult.rows[0]?.size || 'N/A';
 
     // Check backup frequency
-    const _backupCheck = await query(
+    const backupCheck = await query(
       `SELECT COUNT(*) as count FROM schema_migrations WHERE applied_at > NOW() - INTERVAL '1 hour'`
     );
 

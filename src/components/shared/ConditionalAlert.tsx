@@ -30,7 +30,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
 
   if (!visible.length) return null;
 
-  const _tier = getRoleTier(ctx.role);
+  const tier = getRoleTier(ctx.role);
 
   return (
       <div className="space-y-2" role="region" aria-label="Active alerts">

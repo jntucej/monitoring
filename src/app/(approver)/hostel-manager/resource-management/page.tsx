@@ -103,7 +103,7 @@ function HostelManagerResourceManagementInner() {
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const _busy = (presenceLoading && !presence) || (analyticsLoading && !analytics);
+  const busy = (presenceLoading && !presence) || (analyticsLoading && !analytics);
 
   const matrix = presence?.data?.matrix ?? {};
   const gates = presence?.data?.gates ?? [];

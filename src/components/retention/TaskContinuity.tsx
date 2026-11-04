@@ -128,7 +128,7 @@ export function TaskContinuity() {
           const parsed = JSON.parse(raw);
           const token = parsed?.state?.token;
           if (token) {
-            const _res = await fetch(
+            const res = await fetch(
               "/api/campus-extra/task-drafts",
               {
                 method: "DELETE",

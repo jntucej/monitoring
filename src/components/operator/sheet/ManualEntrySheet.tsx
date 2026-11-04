@@ -16,10 +16,10 @@ interface ManualEntrySheetProps {
   workflowType?: WorkflowType;
 }
 
-export function ManualEntrySheet({ isOpen, onClose, onScan, _gateId, workflowType = "hostel" }: ManualEntrySheetProps) {
+export function ManualEntrySheet({ isOpen, onClose, onScan, gateId, workflowType = "hostel" }: ManualEntrySheetProps) {
   const [rollInput, setRollInput] = useState("");
   const [reasonCode, setReasonCode] = useState("");
-  const [setReasonLabel] = useState("");
+  const [reasonLabel, setReasonLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(() => {

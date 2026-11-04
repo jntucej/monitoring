@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getLMSConfig } from "@/lib/integrations/lms";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const config = await getLMSConfig();
     return NextResponse.json({ success: true, data: config });

@@ -95,7 +95,7 @@ export function HostelBlockDrilldown({ block }: { block: string }) {
 export function HostelOverview() {
   const [data, setData] = useState<HostelOverviewData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const _user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const [expandedBlock, setExpandedBlock] = useState<string | null>(null);
 
   usePolling(

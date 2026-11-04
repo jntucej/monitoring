@@ -39,7 +39,7 @@ export default function AdminStudentDetailPage() {
 
 function AdminStudentDetail() {
   const { id } = useParams<{ id: string }>();
-  const _router = useRouter();
+  const router = useRouter();
   const [record, setRecord] = useState<any | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);

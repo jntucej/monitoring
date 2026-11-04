@@ -41,7 +41,7 @@ export function ConfirmSheet({
   const [selectedEntryType, setSelectedEntryType] = useState<"hosteller" | "day_scholar" | undefined>(
     () => recommendation?.entryType as "hosteller" | "day_scholar" | undefined
   );
-  const [selectedButtonId] = useState<EntryButtonId | undefined>(
+  const [selectedButtonId, setSelectedButtonId] = useState<EntryButtonId | undefined>(
     () => recommendation?.entryButton as EntryButtonId | undefined
   );
   const [countdown, setCountdown] = useState<number | null>(null);

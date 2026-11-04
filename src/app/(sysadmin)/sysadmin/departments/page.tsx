@@ -47,7 +47,7 @@ const api = useApi();
     e.preventDefault();
     if (!editingDept?.code || !editingDept?.name || !editingDept.hodUserId) return;
 
-    const { _hodIdInput, hodUserId, ...dept } = editingDept;
+    const { hodIdInput, hodUserId, ...dept } = editingDept;
     const payload = { ...dept, hodUserId } as Record<string, unknown>;
     if (payload.hod === undefined) payload.hod = "Not Assigned";
 

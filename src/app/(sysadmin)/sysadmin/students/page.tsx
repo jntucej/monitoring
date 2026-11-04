@@ -457,7 +457,7 @@ const api = useApi();
       .sort((a, b) => Number(a[0]) - Number(b[0]));
   }, [students]);
 
-  const _byBatch = useMemo(() => {
+  const byBatch = useMemo(() => {
     const map: Record<string, number> = {};
     students.forEach((s) => {
       const k = s.batch || "—";

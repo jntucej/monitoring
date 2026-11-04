@@ -109,7 +109,7 @@ async function handlePatch(
     return handleEscalate(req, auth, row);
   }
 
-  const _supabase = getSupabaseServiceClient();
+  const supabase = getSupabaseServiceClient();
   const now = new Date().toISOString();
   const nextStage = action === "APPROVE" ? resolveNextStage(workflowType, currentStage) : null;
   const newStatus =

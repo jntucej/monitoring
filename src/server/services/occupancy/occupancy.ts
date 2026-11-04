@@ -23,7 +23,7 @@ export async function getCurrentOccupancy(): Promise<{ total: number; capacity: 
       .select("*", { count: "exact", head: true })
       .eq("current_status", "IN");
 
-    const { count: _totalUsersCount } = await getDbClient()
+    const { count: totalUsersCount } = await getDbClient()
       .from("users")
       .select("*", { count: "exact", head: true });
 

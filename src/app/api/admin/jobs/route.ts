@@ -32,13 +32,13 @@ const DEFAULT_JOBS = [
   },
 ];
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
 
     let dbJobs = null; let jobsErr = null;
     try { const res = await supabase.from("scheduled_jobs").select("*"); dbJobs = res.data; jobsErr = res.error; } catch { jobsErr = true; }
-    const { data: dbRuns, error: _runsErr } = await supabase
+    const { data: dbRuns, error: runsErr } = await supabase
       .from("job_runs")
       .select("*")
       .order("start_time", { ascending: false })
@@ -54,7 +54,7 @@ async function handleGet(_req: NextRequest) {
         recentRuns: runs,
       },
     });
-  } catch (_err: any) {
+  } catch (err: any) {
     return NextResponse.json({
       success: true,
       data: {

@@ -33,8 +33,8 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   const { role, user, token } = useAuthStore();
   const { wsConnected, gateTraffic } = useGlass();
 
-  const [setVerifying] = useState(false);
-  const [setLastCheck] = useState<string>("Just now");
+  const [verifying, setVerifying] = useState(false);
+  const [lastCheck, setLastCheck] = useState<string>("Just now");
   const [logs, setLogs] = useState<string[]>([
     "Initial security handshake completed.",
     "Role isolation scope verified.",
@@ -43,7 +43,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   const userRole = role || "student";
   const displayRoleName = ROLE_NAMES[userRole] || userRole.toUpperCase();
 
-  const _runVerification = () => {
+  const runVerification = () => {
     setVerifying(true);
     setTimeout(() => {
       setVerifying(false);
@@ -143,7 +143,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   };
 
   const details = getCategoryDetails(category);
-  const _Icon = details.icon;
+  const Icon = details.icon;
 
   return (
     <AuthGuard>

@@ -80,7 +80,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Pr
     return fail("INVALID_RANGE", "toDate must be after fromDate", 422);
   }
 
-  const _db = getSupabaseServiceClient();
+  const db = getSupabaseServiceClient();
   const history = appendStageHistory(
     row.stage_history,
     { id: auth.userId, name: auth.email ?? "", role: auth.role },

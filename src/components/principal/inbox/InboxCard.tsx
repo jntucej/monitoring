@@ -43,7 +43,7 @@ export interface InboxCardProps {
 export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: InboxCardProps) {
   const student = ticket.student;
   const details = student?.student_details;
-  const _isPending = ticket.status === "PENDING";
+  const isPending = ticket.status === "PENDING";
 
   return (
     <div

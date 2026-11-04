@@ -5,7 +5,7 @@ import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
 
-async function handleGet(req: NextRequest, { _auth }: { auth: AuthContext }) {
+async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const q = new URL(req.url).searchParams.get("q")?.trim();
   if (!q) return fail("VALIDATION_ERROR", "q required", 400);
 

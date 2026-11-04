@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { generatePredictions } from "@/lib/predictive";
 
-async function handlePost(_req: NextRequest) {
+async function handlePost(req: NextRequest) {
   try {
     const updatedPredictions = await generatePredictions();
 

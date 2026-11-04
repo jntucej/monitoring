@@ -21,7 +21,7 @@ import { usePolling } from "@/hooks/usePolling";
 export function HealthDashboard() {
   const router = useRouter();
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 

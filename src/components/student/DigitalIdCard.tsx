@@ -50,7 +50,7 @@ const api = useApi();
 
   // Mess token for today's mess code
   const [messToken, setMessToken] = useState<MessToken | null>(null);
-  const [setMessError] = useState<string | null>(null);
+  const [messError, setMessError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;

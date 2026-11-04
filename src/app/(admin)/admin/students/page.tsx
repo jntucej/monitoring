@@ -212,7 +212,7 @@ function AdminStudentsInner() {
     );
   }
 
-  const _deptSegments = (data?.byDepartment ?? []).map((d) => ({
+  const deptSegments = (data?.byDepartment ?? []).map((d) => ({
     value: d.count,
     color: deptColor(d.code),
   }));

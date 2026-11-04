@@ -69,8 +69,8 @@ export class MoodleProvider implements LMSProvider {
           }
         }
 
-        const { data: _usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-        const { data: _deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
         return {
           synced_courses: syncedCourses,
@@ -144,8 +144,8 @@ export class CanvasProvider implements LMSProvider {
           }
         }
 
-        const { data: _usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-        const { data: _deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
         return {
           synced_courses: syncedCourses,
@@ -222,8 +222,8 @@ export class BlackboardProvider implements LMSProvider {
           }
         }
 
-        const { data: _usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-        const { data: _deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
         return {
           synced_courses: syncedCourses,
@@ -300,8 +300,8 @@ export class SakaiProvider implements LMSProvider {
           }
         }
 
-        const { data: _usersData } = await getDbClient().from("users").select("id").eq("role", "student");
-        const { data: _deptsData } = await getDbClient().from("departments").select("id");
+        const { data: usersData } = await getDbClient().from("users").select("id").eq("role", "student");
+        const { data: deptsData } = await getDbClient().from("departments").select("id");
 
         return {
           synced_courses: syncedCourses,

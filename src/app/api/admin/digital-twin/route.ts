@@ -4,7 +4,7 @@ import { getCurrentOccupancy } from "@/server/services/occupancy/occupancy";
 import { getPredictions } from "@/server/services/analytics/predictions";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
     const occupancy = await getCurrentOccupancy();

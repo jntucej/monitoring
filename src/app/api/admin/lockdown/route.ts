@@ -6,7 +6,7 @@ import { withRateLimit } from "@/lib/rate-limit";
 import type { Role } from "@/lib/types";
 
 /** GET /api/admin/lockdown — returns current active lockdown or null */
-async function handleGet(_req: NextRequest) {
+async function handleGet(req: NextRequest) {
   const lockdown = await getActiveLockdown();
   return NextResponse.json({ success: true, data: lockdown });
 }

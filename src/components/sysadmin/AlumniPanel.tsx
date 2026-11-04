@@ -178,7 +178,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
     try {
       const headers = getAuthHeaders();
       const roll = student.roll || student.uniqueId || "";
-      const _gradYear = getGraduationYearFromRoll(roll);
+      const gradYear = getGraduationYearFromRoll(roll);
       const res = await fetch(`/api/users/${student.id}`, {
         method: "PATCH",
         headers: { ...headers, "Content-Type": "application/json" },

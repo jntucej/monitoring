@@ -299,7 +299,7 @@ function RunsTimeline({ runs, loading }: { runs: Run[]; loading: boolean }) {
    Main component
    ══════════════════════════════════════════════════════════════════════════ */
 export function ScheduledJobsPanel() {
-const _api = useApi();
+const api = useApi();
 
   const addToast = useUIStore((s) => s.addToast);
 

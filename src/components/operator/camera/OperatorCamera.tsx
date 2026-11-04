@@ -23,7 +23,7 @@ const hasNativeBarcodeDetector: boolean =
   typeof window !== "undefined" && "BarcodeDetector" in window;
 
 const formatCache: Record<string, string[]> = {};
-const _getUsableFormats = async (scope: ScanMode): Promise<string[]> => {
+const getUsableFormats = async (scope: ScanMode): Promise<string[]> => {
   const wanted = scope === "qr" ? QR_FORMATS : BARCODE_FORMATS;
   const key = wanted.join(",");
   if (formatCache[key]) return formatCache[key];
