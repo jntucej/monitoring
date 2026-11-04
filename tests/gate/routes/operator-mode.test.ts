@@ -17,6 +17,12 @@ jest.mock('@/server/http/trusted-headers', () => ({
 jest.mock('@/lib/csrf', () => ({
   assertCsrf: () => null,
 }));
+// requiresStepUp: true on the mode route runs assertFreshStepUp, a real
+// DB query — bypass it so route-logic tests don't need a live Postgres.
+jest.mock('@/lib/step-up', () => ({
+  assertFreshStepUp: jest.fn(async () => {}),
+  performStepUp: jest.fn(),
+}));
 
 jest.mock('@/lib/gate-operations', () => ({
   getGateMode: jest.fn(),

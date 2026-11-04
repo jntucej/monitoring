@@ -36,6 +36,21 @@ jest.mock('@/stores/operatorStore', () => ({
 
 import { ScanConfirmation } from '@/components/operator/ScanConfirmation';
 import { TEST_STUDENT } from '../helpers/fixtures';
+import { useScanStore } from '@/stores/scanStore';
+
+// The component reads getRecommendation from useScanStore (not
+// useOperatorStore) — hydrate it with the recommendation the test expects.
+const SCAN_REC = {
+  direction: 'IN',
+  reason: null,
+  entryType: 'hosteller',
+  entryButton: 'home_in',
+  confidence: 0.9,
+  alternatives: [
+    { code: 'day_scholar_in', label: 'Outing In', icon: 'ArrowUp',
+      direction: 'IN', payload: { direction: 'IN', entryType: 'day_scholar', buttonId: 'day_scholar_in' } },
+  ],
+};
 
 describe('<ScanConfirmation> — operator confirmation card', () => {
   const onConfirm = jest.fn();
@@ -43,6 +58,7 @@ describe('<ScanConfirmation> — operator confirmation card', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useScanStore.setState({ getRecommendation: jest.fn(() => SCAN_REC) } as any);
     (global as any).fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true, data: [] }),

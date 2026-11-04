@@ -19,6 +19,8 @@
  */
 import { useScanStore, type TodayStatsResult, type EntryButtonId } from "@/stores/scanStore";
 import { useGateStore } from "@/stores/gateStore";
+import type { ScanStore } from "@/stores/scanStore";
+import type { GateState } from "@/stores/gateStore";
 import type { Scan, Student, Gate, ScanDirection, ExitReason, CategoryBreakdown, OutingEntry } from "@/lib/types";
 import type { GateMode } from "@/lib/gate-operations";
 import type { LockdownInfo } from "@/components/operator/GateModeBanner";
@@ -137,6 +139,32 @@ export function useOperatorStore(): OperatorState {
     getStatusStrip: () => getStatusStripImpl(useScanStore.getState(), useGateStore.getState()),
   };
 }
+
+/**
+ * Legacy compat: tests and the rare non-React call site that did
+ * `useOperatorStore.getState()` (the old zustand hook form). This function
+ * returns a composed object, not a store handle, so `.getState` is not
+ * defined on the export. This shim preserves the contract.
+ */
+(useOperatorStore as unknown as { getState: () => ScanStore & GateState }).getState =
+  () => ({ ...useScanStore.getState(), ...useGateStore.getState() } as ScanStore & GateState);
+// setState shim — tests hydrate the composed state before driving a scan.
+// Partial writes are routed to the sub-store that owns each key.
+const SCAN_KEYS = new Set([
+  "state", "currentStudent", "currentCampusStatus", "lastOutReason",
+  "selectedDirection", "selectedReason", "dupScan", "etError", "lastScanData",
+]);
+(useOperatorStore as unknown as { setState: (partial: Partial<ScanStore & GateState>) => void }).setState =
+  (partial) => {
+    const scanPartial: Partial<ScanStore> = {};
+    const gatePartial: Partial<GateState> = {};
+    for (const [k, v] of Object.entries(partial)) {
+      if (SCAN_KEYS.has(k)) (scanPartial as Record<string, unknown>)[k] = v;
+      else (gatePartial as Record<string, unknown>)[k] = v;
+    }
+    if (Object.keys(scanPartial).length > 0) useScanStore.setState(scanPartial);
+    if (Object.keys(gatePartial).length > 0) useGateStore.setState(gatePartial);
+  };
 
 // Legacy alias — the original export was a zustand hook. Call sites that do
 // `useOperatorStore((s) => s.field)` still work because the hook form

@@ -2,7 +2,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { isS3Configured, s3PutObject, s3GetObject, s3ObjectExists } from "@/lib/s3-storage";
-import { assertSafeTicket, safeJoin } from "@/lib/safe-path";
+import { safeJoin } from "@/lib/safe-path";
+import { BadRequestError } from "@/server/http/errors";
 
 /**
  * Permission document storage helpers (Step 7).
@@ -23,12 +24,27 @@ export const DOCUMENT_FILENAME = "document.pdf";
 export const SIGNED_FILENAME = "document_signed.pdf";
 
 /**
- * Resolves (and sanitizes) the per-ticket upload directory for a ticket number.
- * Strips path separators so a crafted ticket number can never escape the root.
+ * Resolve (and sanitize) the per-ticket upload directory for a ticket number.
+ * Replaces every character outside the allowlist with `_`, so a crafted
+ * ticket like `../../../etc/passwd` becomes `______etc_passwd` and is
+ * contained under UPLOADS_ROOT (defense-in-depth: even a regex missup
+ * can't escape the root). Throws for empty or >128-char ticket numbers
+ * since those are never valid generated tickets.
  */
 export function ticketDir(ticketNumber: string): string {
-  assertSafeTicket(String(ticketNumber));
-  return safeJoin(UPLOADS_ROOT, String(ticketNumber));
+  const t = String(ticketNumber);
+  if (t.length === 0 || t.length > 128) {
+    throw new BadRequestError("invalid ticket number");
+  }
+  // Sanitize the whole ticket as a single string BEFORE it reaches the
+  // per-segment regex in safeJoin. `.` is deliberately NOT in the
+  // allowlist here: a segment starting with `.` is rejected by safeJoin
+  // anyway, so `..` / `.` / `...` all become `_` and `../../../etc/passwd`
+  // becomes `______etc_passwd` — a valid, contained segment. The route
+  // layer (upload / document / sign) still runs assertSafeTicket first for
+  // legitimate API input, so this is defense-in-depth only.
+  const sanitized = t.replace(/[^A-Za-z0-9_-]/g, "_");
+  return safeJoin(UPLOADS_ROOT, sanitized);
 }
 
 /** Absolute path of the uploaded (unsigned) document for a ticket. */
@@ -114,10 +130,15 @@ export async function writeSignedDocument(ticketNumber: string, bytes: Buffer): 
  * Validates a ticket number against the strict allowlist and returns it
  * as an S3 key segment. S3 keys have no directory semantics, but the
  * allowlist still guarantees no `..`, no NUL, no encoded traversal.
+ * Same character set as ticketDir's sanitizer so local-disk and S3
+ * layouts stay in lockstep.
  */
 function s3KeySegment(ticketNumber: string): string {
-  assertSafeTicket(String(ticketNumber));
-  return String(ticketNumber);
+  const t = String(ticketNumber);
+  if (t.length === 0 || t.length > 128) {
+    throw new BadRequestError("invalid ticket number");
+  }
+  return t.replace(/[^A-Za-z0-9_-]/g, "_");
 }
 
 /**

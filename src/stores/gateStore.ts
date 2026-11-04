@@ -11,7 +11,7 @@ import type { LockdownInfo } from "@/components/operator/GateModeBanner";
 import type { Gate } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
 
-interface GateState {
+export interface GateState {
   gate: Gate | null;
   gateId: string | null;
   gateMode: GateMode;

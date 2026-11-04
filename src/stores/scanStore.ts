@@ -106,7 +106,7 @@ async function fetchTodayStats(gateId?: string, signal?: AbortSignal): Promise<{
 
 
 
-interface ScanStore {
+export interface ScanStore {
   state: ScanState;
   currentStudent: Student | null;
   currentCampusStatus: "IN" | "OUT" | null;
