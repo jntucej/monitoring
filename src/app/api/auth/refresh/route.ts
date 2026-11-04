@@ -113,83 +113,160 @@ async function handleRefresh(req: NextRequest) {
 
     const user = userRes.rows[0];
 
-    // Refresh token rotation and reuse detection.
-    // FAIL CLOSED: if we cannot read the sessions table, we must NOT mint new
-    // tokens — an attacker exploiting a DB blip (pool exhaustion, timeout)
-    // would otherwise get a fresh pair for an already-revoked token.
+    // Part 6 — atomic rotation + family-aware reuse detection.
+    // FAIL CLOSED: if we cannot read the sessions table, we must NOT mint
+    // new tokens — an attacker exploiting a DB blip would otherwise get a
+    // fresh pair for an already-revoked token.
+    //
+    // Model:
+    //   family_id  — lineage of a login. Every rotation inherits the family.
+    //   successor_hash — written onto the old row after rotation so a stale
+    //                tab re-presenting the old token within the grace
+    //                window is recognized as a race, not a theft.
+    //   rotated_at — when the row was consumed, for the grace window.
     const oldTokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    let existingSession: { rows: Array<{ id: string; revoked_at: string | null }> };
+    const GRACE_MS = 30_000;
+
+    type Outcome =
+      | { kind: "rotated"; row: { id: string; user_id: string; family_id: string } }
+      | { kind: "grace"; row: { id: string; user_id: string; family_id: string } }
+      | { kind: "reuse"; familyId: string; userId: string; presentedHash: string }
+      | { kind: "unknown" }
+      | { kind: "expired" };
+
+    let outcome: Outcome;
     try {
-      existingSession = await query(
-        "SELECT id, revoked_at FROM sessions WHERE refresh_hash = $1 LIMIT 1",
-        [oldTokenHash]
-      );
+      outcome = await withTransaction(async (client) => {
+        // 1. Atomic consume — only one caller can win the rotation.
+        const consumed = await client.query<{
+          id: string;
+          user_id: string;
+          family_id: string;
+        }>(
+          `UPDATE public.sessions
+              SET revoked_at = NOW(),
+                  rotated_at = NOW()
+            WHERE refresh_hash = $1
+              AND revoked_at IS NULL
+              AND expires_at > NOW()
+            RETURNING id, user_id, family_id`,
+          [oldTokenHash]
+        );
+
+        if (consumed.rowCount === 1) {
+          return {
+            kind: "rotated" as const,
+            row: consumed.rows[0],
+          };
+        }
+
+        // 2. Not consumable. Look up the row even if revoked to decide why.
+        const existing = await client.query<{
+          id: string;
+          user_id: string;
+          family_id: string;
+          successor_hash: string | null;
+          revoked_at: string | null;
+          rotated_at: string | null;
+          expires_at: string;
+        }>(
+          `SELECT id, user_id, family_id, successor_hash, revoked_at, rotated_at, expires_at
+             FROM public.sessions
+            WHERE refresh_hash = $1`,
+          [oldTokenHash]
+        );
+
+        if (existing.rowCount === 0) {
+          return { kind: "unknown" as const };
+        }
+
+        const row = existing.rows[0];
+
+        // 3. Concurrent-refresh grace window: rotated very recently AND a
+        //    successor was already minted — the second tab still holds the
+        //    old cookie. Return the grace path so it mints from the same
+        //    family instead of tripping reuse-detection.
+        if (
+          row.rotated_at &&
+          row.successor_hash &&
+          Date.now() - new Date(row.rotated_at).getTime() < GRACE_MS
+        ) {
+          return { kind: "grace" as const, row: { id: row.id, user_id: row.user_id, family_id: row.family_id } };
+        }
+
+        // 4. Reuse detection: an already-revoked token was presented
+        //    outside the grace window — theft. Revoke the entire family and
+        //    bump session_version so every access token in the lineage dies
+        //    immediately.
+        if (row.revoked_at) {
+          await client.query(
+            `UPDATE public.sessions
+                SET revoked_at = NOW()
+              WHERE family_id = $1 AND revoked_at IS NULL`,
+            [row.family_id]
+          );
+          await client.query(
+            `UPDATE public.users
+                SET session_version = session_version + 1, handle = gen_random_uuid()::text
+              WHERE id = $1`,
+            [row.user_id]
+          );
+          try {
+            await addAudit({
+              action: "REFRESH_REUSE_DETECTED",
+              userId: row.user_id,
+              userName: "(refresh)",
+              role: "system" as Role,
+              details: {
+                familyId: row.family_id,
+                presentedHash: oldTokenHash.slice(0, 16),
+              },
+            });
+          } catch {
+            // best-effort
+          }
+          return {
+            kind: "reuse" as const,
+            familyId: row.family_id,
+            userId: row.user_id,
+            presentedHash: oldTokenHash,
+          };
+        }
+
+        // 5. Expired, not revoked.
+        return { kind: "expired" as const };
+      });
     } catch (err) {
-      console.error("[refresh] reuse-detection query failed:", err);
+      console.error("[refresh] rotation transaction failed:", err);
       return NextResponse.json(
         {
           success: false,
-          error: { code: "SERVER_ERROR", message: "Session validation unavailable. Try again." },
+          error: { code: "SERVER_ERROR", message: "Session rotation failed. Try again." },
         },
         { status: 503 }
       );
     }
 
-    if (existingSession.rows.length > 0 && existingSession.rows[0].revoked_at) {
-      // Two cases:
-      //   (a) Genuine theft: long-revoked token reused → revoke all.
-      //   (b) Concurrent-rotation race: two tabs or a retry fired /refresh
-      //       within a short window; the first rotated, the second sees the
-      //       old row revoked but a live session still exists. In that case
-      //       return 409 (not 401) so the client re-syncs via /api/auth/session
-      //       without destroying the user's other active tabs.
-      const GRACE_MS = 90_000;
-      const revokedAt = new Date(existingSession.rows[0].revoked_at).getTime();
-      const withinGrace = Date.now() - revokedAt < GRACE_MS;
-      let hasLiveSession = false;
-      if (withinGrace) {
-        try {
-          const live = await query(
-            "SELECT 1 FROM sessions WHERE user_id = $1 AND revoked_at IS NULL LIMIT 1",
-            [payload.sub]
-          );
-          hasLiveSession = live.rows.length > 0;
-        } catch {
-          hasLiveSession = false; // DB blip → fail closed to revoke-all
-        }
-      }
+    if (outcome.kind === "unknown" || outcome.kind === "expired") {
+      return NextResponse.json(
+        { success: false, error: { code: "INVALID_TOKEN", message: "Invalid or expired refresh token." } },
+        { status: 401 }
+      );
+    }
 
-      if (withinGrace && hasLiveSession) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: "SESSION_RACE",
-              message: "Session was just rotated. Please retry with the current session.",
-            },
-          },
-          { status: 409 }
-        );
-      }
-
-      // Genuine reuse of a long-revoked token → revoke all (theft signal).
-      await query("UPDATE sessions SET revoked_at = NOW() WHERE user_id = $1", [payload.sub]).catch(() => {});
-      await addAudit({
-        action: "SESSION_ROTATED",
-        userId: user.id,
-        userName: user.name,
-        role: user.role as Role,
-        details: "Refresh token reuse of a long-revoked session detected — all sessions revoked (theft signal)",
-      });
+    if (outcome.kind === "reuse") {
       return NextResponse.json(
         {
           success: false,
-          error: { code: "TOKEN_REVOKED", message: "Refresh token has been revoked." },
+          error: { code: "TOKEN_REVOKED", message: "Session family revoked — sign in again." },
         },
         { status: 401 }
       );
     }
 
+    const familyId = outcome.row.family_id;
+
+    // 3. Mint the new pair. Both "rotated" and "grace" reach here.
     const access_token = await signAccessToken({
       sub: user.id,
       email: user.email,
@@ -204,23 +281,28 @@ async function handleRefresh(req: NextRequest) {
       sub: user.id,
       email: user.email,
       role: user.role,
-      ...(payload.cnf ? { cnf: payload.cnf } : {}),
+      ...(payload.cnf ? { cnf: payload.cnf} : {}),
     });
 
-    // Atomic rotation: insert new session AND revoke old one in a single
-    // transaction. If the insert fails, the revoke is rolled back and the
-    // user's old session remains valid — they are never left without one.
+    // 4. Persist the new session row, inheriting family_id + parent_id.
+    //    On the grace path the parent is the row that already rotated; on
+    //    the rotated path the parent is the row we just consumed.
     const newSessionId = crypto.randomUUID();
     const newTokenHash = crypto.createHash("sha256").update(refresh_token).digest("hex");
+    const parentId = outcome.row.id;
     try {
       await withTransaction(async (client) => {
         await client.query(
-          "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
-          [newSessionId, user.id, newTokenHash]
+          `INSERT INTO sessions
+             (id, user_id, refresh_hash, expires_at, created_at, family_id, parent_id)
+           VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW(), $4, $5)`,
+          [newSessionId, user.id, newTokenHash, familyId, parentId]
         );
+        // 5. Write the successor hash back on the old row so the grace path
+        //    can recognize a legitimate concurrent tab.
         await client.query(
-          "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1",
-          [oldTokenHash]
+          "UPDATE public.sessions SET successor_hash = $1 WHERE id = $2",
+          [newTokenHash, parentId]
         );
       });
     } catch (err: unknown) {
@@ -238,11 +320,11 @@ async function handleRefresh(req: NextRequest) {
     // the first thing a reviewer looks for after an incident.
     try {
       await addAudit({
-        action: "SESSION_ROTATED",
+        action: "REFRESH_ROTATED",
         userId: user.id,
         userName: user.name,
         role: user.role as Role,
-        details: "Refresh token rotated; prior session revoked",
+        details: { familyId, grace: outcome.kind === "grace" },
       });
     } catch {
       // audit is best-effort — never fail the refresh on an audit write

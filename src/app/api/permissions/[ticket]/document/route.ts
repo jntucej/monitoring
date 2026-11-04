@@ -6,6 +6,7 @@ import {
   readDocument,
   readSignedDocument,
 } from "@/lib/permission-document";
+import { assertSafeTicket } from "@/lib/safe-path";
 
 function getTicketParam(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -20,6 +21,18 @@ async function handleGet(req: NextRequest): Promise<Response> {
   if (!ticketParam) {
     return NextResponse.json(
       { success: false, error: { code: "BAD_REQUEST", message: "Ticket parameter required" } },
+      { status: 400 }
+    );
+  }
+
+  // Part 6: the raw path param must match the ticket allowlist before it is
+  // used anywhere (DB lookup, fs resolution). Encoded traversal
+  // (%2F..%2F) decodes to `../` and fails this check → 400.
+  try {
+    assertSafeTicket(ticketParam);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_REQUEST", message: "Invalid ticket number" } },
       { status: 400 }
     );
   }

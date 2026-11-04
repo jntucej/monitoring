@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { isS3Configured, s3PutObject, s3GetObject, s3ObjectExists } from "@/lib/s3-storage";
+import { assertSafeTicket, safeJoin } from "@/lib/safe-path";
 
 /**
  * Permission document storage helpers (Step 7).
@@ -26,24 +27,24 @@ export const SIGNED_FILENAME = "document_signed.pdf";
  * Strips path separators so a crafted ticket number can never escape the root.
  */
 export function ticketDir(ticketNumber: string): string {
-  const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
-  return path.join(UPLOADS_ROOT, safe);
+  assertSafeTicket(String(ticketNumber));
+  return safeJoin(UPLOADS_ROOT, String(ticketNumber));
 }
 
 /** Absolute path of the uploaded (unsigned) document for a ticket. */
 export function documentPath(ticketNumber: string): string {
-  return path.join(ticketDir(ticketNumber), DOCUMENT_FILENAME);
+  return safeJoin(ticketDir(ticketNumber), DOCUMENT_FILENAME);
 }
 
 /** Absolute path of the digitally signed document for a ticket. */
 export function signedDocumentPath(ticketNumber: string): string {
-  return path.join(ticketDir(ticketNumber), SIGNED_FILENAME);
+  return safeJoin(ticketDir(ticketNumber), SIGNED_FILENAME);
 }
 
 /** True when the ticket has an uploaded document on disk. */
 export async function documentExists(ticketNumber: string): Promise<boolean> {
   if (isS3Configured()) {
-    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safe = s3KeySegment(ticketNumber);
     return s3ObjectExists(`permissions/${safe}/${DOCUMENT_FILENAME}`);
   }
   try {
@@ -64,7 +65,7 @@ export async function ensureTicketDir(ticketNumber: string): Promise<string> {
 /** Reads the uploaded document bytes, or null when absent. */
 export async function readDocument(ticketNumber: string): Promise<Buffer | null> {
   if (isS3Configured()) {
-    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safe = s3KeySegment(ticketNumber);
     return s3GetObject(`permissions/${safe}/${DOCUMENT_FILENAME}`);
   }
   try {
@@ -77,7 +78,7 @@ export async function readDocument(ticketNumber: string): Promise<Buffer | null>
 /** Reads the signed document bytes, or null when absent. */
 export async function readSignedDocument(ticketNumber: string): Promise<Buffer | null> {
   if (isS3Configured()) {
-    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safe = s3KeySegment(ticketNumber);
     return s3GetObject(`permissions/${safe}/${SIGNED_FILENAME}`);
   }
   try {
@@ -90,7 +91,7 @@ export async function readSignedDocument(ticketNumber: string): Promise<Buffer |
 /** Writes uploaded document bytes to storage (disk or S3). */
 export async function writeDocument(ticketNumber: string, bytes: Buffer): Promise<void> {
   if (isS3Configured()) {
-    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safe = s3KeySegment(ticketNumber);
     await s3PutObject(`permissions/${safe}/${DOCUMENT_FILENAME}`, bytes, "application/pdf");
     return;
   }
@@ -101,12 +102,22 @@ export async function writeDocument(ticketNumber: string, bytes: Buffer): Promis
 /** Writes signed document bytes to storage (disk or S3). */
 export async function writeSignedDocument(ticketNumber: string, bytes: Buffer): Promise<void> {
   if (isS3Configured()) {
-    const safe = String(ticketNumber).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const safe = s3KeySegment(ticketNumber);
     await s3PutObject(`permissions/${safe}/${SIGNED_FILENAME}`, bytes, "application/pdf");
     return;
   }
   await ensureTicketDir(ticketNumber);
   await fs.writeFile(signedDocumentPath(ticketNumber), bytes);
+}
+
+/**
+ * Validates a ticket number against the strict allowlist and returns it
+ * as an S3 key segment. S3 keys have no directory semantics, but the
+ * allowlist still guarantees no `..`, no NUL, no encoded traversal.
+ */
+function s3KeySegment(ticketNumber: string): string {
+  assertSafeTicket(String(ticketNumber));
+  return String(ticketNumber);
 }
 
 /**

@@ -57,15 +57,24 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const buf = await readAttachment(att.storage_path);
   if (!buf) return fail("FILE_MISSING", "File no longer on storage", 410);
 
-  const SAFE_INLINE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "application/pdf"]);
-  const isInline = SAFE_INLINE_TYPES.has((att.mime_type || "").toLowerCase().trim());
-  const contentType = isInline ? att.mime_type : "application/octet-stream";
-  const disposition = isInline ? "inline" : "attachment";
+  // Part 6: derive the served Content-Type from the file's actual bytes,
+  // never from the client-supplied mime_type. SVG/HTML are not in the
+  // allowlist — they fall back to application/octet-stream (non-executable).
+  const { sniffExtension, SNIFFED_CONTENT_TYPES } = await import("@/lib/file-signature");
+  let servedType = "application/octet-stream";
+  let disposition = "attachment";
+  try {
+    const ext = sniffExtension(buf);
+    servedType = SNIFFED_CONTENT_TYPES[ext];
+    disposition = "inline";
+  } catch {
+    // Not a recognized type — serve as binary attachment.
+  }
   const safeFilename = att.original_name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
   return new Response(buf as unknown as BodyInit, {
     headers: {
-      "content-type": contentType,
+      "content-type": servedType,
       "content-length": String(buf.length),
       "content-disposition": `${disposition}; filename="${safeFilename}"`,
       "x-content-type-options": "nosniff",

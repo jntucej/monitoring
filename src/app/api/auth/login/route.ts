@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { randomBytes, randomUUID } from "crypto";
 import { withRateLimit, extractClientIp } from "@/lib/rate-limit";
 import { query } from "@/lib/postgres";
@@ -307,6 +308,34 @@ async function handleLoginInner(req: NextRequest) {
       role: user.role,
       ...(cnf ? { cnf } : {}),
     });
+
+    // Part 6 — session family: mint a fresh family id and persist the
+    // refresh row BEFORE the token leaves the server. The family is the
+    // unit of revocation: reuse detection and logout both operate on it.
+    const newSessionId = crypto.randomUUID();
+    const familyId = crypto.randomUUID();
+    const refreshHash = crypto.createHash("sha256").update(refresh_token).digest("hex");
+    try {
+      await query(
+        `INSERT INTO public.sessions
+           (id, user_id, refresh_hash, expires_at, created_at, family_id, parent_id)
+         VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW(), $4, NULL)`,
+        [newSessionId, user.id, refreshHash, familyId]
+      );
+      await addAudit({
+        action: "SESSION_FAMILY_CREATED",
+        userId: user.id,
+        userName: user.name || user.email,
+        role: user.role as Role,
+        details: { familyId },
+      });
+    } catch (err) {
+      // Failing to persist the session row must NOT block a successful
+      // password verification: the refresh flow still works for this user,
+      // but reuse-detection will treat the unknown hash as "unknown" and
+      // return 401 rather than minting a new pair. Log and continue.
+      console.error("[login] session family persist failed:", err);
+    }
 
     const response = NextResponse.json({
       success: true,

@@ -11,6 +11,7 @@ import {
   ensureTicketDir,
   documentPath,
 } from "@/lib/permission-document";
+import { assertSafeTicket } from "@/lib/safe-path";
 
 function getTicketParam(req: NextRequest): string {
   const parts = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -26,6 +27,14 @@ async function handlePost(req: NextRequest): Promise<Response> {
   if (!ticket) {
     return NextResponse.json(
       { success: false, error: { code: "MISSING_TICKET", message: "ticket required" } },
+      { status: 400 },
+    );
+  }
+  try {
+    assertSafeTicket(ticket);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "BAD_TICKET", message: "Invalid ticket number" } },
       { status: 400 },
     );
   }

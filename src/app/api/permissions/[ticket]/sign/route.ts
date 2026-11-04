@@ -13,6 +13,7 @@ import {
   readDocument,
   computeSignatureHash,
 } from "@/lib/permission-document";
+import { assertSafeTicket } from "@/lib/safe-path";
 
 function getTicketParam(req: NextRequest): string {
   const parts = new URL(req.url).pathname.split("/").filter(Boolean);
@@ -31,6 +32,13 @@ async function handlePost(req: NextRequest): Promise<Response> {
   const ticket = getTicketParam(req);
   const body = await req.json().catch(() => ({}));
   const signerUserId = body.signerUserId as string | undefined;
+
+  if (!ticket) return badRequest("MISSING_TICKET", "ticket required");
+  try {
+    assertSafeTicket(ticket);
+  } catch {
+    return badRequest("BAD_TICKET", "Invalid ticket number", 400);
+  }
 
   if (!signerUserId) return badRequest("MISSING_SIGNER", "signerUserId required");
 

@@ -66,26 +66,43 @@ async function handleSessionCheck(req: NextRequest) {
           role: refreshPayload.role,
         });
 
-        // Atomic rotation: same pattern as /api/auth/refresh.
-        // If the old refresh token has already been revoked (race), skip the
-        // rotation rather than revoking ALL sessions — the caller is likely
-        // just re-issuing with a stale-but-not-stolen token.
+        // Part 6: atomic consume + family inheritance.
+        // The UPDATE...RETURNING is the single-winner primitive: only one
+        // concurrent rotation can consume a live token. The new row inherits
+        // the family (or creates one when the old row predates the migration
+        // and has no family_id yet).
         const oldHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
         const newHash = crypto.createHash("sha256").update(newRefreshToken).digest("hex");
         const newSessionId = crypto.randomUUID();
         try {
           await withTransaction(async (client) => {
-            await client.query(
-              "INSERT INTO sessions (id, user_id, refresh_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW())",
-              [newSessionId, refreshPayload.sub, newHash]
-            );
-            // Revoke the old session row. If it's already revoked (concurrent
-            // rotation), this is a no-op and we do NOT trigger the revoke-all
-            // path — that is reserved for a genuine token-theft scenario.
-            await client.query(
-              "UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 AND revoked_at IS NULL",
+            const consumed = await client.query<{
+              id: string;
+              family_id: string;
+            }>(
+              `UPDATE sessions
+                  SET revoked_at = NOW(), rotated_at = NOW()
+                WHERE refresh_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()
+                RETURNING id, family_id`,
               [oldHash]
             );
+            const familyId =
+              consumed.rowCount === 1
+                ? consumed.rows[0].family_id
+                : crypto.randomUUID();
+            const parent = consumed.rowCount === 1 ? consumed.rows[0].id : null;
+            await client.query(
+              `INSERT INTO sessions
+                 (id, user_id, refresh_hash, expires_at, created_at, family_id, parent_id)
+               VALUES ($1, $2, $3, NOW() + INTERVAL '30 days', NOW(), $4, $5)`,
+              [newSessionId, refreshPayload.sub, newHash, familyId, parent]
+            );
+            if (consumed.rowCount === 1) {
+              await client.query(
+                "UPDATE sessions SET successor_hash = $1 WHERE id = $2",
+                [newHash, consumed.rows[0].id]
+              );
+            }
           });
         } catch {
           // Rotation failed — return the session without rotating. The user
@@ -94,6 +111,39 @@ async function handleSessionCheck(req: NextRequest) {
           newToken = undefined;
           newRefreshToken = undefined;
         }
+      }
+    }
+
+    // Part 6 fail-closed: if a refresh token was presented for rotation but
+    // no live session row exists for it (already revoked, unknown, or
+    // expired), refuse to mint an access token. Minting here would let a
+    // stolen refresh token resurrect a killed session.
+    if (refreshToken && !payload?.sub && !newToken) {
+      const probe = await query(
+        "SELECT 1 FROM sessions WHERE refresh_hash = $1 AND revoked_at IS NULL AND expires_at > NOW() LIMIT 1",
+        [crypto.createHash("sha256").update(refreshToken).digest("hex")]
+      ).catch(() => ({ rows: [] as unknown[] }));
+      if (probe.rows.length === 0) {
+        // Refresh row is revoked / unknown / expired. Kill the whole family
+        // on reuse (theft signal) and force a re-login.
+        const rev = await query<{ family_id: string | null }>(
+          "SELECT family_id FROM sessions WHERE refresh_hash = $1 LIMIT 1",
+          [crypto.createHash("sha256").update(refreshToken).digest("hex")]
+        ).catch(() => ({ rows: [] as { family_id: string | null }[] }));
+        const fam = rev.rows[0]?.family_id;
+        if (fam) {
+          await query(
+            "UPDATE public.sessions SET revoked_at = NOW() WHERE family_id = $1 AND revoked_at IS NULL",
+            [fam]
+          ).catch(() => undefined);
+        }
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: "INVALID_TOKEN", message: "Session expired. Sign in again." },
+          },
+          { status: 401 },
+        );
       }
     }
 

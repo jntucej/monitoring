@@ -9,6 +9,7 @@ import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { saveAttachment, resolveStorage } from "@/lib/attachment-storage";
+import { sniffExtension, SNIFFED_CONTENT_TYPES } from "@/lib/file-signature";
 import type { AuthContext } from "@/lib/authContext";
 import type { Role } from "@/lib/types";
 
@@ -66,13 +67,39 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const saved: Array<{ id: string; name: string; size: number }> = [];
   for (const file of files) {
     const buf = Buffer.from(await file.arrayBuffer());
-    const result = await saveAttachment({
-      complaintId,
-      fileName: file.name || "upload",
-      mimeType: file.type || "application/octet-stream",
-      buffer: buf,
-      stripExif: row.is_anonymous,
-    });
+
+    // Part 6: verify the file's actual type from magic bytes BEFORE saving.
+    // A rejected file produces no DB row and no storage write.
+    let sniffed: ReturnType<typeof sniffExtension>;
+    try {
+      sniffed = sniffExtension(buf);
+    } catch (err) {
+      const e = err as { code?: string; status?: number; message?: string };
+      return fail(
+        e.code ?? "UNSUPPORTED_FILE_TYPE",
+        e.message ?? "Unsupported file type",
+        e.status ?? 415,
+      );
+    }
+    const canonicalMime = SNIFFED_CONTENT_TYPES[sniffed];
+
+    let result;
+    try {
+      result = await saveAttachment({
+        complaintId,
+        fileName: file.name || "upload",
+        mimeType: canonicalMime,
+        buffer: buf,
+        stripExif: row.is_anonymous,
+      });
+    } catch (err) {
+      const e = err as { code?: string; status?: number; message?: string };
+      return fail(
+        e.code ?? "STORAGE_ERROR",
+        e.message ?? "Failed to store attachment",
+        e.status ?? 500,
+      );
+    }
 
     const { rows: inserted } = await query<{ id: string }>(
       `INSERT INTO public.complaint_attachments (
@@ -85,7 +112,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
         auth.userId,
         auth.role,
         (file.name || "upload").slice(0, 200),
-        file.type || "application/octet-stream",
+        canonicalMime,
         result.sizeBytes,
         result.sha256,
         result.storagePath,
