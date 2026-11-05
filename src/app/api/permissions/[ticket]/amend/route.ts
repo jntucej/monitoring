@@ -90,7 +90,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }): Pr
     ...updates,
     stage_history: history,
     amended_at: new Date().toISOString(),
-    amendment_count: ((row as Record<string, unknown>).amendment_count as number | undefined ?? 0) + 1,
+    amendment_count: ((row as unknown as Record<string, unknown>).amendment_count as number | undefined ?? 0) + 1,
     updated_at: new Date().toISOString(),
   };
 

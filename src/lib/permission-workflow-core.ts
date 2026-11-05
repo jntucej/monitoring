@@ -38,6 +38,9 @@ export interface RequestSnapshot {
   digital_signature?: string | null;
   branch?: string | null;
   requester_user_id?: string;
+  reason?: string | null;
+  from_date?: string | null;
+  to_date?: string | null;
 }
 
 export interface ActorContext {

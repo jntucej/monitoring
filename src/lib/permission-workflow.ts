@@ -245,7 +245,7 @@ export async function getScopedTicket(ticketParam: string, userId: string, role:
   const { query } = await import("@/lib/postgres");
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ticketParam);
   const col = isUuid ? "id" : "ticket_number";
-  const { rows } = await query<any>(
+  const { rows } = await query<RequestSnapshot>(
     `SELECT * FROM public.permissions WHERE ${col} = $1 LIMIT 1`,
     [ticketParam]
   );

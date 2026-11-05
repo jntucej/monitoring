@@ -5,7 +5,7 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
-import {canApproveAtStageWithBranch, resolveNextStage, appendStageHistory, getScopedTicket, requiresStepup}  from "@/lib/permission-workflow";
+import {canApproveAtStageWithBranch, resolveNextStage, appendStageHistory, getScopedTicket, requiresStepup, type RequestSnapshot}  from "@/lib/permission-workflow";
 import {
   prepareHostelForward,
   applyHostelForward,
@@ -71,7 +71,7 @@ async function handlePatch(
   }
 
   const actorBranch = auth.departmentId ?? null;
-  const requesterBranch = (row as any).branch ?? null;
+  const requesterBranch = row.branch ?? null;
   const branchCheck = canApproveAtStageWithBranch(
     auth.role,
     workflowType,
@@ -86,7 +86,7 @@ async function handlePatch(
   const needsStepup = requiresStepup({
     actorRole: auth.role,
     action: action === "FORWARD" ? "forward" : "approve",
-    reason: (row as any).reason,
+    reason: row.reason ?? undefined,
     targetRole: body.targetRole,
   });
 
@@ -125,7 +125,7 @@ async function handlePatch(
     status: newStatus,
     current_stage: newCurrentStage,
     stage_history: appendStageHistory(
-      (row as any).stage_history,
+      row.stage_history,
       { id: auth.userId, name: auth.email ?? auth.userId, role: auth.role },
       action,
       body.comment ?? null,
@@ -187,7 +187,7 @@ async function handlePatch(
     }),
   });
 
-  const studentUserId = (row as any).student_user_id ?? (row as any).requester_user_id;
+  const studentUserId = row.student_user_id ?? row.requester_user_id;
   if (action === "APPROVE" && nextStage) {
     await notifyStage(nextStage, ticket, workflowType);
   } else {
@@ -203,9 +203,9 @@ async function handlePatch(
   if (
     newStatus === "COMPLETED" &&
     workflowType === "hostel" &&
-    ["home_out", "day_pass"].includes((row as any).reason ?? "")
+    ["home_out", "day_pass"].includes(row.reason ?? "")
   ) {
-    await notifyGuardianSMS(studentUserId, ticket, (row as any).reason);
+    await notifyGuardianSMS(studentUserId, ticket, row.reason ?? "");
   }
 
   return ok({
@@ -220,7 +220,7 @@ async function handlePatch(
 async function handleForward(
   _req: NextRequest,
   auth: AuthContext,
-  row: any,
+  row: RequestSnapshot,
   body: PatchBody,
   stepupVerified: boolean,
 ): Promise<Response> {
@@ -260,7 +260,7 @@ async function handleForward(
 async function handleEscalate(
   _req: NextRequest,
   auth: AuthContext,
-  row: any,
+  row: RequestSnapshot,
 ): Promise<Response> {
   const prep = await prepareEscalateUp({
     ticketParam: row.ticket_number,
