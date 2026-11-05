@@ -55,7 +55,7 @@ function OperatorPageInner() {
   // While the auth store has not hydrated, `authenticated` is false even for
   // a valid kiosk session — the mount-redirect bounces logged-in operators to
   // /login on every deep-link load. Wait for hydration before acting.
-  const hydrated = useHasHydrated();
+
 
   // Deep-link guard: an operator landing on /gate/<other> is bounced to
   // their own assigned gate. The redirect target must be a REAL gate —

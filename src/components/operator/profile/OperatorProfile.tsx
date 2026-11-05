@@ -17,7 +17,7 @@ export function OperatorProfile() {
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
-const { setTheme, addToast } = useUIStore();
+const { addToast } = useUIStore();
 
   const handleLogout = async () => {
   const router = useRouter();

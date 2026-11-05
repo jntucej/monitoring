@@ -118,7 +118,7 @@ export function AcademicsDepartmentPanel({
   usePolling(() => { void refresh(); }, { intervalMs: POLL_INTERVALS.normal });
 
   // Single-flight guard: one in-flight mutation at a time, no parallel storm.
-  const inflightRef = useRef<Promise<void> | null>(null);
+
 
   // Inline HOD edit state
   const [editing, setEditing] = useState<string | null>(null);

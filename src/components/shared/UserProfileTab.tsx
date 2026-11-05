@@ -13,7 +13,7 @@ import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 
 export function UserProfileTab() {
   const { user, role, logout } = useAuthStore();
-const { setTheme, addToast } = useUIStore();
+const { addToast } = useUIStore();
 
   const handleLogout = async () => {
   const router = useRouter();

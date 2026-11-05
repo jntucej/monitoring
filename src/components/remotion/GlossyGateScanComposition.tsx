@@ -20,7 +20,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
     console.error(`GlossyGateScanComposition requires durationInFrames in [30, 600], got ${durationInFrames}`);
   }
 
-  const duration = durationInFrames ?? COMPOSITION_DURATIONS.scanEntry;
+
 
 
 

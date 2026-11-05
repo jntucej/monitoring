@@ -56,7 +56,7 @@ export default function SecurityPage() {
   const router = useRouter();
   const {role, user} = useAuthStore();
   const {securityMode, wsConnected, gateTraffic} = useGlass();
-  const [rechecking, setRechecking] = useState(false);
+  const [_rechecking, setRechecking] = useState(false);
 
   const mode = securityMode in POSTURE ? securityMode : "secure";
   const p = POSTURE[mode];
