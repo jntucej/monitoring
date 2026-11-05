@@ -1,7 +1,48 @@
 "use client";
 import { CheckCircle2, AlertTriangle, XCircle, ArrowRight, Loader2 } from "lucide-react";
 
-export function CsvValidationPreview({ validationResult, commitResult, committing, skipErrors, setSkipErrors, onCommit }: any) {
+
+interface CsvRow {
+  row: number;
+  name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  uniqueId?: string | null;
+  employeeId?: string | null;
+  department?: string | null;
+}
+interface CsvRowIssue {
+  row: number;
+  field?: string | null;
+  message: string;
+}
+interface CsvValidationResult {
+  validRows: number;
+  invalidRows: number;
+  rows: CsvRow[];
+  errors: CsvRowIssue[];
+  warnings: CsvRowIssue[];
+}
+interface CsvCommitResult {
+  success: boolean;
+  importedCount: number;
+  failedCount: number;
+  errors: Array<{ row: number; error: string }>;
+  total?: number;
+  created?: number;
+  updated?: number;
+  failed?: number;
+}
+export interface CsvValidationPreviewProps {
+  validationResult: CsvValidationResult | null;
+  commitResult: CsvCommitResult | null;
+  committing: boolean;
+  skipErrors: boolean;
+  setSkipErrors: (v: boolean) => void;
+  onCommit: () => void;
+}
+
+export function CsvValidationPreview({ validationResult, commitResult, committing, skipErrors, setSkipErrors, onCommit }: CsvValidationPreviewProps) {
   if (!validationResult && !commitResult) return null;
   return (
     <div className="space-y-4">
@@ -27,9 +68,9 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
                 <tr><th className="p-2.5">Row</th><th className="p-2.5">Name</th><th className="p-2.5">Email</th><th className="p-2.5">Role</th><th className="p-2.5">ID / Dept</th><th className="p-2.5">Status</th></tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)] font-mono">
-                {validationResult.rows.map((r: any) => {
-                  const rowErrors = validationResult.errors.filter((e: any) => e.row === r.row);
-                  const rowWarns = validationResult.warnings.filter((w: any) => w.row === r.row);
+                {validationResult.rows.map((r) => {
+                  const rowErrors = validationResult.errors.filter((e) => e.row === r.row);
+                  const rowWarns = validationResult.warnings.filter((w) => w.row === r.row);
                   const isOk = rowErrors.length === 0;
                   return (
                     <tr key={r.row} className={isOk ? "hover:bg-[var(--surface-sunken)]/50" : "bg-red-500/5"}>
@@ -40,8 +81,8 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
                       <td className="p-2.5 text-[var(--text-secondary)]">{r.uniqueId || r.employeeId || r.department || "—"}</td>
                       <td className="p-2.5 font-sans">
                         {isOk ? <div className="flex items-center gap-1 text-emerald-500 font-medium"><CheckCircle2 className="w-3.5 h-3.5" /><span>Valid</span></div> :
-                          <div className="space-y-0.5">{rowErrors.map((err: any, idx: number) => <div key={idx} className="flex items-center gap-1 text-red-500 text-[11px]"><XCircle className="w-3.5 h-3.5 shrink-0" /><span>{err.message}</span></div>)}</div>}
-                        {rowWarns.map((w: any, idx: number) => <div key={idx} className="flex items-center gap-1 text-amber-500 text-[11px]"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /><span>{w.message}</span></div>)}
+                          <div className="space-y-0.5">{rowErrors.map((err, idx) => <div key={idx} className="flex items-center gap-1 text-red-500 text-[11px]"><XCircle className="w-3.5 h-3.5 shrink-0" /><span>{err.message}</span></div>)}</div>}
+                        {rowWarns.map((w, idx) => <div key={idx} className="flex items-center gap-1 text-amber-500 text-[11px]"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /><span>{w.message}</span></div>)}
                       </td>
                     </tr>
                   );

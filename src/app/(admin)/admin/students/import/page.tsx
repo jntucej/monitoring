@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
-import { CsvValidationPreview } from "@/components/admin/CsvValidationPreview";
+import { CsvValidationPreview, type CsvValidationPreviewProps } from "@/components/admin/CsvValidationPreview";
 import { getAuthHeaders } from "@/lib/utils";
 
 
@@ -183,8 +183,8 @@ export default function AdminStudentsImportPage() {
             </div>
 
             <CsvValidationPreview
-              validationResult={validationResult}
-              commitResult={commitResult}
+              validationResult={validationResult as CsvValidationPreviewProps['validationResult']}
+              commitResult={commitResult as CsvValidationPreviewProps['commitResult']}
               committing={committing}
               skipErrors={skipErrors}
               setSkipErrors={setSkipErrors}
