@@ -59,7 +59,7 @@ import { sendSMS } from "@/lib/integrations/sms";
  * comes back late is flagged OVERDUE and the ticket's return window is
  * enforced there.
  */
-const OUT_DURATION_CAPS_HOURS: Record<string, number> = {};
+
 /** Duration caps for IN-return checks (hours from last OUT to now).
  *  daily_outing: 1h, day_pass: 12h, home_out: 48h, special_leave: 24h.
  *  Silently flags OVERDUE if exceeded — the scan is allowed but the student's flag_status is updated. */

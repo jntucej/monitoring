@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export function InboxFilters() {
   const stage = searchParams.get("stage") ?? "";
   const workflowType = searchParams.get("workflowType") ?? "";
   const sla = searchParams.get("sla") ?? "all";
-  const status = searchParams.get("status") ?? "PENDING";
+
   const search = searchParams.get("q") ?? "";
 
   const updateParam = useCallback(
@@ -47,15 +47,15 @@ export function InboxFilters() {
     [searchParams, router],
   );
 
-  const filters: InboxFilters = useMemo(
-    () => ({
-      stage: stage || undefined,
-      workflowType: workflowType || undefined,
-      sla: (sla === "all" ? undefined : (sla as InboxFilters["sla"])) as InboxFilters["sla"],
-      status: status || undefined,
-    }),
-    [stage, workflowType, sla, status],
-  );
+
+
+
+
+
+
+
+
+
 
   const hasActiveFilters = !!(stage || workflowType || sla !== "all" || search);
 

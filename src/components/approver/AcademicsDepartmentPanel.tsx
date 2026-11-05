@@ -17,7 +17,7 @@
 //   • skeleton-on-first-paint gate — no layout flash
 //   • stable row keys (department.code)
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Building2, Users, GraduationCap, Scale, RefreshCw, Loader2,
   Pencil, Check, X, AlertTriangle, Inbox, Search,

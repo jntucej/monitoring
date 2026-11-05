@@ -40,7 +40,7 @@ interface RecentAuditItem {
 }
 
 export default function SysAdminProfilePage() {
-const api = useApi();
+
 
   return (
     <AuthGuard allowedRoles={["sysadmin"]}>

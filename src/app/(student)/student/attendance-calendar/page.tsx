@@ -27,12 +27,12 @@ const MONTH_NAMES = [
 
 
   
-function statusOf(d: { status: string | null; time_in: string | null }): "present" | "absent" | "unmarked" | "pending" {
-  const s = (d.status || "").toLowerCase();
-  if (s === "present" || s === "in" || d.time_in) return "present";
-  if (s === "absent" || s === "out") return "absent";
-  return d.time_in ? "present" : "unmarked";
-}
+
+
+
+
+
+
 
 function StudentAttendanceCalendarInner() {
   const now = new Date();

@@ -1,14 +1,14 @@
 "use client";
 
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import {ShieldCheck, ShieldAlert, ShieldQuestion, ArrowLeft, Lock, KeyRound, Database, Globe2, ServerCog, UserCheck, CheckCircle2, QrCode, Bell, Layers, Terminal, Building2, ChevronRight}  from "lucide-react";
+import { ShieldCheck, ShieldAlert, ShieldQuestion, ArrowLeft, Lock, KeyRound, Database, Globe2, ServerCog, UserCheck, CheckCircle2, QrCode, Layers, ChevronRight } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuthStore } from "@/stores/authStore";
 import { useGlass } from "@/context/GlassContext";
 import type { SecurityMode } from "@/context/GlassContext";
-import type { Role } from "@/lib/types";
+
 
 const POSTURE: Record<
   SecurityMode,
@@ -56,7 +56,7 @@ export default function SecurityPage() {
   const router = useRouter();
   const {role, user} = useAuthStore();
   const {securityMode, wsConnected, gateTraffic} = useGlass();
-  const [_rechecking, setRechecking] = useState(false);
+
 
   const mode = securityMode in POSTURE ? securityMode : "secure";
   const p = POSTURE[mode];
@@ -66,116 +66,116 @@ export default function SecurityPage() {
   const displayRoleName = ROLE_DISPLAY_NAMES[userRole] || userRole.toUpperCase();
   const isSysadmin = userRole === "sysadmin";
 
-  const handleRecheck = () => {
-    setRechecking(true);
-    setTimeout(() => {
-      setRechecking(false);
-    }, 800);
-  };
 
-  const getGatePassSecurityParams = (r: Role | string) => {
-    switch (r) {
-      case "student":
-        return {
-          title: "Digital Pass & Curfew Integrity",
-          icon: QrCode,
-          desc: "Anti-tamper dynamic QR generation and automated curfew validation.",
-          items: [
-            { label: "Digital ID Token", value: "Anti-Spoof Encrypted" },
-            { label: "Dynamic QR TTL", value: "60s Auto Refresh" },
-            { label: "Curfew Sync", value: "Hostel Policy Enforced" },
-            { label: "Active Pass Lock", value: "Single Device Bound" },
-          ],
-        };
-      case "guardian":
-      case "parent":
-        return {
-          title: "Ward Movement & Alert Safeguard",
-          icon: Bell,
-          desc: "Real-time SMS/App alerts and emergency movement locks for wards.",
-          items: [
-            { label: "Ward Link Status", value: "Bi-directional Verified" },
-            { label: "Exit Alert Relay", value: "Instant Push Active" },
-            { label: "Emergency Approval", value: "Requires One-Time PIN" },
-            { label: "Ward Log Privacy", value: "End-to-End Encrypted" },
-          ],
-        };
-      case "operator":
-        return {
-          title: "Terminal Scanner & Override Controls",
-          icon: Terminal,
-          desc: "Biometric scanner authorization and local scan cache protection.",
-          items: [
-            { label: "Scanner Hardware Guard", value: "Hardware Key Signed" },
-            { label: "Biometric Override", value: "Supervisor PIN Required" },
-            { label: "Offline Scan Cache", value: "Encrypted Vault" },
-            { label: "Assigned Terminal", value: "Gate #1 Main Entry" },
-          ],
-        };
-      case "supervisor":
-        return {
-          title: "Multi-Gate Operations & Escalation Guard",
-          icon: ShieldCheck,
-          desc: "High-level override authority and real-time gate anomaly tracking.",
-          items: [
-            { label: "Override Privilege", value: "Audit-Logged Escalation" },
-            { label: "Multi-Gate Monitor", value: "All Active Terminals" },
-            { label: "Operator Patrol Sync", value: "Duty Roster Verified" },
-            { label: "High-Risk Alert Lock", value: "System Freeze Ready" },
-          ],
-        };
-      case "principal":
-        return {
-          title: "Hostel Clearance & Night Pass Security",
-          icon: Building2,
-          desc: "Hostel sector curfew compliance and approval verification.",
-          items: [
-            { label: "Outing Clearance Lock", value: "Digital Signature" },
-            { label: "Hostel Sector Scope", value: "Isolated Hostel Block" },
-            { label: "Late Return Tracker", value: "Automated Flagging" },
-            { label: "Resident Roster Sync", value: "Real-time Live Sync" },
-          ],
-        };
-      case "faculty":
-      case "staff":
-        return {
-          title: "Faculty Access & Dept Clearance",
-          icon: UserCheck,
-          desc: "Departmental access privileges and official movement verification.",
-          items: [
-            { label: "Access Clearance", value: "Full Campus & Labs" },
-            { label: "Department Scope", value: "Verified Academic Unit" },
-            { label: "Vehicle Gate Pass", value: "RFID Automated Reader" },
-            { label: "Guest Referral Guard", value: "Self-service Pass Issuer" },
-          ],
-        };
-      case "sysadmin":
-      case "admin":
-        return {
-          title: "Zero-Trust Global Security & IP Controls",
-          icon: ServerCog,
-          desc: "Master system policies, database RLS enforcement, and global kill-switches.",
-          items: [
-            { label: "Zero-Trust Allowlist", value: "Subnet Filter Enforced" },
-            { label: "Database RLS Scope", value: "Strict Row Isolation" },
-            { label: "Audit Telemetry", value: "Immutable System Ledger" },
-            { label: "Master Auth Key", value: "RS256 JWT Signed" },
-          ],
-        };
-      default:
-        return {
-          title: "Gate Access & Visitor Pass Security",
-          icon: QrCode,
-          desc: "Time-bound visitor pass authorization and biometric entry check.",
-          items: [
-            { label: "Visitor Pass Token", value: "Valid Today" },
-            { label: "Check-in Identity", value: "Govt ID Verified" },
-            { label: "Host Approval", value: "Clearance Confirmed" },
-            { label: "Campus Zone Scope", value: "Restricted Zone" },
-          ],
-        };
-    }
-  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const CARDS = [
     {

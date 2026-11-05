@@ -153,7 +153,7 @@ async function handlePost(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { tables = [], format = "csv" } = body;
+const { tables = [] } = body;
 
     if (!Array.isArray(tables) || tables.length === 0) {
       return NextResponse.json(

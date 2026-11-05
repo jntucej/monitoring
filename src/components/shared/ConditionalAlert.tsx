@@ -17,6 +17,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
   useEffect(() => {
     const matches = ALERT_CATALOGUE.filter((a) => {
       // Tier gate
+
       const tier = getRoleTier(ctx.role);
       if (tier < a.minTier) return false;
       // Optional role allowlist
@@ -30,7 +31,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
 
   if (!visible.length) return null;
 
-  const tier = getRoleTier(ctx.role);
+
 
   return (
       <div className="space-y-2" role="region" aria-label="Active alerts">

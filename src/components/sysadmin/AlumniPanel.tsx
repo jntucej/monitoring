@@ -116,8 +116,9 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
   const enriched = useMemo(() => {
     return students.map((s) => {
       const roll = s.roll || s.uniqueId || "";
-      const gradYear = getGraduationYearFromRoll(roll);
+
       const currentYear = new Date().getFullYear();
+      const gradYear = getGraduationYearFromRoll(roll);
       const shouldBeGraduated = gradYear !== null && gradYear <= currentYear;
       const isGraduated = s.status === "DEPROVISIONED" || s.completed === true;
       const isSuspended = s.status === "SUSPENDED" || s.status === "LOCKED";
@@ -177,8 +178,8 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
     setSingleBusy(student.id);
     try {
       const headers = getAuthHeaders();
-      const roll = student.roll || student.uniqueId || "";
-      const gradYear = getGraduationYearFromRoll(roll);
+
+
       const res = await fetch(`/api/users/${student.id}`, {
         method: "PATCH",
         headers: { ...headers, "Content-Type": "application/json" },

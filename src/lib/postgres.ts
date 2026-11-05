@@ -199,6 +199,7 @@ interface EmbeddedRelation {
   nested?: EmbeddedRelation[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any -- T is the generic param of db.from<T>() public API
 export class PostgresQueryBuilder<T = any> {
   private static fkCache = new Map<string, any[]>();
   

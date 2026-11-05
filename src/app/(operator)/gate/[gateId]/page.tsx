@@ -20,7 +20,7 @@ import { SuccessFlash } from "@/components/operator/SuccessFlash";
 import { Scanner } from "@/components/operator/Scanner";
 import { GatePickerScreen } from "@/components/operator/GatePickerScreen";
 import { primeAudio } from "@/lib/sound";
-import { useAuthStore, useHasHydrated } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import { recommend } from "@/lib/operator-recommend";
 import { ConfirmSheet } from "@/components/operator/sheet/ConfirmSheet";
 import type { EntryButtonId } from "@/lib/operator-recommend";

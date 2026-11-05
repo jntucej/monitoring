@@ -219,7 +219,7 @@ export function MealReviewPanel() {
             const selected = existing?.satisfaction ?? null;
             const win = MEAL_WINDOW[meal].start;
             const winEnd = MEAL_WINDOW[meal].end;
-            const disabled = phase !== "open";
+
             return (
               <div
                 key={meal}

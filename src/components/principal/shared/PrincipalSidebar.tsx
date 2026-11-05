@@ -86,6 +86,7 @@ const NAV_CATEGORIES = [
 
 function NavItem({ href, label, icon: Icon }: { href: string; label: string; icon?: React.ComponentType<{ className?: string }> }) {
   const pathname = usePathname();
+
   const isActive = href === pathname || pathname?.startsWith(href);
   return (
     <Link
@@ -108,7 +109,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
   notifications: _notifications = [],
   unreadCount = 0,
 }: PrincipalSidebarProps) {
-  const pathname = usePathname();
+
 
   return (
     <>
