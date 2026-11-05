@@ -32,6 +32,29 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   DF: { label: "Day Scholar Female", color: "bg-amber-500" },
 };
 
+
+interface UserRow {
+  id: string;
+  role: string;
+  status: string;
+  flag_status?: string;
+  department_id?: string;
+  unique_id?: string;
+}
+interface StudentDetailsRow {
+  user_id: string;
+  roll?: string;
+  year?: number | string;
+  section?: string;
+  student_type?: string;
+  gender?: string;
+  department?: string;
+  [key: string]: unknown;
+}
+interface MovementLogRow {
+  direction: string;
+}
+
 async function handleGet(req: NextRequest) {
   try {
     const svc = getSupabaseServiceClient();
@@ -77,9 +100,8 @@ async function handleGet(req: NextRequest) {
       ),
     ]);
 
-    const users = usersRes.data || [];
-    const detailsMap = new Map((detailsRes.data || []).map((sd: any) => [sd.user_id, sd]));
-
+        const details = (detailsRes.data as unknown as StudentDetailsRow[]) || [];
+    const detailsMap = new Map(details.map((sd): [string, StudentDetailsRow] => [sd.user_id, sd]));
     const deptCodeMap: Record<string, string> = {
       "02": "EEE",
       "03": "MECH",
@@ -89,8 +111,9 @@ async function handleGet(req: NextRequest) {
     };
 
     // Join and apply filters in memory
-    const joinedStudents = users.map((u: any) => {
-      const sd = detailsMap.get(u.id) || {};
+    const userRows = (usersRes.data as unknown as UserRow[]) || [];
+    const joinedStudents = userRows.map((u) => {
+      const sd = detailsMap.get(u.id) || ({} as StudentDetailsRow);
       const roll = sd.roll || u.unique_id || "";
       let rawDept = u.department_id || "";
       if (!rawDept && roll.length >= 8) {
@@ -107,7 +130,7 @@ async function handleGet(req: NextRequest) {
         department,
         student_type: sd.student_type || "DM",
       };
-    }).filter((s: any) => {
+    }).filter((s) => {
       if (statusFilter && statusFilter !== "ALL" && s.status !== statusFilter) return false;
       if (genderFilter && genderFilter !== "ALL" && String(s.gender).toLowerCase() !== genderFilter.toLowerCase()) return false;
       if (effectiveDeptFilter && effectiveDeptFilter !== "ALL" && s.department !== effectiveDeptFilter) return false;
@@ -117,13 +140,13 @@ async function handleGet(req: NextRequest) {
     });
 
     const total = joinedStudents.length;
-    const active = joinedStudents.filter((s: any) => s.status === "ACTIVE").length;
-    const suspended = joinedStudents.filter((s: any) => s.status === "SUSPENDED").length;
-    const flagged = joinedStudents.filter((s: any) => s.flag_status === "suspicious" || s.flag_status === "FLAGGED").length;
+    const active = joinedStudents.filter((s) => s.status === "ACTIVE").length;
+    const suspended = joinedStudents.filter((s) => s.status === "SUSPENDED").length;
+    const flagged = joinedStudents.filter((s) => s.flag_status === "suspicious" || s.flag_status === "FLAGGED").length;
 
     // Department breakdown
     const deptCounts: Record<string, number> = {};
-    joinedStudents.forEach((s: any) => {
+    joinedStudents.forEach((s) => {
       const dept = s.department || "UNKNOWN";
       deptCounts[dept] = (deptCounts[dept] || 0) + 1;
     });
@@ -139,7 +162,7 @@ async function handleGet(req: NextRequest) {
 
     // Student type breakdown (HM/HF/DM/DF)
     const typeCounts: Record<string, number> = {};
-    joinedStudents.forEach((s: any) => {
+    joinedStudents.forEach((s) => {
       const t = s.student_type || "DM";
       typeCounts[t] = (typeCounts[t] || 0) + 1;
     });
@@ -153,7 +176,7 @@ async function handleGet(req: NextRequest) {
 
     // Gender breakdown
     const genderCounts: Record<string, number> = {};
-    joinedStudents.forEach((s: any) => {
+    joinedStudents.forEach((s) => {
       const g = (s.gender || "male").toLowerCase();
       genderCounts[g] = (genderCounts[g] || 0) + 1;
     });
@@ -166,7 +189,7 @@ async function handleGet(req: NextRequest) {
 
     // Year breakdown
     const yearCounts: Record<string, number> = {};
-    joinedStudents.forEach((s: any) => {
+    joinedStudents.forEach((s) => {
       const year = s.year || "1";
       yearCounts[String(year)] = (yearCounts[String(year)] || 0) + 1;
     });
@@ -190,7 +213,7 @@ async function handleGet(req: NextRequest) {
     let onCampusToday = 0;
     let todayEntries = 0;
     let todayExits = 0;
-    (todayLogs || []).forEach((log: any) => {
+    (((todayLogs as unknown) as MovementLogRow[]) || []).forEach((log) => {
       if (log.direction === "IN") todayEntries++;
       else todayExits++;
     });
