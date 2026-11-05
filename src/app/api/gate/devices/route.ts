@@ -37,14 +37,32 @@ async function handleGet(_req: NextRequest) {
       .select('gate_id, operator_id, operator_name, timestamp')
       .gte('timestamp', windowStartIso);
 
-    const logs = logsData || [];
-    const operators = opsData || [];
+    type MovementLogRow = {
+      id: string;
+      gate_id: string;
+      direction: string | null;
+      scan_type: string | null;
+      operator_id: string | null;
+      operator_name: string | null;
+      timestamp: string;
+    };
+    type OperatorRow = {
+      id: string;
+      name: string | null;
+      email: string | null;
+      unique_id: string | null;
+      role: string;
+      gate_id: string | null;
+      status: string;
+    };
+    const logs = (logsData as unknown as MovementLogRow[]) || [];
+    const operators = (opsData as unknown as OperatorRow[]) || [];
 
     // Real assignment map: gate_id -> operators actually assigned to it
     // (users.gate_id). No round-robin / hardcoded fallback.
     const assignedByGate: Record<string, typeof operators> = {};
     for (const op of operators) {
-      const gid = (op as any).gate_id;
+      const gid = op.gate_id;
       if (!gid) continue;
       (assignedByGate[gid] ||= []).push(op);
     }
@@ -70,17 +88,17 @@ async function handleGet(_req: NextRequest) {
 
     const allGates = await getAllGatesLive();
     const devices = allGates.map((gate) => {
-      const gateLogs = logs.filter((l: any) => l.gate_id === gate.id || l.gateId === gate.id);
-      const entriesToday = gateLogs.filter((l: any) => {
+      const gateLogs = logs.filter((l) => l.gate_id === gate.id);
+      const entriesToday = gateLogs.filter((l) => {
         const dir = String(l.direction || l.scan_type || "").toUpperCase();
         return dir === "IN" || dir === "ENTRY";
       }).length;
-      const exitsToday = gateLogs.filter((l: any) => {
+      const exitsToday = gateLogs.filter((l) => {
         const dir = String(l.direction || l.scan_type || "").toUpperCase();
         return dir === "OUT" || dir === "EXIT";
       }).length;
       const lastLog = [...gateLogs].sort(
-        (a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       )[0];
 
       const gateOps = assignedByGate[gate.id] || [];
@@ -118,9 +136,9 @@ async function handleGet(_req: NextRequest) {
           : gateOps[0]
           ? {
               id: gateOps[0].id,
-              name: (gateOps[0] as any).name || (gateOps[0] as any).email || "Assigned operator",
-              email: (gateOps[0] as any).email || "",
-              role: (gateOps[0] as any).role || "operator",
+              name: gateOps[0].name || gateOps[0].email || "Assigned operator",
+              email: gateOps[0].email || "",
+              role: gateOps[0].role || "operator",
               attributed: false,
               at: lastInWindow.at,
             }
@@ -147,7 +165,7 @@ async function handleGet(_req: NextRequest) {
         scannedRecently: !!lastInWindow,
         onlineWindowMs: ONLINE_WINDOW_MS,
         lastOperator,
-        assignedOperators: gateOps.map((op: any) => ({
+        assignedOperators: gateOps.map((op) => ({
           id: op.id,
           name: op.name || op.email || "Unnamed operator",
           email: op.email || "",

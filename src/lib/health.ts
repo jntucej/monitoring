@@ -2,6 +2,22 @@ import { supabase, getSupabaseServiceClient } from './dbClient';
 import { getAuthSigningKey } from './auth-token';
 import { query } from './postgres';
 
+type ServiceCheckStatus = 'healthy' | 'degraded' | 'unhealthy';
+interface ServiceSubCheck {
+  status?: ServiceCheckStatus;
+  ok?: boolean;
+  error?: string;
+  jwt_secret?: { ok: boolean; error?: string };
+  system_config_readable?: { ok: boolean; error?: string };
+  has_active_users?: { ok: boolean };
+}
+type ServiceComponent = {
+  status: ServiceCheckStatus;
+  auth?: ServiceSubCheck;
+  worker?: ServiceSubCheck;
+  [key: string]: ServiceSubCheck | ServiceCheckStatus | undefined;
+};
+
 export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
@@ -10,7 +26,7 @@ export interface SystemHealth {
     database: { status: 'healthy' | 'degraded' | 'unhealthy'; latency: number; error?: string };
     redis?: { status: 'healthy' | 'degraded' | 'unhealthy'; latency: number; error?: string };
     gateways: { status: 'healthy' | 'degraded' | 'unhealthy'; online: number; offline: number; total: number };
-    services: { status: 'healthy' | 'degraded' | 'unhealthy'; [key: string]: any };
+    services: ServiceComponent;
     env?: { status: 'healthy' | 'degraded' | 'unhealthy'; error?: string };
   };
   metrics: {
@@ -136,8 +152,8 @@ export async function checkSystemHealth() {
       const { data: gates } = await dbClient.from('gates').select('is_active');
       const gateStatuses = gates || [];
       health.components.gateways.total = gateStatuses.length;
-      health.components.gateways.online = gateStatuses.filter((g: any) => g.is_active).length;
-      health.components.gateways.offline = gateStatuses.filter((g: any) => !g.is_active).length;
+      health.components.gateways.online = (gateStatuses as unknown as Array<{ is_active: boolean }>).filter((g) => g.is_active).length;
+      health.components.gateways.offline = (gateStatuses as unknown as Array<{ is_active: boolean }>).filter((g) => !g.is_active).length;
       if (health.components.gateways.offline > 0) {
         health.components.gateways.status = 'degraded';
         if (health.status === 'healthy') health.status = 'degraded';
@@ -153,7 +169,7 @@ export async function checkSystemHealth() {
       const { data: sessionData } = await dbClient.from("sessions").select("user_id").is("revoked_at", null).gt("expires_at", new Date().toISOString());
       if (sessionData) {
         health.metrics.activeSessions = sessionData.length;
-        const uniqueUsers = new Set(sessionData.map((s: any) => s.user_id).filter(Boolean));
+        const uniqueUsers = new Set((sessionData as unknown as Array<{ user_id: string | null }>).map((s) => s.user_id).filter(Boolean));
         health.metrics.activeUsers = uniqueUsers.size;
       }
     } catch (error) {
@@ -163,7 +179,7 @@ export async function checkSystemHealth() {
     // Get recent alerts
     try {
       const { data: alerts } = await getClient().from('alerts').select('*').order('timestamp', { ascending: false }).limit(10);
-      health.recentAlerts = (alerts || []).map((a: any) => ({ id: a.id, severity: a.severity, message: a.message, timestamp: a.timestamp || a.created_at }));
+      health.recentAlerts = ((alerts as unknown as Array<{ id: string; severity: 'info' | 'warning' | 'critical'; message: string; timestamp?: string; created_at?: string }> || []).map((a) => ({ id: a.id, severity: a.severity, message: a.message, timestamp: a.timestamp || a.created_at || '' })));
     } catch (error) {
       console.error('Error getting recent alerts:', error);
     }
@@ -222,10 +238,10 @@ export async function checkSystemHealth() {
     let usersOk = false;
     try { const { count } = await svc.from('users').select('id', { count: 'exact', head: true }).eq('status', 'ACTIVE'); usersOk = (count ?? 0) > 0; } catch { /* leave false */ }
     const authOk = jwtOk && cfgOk && usersOk;
-    (health.components.services as any).auth = { status: authOk ? 'healthy' : 'degraded', jwt_secret: { ok: jwtOk, error: jwtErr }, system_config_readable: { ok: cfgOk, error: cfgErr }, has_active_users: { ok: usersOk } };
+    health.components.services.auth = { status: authOk ? 'healthy' : 'degraded', jwt_secret: { ok: jwtOk, error: jwtErr }, system_config_readable: { ok: cfgOk, error: cfgErr }, has_active_users: { ok: usersOk } };
     if (!authOk && health.status === 'healthy') health.status = 'degraded';
   } catch (e) {
-    (health.components.services as any).auth = { status: 'unhealthy', error: String(e) };
+    health.components.services.auth = { status: 'unhealthy', error: String(e) };
     if (health.status === 'healthy') health.status = 'degraded';
   }
 

@@ -7,6 +7,7 @@ import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
+import type { Role } from "@/lib/types";
 import { verifyBootstrapToken } from "@/lib/bootstrap-link";
 
 const UNIFORM = { success: false, error: { code: "INVALID_CODE", message: "Invalid identifier or enrollment code." } };
@@ -48,7 +49,15 @@ async function handlePost(req: NextRequest) {
   const normId = (uniqueId ?? "").trim().toUpperCase();
 
   // Resolve the target user by ID or roll.
-  let user: any = null;
+  let user: {
+    id: string;
+    name: string;
+    status: string;
+    role: string;
+    email: string | null;
+    unique_id: string;
+    onboarded_at: string | null;
+  } | null = null;
   if (targetUserId) {
     const { rows: idRows } = await query("SELECT id, name, status, role, email, unique_id, onboarded_at FROM users WHERE id = $1 LIMIT 1", [targetUserId]);
     user = idRows[0] ?? null;
@@ -66,7 +75,7 @@ async function handlePost(req: NextRequest) {
   }
   try {
     assertPasswordPolicy(newPassword, user.role, {
-      email: user.email,
+      email: user.email ?? undefined,
       name: user.name,
     });
   } catch (e) {
@@ -77,11 +86,11 @@ async function handlePost(req: NextRequest) {
   }
 
   const identifierForAudit = targetUserId ? user.unique_id : normId;
-  const rejectAudit = async (u?: any) => {
+  const rejectAudit = async (u?: { id?: string; name?: string; role?: string }) => {
     await addAudit({
       action: "ENROLLMENT_CODE_REJECTED",
       userId: u?.id ?? "Unknown",
-      role: "student" as any,
+      role: "student" as Role,
       details: { identifier: identifierForAudit, reason: "invalid_code", ip: req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown" },
     });
     return NextResponse.json(UNIFORM, { status: 401 });
@@ -106,7 +115,7 @@ async function handlePost(req: NextRequest) {
      ORDER BY created_at DESC LIMIT 1`,
     [user.id]
   );
-  const rows = resRows.rows as any[];
+  const rows = resRows.rows as unknown as Array<{ id: string; code_hash: string }>;
 
   const row = rows[0];
   if (!row) return await rejectAudit(user);
@@ -131,7 +140,7 @@ async function handlePost(req: NextRequest) {
       action: "ENROLLMENT_CODE_RACE_LOST",
       userId: user.id,
       userName: user.name,
-      role: "student" as any,
+      role: "student" as Role,
       details: {
         identifier: identifierForAudit,
         reason: "concurrent burn — code was claimed by another request",
@@ -161,7 +170,7 @@ async function handlePost(req: NextRequest) {
     action: "USER_ONBOARDED",
     userId: user.id,
     userName: user.name,
-    role: "student" as any,
+    role: "student" as Role,
     details: `Completed bootstrap: password + PIN set, onboarded_at stamped.`,
   });
 
