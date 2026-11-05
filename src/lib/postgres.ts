@@ -5,7 +5,7 @@ import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
  * PostgreSQL Connection Pool for Self-Hosted Architecture.
  */
 let poolInstance: Pool | null = null;
-let pgModule: any = null;
+let pgModule: typeof import("pg") | null = null;
 
 async function getPgModule() {
   if (!pgModule) {
@@ -44,7 +44,7 @@ export async function getPostgresPool(): Promise<Pool> {
           : undefined,
     }) as Pool;
 
-    instance.on("error", (err: any, client: any) => {
+    instance.on("error", (err: unknown, client: unknown) => {
       console.error("[PostgreSQL Pool Error]", {
         err,
         client: client ? "idle" : "unknown",
@@ -63,7 +63,7 @@ export async function getPostgresPool(): Promise<Pool> {
  */
 export async function poolQuery<T extends QueryResultRow = any>(
   text: string,
-  params: any[] = [],
+  params: unknown[] = [],
   retries = 3,
   options?: { currentRole?: string; currentUserId?: string }
 ): Promise<QueryResult<T>> {
@@ -187,7 +187,7 @@ export async function withTransaction<T>(
 export interface FilterCondition {
   column: string;
   op: "=" | "!=" | ">" | "<" | ">=" | "<=" | "LIKE" | "ILIKE" | "IN" | "IS" | "NOT_IS";
-  value: any;
+  value: unknown;
   rawClause?: string;
 }
 
@@ -201,9 +201,9 @@ interface EmbeddedRelation {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any -- T is the generic param of db.from<T>() public API
 export class PostgresQueryBuilder<T = any> {
-  private static fkCache = new Map<string, any[]>();
+  private static fkCache = new Map<string, unknown[]>();
   
-  private static async loadForeignKeys(table: string): Promise<any[]> {
+  private static async loadForeignKeys(table: string): Promise<unknown[]> {
     if (this.fkCache.has(table)) return this.fkCache.get(table)!;
     
     // Using global query function (assumed accessible in scope)
@@ -231,7 +231,7 @@ export class PostgresQueryBuilder<T = any> {
   private isMaybeSingle: boolean = false;
   private countMode: boolean = false;
   private headOnly: boolean = false;
-  private pendingMutation?: { type: "insert" | "update" | "delete" | "upsert"; data?: any; options?: any };
+  private pendingMutation?: { type: "insert" | "update" | "delete" | "upsert"; data?: unknown; options?: unknown };
 
   constructor(table: string) {
     this.tableName = table;
@@ -698,7 +698,7 @@ export class PostgresQueryBuilder<T = any> {
         const params: any[] = [];
         // Serialize object/array values (JSONB columns such as stage_history)
         // so the Postgres driver sends them as a JSON string literal.
-        const serialize = (v: any) =>
+        const serialize = (v: unknown) =>
           v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const valueTuples = list.map((row) => {
           const tuple = keys.map((k) => { params.push(serialize(row[k])); return `$${params.length}`; });
@@ -715,14 +715,14 @@ export class PostgresQueryBuilder<T = any> {
         return { data: res.rows, error: null };
       }
       if (this.pendingMutation?.type === "update") {
-        const values = this.pendingMutation.data || {};
+const values = (this.pendingMutation.data as Record<string, unknown>) || {};
         const keys = Object.keys(values);
         if (keys.length === 0) return { data: [], error: null };
         const params: any[] = [];
         // Serialize object/array values (JSONB columns such as stage_history)
         // so the Postgres driver sends them as a JSON string literal rather
         // than an unparsable array parameter ("invalid input syntax for json").
-        const serialize = (v: any) =>
+        const serialize = (v: unknown) =>
           v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const setClauses = keys.map((k) => { params.push(serialize(values[k])); return `"${k}" = $${params.length}`; });
         const where = this.buildWhereClause(params);
@@ -751,16 +751,16 @@ export class PostgresQueryBuilder<T = any> {
         if (list.length === 0) return { data: [], error: null };
         const keys = Object.keys(list[0]);
         const params: any[] = [];
-        const serialize = (v: any) =>
+        const serialize = (v: unknown) =>
           v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const valueTuples = list.map((row) => {
           const tuple = keys.map((k) => { params.push(serialize(row[k])); return `$${params.length}`; });
           return `(${tuple.join(", ")})`;
         });
-        const conflictCol = this.pendingMutation.options?.onConflict || "id";
+        const conflictCol = ((this.pendingMutation.options as { onConflict?: string } | undefined)?.onConflict) || "id";
         const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
         let sql = `INSERT INTO ${this.tableName} (${keys.map((k) => `"${k}"`).join(", ")}) VALUES ${valueTuples.join(", ")}`;
-        if (this.pendingMutation.options?.ignoreDuplicates) {
+        if ((this.pendingMutation.options as { ignoreDuplicates?: boolean } | undefined)?.ignoreDuplicates) {
           sql += ` ON CONFLICT (${conflictCol}) DO NOTHING`;
         } else {
           const updateSet = keys.filter((k) => k !== conflictCol).map((k) => `"${k}" = EXCLUDED."${k}"`).join(", ");
