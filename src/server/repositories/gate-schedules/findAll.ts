@@ -9,6 +9,15 @@ export interface GateScheduleRow {
   isActive: boolean;
 }
 
+interface GateAccessRuleRow {
+  id: string;
+  gate_id?: string;
+  days_of_week?: number[];
+  start_time: string;
+  end_time: string;
+  is_active?: boolean;
+}
+
 export async function findAll(): Promise<GateScheduleRow[]> {
   const { data, error } = await db
     .from("gate_access_rules")
@@ -18,14 +27,14 @@ export async function findAll(): Promise<GateScheduleRow[]> {
   if (error || !data) return [];
   
   // Mapping rules to schedule rows for the unified GET response
-  return data.map((rule: any) => ({
+  return (data as Array<GateAccessRuleRow>).map((rule) => ({
     id: rule.id,
-    gateId: rule.gate_id,
+    gateId: rule.gate_id ?? "",
     // Note: The original schedule view seems to use `days_of_week`.
     // Adjusting based on `gate_access_rules` structure.
     dayOfWeek: Array.isArray(rule.days_of_week) ? rule.days_of_week[0] : 0,
     openTime: rule.start_time,
     closeTime: rule.end_time,
-    isActive: rule.is_active,
+    isActive: rule.is_active ?? true,
   }));
 }

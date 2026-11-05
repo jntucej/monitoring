@@ -832,8 +832,8 @@ export const authAdmin = {
     const name = safeAttributes.user_metadata?.name || safeAttributes.user_metadata?.full_name || email.split("@")[0];
     const role = safeAttributes.role || safeAttributes.user_metadata?.role || "student";
     const passwordHash = safeAttributes.password ? await bcrypt.hash(safeAttributes.password, 10) : null;
-    const uniqueId = safeAttributes.user_metadata?.unique_id || email.split("@")[0].toUpperCase();
-    const handle = (uniqueId || name || `user_${id.replace(/-/g, "").slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    const uniqueId = String(safeAttributes.user_metadata?.unique_id ?? email.split("@")[0].toUpperCase());
+    const handle = String(uniqueId || name || `user_${String(id).replace(/-/g, "").slice(0, 8)}`).toLowerCase().replace(/[^a-z0-9_]/g, "_");
     try {
       const res = await query(
         `INSERT INTO users (id, unique_id, handle, email, name, role, status, password_hash, created_at)
@@ -903,7 +903,7 @@ export const db = {
   rpc: async (fnName: string, args: Record<string, any> = {}) => {
     try {
       if (fnName === "resolve_login_identifier") {
-        const loginId = args.p_login_id || args.login_id || args.identifier || "";
+        const loginId = String(args.p_login_id ?? args.login_id ?? args.identifier ?? "");
         const res = await query(`SELECT email FROM users WHERE LOWER(email) = LOWER($1) OR UPPER(unique_id) = UPPER($1) OR LOWER(login_identifier) = LOWER($1) OR LOWER(handle) = LOWER($1) LIMIT 1`, [loginId.trim()]);
         return { data: res.rows[0]?.email || null, error: null };
       }
