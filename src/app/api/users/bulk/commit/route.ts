@@ -1,4 +1,3 @@
-/* eslint-disable */
 // src/app/api/users/bulk/commit/route.ts
 // LIVE: called by CsvBulkImporter and BulkUserImportModal (sysadmin console).
 // (The parallel /api/admin/users/bulk/* set is used by UserManagementPanel.)
