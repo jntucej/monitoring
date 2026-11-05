@@ -17,9 +17,14 @@ const defaultConfig = {
 };
 
 // Helper: always return defaultConfig on any missing/invalid DB payload
-function toConfig(value: any) {
+type ConfigRow = { data?: unknown; value?: unknown };
+function toConfig(value: unknown) {
   if (!value || typeof value !== "object") return defaultConfig;
-  return { ...defaultConfig, ...value };
+  return { ...defaultConfig, ...(value as Partial<typeof defaultConfig>) };
+}
+
+function configPayload(row: unknown): unknown {
+  return (row as ConfigRow | null)?.data ?? (row as ConfigRow | null)?.value;
 }
 
 async function handleGetInner(_req: NextRequest) {
@@ -43,7 +48,7 @@ async function handleGetInner(_req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: toConfig((data as any)?.data ?? (data as any)?.value),
+      data: toConfig(configPayload(data)),
     });
   } catch {
     return NextResponse.json({ success: true, data: defaultConfig });
@@ -73,7 +78,7 @@ async function handlePatchInner(req: NextRequest) {
     }
 
     const mergedValue = {
-      ...(toConfig((existing as any)?.data ?? (existing as any)?.value) as any),
+      ...(toConfig(configPayload(existing)) as Partial<typeof defaultConfig>),
       ...(body || {}),
       updatedAt: new Date().toISOString(),
     };
@@ -106,7 +111,7 @@ async function handlePatchInner(req: NextRequest) {
     // Invalidate cached config on any change so the new values take effect.
     await invalidateCache("system_config:*");
 
-    return NextResponse.json({ success: true, data: toConfig((upserted as any)?.data ?? (upserted as any)?.value) });
+    return NextResponse.json({ success: true, data: toConfig(configPayload(upserted)) });
   } catch (err) {
     return NextResponse.json(
       {

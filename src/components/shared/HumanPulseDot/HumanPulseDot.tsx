@@ -104,7 +104,7 @@ export const HumanPulseDot = forwardRef<
           delay: delayMs / 1000,
         }}
 
-        {...(props as any)}
+        {...(props as unknown as Record<string, unknown>)}
       />
     );
   }
@@ -123,13 +123,15 @@ export const HumanPulseDot = forwardRef<
 
       style={{
         ...baseStyle,
-        ["--pulse-color" as any]:   resolved,
-        ["--pulse-size" as any]:    `${size}px`,
-        ["--pulse-delay" as any]:   `${delayMs}ms`,
-        ["--beat-duration" as any]: `${BEAT_DURATION_S}s`,
-        ["--lub-scale" as any]:     LUB_SCALE,
-        ["--dub-scale" as any]:     DUB_SCALE,
-        ["--rest-opacity" as any]:  REST_OPACITY,
+        ...({
+          "--pulse-color": resolved,
+          "--pulse-size": `${size}px`,
+          "--pulse-delay": `${delayMs}ms`,
+          "--beat-duration": `${BEAT_DURATION_S}s`,
+          "--lub-scale": LUB_SCALE,
+          "--dub-scale": DUB_SCALE,
+          "--rest-opacity": REST_OPACITY,
+        } as React.CSSProperties),
       }}
 
       {...props}
