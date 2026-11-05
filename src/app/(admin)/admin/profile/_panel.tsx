@@ -135,9 +135,9 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
     finally { setSavingPassword(false); }
   };
 
-  const changePin = async (_e: React.FormEvent) => {
-    // PIN removed — password-only auth model
-  };
+
+
+
 
   const initials = useMemo(() => (name || user?.name || role || "U").trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase()).join(""), [name, user?.name, role]);
 

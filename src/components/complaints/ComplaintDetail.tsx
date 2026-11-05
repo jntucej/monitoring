@@ -87,7 +87,7 @@ export function ComplaintDetail({ role }: { role: string }) {
   if (!data?.complaint) return <p className="p-6 text-[var(--text-muted)]">Complaint not found.</p>;
 
   const c = data.complaint;
-  const isRaiser = role === "student" && c.raised_by; // Note: client view might verify auth store
+
   const isAuthority = role !== "student";
 
   return (

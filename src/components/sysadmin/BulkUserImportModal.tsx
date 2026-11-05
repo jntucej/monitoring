@@ -80,27 +80,27 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
   /** B7: per-row enrollment codes for freshly imported students (from the commit response). */
   const [reportBootstrapCodes, setReportBootstrapCodes] = useState<Array<{ row: number; roll: string | null; code: string }> | null>(null);
 
-  const runValidate = async (): Promise<PreviewState | null> => {
-    const res = await fetch("/api/users/bulk/validate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...api.getHeaders() },
-      body: JSON.stringify({ csv: csvText }),
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) return null;
-    const d = json.data ?? json;
-    return {
-      summary: {
-        total: d.summary?.total ?? 0,
-        valid: d.summary?.valid ?? 0,
-        invalid: d.summary?.invalid ?? 0,
-        skipped: d.summary?.skipped ?? 0,
-      },
-      errors: (d.errors ?? []) as PreviewError[],
-      skippedRows: d.skippedRows ?? [],
-      importedBefore: d.importedBefore ?? 0,
-    };
-  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const handleImport = async () => {
     setBusy("commit");

@@ -17,9 +17,9 @@ interface GeneratedReport {
 
 const TYPES: GeneratedReport["type"][] = ["Daily", "Weekly", "Monthly"];
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
+
+
+
 function rangeFor(type: GeneratedReport["type"]): string {
   const t = new Date();
   if (type === "Daily") return t.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });

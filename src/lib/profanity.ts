@@ -20,9 +20,9 @@ const PROFANITY_TERMS: readonly string[] = [
   "scam", "fraud",
 ];
 
-const BLOCKLIST = new Set(
-  PROFANITY_TERMS.map((t) => t.toLowerCase()),
-);
+
+
+
 
 export interface ProfanityCheck {
   clean: boolean;

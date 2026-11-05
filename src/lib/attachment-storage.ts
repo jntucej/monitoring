@@ -191,7 +191,7 @@ export async function getStorageStatus() {
 }
 
 
-function extFromName(n: string): string | null {
-  const m = n.match(/\.([a-z0-9]{1,8})$/i);
-  return m ? m[1].toLowerCase() : null;
-}
+
+
+
+

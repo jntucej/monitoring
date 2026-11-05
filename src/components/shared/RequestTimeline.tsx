@@ -82,12 +82,12 @@ const NODE_TONE_CLASS: Record<NodeTone, string> = {
   escalation: "bg-[var(--action-warning)]/10 border-[var(--action-warning)]/30",
 };
 
-const NODE_DOT_CLASS: Record<NodeTone, string> = {
-  neutral: "bg-[var(--text-muted)] border-[var(--border)]",
-  positive: "bg-[var(--action-primary)] border-[var(--action-primary)]",
-  negative: "bg-[var(--action-danger)] border-[var(--action-danger)]",
-  escalation: "bg-[var(--action-warning)] border-[var(--action-warning)]",
-};
+
+
+
+
+
+
 
 const NODE_ICON_CLASS: Record<NodeTone, string> = {
   neutral: "text-[var(--text-secondary)]",

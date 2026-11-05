@@ -125,10 +125,10 @@ function getRecommendedActions(
 export function PersonalizedCampusHome() {
   const { user, role } = useAuthStore();
   const engagementState = useEngagementStore();
-  const widgetOrder = useMemo(
-    () => resolveWidgetOrder(engagementState),
-    [engagementState]
-  );
+
+
+
+
 
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);

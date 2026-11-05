@@ -58,7 +58,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const login = useAuthStore((s) => s.login);
   const authenticated = useAuthStore((s) => s.authenticated);
   const role = useAuthStore((s) => s.role);
-  const hasHydrated = useHasHydrated();
+
 
   // Track whether this mount should be allowed to redirect away from /login.
   // Two conditions, both required:

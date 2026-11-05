@@ -29,11 +29,11 @@ const ROLE_LABELS: Record<string, string> = {
   unknown: "Other",
 };
 
-const ROLE_COLORS: Record<string, string> = {
-  student: "blue", faculty: "emerald", staff: "purple", worker: "amber",
-  visitor: "cyan", admin: "sky", sysadmin: "violet",
-  operator: "lime", supervisor: "orange", unknown: "slate",
-};
+
+
+
+
+
 
 function heatColor(v: number, max: number): string {
   if (v === 0) return "rgba(59,130,246,0.06)";

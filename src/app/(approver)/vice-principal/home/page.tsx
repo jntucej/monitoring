@@ -76,7 +76,7 @@ export default function VPTodayPage() {
   usePolling(refresh, { intervalMs: 15_000 });
 
   // Hydrate today's wins from the server
-  const todayWins = useVPRetention((s) => s.todayWins);
+
   const sessionDecisions = useVPRetention((s) => s.sessionDecisions);
 
   const d = data?.data;

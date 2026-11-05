@@ -78,8 +78,8 @@ function ExamBranchReportsInner() {
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const busy =
-    (analyticsLoading && !analytics) || (presenceLoading && !presence);
+
+
 
   const metrics = analytics?.data?.metrics ?? [];
   const series = analytics?.data?.seriesData ?? [];

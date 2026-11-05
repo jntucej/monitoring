@@ -33,16 +33,16 @@ export function UserProfileTab() {
     }
   };
 
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "glass" : theme === "glass" ? "light" : "dark";
-    setTheme(nextTheme);
-    addToast({
-      title: "Theme Changed",
-      message: `Switched to ${nextTheme.toUpperCase()} mode`,
-      variant: "info",
-      duration: 1500,
-    });
-  };
+
+
+
+
+
+
+
+
+
+
 
   if (!user) {
     return (

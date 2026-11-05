@@ -22,12 +22,12 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
 
   const duration = durationInFrames ?? COMPOSITION_DURATIONS.scanEntry;
 
-  const sweep = interpolate(
-    frame,
-    [0, duration - 1],
-    [0, 100],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
+
+
+
+
+
+
 
   const pulseScale = interpolate(Math.sin((frame / fps) * Math.PI * 2), [-1, 1], [0.8, 1.2], {
     extrapolateLeft: "clamp",

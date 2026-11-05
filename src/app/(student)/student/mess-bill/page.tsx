@@ -47,15 +47,15 @@ export default function MessBillPage() {
     }
   };
 
-  const cancelOptOut = async (id: string) => {
-    const r = await fetch(`/api/student/meal-opt-out/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    });
-    const j = await r.json();
-    if (j.success) await load();
-    else alert(j.error?.message ?? "Failed to cancel opt-out");
-  };
+
+
+
+
+
+
+
+
+
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">

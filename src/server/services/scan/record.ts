@@ -171,35 +171,35 @@ function enforceOutScopeByEntryType(
  * there. The function is kept as a hook so callers, tests, and the
  * record-scan audit trail stay stable.
  */
-async function enforceOutDurationCap(
-  userId: string,
-  reason: string | null | undefined,
-): Promise<void> {
-  const normalized = normalizeExitReason(reason);
-  const capHours = OUT_DURATION_CAPS_HOURS[normalized];
-  if (capHours === undefined) return; // no cap for this reason
 
-  const lastMove = await findLastMovementByUserId(userId);
-  if (!lastMove || lastMove.direction !== "IN") {
-    // No recorded IN scan: cannot compute elapsed; skip the cap check.
-    return;
-  }
 
-  const lastInMs = Date.parse(lastMove.timestamp);
-  if (Number.isNaN(lastInMs)) return;
 
-  const elapsedHours = (Date.now() - lastInMs) / (60 * 60 * 1000);
-  if (elapsedHours > capHours) {
-    const code =
-      normalized === "daily_outing" ? "DAILY_OUTING_OVERDUE" : "DAY_PASS_OVERDUE";
-    throw new ConflictError(
-      `${normalized} exit overdue: student has been out for ${elapsedHours.toFixed(1)}h ` +
-        `(cap ${capHours}h from last IN at ${lastMove.timestamp}).`,
-      code,
-      { code, reason: normalized, capHours, elapsedHours: Number(elapsedHours.toFixed(1)) },
-    );
-  }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Enforce IN-return duration caps for home_out / special_leave tickets.

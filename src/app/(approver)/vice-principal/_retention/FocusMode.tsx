@@ -42,7 +42,7 @@ export function FocusMode({
   const addToast = useUIStore((s) => s.success);
   const errorToast = useUIStore((s) => s.error);
   const recordWin = useVPRetention((s) => s.recordWin);
-  const sessionWins = useVPRetention((s) => s.sessionWins);
+
   const sessionDecisions = useVPRetention((s) => s.sessionDecisions);
 
   const [index, setIndex] = useState(0);

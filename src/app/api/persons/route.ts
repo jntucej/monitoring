@@ -8,11 +8,11 @@ import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import type { PersonType } from "@/lib/types";
 
-function extractToken(req: NextRequest): string | null {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  return authHeader.slice(7);
-}
+
+
+
+
+
 
 async function handleGet(req: NextRequest) {
   try {

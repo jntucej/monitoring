@@ -13,17 +13,17 @@ function getEventId(req: NextRequest): string {
   return idx >= 0 ? parts[idx + 1] ?? "" : "";
 }
 
-async function activeRegistrationCount(
-  supabase: ReturnType<typeof getSupabaseServiceClient>,
-  eventId: string
-): Promise<number> {
-  const { count } = await supabase
-    .from("event_registrations")
-    .select("id", { count: "exact", head: true })
-    .eq("event_id", eventId)
-    .in("status", ["registered", "attended"]);
-  return count ?? 0;
-}
+
+
+
+
+
+
+
+
+
+
+
 
 async function handlePost(
   req: NextRequest,

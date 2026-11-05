@@ -457,14 +457,14 @@ const api = useApi();
       .sort((a, b) => Number(a[0]) - Number(b[0]));
   }, [students]);
 
-  const byBatch = useMemo(() => {
-    const map: Record<string, number> = {};
-    students.forEach((s) => {
-      const k = s.batch || "—";
-      map[k] = (map[k] || 0) + 1;
-    });
-    return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [students]);
+
+
+
+
+
+
+
+
 
   const courses = useMemo(() => {
     const set = new Set<string>();

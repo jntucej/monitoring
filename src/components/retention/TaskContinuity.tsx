@@ -128,13 +128,13 @@ export function TaskContinuity() {
           const parsed = JSON.parse(raw);
           const token = parsed?.state?.token;
           if (token) {
-            const res = await fetch(
-              "/api/campus-extra/task-drafts",
-              {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            );
+
+
+
+
+
+
+
             // Silently ignore
           }
         }

@@ -43,17 +43,17 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   const userRole = role || "student";
   const displayRoleName = ROLE_NAMES[userRole] || userRole.toUpperCase();
 
-  const runVerification = () => {
-    setVerifying(true);
-    setTimeout(() => {
-      setVerifying(false);
-      setLastCheck(new Date().toLocaleTimeString());
-      setLogs((prev) => [
-        `[${new Date().toLocaleTimeString()}] Audit check passed. All parameters nominal.`,
-        ...prev,
-      ]);
-    }, 750);
-  };
+
+
+
+
+
+
+
+
+
+
+
 
   const getCategoryDetails = (cat: string) => {
     switch (cat) {

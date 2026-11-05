@@ -212,10 +212,10 @@ function AdminStudentsInner() {
     );
   }
 
-  const deptSegments = (data?.byDepartment ?? []).map((d) => ({
-    value: d.count,
-    color: deptColor(d.code),
-  }));
+
+
+
+
   const typeSegments = (data?.byType ?? []).map((t) => ({
     value: t.count,
     color: t.type === "hosteller" ? "var(--action-primary)" : "var(--action-info)",

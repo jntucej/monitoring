@@ -96,7 +96,7 @@ function OperatorPageInner() {
   // operator sees between the login page and the desk. Gate the redirect
   // on the hydrated flag so it only fires once we KNOW there is no
   // session, not while one is still being re-established.
-  const hasHydrated = useHasHydrated();
+
 
   // Option A landing rule: the desk opens YOUR gate. An unassigned operator
   // lands on the gate picker — never on "the first active gate" (their

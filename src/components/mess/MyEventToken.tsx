@@ -83,9 +83,9 @@ export function MyEventToken({ eventId }: { eventId: string }) {
     }
   };
 
-  const downloadQr = () => {
-    // QR removed — showing only manual code now.
-  };
+
+
+
 
   if (loading) {
     return (

@@ -23,19 +23,19 @@ const hasNativeBarcodeDetector: boolean =
   typeof window !== "undefined" && "BarcodeDetector" in window;
 
 const formatCache: Record<string, string[]> = {};
-const getUsableFormats = async (scope: ScanMode): Promise<string[]> => {
-  const wanted = scope === "qr" ? QR_FORMATS : BARCODE_FORMATS;
-  const key = wanted.join(",");
-  if (formatCache[key]) return formatCache[key];
-  let detectorFormats: string[] = [];
-  if (hasNativeBarcodeDetector) {
-    try {
-      detectorFormats = await (window as any).BarcodeDetector.getSupportedFormats();
-    } catch { detectorFormats = []; }
-  }
-  formatCache[key] = wanted.filter((f) => detectorFormats.includes(f));
-  return formatCache[key];
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ── Per-gate camera stream cache ──────────────────────────────────────────────
 const gateStreamCache: Record<string, MediaStream> = {};

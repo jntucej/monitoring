@@ -324,41 +324,41 @@ export function GlassProvider({
 
     let animationFrameId: number;
     let stableCount = 0;
-    const lastTier: string | null = null;
 
-    const measureFps = () => {
-      if (document.visibilityState === "hidden") return;
 
-      frameCountRef.current += 1;
-      const now = performance.now();
-      const delta = now - lastFpsCheckRef.current;
 
-      // Sample every 2000ms (2 seconds) to avoid micro-jitter state updates
-      if (delta >= 2000) {
-        const fps = Math.round((frameCountRef.current * 1000) / delta);
-        const targetTier: PerformanceTier =
-          fps >= 55 ? "splusplus" : fps >= 30 ? "performance" : fps >= 15 ? "legacy" : "emergency";
 
-        if (performanceTierRef.current === targetTier) {
-          stableCount++;
-        } else {
-          stableCount = 0;
-          performanceTierRef.current = targetTier;
-          setPerformanceTierState(targetTier);
-        }
 
-        frameCountRef.current = 0;
-        lastFpsCheckRef.current = now;
 
-        // Stop after 5 stable samples (~10s) to conserve battery
-        if (stableCount >= 5) {
-          cancelAnimationFrame(animationFrameId);
-          return;
-        }
-      }
 
-      animationFrameId = requestAnimationFrame(measureFps);
-    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     animationFrameId = requestAnimationFrame(measureFps);
 

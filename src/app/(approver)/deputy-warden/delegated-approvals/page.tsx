@@ -23,11 +23,11 @@ import { PermissionList } from "@/components/approver/PermissionList";
 
 /* response shapes */
 
-interface PresenceMatrixData {
-  gates: Array<{ id: string; name: string; code: string; audience: string; type: string }>;
-  matrix: Record<string, Record<string, number>>;
-  lastUpdated: string;
-}
+
+
+
+
+
 
 
 

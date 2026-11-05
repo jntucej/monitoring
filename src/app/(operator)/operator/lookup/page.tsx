@@ -56,11 +56,11 @@ interface LastScanResponse {
 
 type LookupState = "idle" | "loading" | "found" | "notfound" | "error";
 
-function safeText(v: string | number | null | undefined, fallback = "—"): string {
-  const s = String(v ?? "").trim();
-  if (!s || s === "undefined" || s === "NaN" || s.toLowerCase() === "null") return fallback;
-  return s;
-}
+
+
+
+
+
 
 function StatusBadge({ status }: { status: string }) {
   const s = (status ?? "").toUpperCase();

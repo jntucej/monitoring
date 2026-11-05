@@ -78,8 +78,8 @@ function ExamBranchVerificationInner() {
 
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
-  const busy =
-    (presenceLoading && !presence) || (examReqsLoading && !examReqs);
+
+
 
   const gates = presence?.data?.gates ?? [];
   const matrix = presence?.data?.matrix ?? {};

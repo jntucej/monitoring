@@ -115,10 +115,10 @@ function ExaminationReportsInner() {
   const metrics = data?.data?.metrics ?? [];
   const seriesData = data?.data?.seriesData ?? [];
 
-  const metricValue = useMemo(
-    () => (key: string) => metrics.find((m) => m.key === key)?.value ?? 0,
-    [metrics]
-  );
+
+
+
+
 
   // Render series chart (simple bar-style)
   const maxSeries = useMemo(() => {

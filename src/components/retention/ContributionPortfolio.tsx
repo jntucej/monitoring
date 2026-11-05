@@ -56,14 +56,14 @@ export function ContributionPortfolio() {
   }, [load]);
 
   // Group by type
-  const grouped = useMemo(() => {
-    const map: Record<string, PortfolioItem[]> = {};
-    for (const item of items) {
-      if (!map[item.type]) map[item.type] = [];
-      map[item.type].push(item);
-    }
-    return map;
-  }, [items]);
+
+
+
+
+
+
+
+
 
   const userName = user?.name;
   const handleExport = useCallback(async () => {
