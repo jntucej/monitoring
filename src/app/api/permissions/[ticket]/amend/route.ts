@@ -4,7 +4,6 @@
 
 import { NextRequest } from "next/server";
 import { assertCsrf } from "@/lib/csrf";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
 import { ok, fail } from "@/server/http/response";

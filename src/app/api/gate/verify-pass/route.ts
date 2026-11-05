@@ -56,16 +56,16 @@ import type { AuthContext } from "@/lib/authContext";
 
 
 
-const GATE_ROLES = [
-  "operator",
-  "supervisor",
-  "caretaker",
-  "deputy_warden",
-  "hostel_manager",
-  "principal",
-  "admin",
-  "sysadmin",
-];
+
+
+
+
+
+
+
+
+
+
 
 interface PassRow {
   id: string;

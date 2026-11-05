@@ -119,14 +119,14 @@ async function handlePost(req: NextRequest) {
     }));
     // Chunk upserts (Supabase .in() pagination safety).
     const CHUNK = 200;
-    let updatedDetails = 0;
+
     for (let i = 0; i < upsertRows.length; i += CHUNK) {
       const slice = upsertRows.slice(i, i + CHUNK);
       const { error } = await supabase
         .from("student_details")
         .upsert(slice, { onConflict: "user_id" });
       if (error) throw error;
-      updatedDetails += slice.length;
+
     }
 
     // 5) Deprovision the matching users (status flip only — history preserved).

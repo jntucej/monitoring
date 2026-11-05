@@ -537,11 +537,11 @@ export async function runBulkImport(
   // Classify valid rows: existing roll -> skipped, else -> committed.
   for (const r of validation.validRows) {
     const roll = r.roll ? String(r.roll).toUpperCase() : r.uniqueId ? String(r.uniqueId).toUpperCase() : "";
-    const rowNum = rawRows.findIndex((raw) => {
-      const rawRoll = pick(raw, "H.T NO.", "HT NO", "H T NO", "HALL TICKET NO", "ROLL", "roll", "uniqueId")
-        || pick(raw, "htno", "HTNO", "HT NO", "HTNO NO", "HALL TICKET NO");
-      return (rawRoll ? String(rawRoll).toUpperCase() : "") === roll;
-    });
+
+
+
+
+
 
     if (roll && existing.has(roll)) {
       const rep = reportRows.find((x) => x.roll && String(x.roll).toUpperCase() === roll);

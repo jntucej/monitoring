@@ -5,7 +5,6 @@ import { Upload, FileSpreadsheet, Download, Loader2, ShieldAlert } from "lucide-
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { CsvValidationPreview } from "@/components/admin/CsvValidationPreview";
-import { useApi } from "@/hooks/useApi";
 import { getAuthHeaders } from "@/lib/utils";
 
 

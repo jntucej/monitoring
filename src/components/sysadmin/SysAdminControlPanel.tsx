@@ -22,8 +22,8 @@ export function SysAdminControlPanel() {
 const api = useApi();
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [auditCount, setAuditCount] = useState<number | null>(null);
-  const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [_auditCount, setAuditCount] = useState<number | null>(null);
+  const [_sessionCount, setSessionCount] = useState<number | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [telemetryError, setTelemetryError] = useState(false);
 

@@ -42,9 +42,8 @@ export function buildPrompt(
     content: sanitizeRetrieved(c.content),
   }));
 
-  const numbered = safeCtx.length
-    ? safeCtx.map((c, i) => `[${i + 1}] ${c.title}${c.source ? ` (${c.source})` : ""}\n${c.content}`).join("\n\n---\n\n")
-    : "(no matching documents)";
+
+
 
   // L5: use trust markers (tagChunk) around each chunk so the model has a
   // clear data/instruction boundary. The system prompt already declares the

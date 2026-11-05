@@ -53,7 +53,7 @@ async function handlePatch(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => null);
-    const {role, status, pin, flagStatus, flag_status, flags} = body || {};
+const {flagStatus, flag_status, flags} = body || {};
 
     if ((flagStatus !== undefined || flag_status !== undefined || flags !== undefined) && !["admin", "sysadmin", "principal"].includes(actorRole)) {
       return NextResponse.json(

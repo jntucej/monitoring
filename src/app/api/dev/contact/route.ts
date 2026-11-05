@@ -153,7 +153,7 @@ async function handlePost(req: NextRequest) {
         delivered: telegramSent,
       },
     });
-  } catch (error: unknown) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
@@ -182,7 +182,7 @@ async function handleGet(req: NextRequest) {
       [limit]
     );
     return NextResponse.json({ success: true, data: res.rows });
-  } catch (error: unknown) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
