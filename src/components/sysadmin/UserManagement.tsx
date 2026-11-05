@@ -240,7 +240,7 @@ export function UserManagement() {
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="role">Role</label>
             <select id="role"
               value={role}
-              onChange={(e) => setRole(e.target.value as any)}
+              onChange={(e) => setRole(e.target.value)}
               className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
@@ -324,7 +324,7 @@ export function UserManagement() {
         <div className="p-8 flex flex-col items-center gap-4 text-center">
           <XCircle className="w-10 h-10 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load users</h4>
-          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
+          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as { message?: string } | null)?.message || String(error)}</p>
         </div>
       ) : users.length === 0 ? (
         <div className="p-8 text-center text-sm text-[var(--text-muted)]">
@@ -345,7 +345,7 @@ export function UserManagement() {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Thumbprint (biometric) registration status + actions */}
-                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) ? (
+                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? (
                   <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" /> Biometric ✓
                   </span>
@@ -360,9 +360,9 @@ export function UserManagement() {
                   className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
                 >
                   <Fingerprint className="w-3 h-3" />
-                  {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) ? "Re-register" : "Register"}
+                  {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? "Re-register" : "Register"}
                 </button>
-                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as any).thumbprint_hash || (user as any).thumbprint_verified_at) && (
+                {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) && (
                   <button
                     onClick={() => clearThumbprint(user)}
                     disabled={busy}

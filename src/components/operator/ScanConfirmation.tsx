@@ -92,18 +92,18 @@ export function ScanConfirmation({
     >
       <div className="flex items-center gap-3">
         <img
-          src={(student as any).photo || getAvatarPlaceholder((student as any).name || "??")}
-          alt={(student as any).name || "Student"}
+          src={student.photo || getAvatarPlaceholder(student.name || "??")}
+          alt={student.name || "Student"}
           width={56}
           height={56}
           className="w-14 h-14 rounded-xl object-cover shrink-0 border border-[var(--border)]"
         />
         <div className="min-w-0 flex-1">
           <p className="font-bold text-sm text-[var(--text-primary)] truncate">
-            {(student as any).name || (student as any).roll || (student as any).uniqueId}
+            {student.name || student.roll || student.uniqueId}
           </p>
           <p className="text-xs font-mono text-[var(--text-muted)] truncate">
-            {(student as any).roll || (student as any).studentDetails?.roll || (student as any).uniqueId}
+            {student.roll || student.studentDetails?.roll || student.uniqueId}
           </p>
           <span
             className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mt-1 ${

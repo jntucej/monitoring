@@ -41,12 +41,12 @@ const hasNativeBarcodeDetector: boolean =
 const gateStreamCache: Record<string, MediaStream> = {};
 
 // ── Cached native QR BarcodeDetector (lazily created, reused every frame) ───
-let qrDetectorInstance: any = null;
-function getQrDetector(): any | null {
+let qrDetectorInstance: BarcodeDetector | null = null;
+function getQrDetector(): BarcodeDetector | null {
   if (qrDetectorInstance) return qrDetectorInstance;
   if (!hasNativeBarcodeDetector) return null;
   try {
-    qrDetectorInstance = new (window as any).BarcodeDetector({ formats: QR_FORMATS });
+    qrDetectorInstance = new window.BarcodeDetector!({ formats: QR_FORMATS });
     return qrDetectorInstance;
   } catch {
     return null;
@@ -54,12 +54,12 @@ function getQrDetector(): any | null {
 }
 
 // Cached native barcode detector (barcode mode)
-let barcodeDetectorInstance: any = null;
-function getBarcodeDetector(): any | null {
+let barcodeDetectorInstance: BarcodeDetector | null = null;
+function getBarcodeDetector(): BarcodeDetector | null {
   if (barcodeDetectorInstance) return barcodeDetectorInstance;
   if (!hasNativeBarcodeDetector) return null;
   try {
-    barcodeDetectorInstance = new (window as any).BarcodeDetector({ formats: BARCODE_FORMATS });
+    barcodeDetectorInstance = new window.BarcodeDetector!({ formats: BARCODE_FORMATS });
     return barcodeDetectorInstance;
   } catch {
     return null;
@@ -187,7 +187,7 @@ export function OperatorCamera({
     const context = canvas.getContext("2d");
     if (!context) return;
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
+    const decodeQR = typeof jsQR === "function" ? jsQR : ((jsQR as unknown as { default?: typeof jsQR }).default ?? null);
     if (!decodeQR) return;
     try {
       const code = decodeQR(imageData.data, imageData.width, imageData.height, {
@@ -288,7 +288,7 @@ export function OperatorCamera({
       processFrameRef.current();
 
       if (rvfAvailableRef.current && videoRef.current) {
-        (videoRef.current as any).requestVideoFrameCallback(() => tick());
+        videoRef.current.requestVideoFrameCallback(() => tick());
       } else {
         const now = performance.now();
         if (now - lastDecodeRef.current >= 66) {
@@ -302,7 +302,7 @@ export function OperatorCamera({
     processFrameRef.current();
 
     if (rvfAvailableRef.current && videoRef.current) {
-      (videoRef.current as any).requestVideoFrameCallback(() => tick());
+      videoRef.current.requestVideoFrameCallback(() => tick());
     } else {
       animationFrameRef.current = requestAnimationFrame(tick);
     }
