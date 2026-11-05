@@ -22,7 +22,13 @@ async function handleGet(_req: Parameters<ReturnType<typeof withRateLimit>>[0], 
           AND p.mess_day_id = $2`,
       [userId, nextDay?.id ?? "00000000-0000-0000-0000-000000000000"]
     );
-    const prefRow: any = prefRes.rows[0] ?? null;
+    type PrefRow = {
+      mess_day_id: string;
+      primary_item: string | null;
+      will_be_present: boolean | null;
+      hostel_block: string | null;
+    };
+    const prefRow: PrefRow | null = (prefRes.rows[0] as PrefRow | null) ?? null;
 
     let subItemIds: string[] = [];
     if (prefRow) {
@@ -36,7 +42,7 @@ async function handleGet(_req: Parameters<ReturnType<typeof withRateLimit>>[0], 
           `SELECT menu_item_id FROM mess_preference_sub_items WHERE preference_id::text = $1`,
           [prefId]
         );
-        subItemIds = subRes.rows.map((r: any) => r.menu_item_id);
+        subItemIds = subRes.rows.map((r) => String(r.menu_item_id));
       }
     }
 
@@ -52,10 +58,10 @@ async function handleGet(_req: Parameters<ReturnType<typeof withRateLimit>>[0], 
           ORDER BY mi.sort_order ASC`,
         [nextDay.id]
       );
-      menuItems = dayItems.rows.map((r: any) => ({
-        id: r.id,
-        code: r.code,
-        label: r.label,
+      menuItems = dayItems.rows.map((r) => ({
+        id: String(r.id),
+        code: String(r.code),
+        label: String(r.label),
         isAvailable: r.is_available !== false,
       }));
     }
@@ -91,7 +97,7 @@ async function handleGet(_req: Parameters<ReturnType<typeof withRateLimit>>[0], 
   }
 }
 
-async function handlePost(req: any, { auth }: { auth: AuthContext }) {
+async function handlePost(req: Parameters<ReturnType<typeof withRateLimit>>[0], { auth }: { auth: AuthContext }) {
   try {
     const userId = auth.userId;
     const body = await req.json().catch(() => null);
@@ -138,7 +144,7 @@ async function handlePost(req: any, { auth }: { auth: AuthContext }) {
             AND (mdi.is_available = TRUE OR mdi.is_available IS NULL)`,
         [messDayId, ...ids]
       );
-      const found = new Set(subCheck.rows.map((r: any) => r.menu_item_id));
+      const found = new Set(subCheck.rows.map((r) => String(r.menu_item_id)));
       for (const sid of ids) {
         if (!found.has(sid)) {
           return fail("INVALID_SUB_ITEM", `Sub item ${sid} is not available for this day`, 400);

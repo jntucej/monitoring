@@ -4,6 +4,7 @@ import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getAllGatesLive, withTransaction, addAudit } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
+import type { AuthContext } from "@/lib/authContext";
 import { withRateLimit } from "@/lib/rate-limit";
 
 async function handleGet(_req: NextRequest) {
@@ -19,7 +20,7 @@ async function handlePost(req: NextRequest) {
   try {
     const body = await req.json();
     const service = getSupabaseServiceClient();
-    const insertPayload: Record<string, any> = {
+    const insertPayload: Record<string, string | boolean | undefined> = {
       gate_code: body.gateCode || body.gate_code || `G${Date.now().toString(36).toUpperCase()}`,
       name: body.name,
       location: body.location,
@@ -47,7 +48,7 @@ async function handlePost(req: NextRequest) {
   }
 }
 
-async function handlePatch(req: NextRequest, ctx: any) {
+async function handlePatch(req: NextRequest, ctx: { auth?: AuthContext }) {
   const body = await req.json();
   const gateId = req.nextUrl.searchParams.get("id");
   if (!gateId) {
@@ -66,7 +67,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   const fields = Object.entries(patch);
   const sets = fields.map(([k], i) => `${k} = $${i + 2}`).join(", ");
   const vals = [gateId, ...fields.map(([, v]) => v)] as unknown[];
-  let data: any;
+  let data: Record<string, unknown> | undefined;
   await withTransaction(async (client) => {
     if (sets) {
       const r = await client.query(
@@ -80,7 +81,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
 
   await addAudit({
     action: "GATE_UPDATED",
-    userId: ctx?.auth?.userId,
+    userId: ctx?.auth?.userId ?? "",
     userName: ctx?.auth?.email,
     role: ctx?.auth?.role,
     details: `Updated gate ${gateId}: ${JSON.stringify(patch)}`,
@@ -89,7 +90,7 @@ async function handlePatch(req: NextRequest, ctx: any) {
   return NextResponse.json({ success: true, data });
 }
 
-async function handleDelete(req: NextRequest, ctx: any) {
+async function handleDelete(req: NextRequest, ctx: { auth?: AuthContext }) {
   const gateId = req.nextUrl.searchParams.get("id");
   if (!gateId) return NextResponse.json(err("BAD_REQUEST", "id required").body, { status: 400 });
   // Soft-delete: mark inactive instead of deleting (FK references would break).
@@ -102,7 +103,7 @@ async function handleDelete(req: NextRequest, ctx: any) {
   });
   await addAudit({
     action: "GATE_DEACTIVATED",
-    userId: ctx?.auth?.userId,
+    userId: ctx?.auth?.userId ?? "",
     userName: ctx?.auth?.email,
     role: ctx?.auth?.role,
     details: `Deactivated gate ${gateId}`,

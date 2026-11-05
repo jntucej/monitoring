@@ -14,13 +14,31 @@ async function handleGet(_req: NextRequest) {
       service.from('movement_logs').select('*').gte('timestamp', todayStart.toISOString())
     ]);
 
-    const workers = workersRes.data || [];
-    const logs = logsRes.data || [];
+    type WorkerRow = {
+      id: string;
+      name?: string | null;
+      full_name?: string | null;
+      unique_id?: string | null;
+      department_id?: string | null;
+    };
+    type LogRow = {
+      user_id: string;
+      direction: string;
+      timestamp: string;
+      gate_id?: string | null;
+    };
+    type ShiftEntry = {
+      status: string;
+      checkIn: string | null;
+      shiftAdherence: string;
+    };
+    const workers = (workersRes.data as unknown) as WorkerRow[];
+    const logs = (logsRes.data as unknown) as LogRow[];
 
-    const shifts = workers.map((w: any) => {
-      const wLogs = logs.filter((l: any) => l.user_id === w.id);
-      const firstIn = wLogs.find((l: any) => l.direction === "IN");
-      const lastOut = [...wLogs].reverse().find((l: any) => l.direction === "OUT");
+    const shifts: ShiftEntry[] = workers.map((w) => {
+      const wLogs = logs.filter((l) => l.user_id === w.id);
+      const firstIn = wLogs.find((l) => l.direction === "IN");
+      const lastOut = [...wLogs].reverse().find((l) => l.direction === "OUT");
 
       const isOnShift = !!firstIn && !lastOut;
       const isLate = !!firstIn && new Date(firstIn.timestamp).getHours() > 8; // Assuming 8 AM start
@@ -47,9 +65,9 @@ async function handleGet(_req: NextRequest) {
     });
 
     const totalActive = shifts.length;
-    const onShift = shifts.filter((s: any) => s.status === "on_shift").length;
+    const onShift = shifts.filter((s) => s.status === "on_shift").length;
     let lateArrivals = 0;
-    shifts.forEach((s: any) => {
+    shifts.forEach((s) => {
       if (s.checkIn && s.shiftAdherence === "late") lateArrivals++;
     });
     
