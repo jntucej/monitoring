@@ -99,7 +99,7 @@ export async function poolQuery<T extends QueryResultRow = any>(
  */
 export async function query<T extends QueryResultRow = any>(
   text: string,
-  params: any[] = [],
+  params: unknown[] = [],
   options?: { currentUserId?: string; currentRole?: string },
   retries = 3
 ): Promise<QueryResult<T>> {
@@ -363,32 +363,32 @@ export class PostgresQueryBuilder<T = any> {
     return relations;
   }
 
-  eq(column: string, value: any) {
+  eq(column: string, value: unknown) {
     this.filters.push({ column, op: "=", value });
     return this;
   }
 
-  neq(column: string, value: any) {
+  neq(column: string, value: unknown) {
     this.filters.push({ column, op: "!=", value });
     return this;
   }
 
-  gt(column: string, value: any) {
+  gt(column: string, value: unknown) {
     this.filters.push({ column, op: ">", value });
     return this;
   }
 
-  gte(column: string, value: any) {
+  gte(column: string, value: unknown) {
     this.filters.push({ column, op: ">=", value });
     return this;
   }
 
-  lt(column: string, value: any) {
+  lt(column: string, value: unknown) {
     this.filters.push({ column, op: "<", value });
     return this;
   }
 
-  lte(column: string, value: any) {
+  lte(column: string, value: unknown) {
     this.filters.push({ column, op: "<=", value });
     return this;
   }
@@ -403,7 +403,7 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  in(column: string, values: any[]) {
+  in(column: string, values: unknown[]) {
     this.filters.push({ column, op: "IN", value: values });
     return this;
   }
@@ -413,14 +413,14 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  not(column: string, op: string, value: any) {
+  not(column: string, op: string, value: unknown) {
     if (op === "is" && value === null) {
       this.filters.push({ column, op: "NOT_IS", value: null });
     } else if (op === "eq") {
       this.filters.push({ column, op: "!=", value });
     } else if (op === "in") {
       const formatted = Array.isArray(value) ? value.map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v).join(", ") : "NULL";
-      this.filters.push({ column, op: "=" as any, value: null, rawClause: `${column} NOT IN (${formatted})` });
+      this.filters.push({ column, op: "=", value: null, rawClause: `${column} NOT IN (${formatted})` });
     } else {
       this.filters.push({ column, op: "!=", value });
     }
@@ -432,19 +432,19 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  filter(column: string, op: string, value: any) {
+  filter(column: string, op: string, value: unknown) {
     switch (op) {
       case "eq": return this.eq(column, value);
       case "neq": return this.neq(column, value);
       case "gt": return this.gt(column, value);
       case "gte": return this.gte(column, value);
-      case "lt": return this.lt(column, value);
-      case "lte": return this.lte(column, value);
-      case "like": return this.like(column, value);
-      case "ilike": return this.ilike(column, value);
-      case "in": return this.in(column, Array.isArray(value) ? value : [value]);
-      case "is": return this.is(column, value);
-      default: return this.eq(column, value);
+      case "lt": return this.lt(column, value as string | number | Date | null);
+      case "lte": return this.lte(column, value as string | number | Date | null);
+      case "like": return this.like(column, value as string);
+      case "ilike": return this.ilike(column, value as string);
+      case "in": return this.in(column, Array.isArray(value) ? (value as unknown[]) : [value]);
+      case "is": return this.is(column, value as null | boolean);
+      default: return this.eq(column, value as string | number | boolean | Date | null);
     }
   }
 
@@ -477,7 +477,7 @@ export class PostgresQueryBuilder<T = any> {
     return this;
   }
 
-  private parsePostgrestOrClause(clauseStr: string, params: any[], foreignTable?: string): string[] {
+  private parsePostgrestOrClause(clauseStr: string, params: unknown[], foreignTable?: string): string[] {
     const tokens = clauseStr.split(/,(?![^()]*\))/).map((t) => t.trim()).filter(Boolean);
     const sqlParts: string[] = [];
     const prefix = foreignTable ? `${foreignTable}.` : "";
@@ -485,7 +485,7 @@ export class PostgresQueryBuilder<T = any> {
       const match = token.match(/^([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.(.*)$/);
       if (match) {
         const [, col, op, val] = match;
-        let cleanVal: any = val;
+        let cleanVal: string = val;
         if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
         else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
         const colRef = `${prefix}${col}`;
@@ -505,7 +505,7 @@ export class PostgresQueryBuilder<T = any> {
         const parts = token.match(/^([a-zA-Z0-9_.]+)\s*(=|!=|>|<|>=|<=|ILIKE|LIKE|IS)\s*(.+)$/i);
         if (parts) {
           const [, colRef, op, val] = parts;
-          let cleanVal: any = val.replace(/,\s*$/, "")
+          let cleanVal: string = val.replace(/,\s*$/, "")
       .trim();
           if (cleanVal.startsWith('"') && cleanVal.endsWith('"')) cleanVal = cleanVal.slice(1, -1);
           else if (cleanVal.startsWith("'") && cleanVal.endsWith("'")) cleanVal = cleanVal.slice(1, -1);
@@ -545,7 +545,7 @@ export class PostgresQueryBuilder<T = any> {
     permissions: { users: "requester_user_id" },
   };
 
-  private buildWhereClause(params: any[]): string {
+  private buildWhereClause(params: unknown[]): string {
     if (this.filters.length === 0 && this.orClauses.length === 0) return "";
     const whereParts: string[] = [];
     for (const f of this.filters) {
@@ -695,7 +695,7 @@ export class PostgresQueryBuilder<T = any> {
         const list = Array.isArray(raw) ? raw : [raw];
         if (list.length === 0) return { data: [], error: null };
         const keys = Object.keys(list[0]);
-        const params: any[] = [];
+        const params: unknown[] = [];
         // Serialize object/array values (JSONB columns such as stage_history)
         // so the Postgres driver sends them as a JSON string literal.
         const serialize = (v: unknown) =>
@@ -718,7 +718,7 @@ export class PostgresQueryBuilder<T = any> {
 const values = (this.pendingMutation.data as Record<string, unknown>) || {};
         const keys = Object.keys(values);
         if (keys.length === 0) return { data: [], error: null };
-        const params: any[] = [];
+        const params: unknown[] = [];
         // Serialize object/array values (JSONB columns such as stage_history)
         // so the Postgres driver sends them as a JSON string literal rather
         // than an unparsable array parameter ("invalid input syntax for json").
@@ -737,7 +737,7 @@ const values = (this.pendingMutation.data as Record<string, unknown>) || {};
         return { data: res.rows, error: null };
       }
       if (this.pendingMutation?.type === "delete") {
-        const params: any[] = [];
+        const params: unknown[] = [];
         const where = this.buildWhereClause(params);
         const returningCols = this.selectColumns === "*" ? "*" : this.selectColumns;
         const sql = `DELETE FROM ${this.tableName} ${where} RETURNING ${returningCols}`;
@@ -750,7 +750,7 @@ const values = (this.pendingMutation.data as Record<string, unknown>) || {};
         const list = Array.isArray(raw) ? raw : [raw];
         if (list.length === 0) return { data: [], error: null };
         const keys = Object.keys(list[0]);
-        const params: any[] = [];
+        const params: unknown[] = [];
         const serialize = (v: unknown) =>
           v !== null && typeof v === "object" ? JSON.stringify(v) : v;
         const valueTuples = list.map((row) => {
@@ -776,7 +776,7 @@ const values = (this.pendingMutation.data as Record<string, unknown>) || {};
         return { data: res.rows, error: null };
       }
 
-      const params: any[] = [];
+      const params: unknown[] = [];
       const where = this.buildWhereClause(params);
       if (this.countMode && this.headOnly) {
         const countSql = `SELECT COUNT(*)::int as count FROM ${this.tableName} ${where}`;
@@ -858,7 +858,7 @@ export const authAdmin = {
   async updateUserById(userId: string, attributes: { password?: string; email?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; }) {
     try {
       const updates: string[] = [];
-      const params: any[] = [userId];
+      const params: unknown[] = [userId];
       if (attributes.password) { const bcrypt = await import("bcryptjs"); const hash = await bcrypt.hash(attributes.password, 10); params.push(hash); updates.push(`password_hash = $${params.length}`); }
       if (attributes.email) { params.push(attributes.email.toLowerCase().trim()); updates.push(`email = $${params.length}`); }
       if (attributes.user_metadata?.name) { params.push(attributes.user_metadata.name); updates.push(`name = $${params.length}`); }
