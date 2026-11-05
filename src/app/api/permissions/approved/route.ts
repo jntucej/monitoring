@@ -58,14 +58,19 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
     // 1. Modern path: approveable entries in the permissions table.
     //    These were created via the /api/permissions endpoint (the current system).
+    type PassRow = {
+      id: string;
+      reason?: string | null;
+      [key: string]: unknown;
+    };
     const actorRes = await client
       .from("users")
       .select("id")
       .eq("unique_id", normalizedRoll)
       .maybeSingle();
-    const actorId = (actorRes as any)?.id ?? null;
+    const actorId = (actorRes?.data as unknown as { id?: string | null } | null)?.id ?? null;
 
-    let modernPasses: any[] = [];
+    let modernPasses: PassRow[] = [];
     if (actorId) {
       const { data: perms } = await client
         .from("permissions")
@@ -75,7 +80,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         .eq("workflow_type", "hostel")
         .not("reason", "is", null)
         .order("created_at", { ascending: false });
-      modernPasses = (perms || []) as any[];
+      modernPasses = (perms || []) as unknown as PassRow[];
     }
 
     // 2. Legacy path: gate_passes table.
@@ -85,10 +90,10 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       .eq("roll", normalizedRoll)
       .in("final_status", ["APPROVED", "APPROVED_PARENT", "APPROVED_ADMIN"])
       .order("requested_at", { ascending: false });
-    const legacyList = (legacyPasses || []) as any[];
+    const legacyList = (legacyPasses || []) as unknown as PassRow[];
 
     // 3. Apply optional reason filter using normalized aliases.
-    const filtered = [...modernPasses, ...legacyList].filter((p: any) => {
+    const filtered = [...modernPasses, ...legacyList].filter((p) => {
       if (!reason) return true;
       const passReason = normalizeExitReason(p.reason);
       const requestedReason = normalizeExitReason(reason);

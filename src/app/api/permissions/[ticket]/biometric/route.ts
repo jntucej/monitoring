@@ -55,7 +55,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
     return NextResponse.json({ success: false, error: { code: "FORBIDDEN", message: "Not allowed" } }, { status: 403 });
   }
   const row = scoped.request;
-  const studentRoll = (row as any).student?.student_details?.roll as string | undefined;
+  const studentRoll = row.student_details?.roll as string | undefined;
   let verified = false;
   if (device === "thumb" && studentRoll) {
     const person = await findPersonByUniqueId(studentRoll);
@@ -82,7 +82,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
     .update({
       [column]: nowIso,
       stage_history: appendStageHistory(
-        (row as any).stage_history,
+        row.stage_history,
         { id: "system", name: "biometric", role: "system" },
         `BIOMETRIC_${stage.toUpperCase()}`,
         `device=${device}`,
@@ -102,7 +102,7 @@ async function handlePost(req: NextRequest): Promise<Response> {
   });
   await addNotification(
     "user",
-    (row as any).student_user_id ?? (row as any).requester_user_id,
+    row.student_user_id ?? row.requester_user_id,
     "permission",
     "Biometric Verified",
     `${stage} biometric verified for ticket ${ticket}`,

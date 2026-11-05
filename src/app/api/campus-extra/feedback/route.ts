@@ -59,8 +59,22 @@ async function handleGet(
   }
 
   // Resolve assigned_to usernames
+  type FeedbackRow = {
+    id: string;
+    status: string;
+    category: string;
+    subject: string;
+    description: string;
+    assigned_to: string | null;
+    notes?: string | null;
+    reviewer_note?: string | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+    resolved_at?: string | null;
+  };
+  const rowsTyped = (rows as unknown) as FeedbackRow[];
   const assignedIds = Array.from(
-    new Set((rows || []).map((r: any) => r.assigned_to).filter((v: any): v is string => !!v))
+    new Set(rowsTyped.map((r) => r.assigned_to).filter((v): v is string => !!v))
   );
   let assignedNames = new Map<string, string>();
   if (assignedIds.length > 0) {
@@ -68,10 +82,10 @@ async function handleGet(
       .from("users")
       .select("id, name")
       .in("id", assignedIds);
-    assignedNames = new Map((userRows || []).map((u: any) => [u.id, u.name]));
+    assignedNames = new Map(((userRows || []) as unknown as Array<{ id: string; name: string | null }>).map((u) => [u.id, u.name ?? '']));
   }
 
-  const reports = (rows || []).map((r: any) => ({
+  const reports = rowsTyped.map((r) => ({
     id: r.id,
     status: r.status,
     category: r.category,

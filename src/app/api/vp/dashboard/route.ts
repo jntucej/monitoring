@@ -62,12 +62,12 @@ async function handleGet(_req: NextRequest, _context: { auth: AuthContext }) {
           p.sla_deadline ASC NULLS LAST,
           p.created_at ASC
         LIMIT 5`
-    ).catch(() => ({ rows: [] as any[] })),
+    ).catch(() => ({ rows: [] as never[] })),
 
     // Exam day state
     query<{ access_state: string }>(
       `SELECT access_state FROM exam_day_state WHERE day = CURRENT_DATE LIMIT 1`
-    ).catch(() => ({ rows: [] as any[] })),
+    ).catch(() => ({ rows: [] as never[] })),
 
     // Personal pace vs. previous 30d (insights)
     query<{ this_week: string; last_week: string; avg_response_sec: string }>(
@@ -119,7 +119,7 @@ async function handleGet(_req: NextRequest, _context: { auth: AuthContext }) {
         HAVING COUNT(*) > 0
         ORDER BY rate DESC
         LIMIT 3`
-    ).catch(() => ({ rows: [] as any[] })),
+    ).catch(() => ({ rows: [] as never[] })),
 
     // SLA deadlines within the next 24h
     query<{
@@ -140,7 +140,7 @@ async function handleGet(_req: NextRequest, _context: { auth: AuthContext }) {
           AND p.sla_deadline BETWEEN NOW() AND NOW() + INTERVAL '24 hours'
         ORDER BY p.sla_deadline ASC
         LIMIT 5`
-    ).catch(() => ({ rows: [] as any[] })),
+    ).catch(() => ({ rows: [] as never[] })),
 
     // Principal's pending count (social proof — VP feeds the chain)
     query<{ principal_pending: string; my_pending: string }>(

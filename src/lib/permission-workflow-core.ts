@@ -41,6 +41,7 @@ export interface RequestSnapshot {
   reason?: string | null;
   from_date?: string | null;
   to_date?: string | null;
+  student_details?: { roll?: string | null } | null;
 }
 
 export interface ActorContext {
