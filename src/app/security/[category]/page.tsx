@@ -33,7 +33,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
   const { role, user, token } = useAuthStore();
   const { wsConnected, gateTraffic } = useGlass();
 
-  const [verifying, setVerifying] = useState(false);
+  const [setVerifying] = useState(false);
   const [lastCheck, setLastCheck] = useState<string>("Just now");
   const [logs, setLogs] = useState<string[]>([
     "Initial security handshake completed.",

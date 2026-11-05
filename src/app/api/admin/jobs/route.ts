@@ -54,7 +54,7 @@ async function handleGet(_req: NextRequest) {
         recentRuns: runs,
       },
     });
-  } catch (err: any) {
+  } catch {
     return NextResponse.json({
       success: true,
       data: {

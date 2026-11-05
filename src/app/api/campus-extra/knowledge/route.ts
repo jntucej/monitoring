@@ -19,7 +19,7 @@ const PUBLISH_ROLES: string[] = [ROLES.ADMIN, ROLES.SYSADMIN, ROLES.PRINCIPAL, R
 
 async function handleGet(
   req: NextRequest,
-  context: { auth: AuthContext }
+  _context: { auth: AuthContext }
 ) {
   const supabase = getSupabaseServiceClient();
 

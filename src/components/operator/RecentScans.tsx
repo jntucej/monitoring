@@ -3,7 +3,7 @@ import React, { useState, memo } from "react";
 import { User, ArrowDownLeft, ArrowUpRight, ChevronRight, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Scan } from "@/lib/types";
-import { useGlossyMotion } from "@/lib/animations";
+
 
 interface RecentScansProps {
   scans: Scan[];

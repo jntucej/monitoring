@@ -24,6 +24,9 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+
+
+  
 function statusOf(d: { status: string | null; time_in: string | null }): "present" | "absent" | "unmarked" | "pending" {
   const s = (d.status || "").toLowerCase();
   if (s === "present" || s === "in" || d.time_in) return "present";

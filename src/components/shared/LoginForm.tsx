@@ -12,7 +12,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { useAuthStore, useHasHydrated } from "@/stores/authStore";
+import { useAuthStore } from "@/stores/authStore";
 import type { Role } from "@/lib/types";
 import { getDefaultRouteForRole } from "@/lib/route-helpers";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {Award, Share, CheckCircle, Calendar, ShieldCheck, FileText}  from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";

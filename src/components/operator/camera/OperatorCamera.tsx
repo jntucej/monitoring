@@ -22,7 +22,7 @@ const HAS_RVFC: boolean =
 const hasNativeBarcodeDetector: boolean =
   typeof window !== "undefined" && "BarcodeDetector" in window;
 
-const formatCache: Record<string, string[]> = {};
+
 
 
 

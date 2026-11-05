@@ -16,7 +16,7 @@ import {
   Award,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { useEngagementStore, resolveWidgetOrder } from "@/stores/engagementStore";
+import { useEngagementStore } from "@/stores/engagementStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Role } from "@/lib/types";

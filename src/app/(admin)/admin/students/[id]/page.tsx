@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   ArrowLeft, User, Mail, Phone, Building2, Home, Clock,
   ShieldCheck, GraduationCap,
