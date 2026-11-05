@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import {
   motion,
   useMotionValue,
@@ -148,9 +148,11 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
 export function RoleMap() {
   const reduced = useReducedMotion();
   const coarse = useRef(false);
-  if (typeof window !== "undefined") {
-    coarse.current = window.matchMedia("(pointer: coarse)").matches;
-  }
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      coarse.current = window.matchMedia("(pointer: coarse)").matches;
+    }
+  }, []);
 
   return (
     <section

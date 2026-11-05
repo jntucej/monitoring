@@ -4,7 +4,7 @@
  * token from the auth store, handles JSON, and returns typed responses.
  */
 
-import { useCallback, useRef } from "react";
+import {  useCallback,  useRef , useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { singleFlightRefresh } from "@/lib/auth-refresh";
 import type { ApiResponse } from "@/lib/types";
@@ -34,9 +34,11 @@ export function useApi() {
   // rate-limit storms (120 req/min observed in api_metrics) and left the page
   // stuck on its loading skeleton.
   const tokenRef = useRef(token);
-  tokenRef.current = token;
   const logoutRef = useRef(logout);
-  logoutRef.current = logout;
+  useEffect(() => {
+    tokenRef.current = token;
+    logoutRef.current = logout;
+  }, [token, logout]);
 
   const request = useCallback(
     async <T = unknown>(

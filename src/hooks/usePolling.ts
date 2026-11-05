@@ -16,7 +16,9 @@ export function usePolling(
   // (see /api/admin/overview 429 incident, 2026-10-23). The effect now
   // restarts only when intervalMs/enabled actually change.
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
 
   useEffect(() => {
     if (!enabled) return;

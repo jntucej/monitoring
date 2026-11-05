@@ -15,7 +15,9 @@ export function useLiveRefresh(
   const { isLiveStream } = useGlass();
   const { intervalMs, enabled = true } = options;
   const refetchRef = useRef(refetch);
-  refetchRef.current = refetch;
+  useEffect(() => {
+    refetchRef.current = refetch;
+  }, [refetch]);
   const didInitialRun = useRef(false);
 
   useEffect(() => {

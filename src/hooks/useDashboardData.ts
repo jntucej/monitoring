@@ -74,7 +74,9 @@ export function useDashboardData<T>(
   // (fn dep) into an immediate-tick burst loop. The ref below keeps
   // refresh stable while still calling the current underlying refresh.
   const refreshLiveRef = useRef(res.refresh);
-  refreshLiveRef.current = res.refresh;
+  useEffect(() => {
+    refreshLiveRef.current = res.refresh;
+  }, [res.refresh]);
 
   const refresh = useCallback(async () => {
     await refreshLiveRef.current();
