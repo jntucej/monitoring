@@ -36,6 +36,26 @@ import type { AuthContext } from "@/lib/authContext";
 
 
 
+const GATE_ROLES = [
+  "operator",
+  "supervisor",
+  "caretaker",
+  "deputy_warden",
+  "hostel_manager",
+  "principal",
+  "admin",
+  "sysadmin",
+];
+
+interface PassRow {
+  id: string;
+  ticket_number: string;
+  status: string;
+  from_date: string | null;
+  to_date: string | null;
+  used_at: string | null;
+  reason: string | null;
+}
 async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> {
   const url = new URL(req.url);
   const roll = (url.searchParams.get("roll") ?? "").trim().toUpperCase();
