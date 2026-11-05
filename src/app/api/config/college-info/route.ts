@@ -29,7 +29,7 @@ function mapRow(row: any) {
   };
 }
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const cacheKey = "config:college-info";
     const cached = await getCached<any>(cacheKey);

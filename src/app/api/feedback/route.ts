@@ -60,7 +60,7 @@ async function handlePost(_req: NextRequest, _ctx: { auth: AuthContext }) {
   }
 }
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const { data, error } = await getDbClient().from("feedback").select("*").order("created_at", { ascending: false }).limit(100);
     if (!error && data && data.length > 0) {

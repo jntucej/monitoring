@@ -12,7 +12,7 @@ import { withRateLimit } from "@/lib/rate-limit";
  * returns every active faculty user so the Faculty Assignments console's
  * dropdowns can be populated.
  */
-async function handleGet(req: NextRequest, context: { auth: any }) {
+async function handleGet(req: NextRequest, _context: { auth: any }) {
   try {
     const searchParams = new URL(req.url).searchParams;
     const departmentId = searchParams.get("departmentId") || undefined;

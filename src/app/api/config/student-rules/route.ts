@@ -29,7 +29,7 @@ const DEFAULT_STUDENT_RULES = {
   },
 };
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
     const { data, error } = await supabase

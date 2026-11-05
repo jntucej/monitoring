@@ -26,8 +26,8 @@ function StaffMyProfileInner() {
   const tier = getRoleTier(role);
 
   const {
-    data,
-    loading,
+
+
     error,
     refresh,
   } = useApiResource<DataResponse>("/api/profile", { ttlMs: 30_000 });

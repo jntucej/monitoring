@@ -29,7 +29,7 @@ interface ControlRow {
   disabled_at: string | null;
 }
 
-async function handleGet(_req: NextRequest, ctx: { auth: AuthContext }): Promise<Response> {
+async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> {
   const controls = await query<ControlRow>(
     `SELECT c.name, c.enabled, c.reason,
             u.login_identifier AS disabled_by, c.disabled_at

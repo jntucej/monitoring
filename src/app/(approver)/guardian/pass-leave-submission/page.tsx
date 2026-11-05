@@ -67,7 +67,7 @@ function PassLeaveSubmissionInner() {
 
   const {
     data: persons,
-    loading: personsLoading,
+    loading: _personsLoading,
     error: personsError,
     refresh: refreshPersons,
   } = useApiResource<PersonsResponse>("/api/persons?parentId=me", {

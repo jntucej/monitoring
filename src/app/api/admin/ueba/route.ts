@@ -4,7 +4,7 @@ import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
 import type { AuthContext } from "@/lib/authContext";
 
-async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
+async function handleGet(_req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     const [spikes, offHours, impossibleTravel] = await Promise.all([
       query("SELECT * FROM public.v_ueba_volume_spikes LIMIT 50").catch(() => ({ rows: [] })),
@@ -26,7 +26,7 @@ async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext 
   }
 }
 
-async function handlePost(req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
+async function handlePost(_req: NextRequest, { auth: _auth }: { auth: AuthContext }) {
   try {
     await query("REFRESH MATERIALIZED VIEW CONCURRENTLY public.v_user_baseline");
     return NextResponse.json({ success: true, message: "Baseline refreshed successfully" });

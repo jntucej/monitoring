@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSustainabilityMetrics } from "@/lib/sustainability";
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const data = await getSustainabilityMetrics();
     return NextResponse.json({ success: true, data });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServiceClient } from "@/lib/dbClient";
+
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { addAudit, withTransaction } from "@/lib/db";
 import { Role } from "@/lib/types";

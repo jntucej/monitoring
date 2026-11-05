@@ -1,11 +1,11 @@
 "use client";
 
 
-import { notFound } from "next/navigation";
-import { Suspense, useCallback, useMemo } from "react";
+
+import { useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { PageLoading } from "@/components/shared/LoadingStates";
+
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { HealthContent } from "@/components/sysadmin/domains/monitoring/HealthContent";
 import type { HealthData } from "@/components/sysadmin/domains/monitoring/types";

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { withAuthorization } from "@/middleware/authorization";
 
-async function handleGet(req: NextRequest) {
+async function handleGet(_req: NextRequest) {
   try {
     const { query } = await import("@/lib/postgres");
 
