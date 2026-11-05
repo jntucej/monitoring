@@ -34,7 +34,7 @@ const getUsableFormats = async (scope: FormatScope) => {
   let detectorFormats: string[] = [];
   if (hasNativeBarcodeDetector) {
     try {
-      detectorFormats = await (window as any).BarcodeDetector.getSupportedFormats();
+      detectorFormats = await window.BarcodeDetector!.getSupportedFormats();
     } catch { detectorFormats = []; }
   }
   formatCache[key] = wanted.filter((f) => detectorFormats.includes(f));
@@ -50,8 +50,8 @@ const getUsableFormats = async (scope: FormatScope) => {
 const gateStreamCache: Record<string, MediaStream> = {};
 
 // ── Cached native QR BarcodeDetector (lazily created, reused every frame) ───
-let qrDetectorInstance: any = null;
-function getQrDetector(): any | null {
+let qrDetectorInstance: BarcodeDetector | null = null;
+function getQrDetector(): BarcodeDetector | null {
   if (qrDetectorInstance) return qrDetectorInstance;
   if (!hasNativeBarcodeDetector) return null;
   try {
@@ -59,7 +59,7 @@ function getQrDetector(): any | null {
     // engines BarcodeDetector exists but doesn't support qr_code.
     // We defer the supported-formats check to the call site (async); this
     // just caches the constructor so we don't re-instantiate every frame.
-    qrDetectorInstance = new (window as any).BarcodeDetector({ formats: QR_FORMATS });
+    qrDetectorInstance = new window.BarcodeDetector!({ formats: QR_FORMATS });
     return qrDetectorInstance;
   } catch {
     return null;
@@ -67,12 +67,12 @@ function getQrDetector(): any | null {
 }
 
 // Cached native barcode detector (barcode mode)
-let barcodeDetectorInstance: any = null;
-function getBarcodeDetector(): any | null {
+let barcodeDetectorInstance: BarcodeDetector | null = null;
+function getBarcodeDetector(): BarcodeDetector | null {
   if (barcodeDetectorInstance) return barcodeDetectorInstance;
   if (!hasNativeBarcodeDetector) return null;
   try {
-    barcodeDetectorInstance = new (window as any).BarcodeDetector({ formats: BARCODE_FORMATS });
+    barcodeDetectorInstance = new window.BarcodeDetector!({ formats: BARCODE_FORMATS });
     return barcodeDetectorInstance;
   } catch {
     return null;
@@ -277,7 +277,7 @@ export function Scanner({
         if (ctx) {
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
+          const decodeQR = typeof jsQR === "function" ? jsQR : ((jsQR as unknown as { default?: typeof jsQR }).default ?? null);
           if (decodeQR) {
             try {
               const code = decodeQR(imageData.data, imageData.width, imageData.height, {
@@ -304,7 +304,7 @@ export function Scanner({
             getUsableFormats("all").then((usableFormats) => {
               if (usableFormats.length === 0) return;
               try {
-                const detector = new (window as any).BarcodeDetector({ formats: [...usableFormats] });
+                const detector = new window.BarcodeDetector!({ formats: [...usableFormats] });
                 detector
                   .detect(canvas)
                   .then((barcodes: Array<{ rawValue: string }>) => {
@@ -341,7 +341,7 @@ export function Scanner({
     const context = canvas.getContext("2d");
     if (!context) return;
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const decodeQR = typeof jsQR === "function" ? jsQR : (jsQR as any).default;
+    const decodeQR = typeof jsQR === "function" ? jsQR : ((jsQR as unknown as { default?: typeof jsQR }).default ?? null);
     if (!decodeQR) return;
     try {
       const code = decodeQR(imageData.data, imageData.width, imageData.height, {
@@ -394,7 +394,7 @@ export function Scanner({
       if (qrDetector) {
         qrDetector
           .detect(canvas)
-          .then((barcodes: Array<{ rawValue: string; format: string }>) => {
+          .then((barcodes) => {
             const hit = barcodes?.find((b) => b && b.rawValue);
             if (hit) {
               handleSuccessScan(hit.rawValue);
@@ -506,7 +506,7 @@ export function Scanner({
 
       if (rvfAvailableRef.current && videoRef.current) {
         // Native: next decoded video frame.
-        (videoRef.current as any).requestVideoFrameCallback(() => tick());
+        videoRef.current.requestVideoFrameCallback(() => tick());
       } else {
         // Fallback: ~15fps rAF gate.
         const now = performance.now();
@@ -524,7 +524,7 @@ export function Scanner({
 
     if (rvfAvailableRef.current && videoRef.current) {
       // rVFC path: schedule on the next decoded frame.
-      (videoRef.current as any).requestVideoFrameCallback(() => tick());
+      videoRef.current.requestVideoFrameCallback(() => tick());
     } else {
       animationFrameRef.current = requestAnimationFrame(tick);
     }
