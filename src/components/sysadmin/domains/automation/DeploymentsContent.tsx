@@ -1,5 +1,5 @@
-// src/components/sysadmin/domains/automation/DeploymentsContent.tsx
 "use client";
+// src/components/sysadmin/domains/automation/DeploymentsContent.tsx
 
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,5 @@
-// src/app/(approver)/caretaker/page.tsx — caretaker queue (complaints)
 "use client";
+// src/app/(approver)/caretaker/page.tsx — caretaker queue (complaints)
 import { ComplaintConsole } from "@/components/complaints/ComplaintConsole";
 
 export default function Page() {

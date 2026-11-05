@@ -1,5 +1,5 @@
-// src/components/complaints/ComplaintConsole.tsx
 "use client";
+// src/components/complaints/ComplaintConsole.tsx
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";

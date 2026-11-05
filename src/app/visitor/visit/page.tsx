@@ -1,7 +1,7 @@
+"use client";
 // src/app/visitor/visit/page.tsx — the single "your visit" surface:
 // live status + host + check-in/out CTA in one card. /visitor/visit-details
 // and /visitor/checkin-out redirect here.
-"use client";
 
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";

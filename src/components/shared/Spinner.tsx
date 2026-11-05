@@ -1,3 +1,4 @@
+"use client";
 // src/components/shared/Spinner.tsx
 // UI-audit fix 7: THE ONE spinner.
 //
@@ -5,7 +6,6 @@
 // PrincipalLoading, AppLoadingScreen, CinematicLoader, SineWaveLoader, …)
 // should re-export or wrap this instead of defining its own animation.
 // 13 spinners → 1 spinner, 3 sizes.
-"use client";
 
 export type SpinnerSize = "sm" | "md" | "lg";
 

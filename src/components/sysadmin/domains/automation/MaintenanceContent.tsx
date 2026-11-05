@@ -1,5 +1,5 @@
-// src/components/sysadmin/domains/automation/MaintenanceContent.tsx
 "use client";
+// src/components/sysadmin/domains/automation/MaintenanceContent.tsx
 
 import { cn } from "@/lib/utils";
 import { useDashboardData } from "@/hooks/useDashboardData";

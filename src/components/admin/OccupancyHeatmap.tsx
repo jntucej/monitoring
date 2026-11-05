@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { MapPin, Users, Activity, RefreshCw, X } from "lucide-react";

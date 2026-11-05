@@ -1,5 +1,5 @@
-// src/components/complaints/ComplaintDetail.tsx
 "use client";
+// src/components/complaints/ComplaintDetail.tsx
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";

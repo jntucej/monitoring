@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Siren, Lock, Megaphone, Phone, Snowflake, Loader2, Check } from "lucide-react";

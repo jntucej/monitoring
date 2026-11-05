@@ -1,8 +1,8 @@
+"use client";
 /**
  * useApi hook — typed wrapper around fetch() that auto-attaches the JWT
  * token from the auth store, handles JSON, and returns typed responses.
  */
-"use client";
 
 import { useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";

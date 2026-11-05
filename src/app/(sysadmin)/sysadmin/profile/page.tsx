@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 
 
 // src/app/(sysadmin)/sysadmin/profile/page.tsx

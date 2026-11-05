@@ -1,5 +1,5 @@
-// src/components/shared/PwaInstallPrompt.tsx
 "use client";
+// src/components/shared/PwaInstallPrompt.tsx
 
 import { useEffect, useRef, useState } from "react";
 

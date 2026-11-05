@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";

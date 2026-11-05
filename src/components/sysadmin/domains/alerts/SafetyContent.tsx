@@ -1,10 +1,10 @@
+"use client";
 // Safety — the cockpit sysadmin page body.
 //
 // Renders:
 //   1. Four circular status arcs (one per gate_state, SVG, color by state)
 //   2. An incident timeline (vertical list, newest first, open flagged)
 
-"use client";
 
 import { VIZ_THEME } from "@/components/sysadmin/kit/viz";
 import type { SafetyData, SafetyGateState } from "@/components/sysadmin/domains/alerts/types";

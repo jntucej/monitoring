@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 import { useCallback, useEffect, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
 import { useApi } from "@/hooks/useApi";

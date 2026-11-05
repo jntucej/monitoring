@@ -1,5 +1,5 @@
-// src/components/complaints/ComplaintForm.tsx
 "use client";
+// src/components/complaints/ComplaintForm.tsx
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

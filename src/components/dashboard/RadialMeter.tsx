@@ -1,8 +1,8 @@
+"use client";
 /* ------------------------------------------------------------------ *
  *  RadialMeter — an SVG-only animated radial progress meter.
  * ------------------------------------------------------------------ */
 
-"use client";
 
 import { useEffect, useRef, useState } from "react";
 

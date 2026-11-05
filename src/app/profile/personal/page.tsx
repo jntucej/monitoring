@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";

@@ -1,3 +1,4 @@
+"use client";
 // Jobs — the cards sysadmin page body.
 //
 // Renders:
@@ -5,7 +6,6 @@
 //   2. A run-count HeatMatrix (jobs × days) — the signature visual, with cells
 //      colored green / amber / red based on 0 / 1 / 2+ runs per day
 
-"use client";
 
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";

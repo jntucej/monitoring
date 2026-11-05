@@ -1,10 +1,10 @@
+"use client";
 // src/components/admin/shared/ChartRenderer.tsx
 // UI-audit fix 2: dynamic lazy-load of the recharts-based renderer.
 //
 // Before: every admin page that rendered a chart pulled ~200KB of recharts
 // into its first-load bundle. After: the chunk is split and only loads when
 // a chart actually mounts.
-"use client";
 
 import dynamic from "next/dynamic";
 

@@ -1,7 +1,7 @@
+"use client";
 // src/components/shared/ChartRenderer.tsx
 // SCAFFOLD:CHART — 8-type chart renderer. Idempotent: regenerate with
 // `node scripts/scaffold-analytics.mjs new <feature> --force` to update.
-"use client";
 
 import React, { useMemo } from "react";
 import {

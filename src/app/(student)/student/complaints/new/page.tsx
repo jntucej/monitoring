@@ -1,5 +1,5 @@
-// src/app/(student)/student/complaints/new/page.tsx
 "use client";
+// src/app/(student)/student/complaints/new/page.tsx
 import { ComplaintForm } from "@/components/complaints/ComplaintForm";
 export default function Page() {
   return (

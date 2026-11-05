@@ -1,5 +1,5 @@
-import { errMsg } from "@/lib/err-msg";
 "use client";
+import { errMsg } from "@/lib/err-msg";
 
 import { useEffect, useState, useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";

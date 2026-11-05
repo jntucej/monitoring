@@ -1,6 +1,6 @@
+"use client";
 // src/components/shared/ChartTypeSwitcher.tsx
 // SCAFFOLD:CHART — 8-type toggle. Idempotent: regenerate with --force.
-"use client";
 
 import React from "react";
 import {
