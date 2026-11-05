@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 
@@ -126,10 +127,10 @@ const api = useApi();
           setRecentAudits(auditJson.data);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         title: "Telemetry Notice",
-        message: err.message || "Loaded profile from active session cache.",
+        message: errMsg(err) || "Loaded profile from active session cache.",
         variant: "info",
       });
     } finally {
@@ -194,10 +195,10 @@ const api = useApi();
           variant: "error",
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         title: "Network Error",
-        message: err.message || "Failed to communicate with profile service.",
+        message: errMsg(err) || "Failed to communicate with profile service.",
         variant: "error",
       });
     } finally {
@@ -250,10 +251,10 @@ const api = useApi();
           variant: "error",
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         title: "Network Error",
-        message: err.message || "Failed to communicate with authentication service.",
+        message: errMsg(err) || "Failed to communicate with authentication service.",
         variant: "error",
       });
     } finally {

@@ -2,6 +2,7 @@
 // src/app/api/users/bulk/validate/route.ts
 // LIVE: called by CsvBulkImporter and BulkUserImportModal (sysadmin console).
 // (The parallel /api/admin/users/bulk/* set is used by UserManagementPanel.)
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { validateImport, type ValidationResult } from "@/lib/user-import";
@@ -70,8 +71,8 @@ async function handlePost(req: NextRequest) {
     // Classify existing-roll rows as skipped (roll = sole uniqueness key).
     await classifyExistingRolls(result);
     return NextResponse.json({ success: true, data: result, ...result });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { message: error.message || "Validation failed" } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { message: errMsg(error) || "Validation failed" } }, { status: 500 });
   }
 }
 

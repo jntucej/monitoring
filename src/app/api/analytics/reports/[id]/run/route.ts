@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -72,8 +73,8 @@ async function handlePost(req: NextRequest) {
         message: "Report executed successfully and exported to CSV.",
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

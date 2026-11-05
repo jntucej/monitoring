@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 import { useRouter } from "next/navigation";
 
@@ -24,10 +25,10 @@ const { setTheme, addToast } = useUIStore();
         variant: "success",
       });
       router.push("/login");
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         title: "Error Signing Out",
-        message: err.message || "Failed to sign out.",
+        message: errMsg(err) || "Failed to sign out.",
         variant: "error",
       });
     }

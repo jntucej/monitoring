@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -200,12 +201,12 @@ async function handlePost(
       { currentUserId: auth.userId, currentRole: auth.role }
     );
     inserted = result;
-  } catch (e: any) {
+  } catch (e) {
     insErr = e;
-    if (e?.code === "42501") {
-      console.error("[permissions POST] RLS blocked insert", e.message);
+    if (errCode(e) === "42501") {
+      console.error("[permissions POST] RLS blocked insert", errMsg(e));
     } else {
-      console.error("[permissions POST] DB error", e.message);
+      console.error("[permissions POST] DB error", errMsg(e));
     }
   }
   if (!inserted) {

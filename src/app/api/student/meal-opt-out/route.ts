@@ -2,6 +2,7 @@
 // POST — student opts out of a meal before cutoff (6 AM local time).
 // GET  — list student's meal opt-outs.
 
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -72,9 +73,9 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       { currentUserId: auth.userId, currentRole: auth.role }
     );
     optOutRow = res;
-  } catch (e: any) {
+  } catch (e) {
     optOutErr = e;
-    if (e?.code === "42501") console.error("[meal-opt-out POST] RLS blocked", e.message);
+    if (errCode(e) === "42501") console.error("[meal-opt-out POST] RLS blocked", errMsg(e));
   }
   if (!optOutRow) {
     return fail("DB_ERROR", optOutErr ? "Insert failed (RLS or constraint)" : "Insert failed", 500);

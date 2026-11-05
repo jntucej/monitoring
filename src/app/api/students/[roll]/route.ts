@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
 import { findStudentByRoll, getStudentHistory, getStudentStatus, withTransaction } from "@/lib/db";
@@ -155,8 +156,8 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
 
     return NextResponse.json({ success: true, message: "Student updated successfully" });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to update student" } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Failed to update student" } }, { status: 500 });
   }
 }
 
@@ -222,8 +223,8 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     });
 
     return NextResponse.json({ success: true, mode: "hard_delete" });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to delete" } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Failed to delete" } }, { status: 500 });
   }
 }
 

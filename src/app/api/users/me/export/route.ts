@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -35,9 +36,9 @@ async function handleExport(
       success: true,
       data: exportBundle,
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to export data." } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Failed to export data." } },
       { status: 500 }
     );
   }

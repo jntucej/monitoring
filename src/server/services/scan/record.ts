@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { randomUUID } from "crypto";
 import { query } from "@/lib/postgres";
 import { assertNotLockedOut } from "@/server/policy/lockdown";
@@ -241,7 +242,7 @@ async function enforceInReturnDurationCap(
 export async function recordScan(input: RecordScanInput): Promise<RecordScanResult> {
   try {
     return await recordScanInner(input);
-  } catch (err: any) {
+  } catch (err) {
     // Fail audit visibility: record rejected attempt in audit_logs so supervisors
     // and security dashboards have full visibility into failed access attempts.
     await auditWrite({
@@ -254,8 +255,8 @@ export async function recordScan(input: RecordScanInput): Promise<RecordScanResu
         direction: input.direction,
         gateId: input.gateId,
         reason: input.reason ?? null,
-        code: err instanceof AppError ? err.code : "UNKNOWN_ERROR",
-        message: err.message,
+        code: err instanceof AppError ? errCode(err) : "UNKNOWN_ERROR",
+        message: errMsg(err),
       },
     });
     throw err;
@@ -628,7 +629,7 @@ async function recordScanInner(input: RecordScanInput): Promise<RecordScanResult
                   personId: person.id,
                   passId: consumedPassId,
                   window: { fromDate: failWindowFrom },
-                  reason: err instanceof Error ? err.message : String(err),
+                  reason: err instanceof Error ? errMsg(err) : String(err),
                 },
               });
             }

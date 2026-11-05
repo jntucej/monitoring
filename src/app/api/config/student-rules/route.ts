@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -51,7 +52,7 @@ async function handleGet(_req: NextRequest) {
       success: true,
       data: { ...DEFAULT_STUDENT_RULES, ...rules },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("[API] Error fetching student rules:", error);
     return NextResponse.json({
       success: true,
@@ -77,7 +78,7 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error.message } },
+        { success: false, error: { code: "DB_ERROR", message: errMsg(error) } },
         { status: 500 }
       );
     }
@@ -97,9 +98,9 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
       data: body,
       message: "Student rules updated successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 }
     );
   }

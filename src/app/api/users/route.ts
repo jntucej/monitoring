@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes, randomUUID } from "crypto";
 import {
@@ -231,8 +232,8 @@ async function handlePost(req: NextRequest) {
         if (createErr) throw createErr;
         authUserId = data.user.id;
       }
-    } catch (e: any) {
-      console.warn("[users] auth provision failed (continuing with profile-only):", e.message);
+    } catch (e) {
+      console.warn("[users] auth provision failed (continuing with profile-only):", errMsg(e));
       // Continue if auth fails
     }
 
@@ -317,8 +318,8 @@ async function handlePost(req: NextRequest) {
         if (empError) {
           console.warn("[users.POST] employee_details insert failed:", empError.message);
         }
-      } catch (err: any) {
-        console.warn("[users.POST] employee_details insert threw:", err?.message ?? err);
+      } catch (err) {
+        console.warn("[users.POST] employee_details insert threw:", errMsg(err) ?? err);
       }
     }
 
@@ -349,8 +350,8 @@ async function handlePost(req: NextRequest) {
         } else {
           enrollmentCode = code;
         }
-      } catch (enrollCatch: any) {
-        console.warn("[users.POST] enrollment-code issuance threw (non-fatal):", enrollCatch?.message ?? enrollCatch);
+      } catch (enrollCatch) {
+        console.warn("[users.POST] enrollment-code issuance threw (non-fatal):", errMsg(enrollCatch) ?? enrollCatch);
       }
     }
 

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -75,8 +76,8 @@ export function OccupancyHeatmap() {
       } else {
         setError(json.error?.message || "Failed to load presence matrix");
       }
-    } catch (e: any) {
-      setError(e?.message || "Network error");
+    } catch (e) {
+      setError(errMsg(e) || "Network error");
     }
   }, []);
 

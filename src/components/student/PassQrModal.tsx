@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -61,9 +62,9 @@ export function PassQrModal({
 
         setQrText(json.data.qrText);
         setExpiresIn(json.data.expiresIn || 300);
-      } catch (err: any) {
+      } catch (err) {
         if (!isCancelled) {
-          setError(err?.message || "Network error loading QR credential.");
+          setError(errMsg(err) || "Network error loading QR credential.");
         }
       } finally {
         if (!isCancelled) setLoading(false);

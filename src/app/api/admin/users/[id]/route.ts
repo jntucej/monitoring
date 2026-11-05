@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -69,9 +70,9 @@ async function handleGet(req: NextRequest, ctx: { auth: { userId: string; role: 
         scoped: callerDept !== null,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Failed to fetch user" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Failed to fetch user" } },
       { status: 500 }
     );
   }
@@ -293,9 +294,9 @@ async function handlePatch(req: NextRequest, ctx: { auth: { userId: string; role
     });
 
     return NextResponse.json({ success: true, message: "User updated", changes });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Failed to update user" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Failed to update user" } },
       { status: 500 }
     );
   }

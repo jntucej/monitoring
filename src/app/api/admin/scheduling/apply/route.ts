@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -34,8 +35,8 @@ async function handlePost(req: NextRequest) {
       success: true,
       message: "Schedule recommendation applied successfully; audit log updated.",
     });
-  } catch (error: any) {
-    return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? error.message : "Internal error").body, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? errMsg(error) : "Internal error").body, { status: 500 });
   }
 }
 

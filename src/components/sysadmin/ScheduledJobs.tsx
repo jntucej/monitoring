@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -72,8 +73,8 @@ const api = useApi();
 
       addToast({ title: "Success", message: `Job ${!currentEnabled ? "enabled" : "disabled"}`, variant: "success" });
       fetchJobs();
-    } catch (err: any) {
-      addToast({ title: "Error", message: err.message, variant: "error" });
+    } catch (err) {
+      addToast({ title: "Error", message: errMsg(err), variant: "error" });
     }
   };
 
@@ -87,8 +88,8 @@ const api = useApi();
 
       addToast({ title: "Execution Triggered", message: `Job '${jobId}' ran successfully`, variant: "success" });
       fetchJobs();
-    } catch (err: any) {
-      addToast({ title: "Run Failed", message: err.message, variant: "error" });
+    } catch (err) {
+      addToast({ title: "Run Failed", message: errMsg(err), variant: "error" });
     } finally {
       setRunningJobId(null);
     }

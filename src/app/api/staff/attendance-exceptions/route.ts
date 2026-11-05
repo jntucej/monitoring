@@ -121,7 +121,7 @@ async function handleGet(_req: NextRequest) {
         exceptions: { absent, late, flagged },
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in attendance-exceptions API:", error);
     return NextResponse.json(
       { success: false, error: "Failed to load attendance exceptions" },

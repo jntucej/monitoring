@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useEffect, useState } from "react";
@@ -100,9 +101,9 @@ const api = useApi();
         const present = Object.values(byRoll).filter((r) => r.timeIn || r.timeOut);
         const absent = Object.values(byRoll).filter((r) => !r.timeIn && !r.timeOut).slice(0, 50);
         setRows([...present, ...absent]);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to load attendance data:", err);
-        if (!cancelled) setError(err?.message || "Failed to load attendance data");
+        if (!cancelled) setError(errMsg(err) || "Failed to load attendance data");
       } finally {
         if (!cancelled) setLoading(false);
       }

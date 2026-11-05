@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -106,11 +107,11 @@ async function handlePatchInner(req: NextRequest) {
     await invalidateCache("system_config:*");
 
     return NextResponse.json({ success: true, data: toConfig((upserted as any)?.data ?? (upserted as any)?.value) });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
       {
         success: false,
-        error: { code: "INTERNAL_ERROR", message: err?.message ?? "Unknown error", requestId: getRequestId(req) },
+        error: { code: "INTERNAL_ERROR", message: errMsg(err) ?? "Unknown error", requestId: getRequestId(req) },
       },
       { status: 500 }
     );

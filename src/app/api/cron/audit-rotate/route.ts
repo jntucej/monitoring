@@ -8,6 +8,7 @@
 // makes the same work reachable from a host cron entry (see
 // scripts/setup-crons.sh), which is the actual scheduled path.
 
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { query } from "@/lib/postgres";
@@ -71,10 +72,10 @@ export async function POST(req: NextRequest) {
         purgedApiMetrics: metricsRes.rowCount ?? 0,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[cron/audit-rotate] failed:", err);
     return NextResponse.json(
-      { success: false, error: { message: err.message || "Audit rotation failed" } },
+      { success: false, error: { message: errMsg(err) || "Audit rotation failed" } },
       { status: 500 },
     );
   }

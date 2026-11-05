@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { hash } from "@/server/lib/crypto";
@@ -73,9 +74,9 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
       success: true,
       data: { code, expiresAt: expires_at },
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "DB_ERROR", message: err?.message || "Failed to issue mobile enrollment code" } },
+      { success: false, error: { code: "DB_ERROR", message: errMsg(err) || "Failed to issue mobile enrollment code" } },
       { status: 500 }
     );
   }

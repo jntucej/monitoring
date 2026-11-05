@@ -33,7 +33,7 @@ export default function AdminUsersPage() {
         }));
         setDepartments(processedDepts);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
     } finally {
       setLoadingDepts(false);

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -18,8 +19,8 @@ async function handlePost(req: NextRequest) {
     await supabase.rpc("anonymize_user", { p_user_id: userId, p_hash: hash, p_actor_id: actorId });
 
     return NextResponse.json({ success: true, data: { userId, anonymized: true } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

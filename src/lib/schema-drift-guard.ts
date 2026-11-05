@@ -23,6 +23,7 @@
  * directory name is stable across builds, so we resolve it relative
  * to `__dirname` first and fall back to a path next to CWD.
  */
+import { errMsg, errCode } from "@/lib/err-msg";
 import { readdir, stat } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -158,13 +159,13 @@ export async function checkSchemaDrift(minIntervalMs = 5 * 60 * 1000): Promise<D
         recordedChecksums.set(r.filename, r.checksum);
       }
     }
-  } catch (err: any) {
-    if (err?.code === "42P01") {
+  } catch (err) {
+    if (errCode(err) === "42P01") {
       // schema_migrations table does not exist yet (fresh install).
       // Treat as "everything is missing" but do not crash.
       console.warn("[schema-drift] schema_migrations table does not exist yet; treating all migrations as missing");
     } else {
-      console.error("[schema-drift] failed to read schema_migrations:", err?.message);
+      console.error("[schema-drift] failed to read schema_migrations:", errMsg(err));
       return null;
     }
   }

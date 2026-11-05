@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,8 +54,8 @@ export function EmergencyPlaybook({
       addToast({ variant: "success", message: `${a.label} executed` });
       setConfirming(null);
       onClose();
-    } catch (e: any) {
-      addToast({ variant: "error", message: e.message ?? "Failed" });
+    } catch (e) {
+      addToast({ variant: "error", message: errMsg(e) ?? "Failed" });
     } finally {
       setPending(null);
     }

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -29,14 +30,14 @@ async function handlePatch(req: NextRequest) {
     if (error) {
       console.error("Integration config update failed:", error);
       return NextResponse.json(
-        { success: false, error: { code: "UPDATE_FAILED", message: error.message } },
+        { success: false, error: { code: "UPDATE_FAILED", message: errMsg(error) } },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

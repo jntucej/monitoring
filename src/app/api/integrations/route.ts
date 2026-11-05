@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -19,8 +20,8 @@ async function handleGet() {
     }
 
     return NextResponse.json({ success: true, data: configs || [] });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -54,7 +55,7 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: { code: "DB_ERROR", message: error.message } },
+        { success: false, error: { code: "DB_ERROR", message: errMsg(error) } },
         { status: 500 }
       );
     }
@@ -70,9 +71,9 @@ async function handlePost(req: NextRequest, context?: { auth?: AuthContext }) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 }
     );
   }

@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { errMsg, errCode } from "@/lib/err-msg";
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as browserClient, invalidateAllUserSessions, getSupabaseServiceClient } from './dbClient';
 import { randomUUID, randomInt, randomBytes } from "crypto";
@@ -1455,8 +1456,8 @@ export async function createUser(userData: {
       },
       { currentRole: 'sysadmin' }
     );
-  } catch (e: any) {
-    error = { message: e.message, code: e.code };
+  } catch (e) {
+    error = { message: errMsg(e), code: errCode(e) };
   }
 
   if (error) {
@@ -1481,8 +1482,8 @@ export async function createUser(userData: {
       }, { onConflict: 'user_id' });
 
       if (error) console.warn('[createUser] employee_details failed:', error.message);
-    } catch (err: any) {
-      console.warn('[createUser] employee_details threw:', err?.message ?? err);
+    } catch (err) {
+      console.warn('[createUser] employee_details threw:', errMsg(err) ?? err);
     }
   }
 
@@ -1689,7 +1690,7 @@ export async function updateUserRole(userId: string, newRole: Role, actorId: str
     },
     { currentRole: actor?.role ?? 'admin', currentUserId: actorId },
   ).catch((err) => {
-    console.error('[updateUserRole] RLS update failed:', err?.message ?? err);
+    console.error('[updateUserRole] RLS update failed:', errMsg(err) ?? err);
     return 0;
   });
   if (!res) return false;

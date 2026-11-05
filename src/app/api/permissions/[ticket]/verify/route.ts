@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -79,9 +80,9 @@ async function handleGet(req: NextRequest, _ctx?: { auth?: any }): Promise<Respo
         computed: recomputed,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "VERIFY_ERROR", message: err?.message || "Failed to verify signature" } },
+      { success: false, error: { code: "VERIFY_ERROR", message: errMsg(err) || "Failed to verify signature" } },
       { status: 500 }
     );
   }

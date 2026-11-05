@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { createHash, randomBytes } from "crypto";
@@ -156,10 +157,10 @@ export async function POST(req: NextRequest) {
         finalized,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[cron/mess-finalize]", err);
     return NextResponse.json(
-      { success: false, error: { message: err.message } },
+      { success: false, error: { message: errMsg(err) } },
       { status: 500 }
     );
   }

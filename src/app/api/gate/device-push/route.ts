@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { recordScan } from "@/server/services/scan/record";
@@ -122,10 +123,10 @@ async function handlePost(req: NextRequest) {
       message: "Biometric push scan recorded",
       data: scanResult,
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: err.code ?? "SCAN_REJECTED", message: err.message },
-      { status: err.status ?? 400 }
+      { success: false, error: errCode(err) ?? "SCAN_REJECTED", message: errMsg(err) },
+      { status: ((err as { status?: number }).status ?? 400) }
     );
   }
 }

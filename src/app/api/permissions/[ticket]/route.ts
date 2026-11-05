@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 
 import { withAuthorization } from "@/middleware/authorization";
@@ -164,10 +165,10 @@ async function handlePatch(
     if (res.rowCount === 0) {
       updErr = "RLS policy did not permit the status update (0 rows affected)";
     }
-  } catch (e: any) {
-    updErr = e?.message ?? "unknown DB error";
-    if (e?.code === "42501") console.error("[permissions PATCH] RLS blocked update", e.message);
-    else console.error("[permissions PATCH] DB error", e.message);
+  } catch (e) {
+    updErr = errMsg(e) ?? "unknown DB error";
+    if (errCode(e) === "42501") console.error("[permissions PATCH] RLS blocked update", errMsg(e));
+    else console.error("[permissions PATCH] DB error", errMsg(e));
   }
 
   if (updErr) return fail("DB_ERROR", updErr, 500);

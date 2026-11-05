@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
  
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withTransaction } from "@/lib/postgres";
@@ -89,8 +90,8 @@ async function handleGet() {
     const results = Array.from(departmentsMap.values());
 
     return NextResponse.json({ success: true, data: results }, { headers: { "Cache-Control": "no-store" } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: errMsg(error) }, { status: 500 });
   }
 }
 
@@ -142,8 +143,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ success: false, error: { message: e.message } }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ success: false, error: { message: errMsg(e) } }, { status: 500 });
   }
 }
 
@@ -167,8 +168,8 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
     { success: true, message: `Deleted department ${code}` },
     { headers: { "Cache-Control": "no-store" } }
   );
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 400 });
   }
 }
 

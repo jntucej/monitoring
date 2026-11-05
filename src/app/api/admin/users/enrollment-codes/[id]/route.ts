@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
@@ -42,9 +43,9 @@ async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }) {
       { success: false, error: { code: "NOT_FOUND", message: "Code not found or already used." } },
       { status: 404 }
     );
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "DB_ERROR", message: err?.message || "Failed to invalidate code" } },
+      { success: false, error: { code: "DB_ERROR", message: errMsg(err) || "Failed to invalidate code" } },
       { status: 500 }
     );
   }

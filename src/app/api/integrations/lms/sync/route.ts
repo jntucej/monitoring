@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { syncLMSRosters } from "@/lib/integrations/lms";
@@ -10,8 +11,8 @@ async function handlePost(_req: NextRequest) {
       message: `Synced ${result.synced_users} users across ${result.synced_courses} courses from LMS.`,
       data: result,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: errMsg(error) }, { status: 500 });
   }
 }
 

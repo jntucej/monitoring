@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState, useEffect } from "react";
@@ -43,7 +44,7 @@ const api = useApi();
         }
         fetchBackups();
       } else { setMsg({ type: "error", text: json.error?.message || "Backup verification failed" }); }
-    } catch (err: any) { setMsg({ type: "error", text: err.message }); } finally { setVerifying(false); }
+    } catch (err) { setMsg({ type: "error", text: errMsg(err) }); } finally { setVerifying(false); }
   };
 
   useEffect(() => { fetchBackups(); }, []);
@@ -63,7 +64,7 @@ const api = useApi();
         }
         fetchBackups();
       } else { setMsg({ type: "error", text: json.error?.message || "Failed" }); }
-    } catch (err: any) { setMsg({ type: "error", text: err.message }); } finally { setBusy(false); }
+    } catch (err) { setMsg({ type: "error", text: errMsg(err) }); } finally { setBusy(false); }
   };
 
   const handleFileRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {

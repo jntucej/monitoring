@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -121,9 +122,9 @@ async function handlePatch(req: NextRequest) {
       success: true,
       message: `Role promotion request ${status.toLowerCase()} successfully`,
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 }
     );
   }

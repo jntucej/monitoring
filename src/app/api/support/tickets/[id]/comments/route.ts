@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -30,8 +31,8 @@ async function handleGet(req: NextRequest) {
 
     if (error) return NextResponse.json({ success: true, data: [] });
     return NextResponse.json({ success: true, data: comments || [] });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -77,8 +78,8 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: row });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { query, addAudit } from "@/lib/db";
@@ -75,10 +76,10 @@ export async function POST(req: NextRequest) {
         flagged: flaggedRes.rows.length,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[cron/mess-no-show-check]", err);
     return NextResponse.json(
-      { success: false, error: { message: err.message } },
+      { success: false, error: { message: errMsg(err) } },
       { status: 500 }
     );
   }

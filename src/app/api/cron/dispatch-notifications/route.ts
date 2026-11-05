@@ -5,6 +5,7 @@
 // Previously the job only existed in worker/jobs and was never scheduled from
 // a cron route — so the notification queues could never drain.
 
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { query } from "@/lib/postgres";
@@ -140,10 +141,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: { dispatched: results } });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[cron/dispatch-notifications] failed:", err);
     return NextResponse.json(
-      { success: false, error: { message: err.message || "Notification dispatch failed" } },
+      { success: false, error: { message: errMsg(err) || "Notification dispatch failed" } },
       { status: 500 },
     );
   }

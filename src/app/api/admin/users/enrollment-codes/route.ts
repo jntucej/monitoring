@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/postgres";
 import { withAuthorization } from "@/middleware/authorization";
@@ -48,9 +49,9 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
         created_by: r.created_by,
       })),
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Failed to list enrollment codes" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Failed to list enrollment codes" } },
       { status: 500 }
     );
   }

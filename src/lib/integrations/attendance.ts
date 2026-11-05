@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { getDbClient } from "@/lib/db";
 import { AttendanceRecord } from "@/lib/integration-types";
 import { getIstDateString } from "@/server/policy/dates";
@@ -113,12 +114,12 @@ export async function syncAttendanceToHR(
       );
 
       if (error) {
-        errors.push(`Failed to sync ${record.uniqueId}: ${error.message}`);
+        errors.push(`Failed to sync ${record.uniqueId}: ${errMsg(error)}`);
       } else {
         synced++;
       }
-    } catch (error: any) {
-      errors.push(`Error syncing ${record.uniqueId}: ${error.message || error}`);
+    } catch (error) {
+      errors.push(`Error syncing ${record.uniqueId}: ${errMsg(error) || error}`);
     }
   }
 

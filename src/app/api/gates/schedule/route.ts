@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -26,8 +27,8 @@ async function handleGet() {
         holidays: resHolidays.data || [],
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -47,7 +48,7 @@ async function handlePost(req: NextRequest) {
       };
       const { error } = await supabase.from("gate_holidays").insert(row);
     if (error) {
-      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
+      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: errMsg(error) } }, { status: 500 });
     }
       return NextResponse.json({ success: true, data: row });
     }
@@ -67,11 +68,11 @@ async function handlePost(req: NextRequest) {
 
     const { error } = await supabase.from("gate_access_rules").insert(row);
     if (error) {
-      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: error.message } }, { status: 500 });
+      return NextResponse.json({ success: false, error: { code: "DB_ERROR", message: errMsg(error) } }, { status: 500 });
     }
     return NextResponse.json({ success: true, data: row });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

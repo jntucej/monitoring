@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { getDbClient } from "@/lib/db";
 
 export type LMSPlatform = "moodle" | "canvas" | "blackboard" | "sakai";
@@ -64,8 +65,8 @@ export class MoodleProvider implements LMSProvider {
             } else {
               errors.push("Moodle API returned non-ok status");
             }
-          } catch (err: any) {
-            errors.push(`Moodle API sync error: ${err.message}`);
+          } catch (err) {
+            errors.push(`Moodle API sync error: ${errMsg(err)}`);
           }
         }
 
@@ -139,8 +140,8 @@ export class CanvasProvider implements LMSProvider {
             } else {
               errors.push("Canvas API returned non-ok status");
             }
-          } catch (err: any) {
-            errors.push(`Canvas API sync error: ${err.message}`);
+          } catch (err) {
+            errors.push(`Canvas API sync error: ${errMsg(err)}`);
           }
         }
 
@@ -217,8 +218,8 @@ export class BlackboardProvider implements LMSProvider {
             } else {
               errors.push("Blackboard API returned non-ok status");
             }
-          } catch (err: any) {
-            errors.push(`Blackboard API sync error: ${err.message}`);
+          } catch (err) {
+            errors.push(`Blackboard API sync error: ${errMsg(err)}`);
           }
         }
 
@@ -295,8 +296,8 @@ export class SakaiProvider implements LMSProvider {
             } else {
               errors.push("Sakai API returned non-ok status");
             }
-          } catch (err: any) {
-            errors.push(`Sakai API sync error: ${err.message}`);
+          } catch (err) {
+            errors.push(`Sakai API sync error: ${errMsg(err)}`);
           }
         }
 

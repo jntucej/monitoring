@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
@@ -10,8 +11,8 @@ async function handleGet() {
     const rules = await getAlertRules();
     const history = await getAlertHistory();
     return NextResponse.json({ success: true, data: { rules, history } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -46,8 +47,8 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: created });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -57,8 +58,8 @@ async function handlePatch(req: NextRequest) {
     const { id, enabled } = body;
     const updated = await toggleAlertRule(id, Boolean(enabled));
     return NextResponse.json({ success: true, data: updated });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

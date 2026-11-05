@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { linkParentToStudent } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -43,10 +44,10 @@ async function handlePost(req: NextRequest) {
       success: true,
       data: { studentId, guardianId: result.guardianId, ok: result.ok },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error linking parent to student:", error);
     return NextResponse.json(
-      { success: false, error: { code: "LINK_FAILED", message: error?.message || "Failed to update guardian link" } },
+      { success: false, error: { code: "LINK_FAILED", message: errMsg(error) || "Failed to update guardian link" } },
       { status: 500 }
     );
   }

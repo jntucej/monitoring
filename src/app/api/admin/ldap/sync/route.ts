@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { executeLDAPSync } from "@/lib/ldap";
@@ -19,8 +20,8 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

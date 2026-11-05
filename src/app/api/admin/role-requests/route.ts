@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { addAudit, withTransaction } from "@/lib/db";
@@ -70,9 +71,9 @@ async function handleGet(req: NextRequest) {
     }));
 
     return NextResponse.json({ success: true, data: enriched });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal server error" } },
       { status: 500 }
     );
   }
@@ -145,9 +146,9 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: request });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal server error" } },
       { status: 500 }
     );
   }

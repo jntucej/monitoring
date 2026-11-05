@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
@@ -311,9 +312,9 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
         },
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Validation failed" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Validation failed" } },
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import withAuthorization from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -416,16 +417,16 @@ async function handlePost(
       },
       { currentUserId: ctx.auth.userId, currentRole: ctx.auth.role },
     );
-  } catch (err: any) {
+  } catch (err) {
     // Propagate known 409s (HOSTEL_ROOM_REQUIRED, ROOM_OCCUPIED) as-is.
-    if (err?.code === "HOSTEL_ROOM_REQUIRED" || err?.code === "ROOM_OCCUPIED") {
+    if (errCode(err) === "HOSTEL_ROOM_REQUIRED" || errCode(err) === "ROOM_OCCUPIED") {
       return NextResponse.json(
-        { success: false, error: { code: err.code, message: err.message } },
-        { status: err.status ?? 409 },
+        { success: false, error: { code: errCode(err), message: errMsg(err) } },
+        { status: ((err as { status?: number }).status ?? 409) },
       );
     }
     return NextResponse.json(
-      { success: false, error: { code: "DB_ERROR", message: err?.message ?? String(err) } },
+      { success: false, error: { code: "DB_ERROR", message: errMsg(err) ?? String(err) } },
       { status: 500 },
     );
   }

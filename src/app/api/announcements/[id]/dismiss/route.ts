@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -25,8 +26,8 @@ async function handlePost(req: NextRequest) {
     await supabase.from("user_announcement_dismissals").insert(dismissalRow);
 
     return NextResponse.json({ success: true, data: { announcementId: id, dismissed: true } });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

@@ -35,7 +35,7 @@ async function handleGet(_req: NextRequest) {
     }));
 
     return NextResponse.json({ success: true, data: mapped.length > 0 ? mapped : DEFAULT_PASS_TYPES });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching pass types, using defaults:', error);
     return NextResponse.json({ success: true, data: DEFAULT_PASS_TYPES });
   }
@@ -83,7 +83,7 @@ async function handlePatch(req: NextRequest, ctx: { auth: AuthContext }) {
     }
 
     return NextResponse.json({ success: true, data: body });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating pass types:', error);
     return NextResponse.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update pass types' } },

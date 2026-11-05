@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { getAllGatesLive } from "@/lib/db";
@@ -162,10 +163,10 @@ async function handleGet(_req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, devices });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching gate device telemetry:", error);
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Failed to fetch gate telemetry" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Failed to fetch gate telemetry" } },
       { status: 500 }
     );
   }

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { registerThumbprint, clearThumbprint, hashThumbprint, addAudit, findUserById } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -76,9 +77,9 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, message: "Thumbprint registered successfully" });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal error" } },
       { status: 500 }
     );
   }

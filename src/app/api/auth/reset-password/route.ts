@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { withRateLimit, rateLimitByKey } from "@/lib/rate-limit";
@@ -96,8 +97,8 @@ async function handleResetPassword(req: NextRequest) {
           "SELECT id FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1",
           [tokenHash]
         );
-      } catch (err: any) {
-        console.error("[Auth:ResetPassword] token table lookup failed:", err.message);
+      } catch (err) {
+        console.error("[Auth:ResetPassword] token table lookup failed:", errMsg(err));
         return NextResponse.json(
           { success: false, error: { code: "SERVER_ERROR", message: "Password reset is temporarily unavailable." } },
           { status: 500 }
@@ -183,8 +184,8 @@ async function handleResetPassword(req: NextRequest) {
             "INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL '1 hour', NOW())",
             [tokenId, user.id, tokenHash]
           );
-        } catch (err: any) {
-          console.error("[Auth:ResetPassword] cannot persist token:", err.message);
+        } catch (err) {
+          console.error("[Auth:ResetPassword] cannot persist token:", errMsg(err));
           tokenPersisted = false;
         }
 

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { err } from "@/lib/api-response";
 import { parseVoiceCommand } from "@/lib/voice";
@@ -12,8 +13,8 @@ async function handlePost(req: NextRequest) {
 
     const command = parseVoiceCommand(text);
     return NextResponse.json({ success: true, data: command });
-  } catch (error: any) {
-    return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? error.message : "Internal error").body, { status: 500 });
+  } catch (error) {
+    return NextResponse.json(err("INTERNAL_ERROR", error instanceof Error ? errMsg(error) : "Internal error").body, { status: 500 });
   }
 }
 export const POST = withMutationGuard(handlePost, {requiredRole: ["admin", "sysadmin", "operator", "supervisor"], rateLimit: { keyPrefix: "voice_interpret", maxRequests: 60 }});

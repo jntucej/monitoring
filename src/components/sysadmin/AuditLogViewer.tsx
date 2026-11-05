@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useEffect, useState } from "react";
@@ -46,8 +47,8 @@ const api = useApi();
       } else {
         setError(json.error?.message || "Failed to load audit logs");
       }
-    } catch (err: any) {
-      setError(err.message || "Network error loading audit logs");
+    } catch (err) {
+      setError(errMsg(err) || "Network error loading audit logs");
     } finally {
       setLoading(false);
     }

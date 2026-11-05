@@ -182,7 +182,7 @@ async function handlePost(req: NextRequest) {
         linkedStudent,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating parent:", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to create parent" } },

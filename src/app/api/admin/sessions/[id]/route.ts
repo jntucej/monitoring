@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -52,9 +53,9 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
       success: true,
       message: `Active session for user '${targetUser?.name || targetUserId}' revoked successfully`,
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 }
     );
   }

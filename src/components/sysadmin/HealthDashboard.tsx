@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -35,8 +36,8 @@ export function HealthDashboard() {
       const data: SystemHealth = await res.json();
       setHealth(data);
       setLastUpdated(new Date());
-    } catch (err: any) {
-      setError(err.message || "Unable to reach health monitoring service");
+    } catch (err) {
+      setError(errMsg(err) || "Unable to reach health monitoring service");
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { addAudit } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -171,9 +172,9 @@ async function handlePost(req: NextRequest) {
       skipped: cleanRolls.length - deprovisionIds.length,
       message: `${deprovisionIds.length} students marked graduated and deprovisioned.`,
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal server error" } },
       { status: 500 }
     );
   }

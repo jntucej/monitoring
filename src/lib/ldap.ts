@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { getSupabaseServiceClient } from "./dbClient";
 
 export interface LDAPSyncResult {
@@ -140,8 +141,8 @@ export async function executeLDAPSync(): Promise<LDAPSyncResult> {
           if (insertErr) result.errors.push(`User ${ldapUser.uid}: ${insertErr.message}`);
           else result.usersCreated++;
         }
-      } catch (userErr: any) {
-        result.errors.push(`User ${ldapUser.uid}: ${userErr.message}`);
+      } catch (userErr) {
+        result.errors.push(`User ${ldapUser.uid}: ${errMsg(userErr)}`);
       }
     }
 
@@ -159,9 +160,9 @@ export async function executeLDAPSync(): Promise<LDAPSyncResult> {
     } catch {}
 
     return result;
-  } catch (err: any) {
+  } catch (err) {
     result.status = "failed";
-    result.errors.push(`LDAP sync error: ${err.message}`);
+    result.errors.push(`LDAP sync error: ${errMsg(err)}`);
     return result;
   }
 }

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState } from "react";
@@ -128,13 +129,13 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         });
         setReportBootstrapCodes(null);
       }
-    } catch (err: any) {
+    } catch (err) {
       setReport({
         totalRows: 0,
         imported: 0,
         skipped: 0,
         invalid: 0,
-        rows: [{ row: 0, status: "invalid", reason: err.message || "Network error during bulk import" }],
+        rows: [{ row: 0, status: "invalid", reason: errMsg(err) || "Network error during bulk import" }],
       });
       setReportBootstrapCodes(null);
     } finally {

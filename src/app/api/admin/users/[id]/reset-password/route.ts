@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "@/server/lib/crypto";
 import { assertPasswordPolicy } from "@/server/policy/passwords";
@@ -137,9 +138,9 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
     });
 
     return NextResponse.json({ success: true, message: "Password reset" });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Failed to reset password" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Failed to reset password" } },
       { status: 500 }
     );
   }

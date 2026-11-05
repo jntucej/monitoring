@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { getDbClient } from "@/lib/db";
@@ -14,8 +15,8 @@ async function handleGet(_req: NextRequest) {
       success: true,
       data: history || [],
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: errMsg(error) }, { status: 500 });
   }
 }
 

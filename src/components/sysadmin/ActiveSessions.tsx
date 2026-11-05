@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -78,8 +79,8 @@ export function ActiveSessions() {
         variant: "success",
       });
       fetchSessions();
-    } catch (err: any) {
-      addToast({ title: "Revocation Failed", message: err.message, variant: "error" });
+    } catch (err) {
+      addToast({ title: "Revocation Failed", message: errMsg(err), variant: "error" });
     } finally {
       setRevokingId(null);
     }

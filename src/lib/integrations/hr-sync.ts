@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { getDbClient } from "@/lib/db";
 import { HREmployee } from "@/lib/integration-types";
 
@@ -37,8 +38,8 @@ export async function syncEmployeesFromHR(): Promise<{
       } else {
         errors.push(`HRMS API responded with status ${hrmsRes.status}`);
       }
-    } catch (hrmsErr: any) {
-      errors.push(`Failed to reach HRMS endpoint: ${hrmsErr.message}`);
+    } catch (hrmsErr) {
+      errors.push(`Failed to reach HRMS endpoint: ${errMsg(hrmsErr)}`);
     }
 
     // No mock fallback — if the endpoint is configured but returns no data,
@@ -70,7 +71,7 @@ export async function syncEmployeesFromHR(): Promise<{
             .eq("id", existing.id);
 
           if (error) {
-            errors.push(`Failed to update ${emp.employeeId}: ${error.message}`);
+            errors.push(`Failed to update ${emp.employeeId}: ${errMsg(error)}`);
           } else {
             updated++;
           }
@@ -122,8 +123,8 @@ export async function syncEmployeesFromHR(): Promise<{
 
           added++;
         }
-      } catch (error: any) {
-        errors.push(`Error processing ${emp.employeeId}: ${error.message || error}`);
+      } catch (error) {
+        errors.push(`Error processing ${emp.employeeId}: ${errMsg(error) || error}`);
       }
     }
 
@@ -137,9 +138,9 @@ export async function syncEmployeesFromHR(): Promise<{
     } catch {}
 
     return { success: errors.length === 0, added, updated, errors };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error syncing employees:", error);
-    return { success: false, added: 0, updated: 0, errors: [error.message || "Sync failed"] };
+    return { success: false, added: 0, updated: 0, errors: [errMsg(error) || "Sync failed"] };
   }
 }
 

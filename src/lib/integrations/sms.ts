@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { randomBytes } from "crypto";
 import { SMSMessage } from "@/lib/integration-types";
 import { getDbClient } from "@/lib/db";
@@ -109,8 +110,8 @@ export async function sendSMS(params: {
           sentAt: new Date().toISOString(),
           createdAt: new Date().toISOString(),
         };
-      } catch (error: any) {
-        const reason = String(error?.message ?? error).slice(0, 500);
+      } catch (error) {
+        const reason = String(errMsg(error) ?? error).slice(0, 500);
         console.error("Error sending SMS:", reason);
         await getDbClient()
           .from("notification_sms_queue")
@@ -136,8 +137,8 @@ export async function sendSMS(params: {
         createdAt: new Date().toISOString(),
       };
     }
-  } catch (error: any) {
-    console.error("Error in sendSMS:", error?.message ?? error);
+  } catch (error) {
+    console.error("Error in sendSMS:", errMsg(error) ?? error);
     return null;
   }
 }

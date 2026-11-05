@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -97,8 +98,8 @@ export function PromotionRequests() {
         variant: "success",
       });
       fetchRequests();
-    } catch (err: any) {
-      addToast({ title: "Error", message: err.message, variant: "error" });
+    } catch (err) {
+      addToast({ title: "Error", message: errMsg(err), variant: "error" });
     }
   };
 
@@ -130,8 +131,8 @@ export function PromotionRequests() {
       setUserQuery("");
       setReason("");
       fetchRequests();
-    } catch (err: any) {
-      addToast({ title: "Submission Failed", message: err.message, variant: "error" });
+    } catch (err) {
+      addToast({ title: "Submission Failed", message: errMsg(err), variant: "error" });
     } finally {
       setSubmitting(false);
     }

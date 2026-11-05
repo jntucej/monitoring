@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -21,8 +22,8 @@ async function handleGet(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: tickets || [] });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -38,8 +39,8 @@ async function handlePost(req: NextRequest) {
     try {
       validSubject = assertLength(body?.subject, LIMITS.TICKET_SUBJECT, "Subject");
       validDescription = assertLength(body?.description, LIMITS.TICKET_DESCRIPTION, "Description");
-    } catch (valErr: any) {
-      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: valErr.message || "Subject and description are required" } }, { status: 400 });
+    } catch (valErr) {
+      return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: errMsg(valErr) || "Subject and description are required" } }, { status: 400 });
     }
 
     const supabase = getSupabaseServiceClient();
@@ -68,8 +69,8 @@ async function handlePost(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

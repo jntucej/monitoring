@@ -2,6 +2,7 @@
 // src/app/api/users/bulk/commit/route.ts
 // LIVE: called by CsvBulkImporter and BulkUserImportModal (sysadmin console).
 // (The parallel /api/admin/users/bulk/* set is used by UserManagementPanel.)
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { runBulkImport, type BulkImportReport } from "@/lib/user-import";
@@ -55,8 +56,8 @@ async function handlePost(req: NextRequest, context: { auth: AuthContext }) {
       ...report,
       bootstrapCodes: outcome.bootstrapCodes,
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { message: error.message || "Commit failed" } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { message: errMsg(error) || "Commit failed" } }, { status: 500 });
   }
 }
 

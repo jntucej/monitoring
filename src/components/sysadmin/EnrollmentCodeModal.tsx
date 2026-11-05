@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 import { useState } from "react";
 import { X, Copy, Check, KeyRound, Clock, ExternalLink } from "lucide-react";
@@ -30,7 +31,7 @@ const api = useApi();
       const json = await res.json();
       if (json.success) setIssued(json.data);
       else setError(json.error?.message || "Failed to issue code");
-    } catch (e: any) { setError(e.message); }
+    } catch (e) { setError(errMsg(e)); }
     finally { setLoading(false); }
   };
 

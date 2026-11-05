@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { findUserById, updateUserRole, updateAccountStatus, setUserFlag, addAudit, withTransaction } from "@/lib/db";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -297,7 +298,7 @@ async function handlePatch(req: NextRequest) {
           const { error } = await supabase
             .from("student_details")
             .upsert({ user_id: id, ...studentUpdates }, { onConflict: "user_id" });
-          if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+          if (error) return NextResponse.json({ success: false, error: { message: errMsg(error) } }, { status: 400 });
         }
       }
 
@@ -324,7 +325,7 @@ async function handlePatch(req: NextRequest) {
         const { error } = await supabase
           .from("student_details")
           .upsert(completion, { onConflict: "user_id" });
-        if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+        if (error) return NextResponse.json({ success: false, error: { message: errMsg(error) } }, { status: 400 });
 
         // Marking a student completed implies they have left campus: deprovision
         // the account unless the caller explicitly wants to keep it active.
@@ -354,7 +355,7 @@ async function handlePatch(req: NextRequest) {
           const { error } = await supabase
             .from("employee_details")
             .upsert({ user_id: id, ...empUpdates }, { onConflict: "user_id" });
-          if (error) return NextResponse.json({ success: false, error: { message: error.message } }, { status: 400 });
+          if (error) return NextResponse.json({ success: false, error: { message: errMsg(error) } }, { status: 400 });
         }
       }
 
@@ -406,9 +407,9 @@ async function handlePatch(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: "User updated successfully" });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal server error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal server error" } },
       { status: 500 }
     );
   }
@@ -513,7 +514,7 @@ async function handleDelete(req: NextRequest) {
       { status: 500 }
     );
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : String(error);
+    const msg = error instanceof Error ? errMsg(error) : String(error);
     return NextResponse.json(
       { success: false, error: { code: "SERVER_ERROR", message: msg } },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { err } from "@/lib/api-response";
@@ -23,9 +24,9 @@ async function handlePost(_req: NextRequest, _ctx: { auth: AuthContext }) {
     try {
       theme = assertLength(body?.theme, LIMITS.FEEDBACK_THEME, "theme");
       comment = assertLength(body?.comment, LIMITS.FEEDBACK_COMMENT, "comment");
-    } catch (valErr: any) {
+    } catch (valErr) {
       return NextResponse.json(
-        { success: false, error: valErr.message || "Missing or invalid theme or comment" },
+        { success: false, error: errMsg(valErr) || "Missing or invalid theme or comment" },
         { status: 400 }
       );
     }

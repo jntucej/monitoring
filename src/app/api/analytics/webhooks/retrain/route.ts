@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextResponse } from "next/server";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { sampleWebhooksDataset } from "@/lib/webhooks-analytics";
@@ -10,8 +11,8 @@ async function handlePost() {
       message: "Webhooks predictive models successfully retrained.",
       data: { predictions, anomalies },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: errMsg(error) }, { status: 500 });
   }
 }
 

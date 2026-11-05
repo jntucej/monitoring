@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/dbClient';
 import { withRateLimit } from '@/lib/rate-limit';
@@ -24,7 +25,7 @@ async function handleGet(req: NextRequest) {
 
     const { data, error } = await query;
     if (error) {
-      if (error.code === '42P01' || error.code === 'PGRST205') return NextResponse.json({ success: true, data: [] });
+      if (errCode(error) === '42P01' || errCode(error) === 'PGRST205') return NextResponse.json({ success: true, data: [] });
       throw error;
     }
 
@@ -94,8 +95,8 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -135,8 +136,8 @@ async function handleDelete(req: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deleted navigation item ${id}` });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: errMsg(error) } }, { status: 500 });
   }
 }
 

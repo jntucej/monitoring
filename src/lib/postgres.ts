@@ -1,3 +1,4 @@
+import { errMsg, errCode } from "@/lib/err-msg";
 import type { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
 
 /**
@@ -81,12 +82,12 @@ export async function poolQuery<T extends QueryResultRow = any>(
       }
       client.release();
     }
-  } catch (err: any) {
-    if (retries > 0 && (err.code === '40P01' || err.code === '40001')) {
+  } catch (err) {
+    if (retries > 0 && (errCode(err) === '40P01' || errCode(err) === '40001')) {
       await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
       return poolQuery<T>(text, params, retries - 1);
     }
-    console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
+    console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", errMsg(err));
     throw err;
   }
 }
@@ -113,13 +114,13 @@ export async function query<T extends QueryResultRow = any>(
       await client.query("SELECT set_config('app.current_role', $1, false)", [options.currentRole]);
     }
     return await client.query<T>(text, params);
-  } catch (err: any) {
-    if (retries > 0 && (err.code === '40P01' || err.code === '40001')) {
+  } catch (err) {
+    if (retries > 0 && (errCode(err) === '40P01' || errCode(err) === '40001')) {
       client.release();
       await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
       return query<T>(text, params, options, retries - 1);
     }
-    console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", err.message);
+    console.error(`[SQL Error] Query: ${text} | Params:`, params, "| Error:", errMsg(err));
     throw err;
   } finally {
     client.release();
@@ -799,8 +800,8 @@ export class PostgresQueryBuilder<T = any> {
         totalCount = countRes.rows[0]?.count ?? res.rowCount ?? 0;
       }
       return { data: res.rows, error: null, count: totalCount ?? res.rowCount ?? undefined };
-      } catch (err: any) {
-        return { data: null, error: { message: err.message, code: err.code } };
+      } catch (err) {
+        return { data: null, error: { message: errMsg(err), code: errCode(err) } };
       }
     })();
     return this._promise;
@@ -846,12 +847,12 @@ export const authAdmin = {
       );
       const user = res.rows[0] || { id, email, name, role, handle, unique_id: uniqueId };
       return { data: { user: { id: user.id, email: user.email, user_metadata: { ...safeAttributes.user_metadata, name: user.name, role: user.role, handle: user.handle } } }, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message, code: err.code } };
+    } catch (err) {
+      return { data: null, error: { message: errMsg(err), code: errCode(err) } };
     }
   },
   async deleteUser(userId: string) {
-    try { await query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+    try { await query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [userId]); return { data: null, error: null }; } catch (err) { return { data: null, error: { message: errMsg(err), code: errCode(err) } }; }
   },
   async updateUserById(userId: string, attributes: { password?: string; email?: string; user_metadata?: Record<string, any>; app_metadata?: Record<string, any>; }) {
     try {
@@ -866,17 +867,17 @@ export const authAdmin = {
         return { data: { user: res.rows[0] || { id: userId } }, error: null };
       }
       return { data: { user: { id: userId } }, error: null };
-    } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+    } catch (err) { return { data: null, error: { message: errMsg(err), code: errCode(err) } }; }
   },
   async inviteUserByEmail(email: string, options?: { data?: Record<string, any> }) { return this.createUser({ email, user_metadata: options?.data }); },
-  async listUsers() { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users"); return { data: { users: res.rows }, error: null }; } catch (err: any) { return { data: { users: [] }, error: { message: err.message, code: err.code } }; } },
-  async getUserById(userId: string) { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users WHERE id = $1 LIMIT 1", [userId]); if (res.rows.length === 0) return { data: null, error: { message: "User not found", code: "NOT_FOUND" } }; return { data: { user: res.rows[0] }, error: null }; } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; } },
+  async listUsers() { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users"); return { data: { users: res.rows }, error: null }; } catch (err) { return { data: { users: [] }, error: { message: errMsg(err), code: errCode(err) } }; } },
+  async getUserById(userId: string) { try { const res = await query("SELECT id, unique_id, email, name, role, status, created_at FROM users WHERE id = $1 LIMIT 1", [userId]); if (res.rows.length === 0) return { data: null, error: { message: "User not found", code: "NOT_FOUND" } }; return { data: { user: res.rows[0] }, error: null }; } catch (err) { return { data: null, error: { message: errMsg(err), code: errCode(err) } }; } },
   async signOut(userIdOrToken: string) {
     try {
       await query(`UPDATE sessions SET revoked_at = NOW() WHERE refresh_hash = $1 OR user_id::text = $1 OR id::text = $1`, [userIdOrToken]);
       await query("UPDATE users SET session_version = session_version + 1 WHERE id::text = $1", [userIdOrToken]);
       return { error: null };
-    } catch (err: any) { return { error: { message: err.message } }; }
+    } catch (err) { return { error: { message: errMsg(err) } }; }
   },
 };
 
@@ -939,7 +940,7 @@ export const db = {
       const sql = `SELECT * FROM ${fnName}(${placeholders})`;
       const res = await query(sql, params);
       return { data: res.rows.length === 1 ? res.rows[0][fnName] ?? res.rows[0] : res.rows, error: null };
-    } catch (err: any) { return { data: null, error: { message: err.message, code: err.code } }; }
+    } catch (err) { return { data: null, error: { message: errMsg(err), code: errCode(err) } }; }
   },
   auth: {
     admin: authAdmin,
@@ -951,7 +952,7 @@ export const db = {
         if (!payload?.sub) return { data: { user: null }, error: { message: "Invalid token" } };
         const res = await query("SELECT id, unique_id, email, name, role, status FROM users WHERE id = $1 LIMIT 1", [payload.sub]);
         return { data: { user: res.rows[0] || null }, error: null };
-      } catch (err: any) { return { data: { user: null }, error: { message: err.message } }; }
+      } catch (err) { return { data: { user: null }, error: { message: errMsg(err) } }; }
     },
     signOut: async () => ({ error: null }),
   },

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { getDbClient } from "@/lib/db";
 import { LMSConfig, AttendanceRecord, SyncResult, getLMSProvider } from "./lms-provider";
 
@@ -66,11 +67,11 @@ export async function syncLMSRosters(): Promise<SyncResult> {
     });
 
     return result;
-  } catch (error: any) {
+  } catch (error) {
     return {
       synced_courses: 0,
       synced_users: 0,
-      errors: [error.message || "Failed to sync LMS rosters"],
+      errors: [errMsg(error) || "Failed to sync LMS rosters"],
     };
   }
 }

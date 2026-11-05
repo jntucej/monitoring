@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
  
  
+import { errMsg } from "@/lib/err-msg";
 import { NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 
@@ -57,8 +58,8 @@ async function handleGet() {
         timestamp: now.toISOString(),
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } }, { status: 500 });
   }
 }
 

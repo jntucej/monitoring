@@ -5,6 +5,7 @@
 // year of study, batch, entry type and branch. Sheet columns are used for
 // names/contacts; anything that can be computed from the roll is NEVER
 // hardcoded (year is calculated from the Indian academic year, July start).
+import { errMsg } from "@/lib/err-msg";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { Role } from "@/lib/types";
 import { addAudit } from "@/lib/db";
@@ -737,10 +738,10 @@ async function processSingleRow(
         } else {
           bootstrapCode = code;
         }
-      } catch (codeCatch: any) {
+      } catch (codeCatch) {
         console.warn(
           `[user-import] enrollment-code issuance threw for row ${rowNum} (non-fatal):`,
-          codeCatch?.message ?? codeCatch
+          errMsg(codeCatch) ?? codeCatch
         );
       }
     }
@@ -863,7 +864,7 @@ async function processSingleRow(
       bootstrapCode: bootstrapCode ?? undefined,
       roll: row.roll || row.uniqueId || null,
     };
-  } catch (err: any) {
-    return { row: rowNum, error: err.message || "Failed to process row" };
+  } catch (err) {
+    return { row: rowNum, error: errMsg(err) || "Failed to process row" };
   }
 }

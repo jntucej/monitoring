@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { findPersonByUniqueId } from "@/lib/db";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -114,13 +115,13 @@ async function handlePost(req: NextRequest) {
                   details: { score: confidence, reason: "LOW_SCORE", targetRoll },
                 });
       }
-    } catch (faceError: any) {
+    } catch (faceError) {
       await logAuditEvent({
               action: "FACE_MATCH_DENIED",
               userId: person.id,
               userName: (person.fullName ?? person.name ?? "Unknown") as string,
               userRole: (person.role ?? "unknown") as string,
-              details: { reason: "MATCHER_ERROR", error: faceError.message, targetRoll },
+              details: { reason: "MATCHER_ERROR", error: errMsg(faceError), targetRoll },
             });
 
       return NextResponse.json(
@@ -140,9 +141,9 @@ async function handlePost(req: NextRequest) {
         name: person.fullName || person.name,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message || "Internal error" } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) || "Internal error" } },
       { status: 500 }
     );
   }

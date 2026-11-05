@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withMutationGuard } from "@/server/http/mutation-guard";
@@ -18,14 +19,14 @@ async function handleGet(_req: NextRequest) {
       .order("created_at" as any, { ascending: false });
 
     if (error) {
-      console.warn("Could not fetch attendance_records:", error.message);
+      console.warn("Could not fetch attendance_records:", errMsg(error));
       return NextResponse.json({ success: true, data: [] }, { status: 200 });
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in GET /api/attendance_records:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: errMsg(error) }, { status: 500 });
   }
 }
 

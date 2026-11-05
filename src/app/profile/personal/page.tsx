@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -57,7 +58,7 @@ export function ProfilePersonalPanel() {
       setProfile(json.data);
       setName(json.data.name ?? "");
       setPhone(json.data.phone ?? "");
-    } catch (e: any) { addError(e.message || "Failed to load profile"); }
+    } catch (e) { addError(errMsg(e) || "Failed to load profile"); }
     finally { setLoading(false); }
   }, [addError]);
 
@@ -75,7 +76,7 @@ export function ProfilePersonalPanel() {
       const current = useAuthStore.getState().user;
       if (current) setUser({ ...current, name });
       addToast("Profile updated");
-    } catch (e: any) { addError(e.message || "Update failed"); }
+    } catch (e) { addError(errMsg(e) || "Update failed"); }
     finally { setSavingName(false); }
   };
 

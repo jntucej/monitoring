@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { withAdminMutation } from "@/server/http/mutation-guard";
 import { commitImport, type ImportRow } from "@/lib/user-import";
@@ -119,9 +120,9 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       },
       message: `Imported ${result.importedCount}, failed ${result.failedCount}`,
     });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: err?.message || "Bulk commit failed" } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: errMsg(err) || "Bulk commit failed" } },
       { status: 500 }
     );
   }

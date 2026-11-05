@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
 import { withRateLimit } from "@/lib/rate-limit";
@@ -75,7 +76,7 @@ async function handleGet(_req: NextRequest) {
       success: true,
       data: mapped.length > 0 ? mapped : DEFAULT_EXIT_REASONS,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching exit reasons, returning defaults:", error);
     return NextResponse.json({ success: true, data: DEFAULT_EXIT_REASONS });
   }
@@ -123,7 +124,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
     if (error) {
       console.error("Error upserting exit reason:", error);
       return NextResponse.json(
-        { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+        { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
         { status: 500 },
       );
     }
@@ -140,10 +141,10 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating exit reason:", error);
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 },
     );
   }
@@ -176,9 +177,9 @@ async function handleDelete(req: NextRequest, ctx: { auth: AuthContext }) {
     }
 
     return NextResponse.json({ success: true, message: `Deleted exit reason ${code}` });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { success: false, error: { code: "SERVER_ERROR", message: error.message } },
+      { success: false, error: { code: "SERVER_ERROR", message: errMsg(error) } },
       { status: 500 },
     );
   }

@@ -3,6 +3,7 @@
  *
  * Orchestrates hostel-permission forwards and step-up authentication.
  */
+import { errMsg, errCode } from "@/lib/err-msg";
 import { query, withTransaction } from "@/lib/postgres";
 import { verifyPassword, hashPassword } from "@/lib/auth-token";
 import { forwardTicket, type ForwardTicketResult } from "@/lib/permission-workflow-pure";
@@ -142,10 +143,10 @@ export async function applyHostelForward(args: {
       comment: args.comment,
       stepupVerified: args.stepupVerified,
     });
-  } catch (err: any) {
-    const code = err.code ?? "FORWARD_RULE_ERROR";
+  } catch (err) {
+    const code = errCode(err) ?? "FORWARD_RULE_ERROR";
     const status = code === "STEPUP_REQUIRED" ? 400 : 422;
-    return { ok: false, response: NextResponse.json({ success: false, error: { code, message: err.message } }, { status }) };
+    return { ok: false, response: NextResponse.json({ success: false, error: { code, message: errMsg(err) } }, { status }) };
   }
 
   const supabase = getSupabaseServiceClient();
@@ -236,12 +237,12 @@ export async function applyEscalateUp(args: {
       dbError = "RLS policy did not permit the stage update (0 rows affected)";
       console.error("[permissions escalate] RLS no-op update", dbError);
     }
-  } catch (e: any) {
-    dbError = e?.message ?? "unknown error";
-    if (e?.code === "42501") {
-      console.error("[permissions escalate] RLS blocked update", e.message);
+  } catch (e) {
+    dbError = errMsg(e) ?? "unknown error";
+    if (errCode(e) === "42501") {
+      console.error("[permissions escalate] RLS blocked update", errMsg(e));
     } else {
-      console.error("[permissions escalate] DB error", e.message);
+      console.error("[permissions escalate] DB error", errMsg(e));
     }
   }
 

@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 import { useCallback, useEffect, useRef } from "react";
 import { useBotStore, type Citation } from "./store";
@@ -152,11 +153,11 @@ export function useBotChat() {
       broadcastBot({ type: "done", messageId: draftId, content: acc || undefined, citations: cites.length ? cites : undefined });
 
       onDone?.(acc);
-    } catch (err: any) {
-      if (err?.name === "AbortError") {
+    } catch (err) {
+      if ((err as { name?: string }).name === "AbortError") {
         setDraftStatus(draftId, "done");
       } else {
-        const msg = err?.message ?? "unknown_error";
+        const msg = errMsg(err) ?? "unknown_error";
         setError(msg);
         setDraftContent(draftId, acc || "");
         setDraftStatus(draftId, "error");

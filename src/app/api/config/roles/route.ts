@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { errMsg, errCode } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/dbClient';
 import { withRateLimit } from '@/lib/rate-limit';
@@ -17,7 +18,7 @@ async function handleGet(req: NextRequest) {
       .order('display_name');
 
     if (error) {
-      if (error.code === '42P01' || error.code === 'PGRST205') {
+      if (errCode(error) === '42P01' || errCode(error) === 'PGRST205') {
         console.warn('[config/roles] config_roles table missing, returning empty');
         return NextResponse.json({ success: true, data: [] });
       }
@@ -68,8 +69,8 @@ async function handlePost(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: errMsg(error) } }, { status: 500 });
   }
 }
 
@@ -86,8 +87,8 @@ async function handleDelete(req: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json({ success: true, message: `Deactivated role ${code}` });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: { code: 'SERVER_ERROR', message: errMsg(error) } }, { status: 500 });
   }
 }
 

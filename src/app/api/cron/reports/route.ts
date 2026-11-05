@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { getSupabaseServiceClient } from "@/lib/dbClient";
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
         reportIds: executed,
       },
     });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: { message: err.message } }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: { message: errMsg(err) } }, { status: 500 });
   }
 }

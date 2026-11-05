@@ -1,3 +1,4 @@
+import { errMsg } from "@/lib/err-msg";
 "use client";
 
 import { useState, useRef } from "react";
@@ -56,8 +57,8 @@ const api = useApi();
       const json = await res.json();
       if (!res.ok || !json.success) setErrorMsg(json.error?.message || "Validation failed");
       else setValidationResult(json.data);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Network error");
+    } catch (err) {
+      setErrorMsg(errMsg(err) || "Network error");
     } finally {
       setValidating(false);
     }
@@ -76,8 +77,8 @@ const api = useApi();
       const json = await res.json();
       if (!res.ok || !json.success) setErrorMsg(json.error?.message || "Import failed");
       else setCommitResult(json.data);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Network error");
+    } catch (err) {
+      setErrorMsg(errMsg(err) || "Network error");
     } finally {
       setCommitting(false);
     }
