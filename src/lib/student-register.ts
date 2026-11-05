@@ -72,10 +72,24 @@ export async function getStudentRegister(
     };
   }
 
-  const studentList = (students || []) as any[];
-  const userMap = new Map<string, any>();
+  type StudentDetailShape = {
+    roll?: string | null;
+    year?: number | null;
+    hostel_block?: string | null;
+    room_number?: string | null;
+    department?: string | null;
+  };
+  type StudentRow = {
+    id: string;
+    unique_id: string | null;
+    name: string;
+    department_id?: string | null;
+    student_details?: StudentDetailShape | StudentDetailShape[];
+  };
+  const studentList = (students as unknown) as StudentRow[];
+  const userMap = new Map<string, StudentRow>();
   for (const s of studentList) userMap.set(s.id, s);
-  const userIds = studentList.map((s: any) => s.id);
+  const userIds = studentList.map((s) => s.id);
 
   const { data: mvts, error: mvtsErr } = await db
     .from("movement_logs")
@@ -94,8 +108,18 @@ export async function getStudentRegister(
     };
   }
 
-  const movementsByUser = new Map<string, any[]>();
-  for (const m of mvts || []) {
+  type MvtRow = {
+    id: string;
+    user_id: string;
+    direction: string;
+    reason: string | null;
+    timestamp: string;
+    gate_name: string | null;
+    operator_name: string | null;
+  };
+  const mvtsTyped = (mvts as unknown) as MvtRow[];
+  const movementsByUser = new Map<string, MvtRow[]>();
+  for (const m of mvtsTyped || []) {
     const arr = movementsByUser.get(m.user_id) || [];
     arr.push(m);
     movementsByUser.set(m.user_id, arr);
@@ -117,8 +141,8 @@ export async function getStudentRegister(
     if (filter.year && sDetails?.year !== filter.year) continue;
     if (filter.hostelBlock && sDetails?.hostel_block !== filter.hostelBlock) continue;
 
-    const firstOut = userMvts.find((m: any) => m.direction === "OUT");
-    const lastIn = [...userMvts].reverse().find((m: any) => m.direction === "IN");
+    const firstOut = userMvts.find((m) => m.direction === "OUT");
+    const lastIn = [...userMvts].reverse().find((m) => m.direction === "IN");
     const lastMvt = userMvts[userMvts.length - 1];
 
     const currentStatus: "IN" | "OUT" = lastMvt?.direction === "OUT" ? "OUT" : "IN";
@@ -136,7 +160,7 @@ export async function getStudentRegister(
       durationMinutes = Math.max(0, Math.round((inTime - outTime) / (60 * 1000)));
 
       if (currentStatus === "OUT") {
-        const flowConfig = (CANONICAL_EXIT_FLOWS as any)[canonicalFlow];
+        const flowConfig = CANONICAL_EXIT_FLOWS[canonicalFlow as ReasonCode];
         if (flowConfig?.maxDurationHours && durationMinutes > flowConfig.maxDurationHours * 60) {
           isOverdue = true;
           overdueCount++;
@@ -148,7 +172,7 @@ export async function getStudentRegister(
 
     rows.push({
       userId: user.id,
-      roll: sDetails?.roll || user.unique_id,
+      roll: sDetails?.roll || user.unique_id || '',
       name: user.name,
       department: user.department_id || null,
       year: sDetails?.year || null,

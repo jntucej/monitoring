@@ -67,15 +67,25 @@ export async function getStaffRegister(
     return { register, date: day, entries: 0, exits: 0, byReason: {}, rows: [] };
   }
 
-  const activeEmployees = employees.filter(
-    (e: any) => e.users && e.users.status === "ACTIVE",
+  type EmpRow = {
+    user_id: string;
+    employee_id?: string | null;
+    designation?: string | null;
+    department_id?: string | null;
+    is_hod?: boolean | null;
+    staff_category?: StaffCategory | null;
+    users: { id: string; unique_id: string; name: string; role: string; status: string; department_id?: string | null };
+  };
+  const empRows = (employees as unknown) as EmpRow[];
+  const activeEmployees = empRows.filter(
+    (e) => e.users && e.users.status === "ACTIVE",
   );
 
   if (activeEmployees.length === 0) {
     return { register, date: day, entries: 0, exits: 0, byReason: {}, rows: [] };
   }
 
-  const ids = activeEmployees.map((e: any) => e.user_id);
+  const ids = activeEmployees.map((e) => e.user_id);
 
   // 2. Load today's movements for these employees
   const { data: mvts, error: mvtsErr } = await db
@@ -94,20 +104,30 @@ export async function getStaffRegister(
   }
 
   // 3. Group movements by employee
-  const movementsByUser = new Map<string, any[]>();
-  for (const m of mvts || []) {
+  type MvtRow = {
+    id: string;
+    user_id: string;
+    direction: string;
+    reason: string | null;
+    timestamp: string;
+    gate_name: string | null;
+    operator_name: string | null;
+  };
+  const mvtsTyped = (mvts as unknown) as MvtRow[];
+  const movementsByUser = new Map<string, MvtRow[]>();
+  for (const m of mvtsTyped || []) {
     const arr = movementsByUser.get(m.user_id) || [];
     arr.push(m);
     movementsByUser.set(m.user_id, arr);
   }
 
   // 4. Build rows
-  const rows: StaffRegisterRow[] = activeEmployees.map((e: any) => {
-    const u = e.users;
+  const rows: StaffRegisterRow[] = activeEmployees.map((e) => {
+    const u = e.users!;
     const userMvts = movementsByUser.get(e.user_id) || [];
 
-    const firstIn = userMvts.find((m: any) => m.direction === "IN");
-    const lastOut = [...userMvts].reverse().find((m: any) => m.direction === "OUT");
+    const firstIn = userMvts.find((m) => m.direction === "IN");
+    const lastOut = [...userMvts].reverse().find((m) => m.direction === "OUT");
     const last = userMvts[userMvts.length - 1];
 
     return {
@@ -135,7 +155,7 @@ export async function getStaffRegister(
   const byReason: Record<string, { in: number; out: number }> = {};
   let entries = 0;
   let exits = 0;
-  for (const m of mvts || []) {
+  for (const m of mvtsTyped || []) {
     const key = m.reason || "Regular";
     byReason[key] ??= { in: 0, out: 0 };
     if (m.direction === "IN") {
