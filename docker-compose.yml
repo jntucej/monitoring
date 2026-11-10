@@ -30,7 +30,7 @@ services:
       - gate-net
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: gate_redis
     restart: always
     cpu_shares: 768
@@ -348,9 +348,13 @@ services:
       - gate-net
 
   cloudflared:
-    image: cloudflare/cloudflared:2025.9.1
+    image: cloudflare/cloudflared@sha256:4604b477520dc8322af5427da68b44f0bf814938e9d2e4814f2249ee4b03ffdf
     container_name: gate_cloudflared
     restart: always
+    # Run as non-root uid 444 (cloudflared's UID inside the image) so the
+    # tunnel process cannot read root-owned host files if the container is
+    # compromised. cap_drop ALL + no-new-privileges makes escalation impossible.
+    user: "444:444"
     # Single, token-managed model. The TUNNEL_TOKEN is the credential (no local
     # tunnel UUID, no credentials-file, no named volume at the file path). The
     # config file supplies ingress only; cloudflared pairs it with the token.

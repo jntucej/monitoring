@@ -20,14 +20,14 @@ export const PrincipalLayoutShell = memo(function PrincipalLayoutShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-base)]">
+    <div className="flex min-h-dvh bg-[var(--bg-base)]">
       <PrincipalSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         notifications={notifications}
         unreadCount={unreadCount}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-col min-w-0">
         <main className="flex-1">
           {children}
         </main>
@@ -50,10 +50,10 @@ export const PrincipalShell = memo(function PrincipalShell({
 }) {
   return (
     <div className="mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-10">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <header className="mb-8 flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-fluid-2xl font-semibold tracking-tight text-[var(--text-primary)]">{title}</h1>
-          {subtitle && <p className="mt-1 text-fluid-sm text-[var(--text-muted)]">{subtitle}</p>}
+          <h1 className="font-semibold tracking-tight text-[var(--text-primary)]">{title}</h1>
+          {subtitle && <p className="mt-1 text-[var(--text-muted)]">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </header>

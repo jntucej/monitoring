@@ -34,7 +34,7 @@ export default function EmoLandingPage() {
   const openBacklog = rows.filter((r) => !["resolved", "closed"].includes(String(r.status ?? "").toLowerCase())).length;
 
   return (
-    <div className="p-4 sm:p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-4 sm:space-y-6">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-6">
       <PageHeader title="Electrical Maintenance Officer" subtitle="Campus electrical and lab-power grievances (category D1)" />
 
       <WidgetBoundary name="EmoKpis" title="EMO KPIs">

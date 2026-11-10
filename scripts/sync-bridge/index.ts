@@ -33,6 +33,20 @@ const TCP_TIMEOUT_MS = Number(process.env.BIOMETRIC_DEVICE_TCP_TIMEOUT_MS || 500
 const DEVICE_TIMEZONE = (process.env.BIOMETRIC_DEVICE_TIMEZONE || '').trim() || undefined;
 
 const USE_FAKE_DEVICE_LOGS = process.env.USE_FAKE_DEVICE_LOGS === 'true';
+
+// Production guard: fabricating biometric attendance data is a data-integrity
+// and DPDP violation. Refuse to start if the fake-device flag is enabled in
+// production — the only valid modes in prod are real TCP / text-file / binary
+// device logs.
+if (process.env.NODE_ENV === 'production' && USE_FAKE_DEVICE_LOGS) {
+  console.error(
+    '[sync-bridge] FATAL: USE_FAKE_DEVICE_LOGS=true is not permitted in production. ' +
+    'Fabricated biometric attendance logs are a DPDP violation. ' +
+    'Set USE_FAKE_DEVICE_LOGS=false and configure a real log source ' +
+    '(USE_TCP / BIOMETRIC_TEXT_FILE_PATH / BIOMETRIC_BINARY_FILE_PATH).',
+  );
+  process.exit(1);
+}
 const USE_TCP = process.env.USE_TCP === 'true' || USE_FAKE_DEVICE_LOGS;
 const TEXT_FILE_PATH = process.env.BIOMETRIC_TEXT_FILE_PATH || '';
 const BINARY_FILE_PATH = process.env.BIOMETRIC_BINARY_FILE_PATH || '';

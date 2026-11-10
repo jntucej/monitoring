@@ -16,8 +16,8 @@ export function HodDesktopShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-base)]">
-      <aside className="w-64 shrink-0 border-r border-[var(--border)]">
+    <div className="flex h-dvh overflow-hidden bg-[var(--bg-base)]">
+      <aside className="w-64 shrink-0 border-[var(--border)]">
         <HodSidebar mode="expanded" />
       </aside>
 

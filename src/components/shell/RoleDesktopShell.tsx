@@ -12,8 +12,8 @@ export function RoleDesktopShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-base)]">
-      <aside className="w-64 shrink-0 border-r border-[var(--border)]">
+    <div className="flex h-dvh overflow-hidden bg-[var(--bg-base)]">
+      <aside className="w-64 shrink-0 border-[var(--border)]">
         <RoleSidebar manifest={manifest} />
       </aside>
       <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">

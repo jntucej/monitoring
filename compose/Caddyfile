@@ -4,6 +4,13 @@
         output stdout
         format json
     }
+    # Cap the maximum request body size for the whole instance (default is
+    # unbounded — a client can send multi-GB bodies and exhaust disk/memory
+    # before Next.js or the API route sees it). 250 MB covers the largest
+    # legitimate upload (bulk-import CSVs, permission documents).
+    request_body {
+        max 250mb
+    }
 }
 
 :80 {
