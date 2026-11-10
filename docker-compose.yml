@@ -188,6 +188,8 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
       - TELEGRAM_CRITICAL_CHAT_ID=${TELEGRAM_CRITICAL_CHAT_ID:-}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-}
+      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET:-}
       # RAG / campus assistant (bot chat + RAG memory) — OpenAI-compatible LLM.
       # By default the web container reaches the LLM via the llm-proxy sidecar
       # (which uses host network mode to bridge UFW). Override RAG_LLM_API_URL

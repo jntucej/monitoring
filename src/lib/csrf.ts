@@ -22,6 +22,12 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
   const pathname = new URL(req.url).pathname;
   const CSRF_EXEMPT = new Set([
     "/api/auth/login", "/api/auth/refresh", "/api/auth/reset-password", "/api/auth/bootstrap", "/api/csrf",
+    // External webhooks: they carry no browser Origin/Sec-Fetch-Site headers
+    // (Telegram's server sends neither) and are authorized by an HMAC-style
+    // shared-secret header checked inside the route. Exempting from the
+    // origin check does not weaken them — a forged request without the
+    // secret still 403s at the route level.
+    "/api/webhooks/alertmanager", "/api/telegram/webhook",
   ]);
   if (CSRF_EXEMPT.has(pathname)) {
     return { valid: true };

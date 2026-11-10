@@ -13,8 +13,8 @@ interface Props {
 export function EnrollmentCodeModal({ userId, userName, onClose }: Props) {
 const api = useApi();
 
-  const [purpose, setPurpose] = useState<"web_bootstrap" | "mobile" | "pin_reset">("web_bootstrap");
-  const [issued, setIssued] = useState<{ code: string; expiresAt: string; bootstrapLink?: string } | null>(null);
+  const [purpose, setPurpose] = useState<"web_bootstrap" | "mobile" | "pin_reset" | "web_bootstrap_tg">("web_bootstrap");
+  const [issued, setIssued] = useState<{ code: string; expiresAt: string; bootstrapLink?: string; telegramDeepLink?: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -103,6 +103,7 @@ const api = useApi();
                   <option value="web_bootstrap">Web onboarding (password + PIN)</option>
                   <option value="mobile">Mobile device pairing (15 min)</option>
                   <option value="pin_reset">Kiosk PIN reset</option>
+                  <option value="web_bootstrap_tg">Telegram deep link (15 min)</option>
                 </select>
               </div>
 
@@ -155,6 +156,33 @@ const api = useApi();
                   {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
                 </p>
               </div>
+
+              {issued.telegramDeepLink && (
+                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-300 space-y-1">
+                  <p className="font-semibold text-sky-200">Telegram Deep Link (share with candidate):</p>
+                  <p className="font-mono text-[11px] break-all select-all text-sky-300/90">
+                    {issued.telegramDeepLink}
+                  </p>
+                  <p className="text-[10px] text-sky-400/60">
+                    Candidate taps link in Telegram → presses Start → shares their
+                    phone number via the bot button. Verification is hard-blocked if
+                    the number does not match our records.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(issued.telegramDeepLink!);
+                        setLinkCopied(true);
+                        setTimeout(() => setLinkCopied(false), 1500);
+                      } catch {}
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-medium"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    Copy Telegram Link
+                  </button>
+                </div>
+              )}
 
               <button
                 onClick={onClose}

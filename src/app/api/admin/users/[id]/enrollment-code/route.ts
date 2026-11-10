@@ -4,6 +4,7 @@ import { randomInt } from "crypto";
 import { hash } from "@/server/lib/crypto";
 import { query } from "@/lib/postgres";
 import { createBootstrapToken } from "@/lib/bootstrap-link";
+import { generateDeepLinkToken, hashDeepLinkToken, buildTelegramDeepLink } from "@/lib/telegram-deep-link";
 import { withMutationGuard } from "@/server/http/mutation-guard";
 import { addAudit } from "@/lib/db";
 import type { AuthContext } from "@/lib/authContext";
@@ -29,11 +30,11 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   }
 
   const body = await req.json().catch(() => ({}));
-  if (!["mobile", "web_bootstrap", "pin_reset"].includes(body.purpose)) {
+  if (!["mobile", "web_bootstrap", "pin_reset", "web_bootstrap_tg"].includes(body.purpose)) {
     return NextResponse.json({ success: false, error: { code: "BAD_REQUEST", message: "Invalid purpose" } }, { status: 400 });
   }
-  const purpose: "mobile" | "web_bootstrap" | "pin_reset" = body.purpose;
-  const ttlMinutes = purpose === "mobile" ? 15 : 60 * 24;
+  const purpose: "mobile" | "web_bootstrap" | "pin_reset" | "web_bootstrap_tg" = body.purpose;
+  const ttlMinutes = purpose === "mobile" ? 15 : purpose === "web_bootstrap_tg" ? 15 : 60 * 24;
 
   const currentRole = (ctx.auth.role === "admin" || ctx.auth.role === "sysadmin") ? ctx.auth.role : "sysadmin";
 
@@ -57,6 +58,28 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
       { currentRole }
     );
 
+    let telegramDeepLink: string | null = null;
+    if (purpose === "web_bootstrap_tg") {
+      // One-time 24-hex token; only the SHA-256 hash is persisted.
+      const token = generateDeepLinkToken();
+      await query(
+        `INSERT INTO telegram_deep_links (token_hash, user_id, expires_at)
+         VALUES ($1, $2, $3)`,
+        [hashDeepLinkToken(token), userId, expires_at],
+        { currentRole }
+      );
+      const botUsername = process.env.TELEGRAM_BOT_USERNAME ?? "GateMonitorBot";
+      telegramDeepLink = buildTelegramDeepLink(botUsername, token);
+
+      await addAudit({
+        action: "TELEGRAM_DEEP_LINK_ISSUED",
+        userId: ctx.auth.userId,
+        userName: ctx.auth.email,
+        role: ctx.auth.role as Role,
+        details: `Issued telegram deep-link for user ${userId}; expires ${expires_at}`,
+      });
+    }
+
     await addAudit({
       action: "ENROLLMENT_CODE_ISSUED",
       userId: ctx.auth.userId,
@@ -72,7 +95,13 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
 
     return NextResponse.json({
       success: true,
-      data: { code, purpose, expiresAt: expires_at, bootstrapLink },
+      data: {
+        code,
+        purpose,
+        expiresAt: expires_at,
+        bootstrapLink,
+        telegramDeepLink,
+      },
     });
   } catch (err) {
     return NextResponse.json(

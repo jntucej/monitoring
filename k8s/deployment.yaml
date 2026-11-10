@@ -27,6 +27,8 @@ stringData:
   supabase-service-role-key: ""
   telegram-bot-token: ""
   telegram-chat-id: ""
+  telegram-bot-username: ""
+  telegram-webhook-secret: ""
   DATABASE_URL: ""
   REDIS_URL: ""
 
