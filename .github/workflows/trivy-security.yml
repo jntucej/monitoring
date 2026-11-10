@@ -1,0 +1,180 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Nightly scan of main (catches newly-published CVEs in pinned images)
+    - cron: "17 3 * * *"
+
+jobs:
+  # ── npm dependency scan ─────────────────────────────────────────────
+  # Scans package-lock.json against the OSV / npm advisory DB.
+  trivy-npm:
+    name: Trivy — npm lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy fs scan
+        uses: aquasecurity/trivy-action@v2
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "json"
+          output: "trivy-npm-report.json"
+          exit-code: "1"
+          vuln-type: "secret,misconfiguration,vulnerability"
+          severity: "HIGH,CRITICAL"
+          ignore-unfixed: "true"
+
+      - name: Upload Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-npm-report
+          path: trivy-npm-report.json
+          retention-days: 30
+
+  # ── Dockerfile misconfig scan ───────────────────────────────────────
+  trivy-dockerfile:
+    name: Trivy — Dockerfile misconfig
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy config scan
+        uses: aquasecurity/trivy-action@v2
+        with:
+          scan-type: "config"
+          scan-ref: "Dockerfile"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+
+  # ── Compose-file security checks ────────────────────────────────────
+  # Flags :latest image tags, unexpected privileged containers,
+  # missing cap_drop, and plaintext secrets in environment blocks.
+  compose-security:
+    name: Compose security checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          wget -qO yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x yq
+          sudo mv yq /usr/local/bin/
+
+      - name: Check for :latest image tags
+        run: |
+          if grep -E 'image:.*:latest' docker-compose.yml; then
+            echo "::error::Found :latest image tag — pin to a specific version or digest."
+            exit 1
+          fi
+          echo "::notice::No :latest tags found."
+
+      - name: Check for privileged containers (other than cadvisor)
+        run: |
+          result=$(yq -r '.services | to_entries | map(select(.value.privileged == true and .key != "cadvisor")) | .[].key' docker-compose.yml 2>/dev/null)
+          if [ -n "$result" ] && [ "$result" != "null" ]; then
+            echo "::error::Privileged container(s) found (other than cadvisor): $result"
+            exit 1
+          fi
+          echo "::notice::No unexpected privileged containers."
+
+      - name: Check for missing cap_drop on caddy / cloudflared / alertmanager
+        run: |
+          for svc in caddy cloudflared alertmanager; do
+            cap_drop=$(yq ".services.${svc}.cap_drop" docker-compose.yml)
+            if [ "$cap_drop" = "null" ] || [ -z "$cap_drop" ]; then
+              echo "::error::Service '$svc' missing cap_drop: [ALL]"
+              exit 1
+            fi
+          done
+          echo "::notice::cap_drop present on caddy, cloudflared, alertmanager."
+
+      - name: Warn on plaintext secrets in environment blocks
+        run: |
+          # Secrets passed via environment: are visible in /proc/environ of
+          # every co-located container on the host.
+          hits=$(yq '.services[].environment' docker-compose.yml 2>/dev/null             | grep -iE 'PASSWORD|SECRET|TOKEN|API_KEY'             | grep -vE ':-.*\}|\$\{')
+          if [ -n "$hits" ]; then
+            echo "::warning::Potential plaintext secrets in environment blocks:"
+            echo "$hits"
+          fi
+
+  # ── Falco rules validation ─────────────────────────────────────────
+  falco-rules-check:
+    name: Falco rules sanity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate falco-rules.yaml
+        run: |
+          if [ ! -f compose/security/falco-rules.yaml ]; then
+            echo "::error::compose/security/falco-rules.yaml not found"
+            exit 1
+          fi
+          python3 - <<'PY'
+          import yaml, sys
+          with open("compose/security/falco-rules.yaml") as f:
+            rules = yaml.safe_load(f)
+          required = {
+              "Shell spawn in container",
+              "Privilege escalation attempt",
+              "Sensitive file access (shadow)",
+          }
+          present = {r.get("rule") for r in (rules.get("rules") or [])}
+          missing = required - present
+          if missing:
+            print(f"::error::Missing required Falco rules: {missing}")
+            sys.exit(1)
+          print(f"OK — all {len(required)} required rules present.")
+          PY
+
+  # ── Container image scan (on PR + nightly) ─────────────────────────
+  # Runs Trivy CLI directly (no external registry pull needed for the
+  # locally-built images — only external images are scanned here).
+  trivy-images:
+    name: Trivy — external container images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          sudo wget -qO /usr/local/bin/trivy https://ghcr.io/v2/aquasecurity/trivy/latest/layer/sha256             || curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy --version
+
+      - name: Scan external images
+        run: |
+          # Only externally-pulled images (not the locally-built monitoring-*).
+          images=$(grep -oE 'image: [a-z0-9./:_-]+' docker-compose.yml             | awk '{print $2}'             | grep -vE '^(monitoring|gate_)'             | grep -v '^$'             | sort -u)
+          echo "Scanning: $images"
+          failures=0
+          for img in $images; do
+            echo "=== $img ==="
+            # digest-pinned images: Trivy scans by digest reference
+            if echo "$img" | grep -q '@sha256:'; then
+              # extract the plain name for scanning, pass digest separately
+              img_name="${img%%@*}"
+              trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed                 --no-progress "$img" 2>/dev/null || failures=$((failures+1))
+            else
+              trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed                 --no-progress "$img" 2>/dev/null || failures=$((failures+1))
+            fi
+          done
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::$failures image(s) have HIGH/CRITICAL CVEs."
+            exit 1
+          fi
+          echo "::notice::All external images clean."
