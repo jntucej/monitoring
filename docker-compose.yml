@@ -21,6 +21,10 @@ services:
       GATE_APP_PASSWORD: ${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD}}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Production hardening: disable log statement dumps (each DML statement
+      # is written to pg_log, filling the disk and leaking query text).
+      # The application maintains its own audit_logs table.
+      - ./compose/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s

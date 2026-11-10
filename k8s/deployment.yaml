@@ -65,9 +65,19 @@ spec:
       labels:
         app: gate-web
     spec:
+      serviceAccountName: gate-monitor-sa
+      automountServiceAccountToken: false
       containers:
       - name: web
         image: compose-web:latest
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         ports:
         - containerPort: 3000
           name: http
@@ -138,9 +148,18 @@ spec:
       labels:
         app: gate-worker
     spec:
+      serviceAccountName: gate-monitor-sa
+      automountServiceAccountToken: false
       containers:
       - name: worker
         image: compose-worker:latest
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         envFrom:
         - secretRef:
             name: gate-monitor-secrets
@@ -203,6 +222,9 @@ spec:
       containers:
       - name: postgres
         image: supabase/postgres:17.6.1.136
+        securityContext:
+          runAsUser: 999
+          allowPrivilegeEscalation: false
         ports:
         - containerPort: 5432
         env:
@@ -281,7 +303,12 @@ spec:
     spec:
       containers:
       - name: redis
-        image: redis:7-alpine
+        image: redis:7.4-alpine
+        securityContext:
+          runAsUser: 999
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
         command: ["redis-server", "--requirepass", "$(REDIS_PASSWORD)"]
         ports:
         - containerPort: 6379
@@ -348,3 +375,42 @@ spec:
             name: gate-web
             port:
               name: http
+
+---
+# ── RBAC hardening ──────────────────────────────────────────────────
+# Dedicated ServiceAccount with automountServiceAccountToken: false.
+# Least-privilege Role: read access ONLY to gate-monitor-secrets.
+# A pod token leak can no longer list/get arbitrary Secrets in the ns.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gate-monitor-sa
+  namespace: gate-monitor
+automountServiceAccountToken: false
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gate-monitor-secret-reader
+  namespace: gate-monitor
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["gate-monitor-secrets"]
+    verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gate-monitor-secret-reader-binding
+  namespace: gate-monitor
+subjects:
+  - kind: ServiceAccount
+    name: gate-monitor-sa
+    namespace: gate-monitor
+roleRef:
+  kind: Role
+  name: gate-monitor-secret-reader
+  apiGroup: rbac.authorization.k8s.io
