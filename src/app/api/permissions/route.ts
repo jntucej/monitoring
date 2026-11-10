@@ -313,6 +313,12 @@ async function handleGet(
   } else if (["hod", "faculty", "oie", "exam_branch", "exam_superintendent"].includes(role)) {
     params.push(auth.departmentId ?? "");
     where.push(`(workflow_type NOT IN ('staff_leave','memo') OR branch = $${params.length} OR branch IS NULL)`);
+    // HOD additionally: their workflow is scoped to the "hod" stage only —
+    // they must not read the exam or principal queues even when a ?stage=
+    // filter is omitted. admin/sysadmin/principal keep campus-wide visibility.
+    if (role === "hod") {
+      where.push(`current_stage IN ('hod','principal')`);
+    }
   } else if (["parent", "guardian"].includes(role)) {
     params.push(auth.userId);
     where.push(`(
