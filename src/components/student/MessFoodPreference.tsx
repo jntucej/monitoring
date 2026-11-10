@@ -41,6 +41,7 @@ interface MessMyPreference {
   primaryItem: string;
   willBePresent: boolean;
   subItemLabels: string[];
+  subItemIds?: string[];
 }
 
 interface MessMenuItem {
@@ -133,13 +134,18 @@ function MessFoodPreferenceInner() {
     if (p) {
       setPrimaryItem(p.primaryItem);
       setWillBePresent(p.willBePresent);
-      setSubItemIds([]); /* sub ids come from the POST payload; re-derive from labels below */
-      const available = preference.data.menuItems?.filter((i) => i.isAvailable) ?? [];
-      setSubItemIds(
-        (p.subItemLabels ?? [])
-          .map((label) => available.find((i) => i.label === label)?.id)
-          .filter((id): id is string => Boolean(id)),
-      );
+      if (p.subItemIds?.length) {
+        // API returns authoritative sub-item IDs — use them directly.
+        setSubItemIds(p.subItemIds);
+      } else {
+        // Fallback: derive from labels when subItemIds is absent (legacy response).
+        const available = preference.data.menuItems?.filter((i) => i.isAvailable) ?? [];
+        setSubItemIds(
+          (p.subItemLabels ?? [])
+            .map((label) => available.find((i) => i.label === label)?.id)
+            .filter((id): id is string => Boolean(id)),
+        );
+      }
     }
   }, [preference.data]);
 

@@ -59,15 +59,12 @@ export async function handleFalcoWebhook(payload, res) {
   }
 
   // 2. Isolate the container from the docker network.
-  //    This is reversible: `docker network connect gate-net <c>` restores it.
+  //    The worker image does not ship the docker CLI or a docker.sock mount,
+  //    so the isolation branch is a no-op here — the account lock + SEV-1
+  //    status row + Telegram alert still fire (account isolation works).
+  //    Container-level network isolation must be performed by the host-side
+  //    falco sidecar (gate_falco) or the operator manually.
   let isolated = false;
-  try {
-    const { execSync } = await import('node:child_process');
-    execSync(`docker network disconnect gate-net ${container}`, { timeout: 10_000 });
-    isolated = true;
-  } catch (err) {
-    console.error(`[soar] failed to isolate ${container}:`, err.message);
-  }
 
   // 3. Lock the triggering account (if a user is identified).
   let locked = false;

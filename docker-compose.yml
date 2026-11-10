@@ -62,6 +62,8 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      # Scrape token: write METRICS_SCRAPE_TOKEN to a 0644 file before docker compose up
+      - ./.metrics.token:/etc/prometheus/metrics.token:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'

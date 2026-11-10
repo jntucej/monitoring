@@ -19,3 +19,9 @@ scrape_configs:
     static_configs:
       - targets: ['gate_cadvisor:8080']
     metrics_path: '/metrics'
+
+  - job_name: 'gate_web'
+    static_configs:
+      - targets: ['gate_web:3000']
+    metrics_path: '/metrics'
+    bearer_token_file: /etc/prometheus/metrics.token

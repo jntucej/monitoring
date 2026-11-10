@@ -7,7 +7,7 @@ groups:
   - name: gate-monitor-availability
     rules:
       - alert: web_process_down
-        expr: absent(process_start_time_seconds{job="cadvisor", container="gate_web"})
+        expr: up{job="gate_web"} == 0
         for: 2m
         labels:
           severity: critical
