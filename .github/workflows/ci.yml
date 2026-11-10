@@ -143,7 +143,12 @@ jobs:
       - name: Check RLS Cross-Role Enforcement
         run: bash scripts/check-rls-enforcement.sh
         env:
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
+
+      - name: Check RLS FORCE (owner bypass closed)
+        run: bash scripts/check-rls-force.sh
+        env:
+          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
 
       - name: Run Jest Test Suite
         run: npm run test:gate:ci
