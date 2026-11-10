@@ -218,6 +218,13 @@ export class GateMonitorWS {
     this.sseRetryAttempts = 0;
 
     const sseUrl = this.url.replace(/^ws:\/\//i, 'http://').replace(/^wss:\/\//i, 'https://');
+    // Standard EventSource cannot set an Authorization header. /api/gate/stream
+    // resolves identity via the httpOnly access_token cookie (see
+    // bearer() in src/middleware/authorization.ts), which the browser sends
+    // automatically for same-origin requests — so no extra work is needed
+    // here. The previous 401 storm came from EventSource being opened from a
+    // cross-origin context where the cookie was not attached; that is
+    // handled by the PUBLIC_ROUTE guard in GlassContext.
     const eventSource = new EventSource(sseUrl);
 
     eventSource.onopen = () => {

@@ -64,7 +64,7 @@ function credsFor(role: string): Creds | undefined {
   return creds.find((c) => c.role === role);
 }
 
-async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?: string): Promise<"mfa" | boolean> {
+async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?: string): Promise<"mfa" | "login-failed" | "still-logged-in" | "password-rotation-stuck" | boolean> {
   const page = await ctx.newPage();
   try {
     // Pre-seed the client-side auth store so a reloaded page rehydrates:
@@ -97,8 +97,12 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
       return "mfa";
     }
     if (!res.ok() || !body?.data?.token) {
+      const code = body?.error?.code;
+      // Distinct codes so a stale credential (PASSWORD_CHANGE_REQUIRED →
+      // rotation stuck) is not conflated with a bad password.
+      const reason = code === "PASSWORD_CHANGE_REQUIRED" ? "password-rotation-stuck" : "login-failed";
       console.log(`[DEBUG] login ${role}: status=${res.status()} error=${JSON.stringify(body?.error) ?? JSON.stringify(body).slice(0, 200)}`);
-      return false;
+      return reason;
     }
     const { user } = body.data;
     void user;
@@ -215,7 +219,7 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     }
     if (landed.includes("/login")) {
       console.log(`[DEBUG] login ${role}: still on /login url=${landed}`);
-      return false;
+      return "still-logged-in";
     }
     // A mandatory-password-change interstitial is a SUCCESSFUL login for
     // admin-set credentials: the sweep rotates the credential here so it
@@ -241,7 +245,7 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
         const after = page.url();
         if (after.includes("/settings/password")) {
           console.log(`[DEBUG] login ${role}: password rotation did not complete url=${after}`);
-          return false;
+          return "password-rotation-stuck";
         }
         // Persist the rotated password so subsequent runs don't re-hit the
         // interstitial.
@@ -368,9 +372,10 @@ async function main() {
       await ctx.close();
       continue;
     }
-    if (!logged) {
+    if (logged === false || logged === "login-failed" || logged === "password-rotation-stuck" || logged === "still-logged-in") {
+      const errLabel = logged === false ? "login-failed" : logged;
       for (const leaf of [inv.root, ...inv.leaves]) {
-        report.push({ role: inv.role, leaf, status: "broken", errors: ["login-failed"], apiFailures: [], consoleErrors: [] });
+        report.push({ role: inv.role, leaf, status: "broken", errors: [errLabel], apiFailures: [], consoleErrors: [] });
       }
       await ctx.close();
       continue;

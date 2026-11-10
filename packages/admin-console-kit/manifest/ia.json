@@ -128,11 +128,6 @@
       "order": 4,
       "pages": [
         {
-          "label": "Gate Devices",
-          "href": "/admin/gates",
-          "icon": "QrCode"
-        },
-        {
           "label": "Occupancy & Twin",
           "href": "/admin/occupancy",
           "icon": "MapPin"

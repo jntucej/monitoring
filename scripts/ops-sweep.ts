@@ -77,7 +77,9 @@ const OPS: Record<
       { m: "GET", p: "/api/supervisor/shift", label: "shift status" },
       { m: "GET", p: "/api/gates", label: "gates list" },
     ],
-    negative: [{ p: "/api/supervisor/shift", m: "GET", label: "supervisor shift (must 403)" }],
+    // Supervisor's own shift endpoint is allowed — the negative target must
+    // be an endpoint that requires a role supervisor does NOT hold.
+    negative: [{ p: "/api/admin/health/full", m: "GET", label: "admin health (must 403)" }],
   },
   staff: {
     pages: ["/staff", "/staff/my-day", "/staff/requests"],

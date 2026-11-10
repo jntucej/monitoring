@@ -54,7 +54,7 @@ services:
 
   # Prometheus + cAdvisor for real container metrics
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.1.0
     container_name: gate_prometheus
     restart: always
     ports:
@@ -348,7 +348,7 @@ services:
       - gate-net
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2025.9.1
     container_name: gate_cloudflared
     restart: always
     # Single, token-managed model. The TUNNEL_TOKEN is the credential (no local
@@ -370,7 +370,7 @@ services:
       - no-new-privileges:true
 
   alertmanager:
-    image: prom/alertmanager:latest
+    image: prom/alertmanager:v0.28.1
     container_name: gate_alertmanager
     restart: always
     volumes:

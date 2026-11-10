@@ -202,7 +202,7 @@ services:
       - gate-net
 
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    image: cloudflare/cloudflared:2025.9.1
     container_name: gate_cloudflared
     restart: always
     env_file: [.env]

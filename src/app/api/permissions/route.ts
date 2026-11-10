@@ -288,6 +288,17 @@ async function handleGet(
     }
   }
 
+  // If a ?stage= filter is supplied, restrict it to stages the caller's role
+  // may act on. Without this, hod (STAGES_BY_ROLE["hod"]=["hod"]) could
+  // pass ?stage=principal and read the principal queue — a cross-role
+  // information leak. Roles absent from STAGES_BY_ROLE get no stage filter.
+  if (stage) {
+    const myStages = STAGES_BY_ROLE[role];
+    if (myStages && !myStages.includes(stage)) {
+      return fail("FORBIDDEN", "Stage not permitted for this role", 403);
+    }
+  }
+
   if (["admin", "sysadmin"].includes(role)) {
     // see everything
   } else if (["principal", "vice_principal"].includes(role)) {
