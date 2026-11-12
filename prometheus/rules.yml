@@ -55,14 +55,19 @@ groups:
           summary: "More than 5% of HTTP requests returning 5xx"
           description: "Web container error rate above 5% over 5 minutes."
 
-      - alert: worker_process_down
-        expr: absent(process_start_time_seconds{job="cadvisor", container="gate_worker"})
+      # D6: cAdvisor's per-container process metrics are unreliable across
+      # kernel versions (the gate_worker container was frequently absent
+      # from the cadvisor scrape even while running). Use the /health
+      # endpoint instead: a healthy process answers 200; a dead process
+      # returns 000 (connection refused) → up==0 after 2m.
+      - alert: worker_http_health_down
+        expr: up{job="gate_worker"} == 0
         for: 2m
         labels:
           severity: critical
         annotations:
-            summary: "gate_worker process not visible in cAdvisor"
-            description: "The worker container has exited or is not exposing process metrics — notification/SMS dispatch is halted."
+            summary: "gate_worker /health endpoint not responding"
+            description: "The worker container has exited or its HTTP listener (port 3001) is down — notification/SMS dispatch is halted."
 
   # Batch I3: SLO error-budget burn-rate alerts.
   # The SLO snapshot job (worker/jobs/slo_snapshot.js) records the actual
@@ -94,5 +99,20 @@ groups:
         annotations:
           summary: "5xx burn rate is >100× the 99.9% budget"
           description: "The SLO is being consumed fast enough to exhaust the 30-day budget in hours."
+
+  - name: gate-monitor-auth
+    rules:
+      # A non-zero refresh_reuse_detected_total in a 5-minute window means a
+      # stolen refresh token was re-presented outside the grace window. The
+      # session family is already revoked by the handler; this alert pages
+      # the operator so the incident is investigated.
+      - alert: RefreshReuseDetected
+        expr: refresh_reuse_detected_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Refresh-token reuse detected in last 5 minutes"
+          description: "{{ $value }} REFRESH_REUSE_DETECTED event(s). The session family was revoked automatically. Review audit_logs for details."
 
 

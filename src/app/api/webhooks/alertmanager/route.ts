@@ -47,7 +47,10 @@ function verifyAlertmanagerToken(req: NextRequest): NextResponse | null {
     );
   }
 
-  const supplied = req.headers.get("x-alertmanager-token") ?? "";
+  const supplied =
+    req.headers.get("x-alertmanager-token") ??
+    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    "";
   if (
     supplied.length !== expected.length ||
     !timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))

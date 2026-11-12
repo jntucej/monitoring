@@ -7,7 +7,11 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-MemoryHigh=4G
+# Per-service mem_limits in compose: postgres 2g + redis 512m + web 1g +
+# worker 512m + prometheus 512m + cadvisor 256m + alertmanager 128m +
+# falco 512m + llm-proxy 256m = ~6.1GiB peak. The old 4G/6G cap OOM-killed
+# containers on any cadvisor scrape spike.
+MemoryHigh=5G
 MemoryMax=6G
 CPUQuota=200%
 IOWeight=100
@@ -15,10 +19,10 @@ TasksMax=4096
 KillMode=control-group
 Restart=on-failure
 RestartSec=15
-WorkingDirectory=/opt/monitoring/compose
-ExecStart=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
-ExecStop=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env down
-ExecReload=/usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env pull && /usr/bin/docker compose --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
+WorkingDirectory=/opt/monitoring
+ExecStart=/usr/bin/docker compose --project-directory /opt/monitoring --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
+ExecStop=/usr/bin/docker compose --project-directory /opt/monitoring --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env down
+ExecReload=/usr/bin/docker compose --project-directory /opt/monitoring --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env pull && /usr/bin/docker compose --project-directory /opt/monitoring --file /opt/monitoring/compose/docker-compose.yml --env-file /opt/monitoring/env/production.env up -d --remove-orphans
 TimeoutStartSec=300
 TimeoutStopSec=60
 

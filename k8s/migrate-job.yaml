@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gate-migrate
+  namespace: gate-monitor
+  labels:
+    app: gate-monitor
+    job-name: gate-migrate
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: gate-monitor
+        job-name: gate-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: compose-web:latest
+          command: ["npx", "tsx", "scripts/migrate.ts"]
+          workingDir: /app
+          envFrom:
+            - secretRef:
+                name: gate-monitor-secrets
+            - configMapRef:
+                name: gate-monitor-config
+          env:
+            - name: PGOPTIONS
+              value: "-c gate.app_password=$(GATE_APP_PASSWORD)"
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

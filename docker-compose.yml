@@ -25,6 +25,10 @@ services:
       # is written to pg_log, filling the disk and leaking query text).
       # The application maintains its own audit_logs table.
       - ./compose/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
+      # D4: pgaudit extension config (installed by 03b-harden.sh). The
+      # postgresql.conf above must carry `include_dir = 'conf.d'` for this
+      # to take effect — add that line in compose/postgres/postgresql.conf.
+      - ./pgaudit.conf:/var/lib/postgresql/conf.d/pgaudit.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s
@@ -61,6 +65,9 @@ services:
     image: prom/prometheus:v3.1.0
     container_name: gate_prometheus
     restart: always
+    cpu_shares: 768
+    # Long-run resilience: TSDB growth is the main memory pressure; cap it.
+    mem_limit: 512m
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
@@ -91,6 +98,9 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.51.0
     container_name: gate_cadvisor
     restart: always
+    cpu_shares: 384
+    # First scrape touches 200–300 MB; cap it so a spike can't OOM the host.
+    mem_limit: 256m
     privileged: true
     volumes:
       - /:/rootfs:ro
@@ -139,6 +149,13 @@ services:
       # gate_app credential so bootstrap/migrations can set the role password
       # (P0-1): the GUC is read by 20261010120000_create_app_role.sql.
       - GATE_APP_PASSWORD=${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD}}
+      # Expose the password to migration SQL via a GUC. Do NOT rely on
+      # `psql --set` variables: current_setting() inside migration SQL can
+      # only see server GUCs, not psql client variables. The migration
+      # (20261010120000_create_app_role.sql) reads gate.app_password and
+      # REFUSES to fall back to the well-known 'postgres' password when it
+      # is unset.
+      - PGOPTIONS=-c gate.app_password=${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD}}
     depends_on:
       postgres:
         condition: service_healthy
@@ -257,6 +274,8 @@ services:
     image: node:20-alpine
     container_name: gate_llm_proxy
     restart: always
+    cpu_shares: 384
+    mem_limit: 256m
     ports:
       - "127.0.0.1:8080:8080"
     extra_hosts:
@@ -324,11 +343,16 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+      - /app/.cache
     # DR §7: the worker writes the last-known-good status snapshot here every
     # 60s. Caddy serves it read-only at /status as the fallback when web is
     # down. Without this mount the static page can only show the seed value.
+    # C1: docker socket (read-only) so the worker can run `docker inspect`
+    # and `docker restart` for auto-heal / infra-snapshot jobs without a
+    # host-filesystem bind mount.
     volumes:
       - status_data:/usr/share/status
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
@@ -353,10 +377,24 @@ services:
     networks:
       - gate-net
 
+  # D1: host-mode (systemd/cloudflared-gate-monitor.service) is the
+  # recommended path. This container only runs when explicitly requested
+  # with `--profile compose`; the default `docker compose up` skips it.
   cloudflared:
     image: cloudflare/cloudflared@sha256:4604b477520dc8322af5427da68b44f0bf814938e9d2e4814f2249ee4b03ffdf
     container_name: gate_cloudflared
     restart: always
+    profiles: ["compose"]
+    # D1: This service is the container-mode tunnel. The host-mode tunnel
+    # (systemd/cloudflared-gate-monitor.service) and this one fight for the
+    # same Cloudflare tunnel token when both are enabled. Pick ONE path:
+    #   - Host-mode (recommended): enable cloudflared-gate-monitor.service,
+    #     and add `profiles: [compose]` to the cloudflared service so it is
+    #     not created under the default profile. The host-mode tunnel is more
+    #     operationally robust: it starts before Docker, so a
+    #     `docker compose down` does not take the public hostname down.
+    #   - Container-mode: disable the systemd unit and keep this service.
+    #     The tunnel is only up while the container is running.
     # Run as non-root uid 444 (cloudflared's UID inside the image) so the
     # tunnel process cannot read root-owned host files if the container is
     # compromised. cap_drop ALL + no-new-privileges makes escalation impossible.
@@ -383,8 +421,14 @@ services:
     image: prom/alertmanager:v0.28.1
     container_name: gate_alertmanager
     restart: always
+    cpu_shares: 192
+    mem_limit: 128m
     volumes:
       - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      # Bearer token sent with every webhook call (mounted from
+      # ./.alertmanager-token at the project root; created by 02-prepare.sh).
+      # Without it the alertmanager webhook 503s — fail loudly at up-time.
+      - ./.alertmanager-token:/etc/alertmanager/alertmanager-token:ro
       - alertmanager_data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
@@ -408,6 +452,8 @@ services:
     image: falcosecurity/falco-no-driver:0.41.0
     container_name: gate_falco
     restart: always
+    cpu_shares: 768
+    mem_limit: 512m
     privileged: true
     pid: host
     volumes:
@@ -426,6 +472,27 @@ services:
     environment:
       HOST_ROOT: /host
     networks: [gate-net]
+
+  # D6: host metrics for Prometheus filesystem/disk alerts. cAdvisor only
+  # sees container metrics; the host-level disk alerts in rules.yml
+  # (node_filesystem_avail_bytes) need this.
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: gate_node_exporter
+    restart: always
+    cpu_shares: 192
+    mem_limit: 64m
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks: [monitoring-net]
 
 volumes:
   pgdata:

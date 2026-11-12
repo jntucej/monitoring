@@ -19,12 +19,21 @@ receivers:
   # Alertmanager carries in the payload (payload.receiver), and the web
   # hook routes critical vs warning to the correct Telegram chat
   # (TELEGRAM_CRITICAL_CHAT_ID vs TELEGRAM_CHAT_ID).
+  #
+  # Every webhook call carries a Bearer token (mounted from
+  # ./.alertmanager-token — created by 02-prepare.sh). The web hook's
+  # verifyAlertmanagerToken() accepts either this Bearer header or the
+  # legacy x-alertmanager-token header. Without the token the hook 503s,
+  # so a missing token file fails loudly at up-time, not mid-scrape.
   - name: telegram
     webhook_configs:
       - url: 'http://web:3000/api/webhooks/alertmanager'
         send_resolved: true
         http_config:
           follow_redirects: false
+          authorization:
+            type: Bearer
+            credentials_file: /etc/alertmanager/alertmanager-token
 
   - name: telegram-critical
     webhook_configs:
@@ -32,3 +41,6 @@ receivers:
         send_resolved: true
         http_config:
           follow_redirects: false
+          authorization:
+            type: Bearer
+            credentials_file: /etc/alertmanager/alertmanager-token

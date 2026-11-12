@@ -12,7 +12,17 @@ DECLARE
   app_pass TEXT;
   psw_clause TEXT;
 BEGIN
-  app_pass := coalesce(nullif(current_setting('gate.app_password', true), ''), 'postgres');
+  -- The password MUST arrive via the gate.app_password GUC (set by
+  -- PGOPTIONS in the compose migrate service or scripts/db-bootstrap.sh).
+  -- Refuse to silently create/alter gate_app with the well-known
+  -- 'postgres' password: that was the root cause of the "gate_app
+  -- password never matches" finding — the migration's 'postgres'
+  -- fallback silently desynced from GATE_APP_PASSWORD in DATABASE_URL.
+  app_pass := nullif(current_setting('gate.app_password', true), '');
+  IF app_pass IS NULL THEN
+    RAISE EXCEPTION
+      'gate.app_password GUC is not set. Refusing to create gate_app with the well-known ''postgres'' password. Set PGOPTIONS=-c gate.app_password=<secret> (see compose migrate service) or run scripts/rotate-db-creds.sh.';
+  END IF;
   psw_clause := 'PASSWORD ' || quote_literal(app_pass);
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gate_app') THEN
     EXECUTE 'CREATE ROLE gate_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT LOGIN ' || psw_clause;

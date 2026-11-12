@@ -27,7 +27,15 @@ Type=simple
 User=root
 WorkingDirectory=/opt/monitoring/compose
 EnvironmentFile=/opt/monitoring/compose/.env
-# Command reads config.yml and credentials from the compose directory
+# Command reads config.yml and credentials from the compose directory.
+#
+# D1: Host-mode cloudflared CANNOT reach `caddy:80` or `web:3000` — those
+# are Docker-internal hostnames that only exist inside the compose network.
+# The compose file already publishes Caddy at 127.0.0.1:80 and the web
+# container is reachable through Caddy on that same port. The host-mode
+# tunnel therefore points at 127.0.0.1:80 (Caddy's published port), not
+# at the Docker DNS names. The .env file's CLOUDFLARE_TUNNEL_TOKEN must
+# still be present for the CLI to authenticate.
 ExecStart=/usr/local/bin/cloudflared \
   --config /opt/monitoring/compose/cloudflared/config.yml \
   --no-autoupdate \

@@ -9,6 +9,7 @@ ENVIRONMENT=${1:-production}
 SERVER_HOST="192.168.1.36"
 SSH_KEY="$HOME/.ssh/myrepo_deploy"
 REMOTE_DIR="/opt/monitoring/compose"
+BASE_DIR="/opt/monitoring"
 
 echo "=== Manual Deploy Script ==="
 echo "Environment: $ENVIRONMENT"
@@ -46,9 +47,9 @@ echo ""
 # Step 3: Build and deploy
 echo "=== Step 3: Build and Deploy ==="
 ssh -o ConnectTimeout=300 -o StrictHostKeyChecking=no -i "$SSH_KEY" root@"$SERVER_HOST" "
-  cd $REMOTE_DIR
-  docker compose build web --no-cache
-  docker compose up -d --remove-orphans
+  cd $BASE_DIR
+  docker compose --project-directory $BASE_DIR -f $REMOTE_DIR/docker-compose.yml build web --no-cache
+  docker compose --project-directory $BASE_DIR -f $REMOTE_DIR/docker-compose.yml up -d --remove-orphans
   
   echo 'Waiting for healthy...'
   for i in \$(seq 1 30); do

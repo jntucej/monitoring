@@ -50,6 +50,19 @@ async function handleGet(_req: NextRequest) {
     lines.push(`api_status_codes{status="${r.status_code}"} ${r.count}`);
   }
 
+  // Refresh-token reuse detection: count of REFRESH_REUSE_DETECTED audit
+  // rows in the last 5 minutes. The Prometheus alert fires on any nonzero
+  // value — a stolen refresh token re-presented outside the grace window.
+  const { rows: reuseRows } = await query(
+    `SELECT COUNT(*)::int AS n FROM public.audit_logs
+      WHERE action = 'REFRESH_REUSE_DETECTED'
+        AND created_at > NOW() - INTERVAL '5 minutes'`
+  ).catch(() => ({ rows: [{ n: 0 }] as Array<{ n: number }> }));
+  const reuseCount = Number((reuseRows as Array<{ n: number }>)[0]?.n ?? 0);
+  lines.push("# HELP refresh_reuse_detected_total Refresh-token reuse events (last 5m)");
+  lines.push("# TYPE refresh_reuse_detected_total gauge");
+  lines.push(`refresh_reuse_detected_total ${reuseCount}`);
+
   return new NextResponse(lines.join("\n") + "\n", {
     status: 200,
     headers: { "Content-Type": "text/plain; version=0.0.4" },

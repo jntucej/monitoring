@@ -2,7 +2,12 @@
 # Auto-poll GitHub for changes and deploy
 # Runs on server, initiates outbound connection (works through NAT/firewall)
 
-REPO_DIR="/opt/monitoring/compose"
+BASE_DIR="/opt/monitoring"
+DEPLOY_DIR="${BASE_DIR}"
+REPO_DIR="${BASE_DIR}/compose"
+ENV_FILE="${BASE_DIR}/env/production.env"
+COMPOSE=(docker compose --project-directory "${BASE_DIR}" \
+         -f "${REPO_DIR}/docker-compose.yml" --env-file "${ENV_FILE}")
 LOG_FILE="/var/log/gate-monitor-deploy.log"
 CHECK_INTERVAL=300  # 5 minutes
 
@@ -43,13 +48,17 @@ while true; do
             continue
         }
         
+        # C3: rsync the WHOLE tree (not just src/). The compose bind mounts,
+        # migration SQL, and scripts all resolve against ${DEPLOY_DIR}, so
+        # deploying only src/ against stale migrations/compose is worse
+        # than not deploying at all.
         rsync -av --delete \
             --exclude='.git' --exclude='node_modules' --exclude='.next' \
             --exclude='.env' --exclude='.env.*' \
-            src/ /opt/monitoring/compose/src/ >> "$LOG_FILE" 2>&1
-        
-        docker compose build web --no-cache >> "$LOG_FILE" 2>&1
-        docker compose up -d --remove-orphans >> "$LOG_FILE" 2>&1
+            "$REPO_DIR/" "$DEPLOY_DIR/" >> "$LOG_FILE" 2>&1
+
+        "${COMPOSE[@]}" build web --no-cache >> "$LOG_FILE" 2>&1
+        "${COMPOSE[@]}" up -d --remove-orphans >> "$LOG_FILE" 2>&1
         
         # Wait for healthy
         for i in $(seq 1 30); do

@@ -33,3 +33,18 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 echo "✓ Credential rotation completed successfully."
+
+# Containers cache the env/credentials at start; force a rolling restart so
+# every replica picks up the new secret atomically-ish and we don't leave
+# sessions signed with old keys verifying against new keys (or vice versa).
+BASE_DIR="${BASE_DIR:-/opt/monitoring}"
+COMPOSE=(docker compose --project-directory "$BASE_DIR" \
+         -f "$BASE_DIR/compose/docker-compose.yml" --env-file "$BASE_DIR/env/production.env")
+
+echo "==> Rolling-restarting web + worker to pick up new secret…"
+"${COMPOSE[@]}" up -d --force-recreate --no-deps web worker
+for i in $(seq 1 30); do
+  S=$(docker inspect --format='{{.State.Health.Status}}' gate_web 2>/dev/null || echo unknown)
+  [ "$S" = "healthy" ] && { echo "   web healthy after rotation"; break; }
+  sleep 2
+done
