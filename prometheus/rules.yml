@@ -100,4 +100,19 @@ groups:
           summary: "5xx burn rate is >100× the 99.9% budget"
           description: "The SLO is being consumed fast enough to exhaust the 30-day budget in hours."
 
+  - name: gate-monitor-auth
+    rules:
+      # A non-zero refresh_reuse_detected_total in a 5-minute window means a
+      # stolen refresh token was re-presented outside the grace window. The
+      # session family is already revoked by the handler; this alert pages
+      # the operator so the incident is investigated.
+      - alert: RefreshReuseDetected
+        expr: refresh_reuse_detected_total > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Refresh-token reuse detected in last 5 minutes"
+          description: "{{ $value }} REFRESH_REUSE_DETECTED event(s). The session family was revoked automatically. Review audit_logs for details."
+
 
