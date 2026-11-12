@@ -44,14 +44,18 @@ if docker ps --format '{{.Names}}' | grep -q "^gate_postgres$"; then
 # on the backup volume; if < 20% free, prune the oldest backups beyond the
 # retention floor (keeping at least 3 days), then re-check. If still < 5%,
 # refuse the dump and escalate — a full disk is Tier 3, not a silent failure.
+# Free-space guard: refuse to run rather than delete recent backups.
 AVAIL_PCT=$(df --output=pcent "$BACKUP_ROOT" 2>/dev/null | tail -1 | tr -d ' %' || echo 0)
-if [ "$AVAIL_PCT" -gt 80 ]; then
-  find "$BACKUP_ROOT" -name "gate-db-*.sql.gz" -mtime +3 -delete 2>/dev/null || true
-  AVAIL_PCT=$(df --output=pcent "$BACKUP_ROOT" 2>/dev/null | tail -1 | tr -d ' %' || echo 0)
-fi
 if [ "$AVAIL_PCT" -gt 95 ]; then
-  echo "🚨 Backup volume ${AVAIL_PCT}% full after prune — backup skipped (Tier 3)" | tee -a "$LOG"
+  log "REFUSING backup: volume ${AVAIL_PCT}% full. Raise disk or rotate off-host; recent backups are the ones you need most."
   exit 1
+fi
+if [ "$AVAIL_PCT" -gt 85 ]; then
+  # Only prune backups OLDER THAN 7 DAYS, and never the newest one.
+  NEWEST=$(find "$BACKUP_ROOT" -name "gate-db-*.sql.gz" -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -1 | cut -d' ' -f2-)
+  find "$BACKUP_ROOT" -name "gate-db-*.sql.gz" -mtime +7 ! -path "$NEWEST" -delete 2>/dev/null || true
+  AVAIL_PCT=$(df --output=pcent "$BACKUP_ROOT" 2>/dev/null | tail -1 | tr -d ' %' || echo 0)
+  [ "$AVAIL_PCT" -gt 95 ] && { log "REFUSING backup: still ${AVAIL_PCT}% full after 7d prune"; exit 1; }
 fi
 echo "{"job":"backup","status":"started","avail_pct":$AVAIL_PCT,"at":"$(date -Iseconds)"}" >> "$BACKUP_ROOT/.heartbeat.jsonl"
 DB_DUMP="$BACKUP_ROOT/gate-db-$TIMESTAMP.sql.gz"
@@ -136,15 +140,19 @@ tar cf "$COMPOSE_BACKUP" -C "$BASE" docker-compose.yml Caddyfile .env 2>/dev/nul
 tar cf "$COMPOSE_BACKUP" -C "$BASE/compose" docker-compose.yml Caddyfile .env 2>/dev/null || true
 log "✓ Compose config archived"
 
-# 4b. Backup user uploads (complaint attachments, gate passes, sign docs)
-UPLOADS_DIR="$BASE/data/uploads"
-if [ ! -d "$UPLOADS_DIR" ] && [ -d "/root/monitoring/data/uploads" ]; then
-    UPLOADS_DIR="/root/monitoring/data/uploads"
-fi
-if [ -d "$UPLOADS_DIR" ]; then
+# 4b. Backup user uploads — they live in the compose volume `uploads_data`
+# (NOT $BASE/data/uploads, which is a stale bind path). Archive straight
+# from the volume so the bind-mount path is irrelevant.
+UPLOADS_VOL="$(docker volume ls --format '{{.Name}}' | grep -E '(^|_)uploads_data$' | head -1)"
+if [ -n "$UPLOADS_VOL" ]; then
     UPLOADS_BACKUP="$BACKUP_ROOT/uploads-$TIMESTAMP.tar.gz"
-    tar czf "$UPLOADS_BACKUP" -C "$UPLOADS_DIR" . 2>/dev/null || true
-    log "✓ User uploads archived: $(ls -lh "$UPLOADS_BACKUP" 2>/dev/null | awk '{print $5}' || echo '0B')"
+    docker run --rm \
+      -v "${UPLOADS_VOL}:/u:ro" \
+      -v "$(dirname "$BACKUP_ROOT"):/b" \
+      alpine:3.20 \
+      sh -c "cd /u && tar czf /b/$(basename "$UPLOADS_BACKUP") ." \
+      && log "✓ User uploads archived: $(ls -lh "$UPLOADS_BACKUP" 2>/dev/null | awk '{print $5}')" \
+      || log "⚠️  User uploads archive FAILED (volume ${UPLOADS_VOL})"
 fi
 
 # 5. Clean old backups.

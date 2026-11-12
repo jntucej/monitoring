@@ -38,10 +38,10 @@ cat > /etc/cron.d/gate-backup <<EOF
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-# Full backup every hour — RPO target is 1h (RUNBOOK.md). The 6h cadence
-# gave RPO of up to 6h; hourly dumps close that gap. master-backup.sh's
-# free-space pre-check keeps the volume from filling up.
-0 * * * *     root  bash ${BASE_DIR}/scripts/master-backup.sh >> ${BASE_DIR}/backups/cron.log 2>&1
+# Hourly logical dumps are excessive and the >80% prune eats the newest
+# ones. Run one full backup nightly; the hard retention floor in
+# master-backup.sh keeps every backup from the last 7 days unconditionally.
+0 2 * * *     root  bash ${BASE_DIR}/scripts/master-backup.sh >> ${BASE_DIR}/backups/cron.log 2>&1
 
 # Restore-test the latest backup nightly at 03:15. On a non-zero exit
 # (failed restore drill) notify the operator directly — a failed backup

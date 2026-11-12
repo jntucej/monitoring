@@ -39,6 +39,10 @@ notify() {
 # 1. Check Docker daemon
 if ! systemctl is-active --quiet docker; then
   log "CRITICAL: Docker daemon inactive! Restarting..."
+  notify "🚨 *Docker Daemon Inactive* — Auto-restarting docker service..."
+  systemctl restart docker
+  sleep 5
+fi
 
 # Tier 1b circuit breaker: if the same container restarts 3+ times within
 # 30 minutes, stop restarting and escalate — an infinite restart loop on a
@@ -65,10 +69,6 @@ cb_check() { # cb_check <container> -> returns 0 if restart allowed, 1 if trippe
   echo "$((count+1)):$now" > "$f"
   return 0
 }
-  notify "🚨 *Docker Daemon Inactive* — Auto-restarting docker service..."
-  systemctl restart docker
-  sleep 5
-fi
 
 # 2. Check each core container
 CONTAINERS=("gate_postgres" "gate_redis" "gate_llm_proxy" "gate_web" "gate_worker" "gate_caddy")

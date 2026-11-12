@@ -6,9 +6,13 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=gate-monitor
-WorkingDirectory=/opt/monitoring/compose
+# D3: run from ${BASE_DIR}, not ${BASE_DIR}/compose. The compose-relative
+# bind mounts only resolve when the compose file is at the project root;
+# the heal script's own compose invocations use --project-directory, so
+# WorkingDirectory just needs to be the deploy root.
+WorkingDirectory=/opt/monitoring
 EnvironmentFile=/etc/gate-monitor/gate-monitor.env
-ExecStart=/bin/bash /opt/monitoring/compose/scripts/auto-heal-agent.sh
+ExecStart=/bin/bash /opt/monitoring/scripts/auto-heal-agent.sh
 Restart=always
 RestartSec=10
 StandardOutput=journal

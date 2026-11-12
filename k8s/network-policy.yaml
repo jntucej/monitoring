@@ -36,6 +36,10 @@ spec:
         - podSelector:
             matchLabels:
               app: gate-worker
+        # D5: the one-shot migration Job also needs postgres access.
+        - podSelector:
+            matchLabels:
+              job-name: gate-migrate
       ports:
         - protocol: TCP
           port: 5432

@@ -29,6 +29,18 @@ docker compose --env-file "${ENV_FILE}" exec -T postgres \
 }
 echo "✅ PostgreSQL auth verified for gate_app user."
 
+# Prove TCP auth works with the actual configured password. The check above
+# uses the unix socket (trusted auth), which cannot catch the
+# current_setting()/psql-var mismatch between the migration and
+# DATABASE_URL — a wrong gate_app password passes socket auth but fails TCP.
+GATE_APP_PASSWORD="${GATE_APP_PASSWORD:-$(grep -E '^GATE_APP_PASSWORD=' "${ENV_FILE}" | head -1 | cut -d= -f2- || true)}"
+docker compose --project-directory "${BASE_DIR}" --env-file "${ENV_FILE}" exec -T -e PGPASSWORD="${GATE_APP_PASSWORD}" postgres \
+  psql -h 127.0.0.1 -U gate_app -d gate_monitor -c "SELECT 1" >/dev/null || {
+  echo "❌ gate_app TCP auth with the configured password FAILED — mismatch between migration and DATABASE_URL."
+  exit 1
+}
+echo "✅ gate_app TCP auth verified with configured password."
+
 echo "==> 3. Verifying Redis Health..."
 docker compose --env-file "${ENV_FILE}" exec -T redis redis-cli ping || {
   echo "❌ Redis ping failed."

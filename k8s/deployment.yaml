@@ -116,10 +116,21 @@ spec:
         volumeMounts:
         - name: uploads-storage
           mountPath: /app/data/uploads
+        # D5: web runs with readOnlyRootFilesystem; /tmp and /app/.cache
+        # must be writable for node_modules native bindings and Next.js
+        # page-data cache.
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/.cache
       volumes:
       - name: uploads-storage
         persistentVolumeClaim:
           claimName: gate-uploads-pvc
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
 
 ---
 apiVersion: v1

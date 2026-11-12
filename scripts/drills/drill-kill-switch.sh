@@ -21,6 +21,19 @@
 DRILL_ID="kill-switch"
 source "$(cd "$(dirname "$0")" && pwd)/_lib.sh"
 
+# C2 — re-enable trap: if the drill dies (INT TERM or unhandled exit) while
+# auto_* switches are still engaged, re-enable them and record the outcome.
+# Without this, a kill-switch failure leaves every automation permanently
+# disabled until a human runs scripts/rotate-db-creds.sh manually.
+rearm_on_exit() {
+  local rc=$?
+  if psql_admin "SELECT 1 FROM automation_controls WHERE enabled=FALSE AND name LIKE 'auto_%' AND name<>'auto_heal_enabled' LIMIT 1" >/dev/null 2>&1; then
+    psql_admin "UPDATE automation_controls SET enabled=TRUE, reason='drill-kill-switch auto-restore on exit ($rc)' WHERE name LIKE 'auto_%' AND name<>'auto_heal_enabled'" >/dev/null 2>&1 || true
+    write_evidence "fail" "{\"reason\":\"auto-restore triggered\",\"rc\":$rc}" || true
+  fi
+}
+trap rearm_on_exit EXIT INT TERM
+
 require_prod_ok
 
 SYSADMIN_1="${DRILL_SYSADMIN_TOKEN_1:-}"

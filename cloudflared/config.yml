@@ -13,11 +13,17 @@
 # See RUNBOOK.md § "Cloudflare Tunnel (token-managed)" for the lifecycle.
 
 # Ingress rules. Order matters: first match wins.
+#
+# D1: Both hostnames route to Caddy's published port (127.0.0.1:80).
+# Caddy already forwards /api/* and the app routes to web:3000 internally.
+# hooks.cej.in (Resend bounce/complaint webhooks) also lands on Caddy,
+# which forwards /api/webhooks/* to web:3000. Pointing directly at
+# web:3000 would bypass Caddy's TLS termination and rate-limit middleware.
 ingress:
   - hostname: monitor.cej.in
-    service: http://caddy:80
+    service: http://127.0.0.1:80
   - hostname: hooks.cej.in
-    service: http://web:3000
+    service: http://127.0.0.1:80
   # Catch-all: return a clean 404 from cloudflared itself rather than
   # forwarding to a dead service. Prevents accidental exposure of
   # internal hostnames and avoids the 502 that an unreachable
