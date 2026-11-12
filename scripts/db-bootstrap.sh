@@ -15,11 +15,15 @@ cd "$(dirname "$0")/.."
 GATE_APP_PASSWORD="${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD:-postgres}}"
 URL="${DATABASE_URL:-postgres://postgres:***@localhost:5432/gate_monitor}"
 
-psql_exec() { command psql "$URL" -v ON_ERROR_STOP=1 "$@"; }
+psql_exec() {
+  # Pass the gate_app credential as a server GUC (PGOPTIONS), NOT a psql
+  # client variable: current_setting() inside bootstrap SQL only sees
+  # server GUCs. --set creates a psql variable that the SQL cannot read.
+  PGOPTIONS="-c gate.app_password=${GATE_APP_PASSWORD}" command psql "$URL" -v ON_ERROR_STOP=1 "$@"
+}
 
 echo "==> 1. Bootstrap (roles + extensions)"
-# Pass the gate_app credential as a custom GUC so bootstrap.sql can set it.
-psql_exec --set "gate.app_password=${GATE_APP_PASSWORD}" -f database/bootstrap.sql
+psql_exec -f database/bootstrap.sql
 
 echo "==> 1b. Verify gate_app can authenticate"
 if command -v psql >/dev/null 2>&1; then

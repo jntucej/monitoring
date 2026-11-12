@@ -36,6 +36,11 @@ fi
 echo ""
 echo "🚀 Deploying to Kubernetes..."
 kubectl apply -f "$SCRIPT_DIR/deployment.yaml"
+# D5: run the migration Job BEFORE the deployment so web/worker never boot
+# against an un-migrated schema. The Job uses the same image and the
+# PGOPTIONS GUC so the gate_app role gets the correct password.
+kubectl apply -f "$SCRIPT_DIR/migrate-job.yaml"
+kubectl wait --for=condition=complete job/gate-migrate -n "$NAMESPACE" --timeout=300s
 kubectl rollout status deployment/gate-web -n "$NAMESPACE" --timeout=120s
 kubectl rollout status deployment/gate-worker -n "$NAMESPACE" --timeout=120s
 

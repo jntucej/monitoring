@@ -6,7 +6,12 @@
 # restores the previous image tag and recreates the container. The poller
 # stays alive — build failures skip this cycle and retry next cycle.
 
-REPO_DIR="/opt/monitoring/compose"
+BASE_DIR="/opt/monitoring"
+DEPLOY_DIR="${BASE_DIR}"
+REPO_DIR="${BASE_DIR}/compose"
+ENV_FILE="${BASE_DIR}/env/production.env"
+COMPOSE=(docker compose --project-directory "${BASE_DIR}" \
+         -f "${REPO_DIR}/docker-compose.yml" --env-file "${ENV_FILE}")
 LOG_FILE="/var/log/gate-monitor-deploy.log"
 CHECK_INTERVAL=300  # 5 minutes
 COMPOSE_FILE="/opt/monitoring/compose/docker-compose.yml"
@@ -48,45 +53,20 @@ while true; do
             sleep $CHECK_INTERVAL
             continue
         }
-
+        
+        # C3: rsync the WHOLE tree (not just src/). The compose bind mounts,
+        # migration SQL, and scripts all resolve against ${DEPLOY_DIR}, so
+        # deploying only src/ against stale migrations/compose is worse
+        # than not deploying at all.
         rsync -av --delete \
             --exclude='.git' --exclude='node_modules' --exclude='.next' \
             --exclude='.env' --exclude='.env.*' \
-            src/ /opt/monitoring/compose/src/ >> "$LOG_FILE" 2>&1
+            "$REPO_DIR/" "$DEPLOY_DIR/" >> "$LOG_FILE" 2>&1
 
-        # ── Rollback machinery ────────────────────────────────────────
-        # Capture the currently-running image BEFORE rebuilding. The old
-        # image is still on disk after `build --no-cache`, so a tag swap
-        # is instant and free.
-        OLD_IMAGE=$(docker inspect --format='{{.Image}}' gate_web 2>/dev/null || echo "none")
-        echo "[$(date)] Previous image: $OLD_IMAGE" >> "$LOG_FILE"
-
-        # Build: explicit failure handling. Without this, a failed build
-        # is silently followed by `docker up` against the stale image tag
-        # — a no-op deploy that logs "Deploy successful!".
-        if ! docker compose --file "$COMPOSE_FILE" --env-file "$ENV_FILE" build web --no-cache >> "$LOG_FILE" 2>&1; then
-            echo "[$(date)] BUILD FAILED — keeping old image $OLD_IMAGE; skipping deploy this cycle" >> "$LOG_FILE"
-            sleep $CHECK_INTERVAL
-            continue
-        fi
-
-        # Deploy: recreate the container from the freshly-built tag.
-        if ! docker compose --file "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --force-recreate web >> "$LOG_FILE" 2>&1; then
-            echo "[$(date)] DEPLOY FAILED (up -d) — rolling back to $OLD_IMAGE" >> "$LOG_FILE"
-            if [ -n "$OLD_IMAGE" ] && [ "$OLD_IMAGE" != "none" ]; then
-                docker tag "$OLD_IMAGE" monitoring-web:latest >> "$LOG_FILE" 2>&1
-                docker compose --file "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --force-recreate web >> "$LOG_FILE" 2>&1
-                sleep 5
-                RESTORED=$(docker inspect --format='{{.State.Health.Status}}' gate_web 2>/dev/null || echo "missing")
-                echo "[$(date)] ROLLBACK result: $RESTORED" >> "$LOG_FILE"
-            fi
-            sleep $CHECK_INTERVAL
-            continue
-        fi
-
-        # Health check: 60s window. If the new build is not healthy,
-        # roll back to the previous image.
-        HEALTHY=false
+        "${COMPOSE[@]}" build web --no-cache >> "$LOG_FILE" 2>&1
+        "${COMPOSE[@]}" up -d --remove-orphans >> "$LOG_FILE" 2>&1
+        
+        # Wait for healthy
         for i in $(seq 1 30); do
             STATUS=$(docker inspect --format='{{.State.Health.Status}}' gate_web 2>/dev/null || echo "missing")
             if [ "$STATUS" = "healthy" ]; then

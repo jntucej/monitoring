@@ -54,6 +54,9 @@ cleanup() {
   log "Restoring audit_logs table name…"
   psql_admin "ALTER TABLE IF EXISTS public.audit_logs_drill_bak RENAME TO audit_logs" 2>/dev/null || true
 }
+# Fires on ANY exit (INT TERM HUP QUIT ABRT included) so a SIGKILL'd or
+# interrupted drill cannot leave audit_logs renamed.
+trap cleanup EXIT INT TERM HUP QUIT ABRT
 
 if ! psql_admin "ALTER TABLE public.audit_logs RENAME TO audit_logs_drill_bak"; then
   fail "could not rename audit_logs (db admin access broken?)"

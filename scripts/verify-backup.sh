@@ -14,6 +14,7 @@ echo "GATE MONITOR — ROBUST BACKUP RESTORE VERIFICATION"
 echo "================================================================="
 
 PG_CONTAINER="gate_postgres"
+DB="${DB:-gate_monitor}"
 
 LATEST_BACKUP=$(ls -t "$DAILY_DIR"/gate-*.sql.gz 2>/dev/null | head -n 1)
 if [ -z "$LATEST_BACKUP" ]; then
@@ -78,15 +79,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# 4. Restore backup into scratch DB with strict error stopping and error capture
+# 4. Restore backup into scratch DB with strict error stopping and error
+# capture. Strip the --create/--clean database statements and re-point
+# \connect at the scratch DB (sed surgery is single-line — multi-line
+# statements would choke a naive sed).
 echo "Restore backup into $SCRATCH_DB..."
 TMP_ERR="/tmp/restore_err_$$.txt"
 if ! gunzip -c "$LATEST_BACKUP" \
-     | sed -e '/DROP DATABASE IF EXISTS gate_monitor;/d' \
-           -e '/CREATE DATABASE gate_monitor/,/;/d' \
-           -e 's/\\connect gate_monitor/\\connect '"$SCRATCH_DB"'/g' \
-           -e '/CREATE EXTENSION IF NOT EXISTS pg_trgm;/d' \
-           -e '/extension-custom-scripts/d' \
+     | grep -v -E '^CREATE DATABASE|^DROP DATABASE|^\\connect' \
      | docker exec -i "$PG_CONTAINER" psql -U postgres -d "$SCRATCH_DB" -v ON_ERROR_STOP=1 >/dev/null 2> "$TMP_ERR"; then
     echo "❌ FAIL: psql restore encountered errors:"
     cat "$TMP_ERR"

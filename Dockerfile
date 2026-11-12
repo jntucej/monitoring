@@ -45,6 +45,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # (jest, playwright, eslint, typescript) — ~hundreds of MB smaller.
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
+# --- migrate support (migrate service runs scripts/migrate.ts) -----------
+# The migrate one-shot service executes `npx tsx scripts/migrate.ts` inside
+# this image. tsx is already a prod dependency, so it resolves in the
+# runner. The script needs scripts/, database/ (migration SQL) and
+# tsconfig.json; none of them were in the runner image before, so the
+# migrate step could never find scripts/migrate.ts.
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/database ./database
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+
 # Ensure cache/config/uploads dirs exist and are owned by nextjs before the USER switch
 RUN mkdir -p /app/.cache /app/.config /app/data/uploads && chown -R nextjs:nodejs /app
 
@@ -78,14 +88,29 @@ RUN npm ci --omit=dev
 # no bash, no jq, no df --output. Without these the Tier-1 auto-actions
 # silently fail and disk_free_pct is never captured (the forecaster's
 # disk signal is blind). Add them to the worker image.
-RUN apk add --no-cache bash jq \
+# C1: add psql (apply-operator-action.sh) + docker CLI (container restart /
+# network inspect) so Tier-1 auto-actions run inside the worker image.
+# BusyBox lacks GNU df, so coreutils is bundled under a virtual package.
+RUN apk add --no-cache bash jq postgresql-client docker-cli \
     && apk add --no-cache --virtual .coreutils coreutils \
     && rm -rf /var/cache/apk/*
 
-COPY --chown=nextjs:nodejs tsconfig.json ./tsconfig.json
+# COPY --chown=nextjs:nodejs tsconfig.json ./tsconfig.json
+# COPY --chown=nextjs:nodejs worker ./worker
+# COPY --chown=nextjs:nodejs scripts ./scripts
+# COPY --chown=nextjs:nodejs src ./src
+
+# C1: psql + docker CLI so apply-operator-action.sh and infra_snapshot_collector
+# can exec `psql`/`docker` from inside the worker without a host-filesystem
+# bind mount. docker socket is mounted read-only (restart / network inspect
+# only; prune needs no host write).
+# C4: use worker/package.json (slim dep set) instead of the full app tree —
+# drops Next/React/three/recharts/remotion from the worker image.
+COPY worker/package.json worker/package-lock.json* ./
+RUN npm ci --omit=dev
+
 COPY --chown=nextjs:nodejs worker ./worker
 COPY --chown=nextjs:nodejs scripts ./scripts
-COPY --chown=nextjs:nodejs src ./src
 
 RUN mkdir -p /app/.cache /app/.config && chown -R nextjs:nodejs /app
 
