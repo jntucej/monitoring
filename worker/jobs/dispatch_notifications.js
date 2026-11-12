@@ -1,166 +1,329 @@
 // worker/jobs/dispatch_notifications.js
-// Uses the worker's own PG pool (../db.js) — the same pattern as every other job.
-// The previous import of ../../src/lib/dbClient.js failed at runtime because the
-// Next standalone build does not ship a standalone src/lib/dbClient.js file.
 //
-// Dispatch semantics (2026-11 fix):
-//   - EMAIL: send_emails.js is the real email transport (Brevo SMTP via
-//     nodemailer, daily cap 300). This job's email queue handling is a
-//     NO-OP-EXCEPT-SMOKE-TEST on purpose: it must NOT mark rows 'sent' —
-//     that claim belongs to send_emails.js which owns the provider
-//     integration. Rows it sees as 'pending' are left alone.
-//   - SMS: Twilio REST call. Rows are marked 'delivered' on real success,
-//     'failed' with a reason on real error. If no provider is configured
-//     the row stays 'pending' and the job logs loudly (no silent no-op).
-//   - PUSH: web-push is not wired (no VAPID / service-worker push
-//     subscription store exists in this repo). The queue is drained with a
-//     logged status update ('skipped_push_not_configured') — not silently
-//     dropped, not falsely 'sent' — until a push SDK is configured.
+// SINGLE OWNER of notification_sms_queue, notification_email_queue, and
+// notification_push_queue.
+//
+// Fix (2026-11 correctness): previously three jobs drained the same queues
+// in one tick (send_sms.js, send_emails.js, and this job), which without an
+// atomic claim could double-send a message or race on row state. This job is
+// now the only one that claims and dispatches. send_sms.js and send_emails.js
+// have been deleted.
+//
+// Claim semantics:
+//   - Atomic UPDATE ... RETURNING wrapping a SELECT FOR UPDATE SKIP LOCKED
+//     so a concurrent claimant can never grab the same row twice.
+//   - SMS claims by priority_rank (1=otp, 2=urgent, 3=normal), then
+//     next_attempt_at, then created_at.
+//   - Email claims by priority_rank, then created_at.
+//
+// Uses the worker's own PG pool (../db.js) — the same pattern as every other
+// job. The previous import of ../../src/lib/dbClient.js failed at runtime
+// because the Next standalone build does not ship a standalone
+// src/lib/dbClient.js file.
 import { query } from '../db.js';
+import { sendSms } from '../lib/sms-provider.js';
+import { createTransport } from 'nodemailer';
 
-// ── Email ────────────────────────────────────────────────────────────────────
-// The real email path is worker/jobs/send_emails.js (Brevo SMTP). This
-// function exists so the dispatch job remains the single "what is in the
-// queue" surface, but it performs NO state change on email rows: marking
-// them 'sent' here would race send_emails.js and claim a delivery that was
-// not made. The backlog count is logged for observability only.
-async function handleEmailQueue() {
-  const { rows } = await query(
-    `SELECT count(*) AS n FROM notification_email_queue WHERE status = 'pending'`
-  );
-  const n = Number(rows[0]?.n ?? 0);
-  if (n === 0) return;
-  // Deliberately no UPDATE: send_emails.js owns the 'pending' → 'sent' /
-  // 'failed' transition for the email queue. Marking 'sent' here would be
-  // a false claim. Log so operators can see the backlog is being
-  // processed by the email job, not by this one.
-  console.log(`[Worker Job] email: ${n} pending item(s) — owned by send_emails.js (Brevo SMTP); no state change made here`);
-}
+// ── Configuration ──────────────────────────────────────────────────────────
+const SMS_BATCH = 20;
+const EMAIL_BATCH = 50;
+const SMS_MAX_ATTEMPTS = 5;
+const EMAIL_MAX_ATTEMPTS = 5;
+const SMS_SLEEP_MS = 100; // MSG91 allows ~10 SMS/sec; space calls to stay under
 
-// ── SMS ──────────────────────────────────────────────────────────────────────
-// Twilio REST call. Configuration is read from env at call time so the
-// worker can be restarted to pick up new credentials without a rebuild.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 function smsConfig() {
   return {
     enabled: process.env.SMS_ENABLED === 'true',
-    provider: process.env.SMS_PROVIDER || 'twilio',
-    accountSid: process.env.SMS_ACCOUNT_SID || process.env.TWILIO_ACCOUNT_SID || '',
-    authToken: process.env.SMS_AUTH_TOKEN || process.env.TWILIO_AUTH_TOKEN || process.env.SMS_API_SECRET || '',
-    from: process.env.SMS_FROM || '',
+    accountSid: process.env.TWILIO_ACCOUNT_SID || process.env.SMS_ACCOUNT_SID || '',
+    authToken: process.env.TWILIO_AUTH_TOKEN || process.env.SMS_AUTH_TOKEN || '',
+    from: process.env.TWILIO_FROM_NUMBER || process.env.SMS_FROM || '',
   };
 }
 
-async function sendSmsViaProvider(item) {
-  const cfg = smsConfig();
-  const base = `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(cfg.accountSid)}/Messages.json`;
-  const body = new URLSearchParams({
-    To: item.phone_number,
-    From: cfg.from,
-    Body: item.message,
-  });
-  const auth = Buffer.from(`${cfg.accountSid}:${cfg.authToken}`).toString('base64');
-  const res = await fetch(base, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${auth}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: body.toString(),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    const err = new Error(`Twilio ${res.status}: ${text.slice(0, 200)}`);
-    err.twilio = true;
-    throw err;
-  }
-  const json = await res.json().catch(() => ({}));
-  return json.sid || json.messageSid || null;
+// ── Atomic claim helpers ───────────────────────────────────────────────────
+// Claim a batch of SMS rows atomically. The UPDATE ... RETURNING wraps the
+// SELECT in the same statement, so FOR UPDATE SKIP LOCKED prevents a second
+// claimant from grabbing the same rows in the same tick.
+async function claimSmsBatch(limit = SMS_BATCH) {
+  const { rows } = await query(
+    `UPDATE notification_sms_queue q
+        SET status = 'processing',
+            processing_started_at = NOW(),
+            attempts = q.attempts + 1
+      WHERE q.id IN (
+        SELECT id FROM notification_sms_queue
+         WHERE status IN ('pending','failed')
+           AND next_attempt_at <= NOW()
+           AND attempts < $1
+         ORDER BY priority_rank, next_attempt_at, created_at
+         LIMIT $2
+         FOR UPDATE SKIP LOCKED
+      )
+      RETURNING q.*`,
+    [SMS_MAX_ATTEMPTS, limit]
+  );
+  return rows;
+}
+
+async function claimEmailBatch(limit = EMAIL_BATCH) {
+  const { rows } = await query(
+    `UPDATE notification_email_queue q
+        SET status = 'processing',
+            processing_started_at = NOW(),
+            attempts = q.attempts + 1
+      WHERE q.id IN (
+        SELECT id FROM notification_email_queue
+         WHERE status IN ('pending','failed')
+           AND attempts < $1
+         ORDER BY COALESCE(q.priority_rank, 3), q.created_at
+         LIMIT $2
+         FOR UPDATE SKIP LOCKED
+      )
+      RETURNING q.*`,
+    [EMAIL_MAX_ATTEMPTS, limit]
+  );
+  return rows;
+}
+
+// ── SMS dispatch ────────────────────────────────────────────────────────────
+
+async function markSmsSent(id, providerId, costInr) {
+  await query(
+    `UPDATE notification_sms_queue
+        SET status = 'sent',
+            sent_at = NOW(),
+            provider_message_id = $1,
+            cost_inr = $2,
+            error = NULL
+      WHERE id = $3`,
+    [providerId, costInr ?? null, id]
+  );
+}
+
+async function markSmsFailed(id, attempts, errorMsg, permanent) {
+  const nextStatus = permanent || attempts >= SMS_MAX_ATTEMPTS ? 'dead_letter' : 'failed';
+  const backoffMin = Math.min(60, Math.pow(2, Math.max(0, attempts - 1)));
+  await query(
+    `UPDATE notification_sms_queue
+        SET status = $1,
+            error = $2,
+            failed_at = NOW(),
+            next_attempt_at = NOW() + ($3 || ' minutes')::interval
+      WHERE id = $4`,
+    [nextStatus, String(errorMsg).slice(0, 500), String(backoffMin), id]
+  );
 }
 
 async function handleSmsQueue() {
-  const { rows } = await query(
-    `SELECT * FROM notification_sms_queue WHERE status = 'pending' ORDER BY created_at ASC LIMIT 50`
-  );
-  if (!rows?.length) return;
-
   const cfg = smsConfig();
+
+  // Provider not configured: claim nothing, log loudly. A silent no-op was
+  // how a missing SMS provider hid itself for months.
   if (!cfg.enabled) {
-    // Not enabled: leave rows pending, log loudly. A silent no-op here is
-    // how the old code hid a missing SMS provider for months.
-    console.warn(
-      `[Worker Job] sms: ${rows.length} pending item(s) but SMS_ENABLED is not 'true' — leaving rows pending. ` +
-      `Set SMS_ENABLED=true + SMS_PROVIDER/SMS_ACCOUNT_SID/SMS_AUTH_TOKEN/SMS_FROM in .env to start delivering.`
+    const { rows } = await query(
+      `SELECT count(*) AS n FROM notification_sms_queue WHERE status IN ('pending','failed')`
     );
-    return;
+    const n = Number(rows[0]?.n ?? 0);
+    if (n > 0) {
+      console.warn(
+        `[dispatch] sms: ${n} pending/failed but SMS_ENABLED is not 'true'. ` +
+        `Set SMS_ENABLED=true + SMS_PROVIDER/SMS_ACCOUNT_SID/SMS_AUTH_TOKEN/SMS_FROM to start delivering.`
+      );
+    }
+    return { sent: 0, failed: 0, dead: 0 };
   }
   if (!cfg.accountSid || !cfg.authToken || !cfg.from) {
     console.warn(
-      `[Worker Job] sms: SMS_ENABLED=true but provider credentials incomplete ` +
-      `(need SMS_ACCOUNT_SID/SMS_AUTH_TOKEN/SMS_FROM) — leaving ${rows.length} row(s) pending, NOT marking them sent.`
+      `[dispatch] sms: SMS_ENABLED=true but provider credentials incomplete ` +
+      `(need SMS_ACCOUNT_SID / SMS_AUTH_TOKEN / SMS_FROM) — leaving rows pending.`
     );
-    return;
+    return { sent: 0, failed: 0, dead: 0 };
   }
 
-  for (const item of rows) {
-    const attempts = Number(item.attempts ?? 0) + 1;
-    try {
-      await query(
-        `UPDATE notification_sms_queue SET status = 'processing', processing_started_at = now() WHERE id = $1`,
-        [item.id]
-      );
-      const sid = await sendSmsViaProvider(item);
-      await query(
-        `UPDATE notification_sms_queue
-         SET status = 'delivered', sent_at = now(), provider_message_id = $2 WHERE id = $1`,
-        [item.id, sid]
-      );
-      console.log(`[Worker Job] sms delivered ${item.id} → ${item.phone_number} (sid=${sid ?? 'n/a'})`);
-    } catch (err) {
-      const reason = String(err?.message ?? err).slice(0, 500);
-      const finalStatus = attempts >= 5 ? 'dead' : 'pending';
-      await query(
-        `UPDATE notification_sms_queue
-         SET status = $2, attempts = $3, error = $4 WHERE id = $1`,
-        [item.id, finalStatus, attempts, reason]
-      );
-      console.error(`[Worker Job] sms failed ${item.id} (attempts=${attempts}, status=${finalStatus}): ${reason}`);
+  let sent = 0, failed = 0, dead = 0;
+
+  while (true) {
+    const batch = await claimSmsBatch();
+    if (batch.length === 0) break;
+
+    for (const row of batch) {
+      try {
+        const result = await sendSms(row);
+        if (result.ok) {
+          await markSmsSent(row.id, result.providerId ?? '', result.costInr);
+          sent++;
+        } else {
+          const permanent = Boolean(result.permanent) || Number(row.attempts) >= SMS_MAX_ATTEMPTS;
+          await markSmsFailed(row.id, Number(row.attempts), result.error ?? 'unknown', permanent);
+          if (permanent) dead++; else failed++;
+        }
+      } catch (err) {
+        await markSmsFailed(row.id, Number(row.attempts), String(err), false);
+        failed++;
+      }
+      await sleep(SMS_SLEEP_MS);
     }
+
+    if (batch.length < SMS_BATCH) break;
   }
+
+  if (sent || failed || dead) {
+    console.log(`[dispatch] sms: sent=${sent} retry=${failed} dead=${dead}`);
+  }
+  return { sent, failed, dead };
 }
 
-// ── Push ─────────────────────────────────────────────────────────────────────
+// ── Email dispatch ─────────────────────────────────────────────────────────
+
+async function markEmailSent(id, messageId) {
+  await query(
+    `UPDATE notification_email_queue
+        SET status = 'sent', sent_at = NOW(), provider_message_id = $2, error = NULL
+      WHERE id = $1`,
+    [id, messageId]
+  );
+}
+
+async function markEmailFailed(id, attempts, error) {
+  const nextStatus = attempts >= EMAIL_MAX_ATTEMPTS ? 'dead_letter' : 'failed';
+  await query(
+    `UPDATE notification_email_queue
+        SET status = $1, error = $2, failed_at = NOW()
+      WHERE id = $3`,
+    [nextStatus, String(error).slice(0, 500), id]
+  );
+}
+
+let cachedTransporter = null;
+function getEmailTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+  const host = process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com';
+  const port = Number(process.env.BREVO_SMTP_PORT || 587);
+  const user = process.env.BREVO_SMTP_LOGIN;
+  const pass = process.env.BREVO_SMTP_KEY;
+
+  if (!user || !pass) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('BREVO_SMTP_LOGIN or BREVO_SMTP_KEY missing in production');
+    }
+    cachedTransporter = {
+      sendMail: async (opts) => {
+        console.log(`[dispatch] email (dev): To: ${opts.to}, Subject: ${opts.subject}`);
+        return { messageId: `dev-${Date.now()}` };
+      },
+    };
+    return cachedTransporter;
+  }
+
+  cachedTransporter = createTransport({
+    host, port,
+    secure: port === 465,
+    auth: { user, pass },
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
+    connectionTimeout: 10_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 30_000,
+  });
+  return cachedTransporter;
+}
+
+async function handleEmailQueue() {
+  const sentToday = Number(
+    (await query(
+      `SELECT COUNT(*) AS n FROM notification_email_queue WHERE status='sent' AND sent_at >= CURRENT_DATE`
+    )).rows[0]?.n ?? 0
+  );
+  const DAILY_LIMIT = Number(process.env.EMAIL_DAILY_LIMIT || 300);
+  const remaining = DAILY_LIMIT - sentToday;
+
+  if (remaining <= 0) {
+    console.log(`[dispatch] email: daily limit reached (${DAILY_LIMIT}). Skipping.`);
+    return { sent: 0, failed: 0 };
+  }
+
+  const limit = Math.min(EMAIL_BATCH, remaining);
+  const batch = await claimEmailBatch(limit);
+  if (batch.length === 0) return { sent: 0, failed: 0 };
+
+  let transporter;
+  try {
+    transporter = getEmailTransporter();
+  } catch (err) {
+    for (const row of batch) {
+      await markEmailFailed(row.id, Number(row.attempts ?? 0), String(err));
+    }
+    console.error(`[dispatch] email: transporter init failed, ${batch.length} row(s) marked failed:`, err.message);
+    return { sent: 0, failed: batch.length };
+  }
+
+  let sent = 0, failed = 0;
+  for (const email of batch) {
+    try {
+      const info = await transporter.sendMail({
+        from: `Campus Access <${process.env.BREVO_SMTP_FROM || 'noreply@ucej.in'}>`,
+        to: email.email,
+        subject: email.subject,
+        text: email.body,
+        html: email.html || email.body,
+        headers: { 'X-Category': email.category || 'generic' },
+      });
+      await markEmailSent(email.id, info.messageId);
+      sent++;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      await markEmailFailed(email.id, Number(email.attempts ?? 0), msg);
+      failed++;
+      console.error(`[dispatch] email failed ${email.id}:`, msg);
+    }
+    if (sent >= remaining) break;
+  }
+  if (sent || failed) console.log(`[dispatch] email: sent=${sent} failed=${failed}`);
+  return { sent, failed };
+}
+
+// ── Push queue ─────────────────────────────────────────────────────────────
 // No web-push SDK (VAPID + service-worker subscriptions) is wired in this
-// repo. Draining the queue as a silent no-op is how alerts quietly went
-// missing; instead we log each batch and record a status update so the
-// operator can see the queue is being intentionally held, not dropped.
+// repo. The queue is drained with a logged status update so the operator can
+// see it is intentionally held, not silently dropped.
 async function handlePushQueue() {
   const { rows } = await query(
     `SELECT count(*) AS n FROM notification_push_queue WHERE status = 'pending'`
   );
   const n = Number(rows[0]?.n ?? 0);
   if (n === 0) return;
-  console.warn(
-    `[Worker Job] push: ${n} pending item(s) held — web-push SDK not configured. ` +
-    `Rows stay 'pending' (NOT marked sent) until a push transport is wired; ` +
-    `this is a visible no-op, not a silent drop.`
-  );
+  console.warn(`[dispatch] push: ${n} pending held — web-push SDK not configured.`);
 }
 
-// ── Entry point ─────────────────────────────────────────────────────────────
-export default async function dispatchNotifications() {
-  console.log('[Worker Job] Starting notification dispatch...');
-  for (const [name, fn] of [
-    ['email', handleEmailQueue],
-    ['sms', handleSmsQueue],
-    ['push', handlePushQueue],
-  ]) {
-    try {
-      await fn();
-    } catch (err) {
-      // A queue-level failure (table missing, DB down) logs and continues to
-      // the next queue; the next 2-minute run retries.
-      console.error(`[Worker Job] ${name} dispatch failed:`, err.message);
-    }
+// ── Queue depth gauge (Prometheus) ─────────────────────────────────────────
+// Expose per-queue depth so a stalled dispatcher is visible before users
+// complain. The worker's /metrics endpoint calls this every scrape.
+export async function getQueueDepths() {
+  const depths = {};
+  for (const table of ['notification_sms_queue', 'notification_email_queue', 'notification_push_queue']) {
+    const { rows } = await query(
+      `SELECT status, COUNT(*)::int AS n
+         FROM ${table}
+        WHERE status IN ('pending','processing','failed')
+        GROUP BY status`
+    ).catch(() => ({ rows: [] }));
+    depths[table] = rows.reduce((acc, r) => {
+      acc[r.status] = Number(r.n);
+      return acc;
+    }, {});
   }
-  console.log('[Worker Job] Notification dispatch complete.');
+  return depths;
+}
+
+// ── Main entry ─────────────────────────────────────────────────────────────
+export default async function dispatchNotifications() {
+  console.log('[dispatch] notification dispatch starting...');
+  const sms = await handleSmsQueue();
+  const email = await handleEmailQueue();
+  await handlePushQueue();
+  console.log('[dispatch] notification dispatch complete.');
+  return { success: true, data: { sms, email } };
 }

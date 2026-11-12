@@ -1,6 +1,6 @@
 import http from "node:http";
-import sendEmails from './jobs/send_emails.js';
 import { handleFalcoWebhook } from './webhooks/falco_receiver.js';
+import { getQueueDepths } from './jobs/dispatch_notifications.js';
 
 // Worker health probe: the compose healthcheck (and any orchestrator) hits
 // /health on 3001. Keep the process alive and report readiness. The rate-limit
@@ -9,10 +9,34 @@ import { handleFalcoWebhook } from './webhooks/falco_receiver.js';
 // healthy rather than staying stuck in "starting" forever.
 const WORKER_PORT = Number(process.env.WORKER_PORT || 3001);
 
-const worker = http.createServer((req, res) => {
+const worker = http.createServer(async (req, res) => {
   if (req.url === "/health" || req.url === "/") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "healthy", uptime: process.uptime() }));
+    return;
+  }
+
+  // Prometheus text exposition: notification queue depths (pending/processing/
+  // failed). A stalled dispatcher shows up here before users complain.
+  if (req.url === "/metrics" && req.method === "GET") {
+    try {
+      const depths = await getQueueDepths();
+      const lines = [
+        "# HELP gate_notification_queue_depth Rows in notification queue by status",
+        "# TYPE gate_notification_queue_depth gauge",
+      ];
+      for (const [table, byStatus] of Object.entries(depths)) {
+        const queueName = table.replace('notification_', '').replace('_queue', '');
+        for (const [status, count] of Object.entries(byStatus)) {
+          lines.push(`gate_notification_queue_depth{queue="${queueName}",status="${status}"} ${count}`);
+        }
+      }
+      res.writeHead(200, { "Content-Type": "text/plain; version=0.0.4" });
+      res.end(lines.join("\n") + "\n");
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: String(err) }));
+    }
     return;
   }
 
@@ -71,7 +95,6 @@ import cleanupMovementLogs from './jobs/cleanup_movement_logs.js';
 import dispatchNotifications from './jobs/dispatch_notifications.js';
 import retryNotifications from './jobs/retry_notifications.js';
 import cleanupEphemeral from './jobs/cleanup_ephemeral.js';
-import sendSmsQueue from './jobs/send_sms.js';
 import hardDeleteExpired from './jobs/hard_delete_expired.js';
 import sloSnapshot from './jobs/slo_snapshot.js';
 import { startOperatorActionListener, runOperatorActionMaintenance } from './jobs/operator_actions.js';
@@ -163,9 +186,7 @@ async function rotateAuditLogs() {
 
 const jobs = [
   { name: 'rate-limit-cleanup', ms: 5 * 60 * 1000, run: () => runJob('rate-limit-cleanup', cleanupRateLimits) },
-  { name: 'email-dispatch',     ms: 2 * 60 * 1000, run: () => runJob('email-dispatch', sendEmails) },
-  { name: 'sms-dispatch',       ms: 30 * 1000, run: () => runJob('sms-dispatch', sendSmsQueue) },
-  { name: 'notification-dispatch', ms: 2 * 60 * 1000, run: () => runJob('notification-dispatch', dispatchNotifications) },
+  { name: 'notification-dispatch', ms: 30 * 1000, run: () => runJob('notification-dispatch', dispatchNotifications) },
   { name: 'notification-retry', ms: 5 * 60 * 1000, run: () => runJob('notification-retry', retryNotifications) },
   { name: 'cleanup-ephemeral', ms: 15 * 60 * 1000, run: () => runJob('cleanup-ephemeral', cleanupEphemeral) },
   { name: 'audit-log-rotation', ms: 60 * 60 * 1000, run: () => runJob('audit-log-rotation', rotateAuditLogs) },
