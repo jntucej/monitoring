@@ -13,26 +13,25 @@ import { poolQuery } from "@/lib/postgres";
 // alone cannot take the limiter offline — it degrades back to the
 // per-instance memory fallback (auth-sensitive keys still fail closed).
 
-let redisClientPromise: Promise<import("redis").RedisClientType> | null = null;
+type RedisClient = Awaited<ReturnType<typeof import("redis").createClient>>;
+let redisClientPromise: Promise<RedisClient> | null = null;
 
-function getRedisSharedStore() {
+function getRedisSharedStore(): Promise<RedisClient> {
   if (!redisClientPromise) {
     redisClientPromise = (async () => {
-      const { createClient } = await import("redis");
-      const client = createClient({
+      const redis = await import("redis");
+      const client = redis.createClient({
         url: process.env.REDIS_URL || "redis://localhost:6379",
         socket: { reconnectStrategy: (retries: number) => (retries < 5 ? 500 * retries : false) },
       });
       client.on("error", () => { /* connection errors surface on command failure; keep process alive */ });
       await client.connect().catch(() => {
-        // Reset the promise so a later call retries the connect; the
-        // command call itself will throw and fall through to memory.
         redisClientPromise = null;
       });
       return client;
     })();
   }
-  return redisClientPromise;
+  return redisClientPromise!;
 }
 
 interface RateLimitConfig {
@@ -151,8 +150,8 @@ async function checkSharedRedisLimit(key: string, cfg: Required<RateLimitConfig>
       await client.expire(redisKey, windowSec);
     }
     const ttl = await client.ttl(redisKey);
-    const remaining = Math.max(0, cfg.maxRequests - count);
-    const limited = count > cfg.maxRequests;
+    const remaining = Math.max(0, cfg.maxRequests - Number(count));
+    const limited = Number(count) > cfg.maxRequests;
     const retryAfter = limited ? Math.max(1, ttl) : undefined;
     return {
       limited,
