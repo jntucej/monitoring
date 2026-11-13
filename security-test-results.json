@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-11-14 00:58:21",
+  "sections": {
+    "crash": {
+      "passed": 33,
+      "failed": 0,
+      "skipped": 1,
+      "findings": []
+    },
+    "hack": {
+      "passed": 34,
+      "failed": 0,
+      "skipped": 5,
+      "findings": []
+    },
+    "rbac": {
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "findings": []
+    },
+    "resilience": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "findings": []
+    }
+  },
+  "total": {
+    "passed": 86,
+    "failed": 0,
+    "skipped": 6
+  },
+  "verdict": "ALL PASS"
+}
