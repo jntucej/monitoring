@@ -13,6 +13,16 @@ type IncomingWSMessage =
   | { type: "status"; gateId: string; status: string; timestamp?: number }
   | { type: "alert"; gateId: string; message: string; severity?: string; timestamp?: number };
 
+function incomingStatusToGateStatus(s: string): import("@/context/GlassContext").GateStatus {
+  const valid = ["open", "closed", "restricted", "lockdown", "maintenance"] as const;
+  return (valid as readonly string[]).includes(s) ? s as import("@/context/GlassContext").GateStatus : "closed";
+}
+
+function incomingSeverity(s: string | undefined): "warning" | "info" | "critical" {
+  if (s === "critical" || s === "warning" || s === "info") return s;
+  return "warning";
+}
+
 export class GateMonitorWS {
   private url: string;
   private socket: WebSocket | null = null;
@@ -161,14 +171,14 @@ export class GateMonitorWS {
       this.trafficListeners.forEach((fn) => fn(data.traffic));
     } else if (data.type === "status") {
       this.statusListeners.forEach((fn) =>
-        fn({ gateId: data.gateId, status: data.status, timestamp: data.timestamp || Date.now() })
+        fn({ gateId: data.gateId, status: incomingStatusToGateStatus(data.status), timestamp: data.timestamp || Date.now() })
       );
     } else if (data.type === "alert" && data.gateId && data.message) {
       this.alertListeners.forEach((fn) =>
         fn({
           gateId: data.gateId,
           message: data.message,
-          severity: data.severity || "warning",
+          severity: incomingSeverity(data.severity),
           timestamp: data.timestamp || Date.now(),
         })
       );
