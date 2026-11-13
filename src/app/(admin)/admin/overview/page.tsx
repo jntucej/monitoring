@@ -150,6 +150,7 @@ function AdminOverviewInner() {
                   <Link
                     key={card.label}
                     href={card.href}
+                    aria-label={`${card.label}: ${fmt(card.value)}`}
                     className="group rounded-xl border border-border bg-bg-surface p-4 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
                   >
                     <div className="flex items-center justify-between">
@@ -182,7 +183,7 @@ function AdminOverviewInner() {
                         {e.userName || e.userRole || "system"}
                       </p>
                     </div>
-                    <span className="text-[11px] text-text-muted whitespace-nowrap shrink-0">
+                    <span className="text-xs text-text-muted whitespace-nowrap shrink-0">
                       {e.timestamp ? new Date(e.timestamp).toLocaleString("en-IN") : "—"}
                     </span>
                   </div>
@@ -223,6 +224,7 @@ function AdminOverviewInner() {
               <Link
                 key={i}
                 href={mod.href}
+                aria-label={mod.label}
                 className="group p-4 rounded-xl border border-border bg-bg-surface hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -260,7 +262,7 @@ function AdminOverviewInner() {
         <Info className="w-5 h-5 text-action-warning shrink-0" />
         <div>
           <p className="text-xs font-semibold text-action-warning">Command Overview</p>
-          <p className="text-[11px] text-amber-300/70 mt-0.5">
+          <p className="text-xs text-amber-300/70 mt-0.5">
             All modules pull from the same live telemetry feed. The Dashboard page shows real-time
             status; drill into individual modules for deeper management.
           </p>

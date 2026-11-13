@@ -1,0 +1,118 @@
+{
+  "component": "src/app/(admin)/admin/overview/page.tsx",
+  "ui_type": "Dashboard (Admin Overview)",
+  "platform": "Responsive (Desktop-first, tablet, mobile)",
+  "review_mode": "Standard",
+  "audit_date": "2026-11-13",
+  "ux_score": 72,
+  "dimensions": {
+    "cognitive_efficiency": {
+      "score": 14,
+      "max": 20,
+      "notes": "9-module grid creates moderate choice overload. Clear hierarchy with PageHeader + hero + metrics + modules. 30s polling keeps data fresh without user action. Progressive disclosure via WidgetBoundary (collapsed by default)."
+    },
+    "motor_efficiency": {
+      "score": 16,
+      "max": 20,
+      "notes": "All stat cards and module cards are full-width links (large tap targets). 44px+ effective area per card. Icon+text labels aid recognition. ArrowRight indicators signal interactivity."
+    },
+    "visual_hierarchy": {
+      "score": 14,
+      "max": 20,
+      "notes": "Clear F-pattern: hero \u2192 metrics \u2192 modules \u2192 widgets. text-2xl for KPI values, text-xs for labels. Consistent rounded-xl cards with border-border. Emerald accent used consistently for positive states."
+    },
+    "feedback_responsiveness": {
+      "score": 15,
+      "max": 20,
+      "notes": "Loading state ('Loading overview\u2026') and error state (rose border + message) handled. 30s auto-polling with onRefresh button. No skeleton loaders \u2014 full-card placeholders instead."
+    },
+    "consistency_familiarity": {
+      "score": 13,
+      "max": 20,
+      "notes": "Consistent card pattern across stat and module cards. Same hover behavior (emerald border + translate-x arrow). iconMap is clean. Minor: text-[11px] used in 2 places (non-standard spacing). transition-all on card links is a known AI-slop tell."
+    }
+  },
+  "accessibility_snapshot": {
+    "contrast": "PASS \u2014 text-text-muted (#94a3b8) on bg-bg-surface (#0f172a) = 4.5:1 (AA met for large text, borderline for small)",
+    "keyboard": "PASS \u2014 all interactive elements are <Link> with focus rings from global styles",
+    "focus": "PASS \u2014 native focus outlines preserved (no outline:none found)",
+    "targets": "PASS \u2014 card links are full-width (well above 44px minimum)",
+    "aria": "MINOR \u2014 stat cards have no aria-label for screen readers (icon-only context lost); module cards same",
+    "error_handling": "PASS \u2014 error state shows user-readable message in rose-bordered box"
+  },
+  "findings": [
+    {
+      "law": "Choice Overload (Hick's Law)",
+      "severity": "minor",
+      "location": "Module grid (9 cards)",
+      "issue": "9 equal-weight module cards compete for attention. No visual differentiation between high-frequency (Gates, Alerts) and low-frequency (Reports, Occupancy) modules.",
+      "fix": "Add a 'Frequently Used' section with top-3 modules; move the rest to a 'More' expander."
+    },
+    {
+      "law": "Feedback Principle",
+      "severity": "minor",
+      "location": "Loading state",
+      "issue": "Full-card placeholder ('Loading overview\u2026') gives no indication of progress. User may think the page is broken.",
+      "fix": "Add a skeleton shimmer or progress indicator to the metrics section."
+    },
+    {
+      "law": "WCAG 4.1.2 (ARIA)",
+      "severity": "minor",
+      "location": "Stat cards + module cards",
+      "issue": "Icon-only context (Shield, Users, etc.) is not announced to screen readers. aria-label is missing on card links.",
+      "fix": "Add aria-label={`Gates Online: ${activeGates} of ${totalGates}`} to each stat card."
+    },
+    {
+      "law": "Consistency (Nielsen Heuristic 4)",
+      "severity": "minor",
+      "location": "text-[11px] usage",
+      "issue": "text-[11px] is an arbitrary value that doesn't map to the standard scale. Used in audit events timestamp and info strip.",
+      "fix": "Replace with text-xs (12px) \u2014 already in use elsewhere on the page."
+    },
+    {
+      "law": "Von Restorff Effect",
+      "severity": "positive",
+      "location": "Alert info strip",
+      "issue": "Amber warning strip at bottom uses a distinct color from the emerald action cards \u2014 appropriately differentiates warning from action.",
+      "fix": "None needed."
+    },
+    {
+      "law": "Fitts's Law",
+      "severity": "positive",
+      "location": "Stat card links",
+      "issue": "Full-width card links provide large tap targets. ArrowRight indicators make the affordance clear.",
+      "fix": "None needed."
+    }
+  ],
+  "quick_wins": [
+    {
+      "fix": "Replace text-[11px] with text-xs in audit events + info strip",
+      "effort": "5 min",
+      "impact": "High \u2014 removes arbitrary values, improves readability"
+    },
+    {
+      "fix": "Add aria-label to stat card and module card links",
+      "effort": "10 min",
+      "impact": "High \u2014 screen reader users can understand card context"
+    },
+    {
+      "fix": "Add skeleton loader or spinner to the 'Loading overview\u2026' state",
+      "effort": "15 min",
+      "impact": "Medium \u2014 prevents 'is the page broken?' confusion"
+    }
+  ],
+  "actionable_improvements": [
+    {
+      "change": "Segment modules into 'Frequently Used' (top 3) and 'All Modules' (expandable)",
+      "priority": "medium",
+      "effort": "30 min",
+      "impact": "Reduces Hick's Law overload from 9 \u2192 3 primary choices"
+    },
+    {
+      "change": "Replace transition-all on card links with specific transition properties (border-color, background-color, transform)",
+      "priority": "low",
+      "effort": "10 min",
+      "impact": "Performance + removes AI-slop tell (transition-all is a known unslop pattern)"
+    }
+  ]
+}
