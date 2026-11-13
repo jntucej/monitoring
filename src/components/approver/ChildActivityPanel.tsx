@@ -88,15 +88,15 @@ export function ChildActivityPanel() {
   const totalOpen = data?.data?.totalOpenRequests ?? 0;
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0">
+    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <Users className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <Users className="w-4 h-4 text-action-success shrink-0" />
+          <span className="text-sm font-bold text-text-primary truncate">
             Child Activity
           </span>
-          <span className="text-[11px] text-[var(--text-muted)] shrink-0">
+          <span className="text-[11px] text-text-muted shrink-0">
             {children.length} {children.length === 1 ? "child" : "children"}
             {totalOpen > 0 ? ` · ${totalOpen} open request${totalOpen === 1 ? "" : "s"}` : ""}
           </span>
@@ -105,7 +105,7 @@ export function ChildActivityPanel() {
           type="button"
           onClick={handleRefresh}
           disabled={busy || loading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--action-primary)]/40 disabled:opacity-40 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 disabled:opacity-40 transition-colors"
           aria-label="Refresh child activity"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${busy || loading ? "animate-spin" : ""}`} />
@@ -115,12 +115,12 @@ export function ChildActivityPanel() {
 
       {/* Body */}
       {loading && children.length === 0 ? (
-        <div className="flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]">
+        <div className="flex items-center justify-center gap-2 py-8 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           Loading child activity&hellip;
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-amber-200">
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-action-warning">
           <div className="flex items-center justify-between gap-3">
             <span>
               Could not load child activity: {error}
@@ -136,7 +136,7 @@ export function ChildActivityPanel() {
           </div>
         </div>
       ) : children.length === 0 ? (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)]/50 px-3 py-4 text-[11px] text-[var(--text-muted)]">
+        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4 text-[11px] text-text-muted">
           No linked children yet. Link a child to start tracking their campus activity.
         </div>
       ) : (
@@ -156,7 +156,7 @@ export function ChildActivityPanel() {
             if (move) {
               activities.push({
                 icon: isIn ? ArrowDownLeft : ArrowUpRight,
-                tone: isIn ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400",
+                tone: isIn ? "bg-emerald-500/15 text-action-success" : "bg-rose-500/15 text-action-danger",
                 label: `${isIn ? "Entry" : "Exit"} · ${move.gate || "gate"}`,
                 detail: fmtTime(move.at),
               });
@@ -164,7 +164,7 @@ export function ChildActivityPanel() {
             if (child.openRequests > 0) {
               activities.push({
                 icon: Ticket,
-                tone: "bg-amber-500/15 text-amber-400",
+                tone: "bg-amber-500/15 text-action-warning",
                 label: `${child.openRequests} open request${child.openRequests === 1 ? "" : "s"}`,
                 detail: "pending approval",
               });
@@ -172,7 +172,7 @@ export function ChildActivityPanel() {
             if (child.nextEvent) {
               activities.push({
                 icon: CalendarClock,
-                tone: "bg-sky-500/15 text-sky-400",
+                tone: "bg-sky-500/15 text-action-info",
                 label: `Upcoming · ${child.nextEvent.title || "campus event"}`,
                 detail: fmtTime(child.nextEvent.startsAt),
               });
@@ -180,18 +180,18 @@ export function ChildActivityPanel() {
             return (
               <li
                 key={child.childId}
-                className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3 min-w-0"
+                className="rounded-lg border border-border bg-bg-elevated p-3 min-w-0"
               >
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+                  <p className="text-sm font-bold text-text-primary truncate">
                     {child.name || "Unnamed child"}
                   </p>
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">
+                  <span className="text-[10px] font-mono text-text-muted shrink-0">
                     {child.roll || "—"}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-[var(--text-muted)] mb-2">{movementSummary}</p>
+                <p className="text-[11px] text-text-muted mb-2">{movementSummary}</p>
 
                 {activities.length > 0 ? (
                   <ol className="space-y-1">
@@ -204,10 +204,10 @@ export function ChildActivityPanel() {
                           >
                             <Icon className="w-3.5 h-3.5" />
                           </span>
-                          <span className="flex-1 min-w-0 text-[11px] font-semibold text-[var(--text-primary)] truncate">
+                          <span className="flex-1 min-w-0 text-[11px] font-semibold text-text-primary truncate">
                             {a.label}
                           </span>
-                          <time className="text-[10px] font-mono text-[var(--text-muted)] tabular-nums shrink-0">
+                          <time className="text-[10px] font-mono text-text-muted tabular-nums shrink-0">
                             {a.detail}
                           </time>
                         </li>
@@ -215,7 +215,7 @@ export function ChildActivityPanel() {
                     })}
                   </ol>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+                  <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
                     <Clock className="w-3.5 h-3.5" />
                     No recent activity
                   </div>

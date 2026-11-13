@@ -41,24 +41,24 @@ function DatabaseHealthInner() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
       <div>
-        <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Database className="w-6 h-6 text-sky-400" />
+        <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+          <Database className="w-6 h-6 text-action-info" />
           Database Health
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-text-muted mt-1">
           PostgreSQL connectivity, sizing, connections, cache efficiency and query depth.
           Backup &amp; retention policies live under Backup Status and Data Governance.
         </p>
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
+        <p className="text-sm text-text-muted">
+          Signed in as <span className="font-mono text-text-secondary">{role}</span>
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Database health data unavailable: {error}
         </div>
@@ -68,49 +68,49 @@ function DatabaseHealthInner() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
           {busy ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-[var(--bg-elevated)]/40" />
+              <div key={i} className="h-28 animate-pulse rounded-xl bg-bg-elevated/40" />
             ))
           ) : (
             <>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Connectivity</p>
-                <p className={`mt-1 text-xl font-bold ${d?.status === "healthy" ? "text-emerald-400" : "text-rose-400"}`}>
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Connectivity</p>
+                <p className={`mt-1 text-xl font-bold ${d?.status === "healthy" ? "text-action-success" : "text-action-danger"}`}>
                   {d?.status ?? "unknown"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-text-muted">
                   {d?.latencyMs != null ? `${d.latencyMs} ms round-trip` : "latency unavailable"}
                 </p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Database Size</p>
-                <p className="mt-1 text-xl font-bold text-sky-400">{d?.databaseSize ?? "N/A"}</p>
-                <p className="text-xs text-[var(--text-muted)]">pg_database_size(current)</p>
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Database Size</p>
+                <p className="mt-1 text-xl font-bold text-action-info">{d?.databaseSize ?? "N/A"}</p>
+                <p className="text-xs text-text-muted">pg_database_size(current)</p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Connections</p>
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Connections</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {d?.connections ? `${d.connections.active} / ${d.connections.total}` : "N/A"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">active / total sessions</p>
+                <p className="text-xs text-text-muted">active / total sessions</p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Longest Query</p>
-                <p className="mt-1 text-xl font-bold text-amber-400">
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Longest Query</p>
+                <p className="mt-1 text-xl font-bold text-action-warning">
                   {d?.longestQuery != null ? `${d.longestQuery}s` : "idle"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">active query running time</p>
+                <p className="text-xs text-text-muted">active query running time</p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Cache Hit Ratio</p>
-                <p className="mt-1 text-xl font-bold text-emerald-400">
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Cache Hit Ratio</p>
+                <p className="mt-1 text-xl font-bold text-action-success">
                   {d?.cacheHitRatio != null ? `${d.cacheHitRatio}%` : "N/A"}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">shared buffers hit / read</p>
+                <p className="text-xs text-text-muted">shared buffers hit / read</p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Data &amp; Backups</p>
-                <p className="mt-1 text-xl font-bold text-[var(--text-secondary)]">Governed</p>
-                <p className="text-xs text-[var(--text-muted)]">See Backup Status for dump freshness</p>
+              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Data &amp; Backups</p>
+                <p className="mt-1 text-xl font-bold text-text-secondary">Governed</p>
+                <p className="text-xs text-text-muted">See Backup Status for dump freshness</p>
               </div>
             </>
           )}

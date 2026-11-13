@@ -18,22 +18,22 @@ const POSTURE: Record<
     icon: ShieldCheck,
     label: "System Secured",
     note: "6 Active Security Shields",
-    cls: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
-    badgeCls: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    cls: "bg-emerald-500/10 border-emerald-500/30 text-action-success",
+    badgeCls: "bg-emerald-500/20 text-action-success border-emerald-500/40",
   },
   elevated: {
     icon: ShieldQuestion,
     label: "Elevated Monitoring",
     note: "High Telemetry Active",
-    cls: "bg-amber-500/10 border-amber-500/30 text-amber-400",
-    badgeCls: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    cls: "bg-amber-500/10 border-amber-500/30 text-action-warning",
+    badgeCls: "bg-amber-500/20 text-action-warning border-amber-500/40",
   },
   critical: {
     icon: ShieldAlert,
     label: "Critical Verification",
     note: "Step-Up Auth Enforced",
-    cls: "bg-rose-500/10 border-rose-500/30 text-rose-400",
-    badgeCls: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+    cls: "bg-rose-500/10 border-rose-500/30 text-action-danger",
+    badgeCls: "bg-rose-500/20 text-action-danger border-rose-500/40",
   },
 };
 
@@ -185,7 +185,7 @@ export default function SecurityPage() {
       metric: "100%",
       submetric: "Verified Identity",
       badge: "ACTIVE",
-      barColor: "bg-emerald-400",
+      barColor: "bg-action-success",
       barWidth: "w-full",
       tag: "Identity & Role Scope",
     },
@@ -207,7 +207,7 @@ export default function SecurityPage() {
       metric: "0 Failures",
       submetric: "Brute-force Shielded",
       badge: "ACTIVE",
-      barColor: "bg-indigo-400",
+      barColor: "bg-action-primary",
       barWidth: "w-full",
       tag: "Credential Lock",
     },
@@ -218,7 +218,7 @@ export default function SecurityPage() {
       metric: "AES-256",
       submetric: "Isolated Data Scope",
       badge: "ISOLATED",
-      barColor: "bg-purple-400",
+      barColor: "bg-unit-c",
       barWidth: "w-full",
       tag: "Row Level Protection",
     },
@@ -229,7 +229,7 @@ export default function SecurityPage() {
       metric: `${gateTraffic} r/m`,
       submetric: wsConnected ? "Live WS Feed Sync" : "Standby Feed Sync",
       badge: wsConnected ? "ONLINE" : "STANDBY",
-      barColor: wsConnected ? "bg-emerald-400" : "bg-amber-400",
+      barColor: wsConnected ? "bg-action-success" : "bg-action-warning",
       barWidth: "w-[88%]",
       tag: "Network Telemetry",
     },
@@ -248,23 +248,23 @@ export default function SecurityPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-dvh bg-[var(--bg-base)] text-[var(--text-primary)] p-4 md:p-6 space-y-4 max-w-5xl mx-auto select-none">
+      <div className="min-h-dvh bg-bg-base text-text-primary p-4 md:p-6 space-y-4 max-w-5xl mx-auto select-none">
         
         {/* Minimal Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary transition-all cursor-pointer"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h1 className="text-lg md:text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h1 className="text-lg md:text-xl font-bold tracking-tight text-text-primary">
                 Security Hub
               </h1>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-text-muted">
                 {user?.name || "Account"} • <span className="font-semibold">{displayRoleName}</span>
               </p>
             </div>
@@ -274,7 +274,7 @@ export default function SecurityPage() {
             {isSysadmin && (
               <button
                 onClick={() => router.push("/sysadmin/security")}
-                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-action-success text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
               >
                 <ServerCog className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Admin</span>
@@ -287,17 +287,17 @@ export default function SecurityPage() {
         <div className={`rounded-2xl border p-3.5 transition-all ${p.cls}`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-action-success flex items-center justify-center shrink-0">
                 <MainIcon className="w-4.5 h-4.5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xs font-bold text-[var(--text-primary)]">{p.label}</h2>
+                  <h2 className="text-xs font-bold text-text-primary">{p.label}</h2>
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${p.badgeCls}`}>
                     100% SECURED
                   </span>
                 </div>
-                <p className="text-[11px] text-[var(--text-muted)]">{p.note}</p>
+                <p className="text-[11px] text-text-muted">{p.note}</p>
               </div>
             </div>
           </div>
@@ -305,12 +305,12 @@ export default function SecurityPage() {
 
         {/* The 6 Infographic Security Cards */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
+          <div className="flex items-center justify-between text-xs text-text-muted px-1">
             <span className="font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-emerald-400" />
+              <Layers className="w-3.5 h-3.5 text-action-success" />
               Click any container to inspect individual parameters ({CARDS.length})
             </span>
-            <span className="font-mono text-[10px]">Role: <strong className="text-[var(--text-primary)]">{displayRoleName}</strong></span>
+            <span className="font-mono text-[10px]">Role: <strong className="text-text-primary">{displayRoleName}</strong></span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -320,51 +320,51 @@ export default function SecurityPage() {
                 <div
                   key={card.id}
                   onClick={() => router.push(`/security/${card.id}`)}
-                  className="group relative rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:border-emerald-500/50 hover:bg-[var(--bg-elevated)] transition-all cursor-pointer select-none space-y-3 shadow-sm active:scale-[0.99]"
+                  className="group relative rounded-2xl border border-border bg-bg-surface p-4 hover:border-emerald-500/50 hover:bg-bg-elevated transition-all cursor-pointer select-none space-y-3 shadow-sm active:scale-[0.99]"
                 >
                   {/* Card Header */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-action-success flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-110 transition-transform">
                         <CardIcon className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="text-xs font-bold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
+                        <h3 className="text-xs font-bold text-text-primary group-hover:text-action-success transition-colors">
                           {card.title}
                         </h3>
-                        <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                        <span className="text-[10px] text-text-muted font-mono">
                           {card.tag}
                         </span>
                       </div>
                     </div>
 
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-action-success border border-emerald-500/20 shrink-0">
                       {card.badge}
                     </span>
                   </div>
 
                   {/* Main Metric Infographic Display */}
-                  <div className="bg-[var(--bg-base)]/80 rounded-xl p-3 border border-[var(--border)]/60 flex items-center justify-between gap-2">
+                  <div className="bg-bg-base/80 rounded-xl p-3 border border-border/60 flex items-center justify-between gap-2">
                     <div>
-                      <div className="text-lg font-black text-[var(--text-primary)] tracking-tight font-mono">
+                      <div className="text-lg font-black text-text-primary tracking-tight font-mono">
                         {card.metric}
                       </div>
-                      <div className="text-[10px] text-[var(--text-muted)] font-medium">
+                      <div className="text-[10px] text-text-muted font-medium">
                         {card.submetric}
                       </div>
                     </div>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 opacity-80" />
+                    <CheckCircle2 className="w-4 h-4 text-action-success shrink-0 opacity-80" />
                   </div>
 
                   {/* Visual Progress / Infographic Bar */}
                   <div className="space-y-1">
-                    <div className="h-1.5 w-full bg-[var(--bg-base)] rounded-full overflow-hidden border border-[var(--border)]/40">
+                    <div className="h-1.5 w-full bg-bg-base rounded-full overflow-hidden border border-border/40">
                       <div className={`h-full ${card.barColor} ${card.barWidth} rounded-full transition-all duration-500`} />
                     </div>
                   </div>
 
                   {/* Footer tap indicator */}
-                  <div className="flex items-center justify-between text-[10px] font-medium text-[var(--text-muted)] group-hover:text-emerald-400 transition-colors pt-1">
+                  <div className="flex items-center justify-between text-[10px] font-medium text-text-muted group-hover:text-action-success transition-colors pt-1">
                     <span>Inspect Parameters</span>
                     <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -375,7 +375,7 @@ export default function SecurityPage() {
         </div>
 
         {/* Clean Footer */}
-        <div className="text-center pt-2 text-[10px] font-mono text-[var(--text-muted)]">
+        <div className="text-center pt-2 text-[10px] font-mono text-text-muted">
           Gate Monitor Security Core • Role: {displayRoleName} • Click any container to enter
         </div>
 

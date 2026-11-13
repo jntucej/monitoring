@@ -157,26 +157,26 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
   };
 
   const inputCls =
-    "w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]";
+    "w-full px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary";
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-          <ScrollText className="w-5 h-5 text-[var(--action-warning)]" />
+        <h3 className="font-semibold flex items-center gap-2 text-text-primary">
+          <ScrollText className="w-5 h-5 text-action-warning" />
           Exit Reasons
         </h3>
         <button
           type="button"
           onClick={openCreate}
-          className="text-xs flex items-center gap-1 bg-[var(--bg-base)] px-2 py-1 rounded border border-[var(--border)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)]"
+          className="text-xs flex items-center gap-1 bg-bg-base px-2 py-1 rounded border border-border hover:bg-[var(--bg-surface-hover)] text-text-primary"
         >
           <Plus className="w-3 h-3" /> Add Reason
         </button>
       </div>
 
       {reasons.length === 0 ? (
-        <p className="text-xs text-[var(--text-muted)] text-center py-4">No exit reasons configured.</p>
+        <p className="text-xs text-text-muted text-center py-4">No exit reasons configured.</p>
       ) : (
         <div className="space-y-2">
           {reasons.map((r, i) => (
@@ -184,16 +184,16 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               key={r.code}
               className={`flex items-center justify-between gap-3 p-3 rounded-lg border ${
                 r.is_active
-                  ? "border-[var(--border)] bg-[var(--bg-base)]"
-                  : "border-[var(--border)] bg-[var(--bg-base)] opacity-50"
+                  ? "border-border bg-bg-base"
+                  : "border-border bg-bg-base opacity-50"
               }`}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-[var(--text-primary)] truncate">{r.name}</p>
-                <p className="text-xs text-[var(--text-muted)] truncate">
+                <p className="text-sm font-medium text-text-primary truncate">{r.name}</p>
+                <p className="text-xs text-text-muted truncate">
                   {r.description || "No description"}
                 </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                <p className="text-[11px] text-text-muted mt-0.5">
                   approval: {r.approvalBy} · notify: {r.parentNotification}
                   {r.maxDurationHours != null && ` · max ${r.maxDurationHours}h`}
                 </p>
@@ -202,7 +202,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 <button
                   type="button"
                   onClick={() => openEdit(i)}
-                  className="p-1.5 text-[var(--text-muted)] hover:text-[var(--action-primary)]"
+                  className="p-1.5 text-text-muted hover:text-action-primary"
                   aria-label="Edit exit reason"
                 >
                   <Pencil className="w-4 h-4" />
@@ -210,7 +210,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 <button
                   type="button"
                   onClick={() => setDeleteTarget(r)}
-                  className="p-1.5 text-rose-500 hover:text-rose-400"
+                  className="p-1.5 text-action-danger hover:text-action-danger"
                   aria-label="Delete exit reason"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -224,7 +224,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
       {message && (
         <div
           className={`flex items-center gap-2 text-sm font-medium mt-3 ${
-            message.type === "success" ? "text-emerald-400" : "text-rose-400"
+            message.type === "success" ? "text-action-success" : "text-action-danger"
           }`}
         >
           {message.type === "success" ? (
@@ -239,15 +239,15 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
       {/* Create / Edit modal */}
       {formOpen && form && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold text-text-primary">
                 {editingIndex === null ? "New Exit Reason" : "Edit Exit Reason"}
               </h3>
               <button
                 type="button"
                 onClick={() => setFormOpen(false)}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="text-text-muted hover:text-text-primary"
               >
                 ✕
               </button>
@@ -256,7 +256,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="code">Code *</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="code">Code *</label>
                   <input id="code"
                     type="text"
                     value={form.code}
@@ -266,7 +266,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="name">Name *</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="name">Name *</label>
                   <input id="name"
                     type="text"
                     value={form.name}
@@ -277,7 +277,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               </div>
 
               <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="description">Description</label>
+                <label className="block text-xs text-text-muted mb-1" htmlFor="description">Description</label>
                 <textarea id="description"
                   value={form.description}
                   onChange={(e) => updateField("description", e.target.value)}
@@ -286,10 +286,10 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               </div>
 
               <div>
-                <label className="block text-xs text-[var(--text-muted)] mb-2">Applicable To</label>
+                <label className="block text-xs text-text-muted mb-2">Applicable To</label>
                 <div className="flex flex-wrap gap-3">
                   {APPLICABLE_OPTIONS.map((opt) => (
-                    <label key={opt} className="text-xs flex items-center gap-1 text-[var(--text-primary)]">
+                    <label key={opt} className="text-xs flex items-center gap-1 text-text-primary">
                       <input
                         type="checkbox"
                         checked={(form.applicableTo || []).includes(opt)}
@@ -304,7 +304,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="requires-approval">Requires Approval</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="requires-approval">Requires Approval</label>
                   <select id="requires-approval"
                     value={form.requiresApproval ? "true" : "false"}
                     onChange={(e) => updateField("requiresApproval", e.target.value === "true")}
@@ -315,7 +315,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="approval-by">Approval By</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="approval-by">Approval By</label>
                   <select id="approval-by"
                     value={form.approvalBy}
                     onChange={(e) => updateField("approvalBy", e.target.value)}
@@ -329,7 +329,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="parent-notification">Parent Notification</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="parent-notification">Parent Notification</label>
                   <select id="parent-notification"
                     value={form.parentNotification}
                     onChange={(e) => updateField("parentNotification", e.target.value)}
@@ -343,7 +343,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-muted)] mb-1" htmlFor="max-duration-hours">Max Duration (hours)</label>
+                  <label className="block text-xs text-text-muted mb-1" htmlFor="max-duration-hours">Max Duration (hours)</label>
                   <input id="max-duration-hours"
                     type="number"
                     value={form.maxDurationHours ?? ""}
@@ -356,11 +356,11 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[var(--border)]">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => setFormOpen(false)}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
               >
                 Cancel
               </button>
@@ -368,7 +368,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 type="button"
                 onClick={() => void saveForm()}
                 disabled={loading}
-                className="rounded-lg px-4 py-2 text-sm font-semibold bg-[var(--action-primary)] text-white hover:brightness-110 disabled:opacity-50"
+                className="rounded-lg px-4 py-2 text-sm font-semibold bg-action-primary text-white hover:brightness-110 disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : "Save"}
               </button>

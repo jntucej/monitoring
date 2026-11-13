@@ -8,13 +8,13 @@ export function WeekBar() {
   const today = useVPRetention((s) => s.todayWins.length);
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]/50 px-3 py-2 text-[11px]">
-      <span className="text-[var(--text-muted)]">
-        <span className="font-semibold text-[var(--text-primary)]">{session}</span> decisions this session
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated/50 px-3 py-2 text-[11px]">
+      <span className="text-text-muted">
+        <span className="font-semibold text-text-primary">{session}</span> decisions this session
         {today > 0 && (
           <>
             {" · "}
-            <span className="font-semibold text-[var(--text-primary)]">{today}</span> today
+            <span className="font-semibold text-text-primary">{today}</span> today
           </>
         )}
       </span>

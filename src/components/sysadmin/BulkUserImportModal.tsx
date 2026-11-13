@@ -177,32 +177,32 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
-        <div className="flex justify-between items-center border-b border-[var(--border)] pb-3">
+      <div className="bg-bg-surface border border-border rounded-2xl p-4 sm:p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
+        <div className="flex justify-between items-center border-b border-border pb-3">
           <h3 className="font-bold text-lg text-white flex items-center gap-2">
-            <Upload className="w-5 h-5 text-sky-400" /> Bulk Student Import
+            <Upload className="w-5 h-5 text-action-info" /> Bulk Student Import
           </h3>
-          <button onClick={onClose} className="p-1 text-[var(--text-muted)] hover:text-white">
+          <button onClick={onClose} className="p-1 text-text-muted hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {!report && (
           <>
-            <div className="text-xs text-[var(--text-muted)] space-y-1">
+            <div className="text-xs text-text-muted space-y-1">
               <p>
                 Upload the college sheet (<code>8 columns</code> minimal, or up to 35).
                 HTNO drives year, batch and branch — <b>everything else is captured as-is.</b>
               </p>
               <p>
-                <b>New / re-upload:</b> rows whose roll already exists are <span className="text-amber-400">skipped</span> (never updated).
-                Only empty-field / required-field problems mark a row as <span className="text-rose-400">invalid</span>.
+                <b>New / re-upload:</b> rows whose roll already exists are <span className="text-action-warning">skipped</span> (never updated).
+                Only empty-field / required-field problems mark a row as <span className="text-action-danger">invalid</span>.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <label className="cursor-pointer px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-2">
-                <FileText className="w-4 h-4 text-sky-400" /> Choose CSV File
+              <label className="cursor-pointer px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base flex items-center gap-2">
+                <FileText className="w-4 h-4 text-action-info" /> Choose CSV File
                 <input type="file" accept=".csv" onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -215,7 +215,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button
                 type="button"
                 onClick={() => downloadCsv(MINIMAL_CSV, "student_import_template.csv")}
-                className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-action-info flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5" /> Download Template
               </button>
@@ -223,7 +223,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button
                 type="button"
                 onClick={() => { setCsvText(MINIMAL_CSV); setPreview(null); }}
-                className="px-3 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-purple-400 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-unit-c flex items-center gap-1.5"
               >
                 <ScrollText className="w-3.5 h-3.5" /> Load Sample
               </button>
@@ -234,19 +234,19 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               placeholder={"HTNO,STUDENT_NAME,FATHER/GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456"}
               value={csvText}
               onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
-              className="w-full font-mono text-xs p-3 bg-[var(--bg-base)] border border-[var(--border)] rounded-xl text-white focus:outline-none"
+              className="w-full font-mono text-xs p-3 bg-bg-base border border-border rounded-xl text-white focus:outline-none"
             />
 
             {preview && preview.summary.total > 0 && (
-              <div className="p-3 rounded-lg text-xs space-y-2 bg-[var(--bg-base)] border border-[var(--border)]">
+              <div className="p-3 rounded-lg text-xs space-y-2 bg-bg-base border border-border">
                 <div className="flex gap-4 font-semibold">
                   <span>{preview.summary.total} rows</span>
-                  <span className="text-emerald-400">{preview.summary.valid} importable</span>
-                  <span className="text-amber-400">{preview.summary.skipped} already in DB</span>
-                  <span className={preview.summary.invalid ? "text-rose-400" : ""}>{preview.summary.invalid} invalid</span>
+                  <span className="text-action-success">{preview.summary.valid} importable</span>
+                  <span className="text-action-warning">{preview.summary.skipped} already in DB</span>
+                  <span className={preview.summary.invalid ? "text-action-danger" : ""}>{preview.summary.invalid} invalid</span>
                 </div>
                 {preview.skippedRows.length > 0 && (
-                  <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-amber-200">
+                  <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-action-warning">
                     <b>{preview.skippedRows.length}</b> row(s) match existing students — they will be skipped (no update).
                     {preview.skippedRows.slice(0, 5).map((s) => (
                       <div key={s.roll} className="pl-2 text-amber-300/80">row {s.row} · {s.roll}{s.name ? ` (${s.name})` : ""}</div>
@@ -257,7 +257,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                 {preview.errors.length > 0 && (
                   <div className="max-h-28 overflow-y-auto space-y-1">
                     {preview.errors.slice(0, 10).map((er, i) => (
-                      <div key={i} className="text-rose-400">
+                      <div key={i} className="text-action-danger">
                         Row {er.row}{er.field ? ` (${er.field})` : ""}: {er.message}
                       </div>
                     ))}
@@ -266,13 +266,13 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-              <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">Cancel</button>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <button onClick={onClose} className="px-3 py-1.5 text-xs text-text-muted hover:text-white font-medium">Cancel</button>
               <button
                 type="button"
                 onClick={handleImport}
                 disabled={busy !== "idle" || !csvText.trim()}
-                className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
               >
                 {busy === "commit" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importing…</> : "Run Import"}
               </button>
@@ -282,43 +282,43 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
         {report && (
           <div className="space-y-3">
-            <div className="text-xs text-[var(--text-muted)]">
+            <div className="text-xs text-text-muted">
               Import finished. The modal stays open so you can review and download the report.
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
-              <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">{report.imported} imported</div>
-              <div className="rounded-lg p-2 bg-amber-500/10 border border-amber-500/20 text-amber-400">{report.skipped} skipped (already in DB)</div>
-              <div className="rounded-lg p-2 bg-rose-500/10 border border-rose-500/20 text-rose-400">{report.invalid} invalid</div>
+              <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/20 text-action-success">{report.imported} imported</div>
+              <div className="rounded-lg p-2 bg-amber-500/10 border border-amber-500/20 text-action-warning">{report.skipped} skipped (already in DB)</div>
+              <div className="rounded-lg p-2 bg-rose-500/10 border border-rose-500/20 text-action-danger">{report.invalid} invalid</div>
             </div>
 
             <button
               type="button"
               onClick={downloadReport}
-              className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-semibold hover:bg-[var(--bg-base)] text-sky-400 flex items-center justify-center gap-2"
+              className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-action-info flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" /> Download Report CSV (imported + not-imported)
             </button>
 
             {reportBootstrapCodes && reportBootstrapCodes.length > 0 && (
               <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs space-y-1">
-                <div className="font-semibold text-emerald-400">
+                <div className="font-semibold text-action-success">
                   {reportBootstrapCodes.length} one-time setup code(s) issued — hand each to the student so they
                   can activate at <code className="font-mono">/bootstrap?code=…</code>
                 </div>
-                <div className="text-[var(--text-muted)]">
+                <div className="text-text-muted">
                   Each code is shown once and stored hashed (in <code>enrollment_codes</code>). It is not
                   recoverable later, so copy it into the CSV before closing this dialog.
                 </div>
-                <pre className="text-[11px] leading-5 bg-[var(--bg-base)] rounded p-2 overflow-x-auto">
+                <pre className="text-[11px] leading-5 bg-bg-base rounded p-2 overflow-x-auto">
 {reportBootstrapCodes.map((c) => `row ${c.row}  ${c.roll ?? ""}  ${c.code}`).join("\n")}
                 </pre>
               </div>
             )}
 
-            <div className="max-h-64 overflow-y-auto rounded-lg border border-[var(--border)]">
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border">
               <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-[var(--bg-base)] text-[var(--text-muted)]">
+                <thead className="sticky top-0 bg-bg-base text-text-muted">
                   <tr>
                     <th className="p-2 text-left">Row</th>
                     <th className="p-2 text-left">Roll</th>
@@ -332,16 +332,16 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                   {report.rows.map((r) => {
                     const codeEntry = reportBootstrapCodes?.find((c) => c.row === r.row);
                     return (
-                      <tr key={r.row} className="border-t border-[var(--border)]">
-                        <td className="p-2 text-[var(--text-muted)]">{r.row}</td>
+                      <tr key={r.row} className="border-t border-border">
+                        <td className="p-2 text-text-muted">{r.row}</td>
                         <td className="p-2 font-mono">{r.roll || "—"}</td>
                         <td className="p-2">{r.name || "—"}</td>
                         <td className="p-2">
-                          {r.status === "imported" && <span className="text-emerald-400 font-semibold">Imported</span>}
-                          {r.status === "skipped" && <span className="text-amber-400 font-semibold">Already in DB</span>}
-                          {r.status === "invalid" && <span className="text-rose-400 font-semibold">Invalid</span>}
+                          {r.status === "imported" && <span className="text-action-success font-semibold">Imported</span>}
+                          {r.status === "skipped" && <span className="text-action-warning font-semibold">Already in DB</span>}
+                          {r.status === "invalid" && <span className="text-action-danger font-semibold">Invalid</span>}
                         </td>
-                        <td className="p-2 text-[var(--text-muted)]">{r.reason}</td>
+                        <td className="p-2 text-text-muted">{r.reason}</td>
                         <td className="p-2 font-mono">{codeEntry?.code ?? ""}</td>
                       </tr>
                     );
@@ -351,11 +351,11 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
             </div>
 
             <div className="flex justify-end gap-2">
-              <button onClick={onClose} className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-white font-medium">Close</button>
+              <button onClick={onClose} className="px-3 py-1.5 text-xs text-text-muted hover:text-white font-medium">Close</button>
               <button
                 type="button"
                 onClick={() => { setReport(null); setPreview(null); setCsvText(""); setReportBootstrapCodes(null); }}
-                className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg"
+                className="px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold rounded-lg"
               >
                 Import Another File
               </button>
@@ -364,7 +364,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
         )}
 
         {!report && (
-          <details className="text-xs text-[var(--text-muted)]">
+          <details className="text-xs text-text-muted">
             <summary className="cursor-pointer font-semibold">Column reference</summary>
             <div className="mt-2 space-y-2">
               <p className="font-semibold text-[var(--text)]">Minimal 8-column sheet</p>

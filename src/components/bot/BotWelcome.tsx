@@ -28,17 +28,17 @@ export const BotWelcome = memo(function BotWelcome({
       {/* Welcome card: boat silhouette + institutional title. No emoji,
           no slogan — the "quiet library desk attendant" tone. */}
       <div className="flex flex-col items-center gap-1.5 mb-4">
-        <div className="h-11 w-11 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]
+        <div className="h-11 w-11 rounded-xl bg-bg-elevated border border-border
                         flex items-center justify-center">
           <BotBoat size={24} />
         </div>
-        <p className="text-[15px] font-semibold text-[var(--text-primary)]">{t.title}</p>
+        <p className="text-[15px] font-semibold text-text-primary">{t.title}</p>
         {welcome && (
-          <p className="text-[11px] text-[var(--text-muted)]">{welcome.subtitle}</p>
+          <p className="text-[11px] text-text-muted">{welcome.subtitle}</p>
         )}
       </div>
 
-      <p className="text-xs text-[var(--text-muted)] mb-2 text-center">{t.tryAsking}</p>
+      <p className="text-xs text-text-muted mb-2 text-center">{t.tryAsking}</p>
 
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-1.5 justify-center mb-3">
@@ -50,9 +50,9 @@ export const BotWelcome = memo(function BotWelcome({
               transition={{ delay: i * 0.04 }}
               disabled={disabled}
               onClick={() => onChip(label)}
-              className="text-[11px] px-2.5 py-1 rounded-full border border-[var(--border)]
-                         hover:bg-[var(--bg-elevated)] active:scale-95 transition
-                         disabled:opacity-50 text-[var(--text-secondary)]"
+              className="text-[11px] px-2.5 py-1 rounded-full border border-border
+                         hover:bg-bg-elevated active:scale-95 transition
+                         disabled:opacity-50 text-text-secondary"
             >
               {label}
             </motion.button>
@@ -69,9 +69,9 @@ export const BotWelcome = memo(function BotWelcome({
             transition={{ delay: 0.1 + i * 0.04 }}
             disabled={disabled}
             onClick={() => onChip(s)}
-            className="text-left text-xs px-3 py-2 rounded-lg border border-[var(--border)]
-                       hover:bg-[var(--bg-elevated)] active:scale-[0.99] transition
-                       disabled:opacity-50 text-[var(--text-secondary)]"
+            className="text-left text-xs px-3 py-2 rounded-lg border border-border
+                       hover:bg-bg-elevated active:scale-[0.99] transition
+                       disabled:opacity-50 text-text-secondary"
           >
             {s}
           </motion.button>

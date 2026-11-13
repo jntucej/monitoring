@@ -98,38 +98,38 @@ const api = useApi();
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border shadow-sm">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Clock className="w-6 h-6 text-sky-400" /> Scheduled Background Jobs
+            <Clock className="w-6 h-6 text-action-info" /> Scheduled Background Jobs
           </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-text-muted mt-1">
             Automated maintenance tasks, daily stats generation, and system cleanups
           </p>
         </div>
         <button
           onClick={fetchJobs}
           disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh Jobs
         </button>
       </div>
 
       {/* Jobs Table */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)] bg-[var(--bg-elevated)]/40 font-bold text-xs text-white">
+      <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-border bg-bg-elevated/40 font-bold text-xs text-white">
           Active Background Tasks
         </div>
         {loading ? (
-          <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading background jobs...</div>
+          <div className="py-12 text-center text-xs text-text-muted">Loading background jobs...</div>
         ) : jobs.length === 0 ? (
-          <div className="py-12 text-center text-xs text-[var(--text-muted)]">No scheduled jobs registered.</div>
+          <div className="py-12 text-center text-xs text-text-muted">No scheduled jobs registered.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs min-w-[650px]">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+                <tr className="border-b border-border text-text-muted">
                   <th className="p-4">Job Name</th>
                   <th className="p-4">Cron Schedule</th>
                   <th className="p-4">Last Run</th>
@@ -137,15 +137,15 @@ const api = useApi();
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
+                  <tr key={job.id} className="hover:bg-bg-elevated/30 transition-colors">
                     <td className="p-4 font-bold text-white">
                       {job.name}
-                      <span className="block text-[10px] text-[var(--text-muted)] font-normal">{job.description}</span>
+                      <span className="block text-[10px] text-text-muted font-normal">{job.description}</span>
                     </td>
-                    <td className="p-4 font-mono text-[11px] text-sky-300">{job.cron_expression}</td>
-                    <td className="p-4 font-mono text-[10px] text-[var(--text-muted)]">
+                    <td className="p-4 font-mono text-[11px] text-action-info">{job.cron_expression}</td>
+                    <td className="p-4 font-mono text-[10px] text-text-muted">
                       {job.last_run ? new Date(job.last_run).toLocaleString() : "Never"}
                     </td>
                     <td className="p-4">
@@ -153,8 +153,8 @@ const api = useApi();
                         onClick={() => handleToggleJob(job.id, job.enabled)}
                         className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border transition-all ${
                           job.enabled
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                            : "bg-[var(--bg-elevated)]0/20 text-[var(--text-muted)] border-[var(--border)]/30"
+                            ? "bg-emerald-500/20 text-action-success border-emerald-500/30"
+                            : "bg-bg-elevated0/20 text-text-muted border-border/30"
                         }`}
                       >
                         {job.enabled ? "ENABLED" : "DISABLED"}
@@ -164,7 +164,7 @@ const api = useApi();
                       <button
                         onClick={() => handleRunNow(job.id)}
                         disabled={runningJobId === job.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-[10px] shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-action-info text-white font-bold text-[10px] shadow-sm disabled:opacity-50"
                       >
                         <Play className={`w-3 h-3 ${runningJobId === job.id ? "animate-spin" : ""}`} /> Run Now
                       </button>
@@ -177,44 +177,44 @@ const api = useApi();
         )}
       </div>
       {/* Runs Table */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] p-6 rounded-2xl space-y-4">
+      <div className="bg-bg-surface border border-border p-6 rounded-2xl space-y-4">
         <h3 className="font-bold text-sm text-white flex items-center gap-2">
-          <Clock className="w-4 h-4 text-purple-400" /> Execution History (Last 10 Runs)
+          <Clock className="w-4 h-4 text-unit-c" /> Execution History (Last 10 Runs)
         </h3>
         {runs.length === 0 ? (
-          <div className="py-6 text-center text-xs text-[var(--text-muted)] border border-dashed border-[var(--border)] rounded-xl">
+          <div className="py-6 text-center text-xs text-text-muted border border-dashed border-border rounded-xl">
             No recent job executions recorded.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+                <tr className="border-b border-border text-text-muted">
                   <th className="pb-2">Job ID</th>
                   <th className="pb-2">Status</th>
                   <th className="pb-2">Time</th>
                   <th className="pb-2 text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {runs.map((r) => (
-                  <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors">
+                  <tr key={r.id} className="hover:bg-bg-elevated/50 transition-colors">
                     <td className="py-2.5 font-mono text-white font-bold">{r.job_id}</td>
                     <td className="py-2.5">
                       {r.status === "SUCCESS" ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400 font-bold text-[10px]">
+                        <span className="inline-flex items-center gap-1 text-action-success font-bold text-[10px]">
                           <CheckCircle2 className="w-3 h-3" /> SUCCESS
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-rose-400 font-bold text-[10px]">
+                        <span className="inline-flex items-center gap-1 text-action-danger font-bold text-[10px]">
                           <XCircle className="w-3 h-3" /> FAILED
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 font-mono text-[10px] text-[var(--text-muted)]">
+                    <td className="py-2.5 font-mono text-[10px] text-text-muted">
                       {new Date(r.start_time).toLocaleString()}
                     </td>
-                    <td className="py-2.5 text-right text-[10px] text-[var(--text-muted)]">
+                    <td className="py-2.5 text-right text-[10px] text-text-muted">
                       {r.error_message || "Completed in < 5s"}
                     </td>
                   </tr>

@@ -228,9 +228,9 @@ function ManualEntryInner() {
 
   const statusTone = (status: string | undefined) => {
     const s = (status ?? "").toUpperCase();
-    if (s === "ACTIVE") return "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
-    if (s === "SUSPENDED" || s === "LOCKED") return "text-rose-400 border-rose-500/30 bg-rose-500/10";
-    return "text-amber-400 border-amber-500/30 bg-amber-500/10";
+    if (s === "ACTIVE") return "text-action-success border-emerald-500/30 bg-emerald-500/10";
+    if (s === "SUSPENDED" || s === "LOCKED") return "text-action-danger border-rose-500/30 bg-rose-500/10";
+    return "text-action-warning border-amber-500/30 bg-amber-500/10";
   };
 
   const personStatusLabel = (status: string | undefined) => {
@@ -249,18 +249,18 @@ function ManualEntryInner() {
         <button
           type="button"
           onClick={() => setVoiceOpen(true)}
-          className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-primary transition-colors"
         >
           <Mic className="h-3.5 w-3.5" aria-hidden />
           Voice entry
         </button>
         <VoiceAssistantModal onExecuteCommand={handleVoiceCommand} />
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-3 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
             <div className="space-y-1.5 min-w-0">
               <label
                 htmlFor="manual-name"
-                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+                className="text-xs font-semibold text-text-muted uppercase tracking-wide"
               >
                 Name on ID
               </label>
@@ -270,13 +270,13 @@ function ManualEntryInner() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
               <label
                 htmlFor="manual-id"
-                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+                className="text-xs font-semibold text-text-muted uppercase tracking-wide"
               >
                 Roll / Employee / ID Number
               </label>
@@ -289,7 +289,7 @@ function ManualEntryInner() {
                   if (e.key === "Enter") void runLookup();
                 }}
                 placeholder="e.g. 24JJ1A0501"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] font-mono text-sm text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
           </div>
@@ -297,7 +297,7 @@ function ManualEntryInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -311,14 +311,14 @@ function ManualEntryInner() {
 
       {/* Result card */}
       {lookupState === "loading" && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-5 flex items-center gap-3 text-sm text-[var(--text-muted)] min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-5 flex items-center gap-3 text-sm text-text-muted min-w-0">
           <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
           Looking up {lastQuery}…
         </div>
       )}
 
       {lookupState === "error" && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 flex items-start gap-3 text-sm text-rose-300 min-w-0">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 flex items-start gap-3 text-sm text-action-danger min-w-0">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <div className="min-w-0">
             <p className="font-semibold">Lookup failed</p>
@@ -329,12 +329,12 @@ function ManualEntryInner() {
 
       {lookupState === "notfound" && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3 text-sm min-w-0">
-          <XCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <XCircle className="w-5 h-5 text-action-warning shrink-0 mt-0.5" />
           <div className="min-w-0">
-            <p className="font-semibold text-amber-300">
+            <p className="font-semibold text-action-warning">
               No match for <span className="font-mono">{lastQuery}</span>
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">
+            <p className="text-xs text-text-muted mt-1">
               Double-check the number, or deny entry and log the incident. New
               persons must be registered by admin before first gate access.
             </p>
@@ -353,7 +353,7 @@ function ManualEntryInner() {
           <div className="flex items-start gap-3 min-w-0">
             <span
               className={`shrink-0 ${
-                result.status === "ACTIVE" ? "text-emerald-400" : "text-rose-400"
+                result.status === "ACTIVE" ? "text-action-success" : "text-action-danger"
               }`}
             >
               {result.status === "ACTIVE" ? (
@@ -364,7 +364,7 @@ function ManualEntryInner() {
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <p className="text-sm font-bold text-[var(--text-primary)]">
+                <p className="text-sm font-bold text-text-primary">
                   {result.name}
                 </p>
                 <span
@@ -377,46 +377,46 @@ function ManualEntryInner() {
               </div>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
                 <div>
-                  <dt className="text-[var(--text-muted)]">Type</dt>
-                  <dd className="text-[var(--text-primary)] font-medium capitalize">
+                  <dt className="text-text-muted">Type</dt>
+                  <dd className="text-text-primary font-medium capitalize">
                     {result.personType}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-[var(--text-muted)]">ID / Roll</dt>
-                  <dd className="font-mono text-[var(--text-primary)]">{result.uniqueId}</dd>
+                  <dt className="text-text-muted">ID / Roll</dt>
+                  <dd className="font-mono text-text-primary">{result.uniqueId}</dd>
                 </div>
                 {result.department && (
                   <div>
-                    <dt className="text-[var(--text-muted)]">Department</dt>
-                    <dd className="text-[var(--text-primary)]">{result.department}</dd>
+                    <dt className="text-text-muted">Department</dt>
+                    <dd className="text-text-primary">{result.department}</dd>
                   </div>
                 )}
                 {result.year != null && (
                   <div>
-                    <dt className="text-[var(--text-muted)]">Year</dt>
-                    <dd className="text-[var(--text-primary)]">{result.year}</dd>
+                    <dt className="text-text-muted">Year</dt>
+                    <dd className="text-text-primary">{result.year}</dd>
                   </div>
                 )}
                 {result.roomNumber && (
                   <div>
-                    <dt className="text-[var(--text-muted)]">Room</dt>
-                    <dd className="text-[var(--text-primary)]">{result.roomNumber}</dd>
+                    <dt className="text-text-muted">Room</dt>
+                    <dd className="text-text-primary">{result.roomNumber}</dd>
                   </div>
                 )}
                 {result.designation && (
                   <div>
-                    <dt className="text-[var(--text-muted)]">Designation</dt>
-                    <dd className="text-[var(--text-primary)]">{result.designation}</dd>
+                    <dt className="text-text-muted">Designation</dt>
+                    <dd className="text-text-primary">{result.designation}</dd>
                   </div>
                 )}
                 <div>
-                  <dt className="text-[var(--text-muted)]">Campus</dt>
+                  <dt className="text-text-muted">Campus</dt>
                   <dd
                     className={
                       result.onCampus
-                        ? "text-emerald-400 font-semibold"
-                        : "text-[var(--text-primary)]"
+                        ? "text-action-success font-semibold"
+                        : "text-text-primary"
                     }
                   >
                     {result.onCampus ? "On campus" : "Off campus"}
@@ -424,7 +424,7 @@ function ManualEntryInner() {
                 </div>
               </dl>
               {name.trim() && (
-                <p className="text-xs text-[var(--text-muted)] mt-2 flex items-center gap-1.5 min-w-0">
+                <p className="text-xs text-text-muted mt-2 flex items-center gap-1.5 min-w-0">
                   <User className="w-3.5 h-3.5 shrink-0" />
                   Name on ID matches:{" "}
                   {name.trim().toLowerCase() === result.name.trim().toLowerCase()
@@ -440,10 +440,10 @@ function ManualEntryInner() {
       {/* Record form — rendered below a successful lookup */}
       {lookupState === "found" && result && (
         <OperatorWidgetBoundary title="Record Scan">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
+          <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-3 min-w-0">
             {/* Direction toggle */}
             <div className="space-y-1.5 min-w-0">
-              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+              <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                 Direction
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -455,8 +455,8 @@ function ManualEntryInner() {
                     disabled={recordState === "submitting"}
                     className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg border text-sm font-bold transition disabled:opacity-50 ${
                       recordDirection === d
-                        ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-black"
-                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border)]"
+                        ? "bg-action-primary border-action-primary text-black"
+                        : "border-border bg-bg-base text-text-primary hover:border-border"
                     }`}
                   >
                     {d === "IN" ? "Entry (IN)" : "Exit (OUT)"}
@@ -469,7 +469,7 @@ function ManualEntryInner() {
             <div className="space-y-1.5 min-w-0">
               <label
                 htmlFor="manual-reason"
-                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+                className="text-xs font-semibold text-text-muted uppercase tracking-wide"
               >
                 Reason
               </label>
@@ -478,7 +478,7 @@ function ManualEntryInner() {
                 value={recordReason}
                 onChange={(e) => setRecordReason(e.target.value)}
                 disabled={recordState === "submitting"}
-                className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               >
                 <option value="" disabled>
                   Select a reason…
@@ -498,7 +498,7 @@ function ManualEntryInner() {
               <div className="mt-4">
                 <label
                   htmlFor="manual-entry-type"
-                  className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wide"
+                  className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wide"
                 >
                   Entry type
                 </label>
@@ -510,7 +510,7 @@ function ManualEntryInner() {
                     className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm border transition-colors ${
                       recordEntryType === "hosteller"
                         ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
-                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                        : "border-border bg-bg-base text-text-primary hover:border-border"
                     }`}
                   >
                     Hosteller
@@ -522,13 +522,13 @@ function ManualEntryInner() {
                     className={`min-h-[44px] inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm border transition-colors ${
                       recordEntryType === "day_scholar"
                         ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent-text)] font-medium"
-                        : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                        : "border-border bg-bg-base text-text-primary hover:border-border"
                     }`}
                   >
                     Day Scholar
                   </button>
                 </div>
-                <p className="mt-1.5 text-xs text-[var(--text-muted)]">
+                <p className="mt-1.5 text-xs text-text-muted">
                   Defaults to the student&#39;s stored entry type; change only if
                   they are explicitly arriving as the other type today.
                 </p>
@@ -540,7 +540,7 @@ function ManualEntryInner() {
             <div className="space-y-1.5 min-w-0">
               <label
                 htmlFor="manual-reason-text"
-                className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide"
+                className="text-xs font-semibold text-text-muted uppercase tracking-wide"
               >
                 Additional details (optional)
               </label>
@@ -551,7 +551,7 @@ function ManualEntryInner() {
                 onChange={(e) => setRecordReasonText(e.target.value)}
                 placeholder="e.g. returning from doctor visit"
                 disabled={recordState === "submitting"}
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
 
@@ -560,10 +560,10 @@ function ManualEntryInner() {
               <div
                 className={`rounded-lg border p-3 text-xs flex items-start gap-2 min-w-0 ${
                   recordError.code === "NO_GATE_PASS"
-                    ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                    ? "border-rose-500/40 bg-rose-500/10 text-action-danger"
                     : recordError.code === "CONFLICT"
-                      ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
-                      : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                      ? "border-amber-500/40 bg-amber-500/10 text-action-warning"
+                      : "border-rose-500/30 bg-rose-500/10 text-action-danger"
                 }`}
               >
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -586,8 +586,8 @@ function ManualEntryInner() {
 
             {/* Success card */}
             {recordState === "success" && (
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-2 min-w-0">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-action-success flex items-center gap-2 min-w-0">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-action-success" />
                 <span>Scan recorded successfully.</span>
               </div>
             )}
@@ -596,7 +596,7 @@ function ManualEntryInner() {
               type="button"
               onClick={() => void submitRecord()}
               disabled={recordState === "submitting"}
-              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+              className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
             >
               {recordState === "submitting" ? (
                 <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />

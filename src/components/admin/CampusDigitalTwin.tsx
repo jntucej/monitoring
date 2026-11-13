@@ -56,7 +56,7 @@ function CampusDigitalTwinView() {
   usePolling(fetchTwin, { intervalMs: 10_000 });
 
   if (loading || !twinData) {
-    return <div className="p-8 text-center text-xs text-[var(--text-secondary)]">Initializing 2D Campus Digital Twin Engine...</div>;
+    return <div className="p-8 text-center text-xs text-text-secondary">Initializing 2D Campus Digital Twin Engine...</div>;
   }
 
   const getHeatmapColor = (pct: number) => {
@@ -67,9 +67,9 @@ function CampusDigitalTwinView() {
   };
 
   const getStrokeColor = (pct: number) => {
-    if (pct >= 85) return "#ef4444";
-    if (pct >= 65) return "#f59e0b";
-    return "#10b981";
+    if (pct >= 85) return "var(--action-danger)";
+    if (pct >= 65) return "var(--action-warning)";
+    return "var(--action-success)";
   };
 
   return (
@@ -77,10 +77,10 @@ function CampusDigitalTwinView() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <CardTitle className="text-base flex items-center gap-2">
-            <Radio className="h-5 w-5 text-purple-400 animate-pulse" />
+            <Radio className="h-5 w-5 text-unit-c animate-pulse" />
             2D Interactive Campus Digital Twin & Heatmap
           </CardTitle>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-secondary">
             Live layout with occupancy heatmaps, gate flow rates, and click-to-drill zone analytics.
           </p>
         </div>
@@ -100,7 +100,7 @@ function CampusDigitalTwinView() {
         </div>
       </div>
 
-      <div className="relative w-full h-[400px] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg overflow-hidden flex items-center justify-center p-4">
+      <div className="relative w-full h-[400px] bg-bg-elevated border border-border rounded-lg overflow-hidden flex items-center justify-center p-4">
         <svg viewBox="0 0 800 400" className="w-full h-full">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -118,8 +118,8 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[0].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="60" y="75" fill="#ffffff" fontSize="12" fontWeight="bold">{twinData.zones[0].name}</text>
-                <text x="60" y="95" fill="#9ca3af" fontSize="10">
+                <text x="60" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[0].name}</text>
+                <text x="60" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[0].current_occupancy} / {twinData.zones[0].capacity} ({twinData.zones[0].occupancy_percentage}%)
                 </text>
               </g>
@@ -133,8 +133,8 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[1].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="310" y="75" fill="#ffffff" fontSize="12" fontWeight="bold">{twinData.zones[1].name}</text>
-                <text x="310" y="95" fill="#9ca3af" fontSize="10">
+                <text x="310" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[1].name}</text>
+                <text x="310" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[1].current_occupancy} / {twinData.zones[1].capacity} ({twinData.zones[1].occupancy_percentage}%)
                 </text>
               </g>
@@ -148,8 +148,8 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[2].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="560" y="75" fill="#ffffff" fontSize="12" fontWeight="bold">{twinData.zones[2].name}</text>
-                <text x="560" y="95" fill="#9ca3af" fontSize="10">
+                <text x="560" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[2].name}</text>
+                <text x="560" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[2].current_occupancy} / {twinData.zones[2].capacity} ({twinData.zones[2].occupancy_percentage}%)
                 </text>
               </g>
@@ -163,8 +163,8 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor((twinData.zones[3] || twinData.zones[4]).occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="60" y="245" fill="#ffffff" fontSize="12" fontWeight="bold">{(twinData.zones[3] || twinData.zones[4]).name}</text>
-                <text x="60" y="265" fill="#9ca3af" fontSize="10">
+                <text x="60" y="245" fill="#fff" fontSize="12" fontWeight="bold">{(twinData.zones[3] || twinData.zones[4]).name}</text>
+                <text x="60" y="265" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {(twinData.zones[3] || twinData.zones[4]).current_occupancy} ({(twinData.zones[3] || twinData.zones[4]).occupancy_percentage}%)
                 </text>
               </g>
@@ -174,8 +174,8 @@ function CampusDigitalTwinView() {
           <g id="gates">
             {twinData.gates.map((g, i) => (
               <g key={g.id} transform={`translate(${180 + i * 140}, 360)`} className="cursor-pointer">
-                <circle r="12" fill={g.status === "online" ? "#10b981" : "#f59e0b"} />
-                <text x="0" y="4" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">G{i + 1}</text>
+                <circle r="12" fill={g.status === "online" ? "var(--action-success)" : "var(--action-warning)"} />
+                <text x="0" y="4" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">G{i + 1}</text>
               </g>
             ))}
           </g>
@@ -183,11 +183,11 @@ function CampusDigitalTwinView() {
       </div>
 
       {selectedZone && (
-        <div className="p-4 rounded border border-[var(--border)] bg-[var(--bg-surface-elevated)] space-y-3 text-xs">
+        <div className="p-4 rounded border border-border bg-[var(--bg-surface-elevated)] space-y-3 text-xs">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-purple-400" />
-              <h4 className="font-bold text-sm text-[var(--text-primary)]">{selectedZone.name} Detailed Breakdown</h4>
+              <Activity className="h-4 w-4 text-unit-c" />
+              <h4 className="font-bold text-sm text-text-primary">{selectedZone.name} Detailed Breakdown</h4>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setSelectedZone(null)} className="h-7 w-7 p-0">
               <X className="h-4 w-4" />
@@ -195,27 +195,27 @@ function CampusDigitalTwinView() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            <div className="p-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-center">
-              <span className="text-[var(--text-secondary)]">Students</span>
-              <div className="font-bold text-sm text-blue-400">
+            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+              <span className="text-text-secondary">Students</span>
+              <div className="font-bold text-sm text-action-primary">
                 {selectedZone.breakdown?.students ?? Math.round(selectedZone.current_occupancy * 0.7)}
               </div>
             </div>
-            <div className="p-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-center">
-              <span className="text-[var(--text-secondary)]">Faculty</span>
-              <div className="font-bold text-sm text-emerald-400">
+            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+              <span className="text-text-secondary">Faculty</span>
+              <div className="font-bold text-sm text-action-success">
                 {selectedZone.breakdown?.faculty ?? Math.round(selectedZone.current_occupancy * 0.15)}
               </div>
             </div>
-            <div className="p-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-center">
-              <span className="text-[var(--text-secondary)]">Staff</span>
-              <div className="font-bold text-sm text-amber-400">
+            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+              <span className="text-text-secondary">Staff</span>
+              <div className="font-bold text-sm text-action-warning">
                 {selectedZone.breakdown?.staff ?? Math.round(selectedZone.current_occupancy * 0.1)}
               </div>
             </div>
-            <div className="p-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-center">
-              <span className="text-[var(--text-secondary)]">Visitors</span>
-              <div className="font-bold text-sm text-purple-400">
+            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+              <span className="text-text-secondary">Visitors</span>
+              <div className="font-bold text-sm text-unit-c">
                 {selectedZone.breakdown?.visitors ?? Math.round(selectedZone.current_occupancy * 0.05)}
               </div>
             </div>
@@ -242,7 +242,7 @@ const DynamicDigitalTwinView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+      <div className="p-8 text-center text-xs text-text-secondary">
         Initializing 2D Campus Digital Twin Engine...
       </div>
     ),
@@ -277,7 +277,7 @@ export function CampusDigitalTwin() {
       {isVisible ? (
         <DynamicDigitalTwinView />
       ) : (
-        <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+        <div className="p-8 text-center text-xs text-text-secondary">
           Initializing 2D Campus Digital Twin Engine...
         </div>
       )}

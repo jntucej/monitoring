@@ -83,8 +83,8 @@ function VpDecisionHistoryInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Decision History">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-text-muted mb-3 min-w-0">
             <History className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Past Decisions — VP Scope
@@ -100,20 +100,20 @@ function VpDecisionHistoryInner() {
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold border shrink-0 transition-colors ${
                   filter === f
-                    ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
-                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border)] hover:text-[var(--text-secondary)]"
+                    ? "bg-sky-500/15 text-action-info border-sky-500/30"
+                    : "bg-bg-elevated text-text-muted border-border hover:text-text-secondary"
                 }`}
               >
                 {f === "ALL" ? "All" : f.charAt(0) + f.slice(1).toLowerCase()}
               </button>
             ))}
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+            <span className="ml-auto text-xs text-text-muted shrink-0">
               {approved?.total ?? 0} approved · {rejected?.total ?? 0} rejected
             </span>
           </div>
 
           {error && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
               History unavailable: {error}
             </div>
           )}
@@ -121,39 +121,39 @@ function VpDecisionHistoryInner() {
           {loading ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-12 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
+                <div key={i} className="h-12 rounded-lg bg-bg-elevated/60 animate-pulse" />
               ))}
             </div>
           ) : merged.length === 0 ? (
             <div className="p-6 text-center">
-              <ScrollText className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No past decisions recorded in this scope.</p>
+              <ScrollText className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">No past decisions recorded in this scope.</p>
             </div>
           ) : (
             <ul className="space-y-2 min-w-0">
               {merged.slice(0, 20).map((r) => (
                 <li
                   key={`${r.status}-${r.id}`}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="rounded-lg border border-border bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
                       r.status === "APPROVED"
-                        ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                        : "bg-rose-500/15 text-rose-400 border border-rose-500/30"
+                        ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
+                        : "bg-rose-500/15 text-action-danger border border-rose-500/30"
                     }`}
                   >
                     {r.status}
                   </span>
-                  <span className="font-mono text-xs text-sky-400 shrink-0">{r.ticket_number}</span>
-                  <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
+                  <span className="font-mono text-xs text-action-info shrink-0">{r.ticket_number}</span>
+                  <span className="text-sm text-text-secondary truncate min-w-0 flex-1">
                     {r.student?.name || "—"}
                     {r.student?.student_details?.roll ? ` · ${r.student.student_details.roll}` : ""}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] capitalize shrink-0">
+                  <span className="text-xs text-text-muted capitalize shrink-0">
                     {r.workflow_type.replace(/_/g, " ")}
                   </span>
-                  <span className="text-xs text-[var(--text-muted)] shrink-0 ml-auto">
+                  <span className="text-xs text-text-muted shrink-0 ml-auto">
                     {r.updated_at
                       ? new Date(r.updated_at).toLocaleDateString(undefined, {
                           month: "short",
@@ -165,7 +165,7 @@ function VpDecisionHistoryInner() {
                 </li>
               ))}
               {merged.length > 20 && (
-                <li className="text-xs text-[var(--text-muted)]">
+                <li className="text-xs text-text-muted">
                   Showing 20 of {merged.length} decisions.
                 </li>
               )}

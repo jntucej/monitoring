@@ -60,23 +60,23 @@ export function LiveCountsStrip() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         {items.slice(0, 4).map((it) => (
-          <div key={it.label} className="bg-[var(--home-bg-elev-1,#0F172A)]/90 px-5 py-6 text-center">
-            <p className="text-3xl font-bold text-[var(--home-text-primary,#F3F4F6)] md:text-4xl">
+          <div key={it.label} className="bg-[var(--home-bg-elev-1,var(--bg-base))]/90 px-5 py-6 text-center">
+            <p className="text-3xl font-bold text-[var(--home-text-primary,var(--bg-surface))] md:text-4xl">
               <RollingDigits value={it.value} cellHeight={44} />
             </p>
-            <p className="mt-1 text-xs uppercase tracking-wider text-[var(--home-text-muted,#6B7280)]">
+            <p className="mt-1 text-xs uppercase tracking-wider text-[var(--home-text-muted,var(--text-muted))]">
               {it.label}
             </p>
           </div>
         ))}
-        <div className="col-span-2 bg-[var(--home-bg-elev-1,#0F172A)]/90 px-5 py-6 text-center md:col-span-1">
-          <p className="text-3xl font-bold text-[var(--home-text-primary,#F3F4F6)] md:text-4xl">
+        <div className="col-span-2 bg-[var(--home-bg-elev-1,var(--bg-base))]/90 px-5 py-6 text-center md:col-span-1">
+          <p className="text-3xl font-bold text-[var(--home-text-primary,var(--bg-surface))] md:text-4xl">
             <RollingDigits value={items[3].value} cellHeight={44} />
-            <span className="text-[var(--home-text-muted,#6B7280)]">.</span>
+            <span className="text-[var(--home-text-muted,var(--text-muted))]">.</span>
             <RollingDigits value={items[4].value} cellHeight={44} />
-            <span className="text-[var(--home-text-muted,#6B7280)]">%</span>
+            <span className="text-[var(--home-text-muted,var(--text-muted))]">%</span>
           </p>
-          <p className="mt-1 text-xs uppercase tracking-wider text-[var(--home-text-muted,#6B7280)]">
+          <p className="mt-1 text-xs uppercase tracking-wider text-[var(--home-text-muted,var(--text-muted))]">
             Uptime
           </p>
         </div>

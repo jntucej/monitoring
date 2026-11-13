@@ -56,17 +56,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -138,7 +138,7 @@ function DeputyWardenDecisionHistoryInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -146,15 +146,15 @@ function DeputyWardenDecisionHistoryInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">History data unavailable: {error}</span>
@@ -185,7 +185,7 @@ function DeputyWardenDecisionHistoryInner() {
             label="Decided"
             value={decidedCount}
             sub="Records moved on from the principal stage"
-            accent="text-sky-400"
+            accent="text-action-info"
             loading={busy}
           />
           <StatCard
@@ -193,7 +193,7 @@ function DeputyWardenDecisionHistoryInner() {
             label="Approved"
             value={approvedCount}
             sub="Approved or completed at principal stage"
-            accent="text-emerald-400"
+            accent="text-action-success"
             loading={busy}
           />
           <StatCard
@@ -201,7 +201,7 @@ function DeputyWardenDecisionHistoryInner() {
             label="Rejected / Escalated"
             value={rejectedCount}
             sub="Rejected or escalated out of principal stage"
-            accent="text-rose-400"
+            accent="text-action-danger"
             loading={busy}
           />
         </div>
@@ -209,16 +209,16 @@ function DeputyWardenDecisionHistoryInner() {
 
       {/* Decision table */}
       <WidgetBoundary title="Decisions">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
               Loading decision history…
             </div>
           ) : decisions.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <FileText className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <FileText className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 No recorded decisions at the deputy-warden stage yet. Past gate activity and
                 approval outcomes will appear here.
               </p>
@@ -227,7 +227,7 @@ function DeputyWardenDecisionHistoryInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Ticket</th>
                     <th className="text-left px-4 py-3">Workflow</th>
                     <th className="text-left px-4 py-3">Outcome</th>
@@ -236,23 +236,23 @@ function DeputyWardenDecisionHistoryInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {decisions.map((d) => (
-                    <tr key={d.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-[var(--text-secondary)] whitespace-nowrap">
+                    <tr key={d.id} className="hover:bg-bg-elevated/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {d.ticket_number}
                       </td>
-                      <td className="px-4 py-3 text-[var(--text-secondary)]">{d.workflow_type}</td>
+                      <td className="px-4 py-3 text-text-secondary">{d.workflow_type}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
                             d.status === "APPROVED" || d.status === "COMPLETED"
-                              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
-                              : "border-rose-400/30 bg-rose-400/10 text-rose-400"
+                              ? "border-emerald-400/30 bg-emerald-400/10 text-action-success"
+                              : "border-rose-400/30 bg-rose-400/10 text-action-danger"
                           }`}
                         >
                           {d.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[var(--text-muted)]">{fmtStamp(d.decidedAt)}</td>
+                      <td className="px-4 py-3 text-text-muted">{fmtStamp(d.decidedAt)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -138,7 +138,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-x-0 bottom-0 z-50 bg-[var(--bg-surface)] border-t border-[var(--border)] rounded-t-2xl shadow-2xl max-h-[80dvh] flex flex-col"
+              className="fixed inset-x-0 bottom-0 z-50 bg-bg-surface border-t border-border rounded-t-2xl shadow-2xl max-h-[80dvh] flex flex-col"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation drawer"
@@ -149,17 +149,17 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               </div>
 
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Home className="w-5 h-5 text-[var(--action-primary)]" />
-                  <span className="text-sm font-bold text-[var(--text-primary)]">
+                  <Home className="w-5 h-5 text-action-primary" />
+                  <span className="text-sm font-bold text-text-primary">
                     {user?.name || "Operator"}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
@@ -179,11 +179,11 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
               </div>
 
               {/* Logout */}
-              <div className="border-t border-[var(--border)] p-4">
+              <div className="border-t border-border p-4">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 font-semibold text-sm transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-rose-500/10 text-action-danger hover:bg-rose-500/20 font-semibold text-sm transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
                   Sign Out
@@ -200,31 +200,31 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col w-56 lg:w-64 h-full bg-[var(--bg-surface)] border-r border-[var(--border)]",
+        "hidden md:flex flex-col w-56 lg:w-64 h-full bg-bg-surface border-r border-border",
         "fixed left-0 top-0 z-40"
       )}
       role="navigation"
       aria-label="Operator navigation"
     >
       {/* Rail header */}
-      <div className="flex items-center gap-2 px-4 py-4 border-b border-[var(--border)]">
-        <Home className="w-5 h-5 text-[var(--action-primary)]" />
-        <span className="text-sm font-bold text-[var(--text-primary)]">
+      <div className="flex items-center gap-2 px-4 py-4 border-b border-border">
+        <Home className="w-5 h-5 text-action-primary" />
+        <span className="text-sm font-bold text-text-primary">
           Gate Monitor
         </span>
       </div>
 
       {/* User info */}
-      <div className="px-4 py-3 border-b border-[var(--border)]">
+      <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold">
+          <div className="w-8 h-8 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-xs font-bold">
             {user?.name?.charAt(0)?.toUpperCase() || "O"}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+            <p className="text-xs font-semibold text-text-primary truncate">
               {user?.name || "Operator"}
             </p>
-            <p className="text-[10px] text-[var(--text-muted)] truncate">
+            <p className="text-[10px] text-text-muted truncate">
               {user?.gateId ? `Gate ${user.gateId}` : "No gate assigned"}
             </p>
           </div>
@@ -250,11 +250,11 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
       </div>
 
       {/* Logout */}
-      <div className="border-t border-[var(--border)] p-3">
+      <div className="border-t border-border p-3">
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-action-danger hover:bg-rose-500/10 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sign Out

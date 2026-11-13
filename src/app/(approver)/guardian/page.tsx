@@ -75,17 +75,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)]">
-        <Icon className="w-4 h-4 text-emerald-400" />
+    <div className="rounded-xl border border-border bg-bg-surface p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted">
+        <Icon className="w-4 h-4 text-action-success" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted">{sub}</p>}
     </div>
   );
 }
@@ -104,16 +104,16 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="group rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex items-center gap-3 hover:bg-[var(--bg-elevated)] transition-colors motion-reduce:transition-none"
+      className="group rounded-xl border border-border bg-bg-surface p-4 flex items-center gap-3 hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
     >
-      <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-400 shrink-0">
+      <div className="rounded-lg bg-emerald-500/10 p-2 text-action-success shrink-0">
         <Icon className="w-5 h-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-[var(--text-primary)]">{title}</p>
-        <p className="text-xs text-[var(--text-muted)] truncate">{sub}</p>
+        <p className="text-sm font-semibold text-text-primary">{title}</p>
+        <p className="text-xs text-text-muted truncate">{sub}</p>
       </div>
-      <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-400 shrink-0" />
+      <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success shrink-0" />
     </Link>
   );
 }
@@ -181,12 +181,12 @@ function GuardianOverviewInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            <ShieldCheck className="w-6 h-6 text-action-success" />
             Linked Student Overview
           </p>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-text-muted">
             Signed in as{" "}
-            <span className="font-mono text-[var(--text-secondary)]">
+            <span className="font-mono text-text-secondary">
               {user?.role ?? "guardian"}
             </span>
             {user?.name ? ` · ${user.name}` : ""}
@@ -210,7 +210,7 @@ function GuardianOverviewInner() {
           label="On Campus"
           value={onCampus}
           sub={`${offCampus} ward(s) off campus`}
-          accent="text-sky-400"
+          accent="text-action-info"
           loading={personsLoading && wards.length === 0}
         />
         <StatCard
@@ -218,7 +218,7 @@ function GuardianOverviewInner() {
           label="Pending Requests"
           value={pendingRows.length || pending?.total || 0}
           sub="Ward pass/leave requests awaiting the approval chain"
-          accent="text-amber-400"
+          accent="text-action-warning"
           loading={pendingLoading && pendingRows.length === 0}
         />
         <StatCard
@@ -226,7 +226,7 @@ function GuardianOverviewInner() {
           label="Active Passes"
           value={activePasses.length}
           sub={`${pendingPasses.length} still pending`}
-          accent="text-emerald-400"
+          accent="text-action-success"
           loading={passesLoading && passList.length === 0}
         />
       </div>

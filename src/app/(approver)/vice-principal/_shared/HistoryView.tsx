@@ -48,8 +48,8 @@ export function HistoryView({
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
-        <p className="text-xs text-[var(--text-muted)]">Decision outcomes over the last {days} days</p>
+        <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
+        <p className="text-xs text-text-muted">Decision outcomes over the last {days} days</p>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -59,7 +59,7 @@ export function HistoryView({
         <MiniStat label="Escalated" value={d?.totals.escalated} tone="warn" />
       </div>
 
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+      <section className="rounded-2xl border border-border bg-bg-surface p-4">
         <h2 className="mb-3 text-sm font-semibold">Decisions over time</h2>
         <div className="h-52 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -75,8 +75,8 @@ export function HistoryView({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
-        <header className="border-b border-[var(--border)] px-4 py-3">
+      <section className="rounded-2xl border border-border bg-bg-surface">
+        <header className="border-b border-border px-4 py-3">
           <h2 className="text-sm font-semibold">Decision history</h2>
         </header>
         {loading && !d ? (
@@ -88,25 +88,25 @@ export function HistoryView({
             <EmptyState title="No decisions in this range" />
           </div>
         ) : (
-          <ul className="divide-y divide-[var(--border)]">
+          <ul className="divide-y divide-border">
             {d!.decisions.map((dec) => (
               <li key={dec.ticket} className="flex items-center gap-3 px-4 py-3">
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                     dec.outcome === "APPROVED"
-                      ? "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                      : "bg-[var(--action-danger)]/10 text-[var(--action-danger)]"
+                      ? "bg-action-primary/10 text-action-primary"
+                      : "bg-action-danger/10 text-action-danger"
                   }`}
                 >
                   {dec.outcome}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-[var(--text-primary)]">
+                  <p className="truncate text-sm text-text-primary">
                     {dec.student} · {dec.ticket}
                   </p>
-                  <p className="text-[11px] text-[var(--text-muted)]">{dec.reason}</p>
+                  <p className="text-[11px] text-text-muted">{dec.reason}</p>
                 </div>
-                <span className="hidden text-[11px] text-[var(--text-muted)] sm:inline">
+                <span className="hidden text-[11px] text-text-muted sm:inline">
                   {dec.decidedAt}
                 </span>
               </li>

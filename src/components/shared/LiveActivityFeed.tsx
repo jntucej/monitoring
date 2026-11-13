@@ -35,9 +35,9 @@ interface FeedEvent {
 const MAX_FEED = 12;
 
 const SEVERITY_CLASS: Record<string, string> = {
-  info: "bg-[var(--action-info)]/10 text-[var(--action-info)]",
-  warning: "bg-[var(--action-warning)]/10 text-[var(--action-warning)]",
-  critical: "bg-[var(--action-danger)]/10 text-[var(--action-danger)]",
+  info: "bg-action-info/10 text-action-info",
+  warning: "bg-action-warning/10 text-action-warning",
+  critical: "bg-action-danger/10 text-action-danger",
 };
 
 export interface LiveActivityFeedProps {
@@ -117,16 +117,16 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
       {/* Status header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <Activity className="h-4 w-4 text-[var(--action-primary)] shrink-0" />
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] truncate">
+          <Activity className="h-4 w-4 text-action-primary shrink-0" />
+          <h3 className="text-sm font-semibold text-text-primary truncate">
             Live Activity
           </h3>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium shrink-0 ${
             offline
-              ? "bg-[var(--action-danger)]/10 text-[var(--action-danger)]"
-              : "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
+              ? "bg-action-danger/10 text-action-danger"
+              : "bg-action-primary/10 text-action-primary"
           }`}
         >
           {offline ? (
@@ -140,16 +140,16 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
 
       {offline ? (
         /* Static empty list when the socket is disconnected */
-        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)] p-6 text-center">
-          <DoorOpen className="mx-auto h-8 w-8 text-[var(--text-muted)]" />
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
+        <div className="rounded-xl border border-dashed border-border bg-bg-elevated p-6 text-center">
+          <DoorOpen className="mx-auto h-8 w-8 text-text-muted" />
+          <p className="mt-2 text-xs text-text-muted">
             Live feed disconnected — showing last known events.
           </p>
         </div>
       ) : events.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)] p-6 text-center">
-          <Bell className="mx-auto h-8 w-8 text-[var(--text-muted)]" />
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
+        <div className="rounded-xl border border-dashed border-border bg-bg-elevated p-6 text-center">
+          <Bell className="mx-auto h-8 w-8 text-text-muted" />
+          <p className="mt-2 text-xs text-text-muted">
             No live events yet. Gate status changes and alerts will appear here.
           </p>
         </div>
@@ -160,17 +160,17 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
               key={e.id}
               className={`flex items-start gap-3 rounded-lg border p-3 ${
                 e.kind === "alert" && e.severity === "critical"
-                  ? "border-[var(--action-danger)]/30 bg-[var(--action-danger)]/5"
-                  : "border-[var(--border)] bg-[var(--bg-surface)]"
+                  ? "border-action-danger/30 bg-action-danger/5"
+                  : "border-border bg-bg-surface"
               }`}
             >
               <span
                 className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
                   e.kind === "gate"
-                    ? "bg-[var(--action-info)]/10 text-[var(--action-info)]"
+                    ? "bg-action-info/10 text-action-info"
                     : e.severity
                     ? SEVERITY_CLASS[e.severity] ?? SEVERITY_CLASS.info
-                    : "bg-[var(--action-warning)]/10 text-[var(--action-warning)]"
+                    : "bg-action-warning/10 text-action-warning"
                 }`}
               >
                 {e.kind === "gate" ? (
@@ -182,14 +182,14 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
                 )}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-[var(--text-primary)] truncate">
+                <p className="text-xs font-medium text-text-primary truncate">
                   {e.title}
                 </p>
                 {e.detail ? (
-                  <p className="text-[11px] text-[var(--text-muted)] truncate">{e.detail}</p>
+                  <p className="text-[11px] text-text-muted truncate">{e.detail}</p>
                 ) : null}
               </div>
-              <span className="shrink-0 text-[10px] text-[var(--text-muted)]">
+              <span className="shrink-0 text-[10px] text-text-muted">
                 {formatTime(new Date(e.timestamp).toISOString())}
               </span>
             </li>
@@ -205,7 +205,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
 
   return (
     <WidgetBoundary title="Live Activity">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5">
+      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
         {feed}
       </div>
     </WidgetBoundary>

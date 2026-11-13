@@ -81,27 +81,27 @@ export default function NotificationSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-[var(--action-primary)] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-action-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="flex items-center justify-between border-b border-[var(--border)] pb-6">
+      <div className="flex items-center justify-between border-b border-border pb-6">
         <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">
-            <Bell className="w-6 h-6 text-[var(--action-primary)]" />
+          <p className="text-sm font-medium text-text-secondary mb-3">
+            <Bell className="w-6 h-6 text-action-primary" />
             Notification Preferences
           </p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-text-muted mt-1">
             Manage how and when you receive campus gate system alerts.
           </p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--action-primary)] text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="flex items-center gap-2 px-5 py-2.5 bg-action-primary text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {saving ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -115,17 +115,17 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Channels */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Notification Channels</h2>
-        <p className="text-xs text-[var(--text-muted)]">Select channels you want to receive alerts through.</p>
+      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-text-primary">Notification Channels</h2>
+        <p className="text-xs text-text-muted">Select channels you want to receive alerts through.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <label className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer">
+          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-blue-500" />
+              <Smartphone className="w-5 h-5 text-action-primary" />
               <div>
-                <span className="text-sm font-medium text-[var(--text-primary)] block">Push Notifications</span>
-                <span className="text-xs text-[var(--text-muted)]">Browser and mobile push</span>
+                <span className="text-sm font-medium text-text-primary block">Push Notifications</span>
+                <span className="text-xs text-text-muted">Browser and mobile push</span>
               </div>
             </div>
             <input
@@ -136,12 +136,12 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer">
+          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
-              <Smartphone className="w-5 h-5 text-emerald-500" />
+              <Smartphone className="w-5 h-5 text-action-success" />
               <div>
-                <span className="text-sm font-medium text-[var(--text-primary)] block">SMS Alerts</span>
-                <span className="text-xs text-[var(--text-muted)]">Text messages for urgent events</span>
+                <span className="text-sm font-medium text-text-primary block">SMS Alerts</span>
+                <span className="text-xs text-text-muted">Text messages for urgent events</span>
               </div>
             </div>
             <input
@@ -152,12 +152,12 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer">
+          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-purple-500" />
+              <Mail className="w-5 h-5 text-unit-c" />
               <div>
-                <span className="text-sm font-medium text-[var(--text-primary)] block">Email Summary</span>
-                <span className="text-xs text-[var(--text-muted)]">Daily summaries and reports</span>
+                <span className="text-sm font-medium text-text-primary block">Email Summary</span>
+                <span className="text-xs text-text-muted">Daily summaries and reports</span>
               </div>
             </div>
             <input
@@ -168,12 +168,12 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer">
+          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
-              <AppWindow className="w-5 h-5 text-amber-500" />
+              <AppWindow className="w-5 h-5 text-action-warning" />
               <div>
-                <span className="text-sm font-medium text-[var(--text-primary)] block">In-App Notifications</span>
-                <span className="text-xs text-[var(--text-muted)]">Notification bell in header</span>
+                <span className="text-sm font-medium text-text-primary block">In-App Notifications</span>
+                <span className="text-xs text-text-muted">Notification bell in header</span>
               </div>
             </div>
             <input
@@ -187,9 +187,9 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Notification Categories */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Alert Categories</h2>
-        <p className="text-xs text-[var(--text-muted)]">Enable or disable specific types of alerts.</p>
+      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-text-primary">Alert Categories</h2>
+        <p className="text-xs text-text-muted">Enable or disable specific types of alerts.</p>
 
         <div className="space-y-3 pt-2">
           {Object.entries(prefs.types).map(([key, enabled]) => {
@@ -201,9 +201,9 @@ export default function NotificationSettingsPage() {
             return (
               <label
                 key={key}
-                className="flex items-center justify-between p-3 border border-[var(--border)] rounded-lg hover:bg-[var(--bg-elevated)] cursor-pointer"
+                className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer"
               >
-                <span className="text-sm font-medium text-[var(--text-primary)]">{formattedLabel}</span>
+                <span className="text-sm font-medium text-text-primary">{formattedLabel}</span>
                 <input
                   type="checkbox"
                   checked={enabled}
@@ -217,16 +217,16 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Quiet Hours */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-6 space-y-4">
+      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-[var(--action-primary)]" />
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Quiet Hours</h2>
+          <Clock className="w-5 h-5 text-action-primary" />
+          <h2 className="text-lg font-semibold text-text-primary">Quiet Hours</h2>
         </div>
-        <p className="text-xs text-[var(--text-muted)]">Suppress non-critical notifications during these hours.</p>
+        <p className="text-xs text-text-muted">Suppress non-critical notifications during these hours.</p>
 
         <div className="flex items-center gap-4 pt-2">
           <div>
-            <label className="text-xs text-[var(--text-muted)] block mb-1" htmlFor="start-time">Start Time</label>
+            <label className="text-xs text-text-muted block mb-1" htmlFor="start-time">Start Time</label>
             <input id="start-time"
               type="time"
               value={prefs.quietHours?.start || "22:00"}
@@ -234,12 +234,12 @@ export default function NotificationSettingsPage() {
                 ...prev,
                 quietHours: { start: e.target.value, end: prev.quietHours?.end || "06:00" }
               }))}
-              className="bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2"
+              className="bg-bg-elevated border border-border text-text-primary text-sm rounded-lg px-3 py-2"
             />
           </div>
 
           <div>
-            <label className="text-xs text-[var(--text-muted)] block mb-1" htmlFor="end-time">End Time</label>
+            <label className="text-xs text-text-muted block mb-1" htmlFor="end-time">End Time</label>
             <input id="end-time"
               type="time"
               value={prefs.quietHours?.end || "06:00"}
@@ -247,7 +247,7 @@ export default function NotificationSettingsPage() {
                 ...prev,
                 quietHours: { start: prev.quietHours?.start || "22:00", end: e.target.value }
               }))}
-              className="bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] text-sm rounded-lg px-3 py-2"
+              className="bg-bg-elevated border border-border text-text-primary text-sm rounded-lg px-3 py-2"
             />
           </div>
         </div>

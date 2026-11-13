@@ -69,7 +69,7 @@ function ExamBranchCalendarInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -77,15 +77,15 @@ function ExamBranchCalendarInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Calendar unavailable: {error}</span>
@@ -102,27 +102,27 @@ function ExamBranchCalendarInner() {
 
       {/* Category legend */}
       <WidgetBoundary title="Exam Calendar Categories">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 min-w-0">
             {cats.map((c) => (
               <span
                 key={c.code}
                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
                   followed.has(c.code)
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                    ? "bg-emerald-500/20 text-action-success"
+                    : "bg-bg-elevated text-text-muted"
                 }`}
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    followed.has(c.code) ? "bg-emerald-400" : "bg-[var(--bg-elevated)]"
+                    followed.has(c.code) ? "bg-action-success" : "bg-bg-elevated"
                   }`}
                 />
                 {c.label}
               </span>
             ))}
             {cats.length === 0 && (
-              <span className="text-xs text-[var(--text-muted)]">No categories configured yet.</span>
+              <span className="text-xs text-text-muted">No categories configured yet.</span>
             )}
           </div>
         </div>
@@ -130,15 +130,15 @@ function ExamBranchCalendarInner() {
 
       {/* Event list */}
       <WidgetBoundary title="Examination Schedule">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <CalendarDays className="w-4 h-4 text-emerald-400 shrink-0" />
+              <CalendarDays className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 {new Date().toLocaleString([], { month: "long", year: "numeric" })}
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {events.length} event(s)
             </span>
           </div>
@@ -148,17 +148,17 @@ function ExamBranchCalendarInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : events.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <CalendarDays className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <CalendarDays className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">
                 No examination events scheduled this month.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Events are published by the examination office and appear automatically.
               </p>
             </div>
@@ -170,11 +170,11 @@ function ExamBranchCalendarInner() {
                     <span className="text-sm font-medium text-white min-w-0 flex-1 truncate">
                       {ev.title}
                     </span>
-                    <span className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs shrink-0">
+                    <span className="inline-flex items-center rounded-full bg-bg-elevated text-text-muted px-2 py-0.5 text-xs shrink-0">
                       {ev.category}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--text-muted)] min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted min-w-0">
                     <span className="inline-flex items-center gap-1">
                       <CalendarDays className="w-3 h-3" />
                       {new Date(ev.date).toLocaleDateString([], {
@@ -190,7 +190,7 @@ function ExamBranchCalendarInner() {
                         {ev.location}
                       </span>
                     )}
-                    {ev.owner && <span className="text-[var(--text-muted)]">{ev.owner}</span>}
+                    {ev.owner && <span className="text-text-muted">{ev.owner}</span>}
                   </div>
                 </li>
               ))}

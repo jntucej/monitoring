@@ -120,10 +120,10 @@ export function OccupancyHeatmap() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <p className="text-xl font-bold flex items-center gap-2 text-white">
-            <MapPin className="h-5 w-5 text-emerald-400" />
+            <MapPin className="h-5 w-5 text-action-success" />
             Live Campus Presence Matrix
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             Who is inside each gate right now — entry/exit combined by role. Click any cell for details.
           </p>
         </div>
@@ -132,17 +132,17 @@ export function OccupancyHeatmap() {
             onClick={() => setLive(!live)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
               live
-                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]"
+                ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
+                : "bg-bg-elevated text-text-muted border border-border"
             }`}
           >
             <Activity className="h-3.5 w-3.5" />
             {live ? "LIVE" : "PAUSED"}
           </button>
-          <button onClick={load} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-elevated)]" title="Refresh">
+          <button onClick={load} className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-bg-elevated" title="Refresh">
             <RefreshCw className="h-4 w-4" />
           </button>
-          <span className="text-[10px] text-[var(--text-muted)] ml-2">
+          <span className="text-[10px] text-text-muted ml-2">
             {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : "…"}
           </span>
         </div>
@@ -150,44 +150,44 @@ export function OccupancyHeatmap() {
 
       {/* Summary strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-[var(--bg-surface)]/60 border border-[var(--border)] rounded-xl p-3">
-          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Inside</div>
+        <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
+          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Inside</div>
           <div className="text-2xl font-black text-white mt-1">{totalInside}</div>
         </div>
-        <div className="bg-[var(--bg-surface)]/60 border border-[var(--border)] rounded-xl p-3">
-          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Active Gates</div>
-          <div className="text-2xl font-black text-emerald-400 mt-1">{data?.gates.length ?? 0}</div>
+        <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
+          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Active Gates</div>
+          <div className="text-2xl font-black text-action-success mt-1">{data?.gates.length ?? 0}</div>
         </div>
-        <div className="bg-[var(--bg-surface)]/60 border border-[var(--border)] rounded-xl p-3">
-          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Peak Cell</div>
-          <div className="text-2xl font-black text-rose-400 mt-1">{maxCell}</div>
+        <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
+          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Peak Cell</div>
+          <div className="text-2xl font-black text-action-danger mt-1">{maxCell}</div>
         </div>
-        <div className="bg-[var(--bg-surface)]/60 border border-[var(--border)] rounded-xl p-3">
-          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Roles Tracked</div>
-          <div className="text-2xl font-black text-purple-400 mt-1">{data?.roles.length ?? 0}</div>
+        <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
+          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Roles Tracked</div>
+          <div className="text-2xl font-black text-unit-c mt-1">{data?.roles.length ?? 0}</div>
         </div>
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-sm text-rose-300">
+        <div className="px-4 py-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-sm text-action-danger">
           <strong>{error}</strong> — presence matrix unavailable. Gate data will appear once movement logs are recorded.
         </div>
       )}
 
       {/* ── THE MATRIX ── */}
       {data && data.gates.length > 0 && (
-        <div className="bg-[var(--bg-surface)]/40 border border-[var(--border)] rounded-xl overflow-hidden">
+        <div className="bg-bg-surface/40 border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-[520px]">
               <thead>
                 <tr>
-                  <th className="sticky left-0 bg-[var(--bg-surface)] z-10 p-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider text-left border-r border-[var(--border)] min-w-[100px]">
+                  <th className="sticky left-0 bg-bg-surface z-10 p-2 text-[10px] font-bold text-text-muted uppercase tracking-wider text-left border-r border-border min-w-[100px]">
                     Role ↓ / Gate →
                   </th>
                   {data.gates.map((g) => (
                     <th key={g.id} className="p-2 text-center">
-                      <div className="text-[10px] font-bold text-[var(--text-secondary)]">{g.code || g.name}</div>
-                      <div className="text-[9px] text-[var(--text-muted)] capitalize">{g.audience === "all" ? "main" : g.audience}</div>
+                      <div className="text-[10px] font-bold text-text-secondary">{g.code || g.name}</div>
+                      <div className="text-[9px] text-text-muted capitalize">{g.audience === "all" ? "main" : g.audience}</div>
                     </th>
                   ))}
                 </tr>
@@ -197,18 +197,18 @@ export function OccupancyHeatmap() {
                   const rowMax = Math.max(...data.gates.map((g) => data.matrix[g.id]?.[role] ?? 0));
                   return (
                     <tr key={role}>
-                      <td className="sticky left-0 bg-[var(--bg-surface)] z-10 p-2 border-r border-[var(--border)] border-b border-[var(--border)]/60">
+                      <td className="sticky left-0 bg-bg-surface z-10 p-2 border-r border-border border-b border-border/60">
                         <span className={`text-xs font-bold ${
-                          role === "student" ? "text-blue-400" :
-                          role === "faculty" ? "text-emerald-400" :
-                          role === "staff" ? "text-purple-400" :
-                          role === "worker" ? "text-amber-400" :
+                          role === "student" ? "text-action-primary" :
+                          role === "faculty" ? "text-action-success" :
+                          role === "staff" ? "text-unit-c" :
+                          role === "worker" ? "text-action-warning" :
                           role === "visitor" ? "text-cyan-400" :
-                          role === "principal" ? "text-rose-400" : "text-[var(--text-muted)]"
+                          role === "principal" ? "text-action-danger" : "text-text-muted"
                         }`}>
                           {ROLE_LABELS[role] ?? role}
                         </span>
-                        <div className="text-[9px] text-[var(--text-muted)] mt-0.5">{rowMax} peak</div>
+                        <div className="text-[9px] text-text-muted mt-0.5">{rowMax} peak</div>
                       </td>
                       {data.gates.map((g) => {
                         const v = data.matrix[g.id]?.[role] ?? 0;
@@ -216,7 +216,7 @@ export function OccupancyHeatmap() {
                         const tc = heatTextColor(v);
                         const isSel = selected?.gate.id === g.id && selected?.role === role;
                         return (
-                          <td key={g.id} className="p-0.5 border-b border-[var(--border)]/40">
+                          <td key={g.id} className="p-0.5 border-b border-border/40">
                             <button
                               onClick={() => v > 0 ? setSelected({ gate: g, role }) : setSelected(null)}
                               className="w-full h-12 sm:h-14 rounded-lg transition-all hover:ring-2 hover:ring-white/30 flex flex-col items-center justify-center"
@@ -237,7 +237,7 @@ export function OccupancyHeatmap() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)]">
+          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-border text-[10px] text-text-muted">
             <span className="font-bold">Heat:</span>
             {[0.05, 0.15, 0.30, 0.50, 0.70, 0.85, 1.0].map((pct) => (
               <div key={pct} className="flex items-center gap-1">
@@ -253,23 +253,23 @@ export function OccupancyHeatmap() {
       {/* ── Drill-down modal ── */}
       {selected && cellDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
+          <div className="bg-bg-surface border border-border rounded-2xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
-                  <Users className="h-4 w-4 text-emerald-400" />
+                  <Users className="h-4 w-4 text-action-success" />
                   {cellDetail.count} {cellDetail.count === 1 ? "person" : "people"} inside
                 </div>
-                <div className="text-xs text-[var(--text-muted)] mt-1">
+                <div className="text-xs text-text-muted mt-1">
                   {ROLE_LABELS[selected.role] ?? selected.role} @ {data?.gates.find((g) => g.id === selected.gate.id)?.name}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="text-[var(--text-muted)] hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setSelected(null)} className="text-text-muted hover:text-white"><X className="w-5 h-5" /></button>
             </div>
-            <div className="text-xs text-[var(--text-muted)]">
+            <div className="text-xs text-text-muted">
               Individual names are resolved from live movement logs. When scan data is recorded at this gate, each person will appear here by name, roll, and timestamp.
             </div>
-            <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-bold hover:bg-[var(--bg-elevated)]">Close</button>
+            <button onClick={() => setSelected(null)} className="w-full py-2 rounded-xl bg-bg-elevated text-text-secondary text-xs font-bold hover:bg-bg-elevated">Close</button>
           </div>
         </div>
       )}

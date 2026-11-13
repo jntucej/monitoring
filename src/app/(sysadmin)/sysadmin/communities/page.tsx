@@ -70,25 +70,25 @@ function SysadminCommunitiesInner() {
               description="Communities appear here once they are created."
             />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     {r.icon ? <span className="text-lg">{r.icon}</span> : <Users className="w-4 h-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">{r.name}</p>
+                      <p className="text-sm font-semibold text-text-primary">{r.name}</p>
                       {r.is_moderated && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-500/15 text-amber-400 flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-500/15 text-action-warning flex items-center gap-1">
                           <ShieldCheck className="w-3 h-3" /> Moderated
                         </span>
                       )}
                       {typeof r.memberCount === "number" && (
-                        <span className="text-xs text-[var(--text-muted)]">{r.memberCount} members</span>
+                        <span className="text-xs text-text-muted">{r.memberCount} members</span>
                       )}
                     </div>
-                    {r.description && <p className="text-xs text-[var(--text-secondary)] mt-1">{r.description}</p>}
+                    {r.description && <p className="text-xs text-text-secondary mt-1">{r.description}</p>}
                   </div>
                 </div>
               ))}

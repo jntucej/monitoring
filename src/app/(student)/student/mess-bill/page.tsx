@@ -70,31 +70,31 @@ export default function MessBillPage() {
       </div>
 
       {loading ? (
-        <p className="text-[var(--text-muted)] text-sm">Loading bill details…</p>
+        <p className="text-text-muted text-sm">Loading bill details…</p>
       ) : data ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
-            <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Meals Served</span>
-            <p className="text-2xl font-bold text-[var(--text-primary)]">{data.totalServed}</p>
+            <span className="text-xs font-medium uppercase text-text-muted">Meals Served</span>
+            <p className="text-2xl font-bold text-text-primary">{data.totalServed}</p>
           </div>
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
-            <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Total Amount</span>
-            <p className="text-2xl font-bold text-emerald-600">₹{data.totalAmount}</p>
-            <p className="text-xs text-[var(--text-muted)]">@ ₹{data.mealRate} per meal</p>
+            <span className="text-xs font-medium uppercase text-text-muted">Total Amount</span>
+            <p className="text-2xl font-bold text-action-success">₹{data.totalAmount}</p>
+            <p className="text-xs text-text-muted">@ ₹{data.mealRate} per meal</p>
           </div>
           <div className="p-4 border rounded bg-white shadow-sm space-y-1">
-            <span className="text-xs font-medium uppercase text-[var(--text-muted)]">Daily Cutoff</span>
-            <p className="text-sm font-medium text-[var(--text-primary)] mt-1">{data.cutoffTime}</p>
-            <p className="text-xs text-[var(--text-muted)]">Opt out before cutoff to skip billing.</p>
+            <span className="text-xs font-medium uppercase text-text-muted">Daily Cutoff</span>
+            <p className="text-sm font-medium text-text-primary mt-1">{data.cutoffTime}</p>
+            <p className="text-xs text-text-muted">Opt out before cutoff to skip billing.</p>
           </div>
         </div>
       ) : null}
 
       <div className="border rounded bg-white p-6 space-y-4 shadow-sm">
-        <h2 className="font-semibold text-[var(--text-primary)]">Opt out of a upcoming meal</h2>
+        <h2 className="font-semibold text-text-primary">Opt out of a upcoming meal</h2>
         <form onSubmit={optOut} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="date">Date</label>
+            <label className="block text-xs font-medium text-text-muted mb-1" htmlFor="date">Date</label>
             <input id="date"
               type="date"
               required
@@ -104,7 +104,7 @@ export default function MessBillPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="meal">Meal</label>
+            <label className="block text-xs font-medium text-text-muted mb-1" htmlFor="meal">Meal</label>
             <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
@@ -116,7 +116,7 @@ export default function MessBillPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1" htmlFor="reason-optional">Reason (optional)</label>
+            <label className="block text-xs font-medium text-text-muted mb-1" htmlFor="reason-optional">Reason (optional)</label>
             <input id="reason-optional"
               placeholder="e.g. Going home"
               value={optOutReason}
@@ -124,7 +124,7 @@ export default function MessBillPage() {
               className="w-full min-h-[44px] border rounded p-2 text-sm"
             />
           </div>
-          <button type="submit" className="w-full min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm font-medium">
+          <button type="submit" className="w-full min-h-[44px] inline-flex items-center justify-center px-4 py-2 rounded bg-bg-surface text-white text-sm font-medium">
             Confirm opt-out
           </button>
         </form>

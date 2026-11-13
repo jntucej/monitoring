@@ -37,8 +37,8 @@ export function AnalyticsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Department Analytics</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Department Analytics</h1>
+        <p className="text-xs text-text-muted">
           Stage-by-stage SLA compliance and operational efficiency
         </p>
       </header>
@@ -60,18 +60,18 @@ export function AnalyticsView() {
             {cells.map((c) => (
               <li
                 key={c.stage}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{c.stage.replace(/_/g, " ")}</p>
-                  <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {c.rate}% on-time
                   </span>
                 </div>
-                <div className="mt-2 flex gap-3 text-xs text-[var(--text-secondary)]">
+                <div className="mt-2 flex gap-3 text-xs text-text-secondary">
                   <span>Total: {c.total}</span>
                   <span>Within SLA: {c.withinSla}</span>
-                  <span className={c.breached > 0 ? "text-[var(--action-danger)]" : ""}>
+                  <span className={c.breached > 0 ? "text-action-danger" : ""}>
                     Breached: {c.breached}
                   </span>
                 </div>

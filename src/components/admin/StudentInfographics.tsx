@@ -51,11 +51,11 @@ function FilterSelect({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]" htmlFor="label">{label}</label>
+      <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted" htmlFor="label">{label}</label>
       <select id="label"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-primary)] text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+        className="w-full rounded-lg border border-border bg-[var(--bg)] text-text-primary text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>
@@ -68,16 +68,16 @@ function FilterSelect({
 }
 
 const COLOR_CLASSES: Record<string, { bg: string; border: string; text: string; bgSoft: string }> = {
-  emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-emerald-400", bgSoft: "bg-emerald-500/5" },
-  blue: { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400", bgSoft: "bg-blue-500/5" },
-  amber: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-400", bgSoft: "bg-amber-500/5" },
-  rose: { bg: "bg-rose-500/10", border: "border-rose-500/20", text: "text-rose-400", bgSoft: "bg-rose-500/5" },
-  purple: { bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-purple-400", bgSoft: "bg-purple-500/5" },
-  indigo: { bg: "bg-indigo-500/10", border: "border-indigo-500/20", text: "text-indigo-400", bgSoft: "bg-indigo-500/5" },
+  emerald: { bg: "bg-emerald-500/10", border: "border-emerald-500/20", text: "text-action-success", bgSoft: "bg-emerald-500/5" },
+  blue: { bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-action-primary", bgSoft: "bg-blue-500/5" },
+  amber: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-action-warning", bgSoft: "bg-amber-500/5" },
+  rose: { bg: "bg-rose-500/10", border: "border-rose-500/20", text: "text-action-danger", bgSoft: "bg-rose-500/5" },
+  purple: { bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-unit-c", bgSoft: "bg-purple-500/5" },
+  indigo: { bg: "bg-indigo-500/10", border: "border-indigo-500/20", text: "text-action-primary", bgSoft: "bg-indigo-500/5" },
   cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/20", text: "text-cyan-400", bgSoft: "bg-cyan-500/5" },
   pink: { bg: "bg-pink-500/10", border: "border-pink-500/20", text: "text-pink-400", bgSoft: "bg-pink-500/5" },
   teal: { bg: "bg-teal-500/10", border: "border-teal-500/20", text: "text-teal-400", bgSoft: "bg-teal-500/5" },
-  violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-violet-400", bgSoft: "bg-violet-500/5" },
+  violet: { bg: "bg-violet-500/10", border: "border-violet-500/20", text: "text-unit-c", bgSoft: "bg-violet-500/5" },
   orange: { bg: "bg-orange-500/10", border: "border-orange-500/20", text: "text-orange-400", bgSoft: "bg-orange-500/5" },
 };
 
@@ -88,7 +88,7 @@ function StatPill({ label, value, icon, color }: { label: string; value: string 
       <span className={c.text}>{icon}</span>
       <div>
         <div className={`text-lg font-black ${c.text}`}>{value}</div>
-        <div className="text-[9px] text-[var(--text-muted)] uppercase tracking-wide">{label}</div>
+        <div className="text-[9px] text-text-muted uppercase tracking-wide">{label}</div>
       </div>
     </div>
   );
@@ -98,11 +98,11 @@ function BarRow({ label, count, total, color }: { label: string; count: number; 
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-[var(--text-muted)] w-24 shrink-0 truncate">{label}</span>
-      <div className="flex-1 h-2 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+      <span className="text-xs text-text-muted w-24 shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-2 bg-bg-elevated rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-bold text-[var(--text-primary)] w-8 text-right">{count}</span>
+      <span className="text-xs font-bold text-text-primary w-8 text-right">{count}</span>
     </div>
   );
 }
@@ -135,7 +135,7 @@ const api = useApi();
 
   if (loading && !stats) return (
     <div className="flex justify-center items-center py-12">
-      <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!stats) return null;
@@ -147,19 +147,19 @@ const api = useApi();
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <button onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${showFilters || hasFilters ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${showFilters || hasFilters ? "bg-emerald-500/10 border-emerald-500/30 text-action-success" : "border-border bg-bg-surface text-text-muted hover:text-text-primary"}`}>
           <Filter className="w-4 h-4" /><span className="text-sm font-semibold">Filters</span>
-          {hasFilters && <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-[10px] font-bold text-white">{activeCount}</span>}
+          {hasFilters && <span className="px-1.5 py-0.5 rounded-full bg-action-success text-[10px] font-bold text-white">{activeCount}</span>}
         </button>
         {hasFilters && (
-          <button onClick={clearAll} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all text-sm font-semibold">
+          <button onClick={clearAll} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-all text-sm font-semibold">
             <X className="w-3.5 h-3.5" />Clear All
           </button>
         )}
       </div>
 
       {showFilters && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <FilterSelect filterKey="department" label="Department" value={filters.department} options={FILTER_OPTIONS.department} onChange={(v) => setFilter("department", v)} />
             <FilterSelect filterKey="year" label="Year" value={filters.year} options={FILTER_OPTIONS.year} onChange={(v) => setFilter("year", v)} />
@@ -174,7 +174,7 @@ const api = useApi();
                 const displayLabel = key === "year" && YEAR_LABELS[value] ? YEAR_LABELS[value] : (FILTER_OPTIONS[key as FilterKeys]?.find((o) => o === value) || value);
                 return (
                   <button key={key} onClick={() => setFilter(key as FilterKeys, "ALL")}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-all">
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-action-success text-xs font-semibold hover:bg-emerald-500/20 transition-all">
                     {displayLabel}<X className="w-3 h-3" />
                   </button>
                 );
@@ -195,42 +195,42 @@ const api = useApi();
           <StatPill label="Suspended" value={suspended} icon={<Ban className="w-4 h-4" />} color="rose" />
           <StatPill label="Hostelers" value={hostelers} icon={<Home className="w-4 h-4" />} color="purple" />
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">By Department</h3>
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">By Department</h3>
           <div className="space-y-2">{byDepartment.map((d) => <BarRow key={d.code} label={d.code} count={d.count} total={total} color={d.color} />)}</div>
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Student Type</h3>
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">Student Type</h3>
           <div className="space-y-2">{byType.map((t) => <BarRow key={t.type} label={t.label} count={t.count} total={total} color={t.color} />)}</div>
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">By Gender</h3>
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">By Gender</h3>
           <div className="space-y-2">
             {byGender.map((g) => (
               <div key={g.gender} className="flex items-center gap-3">
-                <span className="text-xs text-[var(--text-muted)] w-16 shrink-0">{g.gender}</span>
-                <div className="flex-1 h-2 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+                <span className="text-xs text-text-muted w-16 shrink-0">{g.gender}</span>
+                <div className="flex-1 h-2 bg-bg-elevated rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${g.color}`} style={{ width: `${total > 0 ? Math.round((g.count / total) * 100) : 0}%` }} />
                 </div>
-                <span className="text-xs font-bold text-[var(--text-primary)] w-8 text-right">{g.count}</span>
+                <span className="text-xs font-bold text-text-primary w-8 text-right">{g.count}</span>
               </div>
             ))}
           </div>
           <div className="mt-3 flex gap-2">
             <div className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <User className="w-3 h-3 text-blue-400" /><span className="text-xs text-blue-400 font-bold">{byGender.find((g) => g.gender === "Male")?.count || 0}</span>
+              <User className="w-3 h-3 text-action-primary" /><span className="text-xs text-action-primary font-bold">{byGender.find((g) => g.gender === "Male")?.count || 0}</span>
             </div>
             <div className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-pink-500/10 border border-pink-500/20">
               <UserCircle className="w-3 h-3 text-pink-400" /><span className="text-xs text-pink-400 font-bold">{byGender.find((g) => g.gender === "Female")?.count || 0}</span>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">By Year</h3>
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">By Year</h3>
           <div className="space-y-2">{byYear.map((y) => <BarRow key={y.year} label={y.year} count={y.count} total={total} color={y.color} />)}</div>
         </div>
-        <div className="lg:col-span-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Department Scan Activity (Today)</h3>
+        <div className="lg:col-span-3 rounded-xl border border-border bg-bg-surface p-4">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">Department Scan Activity (Today)</h3>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {byDepartment.map((d) => {
               const accent = d.color.replace("bg-", "").replace("-500", "");
@@ -241,10 +241,10 @@ const api = useApi();
               return (
                 <div key={d.code} className={`p-3 rounded-xl border ${c.border} ${c.bgSoft}`}>
                   <div className={`text-2xl font-black ${c.text}`}>{deptTodayIn + deptTodayOut}</div>
-                  <div className="text-xs font-semibold text-[var(--text-primary)]">{d.code} · today</div>
+                  <div className="text-xs font-semibold text-text-primary">{d.code} · today</div>
                   <div className="flex items-center gap-2 text-[10px] mt-1">
-                    <span className="text-emerald-400 font-bold">↓ {deptTodayIn}</span>
-                    <span className="text-amber-400 font-bold">↑ {deptTodayOut}</span>
+                    <span className="text-action-success font-bold">↓ {deptTodayIn}</span>
+                    <span className="text-action-warning font-bold">↑ {deptTodayOut}</span>
                   </div>
                 </div>
               );

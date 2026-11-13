@@ -29,32 +29,32 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
 
   return (
     <PrincipalWidgetBoundary title="Live Gate Presence">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
-        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-4">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+        <div className="flex items-center gap-2 text-text-muted mb-4">
           <MapPin className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Live Gate Presence</span>
         </div>
-        {loading && <p className="text-sm text-[var(--text-muted)]">Loading…</p>}
+        {loading && <p className="text-sm text-text-muted">Loading…</p>}
         {error && !loading && (
-          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300 flex items-center gap-2">
+          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" /> Could not load presence matrix: {error}
           </div>
         )}
         {matrixData && !loading && !error && gates.length === 0 && (
-          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No active gates configured.</p>
+          <p className="text-sm text-text-muted py-4 text-center">No active gates configured.</p>
         )}
         {matrixData && !loading && !error && gates.length > 0 && (
           <div className="overflow-x-auto min-w-0">
             <table className="w-full text-xs min-w-[560px]">
               <thead>
                 <tr>
-                  <th className="text-left text-[var(--text-muted)] font-semibold pr-3 pb-2">Gate</th>
+                  <th className="text-left text-text-muted font-semibold pr-3 pb-2">Gate</th>
                   {roles.map((r) => (
-                    <th key={r} className="text-center text-[var(--text-muted)] font-semibold px-1.5 pb-2">
+                    <th key={r} className="text-center text-text-muted font-semibold px-1.5 pb-2">
                       {r.length > 6 ? `${r.slice(0, 5)}…` : r}
                     </th>
                   ))}
-                  <th className="text-right text-[var(--text-muted)] font-semibold pl-2">Total</th>
+                  <th className="text-right text-text-muted font-semibold pl-2">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -62,8 +62,8 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
                   const row = matrix[g.id] ?? {};
                   const total = roles.reduce((acc, r) => acc + (Number(row[r]) || 0), 0);
                   return (
-                    <tr key={g.id} className="border-t border-[var(--border)]">
-                      <td className="py-2.5 pr-3 font-medium text-[var(--text-primary)]">
+                    <tr key={g.id} className="border-t border-border">
+                      <td className="py-2.5 pr-3 font-medium text-text-primary">
                         {g.name || g.code || g.id}
                       </td>
                       {roles.map((r) => {
@@ -74,9 +74,9 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
                               className={`inline-block min-w-[1.5rem] rounded px-1 py-0.5 text-center font-mono ${
                                 v > 0
                                   ? v >= 20
-                                    ? "bg-emerald-500/30 text-emerald-300"
+                                    ? "bg-emerald-500/30 text-action-success"
                                     : "bg-indigo-500/25 text-indigo-300"
-                                  : "text-[var(--text-muted)]"
+                                  : "text-text-muted"
                               } ${cellClass(v)}`}
                             >
                               {v}
@@ -84,14 +84,14 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
                           </td>
                         );
                       })}
-                      <td className="text-right pl-2 font-mono text-[var(--text-primary)]">{total}</td>
+                      <td className="text-right pl-2 font-mono text-text-primary">{total}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
             {matrixData.lastUpdated && (
-              <p className="text-[10px] text-[var(--text-muted)] mt-2">Updated {fmtTime(matrixData.lastUpdated)}</p>
+              <p className="text-[10px] text-text-muted mt-2">Updated {fmtTime(matrixData.lastUpdated)}</p>
             )}
           </div>
         )}

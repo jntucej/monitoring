@@ -46,21 +46,21 @@ export function DevMessagesPanel() {
   usePolling(load, { intervalMs: 60_000 });
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+    <div className="rounded-xl border border-border bg-bg-surface p-4">
       <div className="flex items-center gap-2 mb-3">
-        <MessageSquare className="w-4 h-4 text-emerald-400" />
-        <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+        <MessageSquare className="w-4 h-4 text-action-success" />
+        <h3 className="text-sm font-semibold text-text-primary">
           Developer Messages
         </h3>
-        <span className="text-xs text-[var(--text-muted)]">
+        <span className="text-xs text-text-muted">
           {messages.filter((m) => !m.read_at).length} unread
         </span>
       </div>
 
       {loading ? (
-        <p className="text-xs text-[var(--text-muted)]">Loading…</p>
+        <p className="text-xs text-text-muted">Loading…</p>
       ) : messages.length === 0 ? (
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="text-xs text-text-muted">
           No direct messages yet. Users can send one from any dashboard&#39;s
           “Developer” card or the Support page.
         </p>
@@ -71,26 +71,26 @@ export function DevMessagesPanel() {
               key={m.id}
               className={`rounded-lg border p-3 ${
                 m.read_at
-                  ? "border-[var(--border)] opacity-70"
+                  ? "border-border opacity-70"
                   : "border-emerald-500/40 bg-emerald-500/5"
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5 font-semibold text-[var(--text-primary)]">
+                <span className="flex items-center gap-1.5 font-semibold text-text-primary">
                   <Send className="w-3 h-3" />
                   {m.user_name || "Unknown user"}
-                  <span className="uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border)]">
+                  <span className="uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded bg-bg-base border border-border">
                     {m.user_role}
                   </span>
                 </span>
-                <span className="text-[var(--text-muted)]">
+                <span className="text-text-muted">
                   {new Date(m.created_at).toLocaleString()}
                 </span>
               </div>
               {m.user_email && (
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">{m.user_email}</p>
+                <p className="text-xs text-text-muted mt-0.5">{m.user_email}</p>
               )}
-              <p className="text-sm text-[var(--text-primary)] mt-1.5 whitespace-pre-wrap">
+              <p className="text-sm text-text-primary mt-1.5 whitespace-pre-wrap">
                 {m.message}
               </p>
             </li>

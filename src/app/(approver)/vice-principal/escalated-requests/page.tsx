@@ -47,8 +47,8 @@ function VpEscalatedInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Escalated Requests">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <Inbox className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Requests escalated for senior review
@@ -56,7 +56,7 @@ function VpEscalatedInner() {
           </div>
 
           {queueError && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
               Escalated list failed to load: {queueError}
             </div>
           )}
@@ -64,13 +64,13 @@ function VpEscalatedInner() {
           {queueLoading && !escalated ? (
             <div className="space-y-2 min-w-0">
               {[0, 1].map((i) => (
-                <div key={i} className="h-14 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
+                <div key={i} className="h-14 rounded-lg bg-bg-elevated/60 animate-pulse" />
               ))}
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No escalated requests right now.</p>
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">No escalated requests right now.</p>
             </div>
           ) : (
             <ul className="space-y-3 min-w-0">
@@ -79,34 +79,34 @@ function VpEscalatedInner() {
                 return (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0"
+                    className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-amber-400">{r.ticket_number}</span>
-                      <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
+                      <span className="font-mono text-xs text-action-warning">{r.ticket_number}</span>
+                      <span className="text-sm text-text-secondary truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
                         {r.student?.student_details?.roll
                           ? ` · ${r.student.student_details.roll}`
                           : ""}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)] capitalize whitespace-nowrap">
+                      <span className="text-xs text-text-muted capitalize whitespace-nowrap">
                         {r.workflow_type.replace(/_/g, " ")}
                       </span>
-                      <span className="text-[10px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
+                      <span className="text-[10px] font-semibold text-action-warning bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
                         escalated → {r.current_stage}
                       </span>
                       <button
                         type="button"
                         onClick={() => setOpenTicket(open ? null : r.ticket_number)}
                         aria-expanded={open}
-                        className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated transition-colors"
                       >
                         {open ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         {open ? "Hide timeline" : "Timeline"}
                       </button>
                     </div>
                     {open && (
-                      <div className="mt-4 rounded-lg border border-[var(--border)] bg-[#0f172a] p-3 min-w-0">
+                      <div className="mt-4 rounded-lg border border-border bg-bg-base p-3 min-w-0">
                         <RequestTimeline ticket={r.ticket_number} compact />
                       </div>
                     )}

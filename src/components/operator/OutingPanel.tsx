@@ -16,22 +16,22 @@ function fmtDuration(minutes: number): string {
 
 export function OutingPanel({ entries }: OutingPanelProps) {
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 space-y-3">
+    <div className="bg-bg-surface border border-border rounded-xl p-4 space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="font-bold text-sm flex items-center gap-2">
-          <Clock3 className={`w-4 h-4 ${entries.some((e) => e.overdue) ? "text-red-400" : "text-amber-400"}`} />
+          <Clock3 className={`w-4 h-4 ${entries.some((e) => e.overdue) ? "text-red-400" : "text-action-warning"}`} />
           On Outing (No Permission)
-          <span className="px-1.5 py-0.5 rounded-full bg-[var(--bg-base)] text-[10px] font-bold text-[var(--text-muted)]">
+          <span className="px-1.5 py-0.5 rounded-full bg-bg-base text-[10px] font-bold text-text-muted">
             {entries.length}
           </span>
         </h3>
-        <p className="text-[10px] text-[var(--text-muted)]">
+        <p className="text-[10px] text-text-muted">
           Short outings · {entries[0]?.limitMinutes ?? 180}m limit
         </p>
       </div>
 
       {entries.length === 0 ? (
-        <div className="py-5 text-center text-xs text-[var(--text-muted)] flex items-center justify-center gap-2">
+        <div className="py-5 text-center text-xs text-text-muted flex items-center justify-center gap-2">
           <Clock3 className="w-3.5 h-3.5" />
           No one is out on an outing right now.
         </div>
@@ -46,12 +46,12 @@ export function OutingPanel({ entries }: OutingPanelProps) {
               className={`flex items-center justify-between gap-3 p-2.5 rounded-lg border ${
                 e.overdue
                   ? "border-red-500/30 bg-red-500/5"
-                  : "border-[var(--border)] bg-[var(--bg-base)]"
+                  : "border-border bg-bg-base"
               }`}
             >
               <div className="min-w-0">
                 <p className="text-xs font-bold truncate">{e.name || "Unknown"}</p>
-                <p className="text-[10px] font-mono text-[var(--text-muted)]">
+                <p className="text-[10px] font-mono text-text-muted">
                   {e.roll} · out since {new Date(e.outAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
@@ -62,8 +62,8 @@ export function OutingPanel({ entries }: OutingPanelProps) {
                   </span>
                 ) : (
                   <>
-                    <p className="text-xs font-bold tabular-nums text-amber-400">{fmtDuration(e.minutesGone)} gone</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">
+                    <p className="text-xs font-bold tabular-nums text-action-warning">{fmtDuration(e.minutesGone)} gone</p>
+                    <p className="text-[10px] text-text-muted">
                       {fmtDuration(Math.max(0, e.limitMinutes - e.minutesGone))} left
                     </p>
                   </>

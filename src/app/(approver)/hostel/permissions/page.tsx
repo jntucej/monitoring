@@ -71,24 +71,24 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-[var(--text-muted)]">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted">{sub}</p>}
     </div>
   );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
+    <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
       {message}
     </div>
   );
@@ -96,7 +96,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2">
       <span className="flex items-center gap-2">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         {message}
@@ -181,8 +181,8 @@ function HostelPermissionsInner() {
       
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -209,7 +209,7 @@ function HostelPermissionsInner() {
           label="Students On Campus"
           value={presence ? studentsInside : "…"}
           sub={presence ? `Live across ${gates.length} gates · updated ${new Date(presence.data.lastUpdated).toLocaleTimeString()}` : "Presence matrix unavailable"}
-          accent="text-emerald-400"
+          accent="text-action-success"
           loading={presenceLoading && !presence}
         />
         <StatCard
@@ -217,7 +217,7 @@ function HostelPermissionsInner() {
           label="Pending Hostel Passes"
           value={pendingCount}
           sub={`At your stage (${role})`}
-          accent="text-sky-400"
+          accent="text-action-info"
           loading={permLoading && !permissions}
         />
         <StatCard
@@ -225,7 +225,7 @@ function HostelPermissionsInner() {
           label="SLA Breached"
           value={slaBreached}
           sub="Passes past their 48h approval deadline"
-          accent="text-amber-400"
+          accent="text-action-warning"
           loading={permLoading && !permissions}
         />
         <StatCard
@@ -233,33 +233,33 @@ function HostelPermissionsInner() {
           label="Curfew"
           value={curfew.label}
           sub={curfew.detail}
-          accent={curfew.active ? "text-violet-400" : "text-emerald-400"}
+          accent={curfew.active ? "text-unit-c" : "text-action-success"}
         />
       </div>
 
       {/* occupancy heatmap — gate × role matrix */}
       <WidgetBoundary title="Hostel Occupancy">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-action-success" />
+            <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Live Gate Occupancy
             </h2>
             {presence?.data && (
-              <span className="ml-auto text-xs text-[var(--text-muted)]">
+              <span className="ml-auto text-xs text-text-muted">
                 updated {new Date(presence.data.lastUpdated).toLocaleTimeString()}
               </span>
             )}
           </div>
           {presenceLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading occupancy…
             </div>
           ) : presence ? (
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-3">Gate</th>
                     {roles.map((r) => (
                       <th key={r} className="text-right px-4 py-3 capitalize">
@@ -273,22 +273,22 @@ function HostelPermissionsInner() {
                     const row = matrix[g.id] ?? {};
                     const total = Object.values(row).reduce((a, b) => a + b, 0);
                     return (
-                      <tr key={g.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
+                      <tr key={g.id} className="hover:bg-bg-elevated/30 transition-colors">
                         <td className="px-4 py-3 text-white font-medium">
                           {g.name}
-                          <span className="ml-2 text-xs text-[var(--text-muted)] font-mono">{g.code}</span>
+                          <span className="ml-2 text-xs text-text-muted font-mono">{g.code}</span>
                         </td>
                         {roles.map((r) => (
                           <td
                             key={r}
                             className={`px-4 py-3 text-right font-mono text-xs ${
-                              row[r] > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"
+                              row[r] > 0 ? "text-action-success" : "text-text-muted"
                             }`}
                           >
                             {row[r] ?? 0}
                           </td>
                         ))}
-                        <td className="px-4 py-3 text-right font-mono text-xs text-[var(--text-muted)]">{total}</td>
+                        <td className="px-4 py-3 text-right font-mono text-xs text-text-muted">{total}</td>
                       </tr>
                     );
                   })}

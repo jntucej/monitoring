@@ -57,24 +57,24 @@ function DockerServicesInner() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 min-w-0">
       <div>
-        <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Container className="w-6 h-6 text-rose-400" />
+        <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+          <Container className="w-6 h-6 text-action-danger" />
           Docker &amp; Service Status
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-text-muted mt-1">
           Container liveness and app-level service checks. Host-level Prometheus charts are in
           the fleet panel below.
         </p>
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[var(--text-muted)]">
-          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
+        <p className="text-sm text-text-muted">
+          Signed in as <span className="font-mono text-text-secondary">{role}</span>
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Service status unavailable: {error}
         </div>
@@ -82,16 +82,16 @@ function DockerServicesInner() {
 
       {/* App-level service + container summary */}
       <WidgetBoundary title="Services & Containers">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Service &amp; Container Status</span>
             <span
               className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                 d?.status === "healthy"
-                  ? "bg-emerald-500/20 text-emerald-400"
+                  ? "bg-emerald-500/20 text-action-success"
                   : d?.status === "degraded"
-                    ? "bg-amber-500/20 text-amber-400"
-                    : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]"
+                    ? "bg-amber-500/20 text-action-warning"
+                    : "bg-bg-elevated/40 text-text-muted"
               }`}
             >
               {d?.status ?? "loading"}
@@ -101,23 +101,23 @@ function DockerServicesInner() {
           {busy ? (
             <div className="p-4 space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
+                <div key={i} className="h-10 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))}
             </div>
           ) : (
             <div className="divide-y divide-slate-800/60 min-w-0">
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-secondary)]">PostgreSQL</p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-sm font-medium text-text-secondary">PostgreSQL</p>
+                  <p className="text-xs text-text-muted">
                     {d?.database ? `latency ${d.database.latencyMs} ms` : "latency n/a"}
                   </p>
                 </div>
                 <span
                   className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     d?.database?.status === "healthy"
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-rose-500/20 text-rose-400"
+                      ? "bg-emerald-500/20 text-action-success"
+                      : "bg-rose-500/20 text-action-danger"
                   }`}
                 >
                   {d?.database?.status ?? "unknown"}
@@ -125,14 +125,14 @@ function DockerServicesInner() {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-secondary)]">Redis (cache)</p>
-                  <p className="text-xs text-[var(--text-muted)]">shared cache layer</p>
+                  <p className="text-sm font-medium text-text-secondary">Redis (cache)</p>
+                  <p className="text-xs text-text-muted">shared cache layer</p>
                 </div>
                 <span
                   className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     d?.redis?.status === "healthy"
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-amber-500/20 text-amber-400"
+                      ? "bg-emerald-500/20 text-action-success"
+                      : "bg-amber-500/20 text-action-warning"
                   }`}
                 >
                   {d?.redis?.status ?? "unknown"}
@@ -140,8 +140,8 @@ function DockerServicesInner() {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-secondary)]">Gateways (edge nodes)</p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-sm font-medium text-text-secondary">Gateways (edge nodes)</p>
+                  <p className="text-xs text-text-muted">
                     {d?.gateways
                       ? `${d.gateways.online} online / ${d.gateways.offline} offline of ${d.gateways.total}`
                       : "no gateway data"}
@@ -150,8 +150,8 @@ function DockerServicesInner() {
                 <span
                   className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     d?.gateways?.status === "healthy"
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-amber-500/20 text-amber-400"
+                      ? "bg-emerald-500/20 text-action-success"
+                      : "bg-amber-500/20 text-action-warning"
                   }`}
                 >
                   {d?.gateways?.status ?? "unknown"}
@@ -162,25 +162,25 @@ function DockerServicesInner() {
         </div>
 
         {/* Containers table */}
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Containers</span>
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-text-muted">
               {d?.containers ? `${d.containers.length} tracked` : "not available"}
             </span>
           </div>
           {busy ? (
             <div className="p-4 space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
+                <div key={i} className="h-10 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))}
             </div>
           ) : !d?.containers ? (
             <div className="p-6 text-center min-w-0">
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-sm text-text-muted">
                 Container telemetry requires the host Prometheus/cAdvisor exporter.
               </p>
-              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto mt-1">
+              <p className="text-xs text-text-muted max-w-md mx-auto mt-1">
                 {d?.containersError
                   ? `Exporter unreachable: ${d.containersError}`
                   : "No container data in this environment."}
@@ -190,7 +190,7 @@ function DockerServicesInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-left text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-xs text-[var(--text-muted)] uppercase">
+                  <tr className="border-b border-border text-xs text-text-muted uppercase">
                     <th className="px-4 py-2 font-medium">Container</th>
                     <th className="px-3 py-2 font-medium">State</th>
                     <th className="px-3 py-2 font-medium">CPU</th>
@@ -200,24 +200,24 @@ function DockerServicesInner() {
                 </thead>
                 <tbody>
                   {d.containers.map((c) => (
-                    <tr key={c.name} className="border-b border-[var(--border)]/50">
-                      <td className="px-4 py-2 font-mono text-xs text-[var(--text-secondary)]">{c.name}</td>
+                    <tr key={c.name} className="border-b border-border/50">
+                      <td className="px-4 py-2 font-mono text-xs text-text-secondary">{c.name}</td>
                       <td className="px-3 py-2">
                         <span
                           className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                             c.running
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-rose-500/20 text-rose-400"
+                              ? "bg-emerald-500/20 text-action-success"
+                              : "bg-rose-500/20 text-action-danger"
                           }`}
                         >
                           {c.running ? "running" : "stopped"}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-[var(--text-secondary)]">{c.cpuPercent}%</td>
-                      <td className="px-3 py-2 text-[var(--text-secondary)]">{formatBytes(c.memoryBytes)}</td>
-                      <td className="px-3 py-2 text-[var(--text-secondary)]">
+                      <td className="px-3 py-2 text-text-secondary">{c.cpuPercent}%</td>
+                      <td className="px-3 py-2 text-text-secondary">{formatBytes(c.memoryBytes)}</td>
+                      <td className="px-3 py-2 text-text-secondary">
                         {c.restartsLastHour > 0 ? (
-                          <span className="text-amber-400">{c.restartsLastHour}</span>
+                          <span className="text-action-warning">{c.restartsLastHour}</span>
                         ) : (
                           "0"
                         )}

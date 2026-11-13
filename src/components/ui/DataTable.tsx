@@ -53,21 +53,21 @@ export function DataTable<T>({
   const isMobile = !breakpoints.md;
 
   const emptyState = (
-    <div className="p-8 text-center text-[var(--text-muted)]">{emptyMessage}</div>
+    <div className="p-8 text-center text-text-muted">{emptyMessage}</div>
   );
 
   // ---- 'table' layout: single scrollable table at every width ----
   if (mobileLayout === "table") {
     return (
-      <div className="overflow-x-auto overscroll-contain -webkit-overflow-scrolling-touch rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+      <div className="overflow-x-auto overscroll-contain -webkit-overflow-scrolling-touch rounded-xl border border-border bg-bg-surface">
         <table className="w-full min-w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
+            <tr className="border-b border-border text-left text-text-muted">
               {columns.map((col, idx) => (
                 <th
                   key={idx}
                   className={`p-4 font-medium ${col.className || ""} ${
-                    stickyFirstColumn && idx === 0 ? "sticky left-0 bg-[var(--bg-surface)] z-10" : ""
+                    stickyFirstColumn && idx === 0 ? "sticky left-0 bg-bg-surface z-10" : ""
                   }`}
                 >
                   {col.header}
@@ -75,16 +75,16 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--border)]">
+          <tbody className="divide-y divide-border">
             {loading ? (
               <tr>
-                <td colSpan={columns.length} className="p-8 text-center text-[var(--text-muted)]">
+                <td colSpan={columns.length} className="p-8 text-center text-text-muted">
                   Loading…
                 </td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={columns.length} className="p-8 text-center text-rose-400">{error}</td>
+                <td colSpan={columns.length} className="p-8 text-center text-action-danger">{error}</td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
@@ -97,7 +97,7 @@ export function DataTable<T>({
                     <td
                       key={idx}
                       className={`p-4 ${col.className || ""} ${
-                        stickyFirstColumn && idx === 0 ? "sticky left-0 bg-[var(--bg-surface)] z-10" : ""
+                        stickyFirstColumn && idx === 0 ? "sticky left-0 bg-bg-surface z-10" : ""
                       }`}
                     >
                       {col.accessor(item)}
@@ -117,26 +117,26 @@ export function DataTable<T>({
     return (
       <div className="space-y-3">
         {loading ? (
-          <div className="p-8 text-center text-[var(--text-muted)]">Loading…</div>
+          <div className="p-8 text-center text-text-muted">Loading…</div>
         ) : error ? (
-          <div className="p-8 text-center text-rose-400">{error}</div>
+          <div className="p-8 text-center text-action-danger">{error}</div>
         ) : data.length === 0 ? (
-          <div className="p-8 text-center text-[var(--text-muted)]">{emptyMessage}</div>
+          <div className="p-8 text-center text-text-muted">{emptyMessage}</div>
         ) : (
           data.map((item) => (
             <div
               key={keyExtractor(item)}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 shadow-sm"
+              className="rounded-xl border border-border bg-bg-surface p-4 shadow-sm"
             >
               {columns.map((col, idx) => (
                 <div
                   key={idx}
-                  className={`flex flex-col py-2 ${idx !== columns.length - 1 ? "border-b border-[var(--border)]/50" : ""}`}
+                  className={`flex flex-col py-2 ${idx !== columns.length - 1 ? "border-b border-border/50" : ""}`}
                 >
-                  <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <span className="text-xs font-medium text-text-muted uppercase tracking-wider mb-1">
                     {col.header}
                   </span>
-                  <span className={`text-sm text-[var(--text-primary)] ${col.className || ""}`}>
+                  <span className={`text-sm text-text-primary ${col.className || ""}`}>
                     {col.accessor(item)}
                   </span>
                 </div>
@@ -150,15 +150,15 @@ export function DataTable<T>({
 
   // Desktop table layout (md+)
   return (
-    <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+    <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
       <table className="w-full text-sm min-w-full">
         <thead>
-          <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
+          <tr className="border-b border-border text-left text-text-muted">
             {columns.map((col, idx) => (
               <th
                 key={idx}
                 className={`p-4 font-medium ${col.className || ""} ${
-                  stickyFirstColumn && idx === 0 ? "sticky left-0 bg-[var(--bg-surface)] z-10" : ""
+                  stickyFirstColumn && idx === 0 ? "sticky left-0 bg-bg-surface z-10" : ""
                 }`}
               >
                 {col.header}
@@ -166,16 +166,16 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--border)]">
+        <tbody className="divide-y divide-border">
           {loading ? (
             <tr>
-              <td colSpan={columns.length} className="p-8 text-center text-[var(--text-muted)]">
+              <td colSpan={columns.length} className="p-8 text-center text-text-muted">
                 Loading…
               </td>
             </tr>
           ) : error ? (
             <tr>
-              <td colSpan={columns.length} className="p-8 text-center text-rose-400">{error}</td>
+              <td colSpan={columns.length} className="p-8 text-center text-action-danger">{error}</td>
             </tr>
           ) : data.length === 0 ? (
             <tr>
@@ -188,7 +188,7 @@ export function DataTable<T>({
                   <td
                     key={idx}
                     className={`p-4 ${col.className || ""} ${
-                      stickyFirstColumn && idx === 0 ? "sticky left-0 bg-[var(--bg-surface)] z-10" : ""
+                      stickyFirstColumn && idx === 0 ? "sticky left-0 bg-bg-surface z-10" : ""
                     }`}
                   >
                     {col.accessor(item)}

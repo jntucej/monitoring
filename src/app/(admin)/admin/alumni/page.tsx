@@ -67,17 +67,17 @@ function AdminAlumniInner() {
 
       <WidgetBoundary title="Alumni roster">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)] flex items-center gap-3">
+          <div className="p-4 border-b border-border flex items-center gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search alumni by name / roll / email…"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
               />
             </div>
-            <button onClick={load} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><RefreshCw className="w-4 h-4" /></button>
+            <button onClick={load} className="text-text-muted hover:text-text-primary"><RefreshCw className="w-4 h-4" /></button>
           </div>
 
           {rows.length === 0 ? (
@@ -90,7 +90,7 @@ function AdminAlumniInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Name</th>
                     <th className="p-3 text-left">ID</th>
                     <th className="p-3 text-left">Dept</th>
@@ -98,14 +98,14 @@ function AdminAlumniInner() {
                     <th className="p-3 text-left">Checked out</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {rows.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/40">
-                      <td className="p-3 font-semibold text-[var(--text-primary)]">{r.name}</td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.uniqueId ?? r.id}</td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">{r.department ?? "—"}</td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.email ?? "—"}</td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                    <tr key={r.id} className="hover:bg-bg-elevated/40">
+                      <td className="p-3 font-semibold text-text-primary">{r.name}</td>
+                      <td className="p-3 font-mono text-xs text-text-muted">{r.uniqueId ?? r.id}</td>
+                      <td className="p-3 text-xs text-text-muted">{r.department ?? "—"}</td>
+                      <td className="p-3 font-mono text-xs text-text-muted">{r.email ?? "—"}</td>
+                      <td className="p-3 text-xs text-text-muted">
                         {r.checkedOutAt ? new Date(r.checkedOutAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                       </td>
                     </tr>

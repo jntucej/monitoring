@@ -50,46 +50,46 @@ export function SupervisorStatusBar({ counts, lastScan, refreshing = false }: Su
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Supervisor status bar"
     >
       {/* Left: gates · escalations · incidents · shift */}
       <div className="flex items-center gap-4 min-w-0">
         {/* Live indicator */}
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${refreshing ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
-          <span className="text-[var(--text-muted)]">
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${refreshing ? "bg-action-warning animate-pulse" : "bg-action-success"}`} />
+          <span className="text-text-muted">
             {counts?.gatesOnline ?? 0} gates online
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">escalations</span>
-          <span className="font-mono tabular-nums font-bold text-rose-400">
+          <span className="text-text-muted">escalations</span>
+          <span className="font-mono tabular-nums font-bold text-action-danger">
             {counts?.escalations ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">incidents</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="text-text-muted">incidents</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.incidents ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">shift</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="text-text-muted">shift</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {shiftLabel}
           </span>
-          <span className="text-[var(--text-muted)]">active</span>
+          <span className="text-text-muted">active</span>
         </span>
 
         {/* Critical count shown only when > 0 */}
         {counts && counts.critical > 0 ? (
           <span className="inline-flex items-center gap-1.5 min-w-0">
-            <span className="text-[var(--text-muted)]">critical</span>
-            <span className="font-mono tabular-nums font-bold text-rose-400">
+            <span className="text-text-muted">critical</span>
+            <span className="font-mono tabular-nums font-bold text-action-danger">
               {counts.critical}
             </span>
           </span>
@@ -99,12 +99,12 @@ export function SupervisorStatusBar({ counts, lastScan, refreshing = false }: Su
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

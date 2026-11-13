@@ -99,12 +99,12 @@ export function SmsTemplates() {
               aria-pressed={selected?.code === t.code}
               className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                 selected?.code === t.code
-                  ? "bg-[var(--action-primary)]/20 text-[var(--text-primary)]"
-                  : "hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)]"
+                  ? "bg-action-primary/20 text-text-primary"
+                  : "hover:bg-bg-elevated text-text-secondary"
               }`}
             >
               <span className="font-medium">{t.label}</span>
-              <span className="block text-xs text-[var(--text-muted)]">{t.code}</span>
+              <span className="block text-xs text-text-muted">{t.code}</span>
             </button>
           ))}
         </div>
@@ -112,7 +112,7 @@ export function SmsTemplates() {
         {selected && (
           <Card className="p-4 space-y-3">
             <div>
-              <label className="text-xs font-medium text-[var(--text-muted)] uppercase">Label</label>
+              <label className="text-xs font-medium text-text-muted uppercase">Label</label>
               <Input
                 value={editLabel}
                 onChange={(e) => setEditLabel(e.target.value)}
@@ -120,7 +120,7 @@ export function SmsTemplates() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-[var(--text-muted)] uppercase">
+              <label className="text-xs font-medium text-text-muted uppercase">
                 DLT Template ID
                 {!selected.dlt_template_id && " (not registered yet)"}
               </label>
@@ -132,14 +132,14 @@ export function SmsTemplates() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-[var(--text-muted)] uppercase">Body</label>
+              <label className="text-xs font-medium text-text-muted uppercase">Body</label>
               <textarea
                 value={editBody}
                 onChange={(e) => setEditBody(e.target.value)}
                 rows={4}
-                className="mt-1 w-full border border-[var(--border)] bg-[var(--bg-surface)] p-2 rounded text-sm font-mono"
+                className="mt-1 w-full border border-border bg-bg-surface p-2 rounded text-sm font-mono"
               />
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Variables: {selected.variables.length ? selected.variables.map((v) => `{#${v}#}`).join("  ") : "none"}
               </p>
             </div>

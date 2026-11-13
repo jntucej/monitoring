@@ -93,11 +93,11 @@ export default function ExitReasonsPage() {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <DoorOpen className="w-6 h-6 text-amber-400" />
+            <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+              <DoorOpen className="w-6 h-6 text-action-warning" />
               Exit Reasons & Outpass Governance
             </p>
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-text-muted">
               Manage departure reasons, approval levels, and automatic notification workflows
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function ExitReasonsPage() {
                 maxDurationHours: 12,
               })
             }
-            className="px-4 py-2 min-h-[44px] bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
+            className="px-4 py-2 min-h-[44px] bg-action-warning hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Add Exit Reason
           </button>
@@ -125,8 +125,8 @@ export default function ExitReasonsPage() {
           <div
             className={`p-4 rounded-xl border text-sm flex items-center gap-2 ${
               statusMsg.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-action-success"
+                : "bg-rose-500/10 border-rose-500/30 text-action-danger"
             }`}
           >
             {statusMsg.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
@@ -134,15 +134,15 @@ export default function ExitReasonsPage() {
           </div>
         )}
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-sm animate-pulse">
+            <div className="p-8 text-center text-text-muted text-sm animate-pulse">
               Loading exit reasons telemetry…
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[700px]">
-                <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)] text-[var(--text-muted)] uppercase text-xs">
+                <thead className="bg-bg-elevated border-b border-border text-text-muted uppercase text-xs">
                   <tr>
                     <th className="p-4">Reason Code</th>
                     <th className="p-4">Display Name</th>
@@ -152,18 +152,18 @@ export default function ExitReasonsPage() {
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {reasons.map((r) => (
-                    <tr key={r.code} className="hover:bg-[var(--bg-elevated)]/50 transition">
-                      <td className="p-4 font-mono font-bold text-amber-400">{r.code}</td>
-                      <td className="p-4 font-semibold text-[var(--text-primary)]">
+                    <tr key={r.code} className="hover:bg-bg-elevated/50 transition">
+                      <td className="p-4 font-mono font-bold text-action-warning">{r.code}</td>
+                      <td className="p-4 font-semibold text-text-primary">
                         {r.name}
-                        <p className="text-xs font-normal text-[var(--text-muted)]">{r.description}</p>
+                        <p className="text-xs font-normal text-text-muted">{r.description}</p>
                       </td>
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1">
                           {(r.applicableTo || []).map((a) => (
-                            <span key={a} className="px-2 py-0.5 rounded-md bg-[var(--bg-elevated)] text-[var(--text-secondary)] text-xs font-mono">
+                            <span key={a} className="px-2 py-0.5 rounded-md bg-bg-elevated text-text-secondary text-xs font-mono">
                               {a}
                             </span>
                           ))}
@@ -171,30 +171,30 @@ export default function ExitReasonsPage() {
                       </td>
                       <td className="p-4">
                         {r.requiresApproval ? (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30 uppercase">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-action-primary border border-blue-500/30 uppercase">
                             {r.approvalBy}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30">
                             Auto-approve
                           </span>
                         )}
                       </td>
-                      <td className="p-4 font-mono text-xs text-[var(--text-primary)]">
+                      <td className="p-4 font-mono text-xs text-text-primary">
                         {r.maxDurationHours ? `${r.maxDurationHours} Hours` : "Unlimited"}
                       </td>
                       <td className="p-4 text-right space-x-2">
                         <button
                           type="button"
                           onClick={() => setEditingReason(r)}
-                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--bg-elevated)] hover:text-amber-400 transition"
+                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-bg-elevated hover:text-action-warning transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(r.code)}
-                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -209,15 +209,15 @@ export default function ExitReasonsPage() {
 
         {editingReason && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-              <h3 className="text-lg font-bold text-[var(--text-primary)]">
+            <div className="bg-bg-surface border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+              <h3 className="text-lg font-bold text-text-primary">
                 {editingReason.code ? "Edit Exit Reason" : "New Exit Reason"}
               </h3>
 
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Reason Code
                     </label>
                     <input
@@ -226,11 +226,11 @@ export default function ExitReasonsPage() {
                       value={editingReason.code || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, code: e.target.value.toUpperCase() })}
                       placeholder="e.g. MEDICAL"
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Display Name
                     </label>
                     <input
@@ -239,13 +239,13 @@ export default function ExitReasonsPage() {
                       value={editingReason.name || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, name: e.target.value })}
                       placeholder="e.g. Medical Emergency"
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                     Description
                   </label>
                   <textarea
@@ -253,19 +253,19 @@ export default function ExitReasonsPage() {
                     value={editingReason.description || ""}
                     onChange={(e) => setEditingReason({ ...editingReason, description: e.target.value })}
                     placeholder="Provide context for students..."
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Approval Level
                     </label>
                     <select
                       value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
                     >
                       <option value="principal">Principal</option>
                       <option value="warden">Warden</option>
@@ -274,7 +274,7 @@ export default function ExitReasonsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Max Duration (Hours)
                     </label>
                     <input
@@ -282,23 +282,23 @@ export default function ExitReasonsPage() {
                       value={editingReason.maxDurationHours || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, maxDurationHours: e.target.value ? Number(e.target.value) : null })}
                       placeholder="e.g. 24"
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-amber-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+                <div className="flex justify-end gap-2 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="px-4 py-2 min-h-[44px] bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h-[44px] bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingReason.code || !editingReason.name}
-                    className="px-4 py-2 min-h-[44px] bg-amber-500 text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="px-4 py-2 min-h-[44px] bg-action-warning text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Exit Reason
                   </button>

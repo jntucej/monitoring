@@ -36,37 +36,37 @@ export function PermissionStatusBar({ counts, lastScan, refreshing = false }: Pe
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Permission status bar"
     >
       {/* Left: pending / escalated / attendance */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-          <span className="text-[var(--text-muted)]">pending</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-warning shrink-0" />
+          <span className="text-text-muted">pending</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.pending ?? 0}
           </span>
         </span>
 
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">
           <ShieldCheck className="w-3.5 h-3.5" />
           escalated
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts && counts.escalated > 0 ? counts.escalated : "—"}
           </span>
         </span>
 
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">
           attendance
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.attendancePct != null ? `${counts.attendancePct}%` : "—"}
           </span>
         </span>
 
-        <span className="hidden lg:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="hidden lg:inline-flex items-center gap-1.5 text-text-muted">
           total
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.total ?? 0}
           </span>
         </span>
@@ -75,13 +75,13 @@ export function PermissionStatusBar({ counts, lastScan, refreshing = false }: Pe
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

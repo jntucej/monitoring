@@ -19,8 +19,8 @@ export function PrincipalStageTag({ stage }: { stage: string | null | undefined 
     <span
       className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
         stage === "warden_or_principal" || stage === "principal"
-          ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
-          : "bg-sky-500/10 text-sky-400 border-sky-500/20"
+          ? "bg-indigo-500/10 text-action-primary border-indigo-500/20"
+          : "bg-sky-500/10 text-action-info border-sky-500/20"
       }`}
     >
       {label}
@@ -55,8 +55,8 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
       }}
       className={`group relative p-3.5 rounded-xl border transition-all duration-150 cursor-pointer min-w-0 ${
         selected
-          ? "bg-[var(--action-primary)]/5 border-[var(--action-primary)] shadow-sm"
-          : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--text-muted)] hover:shadow-sm"
+          ? "bg-action-primary/5 border-action-primary shadow-sm"
+          : "bg-bg-surface border-border hover:border-[var(--text-muted)] hover:shadow-sm"
       }`}
     >
       <div className="flex items-start gap-3 min-w-0">
@@ -70,8 +70,8 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
             }}
             className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${
               selected
-                ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-white"
-                : "border-[var(--border)] bg-[var(--bg-elevated)]"
+                ? "bg-action-primary border-action-primary text-white"
+                : "border-border bg-bg-elevated"
             }`}
             aria-label={`Select ${ticket.ticket_number}`}
           >
@@ -87,7 +87,7 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
         <div className="flex-1 min-w-0 space-y-1.5">
           {/* Row 1: ticket + SLA + stage */}
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)] shrink-0">
+            <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-bg-elevated border border-border text-action-primary shrink-0">
               {ticket.ticket_number}
             </span>
             <SlaBadge slaDeadline={ticket.sla_deadline} status={ticket.status} />
@@ -96,21 +96,21 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
 
           {/* Row 2: student name + roll */}
           <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="font-semibold text-sm text-[var(--text-primary)] truncate">
+            <span className="font-semibold text-sm text-text-primary truncate">
               {student?.name || "Unknown Student"}
             </span>
             {details?.roll && (
-              <span className="text-xs text-[var(--text-muted)] font-mono shrink-0">
+              <span className="text-xs text-text-muted font-mono shrink-0">
                 ({details.roll})
               </span>
             )}
           </div>
 
           {/* Row 3: workflow / reason */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--text-secondary)] min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-secondary min-w-0">
             <span className="capitalize">{ticket.workflow_type?.replace(/_/g, " ")}</span>
             {ticket.reason && (
-              <span className="text-[var(--text-muted)]">· {ticket.reason.replace(/_/g, " ")}</span>
+              <span className="text-text-muted">· {ticket.reason.replace(/_/g, " ")}</span>
             )}
             {ticket.forwarded_from_role && (
               <span className="flex items-center gap-0.5 text-amber-500/80">
@@ -122,7 +122,7 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
         </div>
 
         {/* Chevron */}
-        <ChevronRight className="w-4 h-4 text-[var(--text-muted)] shrink-0 mt-1 group-hover:text-[var(--text-primary)] transition-colors" />
+        <ChevronRight className="w-4 h-4 text-text-muted shrink-0 mt-1 group-hover:text-text-primary transition-colors" />
       </div>
     </div>
   );

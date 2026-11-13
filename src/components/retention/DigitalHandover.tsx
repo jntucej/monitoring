@@ -42,9 +42,9 @@ const ITEM_TYPES = [
 ] as const;
 
 const SEVERITY_COLORS: Record<string, string> = {
-  high: "text-rose-400 border-rose-500/30 bg-rose-500/10",
-  medium: "text-amber-400 border-amber-500/30 bg-amber-500/10",
-  low: "text-[var(--text-muted)] border-[var(--border)]/30 bg-[var(--bg-elevated)]/20",
+  high: "text-action-danger border-rose-500/30 bg-rose-500/10",
+  medium: "text-action-warning border-amber-500/30 bg-amber-500/10",
+  low: "text-text-muted border-border/30 bg-bg-elevated/20",
 };
 
 /* ------------------------------------------------------------------ */
@@ -132,19 +132,19 @@ export function DigitalHandover() {
 
   return (
     <WidgetBoundary title="Digital Handover">
-      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Handshake className="h-4 w-4 text-amber-400" />
-            <h3 className="text-sm font-medium text-[var(--text-primary)]">Shift Handover</h3>
-            <span className="text-xs text-[var(--text-muted)] capitalize">{role}</span>
+            <Handshake className="h-4 w-4 text-action-warning" />
+            <h3 className="text-sm font-medium text-text-primary">Shift Handover</h3>
+            <span className="text-xs text-text-muted capitalize">{role}</span>
           </div>
           {canHandover && (
             <button
               type="button"
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-500/20 transition-colors motion-reduce:transition-none"
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 transition-colors motion-reduce:transition-none"
             >
               <Plus className="h-3.5 w-3.5" />
               {showForm ? "Cancel" : "New Handover"}
@@ -154,16 +154,16 @@ export function DigitalHandover() {
 
         {/* Create Handover Form */}
         {showForm && (
-          <div className="mb-4 space-y-3 rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/40 p-4">
+          <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] text-[var(--text-muted)] mb-1.5">
+                <label className="block text-[11px] text-text-muted mb-1.5">
                   Hand over to role
                 </label>
                 <select
                   value={toRole}
                   onChange={(e) => setToRole(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                  className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                 >
                   {HANDOVER_ROLES.map((r) => (
                     <option key={r} value={r}>
@@ -173,7 +173,7 @@ export function DigitalHandover() {
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] text-[var(--text-muted)] mb-1.5">
+                <label className="block text-[11px] text-text-muted mb-1.5">
                   Notes (optional)
                 </label>
                 <input
@@ -181,14 +181,14 @@ export function DigitalHandover() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Brief shift summary"
-                  className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                  className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                 />
               </div>
             </div>
 
             {/* Items */}
             <div>
-              <p className="text-[11px] text-[var(--text-muted)] mb-2">Items to hand over</p>
+              <p className="text-[11px] text-text-muted mb-2">Items to hand over</p>
               <div className="space-y-2">
                 {items.map((item, idx) => (
                   <div key={idx} className="flex gap-2 items-start">
@@ -197,7 +197,7 @@ export function DigitalHandover() {
                       onChange={(e) =>
                         updateItem(idx, "type", e.target.value)
                       }
-                      className="rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-2 py-1.5 text-[10px] text-[var(--text-secondary)] focus:outline-none w-32 shrink-0"
+                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-[10px] text-text-secondary focus:outline-none w-32 shrink-0"
                       aria-label="Item type"
                     >
                       {ITEM_TYPES.map((t) => (
@@ -213,14 +213,14 @@ export function DigitalHandover() {
                         updateItem(idx, "title", e.target.value)
                       }
                       placeholder="Describe the item"
-                      className="flex-1 rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-1.5 text-xs text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                      className="flex-1 rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-1.5 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                     />
                     <select
                       value={item.severity}
                       onChange={(e) =>
                         updateItem(idx, "severity", e.target.value)
                       }
-                      className="rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-2 py-1.5 text-[10px] text-[var(--text-secondary)] focus:outline-none w-20 shrink-0"
+                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-[10px] text-text-secondary focus:outline-none w-20 shrink-0"
                       aria-label="Severity"
                     >
                       <option value="low">Low</option>
@@ -230,7 +230,7 @@ export function DigitalHandover() {
                     <button
                       type="button"
                       onClick={() => removeItem(idx)}
-                      className="p-1 text-[var(--text-muted)] hover:text-rose-400 transition-colors motion-reduce:transition-none shrink-0"
+                      className="p-1 text-text-muted hover:text-action-danger transition-colors motion-reduce:transition-none shrink-0"
                       aria-label="Remove item"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -241,7 +241,7 @@ export function DigitalHandover() {
               <button
                 type="button"
                 onClick={addItem}
-                className="mt-2 text-[10px] text-amber-400 hover:text-amber-300 transition-colors motion-reduce:transition-none"
+                className="mt-2 text-[10px] text-action-warning hover:text-action-warning transition-colors motion-reduce:transition-none"
               >
                 + Add another item
               </button>
@@ -251,7 +251,7 @@ export function DigitalHandover() {
               type="button"
               onClick={handleSubmit}
               disabled={submitting || items.filter((i) => i.title.trim()).length === 0}
-              className="flex items-center gap-1.5 rounded-lg bg-amber-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-amber-500 disabled:opacity-40 transition-colors motion-reduce:transition-none"
+              className="flex items-center gap-1.5 rounded-lg bg-amber-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-action-warning disabled:opacity-40 transition-colors motion-reduce:transition-none"
             >
               {submitting ? (
                 "Creating…"
@@ -267,9 +267,9 @@ export function DigitalHandover() {
 
         {/* Handover History */}
         {loading ? (
-          <div className="h-20 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
+          <div className="h-20 animate-pulse rounded bg-bg-elevated/20" />
         ) : handovers.length === 0 ? (
-          <p className="text-xs text-[var(--text-muted)] py-6 text-center">
+          <p className="text-xs text-text-muted py-6 text-center">
             No handovers yet. Generate one at the end of your shift.
           </p>
         ) : (
@@ -282,7 +282,7 @@ export function DigitalHandover() {
                   className={`rounded-lg border p-3 ${
                     expanded
                       ? "border-amber-500/40 bg-amber-500/5"
-                      : "border-[var(--border)]/40 bg-[var(--bg-elevated)]/30"
+                      : "border-border/40 bg-bg-elevated/30"
                   }`}
                 >
                   <button
@@ -293,8 +293,8 @@ export function DigitalHandover() {
                     <div
                       className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${
                         ho.items.some((i) => i.severity === "high")
-                          ? "bg-rose-500/20 text-rose-400"
-                          : "bg-amber-500/20 text-amber-400"
+                          ? "bg-rose-500/20 text-action-danger"
+                          : "bg-amber-500/20 text-action-warning"
                       }`}
                     >
                       {ho.items.some((i) => i.severity === "high") ? (
@@ -304,10 +304,10 @@ export function DigitalHandover() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[var(--text-secondary)]">
+                      <p className="text-xs font-medium text-text-secondary">
                         {ho.byUserName} → {ho.toRole}
                       </p>
-                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
+                      <p className="text-[10px] text-text-muted flex items-center gap-2">
                         <Clock className="h-3 w-3" />
                         {new Date(ho.createdAt).toLocaleString()}
                         <span>·</span>
@@ -315,7 +315,7 @@ export function DigitalHandover() {
                       </p>
                     </div>
                     <ChevronDown
-                      className={`h-4 w-4 text-[var(--text-muted)] shrink-0 transition-transform motion-reduce:transition-none ${
+                      className={`h-4 w-4 text-text-muted shrink-0 transition-transform motion-reduce:transition-none ${
                         expanded ? "rotate-180" : ""
                       }`}
                     />
@@ -324,7 +324,7 @@ export function DigitalHandover() {
                   {expanded && (
                     <div className="mt-3 space-y-1.5">
                       {ho.notes && (
-                        <p className="text-[11px] text-[var(--text-muted)] italic">
+                        <p className="text-[11px] text-text-muted italic">
                           &ldquo;{ho.notes}&rdquo;
                         </p>
                       )}
@@ -335,7 +335,7 @@ export function DigitalHandover() {
                         >
                           <ListTodo className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                            <p className="text-[11px] text-text-secondary truncate">
                               {item.title}
                             </p>
                             <p className="text-[10px] opacity-70 capitalize">

@@ -233,13 +233,13 @@ export function DirectGenerateModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Generate Pass (direct)" size="md">
       <div className="space-y-4">
-        <p className="text-xs text-[var(--text-secondary)]">
+        <p className="text-xs text-text-secondary">
           Generate an approved pass directly, bypassing the staged chain.
         </p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+            <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
               Student (roll or user id)
             </label>
             <Input
@@ -256,11 +256,11 @@ export function DirectGenerateModal({
         </div>
 
         {studentUserId && (
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-            <span className="font-semibold text-[var(--text-primary)]">{studentName || "Student"}</span>
-            <span className="text-[var(--text-muted)] font-mono">({studentUserId})</span>
+          <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+            <span className="font-semibold text-text-primary">{studentName || "Student"}</span>
+            <span className="text-text-muted font-mono">({studentUserId})</span>
             {studentEntryType === "day_scholar" && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-action-warning border border-amber-500/20">
                 Day Scholar
               </span>
             )}
@@ -268,13 +268,13 @@ export function DirectGenerateModal({
         )}
 
         {roomFieldsRequired && (
-          <div className="p-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] space-y-2">
-            <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="p-3 rounded-lg bg-bg-surface border border-border space-y-2">
+            <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wide">
               Hostel Room Assignment (required for day scholar home out)
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-xs font-medium text-text-muted mb-1">
                   Hostel Block
                 </label>
                 <Input
@@ -284,7 +284,7 @@ export function DirectGenerateModal({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-xs font-medium text-text-muted mb-1">
                   Room Number
                 </label>
                 <Input
@@ -294,7 +294,7 @@ export function DirectGenerateModal({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">
+                <label className="block text-xs font-medium text-text-muted mb-1">
                   Warden ID
                 </label>
                 <Input
@@ -309,7 +309,7 @@ export function DirectGenerateModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+            <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
               Reason
             </label>
             <Select
@@ -319,7 +319,7 @@ export function DirectGenerateModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+            <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
               Note
             </label>
             <Input
@@ -332,7 +332,7 @@ export function DirectGenerateModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+            <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
               From
             </label>
             <Input
@@ -342,7 +342,7 @@ export function DirectGenerateModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+            <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
               To {toRequired ? "" : "(optional for home out)"}
             </label>
             <Input
@@ -356,7 +356,7 @@ export function DirectGenerateModal({
 
         {stepupRequired && (
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
-            <div className="flex items-center gap-1.5 text-amber-500 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 text-action-warning text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
               Step-up password required
             </div>
@@ -370,7 +370,7 @@ export function DirectGenerateModal({
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs">
+          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
             {error}
           </div>
         )}

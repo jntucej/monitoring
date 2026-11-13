@@ -60,19 +60,19 @@ export function InboxFilters() {
   const hasActiveFilters = !!(stage || workflowType || sla !== "all" || search);
 
   return (
-    <div className="space-y-2 bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border)] min-w-0">
+    <div className="space-y-2 bg-bg-surface p-3 rounded-xl border border-border min-w-0">
       {/* Row 1: Stage */}
       <div className="flex items-center gap-2">
-        <Filter className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-        <span className="text-xs text-[var(--text-muted)] shrink-0">Stage:</span>
+        <Filter className="w-3.5 h-3.5 text-text-muted shrink-0" />
+        <span className="text-xs text-text-muted shrink-0">Stage:</span>
         <div className="flex items-center gap-1 overflow-x-auto min-w-0">
           <button
             type="button"
             onClick={() => updateParam("stage", "")}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
               !stage
-                ? "bg-[var(--action-primary)] text-white"
-                : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                ? "bg-action-primary text-white"
+                : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
             }`}
           >
             All
@@ -84,8 +84,8 @@ export function InboxFilters() {
               onClick={() => updateParam("stage", s)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
                 stage === s
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                  ? "bg-action-primary text-white"
+                  : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
               }`}
             >
               {s === "warden_or_principal" ? "Warden / Principal" : s.replace(/_/g, " ")}
@@ -96,16 +96,16 @@ export function InboxFilters() {
 
       {/* Row 2: Workflow type */}
       <div className="flex items-center gap-2">
-        <Filter className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-        <span className="text-xs text-[var(--text-muted)] shrink-0">Workflow:</span>
+        <Filter className="w-3.5 h-3.5 text-text-muted shrink-0" />
+        <span className="text-xs text-text-muted shrink-0">Workflow:</span>
         <div className="flex items-center gap-1 overflow-x-auto min-w-0">
           <button
             type="button"
             onClick={() => updateParam("workflowType", "")}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
               !workflowType
-                ? "bg-[var(--action-primary)] text-white"
-                : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                ? "bg-action-primary text-white"
+                : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
             }`}
           >
             All
@@ -117,8 +117,8 @@ export function InboxFilters() {
               onClick={() => updateParam("workflowType", w)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
                 workflowType === w
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                  ? "bg-action-primary text-white"
+                  : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
               }`}
             >
               {w.replace(/_/g, " ")}
@@ -130,8 +130,8 @@ export function InboxFilters() {
       {/* Row 3: SLA + search */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Filter className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-          <span className="text-xs text-[var(--text-muted)] shrink-0">SLA:</span>
+          <Filter className="w-3.5 h-3.5 text-text-muted shrink-0" />
+          <span className="text-xs text-text-muted shrink-0">SLA:</span>
           <div className="flex items-center gap-1">
             {SLA_OPTIONS.map((s) => (
               <button
@@ -140,8 +140,8 @@ export function InboxFilters() {
                 onClick={() => updateParam("sla", s === "all" ? "" : s)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
                   (s === "all" && !sla) || sla === s
-                    ? "bg-[var(--action-primary)] text-white"
-                    : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                    ? "bg-action-primary text-white"
+                    : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
                 }`}
               >
                 {s === "all" ? "All" : s === "overdue" ? "Overdue" : s === "due-soon" ? "Due soon" : "On track"}
@@ -151,7 +151,7 @@ export function InboxFilters() {
         </div>
         <div className="flex items-center gap-2 flex-1 sm:w-48">
           <div className="relative w-full">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
             <Input
               value={search}
               onChange={(e) => updateParam("q", e.target.value)}
@@ -163,7 +163,7 @@ export function InboxFilters() {
             <button
               type="button"
               onClick={() => router.push(window.location.pathname, { scroll: false })}
-              className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary"
               title="Clear all filters"
             >
               <X className="w-3.5 h-3.5" />

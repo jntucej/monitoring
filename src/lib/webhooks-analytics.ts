@@ -173,7 +173,7 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     description: "Aggregated predicted load per category",
     xKey: "type",
     defaultType: "bar",
-    series: [{ key: "value", label: "Predicted", color: "#10b981", type: "bar" }],
+    series: [{ key: "value", label: "Predicted", color: "var(--action-success)", type: "bar" }],
     build: (d) => buildByTypeData(d.predictions),
   },
   {
@@ -183,8 +183,8 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     xKey: "metric",
     defaultType: "radar",
     series: [
-      { key: "v1", label: "v1.0", color: "#3b82f6", type: "line" },
-      { key: "v2", label: "v2.0", color: "#10b981", type: "line" },
+      { key: "v1", label: "v1.0", color: "var(--action-primary)", type: "line" },
+      { key: "v2", label: "v2.0", color: "var(--action-success)", type: "line" },
     ],
     build: (d) => buildModelMetrics(d.predictions),
   },
@@ -195,8 +195,8 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     xKey: "hour",
     defaultType: "area",
     series: [
-      { key: "predicted", label: "Predicted", color: "#10b981", type: "area" },
-      { key: "baseline",  label: "Baseline",  color: "#94a3b8", type: "line" },
+      { key: "predicted", label: "Predicted", color: "var(--action-success)", type: "area" },
+      { key: "baseline",  label: "Baseline",  color: "var(--text-muted)", type: "line" },
     ],
     build: (d) => buildHourlyPattern(buildForecastSeries(d.predictions)),
   },
@@ -206,7 +206,7 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     description: "Count of anomalies grouped by severity",
     xKey: "severity",
     defaultType: "bar",
-    series: [{ key: "count", label: "Count", color: "#ef4444", type: "bar" }],
+    series: [{ key: "count", label: "Count", color: "var(--action-danger)", type: "bar" }],
     build: (d) => buildSeverityData(d.anomalies),
   },
   {
@@ -215,7 +215,7 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     description: "Prediction value distribution",
     xKey: "date",
     defaultType: "pie",
-    series: [{ key: "predicted", label: "Predicted", color: "#8b5cf6", type: "bar" }],
+    series: [{ key: "predicted", label: "Predicted", color: "var(--unit-c)", type: "bar" }],
     build: (d) => buildForecastSeries(d.predictions),
   },
   {
@@ -224,7 +224,7 @@ export const WEBHOOKS_CHARTS: WebhooksChartSpec[] = [
     description: "Predicted vs actual correlation",
     xKey: "predicted",
     defaultType: "scatter",
-    series: [{ key: "actual", label: "Actual", color: "#3b82f6", type: "line" }],
+    series: [{ key: "actual", label: "Actual", color: "var(--action-primary)", type: "line" }],
     build: (d) => buildForecastSeries(d.predictions),
   },
 ];

@@ -42,7 +42,7 @@ export function Fireflies() {
           y: 15 + Math.random() * 70,
           delay: Math.random() * 2.5,
           size: 2 + Math.random() * 3,
-          color: ["#67e8f9", "#a5b4fc", "#f0abfc", "#86efac"][i % 4],
+          color: ["var(--unit-a)", "var(--unit-c)", "var(--unit-c)", "var(--action-success)"][i % 4],
         })),
       );
       if (timer) clearTimeout(timer);

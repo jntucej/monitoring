@@ -109,9 +109,9 @@ export default function AlertRulesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Bell className="w-6 h-6 text-amber-500" /> Alert Rules Management
+              <Bell className="w-6 h-6 text-action-warning" /> Alert Rules Management
             </p>
-            <p className="text-sm text-[var(--text-muted)]">Configure real-time monitoring and threshold alerts.</p>
+            <p className="text-sm text-text-muted">Configure real-time monitoring and threshold alerts.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={fetchAlerts} variant="secondary" size="sm" className="gap-2 min-h-[44px]"><RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh</Button>
@@ -119,12 +119,12 @@ export default function AlertRulesPage() {
           </div>
         </div>
         <Card className="border">
-          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><ShieldAlert className="w-5 h-5 text-blue-500" /> Active Alert Rules</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg flex items-center gap-2"><ShieldAlert className="w-5 h-5 text-action-primary" /> Active Alert Rules</CardTitle></CardHeader>
           <CardContent>
             {loading ? <div className="py-6 text-center text-xs">Loading rules...</div> : rules.length === 0 ? <div className="py-6 text-center text-xs">No alert rules created yet.</div> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left min-w-[650px]">
-                  <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
+                  <thead className="bg-bg-elevated dark:bg-bg-elevated/50 text-text-muted">
                     <tr>
                       <th className="p-3">Name</th>
                       <th className="p-3">Metric</th>
@@ -139,7 +139,7 @@ export default function AlertRulesPage() {
                     {rules.map((rule) => (
                       <tr key={rule.id}>
                         <td className="p-3 font-semibold">{rule.name}</td>
-                        <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{rule.metric}</td>
+                        <td className="p-3 font-mono text-xs text-text-muted">{rule.metric}</td>
                         <td className="p-3 font-mono text-xs">
                           &gt; {rule.threshold} / {rule.durationMinutes}m
                         </td>
@@ -156,7 +156,7 @@ export default function AlertRulesPage() {
                             {rule.severity.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="p-3 font-mono text-xs capitalize text-sky-400">{rule.channel}</td>
+                        <td className="p-3 font-mono text-xs capitalize text-action-info">{rule.channel}</td>
                         <td className="p-3">
                           <Badge variant={rule.enabled ? "success" : "offline"}>
                             {rule.enabled ? "ACTIVE" : "DISABLED"}
@@ -184,7 +184,7 @@ export default function AlertRulesPage() {
         <Card className="border mt-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-500" /> Operational Alert Event History
+              <AlertTriangle className="w-5 h-5 text-action-warning" /> Operational Alert Event History
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={fetchAlerts} className="gap-1 text-xs">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh Log
@@ -192,11 +192,11 @@ export default function AlertRulesPage() {
           </CardHeader>
           <CardContent>
             {history.length === 0 ? (
-              <div className="py-6 text-center text-xs text-[var(--text-muted)]">No alert trigger events logged in this period.</div>
+              <div className="py-6 text-center text-xs text-text-muted">No alert trigger events logged in this period.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
+                  <thead className="bg-bg-elevated dark:bg-bg-elevated/50 text-text-muted">
                     <tr>
                       <th className="p-3">Rule Name</th>
                       <th className="p-3">Metric</th>
@@ -209,12 +209,12 @@ export default function AlertRulesPage() {
                     {history.map((h) => (
                       <tr key={h.id}>
                         <td className="p-3 font-semibold">{h.ruleName}</td>
-                        <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{h.metric}</td>
+                        <td className="p-3 font-mono text-xs text-text-muted">{h.metric}</td>
                         <td className="p-3">
                           <Badge variant={h.severity === "critical" ? "error" : "dayout"}>{h.severity.toUpperCase()}</Badge>
                         </td>
-                        <td className="p-3 text-xs text-[var(--text-primary)]">{h.message}</td>
-                        <td className="p-3 text-xs font-mono text-[var(--text-muted)]">
+                        <td className="p-3 text-xs text-text-primary">{h.message}</td>
+                        <td className="p-3 text-xs font-mono text-text-muted">
                           {new Date(h.triggeredAt).toLocaleString("en-IN")}
                         </td>
                       </tr>
@@ -232,7 +232,7 @@ export default function AlertRulesPage() {
             <Input label="Metric Token" value={formData.metric} onChange={(e) => setFormData({ ...formData, metric: e.target.value })} required />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium mb-1 uppercase text-[var(--text-muted)]">Severity</label>
+                <label className="block text-xs font-medium mb-1 uppercase text-text-muted">Severity</label>
                 <Select
                   options={[
                     { value: "critical", label: "Critical" },
@@ -244,7 +244,7 @@ export default function AlertRulesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1 uppercase text-[var(--text-muted)]">Channel</label>
+                <label className="block text-xs font-medium mb-1 uppercase text-text-muted">Channel</label>
                 <Select
                   options={[
                     { value: "opsgenie", label: "OpsGenie" },
@@ -261,7 +261,7 @@ export default function AlertRulesPage() {
               <Input label="Threshold" type="number" value={formData.threshold} onChange={(e) => setFormData({ ...formData, threshold: e.target.value })} required />
               <Input label="Window (Mins)" type="number" value={formData.durationMinutes} onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })} required />
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button type="submit" variant="primary" loading={saving}>Save Rule</Button>
             </div>

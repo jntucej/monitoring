@@ -39,11 +39,11 @@ function VicePrincipalProfileInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-4 min-w-0">
-      <h1 className="text-xl font-bold text-[var(--text-primary)]">Vice Principal Profile</h1>
+      <h1 className="text-xl font-bold text-text-primary">Vice Principal Profile</h1>
 
       <WidgetBoundary title="Vice Principal Profile">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
-          {error && <p className="text-xs text-rose-400 mb-2">{error}</p>}
+        <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+          {error && <p className="text-xs text-action-danger mb-2">{error}</p>}
 
           {!profile && !error ? (
             <div className="space-y-2">
@@ -62,15 +62,15 @@ function VicePrincipalProfileInner() {
                     className="w-14 h-14 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center">
-                    <User className="w-6 h-6 text-[var(--text-muted)]" />
+                  <div className="w-14 h-14 rounded-full bg-bg-elevated flex items-center justify-center">
+                    <User className="w-6 h-6 text-text-muted" />
                   </div>
                 )}
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--text-primary)]">
+                  <h2 className="text-lg font-bold text-text-primary">
                     {profile.name}
                   </h2>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-indigo-500/10 text-action-primary border border-indigo-500/20">
                     {profile.role.replace(/_/g, " ")}
                   </span>
                 </div>
@@ -78,34 +78,34 @@ function VicePrincipalProfileInner() {
 
               {/* Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                  <Mail className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                  <Mail className="w-4 h-4 text-text-muted shrink-0" />
                   <div>
-                    <div className="text-[10px] text-[var(--text-muted)]">Email</div>
-                    <div className="text-[var(--text-primary)] font-medium">
+                    <div className="text-[10px] text-text-muted">Email</div>
+                    <div className="text-text-primary font-medium">
                       {profile.email}
                     </div>
                   </div>
                 </div>
                 {profile.phone && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <Phone className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                    <Phone className="w-4 h-4 text-text-muted shrink-0" />
                     <div>
-                      <div className="text-[10px] text-[var(--text-muted)]">Phone</div>
-                      <div className="text-[var(--text-primary)] font-medium">
+                      <div className="text-[10px] text-text-muted">Phone</div>
+                      <div className="text-text-primary font-medium">
                         {profile.phone}
                       </div>
                     </div>
                   </div>
                 )}
                 {profile.uniqueId && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <Shield className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                    <Shield className="w-4 h-4 text-text-muted shrink-0" />
                     <div>
-                      <div className="text-[10px] text-[var(--text-muted)]">
+                      <div className="text-[10px] text-text-muted">
                         Unique ID
                       </div>
-                      <div className="font-mono text-[var(--text-primary)]">
+                      <div className="font-mono text-text-primary">
                         {profile.uniqueId}
                       </div>
                     </div>
@@ -114,7 +114,7 @@ function VicePrincipalProfileInner() {
               </div>
             </div>
           ) : (
-            <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+            <p className="text-xs text-text-muted py-4 text-center">
               Profile data unavailable.
             </p>
           )}

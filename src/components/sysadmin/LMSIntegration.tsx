@@ -61,16 +61,16 @@ const api = useApi();
     }
   };
 
-  if (loading) return <div className="p-4 text-xs text-[var(--text-secondary)]">Loading LMS Integration...</div>;
+  if (loading) return <div className="p-4 text-xs text-text-secondary">Loading LMS Integration...</div>;
 
   return (
     <Card className="p-4 space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-6 w-6 text-blue-400" />
+          <BookOpen className="h-6 w-6 text-action-primary" />
           <div>
             <CardTitle className="text-base">LMS Integration (Moodle / Canvas)</CardTitle>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-xs text-text-secondary">
               Automated roster synchronization & real-time gate scan attendance push.
             </p>
           </div>
@@ -87,16 +87,16 @@ const api = useApi();
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border)]">
-          <span className="text-[var(--text-secondary)]">Platform Target</span>
+        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+          <span className="text-text-secondary">Platform Target</span>
           <div className="font-bold text-sm uppercase">{config.platform}</div>
         </div>
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border)]">
-          <span className="text-[var(--text-secondary)]">Sync Schedule</span>
+        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+          <span className="text-text-secondary">Sync Schedule</span>
           <div className="font-bold text-sm">{config.sync_schedule}</div>
         </div>
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border)]">
-          <span className="text-[var(--text-secondary)]">Last Synced</span>
+        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+          <span className="text-text-secondary">Last Synced</span>
           <div className="font-bold text-sm">{new Date(config.last_synced_at).toLocaleTimeString()}</div>
         </div>
       </div>

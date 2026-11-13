@@ -58,7 +58,7 @@ export default function HelpPage() {
   const faqLd = faqJsonLd(FAQS);
 
   return (
-    <main id="main-content" className="mx-auto max-w-3xl px-4 py-12 text-[var(--text-primary)]">
+    <main id="main-content" className="mx-auto max-w-3xl px-4 py-12 text-text-primary">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
@@ -69,7 +69,7 @@ export default function HelpPage() {
       />
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--action-primary)]"
+        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-action-primary"
       >
         <ArrowLeft className="h-4 w-4" /> Back to home
       </Link>
@@ -77,46 +77,46 @@ export default function HelpPage() {
       <h1 className="mt-6 text-3xl font-bold md:text-4xl">
         Help &amp; Frequently Asked Questions
       </h1>
-      <p className="mt-3 text-[var(--text-secondary)]">
+      <p className="mt-3 text-text-secondary">
         Sign-in help, account recovery, and support contacts for the{" "}
         {COLLEGE.officialName} campus portal.
       </p>
 
-      <section className="mt-8 divide-y divide-[var(--border)] border-y border-[var(--border)]">
+      <section className="mt-8 divide-y divide-border border-y border-border">
         {FAQS.map((f) => (
           <details key={f.q} className="py-4">
             <summary className="cursor-pointer list-none font-semibold">
               {f.q}
             </summary>
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">{f.a}</p>
+            <p className="mt-2 text-sm text-text-secondary">{f.a}</p>
           </details>
         ))}
       </section>
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <LifeBuoy className="h-5 w-5 text-[var(--action-primary)]" /> Contact
+          <LifeBuoy className="h-5 w-5 text-action-primary" /> Contact
           support
         </h2>
-        <div className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
+        <div className="mt-4 space-y-2 text-sm text-text-secondary">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <Mail className="h-4 w-4 text-action-primary" aria-hidden="true" />
             <EmailLink email={COLLEGE.email} />
-            <span className="text-[var(--text-muted)]" aria-hidden="true">·</span>
+            <span className="text-text-muted" aria-hidden="true">·</span>
             <EmailLink email={COLLEGE.emailAlt} />
           </div>
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <Phone className="h-4 w-4 text-action-primary" aria-hidden="true" />
             <PhoneLink phone={`+91${COLLEGE.phone}`} label={`+91 ${COLLEGE.phone}`} />
           </div>
         </div>
       </section>
 
-      <div className="mt-10 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 text-sm">
+      <div className="mt-10 rounded-xl border border-border bg-bg-surface p-5 text-sm">
         <strong>Already signed in?</strong>
-        <p className="mt-1 text-[var(--text-secondary)]">
+        <p className="mt-1 text-text-secondary">
           Use the in-app{" "}
-          <Link href="/support" className="text-[var(--action-primary)] underline">
+          <Link href="/support" className="text-action-primary underline">
             Support
           </Link>{" "}
           page to raise a ticket.

@@ -96,12 +96,12 @@ export function getAvatarPlaceholder(name: string): string {
 
 export function getAvatarColor(name: string): string {
   const colors = [
-    "bg-emerald-500/20 text-emerald-400",
-    "bg-sky-500/20 text-sky-400",
+    "bg-emerald-500/20 text-action-success",
+    "bg-sky-500/20 text-action-info",
     "bg-violet-500/20 text-violet-400",
-    "bg-rose-500/20 text-rose-400",
-    "bg-amber-500/20 text-amber-400",
-    "bg-blue-500/20 text-blue-400",
+    "bg-rose-500/20 text-action-danger",
+    "bg-amber-500/20 text-action-warning",
+    "bg-blue-500/20 text-action-primary",
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {

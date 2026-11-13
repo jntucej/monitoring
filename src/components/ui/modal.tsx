@@ -117,9 +117,9 @@ const Modal = ({
     : "fixed inset-0 z-modal flex items-center justify-center bg-black/60 backdrop-blur-sm";
 
   const contentClassName = isMobile
-    ? "relative w-full h-full bg-[var(--bg-surface)] overflow-y-auto overscroll-contain"
+    ? "relative w-full h-full bg-bg-surface overflow-y-auto overscroll-contain"
     : cn(
-        "relative bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-xl w-full mx-4 max-h-[90dvh] overflow-y-auto overscroll-contain",
+        "relative bg-bg-surface border border-border rounded-xl shadow-xl w-full mx-4 max-h-[90dvh] overflow-y-auto overscroll-contain",
         sizeClasses[size]
       );
 
@@ -152,7 +152,7 @@ const Modal = ({
                 onClick={onClose}
                 aria-label="Close dialog"
                 className={cn(
-                  "flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95",
+                  "flex items-center justify-center rounded-xl text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95",
                   "absolute top-3 right-3 p-3 min-w-[44px] min-h-[44px]"
                 )}
               >
@@ -160,7 +160,7 @@ const Modal = ({
               </button>
             )}
             {title && (
-              <div className={cn("border-b border-[var(--border)]", "px-6 py-4")}>
+              <div className={cn("border-b border-border", "px-6 py-4")}>
                 <h2 id="modal-title" className="text-xl font-semibold">
                   {title}
                 </h2>

@@ -94,9 +94,9 @@ export function OperatorChangePasswordCard() {
   };
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-bg-surface p-6 shadow-sm">
       {mustChangePassword && !success && (
-        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200">
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-action-warning">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-semibold">A temporary password was set for your account.</p>
@@ -108,12 +108,12 @@ export function OperatorChangePasswordCard() {
         </div>
       )}
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-xl bg-[var(--action-primary)]/10">
-          <KeyRound className="w-5 h-5 text-[var(--action-primary)]" />
+        <div className="p-2 rounded-xl bg-action-primary/10">
+          <KeyRound className="w-5 h-5 text-action-primary" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Change password</h3>
-          <p className="text-sm text-[var(--text-muted)]">
+          <h3 className="text-lg font-semibold text-text-primary">Change password</h3>
+          <p className="text-sm text-text-muted">
             You will be signed out of all devices after this change.
           </p>
         </div>
@@ -121,9 +121,9 @@ export function OperatorChangePasswordCard() {
 
       {success ? (
         <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4">
-          <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5" />
+          <CheckCircle2 className="w-5 h-5 text-action-success mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            <p className="text-sm font-medium text-action-success dark:text-action-success">
               Password changed successfully.
             </p>
             <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-1">
@@ -161,15 +161,15 @@ export function OperatorChangePasswordCard() {
 
           {error && (
             <div className="flex items-start gap-2 rounded-xl bg-rose-500/10 border border-rose-500/30 p-3">
-              <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>
+              <AlertCircle className="w-4 h-4 text-action-danger mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-action-danger dark:text-action-danger">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 transition"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 transition"
           >
             {submitting ? (
               <>
@@ -204,7 +204,7 @@ function OperatorPasswordField({
 }: OperatorPasswordFieldProps) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+      <span className="block text-sm font-medium text-text-secondary mb-1.5">
         {label}
       </span>
       <div className="relative">
@@ -213,18 +213,18 @@ function OperatorPasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className="w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2.5 pr-10 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+          className="w-full rounded-xl border border-border bg-bg-base px-3 py-2.5 pr-10 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/40"
         />
         <button
           type="button"
           onClick={onToggle}
           aria-label={show ? "Hide password" : "Show password"}
-          className="absolute inset-y-0 right-2 flex items-center px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="absolute inset-y-0 right-2 flex items-center px-2 text-text-muted hover:text-text-primary"
         >
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
-      {hint && <p className="text-xs text-[var(--text-muted)] mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-text-muted mt-1">{hint}</p>}
     </label>
   );
 }

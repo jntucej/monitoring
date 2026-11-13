@@ -418,20 +418,20 @@ const shift = useOperatorShiftClock();
   const canConfirm = state === "confirming" && currentStudent != null;
 
   return (
-    <div className="relative min-h-[85vh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] pb-safe min-w-0">
+    <div className="relative min-h-[85vh] flex flex-col bg-bg-base text-text-primary pb-safe min-w-0">
       {/* ── Operational status + confirmation card (above the camera layer) ── */}
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">
           {/* O16: shift clock — first-scan-derived 8h window label. */}
-          <div className="pointer-events-none flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+          <div className="pointer-events-none flex items-center gap-1.5 text-[11px] text-text-muted">
             {shift.start ? (
               <>
-                <span className="font-mono font-semibold text-[var(--text-secondary)]">
+                <span className="font-mono font-semibold text-text-secondary">
                   {formatTime(shift.start.toISOString())}
                 </span>
                 <span>shift · {shift.end ? formatTime(shift.end.toISOString()) : ""}</span>
                 {shift.remainingHours != null && (
-                  <span className="text-emerald-400">{shift.remainingHours.toFixed(1)}h left</span>
+                  <span className="text-action-success">{shift.remainingHours.toFixed(1)}h left</span>
                 )}
               </>
             ) : (
@@ -455,10 +455,10 @@ const shift = useOperatorShiftClock();
           {gateMode === "MAINTENANCE" && (
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-1 shadow-sm">
               <div className="flex items-center gap-2">
-                <Wrench className="w-5 h-5 text-amber-500" />
-                <h3 className="font-extrabold text-sm text-amber-400 uppercase tracking-wide">Maintenance Mode Active</h3>
+                <Wrench className="w-5 h-5 text-action-warning" />
+                <h3 className="font-extrabold text-sm text-action-warning uppercase tracking-wide">Maintenance Mode Active</h3>
               </div>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xs text-text-secondary leading-relaxed">
                 Scheduled maintenance in progress. Routine scans are temporarily blocked.
               </p>
             </div>
@@ -467,18 +467,18 @@ const shift = useOperatorShiftClock();
           {gateMode === "CURFEW" && (
             <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-4 space-y-1 shadow-sm">
               <div className="flex items-center gap-2">
-                <Moon className="w-5 h-5 text-indigo-400" />
+                <Moon className="w-5 h-5 text-action-primary" />
                 <h3 className="font-extrabold text-sm text-indigo-300 uppercase tracking-wide">Night Curfew Hours Active</h3>
               </div>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              <p className="text-xs text-text-secondary leading-relaxed">
                 Curfew restrictions in effect. An override reason is required for student exits.
               </p>
             </div>
           )}
 
           {activeLockdown && (
-            <div className="bg-rose-600 text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center gap-3 animate-pulse">
-              <ShieldAlert className="w-7 h-7 shrink-0 text-amber-200" />
+            <div className="bg-action-danger text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center gap-3 animate-pulse">
+              <ShieldAlert className="w-7 h-7 shrink-0 text-action-warning" />
               <div className="min-w-0">
                 <h4 className="font-extrabold text-sm uppercase tracking-wider">Campus Lockdown In Effect</h4>
                 <p className="text-xs opacity-90">
@@ -556,11 +556,11 @@ const shift = useOperatorShiftClock();
         <div className="fixed bottom-28 inset-x-0 z-60 flex justify-center px-4 pointer-events-none">
           <form
             onSubmit={submitManual}
-            className="pointer-events-auto w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 space-y-3 shadow-2xl"
+            className="pointer-events-auto w-full max-w-md bg-bg-surface border border-border rounded-2xl p-4 space-y-3 shadow-2xl"
           >
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">Manual Student Lookup</h3>
-              <p className="text-xs text-[var(--text-muted)]">
+              <h3 className="text-sm font-bold text-text-primary">Manual Student Lookup</h3>
+              <p className="text-xs text-text-muted">
                 Type &gt; then roll number (or paste a roll number directly).
               </p>
             </div>
@@ -571,13 +571,13 @@ const shift = useOperatorShiftClock();
               value={manualRollInput}
               onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
               placeholder="e.g. >24JJ1A0501"
-              className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-base font-mono font-bold tracking-wider text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+              className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="flex-1 min-h-[44px] px-4 rounded-xl bg-[var(--action-primary)] disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="flex-1 min-h-[44px] px-4 rounded-xl bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>Verify Roll Number</span>
@@ -585,7 +585,7 @@ const shift = useOperatorShiftClock();
               <button
                 type="button"
                 onClick={() => { setManualOpen(false); setManualRollInput(""); }}
-                className="min-h-[44px] px-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-muted)] text-sm font-semibold"
+                className="min-h-[44px] px-4 rounded-xl bg-bg-base border border-border text-text-muted text-sm font-semibold"
               >
                 Close
               </button>
@@ -638,11 +638,11 @@ const shift = useOperatorShiftClock();
               className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50"
             >
               <div className="scan-error w-full max-w-md p-5 rounded-2xl text-center space-y-3 bg-rose-500/10 border border-rose-500/30">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-rose-400">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-action-danger">
                   <AlertCircle className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-bold text-sm text-[var(--action-danger)]">
+                  <h3 className="font-bold text-sm text-action-danger">
                     {isAuthError
                       ? "Verification Failed"
                       : error.code === "NOT_FOUND"
@@ -655,9 +655,9 @@ const shift = useOperatorShiftClock();
                       ? "Network Error"
                       : "Verification Failed"}
                   </h3>
-                  <p className="text-xs text-[var(--text-secondary)]">{error.message}</p>
+                  <p className="text-xs text-text-secondary">{error.message}</p>
                   {isAuthError && (
-                    <p className="text-[10px] font-semibold text-amber-400">
+                    <p className="text-[10px] font-semibold text-action-warning">
                       Your session could not be verified. Dismiss to sign in again.
                     </p>
                   )}
@@ -672,7 +672,7 @@ const shift = useOperatorShiftClock();
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -690,7 +690,7 @@ const shift = useOperatorShiftClock();
                         reset();
                       }
                     }}
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-rose-500 text-white font-semibold text-xs hover:bg-rose-600 transition-colors active:scale-[0.98] flex items-center justify-center"
+                    className="min-h-[44px] px-4 py-2 rounded-xl bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -721,24 +721,24 @@ const shift = useOperatorShiftClock();
       {/* Scanner closed (X pressed): a single clear re-open action instead
           of a frozen empty desk. */}
       {!scannerOpen && !needsAssignment && (
-        <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-3">
-            <p className="text-sm font-bold text-[var(--text-primary)]">Scanner paused</p>
-            <p className="text-xs text-[var(--text-muted)]">
+        <div className="fixed inset-0 z-50 bg-bg-base flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-bg-surface border border-border rounded-2xl p-6 text-center space-y-3">
+            <p className="text-sm font-bold text-text-primary">Scanner paused</p>
+            <p className="text-xs text-text-muted">
               Camera stopped. Re-open it to continue scanning, or go back to the dashboard.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => { setScannerOpen(true); setManualOpen(false); }}
-                className="min-h-[44px] rounded-xl bg-[var(--action-primary)] text-black font-bold text-sm"
+                className="min-h-[44px] rounded-xl bg-action-primary text-black font-bold text-sm"
               >
                 Open scanner
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/operator")}
-                className="min-h-[44px] rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm"
+                className="min-h-[44px] rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
               >
                 Dashboard
               </button>
@@ -749,12 +749,12 @@ const shift = useOperatorShiftClock();
 
       {/* ── Unassigned operators: the picker, never a first-active gate ── */}
       {needsAssignment && (
-        <div className="fixed inset-0 z-60 bg-[var(--bg-base)] overflow-y-auto">
+        <div className="fixed inset-0 z-60 bg-bg-base overflow-y-auto">
           <div className="min-h-full flex items-center justify-center p-4">
             <div className="w-full max-w-lg">
               <div className="mb-4 space-y-1">
-                <h1 className="text-lg font-bold text-[var(--text-primary)]">Your gate</h1>
-                <p className="text-xs text-[var(--text-muted)]">
+                <h1 className="text-lg font-bold text-text-primary">Your gate</h1>
+                <p className="text-xs text-text-muted">
                   Pick the gate you work today, or claim it with the code your supervisor gave you.
                 </p>
               </div>
@@ -772,7 +772,7 @@ const shift = useOperatorShiftClock();
               type="button"
               disabled={!canConfirm}
               onClick={() => { void doConfirmWithGeo("IN"); }}
-              className="min-h-[56px] rounded-xl bg-[var(--action-primary)] text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h-[56px] rounded-xl bg-action-primary text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               IN
             </button>
@@ -780,7 +780,7 @@ const shift = useOperatorShiftClock();
               type="button"
               disabled={!canConfirm}
               onClick={() => { void doConfirmWithGeo("OUT"); }}
-              className="min-h-[56px] rounded-xl bg-[var(--action-danger)] text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h-[56px] rounded-xl bg-action-danger text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               OUT
             </button>
@@ -793,7 +793,7 @@ const shift = useOperatorShiftClock();
 
 export default function OperatorPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-[var(--text-muted)]">Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-text-muted">Loading…</div>}>
       <OperatorPageInner />
     </Suspense>
   );

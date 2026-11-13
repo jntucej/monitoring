@@ -57,42 +57,42 @@ export function ParentStatusBar({ counts, lastScan, refreshing = false }: Parent
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Parent status bar"
     >
       {/* Left: parent · children · activities · unread · fees due */}
       <div className="flex items-center gap-4 min-w-0 flex-wrap">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-[var(--text-muted)]">Parent</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-action-success shrink-0" />
+          <span className="text-text-muted">Parent</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">children</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="text-text-muted">children</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.children ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">recent activities</span>
-          <span className="font-mono tabular-nums font-bold text-sky-400">
+          <span className="text-text-muted">recent activities</span>
+          <span className="font-mono tabular-nums font-bold text-action-info">
             {counts?.activities ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">unread</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="text-text-muted">unread</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.unread ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">fees due</span>
+          <span className="text-text-muted">fees due</span>
           <span
             className={`font-mono tabular-nums font-bold ${
-              feesDueText === "none" ? "text-[var(--text-muted)]" : "text-rose-400"
+              feesDueText === "none" ? "text-text-muted" : "text-action-danger"
             }`}
           >
             {feesDueText}
@@ -103,13 +103,13 @@ export function ParentStatusBar({ counts, lastScan, refreshing = false }: Parent
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

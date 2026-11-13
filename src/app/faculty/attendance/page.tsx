@@ -80,28 +80,28 @@ function FacultyAttendanceInner() {
   const deptCode = user?.departmentId ? ` · dept ${user.departmentId}` : "";
 
   return (
-    <div className="min-h-dvh bg-[#0d1220] p-4 sm:p-6 md:p-4 space-y-4 sm:space-y-6">
+    <div className="min-h-dvh bg-bg-elevated p-4 sm:p-6 md:p-4 space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <p className="text-2xl font-bold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-emerald-400" />
+            <Users className="w-6 h-6 text-action-success" />
             Faculty Attendance Desk
           </p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {isFaculty
               ? `Your department${deptCode || " (assigned branch)"} — live entry/exit, punctuality and attendance metrics.`
               : "Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics."}
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+        <div className="flex items-center gap-3 text-xs text-text-muted">
           {user?.name && <span className="truncate max-w-[220px]">{user.name}</span>}
         </div>
       </div>
 
       {/* Error banner with retry */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center justify-between gap-2">
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center justify-between gap-2">
           <span className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>Failed to load faculty attendance: {error}</span>
@@ -109,7 +109,7 @@ function FacultyAttendanceInner() {
           <button
             type="button"
             onClick={() => fetchFacultyAttendance()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 shrink-0"
           >
             <RotateCw className="w-3.5 h-3.5" />
             Retry
@@ -120,15 +120,15 @@ function FacultyAttendanceInner() {
       {/* Loading state */}
       {loading && records.length === 0 && !error ? (
         <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
         /* Empty state — no attendance records yet */
-        <div className="flex flex-col items-center justify-center p-12 bg-[#111827] border border-[var(--border)] rounded-2xl text-center space-y-3">
-          <Inbox className="w-10 h-10 text-[var(--text-muted)]" />
+        <div className="flex flex-col items-center justify-center p-12 bg-bg-base border border-border rounded-2xl text-center space-y-3">
+          <Inbox className="w-10 h-10 text-text-muted" />
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-[var(--text-secondary)]">No attendance records yet</h3>
-            <p className="text-xs text-[var(--text-muted)] max-w-sm">
+            <h3 className="text-base font-semibold text-text-secondary">No attendance records yet</h3>
+            <p className="text-xs text-text-muted max-w-sm">
               Faculty appear here after their first gate check-in today. Metrics refresh
               automatically while Live mode is on.
             </p>

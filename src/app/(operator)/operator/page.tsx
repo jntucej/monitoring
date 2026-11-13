@@ -25,12 +25,12 @@ function OperatorDeskHero() {
   const gateId = user?.gateId;
   return (
     <WidgetBoundary name="DeskEntry" title="Your Desk">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 space-y-3">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 space-y-3">
         <div>
-          <p className="text-sm font-bold text-[var(--text-primary)]">
+          <p className="text-sm font-bold text-text-primary">
             {gateId ? `Your gate: ${gateId}` : "No gate assigned yet"}
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-text-muted mt-1">
             {gateId
               ? "The scan desk opens on your assigned gate — one tap."
               : "Claim a gate (or use the desk picker) before you can scan."}
@@ -38,7 +38,7 @@ function OperatorDeskHero() {
         </div>
         <Link
           href={gateId ? `/gate/${gateId}` : "/operator/claim"}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-5 text-sm font-bold text-black transition-colors"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-action-primary px-5 text-sm font-bold text-black transition-colors"
         >
           {gateId ? "Open gate desk" : "Claim your gate"}
         </Link>

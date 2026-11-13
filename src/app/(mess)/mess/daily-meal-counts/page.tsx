@@ -50,24 +50,24 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-4 h-4 mt-2 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="w-4 h-4 mt-2 animate-spin text-text-muted" />
       ) : (
         <p className={`mt-1 text-xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -123,15 +123,15 @@ function MessDailyMealCountsInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -142,31 +142,31 @@ function MessDailyMealCountsInner() {
       )}
 
       <WidgetBoundary title="Daily Meal Counts">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <Calculator className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <Calculator className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Daily Meal Counts</span>
-            <span className="ml-auto text-xs text-[var(--text-muted)]">{fmtDate(d?.mealDate)}</span>
+            <span className="ml-auto text-xs text-text-muted">{fmtDate(d?.mealDate)}</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading daily meal counts…
             </div>
           ) : d && d.total > 0 ? (
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 min-w-0">
-                <StatCard icon={Users} label="Selected" value={d.total} sub="Preferences declared" accent="text-sky-400" />
-                <StatCard icon={CalendarDays} label="Declared Present" value={d.declaredPresent} sub="will_be_present = TRUE" accent="text-amber-400" />
-                <StatCard icon={CheckCircle2} label="Served" value={d.confirmed} sub="Confirmed meals" accent="text-emerald-400" />
-                <StatCard icon={Inbox} label="No-Shows" value={d.noShows} sub="Declared but not served" accent="text-rose-400" />
-                <StatCard icon={Users} label="Veg" value={d.veg} sub="Primary item VEG" accent="text-emerald-400" />
-                <StatCard icon={Users} label="Non-Veg" value={d.nonVeg} sub="Primary item NON_VEG" accent="text-rose-400" />
+                <StatCard icon={Users} label="Selected" value={d.total} sub="Preferences declared" accent="text-action-info" />
+                <StatCard icon={CalendarDays} label="Declared Present" value={d.declaredPresent} sub="will_be_present = TRUE" accent="text-action-warning" />
+                <StatCard icon={CheckCircle2} label="Served" value={d.confirmed} sub="Confirmed meals" accent="text-action-success" />
+                <StatCard icon={Inbox} label="No-Shows" value={d.noShows} sub="Declared but not served" accent="text-action-danger" />
+                <StatCard icon={Users} label="Veg" value={d.veg} sub="Primary item VEG" accent="text-action-success" />
+                <StatCard icon={Users} label="Non-Veg" value={d.nonVeg} sub="Primary item NON_VEG" accent="text-action-danger" />
               </div>
-              <p className="mt-4 text-xs text-[var(--text-muted)]">
+              <p className="mt-4 text-xs text-text-muted">
                 Counts stream from the mess preferences and serving logs for the meal day above.
                 Confirmations run from the{" "}
-                <Link href="/mess/scan" className="text-emerald-400 hover:underline">
+                <Link href="/mess/scan" className="text-action-success hover:underline">
                   Token Scanner
                 </Link>
                 .
@@ -174,8 +174,8 @@ function MessDailyMealCountsInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted max-w-md mx-auto">
                 No meal selections recorded for this meal day yet. Counts appear once students
                 declare a preference for the scheduled mess day.
               </p>

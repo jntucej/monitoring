@@ -18,67 +18,67 @@ export function FacultyCare({
   const allPresent = needsAttention === 0 && total > 0;
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+          <Users className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">
             Faculty care
           </h2>
         </div>
         <Link
           href="/hod/faculty/attendance"
-          className="inline-flex min-h-[44px] items-center text-[11px] text-[var(--action-primary)] hover:underline"
+          className="inline-flex min-h-[44px] items-center text-[11px] text-action-primary hover:underline"
         >
           Details
         </Link>
       </header>
 
       {allPresent ? (
-        <div className="flex items-center gap-2 rounded-lg bg-[var(--action-primary)]/10 px-3 py-2.5">
-          <CheckCircle2 className="size-4 text-[var(--action-primary)]" />
+        <div className="flex items-center gap-2 rounded-lg bg-action-primary/10 px-3 py-2.5">
+          <CheckCircle2 className="size-4 text-action-primary" />
           <div>
-            <p className="text-sm font-medium text-[var(--action-primary)]">
+            <p className="text-sm font-medium text-action-primary">
               All {total} faculty checked in today
             </p>
-            <p className="text-[10px] text-[var(--text-muted)]">
+            <p className="text-[10px] text-text-muted">
               Nobody is left behind.
             </p>
           </div>
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-lg bg-[var(--action-warning)]/10 px-3 py-2">
-            <AlertCircle className="size-4 text-[var(--action-warning)]" />
+          <div className="flex items-center gap-2 rounded-lg bg-action-warning/10 px-3 py-2">
+            <AlertCircle className="size-4 text-action-warning" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-[var(--text-primary)]">
+              <p className="text-sm font-medium text-text-primary">
                 {needsAttention} faculty need attention
               </p>
-              <p className="text-[10px] text-[var(--text-muted)]">
+              <p className="text-[10px] text-text-muted">
                 {presentToday}/{total} present ·{" "}
                 {lateToday > 0 && `${lateToday} late · `}
                 {absentToday > 0 && `${absentToday} absent`}
               </p>
             </div>
-            <ArrowRight className="size-3.5 text-[var(--text-muted)]" />
+            <ArrowRight className="size-3.5 text-text-muted" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Present</p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-primary)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">Present</p>
+              <p className="text-lg font-semibold tabular-nums text-action-primary">
                 {presentToday}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Late</p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-warning)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">Late</p>
+              <p className="text-lg font-semibold tabular-nums text-action-warning">
                 {lateToday}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Absent</p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-danger)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">Absent</p>
+              <p className="text-lg font-semibold tabular-nums text-action-danger">
                 {absentToday}
               </p>
             </div>

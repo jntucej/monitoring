@@ -24,16 +24,16 @@ export interface HostelOverviewData {
 export function HostelBlockCard({ block }: { block: HostelBlock }) {
   const pct = block.total > 0 ? Math.round((block.occupied / block.total) * 100) : 0;
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
+    <div className="rounded-xl border border-border bg-bg-surface p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="font-semibold text-sm">{block.block}</span>
-        <span className="text-xs text-[var(--text-muted)]">
+        <span className="text-xs text-text-muted">
           {block.occupied}/{block.total}
         </span>
       </div>
-      <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-bg-elevated rounded-full overflow-hidden">
         <div
-          className="h-full bg-indigo-500 rounded-full transition-all"
+          className="h-full bg-action-primary rounded-full transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -73,15 +73,15 @@ export function HostelBlockDrilldown({ block }: { block: string }) {
   }
 
   if (!students || students.length === 0) {
-    return <p className="text-xs text-[var(--text-muted)] py-2">No students found for this block.</p>;
+    return <p className="text-xs text-text-muted py-2">No students found for this block.</p>;
   }
 
   return (
     <ul className="space-y-1 mt-2">
       {students.slice(0, 20).map((s) => (
-        <li key={s.roll} className="text-xs text-[var(--text-secondary)] flex justify-between">
+        <li key={s.roll} className="text-xs text-text-secondary flex justify-between">
           <span>{s.name}</span>
-          <span className="font-mono text-[var(--text-muted)]">{s.roll}</span>
+          <span className="font-mono text-text-muted">{s.roll}</span>
         </li>
       ))}
     </ul>
@@ -122,14 +122,14 @@ export function HostelOverview() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Overview">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
-        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
-          <Building2 className="w-4 h-4 text-indigo-400" />
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+        <div className="flex items-center gap-2 text-text-muted mb-3">
+          <Building2 className="w-4 h-4 text-action-primary" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Occupancy</span>
         </div>
 
         {error && (
-          <p className="text-xs text-rose-400 mb-2">{error}</p>
+          <p className="text-xs text-action-danger mb-2">{error}</p>
         )}
 
         {!data && !error && (
@@ -142,22 +142,22 @@ export function HostelOverview() {
           <>
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-[var(--text-primary)]">{data.summary.total}</div>
-                <div className="text-[10px] text-[var(--text-muted)] uppercase">Total</div>
+                <div className="text-2xl font-bold text-text-primary">{data.summary.total}</div>
+                <div className="text-[10px] text-text-muted uppercase">Total</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-400">{data.summary.occupied}</div>
-                <div className="text-[10px] text-[var(--text-muted)] uppercase">Occupied</div>
+                <div className="text-2xl font-bold text-action-success">{data.summary.occupied}</div>
+                <div className="text-[10px] text-text-muted uppercase">Occupied</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-400">{data.summary.available}</div>
-                <div className="text-[10px] text-[var(--text-muted)] uppercase">Available</div>
+                <div className="text-2xl font-bold text-action-primary">{data.summary.available}</div>
+                <div className="text-[10px] text-text-muted uppercase">Available</div>
               </div>
             </div>
 
             <div className="space-y-2">
               {data.blocks.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)] py-2">No block data available.</p>
+                <p className="text-xs text-text-muted py-2">No block data available.</p>
               ) : (
                 data.blocks.map((b) => (
                   <div key={b.block}>
@@ -166,7 +166,7 @@ export function HostelOverview() {
                     <button
                       type="button"
                       onClick={() => setExpandedBlock(expandedBlock === b.block ? null : b.block)}
-                      className="text-[10px] text-indigo-400 hover:underline mt-1"
+                      className="text-[10px] text-action-primary hover:underline mt-1"
                     >
                       {expandedBlock === b.block ? "Hide" : "View students"}
                     </button>

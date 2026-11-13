@@ -77,13 +77,13 @@ export function PermissionRequestForm({
 
   if (ticketNumber) {
     return (
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-4">
+      <div className="bg-bg-surface border border-border rounded-2xl p-6 text-center space-y-4">
         <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+          <CheckCircle2 className="w-6 h-6 text-action-success" />
         </div>
-        <h2 className="text-lg font-bold text-[var(--text-primary)]">Request Submitted</h2>
-        <p className="text-xs text-[var(--text-muted)]">Your ticket #{ticketNumber} is now pending approval.</p>
-        <div className="p-3 rounded-xl bg-[var(--bg-elevated)] font-mono text-sm font-bold text-[var(--action-primary)]">
+        <h2 className="text-lg font-bold text-text-primary">Request Submitted</h2>
+        <p className="text-xs text-text-muted">Your ticket #{ticketNumber} is now pending approval.</p>
+        <div className="p-3 rounded-xl bg-bg-elevated font-mono text-sm font-bold text-action-primary">
           Ticket #{ticketNumber}
         </div>
       </div>
@@ -91,10 +91,10 @@ export function PermissionRequestForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="bg-bg-surface border border-border rounded-2xl p-5 space-y-5 shadow-sm">
       {!lockedWorkflow && (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-[var(--text-secondary)] uppercase">Category</label>
+          <label className="text-xs font-semibold text-text-secondary uppercase">Category</label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: "hostel", label: "Hostel", icon: Building },
@@ -107,8 +107,8 @@ export function PermissionRequestForm({
                 onClick={() => { setWorkflowType(id as WorkflowType); setReason(""); }}
                 className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs font-semibold transition ${
                   workflowType === id
-                    ? "bg-[var(--action-primary)]/10 border-[var(--action-primary)] text-[var(--action-primary)]"
-                    : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                    ? "bg-action-primary/10 border-action-primary text-action-primary"
+                    : "bg-bg-elevated border-border text-text-secondary hover:bg-bg-surface"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -119,55 +119,55 @@ export function PermissionRequestForm({
         </div>
       )}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-[var(--text-secondary)]">Reason *</label>
+        <label className="text-xs font-semibold text-text-secondary">Reason *</label>
         <ReasonSelect
           workflowType={workflowType}
           value={reason}
           onChange={(code) => { setReason(code); setFieldErrors((p) => ({ ...p, reason: "" })); }}
           required
         />
-        {fieldErrors.reason && <p className="text-xs text-rose-500">{fieldErrors.reason}</p>}
+        {fieldErrors.reason && <p className="text-xs text-action-danger">{fieldErrors.reason}</p>}
       </div>
 
       {(workflowType === "hostel" || workflowType === "staff_leave") && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1">
+            <label className="text-xs font-semibold text-text-secondary flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" /> From *
             </label>
             <input
               type="datetime-local"
               value={fromDatetime}
               onChange={(e) => setFromDatetime(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
+              className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
             />
-            {fieldErrors.fromDatetime && <p className="text-xs text-rose-500">{fieldErrors.fromDatetime}</p>}
+            {fieldErrors.fromDatetime && <p className="text-xs text-action-danger">{fieldErrors.fromDatetime}</p>}
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1">
+            <label className="text-xs font-semibold text-text-secondary flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" /> To *
             </label>
             <input
               type="datetime-local"
               value={toDatetime}
               onChange={(e) => setToDatetime(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
+              className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
             />
-            {fieldErrors.toDatetime && <p className="text-xs text-rose-500">{fieldErrors.toDatetime}</p>}
+            {fieldErrors.toDatetime && <p className="text-xs text-action-danger">{fieldErrors.toDatetime}</p>}
           </div>
         </div>
       )}
 
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="description-isexammemo">Description {isExamMemo && "*"}</label>
+        <label className="text-xs font-semibold text-text-secondary" htmlFor="description-isexammemo">Description {isExamMemo && "*"}</label>
         <textarea id="description-isexammemo"
           rows={3}
           value={description}
           onChange={(e) => { setDescription(e.target.value); setFieldErrors((p) => ({ ...p, description: "" })); }}
           placeholder="Details..."
-          className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)]"
+          className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
         />
-        {fieldErrors.description && <p className="text-xs text-rose-500">{fieldErrors.description}</p>}
+        {fieldErrors.description && <p className="text-xs text-action-danger">{fieldErrors.description}</p>}
       </div>
 
       <div className="flex items-center gap-2">
@@ -177,15 +177,15 @@ export function PermissionRequestForm({
           checked={isExamMemo ? true : documentRequired}
           disabled={isExamMemo}
           onChange={(e) => setDocumentRequired(e.target.checked)}
-          className="rounded border-[var(--border)] text-[var(--action-primary)]"
+          className="rounded border-border text-action-primary"
         />
-        <label htmlFor="doc-req-chk" className="text-xs text-[var(--text-secondary)] cursor-pointer">
+        <label htmlFor="doc-req-chk" className="text-xs text-text-secondary cursor-pointer">
           Document Required {isExamMemo && "(Auto-checked for exam/memo)"}
         </label>
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-rose-500 text-xs">
+        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-action-danger text-xs">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -194,7 +194,7 @@ export function PermissionRequestForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-2.5 px-4 rounded-xl bg-[var(--action-primary)] text-white text-xs font-bold hover:brightness-110 disabled:opacity-50 transition flex items-center justify-center gap-2"
+        className="w-full py-2.5 px-4 rounded-xl bg-action-primary text-white text-xs font-bold hover:brightness-110 disabled:opacity-50 transition flex items-center justify-center gap-2"
       >
         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Submit Permission Request</span>}
       </button>

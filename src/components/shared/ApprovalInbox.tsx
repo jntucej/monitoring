@@ -217,12 +217,12 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
   } else if (error) {
     body = (
       <div className="flex flex-col items-center gap-3 p-6 text-center">
-        <AlertTriangle className="h-8 w-8 text-[var(--action-danger)]" />
-        <p className="text-sm text-[var(--text-secondary)]">{error}</p>
+        <AlertTriangle className="h-8 w-8 text-action-danger" />
+        <p className="text-sm text-text-secondary">{error}</p>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-surface"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Retry
         </button>
@@ -251,18 +251,18 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
           return (
             <div
               key={row.id || row.ticket_number}
-              className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 min-w-0 transition-colors hover:border-[var(--text-muted)]"
+              className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-4 min-w-0 transition-colors hover:border-[var(--text-muted)]"
             >
               {/* Header: ticket + SLA badge */}
               <div className="flex items-center justify-between gap-2 min-w-0">
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)] truncate">
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-bg-elevated border border-border text-action-primary truncate">
                   {row.ticket_number}
                 </span>
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ${
                     overdue
-                      ? "bg-[var(--action-danger)]/10 text-[var(--action-danger)]"
-                      : "bg-[var(--action-info)]/10 text-[var(--action-info)]"
+                      ? "bg-action-danger/10 text-action-danger"
+                      : "bg-action-info/10 text-action-info"
                   }`}
                 >
                   {overdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
@@ -272,17 +272,17 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
 
               {/* Student + workflow + stage */}
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                <p className="text-sm font-semibold text-text-primary truncate">
                   {studentName}
                   {roll ? (
-                    <span className="ml-1.5 text-xs font-normal text-[var(--text-muted)]">{roll}</span>
+                    <span className="ml-1.5 text-xs font-normal text-text-muted">{roll}</span>
                   ) : null}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-                  <span className="rounded bg-[var(--bg-elevated)] border border-[var(--border)] px-1.5 py-0.5">
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-text-secondary">
+                  <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5">
                     {row.workflow_type}
                   </span>
-                  <span className="rounded bg-[var(--bg-elevated)] border border-[var(--border)] px-1.5 py-0.5">
+                  <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5">
                     {STAGE_LABELS[row.current_stage] ?? row.current_stage}
                   </span>
                 </div>
@@ -296,7 +296,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "APPROVE")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--action-primary)] px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 disabled:pointer-events-none"
+                      className="inline-flex items-center gap-1 rounded-lg bg-action-primary px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 disabled:pointer-events-none"
                     >
                       {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
                       Approve
@@ -305,7 +305,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "REJECT")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--action-danger)] hover:bg-[var(--bg-surface)] disabled:opacity-40 disabled:pointer-events-none"
+                      className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-action-danger hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
                     >
                       <X className="h-3 w-3" /> Reject
                     </button>
@@ -313,7 +313,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "ESCALATE")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--action-warning)] hover:bg-[var(--bg-surface)] disabled:opacity-40 disabled:pointer-events-none"
+                      className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-action-warning hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
                     >
                       <ArrowUpRight className="h-3 w-3" /> Escalate
                     </button>
@@ -322,7 +322,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                   <button
                     type="button"
                     onClick={() => viewTicket(row.ticket_number)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+                    className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:bg-bg-surface"
                   >
                     <Eye className="h-3 w-3" /> View details
                   </button>
@@ -339,8 +339,8 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Inbox className="h-4 w-4 text-[var(--action-primary)] shrink-0" />
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] truncate">
+          <Inbox className="h-4 w-4 text-action-primary shrink-0" />
+          <h3 className="text-sm font-semibold text-text-primary truncate">
             Action Inbox
             {isApprover ? " — approvals" : " — pending"}
           </h3>
@@ -349,7 +349,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
           type="button"
           onClick={() => void refresh()}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 self-start rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 self-start rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-elevated disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -365,7 +365,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
 
   return (
     <WidgetBoundary title="Approval Inbox">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5">
+      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
         {inner}
       </div>
     </WidgetBoundary>

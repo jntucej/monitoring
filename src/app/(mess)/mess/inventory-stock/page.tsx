@@ -38,7 +38,7 @@ interface InventoryResponse {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -81,15 +81,15 @@ function MessInventoryStockInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -100,41 +100,41 @@ function MessInventoryStockInner() {
       )}
 
       <WidgetBoundary title="Inventory and Stock">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <Package className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <Package className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Inventory &amp; Stock</span>
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">{d ? `${d.total} item(s)` : "—"}</span>
+            <span className="ml-auto text-xs text-text-muted shrink-0">{d ? `${d.total} item(s)` : "—"}</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading inventory…
             </div>
           ) : items.length > 0 ? (
             <div className="min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Active Items</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">{d?.total}</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Active Items</p>
+                  <p className="mt-1 text-lg font-bold text-action-success">{d?.total}</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Primary Items</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">{d?.primaryCount}</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Primary Items</p>
+                  <p className="mt-1 text-lg font-bold text-action-warning">{d?.primaryCount}</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Stock Levels</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Stock Levels</p>
+                  <p className="mt-1 text-lg font-bold text-action-info">
                     {items.reduce((sum, i) => sum + i.scheduledDays, 0)}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">item-day allocations across active mess days</p>
+                  <p className="text-xs text-text-muted">item-day allocations across active mess days</p>
                 </div>
               </div>
 
               <div className="overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[520px]">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-4 py-2.5">Item</th>
                       <th className="text-left px-4 py-2.5">Code</th>
                       <th className="text-left px-4 py-2.5">Type</th>
@@ -143,25 +143,25 @@ function MessInventoryStockInner() {
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {items.map((item) => (
-                      <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                        <td className="px-4 py-3 text-[var(--text-secondary)] font-medium min-w-0 truncate">{item.label}</td>
-                        <td className="px-4 py-3 text-[var(--text-muted)] font-mono text-xs whitespace-nowrap">{item.code}</td>
+                      <tr key={item.id} className="hover:bg-bg-elevated/30 transition-colors">
+                        <td className="px-4 py-3 text-text-secondary font-medium min-w-0 truncate">{item.label}</td>
+                        <td className="px-4 py-3 text-text-muted font-mono text-xs whitespace-nowrap">{item.code}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {item.isPrimary ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-amber-400">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-action-warning">
                               <CheckCircle2 className="w-3 h-3" /> Primary
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-[var(--border)]/40 bg-[var(--bg-elevated)]/20 text-[var(--text-muted)]">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-border/40 bg-bg-elevated/20 text-text-muted">
                               Add-on
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-[var(--text-muted)]">
+                        <td className="px-4 py-3 text-text-muted">
                           {item.scheduledDays > 0 ? (
-                            <span className="text-emerald-400">{item.scheduledDays} day(s)</span>
+                            <span className="text-action-success">{item.scheduledDays} day(s)</span>
                           ) : (
-                            <span className="text-[var(--text-muted)]">Not scheduled</span>
+                            <span className="text-text-muted">Not scheduled</span>
                           )}
                         </td>
                       </tr>
@@ -170,9 +170,9 @@ function MessInventoryStockInner() {
                 </table>
               </div>
 
-              <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
+              <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
                 Stock state mirrors the active menu-item catalog. Use{" "}
-                <Link href="/mess/operational-requests" className="text-emerald-400 hover:underline">
+                <Link href="/mess/operational-requests" className="text-action-success hover:underline">
                   Operational Requests
                 </Link>{" "}
                 to flag stock shortfalls to the caretaker / facilities authority.
@@ -180,11 +180,11 @@ function MessInventoryStockInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted max-w-md mx-auto">
                 No active inventory items. Items are published on mess days via the menu
                 catalog — manage them from the{" "}
-                <Link href="/mess/menu-management" className="text-emerald-400 hover:underline">
+                <Link href="/mess/menu-management" className="text-action-success hover:underline">
                   Menu Management
                 </Link>{" "}
                 tab.

@@ -110,7 +110,7 @@ function ExamBranchReportsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -118,15 +118,15 @@ function ExamBranchReportsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {presenceError && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Reports data unavailable: {presenceError}</span>
@@ -144,56 +144,56 @@ function ExamBranchReportsInner() {
       {/* Top KPI cards */}
       <WidgetBoundary title="Examination-Day Reports">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-text-muted min-w-0">
               <Users className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 On Campus Now
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : (
-              <p className="text-2xl font-bold text-emerald-400">{totalOnCampus}</p>
+              <p className="text-2xl font-bold text-action-success">{totalOnCampus}</p>
             )}
-            <p className="text-xs text-[var(--text-muted)]">All roles inside active gates</p>
+            <p className="text-xs text-text-muted">All roles inside active gates</p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-text-muted min-w-0">
               <ChartBar className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Active Gates
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : (
-              <p className="text-2xl font-bold text-sky-400">{gates.length}</p>
+              <p className="text-2xl font-bold text-action-info">{gates.length}</p>
             )}
-            <p className="text-xs text-[var(--text-muted)]">Gates reporting in real-time</p>
+            <p className="text-xs text-text-muted">Gates reporting in real-time</p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-text-muted min-w-0">
               <FileBarChart className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Analytics
               </span>
             </div>
             {analyticsLoading && !analytics ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : hasMeaningfulMetrics ? (
-              <p className="text-2xl font-bold text-amber-400">{metrics.length} metrics</p>
+              <p className="text-2xl font-bold text-action-warning">{metrics.length} metrics</p>
             ) : (
-              <p className="text-2xl font-bold text-[var(--text-muted)]">N/A</p>
+              <p className="text-2xl font-bold text-text-muted">N/A</p>
             )}
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-text-muted">
               {hasMeaningfulMetrics
                 ? "Approval and turnaround analytics"
                 : "Analytics not available for this role"}
             </p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2 text-text-muted min-w-0">
               <Clock className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
                 Last Updated
@@ -207,22 +207,22 @@ function ExamBranchReportsInner() {
                   })
                 : "—"}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Auto-refreshes every 30 seconds</p>
+            <p className="text-xs text-text-muted">Auto-refreshes every 30 seconds</p>
           </div>
         </div>
       </WidgetBoundary>
 
       {/* Gate × role matrix */}
       <WidgetBoundary title="Gate Occupancy Matrix">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ChartBar className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ChartBar className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Gate × Role Occupancy
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {gates.length} gates · live
             </span>
           </div>
@@ -232,27 +232,27 @@ function ExamBranchReportsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : gates.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <ChartBar className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No active gates reporting.</p>
+              <ChartBar className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">No active gates reporting.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[480px]">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+                  <tr className="border-b border-border text-text-muted">
                     <th className="text-left px-4 py-2.5 font-semibold">Gate</th>
                     {presence?.data?.roles?.map((roleKey) => (
                       <th key={roleKey} className="text-right px-3 py-2.5 font-semibold">
                         {roleKey}
                       </th>
                     ))}
-                    <th className="text-right px-4 py-2.5 font-semibold text-emerald-400">
+                    <th className="text-right px-4 py-2.5 font-semibold text-action-success">
                       Total
                     </th>
                   </tr>
@@ -262,10 +262,10 @@ function ExamBranchReportsInner() {
                     const counts = matrix[gate.id] ?? {};
                     const total = Object.values(counts).reduce((a, b) => a + b, 0);
                     return (
-                      <tr key={gate.id} className="border-b border-[var(--border)]/40 last:border-b-0">
-                        <td className="px-4 py-2.5 text-[var(--text-secondary)] font-medium">
+                      <tr key={gate.id} className="border-b border-border/40 last:border-b-0">
+                        <td className="px-4 py-2.5 text-text-secondary font-medium">
                           {gate.name}
-                          <span className="ml-1.5 text-[var(--text-muted)]">{gate.code}</span>
+                          <span className="ml-1.5 text-text-muted">{gate.code}</span>
                         </td>
                         {presence?.data?.roles?.map((roleKey) => (
                           <td
@@ -273,13 +273,13 @@ function ExamBranchReportsInner() {
                             className={`px-3 py-2.5 text-right tabular-nums ${
                               (counts[roleKey] ?? 0) > 0
                                 ? "text-white"
-                                : "text-[var(--text-muted)]"
+                                : "text-text-muted"
                             }`}
                           >
                             {counts[roleKey] ?? 0}
                           </td>
                         ))}
-                        <td className="px-4 py-2.5 text-right tabular-nums text-emerald-400 font-semibold">
+                        <td className="px-4 py-2.5 text-right tabular-nums text-action-success font-semibold">
                           {total}
                         </td>
                       </tr>
@@ -297,11 +297,11 @@ function ExamBranchReportsInner() {
         <WidgetBoundary title="Role Analytics">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
             {metrics.map((m) => (
-              <div key={m.key} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">{m.label}</p>
+              <div key={m.key} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <p className="text-xs text-text-muted uppercase tracking-wide">{m.label}</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {m.value}
-                  {m.unit && <span className="text-sm text-[var(--text-muted)] ml-1">{m.unit}</span>}
+                  {m.unit && <span className="text-sm text-text-muted ml-1">{m.unit}</span>}
                 </p>
               </div>
             ))}
@@ -312,11 +312,11 @@ function ExamBranchReportsInner() {
       {/* Series data (daily breakdown) */}
       {series.length > 0 && (
         <WidgetBoundary title="Daily Series">
-          <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
+          <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[300px]">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+                  <tr className="border-b border-border text-text-muted">
                     {Object.keys(series[0]).map((k) => (
                       <th key={k} className="text-left px-4 py-2 font-semibold">
                         {k}
@@ -326,9 +326,9 @@ function ExamBranchReportsInner() {
                 </thead>
                 <tbody>
                   {series.slice(0, 14).map((row, i) => (
-                    <tr key={i} className="border-b border-[var(--border)]/40 last:border-b-0">
+                    <tr key={i} className="border-b border-border/40 last:border-b-0">
                       {Object.values(row).map((val, j) => (
-                        <td key={j} className="px-4 py-2 text-[var(--text-secondary)] tabular-nums">
+                        <td key={j} className="px-4 py-2 text-text-secondary tabular-nums">
                           {String(val)}
                         </td>
                       ))}

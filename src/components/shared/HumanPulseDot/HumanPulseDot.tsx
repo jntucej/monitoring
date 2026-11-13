@@ -16,12 +16,12 @@ export type PulseColor =
   | (string & {});
 
 const COLOR_MAP: Record<string, string> = {
-  mint:   "#34d399",
-  rose:   "#f43f5e",
-  gold:   "#f59e0b",
-  sky:    "#38bdf8",
-  amber:  "#fbbf24",
-  violet: "#a78bfa",
+  mint:   "var(--action-success)",
+  rose:   "var(--alert-critical)",
+  gold:   "var(--action-warning)",
+  sky:    "var(--unit-a)",
+  amber:  "var(--action-warning)",
+  violet: "var(--unit-c)",
 };
 
 export interface HumanPulseDotProps
@@ -52,7 +52,7 @@ export const HumanPulseDot = forwardRef<
 >(function HumanPulseDot(
   {
     variant = "dot",
-    color = "#34d399",
+    color = "var(--action-success)",
     size = 8,
     label,
     delayMs = 0,

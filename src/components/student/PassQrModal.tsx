@@ -104,11 +104,11 @@ export function PassQrModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-4 sm:p-6 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full shadow-2xl relative space-y-4 overflow-y-auto max-h-[90dvh]">
+    <div className="bg-bg-surface border border-border rounded-3xl p-4 sm:p-6 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full shadow-2xl relative space-y-4 overflow-y-auto max-h-[90dvh]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition"
+          className="absolute top-4 right-4 p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-bg-elevated transition"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
@@ -116,24 +116,24 @@ export function PassQrModal({
 
         {/* Modal Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20">
+          <div className="p-2.5 rounded-2xl bg-action-primary/10 text-action-primary border border-action-primary/20">
             <QrCode className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[var(--text-primary)]">{passTitle}</h3>
-            <p className="text-xs font-mono text-[var(--text-muted)]">{ticketNumber}</p>
+            <h3 className="text-base font-bold text-text-primary">{passTitle}</h3>
+            <p className="text-xs font-mono text-text-muted">{ticketNumber}</p>
           </div>
         </div>
 
         {/* Body Content */}
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-8 h-8 text-[var(--action-primary)] animate-spin" />
-            <p className="text-xs text-[var(--text-muted)]">Generating signed security credential…</p>
+            <Loader2 className="w-8 h-8 text-action-primary animate-spin" />
+            <p className="text-xs text-text-muted">Generating signed security credential…</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex flex-col items-center text-center space-y-2">
-            <AlertCircle className="w-8 h-8 text-rose-400" />
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs flex flex-col items-center text-center space-y-2">
+            <AlertCircle className="w-8 h-8 text-action-danger" />
             <span className="font-semibold text-rose-200">Credential Not Available</span>
             <p className="text-[11px] text-rose-300/80">{error}</p>
           </div>
@@ -142,7 +142,7 @@ export function PassQrModal({
             {/* QR Canvas */}
             <div
               ref={qrRef}
-              className="bg-white p-5 rounded-2xl flex flex-col items-center justify-center shadow-inner border border-[var(--border)]"
+              className="bg-white p-5 rounded-2xl flex flex-col items-center justify-center shadow-inner border border-border"
             >
               <QRCodeCanvas
                 value={qrText || ""}
@@ -151,24 +151,24 @@ export function PassQrModal({
                 includeMargin
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
-              <div className="mt-2 text-[10px] font-bold text-[var(--text-muted)] font-mono flex items-center gap-1.5 bg-[var(--bg-elevated)] px-3 py-1 rounded-full border border-[var(--border)]">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <div className="mt-2 text-[10px] font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1 rounded-full border border-border">
+                <span className="w-2 h-2 rounded-full bg-action-success animate-ping" />
                 Live Gate Token • Refreshes in {expiresIn}s
               </div>
             </div>
 
             {/* Window and Instructions */}
-            <div className="bg-[var(--bg-elevated)] p-3 rounded-2xl border border-[var(--border)] text-xs space-y-1.5">
-              <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
+            <div className="bg-bg-elevated p-3 rounded-2xl border border-border text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 text-action-success font-semibold text-[11px]">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Approved Pass</span>
               </div>
               {fromDate && toDate && (
-                <p className="text-[11px] text-[var(--text-muted)]">
+                <p className="text-[11px] text-text-muted">
                   Window: {new Date(fromDate).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} — {new Date(toDate).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </p>
               )}
-              <p className="text-[10px] text-[var(--text-muted)]">
+              <p className="text-[10px] text-text-muted">
                 Present this QR code to the gate security scanner upon exit and entry.
               </p>
             </div>
@@ -176,7 +176,7 @@ export function PassQrModal({
             {/* Download Button */}
             <button
               onClick={downloadQr}
-              className="w-full py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] text-xs font-bold hover:bg-[var(--bg-base)] flex items-center justify-center gap-2 transition"
+              className="w-full py-2.5 rounded-xl bg-bg-elevated border border-border text-text-primary text-xs font-bold hover:bg-bg-base flex items-center justify-center gap-2 transition"
             >
               <Download className="w-4 h-4" />
               <span>Save Pass QR Image</span>

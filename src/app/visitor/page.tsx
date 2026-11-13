@@ -27,22 +27,22 @@ export default function VisitorLandingPage() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Visitor Portal</h1>
-        <p className="text-sm text-[var(--text-muted)]">Your visit status, check-in/out, and history.</p>
+        <p className="text-sm text-text-muted">Your visit status, check-in/out, and history.</p>
       </header>
 
       <WidgetBoundary name="VisitorStatusHome" title="Your visit">
         {loading ? (
           <PageLoading />
         ) : (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-3">
-            <div className="text-sm text-[var(--text-secondary)]">
+          <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3">
+            <div className="text-sm text-text-secondary">
               Status: <strong>{state ?? "No visit"}</strong>
               {host && <> · Host: <strong>{host}</strong></>}
               {purpose && <> · {purpose}</>}
             </div>
             <Link
               href="/visitor/visit"
-              className="flex items-center justify-between rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-semibold text-white"
+              className="flex items-center justify-between rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white"
             >
               {state === "ACTIVE" ? "Check out" : "Check in"}
               <MapPin className="w-4 h-4" />
@@ -57,16 +57,16 @@ export default function VisitorLandingPage() {
             <Link
               key={href}
               href={href}
-              className="group min-h-[44px] flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
+              className="group min-h-[44px] flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon className="w-5 h-5 shrink-0" />
                 <div className="min-w-0">
                   <div className="font-semibold truncate">{label}</div>
-                  <div className="text-xs text-[var(--text-muted)] truncate">{desc}</div>
+                  <div className="text-xs text-text-muted truncate">{desc}</div>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 shrink-0 text-[var(--text-muted)] group-hover:text-[var(--action-primary)] transition-colors" />
+              <ArrowRight className="w-4 h-4 shrink-0 text-text-muted group-hover:text-action-primary transition-colors" />
             </Link>
           ))}
         </div>

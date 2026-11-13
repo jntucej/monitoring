@@ -21,11 +21,11 @@ export const SATISFACTION_LEVELS: {
   score: number;
   tone: string;
 }[] = [
-  { value: "VERY_GOOD", label: "Very Good", emoji: "😍", score: 5, tone: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
+  { value: "VERY_GOOD", label: "Very Good", emoji: "😍", score: 5, tone: "text-action-success border-emerald-500/40 bg-emerald-500/10" },
   { value: "GOOD",      label: "Good",      emoji: "🙂", score: 4, tone: "text-lime-400 border-lime-500/40 bg-lime-500/10" },
-  { value: "AVERAGE",   label: "Average",   emoji: "😐", score: 3, tone: "text-amber-400 border-amber-500/40 bg-amber-500/10" },
+  { value: "AVERAGE",   label: "Average",   emoji: "😐", score: 3, tone: "text-action-warning border-amber-500/40 bg-amber-500/10" },
   { value: "BAD",       label: "Bad",       emoji: "🙁", score: 2, tone: "text-orange-400 border-orange-500/40 bg-orange-500/10" },
-  { value: "VERY_BAD",  label: "Very Bad",  emoji: "😞", score: 1, tone: "text-rose-400 border-rose-500/40 bg-rose-500/10" },
+  { value: "VERY_BAD",  label: "Very Bad",  emoji: "😞", score: 1, tone: "text-action-danger border-rose-500/40 bg-rose-500/10" },
 ];
 
 export function satisfactionScore(s: Satisfaction): number {
@@ -38,9 +38,9 @@ export function satisfactionLabel(s: Satisfaction): string {
 
 export type SpecialItemCategory = "VEG" | "NON_VEG" | "SWEET" | "OTHER";
 export const SPECIAL_CATEGORIES: { value: SpecialItemCategory; label: string; tone: string }[] = [
-  { value: "VEG",     label: "Veg",     tone: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" },
-  { value: "NON_VEG", label: "Non-Veg", tone: "bg-rose-500/10 text-rose-300 border-rose-500/30" },
-  { value: "SWEET",   label: "Sweet",   tone: "bg-amber-500/10 text-amber-300 border-amber-500/30" },
+  { value: "VEG",     label: "Veg",     tone: "bg-emerald-500/10 text-action-success border-emerald-500/30" },
+  { value: "NON_VEG", label: "Non-Veg", tone: "bg-rose-500/10 text-action-danger border-rose-500/30" },
+  { value: "SWEET",   label: "Sweet",   tone: "bg-amber-500/10 text-action-warning border-amber-500/30" },
   { value: "OTHER",   label: "Other",   tone: "bg-slate-500/10 text-slate-300 border-slate-500/30" },
 ];
 

@@ -83,8 +83,8 @@ export function ComplaintDetail({ role }: { role: string }) {
     } else alert(j.error?.message ?? "Upload failed");
   };
 
-  if (loading) return <p className="p-6 text-[var(--text-muted)]">Loading…</p>;
-  if (!data?.complaint) return <p className="p-6 text-[var(--text-muted)]">Complaint not found.</p>;
+  if (loading) return <p className="p-6 text-text-muted">Loading…</p>;
+  if (!data?.complaint) return <p className="p-6 text-text-muted">Complaint not found.</p>;
 
   const c = data.complaint;
 
@@ -93,17 +93,17 @@ export function ComplaintDetail({ role }: { role: string }) {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="border-b pb-4">
-        <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{c.title}</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
+        <h1 className="text-2xl font-semibold text-text-primary mt-1">{c.title}</h1>
+        <p className="text-sm text-text-muted mt-1">
           {c.categoryLabel} · Status: <strong className="uppercase">{c.status}</strong> · Owner:{" "}
           <span className="font-mono">{c.currentOwnerRole}</span>
         </p>
       </div>
 
-      <div className="bg-[var(--bg-elevated)] border rounded p-4 space-y-2">
-        <h2 className="font-medium text-[var(--text-primary)]">Description</h2>
-        <p className="text-sm text-[var(--text-muted)] whitespace-pre-wrap">{c.description}</p>
+      <div className="bg-bg-elevated border rounded p-4 space-y-2">
+        <h2 className="font-medium text-text-primary">Description</h2>
+        <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
         {c.resolutionSummary && (
           <div className="mt-3 pt-3 border-t">
             <h3 className="font-medium text-emerald-800">Resolution Summary</h3>
@@ -133,15 +133,15 @@ export function ComplaintDetail({ role }: { role: string }) {
                 onChange={(e) => setResolutionSummary(e.target.value)}
                 className="border rounded p-1.5 text-sm flex-1"
               />
-              <button onClick={resolveComplaint} className="px-3 py-1.5 rounded bg-emerald-600 text-white text-sm">
+              <button onClick={resolveComplaint} className="px-3 py-1.5 rounded bg-action-success text-white text-sm">
                 Resolve
               </button>
             </div>
           )}
-          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 rounded bg-[var(--bg-elevated)] text-white text-sm">
+          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 rounded bg-bg-elevated text-white text-sm">
             Forward / Escalate
           </button>
-          <button onClick={() => patchAction("reject")} className="px-3 py-1.5 rounded bg-rose-600 text-white text-sm">
+          <button onClick={() => patchAction("reject")} className="px-3 py-1.5 rounded bg-action-danger text-white text-sm">
             Reject
           </button>
         </div>
@@ -149,7 +149,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Feedback section for student when resolved */}
       {role === "student" && ["resolved", "awaiting_verification"].includes(c.status) && !data.feedback && (
-        <form onSubmit={submitFeedback} className="border p-4 rounded bg-emerald-50 space-y-3">
+        <form onSubmit={submitFeedback} className="border p-4 rounded bg-action-success/10 space-y-3">
           <h2 className="font-medium text-emerald-950">Leave resolution feedback</h2>
           <div className="flex gap-2 items-center">
             <label className="text-sm">Rating (1-5):</label>
@@ -175,16 +175,16 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Tasks / Timeline */}
       <div className="space-y-3">
-        <h2 className="font-medium text-[var(--text-primary)]">Timeline & Tasks</h2>
+        <h2 className="font-medium text-text-primary">Timeline & Tasks</h2>
         <div className="border rounded divide-y bg-white text-sm">
           {data.tasks.map((t: any) => (
             <div key={t.id} className="p-3 space-y-1">
               <div className="flex justify-between font-medium">
                 <span>{t.action}</span>
-                <span className="uppercase text-xs text-[var(--text-muted)] font-mono">{t.status}</span>
+                <span className="uppercase text-xs text-text-muted font-mono">{t.status}</span>
               </div>
-              <p className="text-xs text-[var(--text-muted)]">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
-              {t.notes && <p className="text-[var(--text-muted)] mt-1 bg-[var(--bg-elevated)] p-2 rounded">{t.notes}</p>}
+              <p className="text-xs text-text-muted">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
+              {t.notes && <p className="text-text-muted mt-1 bg-bg-elevated p-2 rounded">{t.notes}</p>}
             </div>
           ))}
         </div>
@@ -197,7 +197,7 @@ export function ComplaintDetail({ role }: { role: string }) {
             onChange={(e) => setNoteText(e.target.value)}
             className="border rounded p-2 text-sm flex-1"
           />
-          <button type="submit" className="px-3 py-2 rounded bg-[var(--bg-elevated)] text-white text-sm">
+          <button type="submit" className="px-3 py-2 rounded bg-bg-elevated text-white text-sm">
             Post note
           </button>
         </form>
@@ -205,7 +205,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Attachments */}
       <div className="space-y-3 pt-4 border-t">
-        <h2 className="font-medium text-[var(--text-primary)]">Attachments</h2>
+        <h2 className="font-medium text-text-primary">Attachments</h2>
         <div className="flex flex-wrap gap-2">
           {data.attachments.map((a: any) => (
             <a
@@ -213,16 +213,16 @@ export function ComplaintDetail({ role }: { role: string }) {
               href={`/api/complaints/${id}/attachments/${a.id}`}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-[var(--bg-elevated)] flex items-center gap-1.5"
+              className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-bg-elevated flex items-center gap-1.5"
             >
               <span>{a.name}</span>
-              {a.internal && <span className="text-[10px] bg-amber-100 text-amber-800 px-1 rounded">Internal</span>}
+              {a.internal && <span className="text-[10px] bg-action-warning/20 text-amber-800 px-1 rounded">Internal</span>}
             </a>
           ))}
         </div>
         <form onSubmit={uploadAttachment} className="flex gap-2 items-center pt-2">
           <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-          <button type="submit" disabled={!file} className="px-3 py-1.5 rounded bg-[var(--bg-elevated)] text-white text-sm">
+          <button type="submit" disabled={!file} className="px-3 py-1.5 rounded bg-bg-elevated text-white text-sm">
             Upload file
           </button>
         </form>

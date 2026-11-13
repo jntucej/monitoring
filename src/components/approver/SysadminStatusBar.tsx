@@ -56,7 +56,7 @@ export function SysadminStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="SysAdmin status bar"
     >
       {/* Left: service summary */}
@@ -64,15 +64,15 @@ export function SysadminStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0">
           <span
             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              anyProblem ? "bg-amber-400" : "bg-emerald-400"
+              anyProblem ? "bg-action-warning" : "bg-action-success"
             }`}
           />
-          <span className="text-[var(--text-muted)]">SysAdmin</span>
+          <span className="text-text-muted">SysAdmin</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink">
-          <Activity className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">
+          <Activity className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">
             {up} up · {degraded} degraded · {down} down
           </span>
         </span>
@@ -81,13 +81,13 @@ export function SysadminStatusBar({
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last check</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last check</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

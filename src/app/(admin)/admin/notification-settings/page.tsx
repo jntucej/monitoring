@@ -73,70 +73,70 @@ function AdminNotificationSettingsInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <Gauge className="w-3.5 h-3.5 text-emerald-400" /> Total Queued
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <Gauge className="w-3.5 h-3.5 text-action-success" /> Total Queued
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : totalQueued}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : totalQueued}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Push + SMS + email delivery queues</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Push + SMS + email delivery queues</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Preferences">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <Bell className="w-3.5 h-3.5 text-blue-400" /> Preferences Configured
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <Bell className="w-3.5 h-3.5 text-action-primary" /> Preferences Configured
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : (configuredPct ?? 0)}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : (configuredPct ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Users with per-channel settings</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Users with per-channel settings</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Channels">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <Inbox className="w-3.5 h-3.5 text-amber-400" /> Active Channels
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <Inbox className="w-3.5 h-3.5 text-action-warning" /> Active Channels
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : (d?.channels?.length ?? 0)}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : (d?.channels?.length ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Delivery channels in use</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Delivery channels in use</p>
           </div>
         </WidgetBoundary>
       </div>
 
       {/* Channel + queue table */}
       <WidgetBoundary title="Channel & Queue Status">
-        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
+        <div className="rounded-2xl border border-border bg-bg-elevated overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
-              <div className="h-4 w-40 rounded bg-[var(--bg-elevated)] animate-pulse" />
-              <div className="h-4 w-52 rounded bg-[var(--bg-elevated)] animate-pulse" />
+              <div className="h-4 w-40 rounded bg-bg-elevated animate-pulse" />
+              <div className="h-4 w-52 rounded bg-bg-elevated animate-pulse" />
             </div>
           ) : res.error ? (
-            <div className="p-6 text-sm text-rose-400">{res.error}</div>
+            <div className="p-6 text-sm text-action-danger">{res.error}</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2">
               {/* Channels */}
-              <div className="p-4 lg:border-r lg:border-[var(--border)]">
+              <div className="p-4 lg:border-r lg:border-border">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                  <Bell className="w-4 h-4 text-emerald-400" /> Channel volume
+                  <Bell className="w-4 h-4 text-action-success" /> Channel volume
                 </h2>
                 {(d?.channels?.length ?? 0) === 0 ? (
-                  <p className="text-xs text-[var(--text-muted)]">No notification channel activity recorded yet.</p>
+                  <p className="text-xs text-text-muted">No notification channel activity recorded yet.</p>
                 ) : (
                   <div className="divide-y divide-slate-800/60">
                     {d!.channels.map((c) => (
                       <div key={c.channel} className="flex items-center justify-between py-2.5">
-                        <span className="flex items-center gap-2 text-xs font-medium text-[var(--text-secondary)] capitalize">
-                          {CHANNEL_ICONS[c.channel] || <Inbox className="w-3.5 h-3.5 text-[var(--text-muted)]" />}
+                        <span className="flex items-center gap-2 text-xs font-medium text-text-secondary capitalize">
+                          {CHANNEL_ICONS[c.channel] || <Inbox className="w-3.5 h-3.5 text-text-muted" />}
                           {c.channel.replace(/_/g, " ")}
                         </span>
-                        <span className="text-xs tabular-nums text-[var(--text-muted)]">{c.notifications.toLocaleString()}</span>
+                        <span className="text-xs tabular-nums text-text-muted">{c.notifications.toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -146,20 +146,20 @@ function AdminNotificationSettingsInner() {
               {/* Queues */}
               <div className="p-4">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                  <Gauge className="w-4 h-4 text-emerald-400" /> Delivery queue depth
+                  <Gauge className="w-4 h-4 text-action-success" /> Delivery queue depth
                 </h2>
                 {(d?.queue_depth?.length ?? 0) === 0 ? (
-                  <p className="text-xs text-[var(--text-muted)]">No delivery queues configured.</p>
+                  <p className="text-xs text-text-muted">No delivery queues configured.</p>
                 ) : (
                   <div className="divide-y divide-slate-800/60">
                     {d!.queue_depth.map((q) => (
                       <div key={q.queue} className="flex items-center justify-between py-2.5">
-                        <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">
+                        <span className="text-xs font-medium text-text-secondary capitalize">
                           {q.queue.replace(/_/g, " ")} queue
                         </span>
                         <span
                           className={`rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums ${
-                            q.depth > 0 ? "bg-amber-500/15 text-amber-300" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                            q.depth > 0 ? "bg-amber-500/15 text-action-warning" : "bg-bg-elevated text-text-muted"
                           }`}
                         >
                           {q.depth}
@@ -174,18 +174,18 @@ function AdminNotificationSettingsInner() {
 
           {/* Top notification types */}
           {(d?.top_types?.length ?? 0) > 0 && (
-            <div className="border-t border-[var(--border)] p-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+            <div className="border-t border-border p-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
                 Most-sent notification types
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {d!.top_types.map((t) => (
                   <span
                     key={t.type}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-[11px] text-[var(--text-secondary)]"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1 text-[11px] text-text-secondary"
                   >
                     {t.type.replace(/_/g, " ")}
-                    <span className="tabular-nums text-emerald-400">{t.count}</span>
+                    <span className="tabular-nums text-action-success">{t.count}</span>
                   </span>
                 ))}
               </div>
@@ -196,13 +196,13 @@ function AdminNotificationSettingsInner() {
 
       {/* Read-only notice + CTA */}
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
-        <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+        <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-amber-300">Read-only view</p>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
+          <p className="text-sm font-semibold text-action-warning">Read-only view</p>
+          <p className="mt-1 text-xs text-text-muted">
             Channel enablement, quiet-hours and template configuration are managed by the platform team.
             For per-user channel preferences, users can self-serve via{" "}
-            <Link href="/admin/announcements" className="text-emerald-400 hover:underline">
+            <Link href="/admin/announcements" className="text-action-success hover:underline">
               Announcements
             </Link>{" "}
             and their personal profile.

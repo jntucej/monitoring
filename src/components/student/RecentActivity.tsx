@@ -42,21 +42,21 @@ export function RecentActivity() {
   usePolling(load, { intervalMs: 30_000 });
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <h3 className="font-semibold mb-4">Recent Activity</h3>
       <div className="space-y-4">
         {loading ? (
-          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading…
           </div>
         ) : activities.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] text-center py-4">No activity yet.</p>
+          <p className="text-sm text-text-muted text-center py-4">No activity yet.</p>
         ) : (
           activities.map((a) => {
             const isIn = a.direction === "IN";
             return (
               <div key={a.id} className="flex items-center justify-between">
-                <div className={`flex items-center gap-2 font-medium ${isIn ? "text-emerald-400" : "text-rose-400"}`}>
+                <div className={`flex items-center gap-2 font-medium ${isIn ? "text-action-success" : "text-action-danger"}`}>
                   {isIn ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
                   <span className="capitalize">{isIn ? "Entry" : "Exit"}</span>
                 </div>
@@ -64,7 +64,7 @@ export function RecentActivity() {
                   <p className="text-sm">
                     {new Date(a.timestamp).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">{a.gateName}</p>
+                  <p className="text-xs text-text-muted">{a.gateName}</p>
                 </div>
               </div>
             );

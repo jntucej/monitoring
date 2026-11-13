@@ -47,38 +47,38 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Caretaker status bar"
     >
       {/* Left: hostel · open · urgent · last update */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <Building2 className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">Hostel</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <Building2 className="w-3.5 h-3.5 shrink-0 text-text-muted" />
+          <span className="text-text-muted">Hostel</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {hostel ?? "—"}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+        <span className="inline-flex items-center gap-1.5 text-text-muted">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-warning shrink-0" />
           open
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.open ?? 0}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+        <span className="inline-flex items-center gap-1.5 text-text-muted">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-danger shrink-0" />
           urgent
-          <span className="font-mono tabular-nums font-bold text-rose-400">
+          <span className="font-mono tabular-nums font-bold text-action-danger">
             {counts?.urgent ?? 0}
           </span>
         </span>
 
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">
           last update
-          <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+          <span className="font-mono tabular-nums text-text-secondary">
             {fmtRelative(counts?.lastUpdate)}
           </span>
         </span>
@@ -87,12 +87,12 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
       {/* Right: refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {counts?.lastUpdate ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">updated</span>
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">updated</span>
           </span>
         ) : null}
       </div>

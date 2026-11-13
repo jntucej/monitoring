@@ -72,47 +72,47 @@ function StudentAttendanceCalendarInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex items-center gap-2">
-        <CalendarDays className="w-5 h-5 text-[var(--action-primary)]" />
-        <p className="text-sm font-semibold text-[var(--text-primary)]">Attendance Calendar</p>
+        <CalendarDays className="w-5 h-5 text-action-primary" />
+        <p className="text-sm font-semibold text-text-primary">Attendance Calendar</p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
           Attendance data unavailable: {error}. Check your connection or retry later.
         </div>
       )}
 
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 min-w-0">
+      <div className="rounded-xl border border-border bg-bg-surface p-4 min-w-0">
         {/* Month navigation */}
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
             onClick={prevMonth}
-            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             ← Prev
           </button>
-          <p className="text-sm font-bold text-[var(--text-primary)]">
+          <p className="text-sm font-bold text-text-primary">
             {MONTH_NAMES[month]} {year}
           </p>
           <button
             type="button"
             onClick={nextMonth}
-            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             Next →
           </button>
         </div>
 
         {/* Weekday header */}
-        <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+        <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
             <div key={d} className="py-1">{d}</div>
           ))}
         </div>
 
         {loading && !data ? (
-          <div className="flex items-center justify-center py-8 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center justify-center py-8 text-xs text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading calendar…
           </div>
         ) : (
@@ -138,13 +138,13 @@ function StudentAttendanceCalendarInner() {
                   onClick={() => setSelectedDate(isSelected ? null : dayKey)}
                   className={`h-10 rounded-lg text-xs font-bold flex items-center justify-center transition-colors ${
                     state === "present"
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                      ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
                       : state === "absent"
-                      ? "bg-rose-500/15 text-rose-400 border border-rose-500/30"
+                      ? "bg-rose-500/15 text-action-danger border border-rose-500/30"
                       : state === "today"
-                      ? "bg-sky-500/15 text-sky-400 border border-sky-500/40"
-                      : "text-[var(--text-muted)] border border-transparent hover:bg-[var(--bg-elevated)]"
-                  } ${isSelected ? "ring-2 ring-[var(--action-primary)]" : ""}`}
+                      ? "bg-sky-500/15 text-action-info border border-sky-500/40"
+                      : "text-text-muted border border-transparent hover:bg-bg-elevated"
+                  } ${isSelected ? "ring-2 ring-action-primary" : ""}`}
                 >
                   {dayNum}
                 </button>
@@ -154,30 +154,30 @@ function StudentAttendanceCalendarInner() {
         )}
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-[var(--text-muted)]">
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-text-muted">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 border border-emerald-500/60" /> Present</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500/40 border border-rose-500/60" /> Absent</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)]" /> Unmarked</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-bg-elevated border border-border" /> Unmarked</span>
         </div>
       </div>
 
       {/* Day detail */}
       {selected && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 text-xs min-w-0">
-          <p className="font-bold text-[var(--text-primary)] mb-2">{selected.date}</p>
+        <div className="rounded-xl border border-border bg-bg-elevated p-4 text-xs min-w-0">
+          <p className="font-bold text-text-primary mb-2">{selected.date}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <p className="text-[var(--text-muted)]">Time in</p>
-              <p className="font-mono text-[var(--text-primary)]">{selected.time_in || "—"}</p>
+              <p className="text-text-muted">Time in</p>
+              <p className="font-mono text-text-primary">{selected.time_in || "—"}</p>
             </div>
             <div>
-              <p className="text-[var(--text-muted)]">Time out</p>
-              <p className="font-mono text-[var(--text-primary)]">{selected.time_out || "—"}</p>
+              <p className="text-text-muted">Time out</p>
+              <p className="font-mono text-text-primary">{selected.time_out || "—"}</p>
             </div>
           </div>
           {selected.status && (
-            <p className="mt-2 text-[var(--text-muted)]">
-              Status: <span className="font-bold text-[var(--text-primary)]">{selected.status}</span>
+            <p className="mt-2 text-text-muted">
+              Status: <span className="font-bold text-text-primary">{selected.status}</span>
             </p>
           )}
         </div>
@@ -187,37 +187,37 @@ function StudentAttendanceCalendarInner() {
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
-            <div className="flex items-center gap-1.5 text-emerald-400 mb-1">
+            <div className="flex items-center gap-1.5 text-action-success mb-1">
               <CheckCircle2 className="w-4 h-4" />
               <span className="text-xs font-bold">Present</span>
             </div>
-            <p className="text-xl font-black text-emerald-400">{summary.present}</p>
+            <p className="text-xl font-black text-action-success">{summary.present}</p>
           </div>
           <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3">
-            <div className="flex items-center gap-1.5 text-rose-400 mb-1">
+            <div className="flex items-center gap-1.5 text-action-danger mb-1">
               <XCircle className="w-4 h-4" />
               <span className="text-xs font-bold">Absent</span>
             </div>
-            <p className="text-xl font-black text-rose-400">{summary.absent}</p>
+            <p className="text-xl font-black text-action-danger">{summary.absent}</p>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3">
-            <div className="flex items-center gap-1.5 text-[var(--text-muted)] mb-1">
+          <div className="rounded-xl border border-border bg-bg-elevated p-3">
+            <div className="flex items-center gap-1.5 text-text-muted mb-1">
               <Clock className="w-4 h-4" />
               <span className="text-xs font-bold">Unmarked</span>
             </div>
-            <p className="text-xl font-black text-[var(--text-primary)]">{summary.unmarked}</p>
+            <p className="text-xl font-black text-text-primary">{summary.unmarked}</p>
           </div>
         </div>
       )}
 
       {/* CTA to history */}
-      <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/50 p-3 text-xs flex items-center justify-between gap-3 min-w-0">
-        <span className="text-[var(--text-muted)] min-w-0 truncate">
+      <div className="rounded-xl border border-dashed border-border bg-bg-elevated/50 p-3 text-xs flex items-center justify-between gap-3 min-w-0">
+        <span className="text-text-muted min-w-0 truncate">
           See your full gate entry/exit history for day-by-day detail.
         </span>
         <Link
           href="/student/history"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-action-success hover:bg-emerald-500/20 shrink-0"
         >
           Entry/Exit History <ArrowRight className="w-3.5 h-3.5" />
         </Link>

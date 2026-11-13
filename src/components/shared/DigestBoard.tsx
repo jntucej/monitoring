@@ -45,7 +45,7 @@ function TileValue({ value }: { value: unknown }) {
     // Nested object: show key count as a compact preview
     const keys = Object.keys(value);
     return (
-      <span className="text-xs text-[var(--text-secondary)]">
+      <span className="text-xs text-text-secondary">
         {keys.length} fields
       </span>
     );
@@ -53,7 +53,7 @@ function TileValue({ value }: { value: unknown }) {
   if (typeof value === "string") {
     return <span className="text-sm font-semibold">{value}</span>;
   }
-  return <span className="text-sm text-[var(--text-muted)]">—</span>;
+  return <span className="text-sm text-text-muted">—</span>;
 }
 
 export function DigestBoard({ source }: DigestBoardProps) {
@@ -78,12 +78,12 @@ export function DigestBoard({ source }: DigestBoardProps) {
   return (
     <WidgetBoundary title="Digest">
       {loading && tiles.length === 0 ? (
-        <div className="flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]">
+        <div className="flex items-center justify-center gap-2 py-8 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading…</span>
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
           {error}
         </div>
       ) : tiles.length === 0 ? (
@@ -97,9 +97,9 @@ export function DigestBoard({ source }: DigestBoardProps) {
           {tiles.map(({ key, value }) => (
             <div
               key={key}
-              className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 min-w-0"
+              className="rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0"
             >
-              <p className="text-[10px] font-mono uppercase tracking-wide text-[var(--text-muted)] truncate">
+              <p className="text-[10px] font-mono uppercase tracking-wide text-text-muted truncate">
                 {key}
               </p>
               <div className="mt-1">

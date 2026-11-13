@@ -33,8 +33,8 @@ export function FacultyDirectoryView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Faculty Directory</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Faculty Directory</h1>
+        <p className="text-xs text-text-muted">
           Department faculty roster and employee profiles
         </p>
       </header>
@@ -66,23 +66,23 @@ export function FacultyDirectoryView() {
             {facultyList.map((faculty) => (
               <li
                 key={faculty.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{faculty.name || "—"}</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">
+                    <p className="text-[11px] text-text-muted">
                       {faculty.employee_details?.designation ?? "Faculty Member"}
                     </p>
                   </div>
                   {faculty.employee_details?.employee_id && (
-                    <span className="font-mono text-xs text-[var(--text-muted)]">
+                    <span className="font-mono text-xs text-text-muted">
                       {faculty.employee_details.employee_id}
                     </span>
                   )}
                 </div>
                 {faculty.email && (
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">{faculty.email}</p>
+                  <p className="mt-1 text-xs text-text-secondary">{faculty.email}</p>
                 )}
               </li>
             ))}

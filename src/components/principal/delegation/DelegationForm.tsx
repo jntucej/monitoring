@@ -86,7 +86,7 @@ export function DelegationForm({
     <PrincipalWidgetBoundary title="Create Delegation Rule">
       <form onSubmit={submit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div>
-          <label htmlFor="dlg-name" className="block text-xs font-semibold text-[var(--text-muted)] mb-1">
+          <label htmlFor="dlg-name" className="block text-xs font-semibold text-text-muted mb-1">
             Name *
           </label>
           <input
@@ -96,18 +96,18 @@ export function DelegationForm({
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="e.g. Exam delegation"
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div>
-          <label htmlFor="dlg-workflow" className="block text-xs font-semibold text-[var(--text-muted)] mb-1">
+          <label htmlFor="dlg-workflow" className="block text-xs font-semibold text-text-muted mb-1">
             Workflow
           </label>
           <select
             id="dlg-workflow"
             value={form.workflowType}
             onChange={(e) => setForm((f) => ({ ...f, workflowType: e.target.value }))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           >
             {["hostel", "exam", "gate", "memo", "staff_leave"].map((w) => (
               <option key={w} value={w}>{w.replace(/_/g, " ")}</option>
@@ -115,14 +115,14 @@ export function DelegationForm({
           </select>
         </div>
         <div>
-          <label htmlFor="dlg-role" className="block text-xs font-semibold text-[var(--text-muted)] mb-1">
+          <label htmlFor="dlg-role" className="block text-xs font-semibold text-text-muted mb-1">
             Delegate Role *
           </label>
           <select
             id="dlg-role"
             value={form.delegateRole}
             onChange={(e) => setForm((f) => ({ ...f, delegateRole: e.target.value }))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           >
             {["vice_principal", "hod", "supervisor", "oie", "hostel_manager"].map((r) => (
               <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
@@ -130,7 +130,7 @@ export function DelegationForm({
           </select>
         </div>
         <div>
-          <label htmlFor="dlg-priority" className="block text-xs font-semibold text-[var(--text-muted)] mb-1">
+          <label htmlFor="dlg-priority" className="block text-xs font-semibold text-text-muted mb-1">
             Priority
           </label>
           <input
@@ -138,11 +138,11 @@ export function DelegationForm({
             type="number"
             value={form.priority}
             onChange={(e) => setForm((f) => ({ ...f, priority: parseInt(e.target.value) || 0 }))}
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div className="sm:col-span-2 lg:col-span-2">
-          <label htmlFor="dlg-reason" className="block text-xs font-semibold text-[var(--text-muted)] mb-1">
+          <label htmlFor="dlg-reason" className="block text-xs font-semibold text-text-muted mb-1">
             Reason (optional)
           </label>
           <input
@@ -151,14 +151,14 @@ export function DelegationForm({
             value={form.reason}
             onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
             placeholder="Why is this delegation needed?"
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div className="flex items-end">
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? "Saving…" : <><Plus className="w-4 h-4" /> Create Rule</>}
           </button>
@@ -176,21 +176,21 @@ export function DelegationCard({ rule }: { rule: DelegationRule }) {
     <div className={`rounded-xl border p-3 min-w-0 ${
       rule.isActive
         ? "border-emerald-400/20 bg-emerald-400/5"
-        : "border-[var(--border)] bg-[var(--bg-surface)] opacity-60"
+        : "border-border bg-bg-surface opacity-60"
     }`}>
       <div className="flex items-center justify-between min-w-0">
-        <span className="font-semibold text-sm text-[var(--text-primary)]">{rule.name}</span>
+        <span className="font-semibold text-sm text-text-primary">{rule.name}</span>
         {rule.isActive ? (
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <CheckCircle className="w-3.5 h-3.5 text-action-success shrink-0" />
         ) : (
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <AlertTriangle className="w-3.5 h-3.5 text-action-warning shrink-0" />
         )}
       </div>
-      <p className="text-xs text-[var(--text-muted)] mt-0.5">
+      <p className="text-xs text-text-muted mt-0.5">
         {rule.workflowType.replace(/_/g, " ")} → {rule.delegateRole.replace(/_/g, " ")}
         {rule.reason ? ` · ${rule.reason}` : ""}
       </p>
-      <p className="text-[10px] text-[var(--text-muted)] mt-1">Priority {rule.priority}</p>
+      <p className="text-[10px] text-text-muted mt-1">Priority {rule.priority}</p>
     </div>
   );
 }
@@ -200,7 +200,7 @@ export function DelegationCard({ rule }: { rule: DelegationRule }) {
  */
 export function DelegationConflictNotice({ ruleName }: { ruleName: string }) {
   return (
-    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2">
+    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-action-warning text-xs flex items-center gap-2">
       <AlertTriangle className="w-4 h-4 shrink-0" />
       <span>
         A delegation rule already exists for <strong>{ruleName}</strong>. Consider whether this new rule should override or replace it.
@@ -242,22 +242,22 @@ export function DelegationHistory() {
 
   return (
     <PrincipalWidgetBoundary title="Delegation History">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4">
         {loading ? (
           <div className="space-y-2">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-8 w-full" />)}
           </div>
         ) : audit.length === 0 ? (
-          <p className="text-xs text-[var(--text-muted)] py-3 text-center">No delegation history recorded.</p>
+          <p className="text-xs text-text-muted py-3 text-center">No delegation history recorded.</p>
         ) : (
           <ul className="space-y-2">
             {audit.slice(0, 12).map((a) => (
               <li key={a.id} className="flex items-start gap-2 text-xs">
-                <span className="font-mono text-[var(--text-muted)] shrink-0 mt-0.5">{a.action.replace(/_/g, " ")}</span>
-                <span className="text-[var(--text-secondary)] flex-1 min-w-0">
+                <span className="font-mono text-text-muted shrink-0 mt-0.5">{a.action.replace(/_/g, " ")}</span>
+                <span className="text-text-secondary flex-1 min-w-0">
                   {a.user_name && <span className="font-medium">{a.user_name}</span>}
                 </span>
-                <span className="text-[var(--text-muted)] shrink-0">{a.timestamp}</span>
+                <span className="text-text-muted shrink-0">{a.timestamp}</span>
               </li>
             ))}
           </ul>

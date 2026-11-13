@@ -71,7 +71,7 @@ function FacultyReportsInner() {
       {/* Back link */}
       <Link
         href="/faculty"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Faculty Overview
       </Link>
@@ -79,15 +79,15 @@ function FacultyReportsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Faculty Reports data unavailable: {error}</span>
@@ -103,53 +103,53 @@ function FacultyReportsInner() {
       )}
 
       <WidgetBoundary title="Faculty Reports">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Faculty Reports</span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {data?.summary?.totalFaculty ?? 0} faculty · {data?.records?.length ?? 0} record(s)
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading Faculty Reports…
             </div>
           ) : (
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Attendance Rate</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Attendance Rate</p>
+                  <p className="mt-1 text-lg font-bold text-action-success">
                     {data?.summary?.overallAttendanceRate !== undefined ? `${data.summary.overallAttendanceRate}%` : "—"}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">Department-wide today.</p>
+                  <p className="text-xs text-text-muted">Department-wide today.</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Present / Absent</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Present / Absent</p>
+                  <p className="mt-1 text-lg font-bold text-action-info">
                     {data?.summary?.presentToday ?? 0} / {data?.summary?.absentCount ?? 0}
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">{data?.summary?.lateArrivals ?? 0} late arrival(s) today.</p>
+                  <p className="text-xs text-text-muted">{data?.summary?.lateArrivals ?? 0} late arrival(s) today.</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Currently On Campus</p>
-                  <p className="mt-1 text-lg font-bold text-amber-400">
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Currently On Campus</p>
+                  <p className="mt-1 text-lg font-bold text-action-warning">
                     {data?.summary?.currentlyInside ?? 0} inside · {data?.summary?.currentlyOutside ?? 0} out
                   </p>
-                  <p className="text-xs text-[var(--text-muted)]">Live presence snapshot.</p>
+                  <p className="text-xs text-text-muted">Live presence snapshot.</p>
                 </div>
               </div>
 
               {data?.departmentSummaries && data.departmentSummaries.length > 0 && (
                 <div className="mt-4 min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">Department Breakdown</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">Department Breakdown</p>
                   <div className="overflow-x-auto -mx-4 px-4">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--text-muted)]">
+                        <tr className="border-b border-border text-left text-xs text-text-muted">
                           <th className="py-1.5 pr-4">Department</th>
                           <th className="py-1.5 pr-4">Total</th>
                           <th className="py-1.5 pr-4">Present</th>
@@ -158,11 +158,11 @@ function FacultyReportsInner() {
                       </thead>
                       <tbody>
                         {data.departmentSummaries.map((d) => (
-                          <tr key={d.department} className="border-b border-[var(--border)]/50 last:border-0">
-                            <td className="py-2 pr-4 text-[var(--text-secondary)]">{d.department}</td>
-                            <td className="py-2 pr-4 text-[var(--text-muted)]">{d.totalFaculty}</td>
-                            <td className="py-2 pr-4 text-[var(--text-muted)]">{d.presentToday}</td>
-                            <td className="py-2 text-emerald-400">{d.attendanceRate}%</td>
+                          <tr key={d.department} className="border-b border-border/50 last:border-0">
+                            <td className="py-2 pr-4 text-text-secondary">{d.department}</td>
+                            <td className="py-2 pr-4 text-text-muted">{d.totalFaculty}</td>
+                            <td className="py-2 pr-4 text-text-muted">{d.presentToday}</td>
+                            <td className="py-2 text-action-success">{d.attendanceRate}%</td>
                           </tr>
                         ))}
                       </tbody>

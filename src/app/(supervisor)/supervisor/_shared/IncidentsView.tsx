@@ -33,8 +33,8 @@ export function IncidentsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Incidents</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Incidents</h1>
+        <p className="text-xs text-text-muted">
           {rows.length} incident{rows.length === 1 ? "" : "s"} logged in last 24h
         </p>
       </header>
@@ -49,21 +49,21 @@ export function IncidentsView() {
             {rows.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-xs"
+                className="rounded-xl border border-border bg-bg-surface p-3 text-xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[var(--text-primary)]">{item.title}</span>
+                  <span className="font-semibold text-text-primary">{item.title}</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
                       item.resolved
-                        ? "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                        : "bg-[var(--action-danger)]/10 text-[var(--action-danger)]"
+                        ? "bg-action-primary/10 text-action-primary"
+                        : "bg-action-danger/10 text-action-danger"
                     }`}
                   >
                     {item.resolved ? "Resolved" : item.severity}
                   </span>
                 </div>
-                <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                <p className="mt-1 text-[11px] text-text-muted">
                   {new Date(item.timestamp).toLocaleString()}
                 </p>
               </li>
@@ -77,11 +77,11 @@ export function IncidentsView() {
                   header: "Status",
                   accessor: (r) =>
                     r.resolved ? (
-                      <span className="flex items-center gap-1 text-[var(--action-primary)]">
+                      <span className="flex items-center gap-1 text-action-primary">
                         <CheckCircle2 className="size-4" /> Resolved
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-[var(--action-danger)] font-medium">
+                      <span className="flex items-center gap-1 text-action-danger font-medium">
                         <AlertTriangle className="size-4" /> Open
                       </span>
                     ),
@@ -91,7 +91,7 @@ export function IncidentsView() {
                 {
                   header: "Reported At",
                   accessor: (r) => (
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-text-muted">
                       {new Date(r.timestamp).toLocaleString()}
                     </span>
                   ),

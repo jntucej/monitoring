@@ -32,13 +32,13 @@ export function FloatingOrbs() {
             <svg className="w-full h-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
               <defs>
                 <linearGradient id="fluidRibbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00c6ff" stopOpacity={isGlossy ? "0.85" : "0.35"} />
-                  <stop offset="50%" stopColor="#0072ff" stopOpacity={isGlossy ? "0.75" : "0.25"} />
-                  <stop offset="100%" stopColor="#a855f7" stopOpacity={isGlossy ? "0.65" : "0.15"} />
+                  <stop offset="0%" stopColor="var(--action-info)" stopOpacity={isGlossy ? "0.85" : "0.35"} />
+                  <stop offset="50%" stopColor="var(--action-primary)" stopOpacity={isGlossy ? "0.75" : "0.25"} />
+                  <stop offset="100%" stopColor="var(--unit-c)" stopOpacity={isGlossy ? "0.65" : "0.15"} />
                 </linearGradient>
                 <linearGradient id="discGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity="0.7" />
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="var(--unit-c)" stopOpacity="0.7" />
                 </linearGradient>
               </defs>
 
@@ -75,7 +75,7 @@ export function FloatingOrbs() {
         </motion.div>
       ) : (
         <div
-          className="absolute inset-0 opacity-30 bg-gradient-to-br from-[#0072ff]/10 via-transparent to-[#a855f7]/10"
+          className="absolute inset-0 opacity-30 bg-gradient-to-br from-[var(--action-primary)]/10 via-transparent to-[var(--unit-c)]/10"
           aria-hidden="true"
         />
       )}

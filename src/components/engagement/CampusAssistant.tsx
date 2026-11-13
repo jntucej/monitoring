@@ -133,7 +133,7 @@ export function CampusAssistant() {
     return (
       <div className="mt-2 space-y-1.5">
         {rows.length > 0 && (
-          <ul className="space-y-1 text-xs text-[var(--text-primary)]">
+          <ul className="space-y-1 text-xs text-text-primary">
             {rows.map((line, i) => (
               <li key={i} className="rounded-lg bg-[var(--bg-raised)]/50 px-2.5 py-1.5">
                 {line}
@@ -142,7 +142,7 @@ export function CampusAssistant() {
           </ul>
         )}
         {typeof r.count === "number" && rows.length === 0 && (
-          <p className="text-xs text-[var(--text-muted)]">{r.count} item{r.count === 1 ? "" : "s"} total</p>
+          <p className="text-xs text-text-muted">{r.count} item{r.count === 1 ? "" : "s"} total</p>
         )}
         {msg.page && (
           <a
@@ -159,14 +159,14 @@ export function CampusAssistant() {
 
   return (
     <WidgetBoundary title="Campus Assistant">
-      <section aria-label="Campus assistant" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="Campus assistant" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-unit-c">
             <Bot className="h-4.5 w-4.5" aria-hidden />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-[var(--text-primary)]">Campus Assistant</h2>
-            <p className="text-[10px] text-[var(--text-muted)]">
+            <h2 className="text-sm font-bold text-text-primary">Campus Assistant</h2>
+            <p className="text-[10px] text-text-muted">
               Read-only · answers from your own authorized data · no AI guessing
             </p>
           </div>
@@ -174,11 +174,11 @@ export function CampusAssistant() {
 
         <div
           ref={listRef}
-          className="mt-4 max-h-72 space-y-3 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/20 p-3"
+          className="mt-4 max-h-72 space-y-3 overflow-y-auto rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3"
           aria-label="Assistant conversation"
         >
           {messages.length === 0 && !pending ? (
-            <div className="flex flex-col items-center gap-2.5 py-6 text-center text-[var(--text-muted)]">
+            <div className="flex flex-col items-center gap-2.5 py-6 text-center text-text-muted">
               <MessageSquare className="h-5 w-5 opacity-50" aria-hidden />
               <p className="max-w-xs text-xs">
                 Ask me about your pending requests, upcoming events, announcements, or
@@ -190,7 +190,7 @@ export function CampusAssistant() {
                     key={q}
                     type="button"
                     onClick={() => void ask(q)}
-                    className="rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none"
+                    className="rounded-full border border-border bg-bg-surface px-2.5 py-1 text-[11px] text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
                   >
                     {q}
                   </button>
@@ -204,11 +204,11 @@ export function CampusAssistant() {
                   className={`flex max-w-[85%] items-start gap-2 rounded-xl px-3 py-2 text-sm ${
                     msg.role === "user"
                       ? "ml-auto bg-indigo-500/20 text-indigo-100"
-                      : "bg-[var(--bg-raised)]/60 text-[var(--text-primary)]"
+                      : "bg-[var(--bg-raised)]/60 text-text-primary"
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <Bot className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-300" aria-hidden />
+                    <Bot className="mt-0.5 h-3.5 w-3.5 shrink-0 text-unit-c" aria-hidden />
                   ) : (
                     <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" aria-hidden />
                   )}
@@ -221,7 +221,7 @@ export function CampusAssistant() {
             ))
           )}
           {pending && (
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]" role="status">
+            <div className="flex items-center gap-2 text-xs text-text-muted" role="status">
               <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
               Thinking…
             </div>
@@ -229,7 +229,7 @@ export function CampusAssistant() {
         </div>
 
         {error && (
-          <p className="mt-2 text-xs text-rose-300" role="alert">
+          <p className="mt-2 text-xs text-action-danger" role="alert">
             {error}
           </p>
         )}
@@ -247,7 +247,7 @@ export function CampusAssistant() {
             }}
             placeholder="Ask about requests, events, announcements, goals…"
             aria-label="Campus assistant question"
-            className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-violet-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
+            className="flex-1 rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
           />
           <button
             type="button"

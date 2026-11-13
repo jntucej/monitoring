@@ -192,16 +192,16 @@ export function UserManagement() {
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h3 className="font-semibold">User Management</h3>
-        {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-emerald-400" : "text-rose-400"}`}>{msg}</div>}
+        {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-action-success" : "text-action-danger"}`}>{msg}</div>}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowBulkModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-white hover:bg-[var(--bg-base)]"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-bg-elevated border border-border text-white hover:bg-bg-base"
           >
-            <Upload className="w-4 h-4 text-sky-400" />
+            <Upload className="w-4 h-4 text-action-info" />
             Bulk Import
           </button>
           <button
@@ -215,33 +215,33 @@ export function UserManagement() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
+        <form onSubmit={submit} className="mb-4 p-4 bg-bg-base rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="name">Name</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="name">Name</label>
             <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. John Doe"
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="email">Email</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="email">Email</label>
             <input id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. john@example.com"
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="role">Role</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="role">Role</label>
             <select id="role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
               <option value="operator">Operator</option>
@@ -266,27 +266,27 @@ export function UserManagement() {
           </div>
           {["student", "parent", "guardian", "visitor", "worker"].includes(role) && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
-                Custom Unique ID <span className="text-xs text-[var(--text-muted)]">(optional — auto-generated if blank, e.g. ucej-s-0001)</span>
+              <label className="block text-sm font-medium text-text-secondary mb-1">
+                Custom Unique ID <span className="text-xs text-text-muted">(optional — auto-generated if blank, e.g. ucej-s-0001)</span>
               </label>
               <input
                 type="text"
                 value={customUniqueId}
                 onChange={(e) => setCustomUniqueId(e.target.value)}
                 placeholder={`auto: ucej-${role === "student" ? "s" : role === "parent" ? "p" : role === "guardian" ? "g" : role === "visitor" ? "v" : "w"}-NNNN`}
-                className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+                className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
               />
             </div>
           )}
           {role === "operator" && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {role === "operator" ? "Assign Gate" : "Primary Gate"}
               </label>
               <select
                 value={gateId}
                 onChange={(e) => setGateId(e.target.value)}
-                className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+                className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
               >
                 <option value="">— No gate —</option>
                 {gates.map((g) => (
@@ -308,7 +308,7 @@ export function UserManagement() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium"
+              className="px-4 py-2 rounded-lg border border-border text-sm font-medium"
             >
               Cancel
             </button>
@@ -317,17 +317,17 @@ export function UserManagement() {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-muted)] py-8">
+        <div className="flex items-center justify-center gap-2 text-sm text-text-muted py-8">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading users…
         </div>
       ) : error ? (
         <div className="p-8 flex flex-col items-center gap-4 text-center">
           <XCircle className="w-10 h-10 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load users</h4>
-          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as { message?: string } | null)?.message || String(error)}</p>
+          <p className="text-sm text-text-muted">{typeof error === "string" ? error : (error as { message?: string } | null)?.message || String(error)}</p>
         </div>
       ) : users.length === 0 ? (
-        <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+        <div className="p-8 text-center text-sm text-text-muted">
           No users configured yet.
         </div>
       ) : (
@@ -335,10 +335,10 @@ export function UserManagement() {
           {users.map((user) => (
             <div key={user.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-[var(--text-muted)]" />
+                <User className="w-5 h-5 text-text-muted" />
                 <div>
                   <p className="font-medium">{user.name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-text-muted">
                     {user.email} • {user.role}
                   </p>
                 </div>
@@ -346,18 +346,18 @@ export function UserManagement() {
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Thumbprint (biometric) registration status + actions */}
                 {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1">
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/25 flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" /> Biometric ✓
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)] border border-[var(--border)]/25">
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-bg-elevated0/10 text-text-muted border border-border/25">
                     No biometric
                   </span>
                 )}
                 <button
                   onClick={() => registerThumbprint(user)}
                   disabled={busy}
-                  className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
+                  className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-action-info border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
                 >
                   <Fingerprint className="w-3 h-3" />
                   {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? "Re-register" : "Register"}
@@ -366,7 +366,7 @@ export function UserManagement() {
                   <button
                     onClick={() => clearThumbprint(user)}
                     disabled={busy}
-                    className="text-xs font-medium text-rose-400 hover:underline disabled:opacity-50"
+                    className="text-xs font-medium text-action-danger hover:underline disabled:opacity-50"
                   >
                     Clear
                   </button>
@@ -375,7 +375,7 @@ export function UserManagement() {
                   value={user.role}
                   disabled={busy}
                   onChange={(e) => changeRole(user, e.target.value)}
-                  className="text-xs rounded-full bg-sky-500/10 text-sky-300 px-2 py-1 border border-sky-500/20"
+                  className="text-xs rounded-full bg-sky-500/10 text-action-info px-2 py-1 border border-sky-500/20"
                 >
                   {["operator", "admin", "student", "parent", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
                     <option key={r} value={r}>{r}</option>
@@ -386,8 +386,8 @@ export function UserManagement() {
                   disabled={busy}
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${
                     user.status === "ACTIVE"
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)]"
+                      ? "bg-emerald-500/10 text-action-success"
+                      : "bg-bg-elevated0/10 text-text-muted"
                   }`}
                 >
                   {user.status}
@@ -401,7 +401,7 @@ export function UserManagement() {
                     setBusy(false);
                     load();
                   }}
-                  className="text-sm font-medium text-rose-400 hover:underline"
+                  className="text-sm font-medium text-action-danger hover:underline"
                 >
                   Delete
                 </button>

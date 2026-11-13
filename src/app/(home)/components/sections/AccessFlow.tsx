@@ -87,7 +87,7 @@ export function AccessFlow() {
           <motion.path
             d={PATH_D}
             fill="none"
-            stroke="var(--home-accent-indigo,#6366F1)"
+            stroke="var(--home-accent-indigo,var(--action-primary))"
             strokeWidth={4}
             strokeLinecap="round"
             style={reduced ? { pathLength: 1 } : { pathLength }}
@@ -104,13 +104,13 @@ export function AccessFlow() {
               transition={{ duration: 0.4, delay: i * 0.08 }}
               className="text-center"
             >
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-[var(--home-border-hard,rgba(255,255,255,0.18))] bg-[var(--home-bg-elev-1,#0F172A)] text-sm font-bold text-[var(--home-accent-indigo,#6366F1)]">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-[var(--home-border-hard,rgba(255,255,255,0.18))] bg-[var(--home-bg-elev-1,var(--bg-base))] text-sm font-bold text-[var(--home-accent-indigo,var(--action-primary))]">
                 {i + 1}
               </div>
-              <h3 className="mt-3 text-base font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+              <h3 className="mt-3 text-base font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
                 {s.label}
               </h3>
-              <p className="mt-1 text-xs text-[var(--home-text-muted,#6B7280)]">{s.body}</p>
+              <p className="mt-1 text-xs text-[var(--home-text-muted,var(--text-muted))]">{s.body}</p>
             </motion.div>
           ))}
         </div>

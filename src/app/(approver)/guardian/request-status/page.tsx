@@ -39,14 +39,14 @@ interface PermissionListData {
 function statusPill(status?: string) {
   const s = (status ?? "PENDING").toUpperCase();
   if (s === "APPROVED" || s === "COMPLETED")
-    return "border-emerald-400/30 bg-emerald-400/10 text-emerald-400";
+    return "border-emerald-400/30 bg-emerald-400/10 text-action-success";
   if (s === "REJECTED" || s === "CANCELLED")
-    return "border-rose-400/30 bg-rose-400/10 text-rose-400";
+    return "border-rose-400/30 bg-rose-400/10 text-action-danger";
   if (s === "ESCALATED")
-    return "border-amber-400/30 bg-amber-400/10 text-amber-400";
+    return "border-amber-400/30 bg-amber-400/10 text-action-warning";
   if (s === "PENDING")
-    return "border-sky-400/30 bg-sky-400/10 text-sky-400";
-  return "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]";
+    return "border-sky-400/30 bg-sky-400/10 text-action-info";
+  return "border-border/30 bg-bg-elevated/10 text-text-muted";
 }
 
 /* ── main ── */
@@ -92,10 +92,10 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Inbox className="w-6 h-6 text-emerald-400" />
+            <Inbox className="w-6 h-6 text-action-success" />
             Request Status
           </p>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-text-muted">
             Track the approval timeline of pass and leave requests for your wards
           </p>
         </div>
@@ -109,16 +109,16 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* request list */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-3 min-w-0">
-          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3 min-w-0">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Ward requests
           </h2>
           {loading && rows.length === 0 ? (
-            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="flex items-center gap-2 text-sm text-text-muted">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--text-muted)]">
+            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
               No requests found for your wards.
             </div>
           ) : (
@@ -133,11 +133,11 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
                     className={`w-full rounded-lg border p-3 text-left transition-colors motion-reduce:transition-none ${
                       isActive
                         ? "border-emerald-400/50 bg-emerald-500/10"
-                        : "border-[var(--border)] bg-[var(--bg-base)]/50 hover:bg-[var(--bg-elevated)]"
+                        : "border-border bg-bg-base/50 hover:bg-bg-elevated"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-mono font-medium text-[var(--text-primary)]">
+                      <span className="text-sm font-mono font-medium text-text-primary">
                         {r.ticket_number || r.id.slice(0, 8)}
                       </span>
                       <span
@@ -146,7 +146,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
                         {r.status || "PENDING"}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                    <p className="text-xs text-text-muted mt-1">
                       {r.workflow_type ? r.workflow_type.replace(/_/g, " ") : "—"}
                       {r.student?.name ? ` · ${r.student.name}` : ""}
                       {r.student?.student_details?.roll ? ` (${r.student.student_details.roll})` : ""}
@@ -163,7 +163,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
           {effectiveTicket ? (
             <RequestTimeline ticket={effectiveTicket} />
           ) : (
-            <div className="rounded-xl border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--text-muted)] h-full flex items-center justify-center">
+            <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted h-full flex items-center justify-center">
               Select a request to view its approval timeline.
             </div>
           )}

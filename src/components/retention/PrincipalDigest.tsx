@@ -21,16 +21,16 @@ export function PrincipalDigest() {
   if (!d) return null;
 
   const items = [
-    { icon: Award,     label: "Approved",       value: d.approved,       tone: "text-emerald-500" },
+    { icon: Award,     label: "Approved",       value: d.approved,       tone: "text-action-success" },
     { icon: Users,     label: "Delegated",      value: d.delegated,      tone: "text-sky-500" },
-    { icon: Clock,     label: "Avg decision",   value: d.avgDecision,    tone: "text-amber-500" },
-    { icon: TrendingUp,label: "SLA adherence",  value: d.slaAdherence,   tone: "text-emerald-500" },
+    { icon: Clock,     label: "Avg decision",   value: d.avgDecision,    tone: "text-action-warning" },
+    { icon: TrendingUp,label: "SLA adherence",  value: d.slaAdherence,   tone: "text-action-success" },
   ];
 
   return (
     <WidgetBoundary title="Weekly digest">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-        <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
+      <div className="rounded-2xl border border-border bg-bg-surface p-5">
+        <p className="text-xs uppercase tracking-wide text-text-muted">
           Your week
         </p>
         <div className="mt-4 grid grid-cols-2 gap-4">
@@ -38,8 +38,8 @@ export function PrincipalDigest() {
             <div key={label} className="flex items-start gap-3">
               <Icon className={`mt-0.5 h-4 w-4 ${tone}`} />
               <div>
-                <div className="text-xs text-[var(--text-muted)]">{label}</div>
-                <div className="text-lg font-semibold text-[var(--text-primary)] tabular-nums">
+                <div className="text-xs text-text-muted">{label}</div>
+                <div className="text-lg font-semibold text-text-primary tabular-nums">
                   {value ?? "—"}
                 </div>
               </div>
@@ -47,7 +47,7 @@ export function PrincipalDigest() {
           ))}
         </div>
         {d.insight && (
-          <p className="mt-4 border-t border-[var(--border)] pt-3 text-xs italic text-[var(--text-muted)]">
+          <p className="mt-4 border-t border-border pt-3 text-xs italic text-text-muted">
             {d.insight}
           </p>
         )}

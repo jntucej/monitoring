@@ -39,8 +39,8 @@ interface AvailableItem {
 
 const TIER_STYLES: Record<string, string> = {
   bronze: "bg-orange-500/15 text-orange-300 border-orange-500/30",
-  silver: "bg-[var(--bg-elevated)]/15 text-[var(--text-secondary)] border-[var(--border)]/30",
-  gold: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  silver: "bg-bg-elevated/15 text-text-secondary border-border/30",
+  gold: "bg-amber-500/15 text-action-warning border-amber-500/30",
 };
 
 const ICONS: Record<string, typeof Trophy> = {
@@ -57,7 +57,7 @@ function AchievementIcon({ icon, earned, tier }: { icon: string | null; earned: 
   return (
     <div
       className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
-        earned ? cls : "border-[var(--border)] bg-[var(--bg-raised)]/40 text-[var(--text-muted)] opacity-50"
+        earned ? cls : "border-border bg-[var(--bg-raised)]/40 text-text-muted opacity-50"
       }`}
     >
       <Icon className="h-5 w-5" aria-hidden />
@@ -98,19 +98,19 @@ export function Achievements() {
 
   return (
     <WidgetBoundary title="Achievements">
-      <section aria-label="Achievements" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="Achievements" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <Award className="h-4 w-4 text-emerald-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <Award className="h-4 w-4 text-action-success" aria-hidden />
             Achievements
           </h2>
           {loading ? (
-            <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]" role="status">
+            <span className="flex items-center gap-1.5 text-[11px] text-text-muted" role="status">
               <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
               Loading…
             </span>
           ) : (
-            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-muted)]">
+            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
               {earned.length} / {available.length} unlocked
             </span>
           )}
@@ -119,7 +119,7 @@ export function Achievements() {
         {error && !loading ? (
           <div className="mt-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : available.length === 0 && !loading ? (
-          <p className="mt-5 text-sm text-[var(--text-muted)]">
+          <p className="mt-5 text-sm text-text-muted">
             No achievements are available right now.
           </p>
         ) : (
@@ -135,7 +135,7 @@ export function Achievements() {
                   className={`rounded-xl border p-3.5 ${
                     item.earned
                       ? "border-emerald-500/20 bg-emerald-500/5"
-                      : "border-[var(--border)] bg-[var(--bg-raised)]/30"
+                      : "border-border bg-[var(--bg-raised)]/30"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -143,18 +143,18 @@ export function Achievements() {
                     <div className="min-w-0 flex-1">
                       <p
                         className={`truncate text-sm font-semibold ${
-                          item.earned ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+                          item.earned ? "text-text-primary" : "text-text-muted"
                         }`}
                       >
                         {item.title}
                       </p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-muted)]">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">
                         {item.description}
                       </p>
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                      <div className="mt-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-text-muted">
                         <span>{item.tier}</span>
                         {item.earned ? (
-                          <span className="text-emerald-400">
+                          <span className="text-action-success">
                             · {earnedItem ? new Date(earnedItem.earnedAt).toLocaleDateString() : "earned"}
                           </span>
                         ) : (

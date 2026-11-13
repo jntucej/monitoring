@@ -177,18 +177,18 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
             setResetSent(false);
             setError(null);
           }}
-          className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="flex items-center gap-1 text-sm text-text-muted hover:text-text-primary"
         >
           <ChevronLeft className="h-4 w-4" /> Back to sign in
         </button>
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Reset password</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <h1 className="text-2xl font-semibold text-text-primary">Reset password</h1>
+          <p className="mt-1 text-sm text-text-muted">
             We&apos;ll email you a one-time link.
           </p>
         </div>
         {resetSent ? (
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-action-success">
             If that email exists, a reset link has been sent. Check your inbox.
           </div>
         ) : (
@@ -199,10 +199,10 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               onChange={(e) => setResetEmail(e.target.value)}
               placeholder="you@college.edu"
               autoComplete="email"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
+              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
             />
             {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400">
+              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
                 {error}
               </div>
             )}
@@ -210,7 +210,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               type="button"
               onClick={handlePasswordReset}
               disabled={submitting || !resetEmail.trim()}
-              className="w-full rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              className="w-full rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
               {submitting ? "Sending…" : "Send reset link"}
             </button>
@@ -224,14 +224,14 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   return (
     <div className="w-full max-w-sm space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{title}</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">{subtitle}</p>
+        <h1 className="text-2xl font-semibold text-text-primary">{title}</h1>
+        <p className="mt-1 text-sm text-text-muted">{subtitle}</p>
       </div>
 
       {error && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400"
+          className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
@@ -247,7 +247,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         className="space-y-4"
       >
         <div className="space-y-1">
-          <label htmlFor="identifier" className="text-xs font-medium text-[var(--text-muted)]">
+          <label htmlFor="identifier" className="text-xs font-medium text-text-muted">
             Username / Roll number
           </label>
           <div className="relative">
@@ -260,14 +260,14 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               autoComplete="username"
               autoCapitalize="characters"
               required
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 pl-10 text-sm text-[var(--text-primary)]"
+              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 pl-10 text-sm text-text-primary"
             />
-            <UserCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+            <UserCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-xs font-medium text-[var(--text-muted)]">
+          <label htmlFor="password" className="text-xs font-medium text-text-muted">
             Password
           </label>
           <div className="relative">
@@ -279,14 +279,14 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 pl-10 pr-10 text-sm text-[var(--text-primary)]"
+              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 pl-10 pr-10 text-sm text-text-primary"
             />
-            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -294,19 +294,19 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <label className="flex items-center gap-2 text-xs text-text-muted">
             <input
               type="checkbox"
               checked={rememberLogin}
               onChange={(e) => setRememberLogin(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-[var(--border)]"
+              className="h-3.5 w-3.5 rounded border-border"
             />
             Remember me
           </label>
           <button
             type="button"
             onClick={() => setShowResetFlow(true)}
-            className="text-xs text-[var(--action-primary)] hover:underline"
+            className="text-xs text-action-primary hover:underline"
           >
             Forgot password?
           </button>
@@ -315,7 +315,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <button
           type="submit"
           disabled={disabled}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Signing in…" : "Sign In"}
           {!submitting && <ArrowRight className="h-4 w-4" />}
@@ -324,30 +324,30 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
 
       {/* New account? */}
       {code ? (
-        <p className="mt-4 text-center text-sm text-[var(--text-secondary)]">
+        <p className="mt-4 text-center text-sm text-text-secondary">
           It looks like you have an activation code.{" "}
           <Link
             href={`/bootstrap?code=${encodeURIComponent(code)}`}
-            className="font-medium text-[var(--action-primary)] hover:underline"
+            className="font-medium text-action-primary hover:underline"
           >
             Activate your account
           </Link>
         </p>
       ) : (
-        <p className="mt-4 text-center text-sm text-[var(--text-secondary)]">
+        <p className="mt-4 text-center text-sm text-text-secondary">
           New account?{" "}
           <Link
             href="/bootstrap"
-            className="font-medium text-[var(--action-primary)] hover:underline"
+            className="font-medium text-action-primary hover:underline"
           >
             Activate with your enrollment code
           </Link>
         </p>
       )}
 
-      <p className="text-center text-xs text-[var(--text-muted)]">
+      <p className="text-center text-xs text-text-muted">
         Need help?{" "}
-        <Link href="/help" prefetch={false} className="text-[var(--action-primary)] hover:underline">
+        <Link href="/help" prefetch={false} className="text-action-primary hover:underline">
           Contact your administrator
         </Link>
       </p>

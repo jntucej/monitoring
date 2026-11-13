@@ -30,10 +30,10 @@ interface AdminAlertsResponse {
 }
 
 const SEVERITY_TONE: Record<Alert["severity"], string> = {
-  critical: "text-rose-400 bg-rose-400/10 border-rose-400/20",
-  high: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  medium: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  low: "text-[var(--text-muted)] bg-[var(--bg-elevated)]/10 border-[var(--border)]/20",
+  critical: "text-action-danger bg-rose-400/10 border-rose-400/20",
+  high: "text-action-warning bg-amber-400/10 border-amber-400/20",
+  medium: "text-action-primary bg-blue-400/10 border-blue-400/20",
+  low: "text-text-muted bg-bg-elevated/10 border-border/20",
 };
 
 function fmtTime(iso: string | null | undefined): string {
@@ -61,22 +61,22 @@ export function AdminAlertsPanel() {
   }, [data]);
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0">
+    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Bell className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-        <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+        <Bell className="w-4 h-4 text-action-primary shrink-0" />
+        <span className="text-sm font-bold text-text-primary truncate">
           Open Alerts
         </span>
         {openAlerts.length > 0 ? (
-          <span className="ml-auto font-mono text-[10px] text-[var(--text-muted)] shrink-0">
+          <span className="ml-auto font-mono text-[10px] text-text-muted shrink-0">
             {openAlerts.length} active
           </span>
         ) : null}
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-3 py-3 text-[var(--text-muted)]">
+        <div className="flex items-center gap-2 px-3 py-3 text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-[11px]">Loading alerts…</span>
         </div>
@@ -93,14 +93,14 @@ export function AdminAlertsPanel() {
             return (
               <li
                 key={alert.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 min-w-0"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                  <p className="text-xs font-semibold text-text-primary truncate">
                     {alert.title}
                   </p>
                   {alert.message ? (
-                    <p className="text-[10px] text-[var(--text-muted)] truncate">
+                    <p className="text-[10px] text-text-muted truncate">
                       {alert.message}
                     </p>
                   ) : null}
@@ -111,7 +111,7 @@ export function AdminAlertsPanel() {
                   >
                     {alert.severity}
                   </span>
-                  <span className="font-mono text-[10px] text-[var(--text-muted)] tabular-nums">
+                  <span className="font-mono text-[10px] text-text-muted tabular-nums">
                     {fmtTime(alert.timestamp)}
                   </span>
                 </div>

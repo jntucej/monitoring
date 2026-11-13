@@ -164,12 +164,12 @@ export function WorkerCommandBar({ role, open, onClose }: WorkerCommandBarProps)
       aria-label="Worker command palette"
     >
       <div
-        className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
-          <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <Search className="w-4 h-4 text-text-muted shrink-0" />
           <input
             ref={inputRef}
             value={query}
@@ -179,10 +179,10 @@ export function WorkerCommandBar({ role, open, onClose }: WorkerCommandBarProps)
             }}
             onKeyDown={onListKeyDown}
             placeholder="Worker command (my-work / shifts / work-orders / history / records)…"
-            className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none min-w-0"
+            className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
             aria-label="Worker command input"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)] shrink-0">
+          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
             esc
           </kbd>
         </div>
@@ -190,7 +190,7 @@ export function WorkerCommandBar({ role, open, onClose }: WorkerCommandBarProps)
         {/* Command list */}
         <ul role="listbox" aria-label="Worker commands" className="max-h-64 overflow-y-auto py-1">
           {filtered.length === 0 ? (
-            <li className="px-4 py-6 text-center text-xs text-[var(--text-muted)]">
+            <li className="px-4 py-6 text-center text-xs text-text-muted">
               No matching commands
             </li>
           ) : (
@@ -204,14 +204,14 @@ export function WorkerCommandBar({ role, open, onClose }: WorkerCommandBarProps)
                     onClick={() => navigateTo(cmd)}
                     onMouseEnter={() => setActive(idx)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      isActive ? "bg-[var(--action-primary)]/10" : "hover:bg-[var(--bg-elevated)]"
+                      isActive ? "bg-action-primary/10" : "hover:bg-bg-elevated"
                     }`}
                   >
                     <span
                       className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                         isActive
-                          ? "bg-[var(--action-primary)]/20 text-[var(--action-primary)]"
-                          : "bg-[var(--bg-elevated)] text-[var(--text-secondary)]"
+                          ? "bg-action-primary/20 text-action-primary"
+                          : "bg-bg-elevated text-text-secondary"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -219,17 +219,17 @@ export function WorkerCommandBar({ role, open, onClose }: WorkerCommandBarProps)
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-sm font-semibold ${
-                          isActive ? "text-[var(--action-primary)]" : "text-[var(--text-primary)]"
+                          isActive ? "text-action-primary" : "text-text-primary"
                         }`}
                       >
                         {cmd.label}
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)] truncate font-mono">
+                      <p className="text-[11px] text-text-muted truncate font-mono">
                         {cmd.hint}
                       </p>
                     </div>
                     {isActive ? (
-                      <CornerUpRight className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
+                      <CornerUpRight className="w-4 h-4 text-action-primary shrink-0" />
                     ) : null}
                   </button>
                 </li>

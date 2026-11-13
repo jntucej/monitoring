@@ -10,21 +10,21 @@ export interface MiniStatProps {
 
 export function MiniStat({ label, value, tone = "neutral", className }: MiniStatProps) {
   const toneClasses = {
-    ok: "text-[var(--action-primary)]",
-    warn: "text-[var(--action-warning)]",
-    danger: "text-[var(--action-danger)]",
-    info: "text-[var(--action-info,#3b82f6)]",
-    neutral: "text-[var(--text-primary)]",
+    ok: "text-action-primary",
+    warn: "text-action-warning",
+    danger: "text-action-danger",
+    info: "text-[var(--action-info,var(--action-primary))]",
+    neutral: "text-text-primary",
   };
 
   return (
     <div
       className={cn(
-        "rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3",
+        "rounded-xl border border-border bg-bg-surface p-3",
         className
       )}
     >
-      <p className="text-[11px] font-medium text-[var(--text-muted)]">{label}</p>
+      <p className="text-[11px] font-medium text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-0.5 text-xl font-semibold tabular-nums",

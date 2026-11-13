@@ -39,7 +39,7 @@ function OperatorShellInner({ children }: { children: React.ReactNode }) {
   if (!assigned) return <GatePickerScreen />;
 
   return (
-    <div className="relative min-h-dvh bg-[var(--bg-base)]">
+    <div className="relative min-h-dvh bg-bg-base">
       {/* Left rail on tablet/desktop */}
       {isDesktop && (
         <OperatorDrawer open={true} onClose={() => {}} isRail={true} />

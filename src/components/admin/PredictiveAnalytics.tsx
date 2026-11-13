@@ -82,7 +82,7 @@ export function PredictiveAnalytics() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-xs text-[var(--text-secondary)]">Loading AI Predictive Models...</div>;
+    return <div className="p-8 text-center text-xs text-text-secondary">Loading AI Predictive Models...</div>;
   }
 
   return (
@@ -90,10 +90,10 @@ export function PredictiveAnalytics() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <p className="text-xl font-bold flex items-center gap-2">
-            <Brain className="h-6 w-6 text-purple-400" />
+            <Brain className="h-6 w-6 text-unit-c" />
             AI Predictive Analytics & Anomaly Engine
           </p>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-secondary">
             Hourly time-series forecasting (ARIMA / Exponential Smoothing) with Z-Score anomaly detection.
           </p>
         </div>
@@ -105,24 +105,24 @@ export function PredictiveAnalytics() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-emerald-400" />
+          <TrendingUp className="h-8 w-8 text-action-success" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Model Accuracy (MAPE)</div>
-            <div className="text-xl font-bold text-[var(--text-primary)]">{metrics.mape}</div>
+            <div className="text-xs text-text-secondary">Model Accuracy (MAPE)</div>
+            <div className="text-xl font-bold text-text-primary">{metrics.mape}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <Activity className="h-8 w-8 text-blue-400" />
+          <Activity className="h-8 w-8 text-action-primary" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Root Mean Square Error (RMSE)</div>
-            <div className="text-xl font-bold text-[var(--text-primary)]">{metrics.rmse}</div>
+            <div className="text-xs text-text-secondary">Root Mean Square Error (RMSE)</div>
+            <div className="text-xl font-bold text-text-primary">{metrics.rmse}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <CheckCircle className="h-8 w-8 text-purple-400" />
+          <CheckCircle className="h-8 w-8 text-unit-c" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Active Model Version</div>
-            <div className="text-base font-bold text-[var(--text-primary)]">{metrics.model_version}</div>
+            <div className="text-xs text-text-secondary">Active Model Version</div>
+            <div className="text-base font-bold text-text-primary">{metrics.model_version}</div>
           </div>
         </Card>
       </div>
@@ -130,16 +130,16 @@ export function PredictiveAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-400" />
+            <AlertTriangle className="h-5 w-5 text-action-warning" />
             Real-Time Anomaly Detections (&gt;2.0σ Deviation)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {anomalies.length === 0 ? (
-            <p className="text-xs text-[var(--text-secondary)]">No active statistical anomalies detected.</p>
+            <p className="text-xs text-text-secondary">No active statistical anomalies detected.</p>
           ) : (
             anomalies.map((anom) => (
-              <div key={anom.id} className="p-3 rounded border border-[var(--border)] bg-[var(--bg-surface-elevated)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div key={anom.id} className="p-3 rounded border border-border bg-[var(--bg-surface-elevated)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Badge variant={anom.severity === "critical" ? "error" : "offline"} className="text-xs">
@@ -147,9 +147,9 @@ export function PredictiveAnalytics() {
                     </Badge>
                     <span className="font-semibold text-sm">{anom.metric}</span>
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)]">{anom.message}</p>
+                  <p className="text-xs text-text-secondary">{anom.message}</p>
                 </div>
-                <div className="text-xs text-[var(--text-secondary)] font-mono whitespace-nowrap">
+                <div className="text-xs text-text-secondary font-mono whitespace-nowrap">
                   Expected: {anom.expected_value} | Actual: {anom.actual_value}
                 </div>
               </div>
@@ -166,7 +166,7 @@ export function PredictiveAnalytics() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                <tr className="border-b border-border text-text-secondary">
                   <th className="p-2">Metric / Target</th>
                   <th className="p-2">Forecast Timestamp</th>
                   <th className="p-2">Predicted Value</th>
@@ -176,14 +176,14 @@ export function PredictiveAnalytics() {
               </thead>
               <tbody>
                 {predictions.map((p, idx) => (
-                  <tr key={idx} className="border-b border-[var(--border)] hover:bg-[var(--bg-surface-elevated)]">
+                  <tr key={idx} className="border-b border-border hover:bg-[var(--bg-surface-elevated)]">
                     <td className="p-2 font-medium">{p.type.toUpperCase()} ({p.target})</td>
-                    <td className="p-2 text-[var(--text-secondary)]">{new Date(p.timestamp).toLocaleTimeString()}</td>
-                    <td className="p-2 font-bold text-emerald-400">{p.predicted_value}</td>
-                    <td className="p-2 font-mono text-[var(--text-secondary)]">
+                    <td className="p-2 text-text-secondary">{new Date(p.timestamp).toLocaleTimeString()}</td>
+                    <td className="p-2 font-bold text-action-success">{p.predicted_value}</td>
+                    <td className="p-2 font-mono text-text-secondary">
                       [{p.confidence_interval_low} - {p.confidence_interval_high}]
                     </td>
-                    <td className="p-2 text-[var(--text-secondary)]">{p.model_version}</td>
+                    <td className="p-2 text-text-secondary">{p.model_version}</td>
                   </tr>
                 ))}
               </tbody>

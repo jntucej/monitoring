@@ -66,8 +66,8 @@ export function ConfirmSheet({
 
   // Flag banner.
   const flagBanner = student.flagStatus ? (
-    <div className="flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm bg-rose-500/10 border-rose-500/40 text-rose-300">
-      <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-rose-400" />
+    <div className="flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm bg-rose-500/10 border-rose-500/40 text-action-danger">
+      <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-action-danger" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="font-extrabold text-xs uppercase tracking-wider">{student.flagStatus}</span>
@@ -106,7 +106,7 @@ export function ConfirmSheet({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-50 bg-[var(--bg-surface)] border-t border-[var(--border)] rounded-t-2xl shadow-2xl max-h-[85dvh] flex flex-col"
+            className="fixed inset-x-0 bottom-0 z-50 bg-bg-surface border-t border-border rounded-t-2xl shadow-2xl max-h-[85dvh] flex flex-col"
             role="dialog"
             aria-modal="true"
             aria-label="Scan confirmation"
@@ -117,12 +117,12 @@ export function ConfirmSheet({
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-              <h2 className="text-sm font-bold text-[var(--text-primary)]">Confirm Scan</h2>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <h2 className="text-sm font-bold text-text-primary">Confirm Scan</h2>
               <button
                 type="button"
                 onClick={onCancel}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                 aria-label="Cancel"
               >
                 <X className="w-5 h-5" />
@@ -136,18 +136,18 @@ export function ConfirmSheet({
 
               {/* Student info */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-lg font-bold">
+                <div className="w-12 h-12 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-lg font-bold">
                   {student.name?.charAt(0) || "?"}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-base font-bold text-[var(--text-primary)] truncate">
+                  <p className="text-base font-bold text-text-primary truncate">
                     {student.name || student.roll || "Unknown"}
                   </p>
                   {student.roll && (
-                    <p className="text-xs text-[var(--text-muted)] font-mono">{student.roll}</p>
+                    <p className="text-xs text-text-muted font-mono">{student.roll}</p>
                   )}
                   {student.department && (
-                    <p className="text-xs text-[var(--text-muted)]">{student.department}</p>
+                    <p className="text-xs text-text-muted">{student.department}</p>
                   )}
                 </div>
               </div>
@@ -156,7 +156,7 @@ export function ConfirmSheet({
               {recommendation && (
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                       Direction
                     </span>
                     <div className="grid grid-cols-2 gap-2">
@@ -168,8 +168,8 @@ export function ConfirmSheet({
                           className={cn(
                             "py-2.5 rounded-xl border text-sm font-bold transition-all",
                             selectedDirection === dir
-                              ? "bg-[var(--action-primary)] border-[var(--action-primary)] text-black"
-                              : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                              ? "bg-action-primary border-action-primary text-black"
+                              : "border-border bg-bg-base text-text-primary hover:border-border"
                           )}
                         >
                           {dir === "IN" ? "Entry (IN)" : "Exit (OUT)"}
@@ -181,7 +181,7 @@ export function ConfirmSheet({
                   {/* Entry type for students */}
                   {student.personType === "student" && selectedDirection === "IN" && (
                     <div className="space-y-1.5">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                      <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                         Entry Type
                       </span>
                       <div className="grid grid-cols-2 gap-2">
@@ -193,8 +193,8 @@ export function ConfirmSheet({
                             className={cn(
                               "py-2 px-3 rounded-lg border text-xs font-medium transition-colors",
                               selectedEntryType === type
-                                ? "border-[var(--action-primary)] bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                                : "border-[var(--border)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                                ? "border-action-primary bg-action-primary/10 text-action-primary"
+                                : "border-border bg-bg-base text-text-primary hover:border-border"
                             )}
                           >
                             {type === "hosteller" ? "Hosteller" : "Day Scholar"}
@@ -207,13 +207,13 @@ export function ConfirmSheet({
                   {/* Reason for exit */}
                   {selectedDirection === "OUT" && (
                     <div className="space-y-1.5">
-                      <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                      <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                         Reason
                       </span>
                       <select
                         value={selectedReason || ""}
                         onChange={(e) => setSelectedReason(e.target.value as ExitReason)}
-                        className="w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                        className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
                       >
                         <option value="">Select reason...</option>
                         <option value="daily_outing">Daily Outing</option>
@@ -230,9 +230,9 @@ export function ConfirmSheet({
             </div>
 
             {/* Footer */}
-            <div className="border-t border-[var(--border)] p-4 space-y-2">
+            <div className="border-t border-border p-4 space-y-2">
               {autoConfirmMs && autoConfirmMs > 0 && countdown !== null && (
-                <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
+                <div className="flex items-center justify-center gap-2 text-xs text-text-muted">
                   <Clock className="w-3.5 h-3.5 animate-pulse" />
                   Auto-confirming in {countdown}ms...
                 </div>
@@ -241,14 +241,14 @@ export function ConfirmSheet({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                  className="py-3 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:bg-bg-elevated transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className="py-3 rounded-xl bg-[var(--action-primary)] text-black font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
+                  className="py-3 rounded-xl bg-action-primary text-black font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
                 >
                   Confirm
                 </button>

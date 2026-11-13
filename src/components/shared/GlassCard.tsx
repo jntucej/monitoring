@@ -85,9 +85,9 @@ export function GlassCard({
 
   const getContainerBackground = () => {
     if (displayMode === "outdoor" || performanceTier === "emergency") {
-      return isDark ? "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-white" : "bg-[var(--bg-elevated)]/95 border-[var(--border)] text-[var(--text-primary)]";
+      return isDark ? "bg-bg-elevated/95 border-border text-white" : "bg-bg-elevated/95 border-border text-text-primary";
     }
-    return isDark ? "bg-[var(--bg-surface)]/60 border-white/10 text-[var(--text-primary)]" : "bg-white/80 border-white/80 text-neutral-900";
+    return isDark ? "bg-bg-surface/60 border-white/10 text-text-primary" : "bg-white/80 border-white/80 text-neutral-900";
   };
 
   // 3D Tilt Motion Tracking with critically damped spring
@@ -122,10 +122,10 @@ export function GlassCard({
   };
 
   const statusMap = {
-    entry: { color: "emerald", text: "Granted", pulse: "bg-emerald-500", border: "border-emerald-500/30", bg: "bg-emerald-500/20", textCol: "text-emerald-300" },
-    exit: { color: "rose", text: "Restricted", pulse: "bg-rose-500", border: "border-rose-500/30", bg: "bg-rose-500/20", textCol: "text-rose-300" },
-    idle: { color: "slate", text: "Standby", pulse: "bg-[var(--bg-elevated)]", border: "border-[var(--border)]/30", bg: "bg-[var(--bg-elevated)]/20", textCol: "text-[var(--text-secondary)]" },
-    warning: { color: "amber", text: "Alert", pulse: "bg-amber-500", border: "border-amber-500/30", bg: "bg-amber-500/20", textCol: "text-amber-300" },
+    entry: { color: "emerald", text: "Granted", pulse: "bg-action-success", border: "border-emerald-500/30", bg: "bg-emerald-500/20", textCol: "text-action-success" },
+    exit: { color: "rose", text: "Restricted", pulse: "bg-action-danger", border: "border-rose-500/30", bg: "bg-rose-500/20", textCol: "text-action-danger" },
+    idle: { color: "slate", text: "Standby", pulse: "bg-bg-elevated", border: "border-border/30", bg: "bg-bg-elevated/20", textCol: "text-text-secondary" },
+    warning: { color: "amber", text: "Alert", pulse: "bg-action-warning", border: "border-amber-500/30", bg: "bg-amber-500/20", textCol: "text-action-warning" },
   };
 
   const current = statusMap[status];
@@ -229,21 +229,21 @@ export function GlassCard({
       {/* Content Z-lift Layer with High Contrast Typography */}
       <div style={{ transform: can3D ? "translateZ(20px)" : "none", transformStyle: can3D ? "preserve-3d" : "flat" }} className="relative z-10">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold tracking-tight text-[var(--text-primary)]">
+          <h3 className="text-lg font-bold tracking-tight text-text-primary">
             <WordByWordText text={title} />
           </h3>
           <span className={cn("text-xs font-mono px-2.5 py-1 rounded-full border font-semibold", current.bg, current.textCol, current.border)}>
             {current.text}
           </span>
         </div>
-        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-[var(--text-secondary)]" : "text-[var(--text-muted)]")}>
+        <p className={cn("text-sm mb-4 font-medium", isDark ? "text-text-secondary" : "text-text-muted")}>
           <WordByWordText text={subtitle} delay={0.05} />
         </p>
         {children}
         <button
           type="button"
           onClick={() => setActiveGate(isActive ? null : id)}
-          className="mt-4 min-h-[44px] px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-[var(--text-secondary)] hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
+          className="mt-4 min-h-[44px] px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-text-secondary hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
         >
           {isActive ? "Close Focus" : "Focus Gate"}
         </button>

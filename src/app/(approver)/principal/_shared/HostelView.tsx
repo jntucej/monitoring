@@ -35,8 +35,8 @@ export function HostelView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Hostel Oversight</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Hostel Oversight</h1>
+        <p className="text-xs text-text-muted">
           Hostel block status and occupancy
         </p>
       </header>
@@ -64,10 +64,10 @@ export function HostelView() {
               return (
                 <li
                   key={b.id ?? idx}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                  className="rounded-xl border border-border bg-bg-surface p-3"
                 >
                   <p className="text-sm font-medium">{name}</p>
-                  <div className="mt-2 flex gap-3 text-xs text-[var(--text-secondary)]">
+                  <div className="mt-2 flex gap-3 text-xs text-text-secondary">
                     <span>Capacity: {b.capacity ?? b.total_rooms ?? "—"}</span>
                     <span>Occupied: {b.occupied ?? "—"}</span>
                   </div>
@@ -94,7 +94,7 @@ export function HostelView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "ACTIVE"}
                     </span>
                   ),

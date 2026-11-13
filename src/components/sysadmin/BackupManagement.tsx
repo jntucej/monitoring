@@ -90,70 +90,70 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3 border-b border-[var(--border)] pb-3">
+    <div className="bg-bg-surface border border-border rounded-xl p-5 space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-3 border-b border-border pb-3">
         <div>
           <h3 className="font-semibold text-white flex items-center gap-2">
-            <Database className="w-5 h-5 text-sky-400" /> Database Backup & Restore
+            <Database className="w-5 h-5 text-action-info" /> Database Backup & Restore
           </h3>
-          <p className="text-xs text-[var(--text-muted)]">Create snapshots or restore database state.</p>
+          <p className="text-xs text-text-muted">Create snapshots or restore database state.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleVerifyBackup} disabled={verifying || busy} className="px-3 py-1.5 text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+          <button onClick={handleVerifyBackup} disabled={verifying || busy} className="px-3 py-1.5 text-xs font-semibold bg-emerald-700 hover:bg-action-success text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
             {verifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify Integrity
           </button>
-          <label className="cursor-pointer px-3 py-1.5 text-xs font-semibold bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg hover:bg-[var(--bg-base)] flex items-center gap-1.5">
-            <Upload className="w-3.5 h-3.5 text-amber-400" /> Restore Snapshot
+          <label className="cursor-pointer px-3 py-1.5 text-xs font-semibold bg-bg-elevated border border-border rounded-lg hover:bg-bg-base flex items-center gap-1.5">
+            <Upload className="w-3.5 h-3.5 text-action-warning" /> Restore Snapshot
             <input type="file" accept=".json" onChange={handleFileRestore} className="hidden" disabled={busy} />
           </label>
-          <button onClick={handleCreateBackup} disabled={busy} className="px-3 py-1.5 text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+          <button onClick={handleCreateBackup} disabled={busy} className="px-3 py-1.5 text-xs font-semibold bg-sky-600 hover:bg-action-info text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
             {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Backup Now
           </button>
         </div>
       </div>
 
-      {msg && <div className={`p-3 rounded-lg text-xs font-medium ${msg.type === "success" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>{msg.text}</div>}
+      {msg && <div className={`p-3 rounded-lg text-xs font-medium ${msg.type === "success" ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>{msg.text}</div>}
 
       {loading ? (
-        <div className="text-xs text-center py-4 text-[var(--text-muted)] flex justify-center items-center gap-2">
-          <RefreshCw className="w-4 h-4 animate-spin text-sky-400" /> Loading backups...
+        <div className="text-xs text-center py-4 text-text-muted flex justify-center items-center gap-2">
+          <RefreshCw className="w-4 h-4 animate-spin text-action-info" /> Loading backups...
         </div>
       ) : backups.length === 0 ? (
-        <div className="text-xs text-center py-4 text-[var(--text-muted)]">No backup snapshots recorded.</div>
+        <div className="text-xs text-center py-4 text-text-muted">No backup snapshots recorded.</div>
       ) : (
         <div className="space-y-3">
-          <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
             {backups.slice(0, 10).map((b) => (
-              <div key={b.id} className="p-3 flex items-center justify-between bg-[var(--bg-elevated)]/40 text-xs gap-3">
+              <div key={b.id} className="p-3 flex items-center justify-between bg-bg-elevated/40 text-xs gap-3">
                 <div className="space-y-0.5 min-w-0">
-                  <p className="font-semibold text-sky-400 font-mono truncate">{b.filename}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">
+                  <p className="font-semibold text-action-info font-mono truncate">{b.filename}</p>
+                  <p className="text-[10px] text-text-muted">
                     {new Date(b.createdAt).toLocaleString("en-IN")} &bull; {b.recordCount} records &bull; {b.size > 1048576 ? `${(b.size / 1048576).toFixed(1)} MB` : `${Math.round(b.size / 1024)} KB`}
                   </p>
                   {b.checksum && (
-                    <p className="text-[10px] font-mono text-[var(--text-muted)] truncate max-w-sm">
+                    <p className="text-[10px] font-mono text-text-muted truncate max-w-sm">
                       SHA-256: <span className="text-emerald-400/90">{b.checksum.slice(0, 16)}…</span>
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">{b.status}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/10 text-action-success font-bold border border-emerald-500/20">{b.status}</span>
                 </div>
               </div>
             ))}
           </div>
 
           {verifications.length > 0 && (
-            <div className="pt-2 border-t border-[var(--border)]">
-              <h4 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-2">Recent Verification History</h4>
-              <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-lg overflow-hidden text-xs">
+            <div className="pt-2 border-t border-border">
+              <h4 className="text-xs font-semibold text-text-muted uppercase mb-2">Recent Verification History</h4>
+              <div className="divide-y divide-border border border-border rounded-lg overflow-hidden text-xs">
                 {verifications.slice(0, 3).map((v) => (
-                  <div key={v.id} className="p-2 flex items-center justify-between bg-[var(--bg-surface)]">
+                  <div key={v.id} className="p-2 flex items-center justify-between bg-bg-surface">
                     <div>
-                      <span className="font-semibold text-emerald-400 font-mono">Verified: {v.recordsVerified || v.records_verified || 0} records</span>
-                      <p className="text-[10px] text-[var(--text-muted)]">{new Date(v.verifiedAt || v.created_at || Date.now()).toLocaleString("en-IN")}</p>
+                      <span className="font-semibold text-action-success font-mono">Verified: {v.recordsVerified || v.records_verified || 0} records</span>
+                      <p className="text-[10px] text-text-muted">{new Date(v.verifiedAt || v.created_at || Date.now()).toLocaleString("en-IN")}</p>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/20 text-emerald-400 font-bold">{v.status || "PASSED"}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/20 text-action-success font-bold">{v.status || "PASSED"}</span>
                   </div>
                 ))}
               </div>

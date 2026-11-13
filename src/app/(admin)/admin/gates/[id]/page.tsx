@@ -117,32 +117,32 @@ export default function GateDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-surface)] border border-[var(--border)] p-5 rounded-2xl shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface border border-border p-5 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-base)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              className="p-2 rounded-xl bg-bg-elevated border border-border hover:bg-bg-base text-text-muted hover:text-text-primary transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-[var(--text-primary)]">
+                <p className="text-xl font-bold text-text-primary">
                   {data?.gateName || `Gate ${gateId}`}
                 </p>
                 {data && (
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
                       data.status === "ACTIVE"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                        ? "bg-emerald-500/10 text-action-success border-emerald-500/20"
+                        : "bg-rose-500/10 text-action-danger border-rose-500/20"
                     }`}
                   >
                     {data.status}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="text-xs text-text-muted mt-0.5">
                 {data?.gateCode ? `${data.gateCode} — ` : ""}
                 Terminal ID: {gateId} — {data?.location || "Campus Access Point"}
               </p>
@@ -153,7 +153,7 @@ export default function GateDetailPage() {
             <button
               onClick={fetchGateDetails}
               disabled={loading}
-              className="px-3 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs font-semibold hover:bg-[var(--bg-base)] flex items-center gap-1.5 transition-colors"
+              className="px-3 py-2 rounded-xl bg-bg-elevated border border-border text-xs font-semibold hover:bg-bg-base flex items-center gap-1.5 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
@@ -163,7 +163,7 @@ export default function GateDetailPage() {
                 <button
                   onClick={() => setConfirmDeactivate(true)}
                   disabled={toggleBusy}
-                  className="px-3 py-2 rounded-xl bg-[var(--bg-elevated)] border border-rose-500/30 text-rose-400 text-xs font-semibold hover:bg-rose-500/10 flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-2 rounded-xl bg-bg-elevated border border-rose-500/30 text-action-danger text-xs font-semibold hover:bg-rose-500/10 flex items-center gap-1.5 transition-colors"
                 >
                   <Power className="w-3.5 h-3.5" /> Deactivate
                 </button>
@@ -171,14 +171,14 @@ export default function GateDetailPage() {
                 <button
                   onClick={() => toggleActive(true)}
                   disabled={toggleBusy}
-                  className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
                 >
                   <Power className="w-3.5 h-3.5" /> Activate
                 </button>
               )
             )}
             {isSentinel && (
-              <span className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-semibold">
+              <span className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-action-warning text-xs font-semibold">
                 <Lock className="w-3.5 h-3.5" /> System sentinel gate — read-only
               </span>
             )}
@@ -186,7 +186,7 @@ export default function GateDetailPage() {
         </div>
 
         {operatorNote && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{operatorNote}</span>
           </div>
@@ -202,7 +202,7 @@ export default function GateDetailPage() {
                   label="Scans Today"
                   value={data?.scansToday ?? 0}
                   icon={Activity}
-                  color="#10b981"
+                  color="var(--action-success)"
                   trend="Total throughput"
                   onClick={() => router.push("/admin/reports")}
                 />
@@ -210,7 +210,7 @@ export default function GateDetailPage() {
                   label="Entries (IN)"
                   value={data?.entriesToday ?? 0}
                   icon={CheckCircle2}
-                  color="#3b82f6"
+                  color="var(--action-primary)"
                   trend="Checked in campus"
                   onClick={() => router.push("/admin/attendance")}
                 />
@@ -218,7 +218,7 @@ export default function GateDetailPage() {
                   label="Exits (OUT)"
                   value={data?.exitsToday ?? 0}
                   icon={Clock}
-                  color="#f59e0b"
+                  color="var(--action-warning)"
                   trend="Checked out campus"
                   onClick={() => router.push("/admin/attendance")}
                 />
@@ -226,7 +226,7 @@ export default function GateDetailPage() {
                   label="Peak Activity"
                   value={data?.peakHour || "N/A"}
                   icon={TrendingUp}
-                  color="#8b5cf6"
+                  color="var(--unit-c)"
                   trend="Mode entry hour (7 days)"
                   onClick={() => router.push("/admin/analytics/predictive")}
                 />
@@ -235,19 +235,19 @@ export default function GateDetailPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <WidgetBoundary title="Scan Stream">
-                <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-4 shadow-sm">
+                <div className="lg:col-span-2 bg-bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-emerald-400" />
+                    <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-action-success" />
                       Recent Scan Activity (last 20)
                     </h3>
-                    <span className="text-xs text-[var(--text-muted)] font-mono">Real-time</span>
+                    <span className="text-xs text-text-muted font-mono">Real-time</span>
                   </div>
 
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <table className="w-full text-xs text-left border-collapse min-w-[500px]">
                       <thead>
-                        <tr className="border-b border-[var(--border)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                        <tr className="border-b border-border text-text-muted uppercase tracking-wider font-semibold">
                           <th className="pb-2 px-3">Subject Name</th>
                           <th className="pb-2 px-3">Category</th>
                           <th className="pb-2 px-3">Movement</th>
@@ -255,37 +255,37 @@ export default function GateDetailPage() {
                           <th className="pb-2 px-3 text-right">Operator</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[var(--border)]">
+                      <tbody className="divide-y divide-border">
                         {data?.recentScans && data.recentScans.length > 0 ? (
                           data.recentScans.map((scan) => (
-                            <tr key={scan.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors">
-                              <td className="py-3 px-3 font-semibold text-[var(--text-primary)]">{scan.personName}</td>
-                              <td className="py-3 px-3 text-[var(--text-muted)]">{scan.personRole}</td>
+                            <tr key={scan.id} className="hover:bg-bg-elevated/50 transition-colors">
+                              <td className="py-3 px-3 font-semibold text-text-primary">{scan.personName}</td>
+                              <td className="py-3 px-3 text-text-muted">{scan.personRole}</td>
                               <td className="py-3 px-3">
                                 <span
                                   className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                                     scan.direction === "IN"
-                                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                                      : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                                      ? "bg-emerald-500/20 text-action-success border border-emerald-500/30"
+                                      : "bg-amber-500/20 text-action-warning border border-amber-500/30"
                                   }`}
                                 >
                                   {scan.direction}
                                 </span>
                                 {scan.reason && (
-                                  <span className="ml-1.5 text-[10px] text-[var(--text-muted)]">({scan.reason})</span>
+                                  <span className="ml-1.5 text-[10px] text-text-muted">({scan.reason})</span>
                                 )}
                               </td>
-                              <td className="py-3 px-3 font-mono text-[var(--text-muted)]">
+                              <td className="py-3 px-3 font-mono text-text-muted">
                                 {new Date(scan.timestamp).toLocaleString()}
                               </td>
-                              <td className="py-3 px-3 text-right font-bold text-emerald-400">
+                              <td className="py-3 px-3 text-right font-bold text-action-success">
                                 {scan.operator || "Auto"}
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-[var(--text-muted)]">
+                            <td colSpan={5} className="py-8 text-center text-text-muted">
                               No recent scans recorded for this gate terminal.
                             </td>
                           </tr>
@@ -298,33 +298,33 @@ export default function GateDetailPage() {
 
               <WidgetBoundary title="Assigned Operator">
                 <div className="space-y-4">
-                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 space-y-4 shadow-sm">
-                    <h3 className="font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-purple-400" />
+                  <div className="bg-bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-sm">
+                    <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
+                      <UserCheck className="w-4 h-4 text-unit-c" />
                       Active Gate Operator
                     </h3>
 
                     {data?.activeOperator ? (
-                      <div className="p-3.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center border border-purple-500/30">
+                      <div className="p-3.5 rounded-xl bg-bg-base border border-border flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-purple-500/20 text-unit-c font-bold flex items-center justify-center border border-purple-500/30">
                           {data.activeOperator.name.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[var(--text-primary)]">{data.activeOperator.name}</p>
-                          <p className="text-[11px] text-[var(--text-muted)]">{data.activeOperator.email ?? "No email"}</p>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400">
+                          <p className="text-xs font-bold text-text-primary">{data.activeOperator.name}</p>
+                          <p className="text-[11px] text-text-muted">{data.activeOperator.email ?? "No email"}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-action-success">
                             Active On Duty
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-[var(--text-muted)] italic">No operator currently on duty at this gate.</p>
+                      <p className="text-xs text-text-muted italic">No operator currently on duty at this gate.</p>
                     )}
 
                     {!isSentinel && (
-                      <p className="text-[11px] text-[var(--text-muted)]">
+                      <p className="text-[11px] text-text-muted">
                         Reassigning the operator is managed from the operator desk
-                        (<button onClick={() => router.push(`/gate/${gateId}`)} className="underline font-semibold text-emerald-400">
+                        (<button onClick={() => router.push(`/gate/${gateId}`)} className="underline font-semibold text-action-success">
                           open operator desk
                         </button>)
                         — this page is read-only for operator assignment.

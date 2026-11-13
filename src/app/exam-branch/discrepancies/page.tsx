@@ -41,20 +41,20 @@ const SEVERITY_STYLES: Record<
   { badge: string; dot: string }
 > = {
   critical: {
-    badge: "bg-rose-500/15 text-rose-300 border border-rose-500/30",
-    dot: "bg-rose-400",
+    badge: "bg-rose-500/15 text-action-danger border border-rose-500/30",
+    dot: "bg-action-danger",
   },
   high: {
-    badge: "bg-amber-500/15 text-amber-300 border border-amber-500/30",
-    dot: "bg-amber-400",
+    badge: "bg-amber-500/15 text-action-warning border border-amber-500/30",
+    dot: "bg-action-warning",
   },
   medium: {
     badge: "bg-yellow-500/15 text-yellow-300 border border-yellow-500/30",
     dot: "bg-yellow-400",
   },
   low: {
-    badge: "bg-sky-500/15 text-sky-300 border border-sky-500/30",
-    dot: "bg-sky-400",
+    badge: "bg-sky-500/15 text-action-info border border-sky-500/30",
+    dot: "bg-action-info",
   },
 };
 
@@ -96,7 +96,7 @@ function ExamBranchDiscrepanciesInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -104,15 +104,15 @@ function ExamBranchDiscrepanciesInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && !forbidden && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Discrepancies unavailable: {error}</span>
@@ -130,56 +130,56 @@ function ExamBranchDiscrepanciesInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Discrepancy Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Open Discrepancies</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Open Discrepancies</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalOpen}</p>
-            <p className="text-xs text-[var(--text-muted)]">Unresolved alerts visible to this role</p>
+            <p className="text-xs text-text-muted">Unresolved alerts visible to this role</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Critical</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Critical</p>
             <p
               className={`mt-1 text-2xl font-bold ${
-                criticalCount > 0 ? "text-rose-400" : "text-[var(--text-muted)]"
+                criticalCount > 0 ? "text-action-danger" : "text-text-muted"
               }`}
             >
               {criticalCount}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Requires immediate attention</p>
+            <p className="text-xs text-text-muted">Requires immediate attention</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">High</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">High</p>
             <p
               className={`mt-1 text-2xl font-bold ${
-                highCount > 0 ? "text-amber-400" : "text-[var(--text-muted)]"
+                highCount > 0 ? "text-action-warning" : "text-text-muted"
               }`}
             >
               {highCount}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Elevated severity — escalate if unresolved</p>
+            <p className="text-xs text-text-muted">Elevated severity — escalate if unresolved</p>
           </div>
         </div>
       </WidgetBoundary>
 
       {/* Discrepancy list */}
       <WidgetBoundary title="Attendance Discrepancies">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <CircleAlert className="w-4 h-4 text-rose-400 shrink-0" />
+              <CircleAlert className="w-4 h-4 text-action-danger shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Flagged Discrepancies
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">{totalOpen} open</span>
+            <span className="text-xs text-text-muted shrink-0">{totalOpen} open</span>
           </div>
 
           {forbidden ? (
             <div className="p-6 text-center min-w-0">
-              <ShieldAlert className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <ShieldAlert className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">
                 Access to live discrepancies is restricted.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 The alerts feed is limited to administrative roles. Contact your
                 supervisor or admin if you need attendance discrepancy details.
               </p>
@@ -189,17 +189,17 @@ function ExamBranchDiscrepanciesInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : alerts.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <CircleAlert className="w-8 h-8 mx-auto text-emerald-600 mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <CircleAlert className="w-8 h-8 mx-auto text-action-success mb-2" />
+              <p className="text-sm text-text-muted">
                 No open discrepancies.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Attendance and access discrepancies appear here when they are
                 flagged by the gate system.
               </p>
@@ -224,10 +224,10 @@ function ExamBranchDiscrepanciesInner() {
                         {alert.title}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] min-w-0 break-words">
+                    <p className="text-xs text-text-muted min-w-0 break-words">
                       {alert.message}
                     </p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)] min-w-0">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted min-w-0">
                       <span>
                         {new Date(alert.timestamp).toLocaleString([], {
                           month: "short",

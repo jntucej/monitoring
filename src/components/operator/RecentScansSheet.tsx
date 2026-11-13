@@ -87,11 +87,11 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
           style={{ transform: `translate(-50%, ${-Math.round(dragPx / 3)}px)` }}
         >
           <ChevronUp
-            className="h-5 w-5 text-[var(--text-muted)]"
+            className="h-5 w-5 text-text-muted"
             style={{ opacity: 0.4 + dragPx / 160 }}
             aria-hidden
           />
-          <span className="text-[10px] font-medium text-[var(--text-muted)]">
+          <span className="text-[10px] font-medium text-text-muted">
             {scans.length} recent
           </span>
         </div>
@@ -109,13 +109,13 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
             aria-hidden
           />
           <div
-            className="absolute inset-x-0 bottom-0 max-h-[70dvh] rounded-t-2xl bg-[var(--bg-surface)] border-t border-[var(--border)] shadow-2xl flex flex-col"
+            className="absolute inset-x-0 bottom-0 max-h-[70dvh] rounded-t-2xl bg-bg-surface border-t border-border shadow-2xl flex flex-col"
             style={{ maxHeight: "70dvh" }}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div className="flex items-center gap-2">
-                <ScanLine className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />
-                <h2 className="text-sm font-bold text-[var(--text-primary)]">
+                <ScanLine className="h-4 w-4 text-text-muted" aria-hidden />
+                <h2 className="text-sm font-bold text-text-primary">
                   Recent scans{gateName ? ` · ${gateName}` : ""}
                 </h2>
               </div>
@@ -125,14 +125,14 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
                   setOpen(false);
                   setDetailScan(null);
                 }}
-                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="text-xs text-text-muted hover:text-text-primary"
               >
                 Close
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {scans.length === 0 ? (
-                <p className="text-sm text-[var(--text-muted)] py-6 text-center">
+                <p className="text-sm text-text-muted py-6 text-center">
                   No recent scans yet.
                 </p>
               ) : (
@@ -141,29 +141,29 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
                     key={scan.id}
                     type="button"
                     onClick={() => setDetailScan(scan)}
-                    className="w-full flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] p-3 text-left hover:border-[var(--border-strong)] transition-colors"
+                    className="w-full flex items-center gap-3 rounded-lg border border-border bg-bg-base p-3 text-left hover:border-border transition-colors"
                   >
                     <div
                       className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                         scan.direction === "IN"
-                          ? "bg-emerald-500/15 text-emerald-400"
-                          : "bg-amber-500/15 text-amber-400"
+                          ? "bg-emerald-500/15 text-action-success"
+                          : "bg-amber-500/15 text-action-warning"
                       }`}
                     >
                       {scan.direction === "IN" ? "IN" : "OUT"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                      <p className="text-sm font-semibold text-text-primary truncate">
                         {scan.name || scan.roll || "Unknown"}
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)]">
+                      <p className="text-[11px] text-text-muted">
                         {scan.roll}
                         {scan.reason ? ` · ${scan.reason}` : ""}
                         {scan.isCorrection ? " · correction" : ""}
                       </p>
                     </div>
-                    <Clock className="h-3.5 w-3.5 text-[var(--text-muted)] shrink-0" aria-hidden />
-                    <span className="text-[11px] text-[var(--text-muted)] shrink-0">
+                    <Clock className="h-3.5 w-3.5 text-text-muted shrink-0" aria-hidden />
+                    <span className="text-[11px] text-text-muted shrink-0">
                       {formatTime(scan.timestamp)}
                     </span>
                   </button>
@@ -188,20 +188,20 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
 function ScanDetailPanel({ scan, onClose }: { scan: RecentScan; onClose: () => void }) {
   return (
     <div className="fixed inset-x-0 top-0 z-90 mx-auto w-full max-w-md p-4" role="dialog" aria-modal="true" aria-label="Scan detail">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 shadow-2xl space-y-2">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 shadow-2xl space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">
+          <h3 className="text-sm font-bold text-text-primary">
             {scan.name || scan.roll} · {scan.direction}
           </h3>
-          <button type="button" onClick={onClose} className="text-xs text-[var(--text-muted)]">Close</button>
+          <button type="button" onClick={onClose} className="text-xs text-text-muted">Close</button>
         </div>
-        <p className="text-xs text-[var(--text-secondary)]">
+        <p className="text-xs text-text-secondary">
           {scan.roll}{scan.gateName ? ` · ${scan.gateName}` : ""}
           {scan.reason ? ` · ${scan.reason}` : ""}
           {scan.isManual ? " · manual" : ""}
           {scan.isCorrection ? " · correction" : ""}
         </p>
-        <p className="text-[11px] text-[var(--text-muted)]">{formatTime(scan.timestamp)}</p>
+        <p className="text-[11px] text-text-muted">{formatTime(scan.timestamp)}</p>
       </div>
     </div>
   );

@@ -20,9 +20,9 @@ function expiryLabel(to: string, status: string): string {
 }
 
 function statusStyle(s: string) {
-  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-emerald-300", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="w-8 h-8 text-emerald-400" /> };
-  if (s === "REJECTED") return { text: "text-rose-300", bg: "bg-rose-500/10", icon: <XCircle className="w-8 h-8 text-rose-400" /> };
-  return { text: "text-amber-300", bg: "bg-amber-500/10", icon: <Clock className="w-8 h-8 text-amber-400" /> };
+  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-action-success", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="w-8 h-8 text-action-success" /> };
+  if (s === "REJECTED") return { text: "text-action-danger", bg: "bg-rose-500/10", icon: <XCircle className="w-8 h-8 text-action-danger" /> };
+  return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="w-8 h-8 text-action-warning" /> };
 }
 
 export function ActivePasses() {
@@ -62,24 +62,24 @@ export function ActivePasses() {
   usePolling(load, { intervalMs: 30_000 });
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <h3 className="font-semibold mb-4">Active Passes</h3>
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+        <div className="flex items-center gap-2 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading…
         </div>
       ) : error ? (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
-          <p className="text-sm text-rose-300">Could not load passes: {error}</p>
+          <p className="text-sm text-action-danger">Could not load passes: {error}</p>
           <button
             onClick={load}
-            className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+            className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
           >
             Retry
           </button>
         </div>
       ) : passes.length === 0 ? (
-        <p className="text-sm text-[var(--text-muted)] text-center py-4">No passes yet.</p>
+        <p className="text-sm text-text-muted text-center py-4">No passes yet.</p>
       ) : (
         <div className="space-y-4">
           {passes.map((pass) => {

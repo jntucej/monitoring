@@ -75,16 +75,16 @@ export function AcademicPersonalSection() {
     const filled = rows.filter((r) => value(r.key) !== "—");
     if (filled.length === 0) return null;
     return (
-      <div key={id} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-md">
+      <div key={id} className="bg-bg-surface border border-border rounded-2xl p-4 sm:p-5 shadow-md">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[var(--action-primary)]">{icon}</span>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">{title}</h3>
+          <span className="text-action-primary">{icon}</span>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">{title}</h3>
         </div>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
           {filled.map((r) => (
-            <div key={r.key} className="flex items-baseline justify-between gap-3 py-1 border-b border-[var(--border)]/40 last:border-b-0">
-              <dt className="text-[11px] sm:text-xs font-medium text-[var(--text-muted)]">{r.label}</dt>
-              <dd className="text-[11px] sm:text-xs font-semibold text-[var(--text-primary)] text-right break-words">
+            <div key={r.key} className="flex items-baseline justify-between gap-3 py-1 border-b border-border/40 last:border-b-0">
+              <dt className="text-[11px] sm:text-xs font-medium text-text-muted">{r.label}</dt>
+              <dd className="text-[11px] sm:text-xs font-semibold text-text-primary text-right break-words">
                 {value(r.key)}
               </dd>
             </div>
@@ -97,8 +97,8 @@ export function AcademicPersonalSection() {
   return (
     <div className="space-y-4 w-full">
       <div className="flex items-center gap-2">
-        <IdCard className="w-4 h-4 text-[var(--action-primary)]" />
-        <p className="text-sm font-semibold text-[var(--text-primary)]">Academic &amp; Personal Details</p>
+        <IdCard className="w-4 h-4 text-action-primary" />
+        <p className="text-sm font-semibold text-text-primary">Academic &amp; Personal Details</p>
       </div>
       {group("Academic", <GraduationCap className="w-4 h-4" />, academic, "academic")}
       {group("Personal", <User className="w-4 h-4" />, personal, "personal")}

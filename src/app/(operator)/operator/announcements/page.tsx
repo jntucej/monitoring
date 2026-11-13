@@ -65,10 +65,10 @@ function OperatorAnnouncementsInner() {
       <div className="flex items-center justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <Megaphone className="w-5 h-5 text-[var(--action-primary)] shrink-0" />
-            <h2 className="text-lg font-bold text-[var(--text-primary)] truncate">Announcements</h2>
+            <Megaphone className="w-5 h-5 text-action-primary shrink-0" />
+            <h2 className="text-lg font-bold text-text-primary truncate">Announcements</h2>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
+          <p className="text-xs text-text-muted mt-1 min-w-0">
             Active campus announcements visible to your role.
           </p>
         </div>
@@ -76,7 +76,7 @@ function OperatorAnnouncementsInner() {
           type="button"
           onClick={() => void loadAnnouncements()}
           disabled={loading}
-          className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition shrink-0 disabled:opacity-50"
+          className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition shrink-0 disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" />Loading</span>
@@ -85,36 +85,36 @@ function OperatorAnnouncementsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
         </div>
       )}
 
       <OperatorWidgetBoundary title="Active Announcements">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
           {loading ? (
-            <div className="p-6 flex items-center justify-center text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-6 flex items-center justify-center text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none mr-2 shrink-0" />
               Loading announcements…
             </div>
           ) : announcements.length === 0 ? (
             <div className="p-8 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No active announcements at this time.</p>
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">No active announcements at this time.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-[var(--border)] min-w-0">
+            <ul className="divide-y divide-border min-w-0">
               {announcements.map((a) => (
                 <li key={a.id} className="px-4 py-4 min-w-0">
                   <div className="flex items-start gap-3 min-w-0">
-                    <Megaphone className="w-4 h-4 text-[var(--action-primary)] shrink-0 mt-0.5" />
+                    <Megaphone className="w-4 h-4 text-action-primary shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">{a.title}</p>
-                      {a.body && <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-3">{a.body}</p>}
-                      <div className="flex items-center gap-3 mt-2 text-[10px] text-[var(--text-muted)]">
+                      <p className="text-sm font-semibold text-text-primary">{a.title}</p>
+                      {a.body && <p className="text-xs text-text-muted mt-1 line-clamp-3">{a.body}</p>}
+                      <div className="flex items-center gap-3 mt-2 text-[10px] text-text-muted">
                         {a.audience && (
-                          <span className="rounded-full border border-[var(--border)] px-1.5 py-0.5 uppercase">
+                          <span className="rounded-full border border-border px-1.5 py-0.5 uppercase">
                             {a.audience}
                           </span>
                         )}

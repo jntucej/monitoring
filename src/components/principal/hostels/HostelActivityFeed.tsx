@@ -60,22 +60,22 @@ export function HostelActivityFeed() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Activity Feed">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
-        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
-          <Activity className="w-4 h-4 text-sky-400" />
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+        <div className="flex items-center gap-2 text-text-muted mb-3">
+          <Activity className="w-4 h-4 text-action-info" />
           <span className="text-xs font-semibold uppercase tracking-wide">
             Recent Gate Activity (Hostel)
           </span>
         </div>
 
-        {error && <p className="text-xs text-rose-400 mb-2">{error}</p>}
+        {error && <p className="text-xs text-action-danger mb-2">{error}</p>}
 
         {loading && events.length === 0 ? (
           <div className="space-y-2">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : events.length === 0 ? (
-          <p className="text-xs text-[var(--text-muted)] py-3 text-center">
+          <p className="text-xs text-text-muted py-3 text-center">
             No recent hostel movement logged.
           </p>
         ) : (
@@ -83,21 +83,21 @@ export function HostelActivityFeed() {
             {events.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center gap-2 text-xs p-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]"
+                className="flex items-center gap-2 text-xs p-2 rounded-lg bg-bg-elevated border border-border"
               >
                 {e.type === "entry" ? (
-                  <ArrowDownRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <ArrowDownRight className="w-3.5 h-3.5 text-action-success shrink-0" />
                 ) : (
-                  <ArrowUpRight className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-action-warning shrink-0" />
                 )}
-                <span className="text-[var(--text-primary)] font-medium flex-1 min-w-0 truncate">
+                <span className="text-text-primary font-medium flex-1 min-w-0 truncate">
                   {e.student_name || "—"}
-                  {e.student_roll && <span className="font-mono text-[var(--text-muted)] ml-1">({e.student_roll})</span>}
+                  {e.student_roll && <span className="font-mono text-text-muted ml-1">({e.student_roll})</span>}
                 </span>
                 {e.gate_name && (
-                  <span className="text-[var(--text-muted)] truncate hidden sm:block">{e.gate_name}</span>
+                  <span className="text-text-muted truncate hidden sm:block">{e.gate_name}</span>
                 )}
-                <span className="text-[var(--text-muted)] font-mono shrink-0">
+                <span className="text-text-muted font-mono shrink-0">
                   <Clock className="w-3 h-3 inline mr-0.5" />
                   {fmtTime(e.timestamp)}
                 </span>

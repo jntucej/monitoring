@@ -67,80 +67,80 @@ function BackupReinforcedInner() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       <div>
-        <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Database className="w-6 h-6 text-emerald-400" />
+        <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+          <Database className="w-6 h-6 text-action-success" />
           Backup Status
         </p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">
+        <p className="text-xs text-text-muted mt-1">
           Cron dump freshness from /opt/monitoring/backups, plus manual backup &amp; export tooling.
-          Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>.
+          Signed in as <span className="font-mono text-text-secondary">{role}</span>.
         </p>
       </div>
 
       {/* Cron backup freshness strip */}
       <WidgetBoundary title="Cron Backup Freshness">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <span className="text-sm font-semibold text-white flex items-center gap-2">
-              <HardDrive className="w-4 h-4 text-emerald-400" /> Host Backup Directory
+              <HardDrive className="w-4 h-4 text-action-success" /> Host Backup Directory
             </span>
-            <span className="text-xs text-[var(--text-muted)]">source: {d?.source ?? "loading"}</span>
+            <span className="text-xs text-text-muted">source: {d?.source ?? "loading"}</span>
           </div>
           {busy ? (
             <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
+                <div key={i} className="h-16 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))}
             </div>
           ) : d?.source === "unavailable" || !d?.lastBackup ? (
             <div className="p-6 text-center min-w-0">
               <AlertTriangle className="w-5 h-5 text-amber-400/70 mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-sm text-text-muted">
                 Host backup directory not visible in this environment.
               </p>
-              <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto mt-1">
+              <p className="text-xs text-text-muted max-w-md mx-auto mt-1">
                 The cron dumps live on the production host under /opt/monitoring/backups. Use the
                 dev/ops contact strip below if you need to verify dump integrity off-host.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Last Backup</p>
-                <p className="mt-1 text-sm font-bold text-emerald-400 truncate">
+              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Last Backup</p>
+                <p className="mt-1 text-sm font-bold text-action-success truncate">
                   {d.lastBackup.name}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">{size(d.lastBackup.sizeBytes)}</p>
+                <p className="text-xs text-text-muted">{size(d.lastBackup.sizeBytes)}</p>
               </div>
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Age</p>
+              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Age</p>
                 <p
-                  className={`mt-1 text-sm font-bold ${d.stale ? "text-rose-400" : "text-sky-400"}`}
+                  className={`mt-1 text-sm font-bold ${d.stale ? "text-action-danger" : "text-action-info"}`}
                 >
                   {formatAge(d.lastBackupAgeHours)}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-text-muted">
                   {d.stale ? "older than 24h — verify cron" : "within 24h window"}
                 </p>
               </div>
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                <p className="text-xs text-[var(--text-muted)] uppercase">Cron Cadence</p>
-                <p className="mt-1 text-sm font-bold text-[var(--text-secondary)]">
+              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <p className="text-xs text-text-muted uppercase">Cron Cadence</p>
+                <p className="mt-1 text-sm font-bold text-text-secondary">
                   {d.daily.length} daily · {d.weekly.length} weekly
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">most recent entries shown below</p>
+                <p className="text-xs text-text-muted">most recent entries shown below</p>
               </div>
             </div>
           )}
           {!busy && d && d.source === "host-backup-dir" && d.daily.length > 0 && (
             <div className="px-4 pb-4 min-w-0">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold uppercase text-[var(--text-muted)]">Recent Dumps</p>
+                <p className="text-xs font-semibold uppercase text-text-muted">Recent Dumps</p>
                 <button
                   type="button"
                   onClick={() => void refreshAll()}
                   disabled={busy}
-                  className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className="w-3 h-3" /> Refresh
                 </button>
@@ -149,15 +149,15 @@ function BackupReinforcedInner() {
                 {d.daily.slice(0, 6).map((b) => (
                   <div
                     key={b.name}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-2 flex items-center justify-between gap-2 min-w-0"
+                    className="rounded-lg border border-border bg-bg-surface/40 p-2 flex items-center justify-between gap-2 min-w-0"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-[var(--text-secondary)] truncate">{b.name}</p>
-                      <p className="text-[10px] text-[var(--text-muted)]">
+                      <p className="text-xs font-medium text-text-secondary truncate">{b.name}</p>
+                      <p className="text-[10px] text-text-muted">
                         {new Date(b.mtime).toLocaleString()} · {size(b.sizeBytes)}
                       </p>
                     </div>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-action-success shrink-0" />
                   </div>
                 ))}
               </div>
@@ -167,7 +167,7 @@ function BackupReinforcedInner() {
       </WidgetBoundary>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Backup status unavailable: {error}</span>
@@ -185,7 +185,7 @@ function BackupReinforcedInner() {
       {/* Manual backup & export tooling (existing component) */}
       <WidgetBoundary title="Manual Backups & Exports">
         <div className="space-y-4 min-w-0">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
             <Clock className="w-3.5 h-3.5" />
             Full-DB and per-table dumps &amp; CSV exports remain available here.
           </div>
@@ -196,13 +196,13 @@ function BackupReinforcedInner() {
       <div className="flex flex-wrap gap-2 min-w-0">
         <Link
           href="/sysadmin/data"
-          className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+          className="text-xs text-action-info hover:text-action-info transition-colors"
         >
           Data Governance &amp; Retention →
         </Link>
         <Link
           href="/sysadmin/audit"
-          className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+          className="text-xs text-action-info hover:text-action-info transition-colors"
         >
           Audit this action →
         </Link>

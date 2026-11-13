@@ -51,7 +51,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
       <WidgetBoundary>
         <div className="grid gap-4 p-4 sm:p-6 md:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-64 animate-pulse rounded-xl bg-[var(--surface-default)]" />
+            <div key={i} className="h-64 animate-pulse rounded-xl bg-bg-base" />
           ))}
         </div>
       </WidgetBoundary>
@@ -61,7 +61,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
   if (error && !data) {
     return (
       <WidgetBoundary>
-        <div className="rounded-md border border-[var(--action-danger)] bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]">
+        <div className="rounded-md border border-action-danger bg-action-danger/10 p-4 text-sm text-action-danger">
           Failed to load promotions: {error}
         </div>
       </WidgetBoundary>
@@ -75,10 +75,10 @@ export function PromotionsContent({ data, loading, error }: Props) {
       <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
             Role Promotions
           </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          <p className="mt-1 text-sm text-text-secondary">
             Kanban view of role-change requests. Median decision time{" "}
             {d.median_time_to_decision_h > 0 ? formatHours(d.median_time_to_decision_h) : "n/a"}.
           </p>
@@ -107,7 +107,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
             return (
               <div
                 key={status}
-                className="flex flex-col rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-3"
+                className="flex flex-col rounded-xl border border-border bg-bg-base p-3"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
                       className="inline-block h-2.5 w-2.5 rounded-full"
                       style={{ backgroundColor: COLUMN_TONE[status] }}
                     />
-                    <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    <span className="text-sm font-semibold text-text-primary">
                       {status.charAt(0) + status.slice(1).toLowerCase()}
                     </span>
                   </div>
@@ -124,7 +124,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
                 <div className="flex-1 space-y-2">
                   {rows.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-[var(--border)] p-4 text-center text-xs text-[var(--text-muted)]">
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-text-muted">
                       No {status.toLowerCase()} requests.
                     </div>
                   ) : (
@@ -140,8 +140,8 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
         {/* Signature visual: role-transition Sankey */}
         {hasSankey && sankey ? (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4">
-            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+          <div className="rounded-xl border border-border bg-bg-base p-4">
+            <h2 className="mb-3 text-sm font-semibold text-text-primary">
               Role transitions (from-role → to-role)
             </h2>
             <Sankey
@@ -152,7 +152,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
             />
           </div>
         ) : (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4 text-sm text-[var(--text-muted)]">
+          <div className="rounded-xl border border-border bg-bg-base p-4 text-sm text-text-muted">
             No role transitions recorded yet.
           </div>
         )}
@@ -165,8 +165,8 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
 function Kpi({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4">
-      <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+    <div className="rounded-xl border border-border bg-bg-base p-4">
+      <div className="text-[11px] uppercase tracking-wide text-text-muted">{label}</div>
       <div className="mt-1 text-2xl font-bold" style={{ color: tone }}>
         {value}
       </div>
@@ -197,7 +197,7 @@ function ColumnDonut({ count, total, tone }: { count: number; total: number; ton
           strokeDashoffset={offset}
         />
       </svg>
-      <span className="text-xs tabular-nums text-[var(--text-secondary)]">{count}</span>
+      <span className="text-xs tabular-nums text-text-secondary">{count}</span>
     </div>
   );
 }
@@ -225,15 +225,15 @@ function PromotionCard({ row, tone }: { row: PromotionRow; tone: string }) {
     <div
       className={cn(
         "rounded-lg border bg-[var(--surface-raised)] p-2.5 text-xs",
-        breached ? "border-[var(--action-danger)]/50" : "border-[var(--border)]",
+        breached ? "border-action-danger/50" : "border-border",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate font-medium text-[var(--text-primary)]">
+          <div className="truncate font-medium text-text-primary">
             {row.target_user_name ?? row.target_user_id}
           </div>
-          <div className="truncate text-[var(--text-muted)]">
+          <div className="truncate text-text-muted">
             {row.target_user_role ?? "unknown"} → {row.requested_role}
           </div>
         </div>
@@ -262,7 +262,7 @@ function PromotionCard({ row, tone }: { row: PromotionRow; tone: string }) {
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+      <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
         <span>{new Date(row.created_at).toLocaleDateString()}</span>
         {row.approver_name && <span>by {row.approver_name}</span>}
       </div>

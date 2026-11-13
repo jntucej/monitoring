@@ -77,10 +77,10 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
   if (loading || fetching) {
     return (
       <div className="grid grid-cols-2 gap-4 animate-pulse">
-        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
-        <div className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)]" />
+        <div className="h-24 rounded-xl bg-bg-surface border border-border" />
+        <div className="h-24 rounded-xl bg-bg-surface border border-border" />
+        <div className="h-24 rounded-xl bg-bg-surface border border-border" />
+        <div className="h-24 rounded-xl bg-bg-surface border border-border" />
       </div>
     );
   }
@@ -88,53 +88,53 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Shift Status */}
-      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
-          <UserCheck className="w-3.5 h-3.5 text-blue-400" />
+      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
+          <UserCheck className="w-3.5 h-3.5 text-action-primary" />
           Shift Status
         </div>
-        <div className={`text-xl font-bold ${data.shiftStatus === "ON DUTY" ? "text-emerald-400" : data.shiftStatus === "OFF DUTY" ? "text-amber-400" : "text-[var(--text-muted)]"}`}>
+        <div className={`text-xl font-bold ${data.shiftStatus === "ON DUTY" ? "text-action-success" : data.shiftStatus === "OFF DUTY" ? "text-action-warning" : "text-text-muted"}`}>
           {data.shiftStatus ?? "UNKNOWN"}
         </div>
-        <p className="text-[10px] text-[var(--text-muted)] font-mono">
+        <p className="text-[10px] text-text-muted font-mono">
           {data.shiftStatus === "ON DUTY" ? "Currently on campus" : data.shiftStatus === "OFF DUTY" ? "Not on campus" : "No data"}
         </p>
       </div>
 
       {/* Today Entry */}
-      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
-          <Clock className="w-3.5 h-3.5 text-purple-400" />
+      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
+          <Clock className="w-3.5 h-3.5 text-unit-c" />
           Today&#39;s Gate Entry
         </div>
-        <div className="text-xl font-bold text-[var(--text-primary)] font-mono">{data.todayEntry ?? "—"}</div>
-        <p className="text-[10px] text-[var(--text-muted)] font-mono">
+        <div className="text-xl font-bold text-text-primary font-mono">{data.todayEntry ?? "—"}</div>
+        <p className="text-[10px] text-text-muted font-mono">
           {data.todayEntry ? "First recorded IN scan" : "No entry today"}
         </p>
       </div>
 
       {/* Last Exit */}
-      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
-          <Clock className="w-3.5 h-3.5 text-amber-400" />
+      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
+          <Clock className="w-3.5 h-3.5 text-action-warning" />
           Last Recorded Exit
         </div>
-        <div className="text-xl font-bold text-[var(--text-primary)] font-mono">{data.todayExit ?? "—"}</div>
-        <p className="text-[10px] text-[var(--text-muted)] font-mono">
+        <div className="text-xl font-bold text-text-primary font-mono">{data.todayExit ?? "—"}</div>
+        <p className="text-[10px] text-text-muted font-mono">
           {data.todayExit ? "Last OUT scan" : "No exit logged yet"}
         </p>
       </div>
 
       {/* Shift Compliance */}
-      <div className="p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
+          <ShieldCheck className="w-3.5 h-3.5 text-action-success" />
           Shift Adherence
         </div>
-        <div className="text-xl font-bold text-[var(--text-primary)] font-mono">
+        <div className="text-xl font-bold text-text-primary font-mono">
           {data.adherencePct !== null ? `${data.adherencePct}%` : "—"}
         </div>
-        <p className="text-[10px] text-[var(--text-muted)] font-mono">
+        <p className="text-[10px] text-text-muted font-mono">
           {data.adherencePct !== null ? "Restricted hours compliant" : "Requires history data"}
         </p>
       </div>

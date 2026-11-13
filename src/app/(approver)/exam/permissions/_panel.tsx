@@ -42,24 +42,24 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-[var(--text-muted)]">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)]">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted">{sub}</p>}
     </div>
   );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]/30 p-8 text-center text-sm text-[var(--text-muted)]">
+    <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
       {message}
     </div>
   );
@@ -111,8 +111,8 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
     <div className="mx-auto w-full max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 py-6 min-w-0">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -125,7 +125,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
           label="OIE Pending"
           value={oieTotal}
           sub="Exam clearances awaiting OIE review"
-          accent="text-emerald-400"
+          accent="text-action-success"
           loading={oieLoading && !oieData}
         />
         <StatCard
@@ -133,7 +133,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
           label="VP Pending"
           value={vpTotal}
           sub="Requests escalated to Vice Principal"
-          accent="text-sky-400"
+          accent="text-action-info"
           loading={vpLoading && !vpData}
         />
         <StatCard
@@ -141,7 +141,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
           label="SLA Breached"
           value={oieSlaBreached}
           sub="OIE queue past their 48h SLA deadline"
-          accent="text-amber-400"
+          accent="text-action-warning"
           loading={oieLoading && !oieData}
         />
         <StatCard
@@ -167,7 +167,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               initialPermissions={oieData.data}
             />
           ) : oieLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading OIE queue…
             </div>
           ) : (
@@ -186,7 +186,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
               initialPermissions={vpData.data}
             />
           ) : vpLoading ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading VP queue…
             </div>
           ) : (

@@ -101,25 +101,25 @@ export function GatePickerScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-[var(--bg-base)] flex-col items-center justify-center gap-3">
+      <div className="min-h-dvh bg-bg-base flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 border-t-transparent rounded-full animate-spin" />
-        <p className="font-semibold text-[var(--text-muted)]">Loading gates…</p>
+        <p className="font-semibold text-text-muted">Loading gates…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-base)] flex-col items-center justify-center p-4">
+    <div className="min-h-dvh bg-bg-base flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-4">
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-action-success flex items-center justify-center mx-auto">
             <MapPin className="w-6 h-6" />
           </div>
-          <h1 className="font-bold text-[var(--text-primary)]">
+          <h1 className="font-bold text-text-primary">
             Select Your Gate
           </h1>
-          <p className="text-[var(--text-secondary)]">
+          <p className="text-text-secondary">
             Choose the gate desk where you are working today.
           </p>
         </div>
@@ -133,7 +133,7 @@ export function GatePickerScreen() {
         )}
 
         {gates.length === 0 ? (
-          <div className="rounded-xl border-[var(--border)] bg-[var(--bg-surface)] p-6 text-[var(--text-muted)]">
+          <div className="rounded-xl border-border bg-bg-surface p-6 text-text-muted">
             No active gates found. Contact your supervisor.
           </div>
         ) : (
@@ -146,16 +146,16 @@ export function GatePickerScreen() {
                 className={[
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
                   selected === g.id
-                    ? "border-emerald-500 bg-emerald-500/10 text-[var(--text-primary)]"
-                    : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)]",
+                    ? "border-[var(--action-success)] bg-emerald-500/10 text-text-primary"
+                    : "border-border bg-bg-surface text-text-primary hover:border-border hover:bg-bg-elevated",
                 ].join(" ")}
               >
                 <div
                   className={[
                     "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
                     selected === g.id
-                      ? "border-emerald-500 bg-emerald-500"
-                      : "border-[var(--border)]",
+                      ? "border-[var(--action-success)] bg-action-success"
+                      : "border-border",
                   ].join(" ")}
                 >
                   {selected === g.id && (
@@ -165,13 +165,13 @@ export function GatePickerScreen() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">{g.name}</div>
                   {g.location && (
-                    <div className="text-[var(--text-muted)] truncate">
+                    <div className="text-text-muted truncate">
                       {g.location}
                     </div>
                   )}
                 </div>
                 {g.gateCode && (
-                  <span className="font-mono text-[var(--text-muted)] shrink-0">
+                  <span className="font-mono text-text-muted shrink-0">
                     {g.gateCode}
                   </span>
                 )}
@@ -185,7 +185,7 @@ export function GatePickerScreen() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !selected}
-          className="w-full py-3 px-4 rounded-xl bg-[var(--action-primary)] hover:brightness-110 disabled:opacity-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+          className="w-full py-3 px-4 rounded-xl bg-action-primary hover:brightness-110 disabled:opacity-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
         >
           {submitting ? (
             <>

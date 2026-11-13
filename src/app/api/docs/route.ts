@@ -44,7 +44,7 @@ async function handleGet() {
   <title>Gate Monitor API Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css" />
 </head>
-<body style="margin: 0; background: #090d16;">
+<body style="margin: 0; background: var(--bg-base);">
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
   <script>

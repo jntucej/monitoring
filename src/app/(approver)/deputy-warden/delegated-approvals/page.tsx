@@ -73,17 +73,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -91,17 +91,17 @@ function StatCard({
 function DelegationBadge({ active, loading }: { active: boolean; loading: boolean }) {
   if (loading) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-text-muted">
         <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" /> Checking delegation…
       </span>
     );
   }
   return active ? (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-action-success">
       <Gavel className="w-3 h-3" /> Within delegated scope — approval actions enabled
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 bg-[var(--bg-elevated)]/30 px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-bg-elevated/30 px-2.5 py-1 text-xs font-semibold text-text-secondary">
       <Gavel className="w-3 h-3" /> Read-only — no delegation data recorded yet
     </span>
   );
@@ -158,7 +158,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       {/* Back link */}
       <Link
         href="/deputy-warden/daily-overview"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
       </Link>
@@ -166,11 +166,11 @@ function DeputyWardenDelegatedApprovalsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
+          <p className="text-xs text-text-muted mt-1 min-w-0">
             Authority: the deputy warden acts only within the explicit delegation or standing policy
             scope of the principal/warden. Delegation data drives the badge below.
           </p>
@@ -178,7 +178,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Approvals data unavailable: {error}</span>
@@ -201,7 +201,7 @@ function DeputyWardenDelegatedApprovalsInner() {
             label="Pending at Warden Stage"
             value={total}
             sub="Hostel / outpass requests awaiting principal review"
-            accent="text-amber-400"
+            accent="text-action-warning"
             loading={loading && !data}
           />
           <StatCard
@@ -209,7 +209,7 @@ function DeputyWardenDelegatedApprovalsInner() {
             label="SLA Breached"
             value={slaBreached}
             sub="Requests past their 48h deadline"
-            accent="text-rose-400"
+            accent="text-action-danger"
             loading={loading && !data}
           />
           <StatCard
@@ -221,16 +221,16 @@ function DeputyWardenDelegatedApprovalsInner() {
                 ? "Approval actions enabled within delegated scope"
                 : "No delegation data — this view is read-only"
             }
-            accent={delegationActive ? "text-emerald-400" : "text-[var(--text-secondary)]"}
+            accent={delegationActive ? "text-action-success" : "text-text-secondary"}
             loading={delegationLoading && !delegation}
           />
         </div>
       </WidgetBoundary>
 
       {/* Delegation status banner */}
-      <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-wrap items-center gap-3 min-w-0">
+      <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-wrap items-center gap-3 min-w-0">
         <DelegationBadge active={delegationActive} loading={delegationLoading && !delegation} />
-        <p className="text-xs text-[var(--text-muted)] min-w-0">
+        <p className="text-xs text-text-muted min-w-0">
           {delegation?.data?.note ??
             "Delegation data is read from the principal/warden policy ledger; until a delegation is recorded, decisions here are logged as review notes and escalated to the warden stage."}
         </p>
@@ -241,7 +241,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       {busy ? (
         <WidgetBoundary title="Approval Queue">
           <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />{" "}
               Loading delegated-approval queue…
             </div>
@@ -251,8 +251,8 @@ function DeputyWardenDelegatedApprovalsInner() {
         <WidgetBoundary title="Approval Queue">
           <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 No pending items at the deputy-warden stage. The queue is clear.
               </p>
             </div>

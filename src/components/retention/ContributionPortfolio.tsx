@@ -19,10 +19,10 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  achievement: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-  event_attendance: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  event_registration: "text-blue-400 bg-blue-500/10 border-blue-500/30",
-  goal_completed: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+  achievement: "text-action-warning bg-amber-500/10 border-amber-500/30",
+  event_attendance: "text-action-success bg-emerald-500/10 border-emerald-500/30",
+  event_registration: "text-action-primary bg-blue-500/10 border-blue-500/30",
+  goal_completed: "text-unit-c bg-purple-500/10 border-purple-500/30",
   work_assignment: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
 };
 
@@ -113,14 +113,14 @@ export function ContributionPortfolio() {
 
   return (
     <WidgetBoundary title="Contribution Portfolio">
-      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Award className="h-4 w-4 text-amber-400" />
-            <h3 className="text-sm font-medium text-[var(--text-primary)]">Contribution Portfolio</h3>
+            <Award className="h-4 w-4 text-action-warning" />
+            <h3 className="text-sm font-medium text-text-primary">Contribution Portfolio</h3>
             {totalVerified > 0 && (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300">
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-action-warning">
                 {totalVerified} verified
               </span>
             )}
@@ -130,7 +130,7 @@ export function ContributionPortfolio() {
               type="button"
               onClick={handleExport}
               disabled={items.length === 0 || exported}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-500/20 disabled:opacity-40 transition-colors motion-reduce:transition-none"
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 disabled:opacity-40 transition-colors motion-reduce:transition-none"
             >
               {exported ? (
                 <>
@@ -148,8 +148,8 @@ export function ContributionPortfolio() {
         </div>
 
         {/* Disclaimer */}
-        <div className="mb-4 rounded-lg border border-[var(--border)]/40 bg-[var(--bg-surface)]/30 p-2.5">
-          <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1.5">
+        <div className="mb-4 rounded-lg border border-border/40 bg-bg-surface/30 p-2.5">
+          <p className="text-[10px] text-text-muted flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified contributions only. This is a personal record, not an
             official transcript. Exported items contain no PII.
@@ -158,11 +158,11 @@ export function ContributionPortfolio() {
 
         {/* Content */}
         {loading ? (
-          <div className="h-32 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
+          <div className="h-32 animate-pulse rounded bg-bg-elevated/20" />
         ) : items.length === 0 ? (
           <div className="py-8 text-center">
-            <FileText className="h-8 w-8 text-[var(--text-muted)] mx-auto mb-2" />
-            <p className="text-xs text-[var(--text-muted)]">
+            <FileText className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <p className="text-xs text-text-muted">
               No contributions yet. Participate in campus events, complete goals,
               and earn achievements to build your portfolio.
             </p>
@@ -173,12 +173,12 @@ export function ContributionPortfolio() {
               <div
                 key={item.id}
                 className={`rounded-lg border p-3 ${
-                  TYPE_COLORS[item.type] ?? "text-[var(--text-secondary)] border-[var(--border)]/40 bg-[var(--bg-elevated)]/30"
+                  TYPE_COLORS[item.type] ?? "text-text-secondary border-border/40 bg-bg-elevated/30"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-[var(--text-primary)] truncate">
+                    <p className="text-xs font-medium text-text-primary truncate">
                       {item.title}
                     </p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -197,7 +197,7 @@ export function ContributionPortfolio() {
                     )}
                   </div>
                   {item.verified && (
-                    <CheckCircle className="h-4 w-4 shrink-0 text-emerald-400" />
+                    <CheckCircle className="h-4 w-4 shrink-0 text-action-success" />
                   )}
                 </div>
               </div>

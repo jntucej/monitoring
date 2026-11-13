@@ -28,12 +28,12 @@ export default function ChainsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
       <h1 className="text-2xl font-semibold">Complaint escalation chains</h1>
-      <p className="text-sm text-[var(--text-muted)]">
-        Chains are seeded via migration. To modify, edit <code className="px-1 bg-[var(--bg-elevated)] rounded">complaint_escalation_chains</code> directly.
+      <p className="text-sm text-text-muted">
+        Chains are seeded via migration. To modify, edit <code className="px-1 bg-bg-elevated rounded">complaint_escalation_chains</code> directly.
       </p>
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left border-b bg-[var(--bg-elevated)]">
+          <thead className="text-left border-b bg-bg-elevated">
             <tr>
               <th className="p-3">Code</th>
               <th className="p-3">Label</th>
@@ -43,10 +43,10 @@ export default function ChainsPage() {
           </thead>
           <tbody className="divide-y">
             {rows.map((c) => (
-              <tr key={c.code} className="hover:bg-[var(--bg-elevated)]">
+              <tr key={c.code} className="hover:bg-bg-elevated">
                 <td className="p-3 font-mono">{c.code}</td>
                 <td className="p-3 font-medium">{c.label}</td>
-                <td className="p-3 font-mono text-[var(--text-muted)]">{c.ownerRole}</td>
+                <td className="p-3 font-mono text-text-muted">{c.ownerRole}</td>
                 <td className="p-3">{c.slaHours}</td>
               </tr>
             ))}

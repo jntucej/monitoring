@@ -24,12 +24,12 @@ export function StrategicScorecard({
   const unblocked = usePrincipalRetention((s) => s.unblockedToday);
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+        <h2 className="text-sm font-semibold text-text-primary">
           Your impact
         </h2>
-        <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">
           this week
         </span>
       </header>
@@ -37,7 +37,7 @@ export function StrategicScorecard({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat
           icon={ShieldCheck}
-          iconClass="text-[var(--action-primary)]"
+          iconClass="text-action-primary"
           label="Decisions"
           value={thisWeek}
           hint={
@@ -48,21 +48,21 @@ export function StrategicScorecard({
         />
         <Stat
           icon={Users}
-          iconClass="text-[var(--action-info)]"
+          iconClass="text-action-info"
           label="Unblocked today"
           value={unblocked}
           hint={`${bests.biggestUnblockCount} best`}
         />
         <Stat
           icon={Zap}
-          iconClass="text-[var(--action-warning)]"
+          iconClass="text-action-warning"
           label="Fastest"
           value={fmtMs(bests.fastestResponseMs)}
           hint="personal best"
         />
         <Stat
           icon={Award}
-          iconClass="text-[var(--action-primary)]"
+          iconClass="text-action-primary"
           label="Avg response"
           value={fmtMs(avgResponseSec * 1000)}
           hint="this week"
@@ -89,14 +89,14 @@ function Stat({
     <div>
       <div className="mb-1 flex items-center gap-1.5">
         <Icon className={`size-3.5 ${iconClass}`} aria-hidden />
-        <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        <p className="text-[10px] uppercase tracking-wider text-text-muted">
           {label}
         </p>
       </div>
-      <p className="text-xl font-semibold tabular-nums text-[var(--text-primary)]">
+      <p className="text-xl font-semibold tabular-nums text-text-primary">
         {value}
       </p>
-      <p className="text-[10px] text-[var(--text-muted)]">{hint}</p>
+      <p className="text-[10px] text-text-muted">{hint}</p>
     </div>
   );
 }

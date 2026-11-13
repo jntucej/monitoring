@@ -38,27 +38,27 @@ export function TodayStatus() {
   const time = data?.lastScan ? getTimeAgo(data.lastScan.timestamp) : "—";
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-      <p className="text-sm text-[var(--text-secondary)]">{greeting()},</p>
-      <h1 className="text-xl font-semibold text-[var(--text-primary)]">
+    <div className="rounded-2xl border border-border bg-bg-surface p-4">
+      <p className="text-sm text-text-secondary">{greeting()},</p>
+      <h1 className="text-xl font-semibold text-text-primary">
         {user?.name ?? "Student"}
       </h1>
       <div className="mt-3 flex items-center gap-2">
         <state.Icon
           className={`h-5 w-5 ${
             state.tone === "in"
-              ? "text-[var(--action-success)]"
+              ? "text-action-success"
               : state.tone === "out"
                 ? "text-[var(--alert-warning)]"
-                : "text-[var(--text-muted)]"
+                : "text-text-muted"
           }`}
           aria-hidden
         />
-        <span className="text-base font-medium text-[var(--text-primary)]">
+        <span className="text-base font-medium text-text-primary">
           {state.label}
         </span>
         {data?.lastScan && (
-          <span className="text-sm text-[var(--text-muted)]">
+          <span className="text-sm text-text-muted">
             · last scan {time}
           </span>
         )}

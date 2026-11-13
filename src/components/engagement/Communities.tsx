@@ -274,26 +274,26 @@ export function Communities() {
 
   return (
     <WidgetBoundary title="Communities">
-      <section aria-label="Campus communities" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="Campus communities" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <Users className="h-4 w-4 text-violet-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <Users className="h-4 w-4 text-unit-c" aria-hidden />
             Communities
           </h2>
-          <p className="text-[10px] text-[var(--text-muted)]">
+          <p className="text-[10px] text-text-muted">
             All communities are moderated — new posts await review
           </p>
         </div>
 
         {loadingCommunities && communities.length === 0 ? (
-          <div className="mt-6 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]" role="status">
+          <div className="mt-6 flex items-center justify-center gap-2 py-8 text-sm text-text-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
             Loading communities…
           </div>
         ) : error && communities.length === 0 ? (
           <div className="mt-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : communities.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
+          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
             <p className="text-sm">No communities yet — administrators can create one.</p>
           </div>
@@ -313,17 +313,17 @@ export function Communities() {
                     className={`flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors motion-reduce:transition-none ${
                       active
                         ? "border-violet-500/50 bg-violet-500/15"
-                        : "border-[var(--border)] bg-[var(--bg-raised)]/30 hover:bg-[var(--bg-raised)]/60"
+                        : "border-border bg-[var(--bg-raised)]/30 hover:bg-[var(--bg-raised)]/60"
                     }`}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-violet-300" aria-hidden />
+                    <Icon className="h-4 w-4 shrink-0 text-unit-c" aria-hidden />
                     <span className="min-w-0">
-                      <span className="block truncate text-xs font-semibold text-[var(--text-primary)]">{c.name}</span>
-                      <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                      <span className="block truncate text-xs font-semibold text-text-primary">{c.name}</span>
+                      <span className="flex items-center gap-1 text-[10px] text-text-muted">
                         <Users className="h-3 w-3" aria-hidden />
                         {c.memberCount}
                         {c.isMember && (
-                          <span className="ml-1 rounded-full bg-violet-500/20 px-1.5 text-[9px] font-semibold text-violet-300">
+                          <span className="ml-1 rounded-full bg-violet-500/20 px-1.5 text-[9px] font-semibold text-unit-c">
                             {c.myRole ?? "member"}
                           </span>
                         )}
@@ -335,17 +335,17 @@ export function Communities() {
             </div>
 
             {selected ? (
-              <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/30 p-4">
+              <div className="mt-4 rounded-xl border border-border bg-[var(--bg-raised)]/30 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm font-bold text-[var(--text-primary)]">{selected.name}</h3>
+                    <h3 className="truncate text-sm font-bold text-text-primary">{selected.name}</h3>
                     {selected.description && (
-                      <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-muted)]">{selected.description}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{selected.description}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5">
                     {action && (
-                      <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                      <span className="flex items-center gap-1 text-[10px] text-text-muted">
                         <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" aria-hidden />
                         {action}
                       </span>
@@ -354,7 +354,7 @@ export function Communities() {
                       <button
                         type="button"
                         onClick={() => void leave()}
-                        className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-rose-300 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-surface px-2.5 py-1 text-[11px] font-medium text-text-muted hover:text-action-danger motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
                       >
                         <UserMinus className="h-3.5 w-3.5" aria-hidden />
                         Leave
@@ -363,7 +363,7 @@ export function Communities() {
                       <button
                         type="button"
                         onClick={() => void join()}
-                        className="inline-flex items-center gap-1 rounded-lg border border-violet-500/40 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-violet-300 hover:bg-violet-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-lg border border-violet-500/40 bg-violet-500/15 px-2.5 py-1 text-[11px] font-semibold text-unit-c hover:bg-violet-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
                       >
                         <UserPlus className="h-3.5 w-3.5" aria-hidden />
                         Join
@@ -375,14 +375,14 @@ export function Communities() {
                 {canCompose ? (
                   <div className="mt-3">
                     {composerOpen ? (
-                      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
+                      <div className="rounded-xl border border-border bg-bg-surface p-3">
                         <input
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           placeholder="Title"
                           aria-label="Post title"
                           maxLength={200}
-                          className="w-full rounded-md border border-[var(--border)] bg-[var(--bg-raised)] px-2 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-violet-500/50"
+                          className="w-full rounded-md border border-border bg-[var(--bg-raised)] px-2 py-1.5 text-xs text-text-primary outline-none focus:border-violet-500/50"
                         />
                         <textarea
                           value={text}
@@ -391,17 +391,17 @@ export function Communities() {
                           aria-label="Post body"
                           rows={3}
                           maxLength={5000}
-                          className="mt-2 w-full resize-y rounded-md border border-[var(--border)] bg-[var(--bg-raised)] px-2 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-violet-500/50"
+                          className="mt-2 w-full resize-y rounded-md border border-border bg-[var(--bg-raised)] px-2 py-1.5 text-xs text-text-primary outline-none focus:border-violet-500/50"
                         />
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <p className="text-[10px] text-[var(--text-muted)]">
+                          <p className="text-[10px] text-text-muted">
                             {canModerateSelected ? "Posts publish immediately." : "Your post will be reviewed by moderators."}
                           </p>
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={() => setComposerOpen(false)}
-                              className="rounded-md border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-muted)]"
+                              className="rounded-md border border-border px-2 py-1 text-[11px] text-text-muted"
                             >
                               Cancel
                             </button>
@@ -409,7 +409,7 @@ export function Communities() {
                               type="button"
                               onClick={() => void createPost()}
                               disabled={!title.trim() || !text.trim()}
-                              className="inline-flex items-center gap-1 rounded-md border border-violet-500/40 bg-violet-500/15 px-2 py-1 text-[11px] font-semibold text-violet-300 disabled:opacity-40"
+                              className="inline-flex items-center gap-1 rounded-md border border-violet-500/40 bg-violet-500/15 px-2 py-1 text-[11px] font-semibold text-unit-c disabled:opacity-40"
                             >
                               <MessageSquarePlus className="h-3.5 w-3.5" aria-hidden />
                               Post
@@ -421,7 +421,7 @@ export function Communities() {
                       <button
                         type="button"
                         onClick={() => setComposerOpen(true)}
-                        className="flex w-full items-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-surface)]/60 px-3 py-2.5 text-xs text-[var(--text-muted)] hover:border-violet-500/40 hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none"
+                        className="flex w-full items-center gap-2 rounded-xl border border-dashed border-border bg-bg-surface/60 px-3 py-2.5 text-xs text-text-muted hover:border-violet-500/40 hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
                       >
                         <Plus className="h-3.5 w-3.5" aria-hidden />
                         Start a discussion in {selected.name}
@@ -429,18 +429,18 @@ export function Communities() {
                     )}
                   </div>
                 ) : (
-                  <p className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/50 px-3 py-2.5 text-[11px] text-[var(--text-muted)]">
+                  <p className="mt-3 rounded-xl border border-border bg-bg-surface/50 px-3 py-2.5 text-[11px] text-text-muted">
                     Join {selected.name} to start a discussion.
                   </p>
                 )}
 
                 {loadingPosts ? (
-                  <div className="mt-4 flex items-center gap-2 py-4 text-xs text-[var(--text-muted)]" role="status">
+                  <div className="mt-4 flex items-center gap-2 py-4 text-xs text-text-muted" role="status">
                     <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
                     Loading posts…
                   </div>
                 ) : selectedData && selectedData.posts.length === 0 ? (
-                  <p className="mt-4 flex items-center gap-2 py-2 text-xs text-[var(--text-muted)]">
+                  <p className="mt-4 flex items-center gap-2 py-2 text-xs text-text-muted">
                     <Inbox className="h-4 w-4 opacity-50" aria-hidden />
                     No posts here yet.
                   </p>
@@ -451,24 +451,24 @@ export function Communities() {
                       const pendingHint = p.status === "pending" && (p.isOwn || canModerateSelected);
                       const hiddenHint = p.status === "hidden" && (p.isOwn || canModerateSelected);
                       return (
-                        <li key={p.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-3">
+                        <li key={p.id} className="rounded-xl border border-border bg-bg-surface/60 p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <p className="truncate text-xs font-semibold text-[var(--text-primary)]">{p.title}</p>
-                              <p className="mt-1 line-clamp-3 text-[11px] text-[var(--text-muted)]">{p.body}</p>
-                              <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[10px] text-[var(--text-muted)]">
-                                <span className="font-medium text-[var(--text-primary)]">{p.author}</span>
+                              <p className="truncate text-xs font-semibold text-text-primary">{p.title}</p>
+                              <p className="mt-1 line-clamp-3 text-[11px] text-text-muted">{p.body}</p>
+                              <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[10px] text-text-muted">
+                                <span className="font-medium text-text-primary">{p.author}</span>
                                 <span aria-hidden>·</span>
                                 <Clock className="h-3 w-3" aria-hidden />
                                 {formatWhen(p.createdAt) ?? "recently"}
                                 {p.isOwn && pendingHint && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-semibold text-amber-300">
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 font-semibold text-action-warning">
                                     <ShieldCheck className="h-3 w-3" aria-hidden />
                                     pending moderation
                                   </span>
                                 )}
                                 {hiddenHint && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 font-semibold text-rose-300">
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 font-semibold text-action-danger">
                                     <EyeOff className="h-3 w-3" aria-hidden />
                                     hidden
                                   </span>
@@ -482,7 +482,7 @@ export function Communities() {
                                     type="button"
                                     onClick={() => void moderate(p.id, "approve")}
                                     title="Approve post"
-                                    className="inline-flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-500/25"
+                                    className="inline-flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-[10px] font-semibold text-action-success hover:bg-emerald-500/25"
                                   >
                                     <Check className="h-3 w-3" aria-hidden />
                                     Approve
@@ -493,7 +493,7 @@ export function Communities() {
                                     type="button"
                                     onClick={() => void moderate(p.id, "hide")}
                                     title="Hide post"
-                                    className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[10px] font-semibold text-rose-300 hover:bg-rose-500/25"
+                                    className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[10px] font-semibold text-action-danger hover:bg-rose-500/25"
                                   >
                                     <EyeOff className="h-3 w-3" aria-hidden />
                                     Hide
@@ -511,20 +511,20 @@ export function Communities() {
                                   placeholder="Why is this post a problem?"
                                   aria-label="Report reason"
                                   maxLength={500}
-                                  className="min-w-0 flex-1 rounded-md border border-[var(--border)] bg-[var(--bg-raised)] px-2 py-1 text-[11px] text-[var(--text-primary)] outline-none focus:border-rose-500/50"
+                                  className="min-w-0 flex-1 rounded-md border border-border bg-[var(--bg-raised)] px-2 py-1 text-[11px] text-text-primary outline-none focus:border-rose-500/50"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => void report(p.id)}
                                   disabled={!(reportReason[p.id] ?? "").trim()}
-                                  className="rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[10px] font-semibold text-rose-300 disabled:opacity-40"
+                                  className="rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[10px] font-semibold text-action-danger disabled:opacity-40"
                                 >
                                   Send
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setReportTarget(null)}
-                                  className="rounded-md border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--text-muted)]"
+                                  className="rounded-md border border-border px-2 py-1 text-[10px] text-text-muted"
                                 >
                                   Cancel
                                 </button>
@@ -534,7 +534,7 @@ export function Communities() {
                                 type="button"
                                 onClick={() => setReportTarget(p.id)}
                                 disabled={!selectedData.isMember}
-                                className="inline-flex items-center gap-1 rounded-md border border-transparent px-1.5 py-1 text-[10px] text-[var(--text-muted)] hover:text-rose-300 disabled:opacity-30"
+                                className="inline-flex items-center gap-1 rounded-md border border-transparent px-1.5 py-1 text-[10px] text-text-muted hover:text-action-danger disabled:opacity-30"
                               >
                                 <Flag className="h-3 w-3" aria-hidden />
                                 Report
@@ -549,7 +549,7 @@ export function Communities() {
                 ) : null}
               </div>
             ) : (
-              <p className="mt-4 text-xs text-[var(--text-muted)]">Select a community above to view its discussions.</p>
+              <p className="mt-4 text-xs text-text-muted">Select a community above to view its discussions.</p>
             )}
           </>
         )}

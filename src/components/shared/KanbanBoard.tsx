@@ -64,9 +64,9 @@ function toBoardRow(item: PermissionItem): BoardRow {
 
 /** Per-column accent so a column reads at a glance. */
 const COLUMN_ACCENT: Record<string, string> = {
-  PENDING: "text-amber-500",
-  APPROVED: "text-emerald-500",
-  REJECTED: "text-rose-500",
+  PENDING: "text-action-warning",
+  APPROVED: "text-action-success",
+  REJECTED: "text-action-danger",
 };
 
 export interface KanbanBoardProps {
@@ -107,11 +107,11 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
   return (
     <WidgetBoundary title="Kanban Board">
       {loading && items.length === 0 ? (
-        <div className="flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]">
+        <div className="flex items-center justify-center gap-2 py-8 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading permissions&hellip;
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
           {error}
         </div>
       ) : items.length === 0 ? (
@@ -120,41 +120,41 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-1">
           {columns.map((col) => {
             const rows = byColumn[col] ?? [];
-            const accent = COLUMN_ACCENT[col] ?? "text-[var(--text-secondary)]";
+            const accent = COLUMN_ACCENT[col] ?? "text-text-secondary";
             return (
               <section
                 key={col}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 flex flex-col min-h-0"
+                className="rounded-xl border border-border bg-bg-surface/60 flex flex-col min-h-0"
                 aria-label={`${col} column`}
               >
-                <header className="flex items-center justify-between px-3 py-2 border-b border-[var(--border)]">
+                <header className="flex items-center justify-between px-3 py-2 border-b border-border">
                   <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>{col}</span>
-                  <span className="text-[11px] font-mono text-[var(--text-muted)] tabular-nums">{rows.length}</span>
+                  <span className="text-[11px] font-mono text-text-muted tabular-nums">{rows.length}</span>
                 </header>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar max-h-[420px]">
                   {rows.length === 0 ? (
-                    <p className="text-[11px] text-[var(--text-muted)] italic px-2 py-4 text-center">No {col.toLowerCase()} items</p>
+                    <p className="text-[11px] text-text-muted italic px-2 py-4 text-center">No {col.toLowerCase()} items</p>
                   ) : (
                     rows.map((item) => (
                       <button
                         key={item.id || item.ticket_number}
                         type="button"
                         onClick={() => onSelect(toBoardRow(item))}
-                        className="w-full text-left rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--action-primary)]/40 hover:bg-[var(--bg-base)] transition-colors p-3 space-y-2"
+                        className="w-full text-left rounded-lg border border-border bg-bg-elevated hover:border-action-primary/40 hover:bg-bg-base transition-colors p-3 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border)] text-[var(--action-primary)] truncate">
+                          <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded bg-bg-base border border-border text-action-primary truncate">
                             {item.ticket_number}
                           </span>
-                          <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                          <span className="text-[10px] font-mono text-text-muted">
                             {item.workflow_type}
                           </span>
                         </div>
-                        <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+                        <p className="text-sm font-bold text-text-primary truncate">
                           {item.student?.name || "Unknown Student"}
                         </p>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                          <span className="text-[11px] font-mono text-text-muted">
                             {item.student?.student_details?.roll || "—"}
                           </span>
                           <div className="flex items-center gap-1.5">
@@ -162,10 +162,10 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                             <span
                               className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                                 item.status === "PENDING"
-                                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                                  ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
                                   : item.status === "APPROVED"
-                                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                                  : "bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                                  ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
+                                  : "bg-rose-500/10 text-action-danger border border-rose-500/20"
                               }`}
                             >
                               {item.status}

@@ -88,10 +88,10 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h3 className="font-semibold">Gate Management</h3>
-        {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-emerald-400" : "text-rose-400"}`}>{msg}</div>}
+        {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-action-success" : "text-action-danger"}`}>{msg}</div>}
         <button
           onClick={() => setShowForm((s) => !s)}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700"
@@ -102,33 +102,33 @@ const api = useApi();
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="mb-4 p-4 bg-[var(--bg-base)] rounded-lg space-y-3">
+        <form onSubmit={submit} className="mb-4 p-4 bg-bg-base rounded-lg space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="name">Name</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="name">Name</label>
             <input id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Main Gate"
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="location">Location</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="location">Location</label>
             <input id="location"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. North Campus"
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="type">Type</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="type">Type</label>
             <select id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "main" | "hostel" | "back")}
-              className="block w-full rounded-md border-[var(--border)] bg-[var(--bg-elevated)] text-white sm:text-sm p-2"
+              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
             >
               <option value="main">Main</option>
               <option value="hostel">Hostel</option>
@@ -146,7 +146,7 @@ const api = useApi();
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium"
+              className="px-4 py-2 rounded-lg border border-border text-sm font-medium"
             >
               Cancel
             </button>
@@ -155,17 +155,17 @@ const api = useApi();
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-muted)] py-8">
+        <div className="flex items-center justify-center gap-2 text-sm text-text-muted py-8">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading gates…
         </div>
       ) : error ? (
         <div className="p-8 flex flex-col items-center gap-4 text-center">
           <XCircle className="w-10 h-10 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load gates</h4>
-          <p className="text-sm text-[var(--text-muted)]">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
+          <p className="text-sm text-text-muted">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
         </div>
       ) : gates.length === 0 ? (
-        <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+        <div className="p-8 text-center text-sm text-text-muted">
           No gates configured yet.
         </div>
       ) : (
@@ -173,10 +173,10 @@ const api = useApi();
           {gates.map((gate) => (
             <div key={gate.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
               <div className="flex items-center gap-3">
-                <DoorOpen className="w-5 h-5 text-[var(--text-muted)]" />
+                <DoorOpen className="w-5 h-5 text-text-muted" />
                 <div>
                   <p className="font-medium">{gate.name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-text-muted">
                     {gate.location} • {gate.type}
                   </p>
                 </div>
@@ -184,12 +184,12 @@ const api = useApi();
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={() => toggleActive(gate)}
-                  className={`text-sm font-medium px-3 py-1 rounded-full ${gate.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}
+                  className={`text-sm font-medium px-3 py-1 rounded-full ${gate.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}
                 >
                   {gate.isActive ? "Active" : "Inactive"}
                 </button>
-                <button className="text-sm font-medium text-sky-400 hover:underline">Edit</button>
-                <button className="text-sm font-medium text-rose-400 hover:underline">Delete</button>
+                <button className="text-sm font-medium text-action-info hover:underline">Edit</button>
+                <button className="text-sm font-medium text-action-danger hover:underline">Delete</button>
               </div>
             </div>
           ))}

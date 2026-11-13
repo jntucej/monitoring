@@ -136,25 +136,25 @@ export function SupportDashboard() {
     <div className="space-y-6">
       <div>
         <p className="text-2xl font-bold tracking-tight">Support Ticket Management</p>
-        <p className="text-sm text-[var(--text-muted)]">Triage, assign, and resolve user feedback and gate issues.</p>
+        <p className="text-sm text-text-muted">Triage, assign, and resolve user feedback and gate issues.</p>
       </div>
 
       {metrics && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <Card className="p-4 border text-center">
-            <div className="text-xs text-[var(--text-muted)]">Total Tickets</div>
+            <div className="text-xs text-text-muted">Total Tickets</div>
             <div className="text-2xl font-bold">{String(m.totalTickets ?? 0)}</div>
           </Card>
           <Card className="p-4 border text-center">
-            <div className="text-xs text-amber-500 font-medium">Open</div>
+            <div className="text-xs text-action-warning font-medium">Open</div>
             <div className="text-2xl font-bold text-amber-600">{String(m.openTickets ?? 0)}</div>
           </Card>
           <Card className="p-4 border text-center">
-            <div className="text-xs text-emerald-500 font-medium">Resolved</div>
-            <div className="text-2xl font-bold text-emerald-600">{String(m.resolvedTickets ?? 0)}</div>
+            <div className="text-xs text-action-success font-medium">Resolved</div>
+            <div className="text-2xl font-bold text-action-success">{String(m.resolvedTickets ?? 0)}</div>
           </Card>
           <Card className="p-4 border text-center">
-            <div className="text-xs text-blue-500 font-medium">Avg Resolution Time</div>
+            <div className="text-xs text-action-primary font-medium">Avg Resolution Time</div>
             <div className="text-2xl font-bold text-blue-600">{String(m.avgResolutionHours ?? "—")} hrs</div>
           </Card>
         </div>
@@ -164,10 +164,10 @@ export function SupportDashboard() {
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <LifeBuoy className="w-5 h-5 text-blue-500" /> Tickets
+              <LifeBuoy className="w-5 h-5 text-action-primary" /> Tickets
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[var(--text-muted)]" />
+              <Filter className="w-4 h-4 text-text-muted" />
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-1.5 border rounded text-xs">
                 {STATUS_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
               </select>
@@ -180,7 +180,7 @@ export function SupportDashboard() {
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
+              <thead className="bg-bg-elevated dark:bg-bg-elevated/50 text-text-muted">
                 <tr>
                   <th className="p-3">Ticket #</th>
                   <th className="p-3">User</th>
@@ -194,14 +194,14 @@ export function SupportDashboard() {
               </thead>
               <tbody className="divide-y">
                 {tickets.length === 0 && (
-                  <tr><td colSpan={8} className="p-6 text-center text-sm text-[var(--text-muted)]">No tickets found.</td></tr>
+                  <tr><td colSpan={8} className="p-6 text-center text-sm text-text-muted">No tickets found.</td></tr>
                 )}
                 {tickets.map((t) => (
                   <tr key={t.id}>
                     <td className="p-3 font-mono text-xs">{t.ticket_number}</td>
                     <td className="p-3">
                       <div>{t.user_name}</div>
-                      <div className="text-xs text-[var(--text-muted)] capitalize">{t.user_role}</div>
+                      <div className="text-xs text-text-muted capitalize">{t.user_role}</div>
                     </td>
                     <td className="p-3 font-medium max-w-48 truncate" title={t.subject}>{t.subject}</td>
                     <td className="p-3 text-xs capitalize">{(t.category ?? "").replace("_", " ")}</td>

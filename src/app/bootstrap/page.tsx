@@ -111,32 +111,32 @@ function BootstrapPageInner() {
   );
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-8 relative overflow-x-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8 relative overflow-x-hidden">
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="w-full max-w-md space-y-5">
         <div className="text-center space-y-1.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-action-success mx-auto flex items-center justify-center shadow-xs">
             <KeyRound className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Activate Your Account</h1>
-          <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+          <h1 className="text-2xl font-bold text-text-primary">Activate Your Account</h1>
+          <p className="text-xs text-text-muted max-w-sm mx-auto">
             {urlToken
               ? "Follow your personalized activation link to set your password. Your ID is pre-filled and locked."
               : "Enter your university ID and the one-time activation code from your administrator to set your password."}
           </p>
         </div>
 
-        <div className="rounded-3xl bg-[var(--bg-surface)] border border-[var(--border)] p-6 sm:p-8 space-y-5 shadow-2xl">
+        <div className="rounded-3xl bg-bg-surface border border-border p-6 sm:p-8 space-y-5 shadow-2xl">
           {error && (
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-xs text-rose-300">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-xs text-action-danger">
+              <AlertCircle className="w-4 h-4 shrink-0 text-action-danger mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {state === "success" && (
-            <div className="flex items-center gap-2.5 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-300 font-semibold">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            <div className="flex items-center gap-2.5 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-action-success font-semibold">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-action-success" />
               <span>Account activated successfully! Redirecting to login…</span>
             </div>
           )}
@@ -145,7 +145,7 @@ function BootstrapPageInner() {
             {/* Unique ID / Roll */}
             {!idLocked && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="uniqueId">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="uniqueId">
                   ID / Roll Number *
                 </label>
                 <div className="relative">
@@ -157,9 +157,9 @@ function BootstrapPageInner() {
                     placeholder="e.g. 24JJ1A0501 or EMP-001"
                     required
                     autoCapitalize="characters"
-                    className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-medium uppercase"
+                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)] font-medium uppercase"
                   />
-                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
               </div>
             )}
@@ -167,7 +167,7 @@ function BootstrapPageInner() {
             {/* Locked ID (secure token) */}
             {idLocked && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="uniqueId-locked">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="uniqueId-locked">
                   Your Account ID
                 </label>
                 <div className="relative">
@@ -176,9 +176,9 @@ function BootstrapPageInner() {
                     type="text"
                     value={uniqueId}
                     readOnly
-                    className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)]/60 font-medium cursor-not-allowed"
+                    className="w-full rounded-xl bg-bg-elevated border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary/60 font-medium cursor-not-allowed"
                   />
-                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
                 <p className="text-[10px] text-emerald-400/70">Locked to your personalized activation link. You cannot change this.</p>
               </div>
@@ -188,11 +188,11 @@ function BootstrapPageInner() {
             {!urlToken && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="code">
+                  <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="code">
                     Activation Code *
                   </label>
                   {urlCode && (
-                    <span className="text-[10px] text-emerald-400 font-medium">Pre-filled from link</span>
+                    <span className="text-[10px] text-action-success font-medium">Pre-filled from link</span>
                   )}
                 </div>
                 <div className="relative">
@@ -204,23 +204,23 @@ function BootstrapPageInner() {
                     placeholder="e.g. ABCD1234"
                     required
                     maxLength={12}
-                    className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500 font-bold uppercase"
+                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)] font-bold uppercase"
                   />
-                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                  <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
               </div>
             )}
 
             {urlToken && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-action-success">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-action-success" />
                 <span>Secure activation link verified. Set your password below to finish.</span>
               </div>
             )}
 
             {/* New Password */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="password">
+              <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="password">
                 New Password *
               </label>
               <div className="relative">
@@ -232,15 +232,15 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="At least 8 characters"
-                  className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500"
+                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)]"
                 />
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
             </div>
 
             {/* Confirm Password */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide block" htmlFor="confirmPassword">
+              <label className="text-xs font-semibold text-text-muted uppercase tracking-wide block" htmlFor="confirmPassword">
                 Confirm Password *
               </label>
               <div className="relative">
@@ -252,16 +252,16 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="Re-enter your password"
-                  className="w-full rounded-xl bg-[var(--bg-base)] border border-[var(--border)] px-3.5 py-2.5 pl-10 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:border-emerald-500"
+                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)]"
                 />
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={state === "submitting" || state === "success"}
-              className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 shadow-md mt-2"
+              className="w-full rounded-xl bg-action-success hover:bg-action-success text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 shadow-md mt-2"
             >
               {state === "submitting" ? (
                 <>
@@ -277,10 +277,10 @@ function BootstrapPageInner() {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-[var(--border)] text-center">
-            <p className="text-xs text-[var(--text-muted)]">
+          <div className="pt-2 border-t border-border text-center">
+            <p className="text-xs text-text-muted">
               Already activated your account?{" "}
-              <Link href="/login" className="text-emerald-400 hover:underline font-semibold">
+              <Link href="/login" className="text-action-success hover:underline font-semibold">
                 Sign in here
               </Link>
             </p>
@@ -295,7 +295,7 @@ export default function BootstrapPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh flex items-center justify-center text-[var(--text-muted)] text-xs">
+        <div className="min-h-dvh flex items-center justify-center text-text-muted text-xs">
           Loading…
         </div>
       }

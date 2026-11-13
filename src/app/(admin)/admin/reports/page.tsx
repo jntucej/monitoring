@@ -190,41 +190,41 @@ export default function AdminReportsPage() {
       <div className="space-y-6">
       <div>
         <p className="text-2xl font-bold">Reports</p>
-        <p className="text-[var(--text-muted)]">Generate and download reports</p>
+        <p className="text-text-muted">Generate and download reports</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-5">
-          <BarChart3 className="w-6 h-6 text-[var(--action-primary)] mb-3" />
+        <div className="bg-bg-surface rounded-xl border border-border p-5">
+          <BarChart3 className="w-6 h-6 text-action-primary mb-3" />
           <p className="text-2xl font-bold">{loading ? "—" : (data?.onCampus ?? 0).toLocaleString()}</p>
-          <p className="text-sm text-[var(--text-muted)]">Students on Campus</p>
+          <p className="text-sm text-text-muted">Students on Campus</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-5">
-          <BarChart3 className="w-6 h-6 text-[var(--action-info)] mb-3" />
+        <div className="bg-bg-surface rounded-xl border border-border p-5">
+          <BarChart3 className="w-6 h-6 text-action-info mb-3" />
           <p className="text-2xl font-bold">{loading ? "—" : (data?.totalScans ?? 0).toLocaleString()}</p>
-          <p className="text-sm text-[var(--text-muted)]">Scans Today</p>
+          <p className="text-sm text-text-muted">Scans Today</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-5">
-          <BarChart3 className="w-6 h-6 text-[var(--action-warning)] mb-3" />
+        <div className="bg-bg-surface rounded-xl border border-border p-5">
+          <BarChart3 className="w-6 h-6 text-action-warning mb-3" />
           <p className="text-2xl font-bold">{loading ? "—" : `${attendanceRate}%`}</p>
-          <p className="text-sm text-[var(--text-muted)]">Activity Ratio (In/(In+Out))</p>
+          <p className="text-sm text-text-muted">Activity Ratio (In/(In+Out))</p>
         </div>
       </div>
 
       {/* KPI summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-            <ClipboardList className="w-3.5 h-3.5 text-[var(--action-primary)]" /> Reports Generated
+        <div className="bg-bg-surface rounded-xl border border-border p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <ClipboardList className="w-3.5 h-3.5 text-action-primary" /> Reports Generated
           </div>
-          <div className="mt-1.5 text-xl font-black text-[var(--text-primary)] tabular-nums">{generated.length}</div>
-          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Session reports (refresh resets)</p>
+          <div className="mt-1.5 text-xl font-black text-text-primary tabular-nums">{generated.length}</div>
+          <p className="mt-0.5 text-[11px] text-text-muted">Session reports (refresh resets)</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-            <Clock className="w-3.5 h-3.5 text-[var(--action-info)]" /> Last Export
+        <div className="bg-bg-surface rounded-xl border border-border p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <Clock className="w-3.5 h-3.5 text-action-info" /> Last Export
           </div>
-          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">
+          <div className="mt-1.5 text-sm font-bold text-text-primary">
             {generated.length > 0
               ? new Date(generated[0].generatedAt).toLocaleString("en-IN", {
                   day: "2-digit",
@@ -234,21 +234,21 @@ export default function AdminReportsPage() {
                 })
               : "No exports this session"}
           </div>
-          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
+          <p className="mt-0.5 text-[11px] text-text-muted">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-            <FileText className="w-3.5 h-3.5 text-[var(--action-warning)]" /> Export Formats
+        <div className="bg-bg-surface rounded-xl border border-border p-4">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <FileText className="w-3.5 h-3.5 text-action-warning" /> Export Formats
           </div>
-          <div className="mt-1.5 text-sm font-bold text-[var(--text-primary)]">CSV</div>
-          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">One-click download from report rows</p>
+          <div className="mt-1.5 text-sm font-bold text-text-primary">CSV</div>
+          <p className="mt-0.5 text-[11px] text-text-muted">One-click download from report rows</p>
         </div>
       </div>
 
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between gap-2 flex-wrap">
+      <div className="bg-bg-surface rounded-xl border border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between gap-2 flex-wrap">
           <h3 className="font-semibold flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[var(--action-primary)]" />
+            <FileText className="w-5 h-5 text-action-primary" />
             Available Reports
           </h3>
           <div className="flex gap-2 flex-wrap">
@@ -257,7 +257,7 @@ export default function AdminReportsPage() {
                 key={t}
                 onClick={() => generate(t)}
                 disabled={busy !== null || loading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-[var(--bg-base)] border border-[var(--border)] hover:border-[var(--action-primary)] disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-bg-base border border-border hover:border-action-primary disabled:opacity-50"
               >
                 {busy === t && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Generate {t}
@@ -266,39 +266,39 @@ export default function AdminReportsPage() {
             <button
               onClick={exportAll}
               disabled={loading || !data}
-              className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg bg-[var(--action-primary)] text-white hover:brightness-110 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-lg bg-action-primary text-white hover:brightness-110 disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
               Export CSV
             </button>
           </div>
         </div>
-        <div className="divide-y divide-[var(--border)]">
+        <div className="divide-y divide-border">
           {generated.length === 0 ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-sm">
+            <div className="p-8 text-center text-text-muted text-sm">
               No reports generated yet. Click a button above to create one.
             </div>
           ) : (
             generated.map((report) => (
               <div key={report.id} className="p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-[var(--action-primary)]/10 text-[var(--action-primary)] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-action-primary/10 text-action-primary flex items-center justify-center">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="font-medium">{report.title}</p>
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <p className="text-sm text-text-muted">
                       {report.range} • {new Date(report.generatedAt).toLocaleTimeString("en-IN")}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)] text-[var(--text-muted)]">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-bg-base border border-border text-text-muted">
                     {report.type}
                   </span>
                   <button
                     onClick={() => downloadReportCSV(report, data)}
-                    className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--action-primary)] hover:bg-white/5"
+                    className="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-white/5"
                     title="Download CSV"
                   >
                     <Download className="w-4 h-4" />

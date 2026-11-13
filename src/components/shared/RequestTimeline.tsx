@@ -76,10 +76,10 @@ const STAGE_LABELS: Record<string, string> = {
 type NodeTone = "neutral" | "positive" | "negative" | "escalation";
 
 const NODE_TONE_CLASS: Record<NodeTone, string> = {
-  neutral: "bg-[var(--bg-elevated)] border-[var(--border)]",
-  positive: "bg-[var(--action-primary)]/10 border-[var(--action-primary)]/30",
-  negative: "bg-[var(--action-danger)]/10 border-[var(--action-danger)]/30",
-  escalation: "bg-[var(--action-warning)]/10 border-[var(--action-warning)]/30",
+  neutral: "bg-bg-elevated border-border",
+  positive: "bg-action-primary/10 border-action-primary/30",
+  negative: "bg-action-danger/10 border-action-danger/30",
+  escalation: "bg-action-warning/10 border-action-warning/30",
 };
 
 
@@ -90,10 +90,10 @@ const NODE_TONE_CLASS: Record<NodeTone, string> = {
 
 
 const NODE_ICON_CLASS: Record<NodeTone, string> = {
-  neutral: "text-[var(--text-secondary)]",
-  positive: "text-[var(--action-primary)]",
-  negative: "text-[var(--action-danger)]",
-  escalation: "text-[var(--action-warning)]",
+  neutral: "text-text-secondary",
+  positive: "text-action-primary",
+  negative: "text-action-danger",
+  escalation: "text-action-warning",
 };
 
 function entryTone(entry: TimelineEntry): NodeTone {
@@ -180,24 +180,24 @@ function TimelineNode({
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`text-xs font-semibold px-2 py-0.5 rounded border ${NODE_TONE_CLASS[tone]} ${
-              tone === "neutral" ? "text-[var(--text-secondary)]" : NODE_ICON_CLASS[tone]
+              tone === "neutral" ? "text-text-secondary" : NODE_ICON_CLASS[tone]
             }`}
           >
             {action}
           </span>
           {stageLabel && (
-            <span className="text-[11px] text-[var(--text-muted)]">
+            <span className="text-[11px] text-text-muted">
               stage: {stageLabel}
             </span>
           )}
         </div>
 
-        <p className="mt-1 text-xs text-[var(--text-secondary)]">
-          <span className="font-medium text-[var(--text-primary)]">{actorLabel(entry)}</span>
+        <p className="mt-1 text-xs text-text-secondary">
+          <span className="font-medium text-text-primary">{actorLabel(entry)}</span>
           {typeof entry.actor === "object" && entry.actor?.role ? (
-            <span className="text-[var(--text-muted)]"> · {entry.actor.role}</span>
+            <span className="text-text-muted"> · {entry.actor.role}</span>
           ) : null}
-          <span className="mx-1.5 text-[var(--text-muted)]">·</span>
+          <span className="mx-1.5 text-text-muted">·</span>
           {entry.timestamp ? (
             <time dateTime={entry.timestamp}>{formatDateTime(entry.timestamp)}</time>
           ) : (
@@ -206,12 +206,12 @@ function TimelineNode({
         </p>
 
         {entry.comment ? (
-          <p className="mt-1 text-[11px] text-[var(--text-muted)] italic line-clamp-2">
+          <p className="mt-1 text-[11px] text-text-muted italic line-clamp-2">
             “{entry.comment}”
           </p>
         ) : null}
 
-        <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+        <p className="mt-1 text-[11px] text-text-muted">
           {nextStepHint(entry, isLast, status)}
         </p>
       </div>
@@ -275,11 +275,11 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
     if (error || !detail) {
       return (
         <div className="flex flex-col items-center gap-2 p-6 text-center">
-          <XCircle className="h-7 w-7 text-[var(--action-danger)]" />
-          <p className="text-sm text-[var(--text-secondary)]">
+          <XCircle className="h-7 w-7 text-action-danger" />
+          <p className="text-sm text-text-secondary">
             {error ?? "Ticket not found"}
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             Check the ticket number or your access permissions.
           </p>
         </div>
@@ -290,25 +290,25 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
       <div className="min-w-0">
         {/* Ticket header */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <Ticket className="h-4 w-4 text-[var(--action-primary)]" />
-          <span className="font-mono text-sm font-bold text-[var(--text-primary)]">
+          <Ticket className="h-4 w-4 text-action-primary" />
+          <span className="font-mono text-sm font-bold text-text-primary">
             {detail.ticket_number}
           </span>
-          <span className="rounded bg-[var(--bg-elevated)] border border-[var(--border)] px-1.5 py-0.5 text-[11px] text-[var(--text-secondary)]">
+          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-[11px] text-text-secondary">
             {detail.workflow_type}
           </span>
-          <span className="rounded bg-[var(--bg-elevated)] border border-[var(--border)] px-1.5 py-0.5 text-[11px] text-[var(--text-secondary)]">
+          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-[11px] text-text-secondary">
             {detail.status}
           </span>
           {detail.sla_deadline ? (
-            <span className="text-[11px] text-[var(--text-muted)]">
+            <span className="text-[11px] text-text-muted">
               SLA {getTimeAgo(detail.sla_deadline)}
             </span>
           ) : null}
         </div>
 
         {/* Vertical timeline */}
-        <ol className="relative border-l border-[var(--border)] ml-3 pl-2 space-y-0">
+        <ol className="relative border-l border-border ml-3 pl-2 space-y-0">
           {nodes.map((entry, i) => (
             <TimelineNode
               key={`${entry.action}-${i}`}
@@ -324,7 +324,7 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
   }, [loading, error, detail, nodes, isTerminal]);
 
   const inner = (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5 min-w-0">
+    <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5 min-w-0">
       {content}
     </div>
   );

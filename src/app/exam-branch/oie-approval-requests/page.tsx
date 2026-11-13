@@ -76,7 +76,7 @@ function OieApprovalRequestsInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -84,8 +84,8 @@ function OieApprovalRequestsInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -96,7 +96,7 @@ function OieApprovalRequestsInner() {
         className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 min-w-0"
         role="note"
       >
-        <p className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
+        <p className="flex items-center gap-2 text-sm font-semibold text-action-success">
           <ShieldCheck className="w-4 h-4 shrink-0" />
           OIE approval required
         </p>
@@ -110,7 +110,7 @@ function OieApprovalRequestsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">
@@ -128,15 +128,15 @@ function OieApprovalRequestsInner() {
       )}
 
       <WidgetBoundary title="OIE Approval Requests">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <Inbox className="w-4 h-4 text-emerald-400 shrink-0" />
+              <Inbox className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Requests Requiring OIE Approval
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {data?.total ?? 0} pending
             </span>
           </div>
@@ -146,17 +146,17 @@ function OieApprovalRequestsInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-16 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Inbox className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">
                 No exam requests are currently pending OIE approval.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Items appear here when an exam clearance reaches the OIE stage.
               </p>
             </div>
@@ -166,10 +166,10 @@ function OieApprovalRequestsInner() {
                 <li key={req.id} className="px-4 py-3 min-w-0">
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 min-w-0">
-                      <span className="font-mono text-xs text-[var(--text-secondary)]">
+                      <span className="font-mono text-xs text-text-secondary">
                         {req.ticket_number}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-300 px-2 py-0.5 text-xs">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-action-success px-2 py-0.5 text-xs">
                         <FileWarning className="w-3 h-3" />
                         {stageLabel(req.current_stage)}
                       </span>
@@ -177,8 +177,8 @@ function OieApprovalRequestsInner() {
                         <span
                           className={`text-xs ${
                             new Date(req.sla_deadline).getTime() < Date.now()
-                              ? "text-rose-400 font-semibold"
-                              : "text-[var(--text-muted)]"
+                              ? "text-action-danger font-semibold"
+                              : "text-text-muted"
                           }`}
                         >
                           SLA {new Date(req.sla_deadline).toLocaleString([], {
@@ -190,7 +190,7 @@ function OieApprovalRequestsInner() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] min-w-0">
+                    <p className="text-xs text-text-muted min-w-0">
                       Created{" "}
                       {new Date(req.created_at).toLocaleString([], {
                         month: "short",
@@ -203,7 +203,7 @@ function OieApprovalRequestsInner() {
                         ? ` · scope: ${req.hostel_scope}`
                         : ""}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] italic">
+                    <p className="text-xs text-text-muted italic">
                       OIE must review and approve before the next stage.
                     </p>
                   </div>

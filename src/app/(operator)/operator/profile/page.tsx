@@ -59,7 +59,7 @@ function OperatorProfileInner() {
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-6 flex items-center gap-3 text-sm text-[var(--text-muted)] min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-6 flex items-center gap-3 text-sm text-text-muted min-w-0">
           <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
           Loading profile…
         </div>
@@ -70,52 +70,52 @@ function OperatorProfileInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="min-w-0">
-        <h2 className="text-lg font-bold text-[var(--text-primary)]">My Profile</h2>
-        <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
+        <h2 className="text-lg font-bold text-text-primary">My Profile</h2>
+        <p className="text-xs text-text-muted mt-1 min-w-0">
           Your operator account details.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
         </div>
       )}
 
       {msg && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-action-success flex items-center gap-2 min-w-0">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span className="truncate">{msg}</span>
         </div>
       )}
 
       <OperatorWidgetBoundary title="Account Details">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-4 min-w-0">
           {/* Avatar + name */}
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-[var(--action-primary)]/10 flex items-center justify-center shrink-0">
-              <UserCircle className="w-8 h-8 text-[var(--action-primary)]" />
+            <div className="w-14 h-14 rounded-full bg-action-primary/10 flex items-center justify-center shrink-0">
+              <UserCircle className="w-8 h-8 text-action-primary" />
             </div>
             <div className="min-w-0">
-              <p className="text-base font-bold text-[var(--text-primary)] truncate">{user?.name || "—"}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{user?.email || "—"}</p>
+              <p className="text-base font-bold text-text-primary truncate">{user?.name || "—"}</p>
+              <p className="text-xs text-text-muted mt-0.5">{user?.email || "—"}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm min-w-0">
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Role</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">Role</p>
               <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-[var(--action-primary)] shrink-0" />
-                <p className="text-[var(--text-primary)] capitalize">{user?.role || "—"}</p>
+                <ShieldCheck className="w-3.5 h-3.5 text-action-primary shrink-0" />
+                <p className="text-text-primary capitalize">{user?.role || "—"}</p>
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Assigned Gate</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">Assigned Gate</p>
               <div className="flex items-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-                <p className="text-[var(--text-primary)]">{user?.gateId ? `Gate ${user.gateId}` : "—"}</p>
+                <Building2 className="w-3.5 h-3.5 text-text-muted shrink-0" />
+                <p className="text-text-primary">{user?.gateId ? `Gate ${user.gateId}` : "—"}</p>
               </div>
             </div>
           </div>
@@ -123,12 +123,12 @@ function OperatorProfileInner() {
           {/* Phone */}
           <div className="space-y-1.5 min-w-0">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">Phone</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">Phone</p>
               {!editingPhone && (
                 <button
                   type="button"
                   onClick={() => setEditingPhone(true)}
-                  className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--action-primary)] hover:underline"
+                  className="inline-flex min-h-[44px] items-center gap-1 text-xs text-action-primary hover:underline"
                 >
                   <Pencil className="w-3 h-3" /> Edit
                 </button>
@@ -137,20 +137,20 @@ function OperatorProfileInner() {
             {editingPhone ? (
               <div className="flex flex-wrap gap-2 min-w-0">
                 <div className="relative flex-1 min-w-[200px]">
-                  <Phone className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Phone className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 XXXXX XXXXX"
-                    className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none min-w-0"
+                    className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ring-[var(--focus-ring)] outline-none min-w-0"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => void handleSavePhone()}
                   disabled={saving}
-                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-3 py-2 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 shrink-0"
+                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg bg-action-primary px-3 py-2 text-xs font-bold text-black hover:brightness-110 disabled:opacity-50 shrink-0"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 </button>
@@ -158,14 +158,14 @@ function OperatorProfileInner() {
                   type="button"
                   onClick={() => { setEditingPhone(false); setPhone(user?.phone ?? ""); }}
                   disabled={saving}
-                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] shrink-0"
+                  className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-muted hover:bg-bg-elevated shrink-0"
                 >
                   Cancel
                 </button>
               </div>
             ) : (
-              <p className="text-sm text-[var(--text-primary)] font-mono">
-                {user?.phone || <span className="text-[var(--text-muted)]">Not set</span>}
+              <p className="text-sm text-text-primary font-mono">
+                {user?.phone || <span className="text-text-muted">Not set</span>}
               </p>
             )}
           </div>

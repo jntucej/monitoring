@@ -57,7 +57,7 @@ function fmtTs(iso: string | null | undefined): string {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -134,22 +134,22 @@ function MessIssuesInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setRaiseOpen((o) => !o)}
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/20 shrink-0"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-action-success hover:bg-emerald-500/20 shrink-0"
         >
           <Plus className="w-4 h-4" /> Raise Issue
         </button>
@@ -163,17 +163,17 @@ function MessIssuesInner() {
         <WidgetBoundary title="Raise Mess Issue">
           <form
             onSubmit={raiseIssue}
-            className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 space-y-3 min-w-0"
+            className="rounded-xl border border-border bg-bg-base p-4 space-y-3 min-w-0"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
               <label className="block min-w-0">
-                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                   Issue type
                 </span>
                 <select
                   value={eventType}
                   onChange={(e) => setEventType(e.target.value)}
-                  className="mt-1 w-full min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
                 >
                   <option value="NO_SHOW_FLAGGED">No-show flagged</option>
                   <option value="TOKEN_REVOKED">Token revoked</option>
@@ -182,7 +182,7 @@ function MessIssuesInner() {
                 </select>
               </label>
               <label className="block min-w-0">
-                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                   Description
                 </span>
                 <textarea
@@ -190,7 +190,7 @@ function MessIssuesInner() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="What happened, when, and who is affected?"
-                  className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 min-w-0"
+                  className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)] min-w-0"
                 />
               </label>
             </div>
@@ -198,7 +198,7 @@ function MessIssuesInner() {
               <button
                 type="submit"
                 disabled={raising || !description.trim()}
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
               >
                 {raising ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Raise Issue
@@ -206,7 +206,7 @@ function MessIssuesInner() {
               <button
                 type="button"
                 onClick={() => setRaiseOpen(false)}
-                className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated"
               >
                 Cancel
               </button>
@@ -216,16 +216,16 @@ function MessIssuesInner() {
       )}
 
       <WidgetBoundary title="Mess Issues">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
             <BellRing className="w-4 h-4 text-amber-400/70 shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Mess Issues Feed</span>
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+            <span className="ml-auto text-xs text-text-muted shrink-0">
               {issuesRes?.data?.total ?? 0} event(s)
             </span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading issues feed…
             </div>
@@ -233,7 +233,7 @@ function MessIssuesInner() {
             <div className="overflow-x-auto min-w-0">
               <table className="w-full text-sm min-w-[560px]">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                  <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                     <th className="text-left px-4 py-2.5">Event</th>
                     <th className="text-left px-4 py-2.5">Status</th>
                     <th className="text-left px-4 py-2.5">Meal Date</th>
@@ -242,12 +242,12 @@ function MessIssuesInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {issues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
+                    <tr key={issue.id} className="hover:bg-bg-elevated/30 transition-colors">
                       <td className="px-4 py-2.5 min-w-0">
-                        <p className="text-[var(--text-secondary)] font-medium capitalize truncate">
+                        <p className="text-text-secondary font-medium capitalize truncate">
                           {issue.eventType.replace(/_/g, " ")}
                         </p>
-                        <p className="text-xs text-[var(--text-muted)] truncate">
+                        <p className="text-xs text-text-muted truncate">
                           {issue.userName ? `${issue.userName} · ` : ""}
                           {issue.channel.toLowerCase()}
                         </p>
@@ -256,17 +256,17 @@ function MessIssuesInner() {
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
                             issue.status === "SENT"
-                              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
-                              : "border-[var(--border)]/40 bg-[var(--bg-elevated)]/20 text-[var(--text-muted)]"
+                              ? "border-emerald-400/30 bg-emerald-400/10 text-action-success"
+                              : "border-border/40 bg-bg-elevated/20 text-text-muted"
                           }`}
                         >
                           {issue.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-[var(--text-muted)] whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-text-muted whitespace-nowrap">
                         {issue.mealDate ? fmtTs(issue.mealDate) : "—"}
                       </td>
-                      <td className="px-4 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                      <td className="px-4 py-2.5 text-text-muted text-xs whitespace-nowrap">
                         {fmtTs(issue.createdAt)}
                       </td>
                     </tr>
@@ -276,8 +276,8 @@ function MessIssuesInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted max-w-md mx-auto">
                 No mess issues or exception events recorded. No-show flags, token revocations,
                 and raised incidents will appear here.
               </p>

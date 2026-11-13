@@ -45,17 +45,17 @@ export default function SysadminCommandCenterPage() {
       ) : error ? (
         <div
           role="alert"
-          className="rounded-2xl border border-[var(--action-danger)]/30 bg-[var(--action-danger)]/5 p-5 text-sm text-[var(--text-primary)]"
+          className="rounded-2xl border border-action-danger/30 bg-action-danger/5 p-5 text-sm text-text-primary"
         >
-          <p className="flex items-center gap-2 font-medium text-[var(--action-danger)]">
+          <p className="flex items-center gap-2 font-medium text-action-danger">
             <AlertTriangle className="h-4 w-4" />
             Failed to load command center
           </p>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">{error}</p>
+          <p className="mt-1 text-xs text-text-muted">{error}</p>
           <button
             type="button"
             onClick={refresh}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 min-h-[44px] text-xs hover:bg-[var(--bg-elevated)]"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 min-h-[44px] text-xs hover:bg-bg-elevated"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Retry

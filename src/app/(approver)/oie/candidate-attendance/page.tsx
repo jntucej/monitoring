@@ -40,10 +40,10 @@ interface CandidateAttendanceResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
-        <Inbox className="w-5 h-5 text-[var(--text-muted)]" />
-        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
+        <Inbox className="w-5 h-5 text-text-muted" />
+        <p className="max-w-md text-sm text-text-muted">{message}</p>
       </div>
     </div>
   );
@@ -51,7 +51,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -77,7 +77,7 @@ function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[640px]">
         <thead>
-          <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+          <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Roll</th>
             <th className="text-left px-4 py-3">Direction</th>
@@ -88,34 +88,34 @@ function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 25).map((r) => (
-            <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-              <td className="px-4 py-3 text-[var(--text-secondary)] min-w-0">
+            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+              <td className="px-4 py-3 text-text-secondary min-w-0">
                 {r.candidate_name || "—"}
                 {r.candidate_unique_id ? (
-                  <span className="ml-2 text-xs text-[var(--text-muted)]">{r.candidate_unique_id}</span>
+                  <span className="ml-2 text-xs text-text-muted">{r.candidate_unique_id}</span>
                 ) : null}
               </td>
-              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                 {r.roll || "—"}
               </td>
               <td className="px-4 py-3">
                 <span
                   className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
                     r.direction === "IN"
-                      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
-                      : "border-amber-400/30 bg-amber-400/10 text-amber-400"
+                      ? "border-emerald-400/30 bg-emerald-400/10 text-action-success"
+                      : "border-amber-400/30 bg-amber-400/10 text-action-warning"
                   }`}
                 >
                   {r.direction}
                 </span>
               </td>
-              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                 {r.date}
               </td>
-              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                 {new Date(r.timestamp_utc).toLocaleString()}
               </td>
-              <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+              <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                 {r.status}
               </td>
             </tr>
@@ -153,15 +153,15 @@ function CandidateAttendanceInner() {
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -175,14 +175,14 @@ function CandidateAttendanceInner() {
       )}
 
       <WidgetBoundary title="Candidate Attendance">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <Users className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <Users className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Recent Exam Candidate Gate Records
             </span>
             {rows.length > 0 && (
-              <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+              <span className="ml-auto text-xs text-text-muted shrink-0">
                 {rows.length} records
               </span>
             )}
@@ -194,7 +194,7 @@ function CandidateAttendanceInner() {
           ) : (
             <AttendanceTable rows={rows} />
           )}
-          <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
+          <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
             Records are read-only. Marks, grades, and confidential results are not exposed at
             this tier.
           </div>

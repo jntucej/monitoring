@@ -144,7 +144,7 @@ function ExceptionsInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {(txError || permError) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate min-w-0">
             {[txError, permError].filter(Boolean).join(" · ")}
@@ -153,9 +153,9 @@ function ExceptionsInner() {
       )}
 
       <OperatorWidgetBoundary title="Today&rsquo;s Exceptions">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
           {/* Filter tabs */}
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-[var(--border)] min-w-0">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-border min-w-0">
             {(["ALL", "FLAGGED", "DENIED", "MANUAL"] as Filter[]).map((f) => (
               <button
                 key={f}
@@ -163,8 +163,8 @@ function ExceptionsInner() {
                 onClick={() => setFilter(f)}
                 className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
-                    ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-primary/15 text-action-primary"
+                    : "text-text-muted hover:text-text-primary"
                 }`}
               >
                 {f === "ALL"
@@ -176,20 +176,20 @@ function ExceptionsInner() {
                       : "Manual"}
               </button>
             ))}
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+            <span className="ml-auto text-xs text-text-muted shrink-0">
               {busy ? "…" : `${filtered.length} shown`}
             </span>
           </div>
 
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading exceptions…
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Inbox className="w-5 h-5 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 No exceptions {filter === "ALL" ? "" : filter.toLowerCase()}
                 recorded in the selected filter today.
               </p>
@@ -197,7 +197,7 @@ function ExceptionsInner() {
           ) : (
             <>
               {/* Mobile: stacked cards — no horizontal scroll */}
-              <ul className="sm:hidden divide-y divide-[var(--border)]">
+              <ul className="sm:hidden divide-y divide-border">
                 {filtered.map((r) => {
                   const tags: string[] = [];
                   if (isDenied(r)) tags.push("Denied");
@@ -208,13 +208,13 @@ function ExceptionsInner() {
                     <li key={r.id} className="px-3 py-3 space-y-1.5">
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                          <p className="text-sm font-semibold text-text-primary truncate">
                             {r.name || "—"}
                             {r.roll && (
-                              <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">{r.roll}</span>
+                              <span className="ml-1.5 font-mono text-xs text-text-muted">{r.roll}</span>
                             )}
                           </p>
-                          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                          <p className="text-[11px] text-text-muted mt-0.5">
                             {fmtTime(r.timestamp)} · {safeText(r.gate_name ?? r.gate_id)}
                           </p>
                         </div>
@@ -224,10 +224,10 @@ function ExceptionsInner() {
                               key={t}
                               className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
                                 t === "Denied"
-                                  ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                                  ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
                                   : t === "Flagged"
-                                    ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                                    : "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                                    ? "border-amber-500/30 bg-amber-500/10 text-action-warning"
+                                    : "border-sky-500/30 bg-sky-500/10 text-action-info"
                               }`}
                             >
                               {t}
@@ -235,7 +235,7 @@ function ExceptionsInner() {
                           ))}
                         </div>
                       </div>
-                      {r.reason && <p className="text-xs text-[var(--text-muted)]">Reason: {r.reason}</p>}
+                      {r.reason && <p className="text-xs text-text-muted">Reason: {r.reason}</p>}
                     </li>
                   );
                 })}
@@ -245,7 +245,7 @@ function ExceptionsInner() {
               <div className="hidden sm:block overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-3 py-2 font-semibold">Time</th>
                       <th className="text-left px-3 py-2 font-semibold">Person</th>
                       <th className="text-left px-3 py-2 font-semibold">Tag</th>
@@ -253,7 +253,7 @@ function ExceptionsInner() {
                       <th className="text-left px-3 py-2 font-semibold">Gate</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)]">
+                  <tbody className="divide-y divide-border">
                     {filtered.map((r) => {
                       const tags: string[] = [];
                       if (isDenied(r)) tags.push("Denied");
@@ -262,14 +262,14 @@ function ExceptionsInner() {
                       if (Boolean(r.is_correction))
                         tags.push("Correction");
                       return (
-                        <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                        <tr key={r.id} className="hover:bg-bg-surface transition-colors">
+                          <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                             {fmtTime(r.timestamp)}
                           </td>
-                          <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
+                          <td className="px-3 py-2.5 text-text-primary min-w-0">
                             <span className="font-semibold">{r.name || "—"}</span>
                             {r.roll && (
-                              <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                              <span className="ml-1.5 font-mono text-xs text-text-muted">
                                 {r.roll}
                               </span>
                             )}
@@ -282,24 +282,24 @@ function ExceptionsInner() {
                                     key={t}
                                     className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                                       t === "Denied"
-                                        ? "border-rose-500/30 bg-rose-500/10 text-rose-400"
+                                        ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
                                         : t === "Flagged"
-                                          ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                                          : "border-sky-500/30 bg-sky-500/10 text-sky-400"
+                                          ? "border-amber-500/30 bg-amber-500/10 text-action-warning"
+                                          : "border-sky-500/30 bg-sky-500/10 text-action-info"
                                     }`}
                                   >
                                     {t}
                                   </span>
                                 ))
                               ) : (
-                                <span className="text-[var(--text-muted)] text-xs">—</span>
+                                <span className="text-text-muted text-xs">—</span>
                               )}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs max-w-[220px] truncate">
+                          <td className="px-3 py-2.5 text-text-muted text-xs max-w-[220px] truncate">
                             {r.reason || "—"}
                           </td>
-                          <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                          <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                             {safeText(r.gate_name ?? r.gate_id)}
                           </td>
                         </tr>
@@ -315,43 +315,43 @@ function ExceptionsInner() {
 
       {/* Denied hostel passes (workflow) */}
       <OperatorWidgetBoundary title="Rejected Passes Today">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-            <span className="text-sm font-semibold text-[var(--text-primary)] truncate">
+        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <ShieldAlert className="w-4 h-4 text-action-danger shrink-0" />
+            <span className="text-sm font-semibold text-text-primary truncate">
               Hostel passes rejected at the main-gate stage today
             </span>
           </div>
           {permLoading && !deniedPerms ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading rejected passes…
             </div>
           ) : deniedPermissionRows.length === 0 ? (
             <div className="p-4 text-center min-w-0">
-              <Clock className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-xs text-[var(--text-muted)]">
+              <Clock className="w-5 h-5 text-text-muted mx-auto mb-2" />
+              <p className="text-xs text-text-muted">
                 No hostel passes were rejected at the main-gate stage today.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-[var(--border)] min-w-0">
+            <ul className="divide-y divide-border min-w-0">
               {deniedPermissionRows.map((p) => (
                 <li key={p.id} className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 min-w-0">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    <p className="text-sm font-semibold text-text-primary truncate">
                       {p.student?.name || "Unknown applicant"}
                       {p.student?.unique_id && (
-                        <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                        <span className="ml-1.5 font-mono text-xs text-text-muted">
                           {p.student.unique_id}
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
+                    <p className="text-xs text-text-muted font-mono mt-0.5">
                       {p.ticket_number || p.id}
                     </p>
                   </div>
-                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-rose-400 shrink-0">
+                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-action-danger shrink-0">
                     REJECTED
                   </span>
                 </li>

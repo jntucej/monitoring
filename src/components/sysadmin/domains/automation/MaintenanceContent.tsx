@@ -75,11 +75,11 @@ function GanttRow({ row, dayCount }: { row: MaintenanceGanttRow; dayCount: numbe
 
   return (
     <div className="flex items-center gap-2">
-      <span className="w-32 shrink-0 truncate text-xs text-[var(--text-primary)]" title={row.title}>
+      <span className="w-32 shrink-0 truncate text-xs text-text-primary" title={row.title}>
         {row.title}
       </span>
       <span
-        className="w-14 shrink-0 text-[10px] text-[var(--text-muted)]"
+        className="w-14 shrink-0 text-[10px] text-text-muted"
       >
         {statusLabel(row.status)}
       </span>
@@ -112,7 +112,7 @@ export function MaintenanceContent(
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-xl bg-[var(--bg-surface)] opacity-40" />
+          <div key={i} className="h-24 animate-pulse rounded-xl bg-bg-surface opacity-40" />
         ))}
       </div>
     );
@@ -120,7 +120,7 @@ export function MaintenanceContent(
 
   if (error) {
     return (
-      <div className="rounded-xl border border-[var(--action-danger)]/30 bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]">
+      <div className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger">
         Failed to load maintenance data: {error}
       </div>
     );
@@ -147,24 +147,24 @@ export function MaintenanceContent(
       {/* KPI strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* scheduled */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Scheduled
           </p>
-          <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <span className="text-lg font-semibold text-text-primary">
             {kpis.scheduled}
           </span>
         </div>
 
         {/* in-progress */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             In Progress
           </p>
           <span
             className={cn(
               "text-lg font-semibold",
-              kpis.inProgress > 0 ? "text-[var(--action-info)]" : "text-[var(--text-primary)]",
+              kpis.inProgress > 0 ? "text-action-info" : "text-text-primary",
             )}
           >
             {kpis.inProgress}
@@ -172,33 +172,33 @@ export function MaintenanceContent(
         </div>
 
         {/* next window countdown */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Next Window
           </p>
-          <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <span className="text-lg font-semibold text-text-primary">
             {kpis.nextWindowCountdown ?? "—"}
           </span>
         </div>
 
         {/* notifications sent */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Notifications
           </p>
-          <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <span className="text-lg font-semibold text-text-primary">
             {kpis.notificationsSent}
           </span>
         </div>
       </div>
 
       {/* Signature visual: 30-day Gantt */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+      <div className="rounded-xl border border-border bg-bg-surface p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-[var(--text-primary)]">
+          <p className="text-sm font-semibold text-text-primary">
             30-Day Maintenance Windows
           </p>
-          <div className="flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
+          <div className="flex items-center gap-3 text-[10px] text-text-muted">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full inline-block" style={{ background: TYPE_COLORS.scheduled }} />
               Scheduled
@@ -216,10 +216,10 @@ export function MaintenanceContent(
 
         {gantt.length === 0 ? (
           <div className="py-6 text-center">
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-text-muted">
               No maintenance windows scheduled in the next 30 days.
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-1 opacity-60">
+            <p className="text-xs text-text-muted mt-1 opacity-60">
               Windows are managed via the maintenance scheduler.
             </p>
           </div>
@@ -234,7 +234,7 @@ export function MaintenanceContent(
 
             {/* Day labels */}
             <div
-              className="grid gap-px text-[9px] text-[var(--text-muted)] pl-[152px]"
+              className="grid gap-px text-[9px] text-text-muted pl-[152px]"
               style={{ gridTemplateColumns: `repeat(${dayCount}, 1fr)` }}
             >
               {labels.map((lbl, i) =>

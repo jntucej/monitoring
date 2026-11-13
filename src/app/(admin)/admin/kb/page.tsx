@@ -81,43 +81,43 @@ function AdminKbInner() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label>
-                  <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Title</span>
+                  <span className="text-xs font-semibold text-text-secondary block mb-1">Title</span>
                   <input
                     required
                     value={draft.title}
                     onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
                     placeholder="e.g. Gate Security SOP"
-                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
                   />
                 </label>
                 <label>
-                  <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Source (dedupe key)</span>
+                  <span className="text-xs font-semibold text-text-secondary block mb-1">Source (dedupe key)</span>
                   <input
                     required
                     value={draft.source}
                     onChange={(e) => setDraft((d) => ({ ...d, source: e.target.value }))}
                     placeholder="e.g. policy/gate-security"
-                    className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                    className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
                   />
                 </label>
               </div>
               <label>
-                <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Content</span>
+                <span className="text-xs font-semibold text-text-secondary block mb-1">Content</span>
                 <textarea
                   required
                   rows={6}
                   value={draft.content}
                   onChange={(e) => setDraft((d) => ({ ...d, content: e.target.value }))}
                   placeholder="Paste the policy / SOP text…"
-                  className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)] resize-y"
+                  className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary resize-y"
                 />
               </label>
               <label>
-                <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Audience role</span>
+                <span className="text-xs font-semibold text-text-secondary block mb-1">Audience role</span>
                 <select
                   value={draft.role}
                   onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                  className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
                 >
                   <option value="all">All roles</option>
                   <option value="operator">Operator</option>
@@ -128,7 +128,7 @@ function AdminKbInner() {
               </label>
 
               {result && (
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-xs text-emerald-300 flex items-center gap-2.5">
+                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-xs text-action-success flex items-center gap-2.5">
                   <BookOpen className="w-4 h-4 shrink-0" />
                   <span>
                     Ingested {result.chunkCount} chunk{result.chunkCount === 1 ? "" : "s"}
@@ -137,7 +137,7 @@ function AdminKbInner() {
                 </div>
               )}
               {error && (
-                <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-300 flex items-center gap-2.5">
+                <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-action-danger flex items-center gap-2.5">
                   <span>{error}</span>
                 </div>
               )}
@@ -146,7 +146,7 @@ function AdminKbInner() {
                 <button
                   type="submit"
                   disabled={busy || !draft.title || !draft.source || !draft.content}
-                  className="px-4 py-2.5 rounded-xl bg-[var(--action-primary)] hover:opacity-90 text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
+                  className="px-4 py-2.5 rounded-xl bg-action-primary hover:opacity-90 text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
                 >
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Ingest Document

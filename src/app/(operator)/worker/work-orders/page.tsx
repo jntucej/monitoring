@@ -50,41 +50,41 @@ function WorkerWorkOrdersInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
       <div className="flex items-center gap-3 min-w-0">
-        <ClipboardList className="h-6 w-6 text-sky-400 shrink-0" />
+        <ClipboardList className="h-6 w-6 text-action-info shrink-0" />
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-white truncate">My Work Orders</h1>
-          <p className="text-sm text-[var(--text-muted)] min-w-0">Maintenance tasks assigned to you</p>
+          <p className="text-sm text-text-muted min-w-0">Maintenance tasks assigned to you</p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
           Work orders unavailable: {error}
         </div>
       )}
 
       <OperatorWidgetBoundary title="Open">
         <div className="min-w-0">
-          <p className="mb-3 text-xs text-[var(--text-muted)]">{totalOpen} open task(s)</p>
+          <p className="mb-3 text-xs text-text-muted">{totalOpen} open task(s)</p>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" /> Loading…
             </div>
           ) : open.length === 0 ? (
-            <OperatorEmptyState icon={<CheckCircle2 className="h-6 w-6 text-emerald-500" />} title="All caught up" description="No open work orders assigned to you right now." />
+            <OperatorEmptyState icon={<CheckCircle2 className="h-6 w-6 text-action-success" />} title="All caught up" description="No open work orders assigned to you right now." />
           ) : (
             <div className="divide-y divide-slate-800">
               {open.map((o) => (
                 <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{o.ticket}</p>
-                    <p className="text-xs text-[var(--text-muted)] truncate">
+                    <p className="text-xs text-text-muted truncate">
                       {o.requesterName ? `${o.requesterName} · ` : ""}
                       {o.type ?? "task"}
                       {o.stage ? ` · ${o.stage}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-400">
+                  <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-action-warning">
                     {o.status ?? "PENDING"}
                   </span>
                 </div>
@@ -103,12 +103,12 @@ function WorkerWorkOrdersInner() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{c.ticket}</p>
                     {c.updatedAt && (
-                      <p className="text-xs text-[var(--text-muted)]">
+                      <p className="text-xs text-text-muted">
                         Updated {new Date(c.updatedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-action-success">
                     {c.status}
                   </span>
                 </div>

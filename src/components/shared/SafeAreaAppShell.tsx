@@ -98,7 +98,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
   const showNav = _hasHydrated && authenticated && !isStandaloneConsole;
 
   return (
-    <div className="relative min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)] antialiased selection:bg-[var(--action-primary)] selection:text-white pt-safe pb-safe pl-safe pr-safe">
+    <div className="relative min-h-[100dvh] flex flex-col bg-bg-base text-text-primary antialiased selection:bg-action-primary selection:text-white pt-safe pb-safe pl-safe pr-safe">
       {/* Global loading overlay — covers the entire shell until auth hydrates.
           Suppressed on the home page so / lands on content, not a loader. */}
       {!isHome && !isLogin && <AppLoadingScreen />}

@@ -21,14 +21,14 @@ function outcomeStyle(outcome: Win["outcome"]): {
 } {
   switch (outcome) {
     case "APPROVED":
-      return { icon: Check, color: "text-[var(--action-primary)]" };
+      return { icon: Check, color: "text-action-primary" };
     case "REJECTED":
-      return { icon: X, color: "text-[var(--action-danger)]" };
+      return { icon: X, color: "text-action-danger" };
     case "ESCALATED":
-      return { icon: ArrowUpRight, color: "text-[var(--action-warning)]" };
+      return { icon: ArrowUpRight, color: "text-action-warning" };
     case "FORWARDED":
     default:
-      return { icon: ArrowUpRight, color: "text-[var(--action-info)]" };
+      return { icon: ArrowUpRight, color: "text-action-info" };
   }
 }
 
@@ -53,12 +53,12 @@ export function WinFeed() {
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
-        <Sparkles className="size-4 text-[var(--action-warning)]" />
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Your wins</h2>
+        <Sparkles className="size-4 text-action-warning" />
+        <h2 className="text-sm font-semibold text-text-primary">Your wins</h2>
         {merged.length > 0 && (
-          <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--action-primary)]">
+          <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-[10px] font-medium text-action-primary">
             {merged.length}
           </span>
         )}
@@ -70,7 +70,7 @@ export function WinFeed() {
           description="Your first cleared item will appear here."
         />
       ) : (
-        <ul className="divide-y divide-[var(--border)]">
+        <ul className="divide-y divide-border">
           <AnimatePresence initial={false}>
             {merged.slice(0, 6).map((w) => {
               const style = outcomeStyle(w.outcome);
@@ -84,15 +84,15 @@ export function WinFeed() {
                   className="flex items-center gap-3 py-2 text-xs"
                 >
                   <span
-                    className={`flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--bg-elevated)] ${style.color}`}
+                    className={`flex size-6 shrink-0 items-center justify-center rounded-full bg-bg-elevated ${style.color}`}
                   >
                     <Icon className="size-3.5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-[var(--text-primary)]">
+                    <p className="truncate font-medium text-text-primary">
                       {w.subject}
                     </p>
-                    <p className="text-[10px] text-[var(--text-muted)]">
+                    <p className="text-[10px] text-text-muted">
                       {w.ticket} · {w.outcome.toLowerCase()} · {relativeTime(w.at)}
                     </p>
                   </div>

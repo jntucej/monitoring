@@ -42,40 +42,40 @@ export function WorkerStatusBar({ counts, lastScan, refreshing = false }: Worker
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Worker status bar"
     >
       {/* Left: task / active / work-order counts */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)] shrink-0" />
-          <span className="text-[var(--text-muted)]">Worker</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0" />
+          <span className="text-text-muted">Worker</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">{counts?.tasks ?? 0} tasks</span>
+          <span className="text-text-muted">{counts?.tasks ?? 0} tasks</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">{counts?.active ?? 0} active</span>
+          <span className="text-text-muted">{counts?.active ?? 0} active</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <Wrench className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">{counts?.workOrders ?? 0} work-orders</span>
+          <Wrench className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">{counts?.workOrders ?? 0} work-orders</span>
         </span>
       </div>
 
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last update</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last update</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

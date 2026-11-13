@@ -49,7 +49,7 @@ function Facet({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
         {label}
       </span>
       {options.map((o) => {
@@ -63,8 +63,8 @@ function Facet({
             className={cn(
               "rounded-full border px-2.5 py-0.5 text-xs transition",
               on
-                ? "border-[var(--action-primary)] bg-[var(--action-primary)] text-white"
-                : "border-[var(--border)] bg-[var(--surface-default)] text-[var(--text-secondary)] hover:border-[var(--action-primary)]",
+                ? "border-action-primary bg-action-primary text-white"
+                : "border-border bg-bg-base text-text-secondary hover:border-action-primary",
             )}
           >
             {o}
@@ -101,8 +101,8 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
     return (
       <WidgetBoundary>
         <div className="space-y-4 p-4">
-          <div className="h-4 w-40 animate-pulse rounded bg-[var(--surface-default)]" />
-          <div className="h-40 w-full animate-pulse rounded bg-[var(--surface-default)]" />
+          <div className="h-4 w-40 animate-pulse rounded bg-bg-base" />
+          <div className="h-40 w-full animate-pulse rounded bg-bg-base" />
         </div>
       </WidgetBoundary>
     );
@@ -111,7 +111,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
   if (error && !data) {
     return (
       <WidgetBoundary>
-        <div className="rounded-md border border-[var(--action-danger)] bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]">
+        <div className="rounded-md border border-action-danger bg-action-danger/10 p-4 text-sm text-action-danger">
           Failed to load people: {error}
         </div>
       </WidgetBoundary>
@@ -130,10 +130,10 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
     <WidgetBoundary>
       <div className="space-y-6 p-4 sm:p-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
             People &amp; Identity
           </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          <p className="mt-1 text-sm text-text-secondary">
             Faceted directory of every account with role, state, and
             cohort retention. Click a row to open the detail drawer.
           </p>
@@ -158,8 +158,8 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
         </div>
 
         {/* Facet FilterBar */}
-        <div className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-base p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
             <span>Filters</span>
             {(roleFilter.length > 0 || stateFilter.length > 0) && (
               <button
@@ -168,7 +168,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
                   setRoleFilter([]);
                   setStateFilter([]);
                 }}
-                className="ml-auto text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="ml-auto text-xs text-text-muted hover:text-text-primary"
               >
                 Clear all
               </button>
@@ -180,8 +180,8 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
 
         {/* Signature visual: cohort retention HeatMatrix */}
         {hasCohort && cohortGrid ? (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4">
-            <h2 className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
+          <div className="rounded-xl border border-border bg-bg-base p-4">
+            <h2 className="mb-3 text-sm font-semibold text-text-primary">
               Cohort retention — admission year × semester
             </h2>
             <HeatMatrix
@@ -191,17 +191,17 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
               label="Cohort retention, % active per cohort cell"
               cellSize={22}
             />
-            <p className="mt-2 text-[11px] text-[var(--text-muted)]">
+            <p className="mt-2 text-[11px] text-text-muted">
               Cell intensity = % of users in that admission-year cohort still ACTIVE.
             </p>
           </div>
         ) : null}
 
         {/* Faceted table */}
-        <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface-default)]">
+        <div className="overflow-x-auto rounded-xl border border-border bg-bg-base">
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)] text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)]">
+              <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-text-muted">
                 <th className="px-3 py-2 font-medium">Name</th>
                 <th className="px-3 py-2 font-medium">Email</th>
                 <th className="px-3 py-2 font-medium">Role</th>
@@ -213,7 +213,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
             <tbody>
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-[var(--text-muted)]">
+                  <td colSpan={6} className="px-3 py-6 text-center text-text-muted">
                     No people match the current filters.
                   </td>
                 </tr>
@@ -222,22 +222,22 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
                   <tr
                     key={r.id}
                     onClick={() => onRowClick(r.id)}
-                    className="cursor-pointer border-b border-[var(--border)] transition last:border-0 hover:bg-[var(--surface-raised)]"
+                    className="cursor-pointer border-b border-border transition last:border-0 hover:bg-[var(--surface-raised)]"
                   >
-                    <td className="px-3 py-2 font-medium text-[var(--text-primary)]">{r.name}</td>
-                    <td className="px-3 py-2 text-[var(--text-secondary)]">{r.email}</td>
+                    <td className="px-3 py-2 font-medium text-text-primary">{r.name}</td>
+                    <td className="px-3 py-2 text-text-secondary">{r.email}</td>
                     <td className="px-3 py-2">
-                      <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs">
+                      <span className="rounded-full border border-border px-2 py-0.5 text-xs">
                         {r.role}
                       </span>
                     </td>
                     <td className="px-3 py-2">
                       <StatusPill status={r.state} />
                     </td>
-                    <td className="px-3 py-2 text-[var(--text-secondary)]">
+                    <td className="px-3 py-2 text-text-secondary">
                       {r.cohort_active_pct > 0 ? `${r.cohort_active_pct}%` : "—"}
                     </td>
-                    <td className="px-3 py-2 text-[var(--text-muted)]">
+                    <td className="px-3 py-2 text-text-muted">
                       {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
                     </td>
                   </tr>
@@ -271,10 +271,10 @@ function Kpi({
           ? "var(--action-danger)"
           : "var(--action-primary)";
   return (
-    <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface-default)] p-4">
+    <div className="flex items-center justify-between rounded-xl border border-border bg-bg-base p-4">
       <div>
-        <div className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
-        <div className="mt-1 text-2xl font-bold text-[var(--text-primary)]">{value}</div>
+        <div className="text-[11px] uppercase tracking-wide text-text-muted">{label}</div>
+        <div className="mt-1 text-2xl font-bold text-text-primary">{value}</div>
       </div>
       <MiniSparkline label={label} values={spark} color={color} />
     </div>

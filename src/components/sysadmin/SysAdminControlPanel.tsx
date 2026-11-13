@@ -79,16 +79,16 @@ const api = useApi();
       {/* Page Heading */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             Dedicated infrastructure, security governance, SSO/LDAP integrations & telemetry console.
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Link
             href="/sysadmin/profile"
-            className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated transition-all flex items-center gap-1.5"
           >
-            <User className="w-3.5 h-3.5 text-sky-400" />
+            <User className="w-3.5 h-3.5 text-action-info" />
             SysAdmin Profile
           </Link>
         </div>
@@ -107,15 +107,15 @@ const api = useApi();
       <GovernanceModules />
 
       {/* Live System Audit Stream */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-xl space-y-4">
+      <div className="rounded-2xl border border-border bg-bg-surface p-5 shadow-xl space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-amber-400" />
-            <h3 className="text-sm font-bold text-[var(--text-primary)]">Live System Audit Telemetry Stream</h3>
+            <ShieldAlert className="w-5 h-5 text-action-warning" />
+            <h3 className="text-sm font-bold text-text-primary">Live System Audit Telemetry Stream</h3>
           </div>
           <Link
             href="/sysadmin/audit"
-            className="text-xs text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1"
+            className="text-xs text-action-danger hover:text-action-danger font-semibold flex items-center gap-1"
           >
             View Full Audit Trail <ArrowRight className="w-3 h-3" />
           </Link>
@@ -123,14 +123,14 @@ const api = useApi();
 
         {telemetryError && (
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30">
-            <div className="flex items-center gap-2 text-xs text-rose-300 font-medium">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="flex items-center gap-2 text-xs text-action-danger font-medium">
+              <AlertCircle className="w-4 h-4 text-action-danger shrink-0" />
               <span>Could not load telemetry. Audit or session endpoints unavailable.</span>
             </div>
             <button
               onClick={fetchTelemetry}
               disabled={isSyncing}
-              className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[11px] font-bold hover:bg-rose-500/30 transition disabled:opacity-50"
+              className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-[11px] font-bold hover:bg-rose-500/30 transition disabled:opacity-50"
             >
               Retry
             </button>
@@ -138,8 +138,8 @@ const api = useApi();
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[var(--text-primary)]">
-            <thead className="bg-[var(--bg-elevated)] text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--border)]">
+          <table className="w-full text-left text-xs text-text-primary">
+            <thead className="bg-bg-elevated text-[10px] font-bold uppercase tracking-wider text-text-muted border-b border-border">
               <tr>
                 <th className="py-2.5 px-3">Action Event</th>
                 <th className="py-2.5 px-3">User / Executed By</th>
@@ -147,7 +147,7 @@ const api = useApi();
                 <th className="py-2.5 px-3">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)] font-mono">
+            <tbody className="divide-y divide-border font-mono">
               {auditLogs.length > 0 ? (
                 auditLogs.map((log) => {
                   const details = log.details || {};
@@ -155,24 +155,24 @@ const api = useApi();
                   const geo = details.geo;
                   const gpsText = geo && geo.latitude ? `${geo.latitude}, ${geo.longitude}` : "GPS N/A";
                   return (
-                    <tr key={log.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors">
-                      <td className="py-2.5 px-3 font-semibold text-rose-400">
+                    <tr key={log.id} className="hover:bg-bg-elevated/50 transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-action-danger">
                         {log.action}
                       </td>
-                      <td className="py-2.5 px-3 text-[var(--text-primary)]">
+                      <td className="py-2.5 px-3 text-text-primary">
                         {log.user_name || "System Core"} ({log.user_role || "system"})
                       </td>
                       <td className="py-2.5 px-3">
                         <div className="flex flex-col gap-0.5">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 w-fit">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-action-primary border border-indigo-500/30 w-fit">
                             {sysTag}
                           </span>
-                          <span className="text-[10px] text-emerald-400 font-mono">
+                          <span className="text-[10px] text-action-success font-mono">
                             📍 {gpsText}
                           </span>
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 text-[var(--text-muted)] text-[11px]">
+                      <td className="py-2.5 px-3 text-text-muted text-[11px]">
                         {log.timestamp ? new Date(log.timestamp).toLocaleString() : "—"}
                       </td>
                     </tr>
@@ -180,7 +180,7 @@ const api = useApi();
                 })
               ) : (
                 <tr>
-                  <td colSpan={4} className="py-6 text-center text-[var(--text-muted)] font-sans">
+                  <td colSpan={4} className="py-6 text-center text-text-muted font-sans">
                     {telemetryError ? "Telemetry unavailable — see banner above." : "No recent audit logs available or initializing..."}
                   </td>
                 </tr>

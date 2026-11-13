@@ -32,7 +32,7 @@ export function ScanViewfinder({ onScanQr, onScanBarcode, onManualEntry }: ScanV
       <button
         type="button"
         onClick={() => void onScanQr()}
-        className="flex items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] text-black font-semibold text-sm py-3"
+        className="flex items-center justify-center gap-2 rounded-xl bg-action-primary text-black font-semibold text-sm py-3"
       >
         <QrCode className="w-4 h-4" />
         Scan QR
@@ -40,7 +40,7 @@ export function ScanViewfinder({ onScanQr, onScanBarcode, onManualEntry }: ScanV
       <button
         type="button"
         onClick={() => void onScanBarcode()}
-        className="flex items-center justify-center gap-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-secondary)] font-semibold text-sm py-3 border border-[var(--border)]"
+        className="flex items-center justify-center gap-2 rounded-xl bg-bg-elevated text-text-secondary font-semibold text-sm py-3 border border-border"
       >
         <ScanLine className="w-4 h-4" />
         Scan Barcode
@@ -48,7 +48,7 @@ export function ScanViewfinder({ onScanQr, onScanBarcode, onManualEntry }: ScanV
       <button
         type="button"
         onClick={onManualEntry}
-        className="flex items-center justify-center gap-2 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-muted)] font-medium text-xs py-2.5 border border-[var(--border)]"
+        className="flex items-center justify-center gap-2 rounded-xl bg-bg-elevated text-text-muted font-medium text-xs py-2.5 border border-border"
       >
         <KeyRound className="w-3.5 h-3.5" />
         Manual Entry

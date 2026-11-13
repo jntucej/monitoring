@@ -53,11 +53,11 @@ interface StudentsData {
 }
 
 const DEPT_COLORS: Record<string, string> = {
-  CSE: "#3b82f6",
-  IT: "#06b6d4",
-  ECE: "#10b981",
-  EEE: "#f59e0b",
-  MECH: "#ef4444",
+  CSE: "var(--action-primary)",
+  IT: "var(--action-info)",
+  ECE: "var(--action-success)",
+  EEE: "var(--action-warning)",
+  MECH: "var(--action-danger)",
 };
 
 function deptColor(code: string | null | undefined) {
@@ -230,7 +230,7 @@ function AdminStudentsInner() {
       />
 
       {error && (
-        <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">
+        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
@@ -238,8 +238,8 @@ function AdminStudentsInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Total students</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <p className="text-xs text-text-muted">Total students</p>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">
             {data?.total ?? 0}
           </p>
           {data && <MiniSparkline
@@ -250,8 +250,8 @@ function AdminStudentsInner() {
           />}
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Active</p>
-          <p className="text-2xl font-bold text-[var(--action-primary)] tabular-nums">
+          <p className="text-xs text-text-muted">Active</p>
+          <p className="text-2xl font-bold text-action-primary tabular-nums">
             {data?.active ?? 0}
           </p>
           <MiniCountPills
@@ -260,17 +260,17 @@ function AdminStudentsInner() {
           />
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">On campus today</p>
-          <p className="text-2xl font-bold text-sky-400 tabular-nums">
+          <p className="text-xs text-text-muted">On campus today</p>
+          <p className="text-2xl font-bold text-action-info tabular-nums">
             {data?.onCampusToday ?? 0}
           </p>
-          <p className="text-[11px] text-[var(--text-muted)]">
+          <p className="text-[11px] text-text-muted">
             {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Hostellers</p>
-          <p className="text-2xl font-bold text-violet-400 tabular-nums">
+          <p className="text-xs text-text-muted">Hostellers</p>
+          <p className="text-2xl font-bold text-unit-c tabular-nums">
             {data?.byType.find((t) => t.type === "hosteller")?.count ?? 0}
           </p>
           <MiniStackedBar label="by type" segments={typeSegments} />
@@ -282,7 +282,7 @@ function AdminStudentsInner() {
         <WidgetBoundary title="Filters">
           <aside className="glass-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Department
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -293,7 +293,7 @@ function AdminStudentsInner() {
                     className={`text-[11px] px-2 py-1 rounded-full border transition ${
                       deptFilter.includes(d.code)
                         ? "border-transparent text-white"
-                        : "border-[var(--border)] text-[var(--text-primary)]"
+                        : "border-border text-text-primary"
                     }`}
                     style={deptFilter.includes(d.code) ? { background: deptColor(d.code) } : undefined}
                   >
@@ -304,7 +304,7 @@ function AdminStudentsInner() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Year
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -314,8 +314,8 @@ function AdminStudentsInner() {
                     onClick={() => toggleIn(yearFilter, y.year, setYearFilter)}
                     className={`text-[11px] px-2 py-1 rounded-full border transition ${
                       yearFilter.includes(y.year)
-                        ? "border-[var(--action-primary)] bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                        : "border-[var(--border)] text-[var(--text-primary)]"
+                        ? "border-action-primary bg-action-primary/10 text-action-primary"
+                        : "border-border text-text-primary"
                     }`}
                   >
                     Year {y.year} <span className="opacity-70">{y.count}</span>
@@ -325,7 +325,7 @@ function AdminStudentsInner() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Type
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -335,8 +335,8 @@ function AdminStudentsInner() {
                     onClick={() => setTypeFilter(t)}
                     className={`text-[11px] px-2 py-1 rounded-full border transition ${
                       typeFilter === t
-                        ? "border-[var(--action-primary)] bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                        : "border-[var(--border)] text-[var(--text-primary)]"
+                        ? "border-action-primary bg-action-primary/10 text-action-primary"
+                        : "border-border text-text-primary"
                     }`}
                   >
                     {t === "all" ? "All" : t === "hosteller" ? "Hostellers" : "Day scholars"}
@@ -353,7 +353,7 @@ function AdminStudentsInner() {
                   setTypeFilter("all");
                   setQuery("");
                 }}
-                className="text-xs text-[var(--action-primary)] hover:underline flex items-center gap-1"
+                className="text-xs text-action-primary hover:underline flex items-center gap-1"
               >
                 <X className="w-3 h-3" /> Clear filters
               </button>
@@ -364,19 +364,19 @@ function AdminStudentsInner() {
         {/* Table */}
         <div className="lg:col-span-3 space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, roll, or email…"
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 
           <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[640px]">
-                <thead className="bg-[var(--bg-surface)]/60 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                <thead className="bg-bg-surface/60 text-text-muted text-xs uppercase tracking-wide">
                   <tr>
                     <th className="text-left px-4 py-2.5 font-medium">Student</th>
                     <th className="text-left px-4 py-2.5 font-medium">Department</th>
@@ -389,7 +389,7 @@ function AdminStudentsInner() {
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                      <td colSpan={6} className="px-4 py-10 text-center text-text-muted">
                         No students match this view
                       </td>
                     </tr>
@@ -398,7 +398,7 @@ function AdminStudentsInner() {
                     <tr
                       key={r.id}
                       onClick={() => setActive(r)}
-                      className="border-t border-[var(--border)] hover:bg-[var(--bg-surface)]/40 cursor-pointer"
+                      className="border-t border-border hover:bg-bg-surface/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
@@ -409,8 +409,8 @@ function AdminStudentsInner() {
                             {initials(r.name)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[var(--text-primary)] font-medium truncate">{r.name}</p>
-                            <p className="text-[11px] text-[var(--text-muted)] font-mono">{r.roll ?? "—"}</p>
+                            <p className="text-text-primary font-medium truncate">{r.name}</p>
+                            <p className="text-[11px] text-text-muted font-mono">{r.roll ?? "—"}</p>
                           </div>
                         </div>
                       </td>
@@ -428,22 +428,22 @@ function AdminStudentsInner() {
                       <td className="px-4 py-2.5 text-xs">{r.year ?? "—"}</td>
                       <td className="px-4 py-2.5">
                         {r.isHosteller ? (
-                          <span className="flex items-center gap-1 text-xs text-violet-400">
+                          <span className="flex items-center gap-1 text-xs text-unit-c">
                             <Home className="w-3 h-3" /> Hosteller
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-xs text-sky-400">
+                          <span className="flex items-center gap-1 text-xs text-action-info">
                             <Building2 className="w-3 h-3" /> Day
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">
+                      <td className="px-4 py-2.5 text-xs text-text-muted">
                         {r.hostelBlock && r.roomNumber
                           ? `${r.hostelBlock}-${r.roomNumber}`
                           : "—"}
                       </td>
                       <td className="px-4 py-2.5">
-                        <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+                        <ChevronRight className="w-4 h-4 text-text-muted" />
                       </td>
                     </tr>
                   ))}
@@ -461,7 +461,7 @@ function AdminStudentsInner() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setActive(null)}
           />
-          <aside className="relative w-full max-w-md h-full glass-card border-l border-[var(--border)] p-5 overflow-y-auto">
+          <aside className="relative w-full max-w-md h-full glass-card border-l border-border p-5 overflow-y-auto">
             <header className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div
@@ -471,17 +471,17 @@ function AdminStudentsInner() {
                   {initials(active.name)}
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                  <h2 className="text-lg font-semibold text-text-primary">
                     {active.name}
                   </h2>
-                  <p className="text-xs font-mono text-[var(--text-muted)]">
+                  <p className="text-xs font-mono text-text-muted">
                     {active.roll ?? "—"}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-[var(--bg-surface)]/60"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-bg-surface/60"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -489,60 +489,60 @@ function AdminStudentsInner() {
 
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <dt className="text-[var(--text-muted)]">Department</dt>
-                <dd className="text-[var(--text-primary)]">{active.department ?? "—"}</dd>
+                <dt className="text-text-muted">Department</dt>
+                <dd className="text-text-primary">{active.department ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Course</dt>
-                <dd className="text-[var(--text-primary)]">{active.course ?? "—"}</dd>
+                <dt className="text-text-muted">Course</dt>
+                <dd className="text-text-primary">{active.course ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Year</dt>
-                <dd className="text-[var(--text-primary)]">{active.year ?? "—"}</dd>
+                <dt className="text-text-muted">Year</dt>
+                <dd className="text-text-primary">{active.year ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Section</dt>
-                <dd className="text-[var(--text-primary)]">{active.section ?? "—"}</dd>
+                <dt className="text-text-muted">Section</dt>
+                <dd className="text-text-primary">{active.section ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Status</dt>
-                <dd className="text-[var(--action-primary)]">{active.status}</dd>
+                <dt className="text-text-muted">Status</dt>
+                <dd className="text-action-primary">{active.status}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Type</dt>
-                <dd className="text-[var(--text-primary)]">
+                <dt className="text-text-muted">Type</dt>
+                <dd className="text-text-primary">
                   {active.isHosteller ? "Hosteller" : "Day scholar"}
                 </dd>
               </div>
               {active.email && (
                 <div className="col-span-2">
-                  <dt className="text-[var(--text-muted)]">Email</dt>
-                  <dd className="flex items-center gap-1 text-[var(--text-primary)]">
+                  <dt className="text-text-muted">Email</dt>
+                  <dd className="flex items-center gap-1 text-text-primary">
                     <Mail className="w-3 h-3" /> {active.email}
                   </dd>
                 </div>
               )}
               {active.phone && (
                 <div className="col-span-2">
-                  <dt className="text-[var(--text-muted)]">Phone</dt>
-                  <dd className="flex items-center gap-1 text-[var(--text-primary)]">
+                  <dt className="text-text-muted">Phone</dt>
+                  <dd className="flex items-center gap-1 text-text-primary">
                     <Phone className="w-3 h-3" /> {active.phone}
                   </dd>
                 </div>
               )}
               {active.hostelBlock && (
                 <div className="col-span-2">
-                  <dt className="text-[var(--text-muted)]">Hostel</dt>
-                  <dd className="text-[var(--text-primary)]">
+                  <dt className="text-text-muted">Hostel</dt>
+                  <dd className="text-text-primary">
                     {active.hostelBlock} · Room {active.roomNumber ?? "—"}
                   </dd>
                 </div>
               )}
             </dl>
-            <div className="mt-6 pt-4 border-t border-[var(--border)]">
+            <div className="mt-6 pt-4 border-t border-border">
               <a
                 href={`/admin/students/${active.roll ?? active.id}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-primary)] hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
               >
                 View full profile <ChevronRight className="w-3.5 h-3.5" />
               </a>

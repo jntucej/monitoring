@@ -47,21 +47,21 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
           >
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm">{a.title}</p>
-              <p className="mt-0.5 text-[13px] text-[var(--text-muted)]">{a.message}</p>
+              <p className="mt-0.5 text-[13px] text-text-muted">{a.message}</p>
               {a.href && (
                 <a
                   href={a.href}
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-500 hover:underline"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-action-success hover:underline"
                 >
                   {a.ctaLabel ?? "Open"} <ChevronRight className="h-3 w-3" />
                 </a>
               )}
             </div>
             <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded
-              ${a.severity === "critical" ? "bg-rose-500/20 text-rose-300" : ""}
-              ${a.severity === "high" ? "bg-amber-500/20 text-amber-300" : ""}
-              ${a.severity === "medium" ? "bg-sky-500/20 text-sky-300" : ""}
-              ${a.severity === "low" ? "bg-emerald-500/20 text-emerald-300" : ""}
+              ${a.severity === "critical" ? "bg-rose-500/20 text-action-danger" : ""}
+              ${a.severity === "high" ? "bg-amber-500/20 text-action-warning" : ""}
+              ${a.severity === "medium" ? "bg-sky-500/20 text-action-info" : ""}
+              ${a.severity === "low" ? "bg-emerald-500/20 text-action-success" : ""}
             `}>
               {a.severity.toUpperCase()}
             </span>

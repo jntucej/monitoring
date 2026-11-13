@@ -20,7 +20,7 @@ export const PrincipalSidebarCategory = memo(function PrincipalSidebarCategory({
     <div className="mb-1">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
       >
         {icon && <span className="shrink-0">{icon}</span>}
         <span className="flex-1 text-left">{title}</span>
@@ -30,7 +30,7 @@ export const PrincipalSidebarCategory = memo(function PrincipalSidebarCategory({
         }
       </button>
       {open && (
-        <div className="mt-1 ml-3 space-y-0.5 border-l border-[var(--border)] pl-3">
+        <div className="mt-1 ml-3 space-y-0.5 border-l border-border pl-3">
           {children}
         </div>
       )}

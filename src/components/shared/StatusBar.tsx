@@ -41,21 +41,21 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Status bar"
     >
       {/* Left: gate + shift */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <MapPin className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-          <span className="font-bold text-[var(--text-primary)] truncate">
+          <MapPin className="w-3.5 h-3.5 text-text-muted shrink-0" />
+          <span className="font-bold text-text-primary truncate">
             {gate?.name || "Gate not set"}
           </span>
-          <span className="font-mono text-[10px] text-[var(--text-muted)]">
+          <span className="font-mono text-[10px] text-text-muted">
             {gate ? `ID ${gate.id.slice(0, 8)}` : "—"}
           </span>
         </span>
-        <span className="hidden sm:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">
           <Timer className="w-3.5 h-3.5" />
           Shift {fmt(shiftWindow.start)} – {fmt(shiftWindow.end)}
         </span>
@@ -64,24 +64,24 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
       {/* Right: counts + last scan */}
       <div className="flex items-center gap-4 shrink-0">
         <span className="inline-flex items-center gap-1.5">
-          <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-mono tabular-nums text-emerald-400 font-bold">{counts?.entries ?? 0}</span>
-          <span className="text-[var(--text-muted)]">in</span>
+          <ArrowDownLeft className="w-3.5 h-3.5 text-action-success" />
+          <span className="font-mono tabular-nums text-action-success font-bold">{counts?.entries ?? 0}</span>
+          <span className="text-text-muted">in</span>
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <ArrowUpRight className="w-3.5 h-3.5 text-[var(--action-danger)]" />
-          <span className="font-mono tabular-nums text-[var(--action-danger)] font-bold">{counts?.exits ?? 0}</span>
-          <span className="text-[var(--text-muted)]">out</span>
+          <ArrowUpRight className="w-3.5 h-3.5 text-action-danger" />
+          <span className="font-mono tabular-nums text-action-danger font-bold">{counts?.exits ?? 0}</span>
+          <span className="text-text-muted">out</span>
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-[var(--text-muted)]">total</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">{counts?.total ?? 0}</span>
+          <span className="text-text-muted">total</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">{counts?.total ?? 0}</span>
         </span>
         {lastScan ? (
           <span className="hidden md:inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {new Date(lastScan).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </span>
           </span>

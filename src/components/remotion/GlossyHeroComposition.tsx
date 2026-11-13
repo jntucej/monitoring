@@ -31,8 +31,8 @@ export const GlossyHeroComposition: React.FC<GlossyHeroCompositionProps> = () =>
 
       {/* Header Info */}
       <div className="relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-semibold tracking-wider uppercase mb-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-action-success text-xs font-mono font-semibold tracking-wider uppercase mb-2">
+          <span className="w-2 h-2 rounded-full bg-action-success animate-pulse" />
           Real-Time Gate Telemetry
         </div>
         <h2 className="text-xl font-bold tracking-tight text-white">Campus Access Controller</h2>

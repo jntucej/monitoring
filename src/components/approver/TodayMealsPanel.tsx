@@ -59,9 +59,9 @@ interface MealCountsResponse {
 type MealStatus = "upcoming" | "active" | "closed";
 
 const STATUS_TONE: Record<MealStatus, string> = {
-  upcoming: "text-sky-400 bg-sky-400/10 border-sky-400/20",
-  active: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  closed: "text-rose-400 bg-rose-400/10 border-rose-400/20",
+  upcoming: "text-action-info bg-sky-400/10 border-sky-400/20",
+  active: "text-action-success bg-emerald-400/10 border-emerald-400/20",
+  closed: "text-action-danger bg-rose-400/10 border-rose-400/20",
 };
 
 const STATUS_LABEL: Record<MealStatus, string> = {
@@ -131,17 +131,17 @@ export function TodayMealsPanel() {
   const visible = days.length > 0 ? days : [];
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0">
+    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <UtensilsCrossed className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-        <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+        <UtensilsCrossed className="w-4 h-4 text-action-primary shrink-0" />
+        <span className="text-sm font-bold text-text-primary truncate">
           Today&apos;s Meals
         </span>
       </div>
 
       {daysLoading || countsLoading ? (
-        <div className="flex items-center gap-2 px-3 py-3 text-[var(--text-muted)]">
+        <div className="flex items-center gap-2 px-3 py-3 text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-[11px]">Loading today&apos;s service…</span>
         </div>
@@ -158,16 +158,16 @@ export function TodayMealsPanel() {
             return (
               <li
                 key={row.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 min-w-0"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                  <p className="text-xs font-semibold text-text-primary truncate">
                     {dayName(row.mealDate)}
-                    <span className="ml-1.5 font-mono text-[10px] font-normal text-[var(--text-muted)]">
+                    <span className="ml-1.5 font-mono text-[10px] font-normal text-text-muted">
                       {row.mealType}
                     </span>
                   </p>
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] truncate">
+                  <p className="text-[10px] font-mono text-text-muted truncate">
                     {fmtWindow(row.windowOpensAt)} – {fmtWindow(row.windowClosesAt)}
                   </p>
                 </div>
@@ -186,15 +186,15 @@ export function TodayMealsPanel() {
       {/* Today's serving counts (only when an active day has counts). */}
       {countsData?.data ? (
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)]/50 px-2.5 py-1.5 min-w-0">
-            <p className="text-[10px] text-[var(--text-muted)]">Declared present</p>
-            <p className="text-sm font-bold text-[var(--text-primary)] font-mono tabular-nums">
+          <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
+            <p className="text-[10px] text-text-muted">Declared present</p>
+            <p className="text-sm font-bold text-text-primary font-mono tabular-nums">
               {countsData.data.declaredPresent}
             </p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)]/50 px-2.5 py-1.5 min-w-0">
-            <p className="text-[10px] text-[var(--text-muted)]">Confirmed served</p>
-            <p className="text-sm font-bold text-emerald-400 font-mono tabular-nums">
+          <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
+            <p className="text-[10px] text-text-muted">Confirmed served</p>
+            <p className="text-sm font-bold text-action-success font-mono tabular-nums">
               {countsData.data.confirmed}
             </p>
           </div>

@@ -60,7 +60,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
         <div
           role="radiogroup"
           aria-label="Theme selection"
-          className="flex items-center p-0.5 sm:p-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-inner relative shrink-0"
+          className="flex items-center p-0.5 sm:p-1 rounded-full bg-bg-elevated border border-border shadow-inner relative shrink-0"
         >
           {themes.map((t) => {
             const isActive = currentTheme === t.id;
@@ -72,14 +72,14 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
                 aria-checked={isActive}
                 onClick={() => handleThemeChange(t.id as any)}
                 className={`relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
-                  isActive ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  isActive ? "text-text-primary" : "text-text-muted hover:text-text-primary"
                 }`}
                 aria-label={`Switch to ${t.label} theme`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="theme-toggle-bubble"
-                    className="absolute inset-0 bg-[var(--bg-surface)] rounded-full shadow-sm border border-[var(--border-strong)] z-0"
+                    className="absolute inset-0 bg-bg-surface rounded-full shadow-sm border border-border z-0"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
                 )}
@@ -94,7 +94,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
           onClick={() => setShowFeedback(true)}
           title="Report Theme Issue"
           aria-label="Report Theme Issue"
-          className="p-1 sm:p-1.5 min-w-[36px] min-h-[36px] rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
+          className="p-1 sm:p-1.5 min-w-[36px] min-h-[36px] rounded-full text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
         >
           <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>

@@ -94,16 +94,16 @@ function AdminSessionsInner() {
 
       <WidgetBoundary title="Session list">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)]">
+          <div className="p-4 border-b border-border">
             <p className="text-sm font-semibold flex items-center gap-2">
-              <MonitorSmartphone className="w-4 h-4 text-[var(--action-primary)]" />
+              <MonitorSmartphone className="w-4 h-4 text-action-primary" />
               {rows.length} active session{rows.length === 1 ? "" : "s"}
             </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                <tr className="text-xs text-text-muted border-b border-border">
                   <th className="p-3 text-left">User</th>
                   <th className="p-3 text-left">Role</th>
                   <th className="p-3 text-left">Last active</th>
@@ -111,28 +111,28 @@ function AdminSessionsInner() {
                   <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {rows.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-[var(--text-muted)]">No active sessions.</td></tr>
+                  <tr><td colSpan={5} className="p-6 text-center text-text-muted">No active sessions.</td></tr>
                 )}
                 {rows.map((r) => (
-                  <tr key={r.sessionId} className="hover:bg-[var(--bg-elevated)]/40">
+                  <tr key={r.sessionId} className="hover:bg-bg-elevated/40">
                     <td className="p-3">
-                      <p className="text-[var(--text-primary)] font-medium">{r.name}</p>
-                      <p className="text-[11px] text-[var(--text-muted)] font-mono">{r.email}</p>
+                      <p className="text-text-primary font-medium">{r.name}</p>
+                      <p className="text-[11px] text-text-muted font-mono">{r.email}</p>
                     </td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--bg-elevated)] text-[var(--text-muted)] capitalize">{r.role}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted capitalize">{r.role}</span>
                     </td>
-                    <td className="p-3 text-xs text-[var(--text-muted)]">
+                    <td className="p-3 text-xs text-text-muted">
                       {r.lastActive ? new Date(r.lastActive).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                     </td>
-                    <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.ipAddress ?? "—"}</td>
+                    <td className="p-3 font-mono text-xs text-text-muted">{r.ipAddress ?? "—"}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => setRevokeTarget(r)}
                         disabled={busy === r.sessionId}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-danger)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 hover:bg-[var(--action-danger)]/10 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-danger border border-border rounded-lg px-2.5 py-1.5 hover:bg-action-danger/10 disabled:opacity-50"
                       >
                         {busy === r.sessionId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
                         Revoke

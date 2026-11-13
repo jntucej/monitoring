@@ -49,7 +49,7 @@ function ReleaseRail({ rows }: { rows: DeploymentRow[] }) {
 
   if (visible.length === 0) {
     return (
-      <p className="text-sm text-[var(--text-muted)] py-3">
+      <p className="text-sm text-text-muted py-3">
         No deployment records.
       </p>
     );
@@ -124,7 +124,7 @@ function ReleaseRail({ rows }: { rows: DeploymentRow[] }) {
         {visible.map((d, _i) => (
           <div
             key={d.id}
-            className="shrink-0 text-[9px] text-[var(--text-muted)] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border)] w-[28px] text-center"
+            className="shrink-0 text-[9px] text-text-muted px-1.5 py-0.5 rounded bg-bg-surface border border-border w-[28px] text-center"
             title={`${d.status} · ${relative(d.created_at)}`}
           >
             {new Date(d.created_at).toLocaleDateString(undefined, {
@@ -157,7 +157,7 @@ export function DeploymentsContent(
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-xl bg-[var(--bg-surface)] opacity-40" />
+          <div key={i} className="h-24 animate-pulse rounded-xl bg-bg-surface opacity-40" />
         ))}
       </div>
     );
@@ -165,7 +165,7 @@ export function DeploymentsContent(
 
   if (error) {
     return (
-      <div className="rounded-xl border border-[var(--action-danger)]/30 bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]">
+      <div className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger">
         Failed to load deployment data: {error}
       </div>
     );
@@ -180,18 +180,18 @@ export function DeploymentsContent(
       {/* KPI strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* last deploy */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Last Deploy
           </p>
-          <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <span className="text-lg font-semibold text-text-primary">
             {relative(kpis.lastDeployAt)}
           </span>
         </div>
 
         {/* health gate pass % */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Health Gate
           </p>
           <div className="flex items-center gap-2">
@@ -204,23 +204,23 @@ export function DeploymentsContent(
                   : "var(--action-warning)"
               }
             />
-            <span className="text-lg font-semibold text-[var(--text-primary)]">
+            <span className="text-lg font-semibold text-text-primary">
               {kpis.healthGatePassPct}%
             </span>
           </div>
         </div>
 
         {/* rollbacks 30d */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Rollbacks 30d
           </p>
           <span
             className={cn(
               "text-lg font-semibold",
               kpis.rollbacks30d > 0
-                ? "text-[var(--action-warning)]"
-                : "text-[var(--text-primary)]",
+                ? "text-action-warning"
+                : "text-text-primary",
             )}
           >
             {kpis.rollbacks30d}
@@ -228,19 +228,19 @@ export function DeploymentsContent(
         </div>
 
         {/* lead time */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">
+        <div className="rounded-xl border border-border bg-bg-surface p-3">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
             Lead Time
           </p>
-          <span className="text-lg font-semibold text-[var(--text-primary)]">
+          <span className="text-lg font-semibold text-text-primary">
             {kpis.leadTimeAvgMin > 0 ? `${kpis.leadTimeAvgMin}m` : "—"}
           </span>
         </div>
       </div>
 
       {/* Signature visual: release rail */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-        <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+      <div className="rounded-xl border border-border bg-bg-surface p-4">
+        <p className="text-sm font-semibold text-text-primary mb-3">
           Release Rail
         </p>
         <ReleaseRail rows={deployments} />
@@ -248,10 +248,10 @@ export function DeploymentsContent(
 
       {/* Recent deployments table */}
       {deployments.length > 0 && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)] text-left text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+              <tr className="border-b border-border text-left text-[10px] uppercase tracking-wide text-text-muted">
                 <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Version</th>
                 <th className="px-3 py-2">Detail</th>
@@ -260,23 +260,23 @@ export function DeploymentsContent(
             </thead>
             <tbody>
               {deployments.slice(0, 15).map((d) => (
-                <tr key={d.id} className="border-b border-[var(--border)] last:border-b-0">
+                <tr key={d.id} className="border-b border-border last:border-b-0">
                   <td className="px-3 py-2">
                     <span
                       className="inline-block w-2 h-2 rounded-full"
                       style={{ background: dotColor(d.status) }}
                     />
-                    <span className="ml-2 text-xs text-[var(--text-muted)]">
+                    <span className="ml-2 text-xs text-text-muted">
                       {d.status}
                     </span>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-[var(--text-primary)]">
+                  <td className="px-3 py-2 font-mono text-xs text-text-primary">
                     {d.version ?? "—"}
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--text-muted)] truncate max-w-[200px]">
+                  <td className="px-3 py-2 text-xs text-text-muted truncate max-w-[200px]">
                     {d.message ?? d.commit ?? "—"}
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--text-muted)] whitespace-nowrap">
+                  <td className="px-3 py-2 text-xs text-text-muted whitespace-nowrap">
                     {relative(d.created_at)}
                   </td>
                 </tr>

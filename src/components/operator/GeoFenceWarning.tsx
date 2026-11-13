@@ -53,16 +53,16 @@ export function GeoFenceWarning({
       aria-label={`Off-fence at ${gateName}`}
       className="fixed inset-x-0 bottom-0 z-80 mx-auto w-full max-w-md p-4"
     >
-      <div className="rounded-2xl border border-amber-500/40 bg-[var(--bg-surface)] p-4 shadow-2xl">
+      <div className="rounded-2xl border border-amber-500/40 bg-bg-surface p-4 shadow-2xl">
         <div className="flex items-start gap-3">
-          <MapPinOff className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" aria-hidden />
+          <MapPinOff className="mt-0.5 h-5 w-5 shrink-0 text-action-warning" aria-hidden />
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-[var(--text-primary)]">
+            <h3 className="text-sm font-bold text-text-primary">
               Outside {gateName} fence
             </h3>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            <p className="mt-1 text-xs text-text-secondary">
               The kiosk is{" "}
-              <strong className="text-amber-400">
+              <strong className="text-action-warning">
                 {Math.round(distanceMeters)} m
               </strong>{" "}
               from the gate (allowed radius {Math.round(allowedRadiusMeters)} m).

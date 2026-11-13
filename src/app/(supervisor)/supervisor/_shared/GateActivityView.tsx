@@ -37,8 +37,8 @@ export function GateActivityView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Gate Activity</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Gate Activity</h1>
+        <p className="text-xs text-text-muted">
           Live gate occupancy, guard coverage, and hourly movement volumes
         </p>
       </header>
@@ -53,18 +53,18 @@ export function GateActivityView() {
             {gates.map((g) => (
               <li
                 key={g.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-xs"
+                className="rounded-xl border border-border bg-bg-surface p-3 text-xs"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <DoorOpen className="size-4 text-[var(--action-info)]" />
-                    <span className="font-semibold text-[var(--text-primary)]">{g.name}</span>
+                    <DoorOpen className="size-4 text-action-info" />
+                    <span className="font-semibold text-text-primary">{g.name}</span>
                   </div>
-                  <span className="font-medium text-[var(--text-secondary)]">
+                  <span className="font-medium text-text-secondary">
                     {g.onPost} guards
                   </span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
                   <span>In: {g.recentEntries} / 1h</span>
                   <span>Out: {g.recentExits} / 1h</span>
                 </div>
@@ -80,7 +80,7 @@ export function GateActivityView() {
                 {
                   header: "Guards on Post",
                   accessor: (g) => (
-                    <span className="font-semibold tabular-nums text-[var(--action-primary)]">
+                    <span className="font-semibold tabular-nums text-action-primary">
                       {g.onPost}
                     </span>
                   ),
@@ -89,7 +89,7 @@ export function GateActivityView() {
                   header: "Recent Entries (1h)",
                   accessor: (g) => (
                     <span className="flex items-center gap-1">
-                      <ArrowDownLeft className="size-3 text-[var(--action-info)]" />
+                      <ArrowDownLeft className="size-3 text-action-info" />
                       {g.recentEntries}
                     </span>
                   ),
@@ -98,7 +98,7 @@ export function GateActivityView() {
                   header: "Recent Exits (1h)",
                   accessor: (g) => (
                     <span className="flex items-center gap-1">
-                      <ArrowUpRight className="size-3 text-[var(--action-warning)]" />
+                      <ArrowUpRight className="size-3 text-action-warning" />
                       {g.recentExits}
                     </span>
                   ),

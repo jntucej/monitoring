@@ -35,24 +35,24 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
       <div className="rounded-3xl bg-gradient-to-br from-[var(--action-primary)]/20 to-[var(--action-info)]/10 p-6">
-        <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
+        <p className="text-xs uppercase tracking-wide text-text-muted">
           {r.periodLabel}
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-[var(--text-primary)]">
+        <h1 className="mt-1 text-2xl font-bold text-text-primary">
           {r.userName}
         </h1>
-        <p className="text-sm text-[var(--text-secondary)]">{r.role}</p>
+        <p className="text-sm text-text-secondary">{r.role}</p>
         <dl className="mt-6 grid grid-cols-3 gap-2 text-center">
           <div>
-            <dt className="text-xs text-[var(--text-muted)]">Events</dt>
+            <dt className="text-xs text-text-muted">Events</dt>
             <dd className="text-xl font-bold">{r.eventsRegistered}</dd>
           </div>
           <div>
-            <dt className="text-xs text-[var(--text-muted)]">Achievements</dt>
+            <dt className="text-xs text-text-muted">Achievements</dt>
             <dd className="text-xl font-bold">{r.earnedAchievements.length}</dd>
           </div>
           <div>
-            <dt className="text-xs text-[var(--text-muted)]">Goals</dt>
+            <dt className="text-xs text-text-muted">Goals</dt>
             <dd className="text-xl font-bold">
               {r.completedGoals}/{r.totalGoals}
             </dd>
@@ -61,7 +61,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
       </div>
       <button
         onClick={share}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-4 py-3 text-sm"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm"
       >
         <Share2 className="h-4 w-4" aria-hidden /> Share
       </button>

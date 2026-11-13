@@ -64,17 +64,17 @@ export function SustainabilityDashboard() {
     document.body.removeChild(link);
   };
 
-  if (loading || !metrics) return <div className="p-8 text-center text-xs text-[var(--text-secondary)]">Computing Green IT Sustainability Metrics...</div>;
+  if (loading || !metrics) return <div className="p-8 text-center text-xs text-text-secondary">Computing Green IT Sustainability Metrics...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <p className="text-xl font-bold flex items-center gap-2">
-            <Leaf className="h-6 w-6 text-emerald-400" />
+            <Leaf className="h-6 w-6 text-action-success" />
             Sustainability & Green IT Dashboard
           </p>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-secondary">
             Tracking paperless digital pass savings, carbon footprint reduction, and gate energy consumption.
           </p>
         </div>
@@ -85,38 +85,38 @@ export function SustainabilityDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <FileText className="h-8 w-8 text-blue-400" />
+          <FileText className="h-8 w-8 text-action-primary" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Digital Passes Issued</div>
+            <div className="text-xs text-text-secondary">Digital Passes Issued</div>
             <div className="text-2xl font-bold">{metrics.digital_passes_count.toLocaleString()}</div>
-            <div className="text-[10px] text-emerald-400 font-medium">100% Paperless</div>
+            <div className="text-[10px] text-action-success font-medium">100% Paperless</div>
           </div>
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Leaf className="h-8 w-8 text-emerald-400" />
+          <Leaf className="h-8 w-8 text-action-success" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Paper Saved (Sheets)</div>
+            <div className="text-xs text-text-secondary">Paper Saved (Sheets)</div>
             <div className="text-2xl font-bold">{metrics.paper_saved_sheets.toLocaleString()}</div>
-            <div className="text-[10px] text-[var(--text-secondary)]">~2 sheets/pass</div>
+            <div className="text-[10px] text-text-secondary">~2 sheets/pass</div>
           </div>
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Trees className="h-8 w-8 text-amber-400" />
+          <Trees className="h-8 w-8 text-action-warning" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Trees Equivalent Saved</div>
+            <div className="text-xs text-text-secondary">Trees Equivalent Saved</div>
             <div className="text-2xl font-bold">{metrics.trees_equivalent} Trees</div>
-            <div className="text-[10px] text-emerald-400">Carbon offset</div>
+            <div className="text-[10px] text-action-success">Carbon offset</div>
           </div>
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Zap className="h-8 w-8 text-purple-400" />
+          <Zap className="h-8 w-8 text-unit-c" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Carbon Offset (kg CO2)</div>
+            <div className="text-xs text-text-secondary">Carbon Offset (kg CO2)</div>
             <div className="text-2xl font-bold">{metrics.carbon_saved_kg} kg</div>
-            <div className="text-[10px] text-[var(--text-secondary)]">Gate energy: {metrics.energy_kwh} kWh</div>
+            <div className="text-[10px] text-text-secondary">Gate energy: {metrics.energy_kwh} kWh</div>
           </div>
         </Card>
       </div>
@@ -129,7 +129,7 @@ export function SustainabilityDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                <tr className="border-b border-border text-text-secondary">
                   <th className="p-2">Month</th>
                   <th className="p-2">Paper Saved (Sheets)</th>
                   <th className="p-2">Carbon Offset (kg CO2)</th>
@@ -138,10 +138,10 @@ export function SustainabilityDashboard() {
               </thead>
               <tbody>
                 {history.map((row, idx) => (
-                  <tr key={idx} className="border-b border-[var(--border)] hover:bg-[var(--bg-surface-elevated)]">
+                  <tr key={idx} className="border-b border-border hover:bg-[var(--bg-surface-elevated)]">
                     <td className="p-2 font-semibold">{row.month} 2026</td>
-                    <td className="p-2 font-mono text-emerald-400">{row.paper_saved.toLocaleString()}</td>
-                    <td className="p-2 font-mono text-purple-400">{row.carbon_saved} kg</td>
+                    <td className="p-2 font-mono text-action-success">{row.paper_saved.toLocaleString()}</td>
+                    <td className="p-2 font-mono text-unit-c">{row.carbon_saved} kg</td>
                     <td className="p-2">
                       <Badge variant="success" className="text-xs">Verified</Badge>
                     </td>

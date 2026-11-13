@@ -12,13 +12,13 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
     return (
       <div className="flex gap-1">
         {teaching > 0 && (
-          <span className="flex items-center gap-0.5 rounded-full bg-[var(--action-info)]/10 px-1.5 py-0.5 text-[10px] text-[var(--action-info)]">
+          <span className="flex items-center gap-0.5 rounded-full bg-action-info/10 px-1.5 py-0.5 text-[10px] text-action-info">
             <GraduationCap className="size-2.5" />
             {teaching}
           </span>
         )}
         {faculty > 0 && (
-          <span className="flex items-center gap-0.5 rounded-full bg-[var(--action-primary)]/10 px-1.5 py-0.5 text-[10px] text-[var(--action-primary)]">
+          <span className="flex items-center gap-0.5 rounded-full bg-action-primary/10 px-1.5 py-0.5 text-[10px] text-action-primary">
             <Users className="size-2.5" />
             {faculty}
           </span>
@@ -31,7 +31,7 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
     <div className="flex flex-wrap gap-2">
       {teaching > 0 && (
         <div
-          className="flex items-center gap-1.5 rounded-full border border-[var(--action-info)]/30 bg-[var(--action-info)]/10 px-2.5 py-1 text-xs text-[var(--action-info)]"
+          className="flex items-center gap-1.5 rounded-full border border-[var(--action-info)]/30 bg-action-info/10 px-2.5 py-1 text-xs text-action-info"
           title="Consecutive workdays where you marked attendance for all classes"
         >
           <GraduationCap className="size-3" />
@@ -41,7 +41,7 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
       )}
       {faculty > 0 && (
         <div
-          className="flex items-center gap-1.5 rounded-full border border-[var(--action-primary)]/30 bg-[var(--action-primary)]/10 px-2.5 py-1 text-xs text-[var(--action-primary)]"
+          className="flex items-center gap-1.5 rounded-full border border-action-primary/30 bg-action-primary/10 px-2.5 py-1 text-xs text-action-primary"
           title="Consecutive workdays with zero faculty attendance escalations"
         >
           <Flame className="size-3" />

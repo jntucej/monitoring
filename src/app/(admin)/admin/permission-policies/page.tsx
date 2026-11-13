@@ -36,10 +36,10 @@ interface PermissionPoliciesData {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4 space-y-2 animate-pulse">
-      <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
-      <div className="h-5 w-32 rounded bg-[var(--bg-elevated)]" />
-      <div className="h-3 w-40 rounded bg-[var(--bg-elevated)]" />
+    <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-2 animate-pulse">
+      <div className="h-3 w-24 rounded bg-bg-elevated" />
+      <div className="h-5 w-32 rounded bg-bg-elevated" />
+      <div className="h-3 w-40 rounded bg-bg-elevated" />
     </div>
   );
 }
@@ -82,66 +82,66 @@ function AdminPermissionPoliciesInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <GitBranch className="w-3.5 h-3.5 text-emerald-400" /> Workflow Types
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <GitBranch className="w-3.5 h-3.5 text-action-success" /> Workflow Types
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : workflows.length}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : workflows.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Defined pass types in circulation</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Defined pass types in circulation</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Open Requests">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <FileCheck className="w-3.5 h-3.5 text-amber-400" /> Open Requests
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <FileCheck className="w-3.5 h-3.5 text-action-warning" /> Open Requests
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading
-                ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" />
+                ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" />
                 : workflows.reduce((sum, w) => sum + (w.open_count || 0), 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Across all workflow types</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Across all workflow types</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
-          <div className="rounded-xl border border-[var(--border)] bg-[#0d1220] p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              <Clock className="w-3.5 h-3.5 text-blue-400" /> Standard SLA
+          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <Clock className="w-3.5 h-3.5 text-action-primary" /> Standard SLA
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
-              {loading ? <span className="inline-block w-10 h-5 rounded bg-[var(--bg-elevated)] animate-pulse" /> : "48 hrs"}
+              {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : "48 hrs"}
             </div>
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Approval turnaround target</p>
+            <p className="mt-0.5 text-[11px] text-text-muted">Approval turnaround target</p>
           </div>
         </WidgetBoundary>
       </div>
 
       {/* Workflow table */}
       <WidgetBoundary title="Permission Workflow Policies">
-        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-[var(--border)]">
+        <div className="rounded-2xl border border-border bg-bg-elevated overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-border">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-action-success" />
               Workflow stage definitions
             </div>
             <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter workflows…"
-                className="w-full rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)]"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-white"
                   aria-label="Clear filter"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -151,7 +151,7 @@ function AdminPermissionPoliciesInner() {
           </div>
 
           {res.error ? (
-            <div className="p-6 text-sm text-rose-400">{res.error}</div>
+            <div className="p-6 text-sm text-action-danger">{res.error}</div>
           ) : loading ? (
             <div className="p-4 space-y-2">
               <SkeletonCard />
@@ -159,12 +159,12 @@ function AdminPermissionPoliciesInner() {
               <SkeletonCard />
             </div>
           ) : visibleWorkflows.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+            <div className="p-8 text-center text-sm text-text-muted">
               <p>No workflow definitions match the current filter.</p>
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="mt-3 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+                className="mt-3 text-xs font-semibold text-action-success hover:text-action-success"
               >
                 Clear filter
               </button>
@@ -172,7 +172,7 @@ function AdminPermissionPoliciesInner() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[700px]">
-                <thead className="bg-[var(--bg-surface)]/60 text-xs uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border)]">
+                <thead className="bg-bg-surface/60 text-xs uppercase tracking-wide text-text-muted border-b border-border">
                   <tr>
                     <th className="py-2.5 px-4">Workflow</th>
                     <th className="py-2.5 px-4">Current Stage</th>
@@ -184,30 +184,30 @@ function AdminPermissionPoliciesInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
                   {visibleWorkflows.map((w) => (
-                    <tr key={w.workflow_type} className="hover:bg-[var(--bg-surface)]/40">
+                    <tr key={w.workflow_type} className="hover:bg-bg-surface/40">
                       <td className="py-3 px-4 font-semibold text-white">{w.workflow_type}</td>
-                      <td className="py-3 px-4 text-[var(--text-secondary)]">
+                      <td className="py-3 px-4 text-text-secondary">
                         {w.stages.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {w.stages.map((s) => (
                               <span
                                 key={s.stage}
-                                className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]"
+                                className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary"
                               >
                                 {s.stage}
-                                {s.open > 0 && <span className="text-emerald-400 tabular-nums">{s.open}</span>}
+                                {s.open > 0 && <span className="text-action-success tabular-nums">{s.open}</span>}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-[var(--text-muted)]">—</span>
+                          <span className="text-text-muted">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-[var(--text-secondary)]">{w.document_required ? "Required" : "Optional"}</td>
-                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">
+                      <td className="py-3 px-4 text-text-secondary">{w.document_required ? "Required" : "Optional"}</td>
+                      <td className="py-3 px-4 tabular-nums text-text-secondary">
                         {w.open_count} / {w.pending_count}
                       </td>
-                      <td className="py-3 px-4 tabular-nums text-[var(--text-secondary)]">{w.sla_hours} hrs</td>
+                      <td className="py-3 px-4 tabular-nums text-text-secondary">{w.sla_hours} hrs</td>
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {w.approver_roles.map((r) => (
@@ -225,9 +225,9 @@ function AdminPermissionPoliciesInner() {
           )}
 
           {/* Role policy (read-only) */}
-          <div className="p-4 border-t border-[var(--border)]">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <Users className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center gap-2 text-xs text-text-muted">
+              <Users className="w-3.5 h-3.5 text-action-success" />
               {loading
                 ? "Loading role policy…"
                 : `${workflows.length > 0 ? workflows.map((w) => w.workflow_type).join(", ") : "N/A"} — role policy entries are managed under Roles.`}
@@ -239,10 +239,10 @@ function AdminPermissionPoliciesInner() {
       {/* Read-only notice */}
       <WidgetBoundary title="Editing note">
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
-          <Lock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-300">Read-only view</p>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
+            <p className="text-sm font-semibold text-action-warning">Read-only view</p>
+            <p className="mt-1 text-xs text-text-muted">
               Permission workflow definitions, stage SLAs and role policy are locked for admins — editing
               requires sysadmin access. If a stage, SLA or approver chain is out of date, raise a role
               change request or contact the platform team.

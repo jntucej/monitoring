@@ -83,22 +83,22 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={`Person detail: ${d?.name ?? activeRow.name ?? activeRow.id}`}
-        className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-[var(--border)] bg-[var(--surface-default)] shadow-xl"
+        className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-border bg-bg-base shadow-xl"
       >
         {/* header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-default)] px-4 py-3">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-bg-base px-4 py-3">
           <div className="min-w-0">
-            <div className="truncate text-base font-semibold text-[var(--text-primary)]">
+            <div className="truncate text-base font-semibold text-text-primary">
               {d?.name ?? activeRow.name}
             </div>
-            <div className="truncate text-xs text-[var(--text-muted)]">
+            <div className="truncate text-xs text-text-muted">
               {d?.email ?? activeRow.email}
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-[var(--border)] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]"
+            className="rounded-md border border-border p-1.5 text-text-secondary hover:bg-[var(--surface-raised)]"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -113,7 +113,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
             </div>
           )}
           {state === "error" && (
-            <div className="rounded-md border border-[var(--action-danger)] bg-[var(--action-danger)]/10 p-3 text-sm text-[var(--action-danger)]">
+            <div className="rounded-md border border-action-danger bg-action-danger/10 p-3 text-sm text-action-danger">
               {error}
             </div>
           )}
@@ -144,16 +144,16 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
                   {d.roles.map((r) => (
                     <li
                       key={r.role}
-                      className="flex items-center justify-between rounded border border-[var(--border)] px-2 py-1 text-sm"
+                      className="flex items-center justify-between rounded border border-border px-2 py-1 text-sm"
                     >
-                      <span className="text-[var(--text-primary)]">{r.role}</span>
-                      <span className="text-xs text-[var(--text-muted)]">
+                      <span className="text-text-primary">{r.role}</span>
+                      <span className="text-xs text-text-muted">
                         {new Date(r.granted_at).toLocaleDateString()}
                       </span>
                     </li>
                   ))}
                   {d.roles.length === 0 && (
-                    <li className="text-sm text-[var(--text-muted)]">No roles recorded.</li>
+                    <li className="text-sm text-text-muted">No roles recorded.</li>
                   )}
                 </ul>
               </Section>
@@ -161,7 +161,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
               {/* SESSIONS */}
               <Section title={`Sessions (${d.sessionsCount})`}>
                 {d.sessions.length === 0 ? (
-                  <p className="text-sm text-[var(--text-muted)]">No sessions.</p>
+                  <p className="text-sm text-text-muted">No sessions.</p>
                 ) : (
                   <ul className="space-y-1">
                     {d.sessions.map((s) => (
@@ -170,18 +170,18 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
                         className={cn(
                           "rounded border px-2 py-1 text-xs",
                           s.revoked_at
-                            ? "border-[var(--border)] text-[var(--text-muted)]"
-                            : "border-[var(--action-ok)]/40 text-[var(--text-primary)]",
+                            ? "border-border text-text-muted"
+                            : "border-[var(--action-ok)]/40 text-text-primary",
                         )}
                       >
                         <div className="flex items-center justify-between">
                           <span>{s.revoked_at ? "Revoked" : "Active"}</span>
                           <span className="font-mono">{s.ip_address ?? "—"}</span>
                         </div>
-                        <div className="truncate text-[var(--text-muted)]">
+                        <div className="truncate text-text-muted">
                           {s.user_agent ?? "unknown agent"}
                         </div>
-                        <div className="text-[var(--text-muted)]">
+                        <div className="text-text-muted">
                           seen{" "}
                           {s.last_seen_at
                             ? new Date(s.last_seen_at).toLocaleString()
@@ -196,15 +196,15 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
               {/* AUDIT */}
               <Section title="Recent audit">
                 {d.audit.length === 0 ? (
-                  <p className="text-sm text-[var(--text-muted)]">No audit entries.</p>
+                  <p className="text-sm text-text-muted">No audit entries.</p>
                 ) : (
                   <ul className="space-y-1">
                     {d.audit.map((a, i) => (
                       <li key={i} className="text-xs">
-                        <span className="font-medium text-[var(--text-primary)]">
+                        <span className="font-medium text-text-primary">
                           {a.action}
                         </span>{" "}
-                        <span className="text-[var(--text-muted)]">
+                        <span className="text-text-muted">
                           · {new Date(a.timestamp).toLocaleString()}
                         </span>
                       </li>
@@ -235,7 +235,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
         {title}
       </h3>
       {children}
@@ -246,8 +246,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <dt className="text-[11px] text-[var(--text-muted)]">{k}</dt>
-      <dd className="text-[var(--text-primary)]">{v}</dd>
+      <dt className="text-[11px] text-text-muted">{k}</dt>
+      <dd className="text-text-primary">{v}</dd>
     </div>
   );
 }
@@ -256,7 +256,7 @@ function DrawerLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <a
       href={href}
-      className="rounded-full border border-[var(--border)] px-2.5 py-0.5 text-xs text-[var(--text-secondary)] hover:border-[var(--action-primary)] hover:text-[var(--action-primary)]"
+      className="rounded-full border border-border px-2.5 py-0.5 text-xs text-text-secondary hover:border-action-primary hover:text-action-primary"
     >
       {children}
     </a>

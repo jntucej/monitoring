@@ -89,18 +89,18 @@ export function EmptyState({
         className={`relative z-10 flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
       >
         {icon && (
-          <div className="mb-4 text-[var(--text-muted)] opacity-60" aria-hidden="true">
+          <div className="mb-4 text-text-muted opacity-60" aria-hidden="true">
             {icon}
           </div>
         )}
 
-        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-1">{title}</h3>
+        <h3 className="text-sm font-semibold text-text-secondary mb-1">{title}</h3>
 
         {description && (
-          <p className="text-xs text-[var(--text-muted)] max-w-xs">{description}</p>
+          <p className="text-xs text-text-muted max-w-xs">{description}</p>
         )}
 
-        {action && <div className="mt-4">{action}</div>}{!action && <p className="mt-4 text-[11px] text-[var(--text-muted)] opacity-60">No action available</p>}
+        {action && <div className="mt-4">{action}</div>}{!action && <p className="mt-4 text-[11px] text-text-muted opacity-60">No action available</p>}
       </div>
     </>
   );

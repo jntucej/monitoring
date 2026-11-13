@@ -20,20 +20,20 @@ export default function JobsPage() {
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-[var(--action-primary)]" />
+          <Clock className="w-5 h-5 text-action-primary" />
           <div>
-            <h1 className="text-lg font-semibold text-[var(--text-primary)]">Jobs</h1>
-            <p className="text-xs text-[var(--text-muted)]">
+            <h1 className="text-lg font-semibold text-text-primary">Jobs</h1>
+            <p className="text-xs text-text-muted">
               14-day scheduled job runs · success rate · heat matrix
             </p>
           </div>
         </div>
         {loading && !data ? (
-          <div className="h-40 animate-pulse rounded-xl bg-[var(--bg-surface)] opacity-40" />
+          <div className="h-40 animate-pulse rounded-xl bg-bg-surface opacity-40" />
         ) : error && !data ? (
           <div
             role="alert"
-            className="rounded-xl border border-[var(--action-danger)]/30 bg-[var(--action-danger)]/10 p-4 text-sm text-[var(--action-danger)]"
+            className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger"
           >
             Failed to load job data: {error}
           </div>

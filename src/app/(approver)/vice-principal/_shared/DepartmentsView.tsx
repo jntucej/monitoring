@@ -42,8 +42,8 @@ export function DepartmentsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Departments</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Departments</h1>
+        <p className="text-xs text-text-muted">
           Headcount and attendance per department
         </p>
       </header>
@@ -69,18 +69,18 @@ export function DepartmentsView() {
             {(d?.departments ?? []).map((dept: VPAcademics["departments"][0]) => (
               <li
                 key={dept.code}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{dept.name}</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">
+                    <p className="text-[11px] text-text-muted">
                       HOD: {dept.hodName ?? "—"}
                     </p>
                   </div>
                   <AttendancePill pct={dept.attendancePct} />
                 </div>
-                <div className="mt-2 flex gap-3 text-[11px] text-[var(--text-secondary)]">
+                <div className="mt-2 flex gap-3 text-[11px] text-text-secondary">
                   <span>{dept.students} students</span>
                   <span>{dept.faculty} faculty</span>
                   <span>1:{dept.ratio}</span>

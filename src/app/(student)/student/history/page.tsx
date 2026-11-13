@@ -48,17 +48,17 @@ const api = useApi();
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-[var(--text-muted)]">All your gate activity</p>
+          <p className="text-text-muted">All your gate activity</p>
         </div>
-        <div className="flex flex-wrap items-center gap-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-1">
+        <div className="flex flex-wrap items-center gap-1 bg-bg-surface border border-border rounded-lg p-1">
           {(["ALL", "IN", "OUT"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1 text-sm rounded-md transition ${
                 filter === f
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "text-[var(--text-muted)] hover:text-white"
+                  ? "bg-action-primary text-white"
+                  : "text-text-muted hover:text-white"
               }`}
             >
               {f}
@@ -67,36 +67,36 @@ const api = useApi();
         </div>
       </div>
 
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
         {loading ? (
-          <div className="p-8 flex items-center justify-center gap-2 text-[var(--text-muted)] text-sm">
+          <div className="p-8 flex items-center justify-center gap-2 text-text-muted text-sm">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading history…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+          <div className="p-8 text-center text-sm text-text-muted">
             <Filter className="w-8 h-8 mx-auto opacity-40 mb-2" />
             No scans match this filter.
           </div>
         ) : (
-          <div className="divide-y divide-[var(--border)]">
+          <div className="divide-y divide-border">
             {filtered.map((s) => {
               const isIn = s.direction === "IN";
               return (
                 <div key={s.id} className="p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isIn ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isIn ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                     {isIn ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
                   </div>
                   <div className="flex-1">
-                    <p className={`font-medium ${isIn ? "text-emerald-400" : "text-rose-400"}`}>
+                    <p className={`font-medium ${isIn ? "text-action-success" : "text-action-danger"}`}>
                       {isIn ? "Entry" : "Exit"} {s.reason ? `(${s.reason})` : ""}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {s.gateName} {s.operatorName ? `• Operator: ${s.operatorName}` : ""}
                     </p>
                   </div>
                   <div className="text-right text-sm">
                     <p>{new Date(s.timestamp).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-text-muted">
                       {new Date(s.timestamp).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>

@@ -16,20 +16,20 @@ export function SystemHealthSection() {
       <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-md">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-action-success border border-emerald-500/20">
               <Activity className="h-3.5 w-3.5 animate-pulse" />
               Live Telemetry &amp; Compliance Audit
             </div>
             <h2 className="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
               Transparent Security &amp; Health Audits
             </h2>
-            <p className="mt-1 text-sm text-[var(--home-text-secondary,#9CA3AF)]">
+            <p className="mt-1 text-sm text-[var(--home-text-secondary,var(--text-muted))]">
               Continuous monitoring of access policies, database RLS, and cryptographic audit trails.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium border border-white/10">
-              <ShieldCheck className="h-4 w-4 text-[var(--home-accent-gold,#FBBF24)]" />
+              <ShieldCheck className="h-4 w-4 text-[var(--home-accent-gold,var(--action-warning))]" />
               Production Hardened
             </span>
           </div>
@@ -46,15 +46,15 @@ export function SystemHealthSection() {
               className="rounded-2xl border border-white/10 bg-white/5 p-5"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+                <span className="text-xs uppercase tracking-widest text-text-muted">
                   {item.label}
                 </span>
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <CheckCircle2 className="h-4 w-4 text-action-success" />
               </div>
               <div className="mt-2 text-lg font-semibold text-white">
                 {item.status}
               </div>
-              <p className="mt-1 text-xs text-[var(--text-muted)]">
+              <p className="mt-1 text-xs text-text-muted">
                 {item.desc}
               </p>
             </motion.div>

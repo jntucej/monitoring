@@ -108,7 +108,7 @@ function PassVerificationInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Queue unavailable: {error}</span>
@@ -124,30 +124,30 @@ function PassVerificationInner() {
       )}
 
       <OperatorWidgetBoundary title="Verification Queue">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
-            <span className="text-sm font-semibold text-[var(--text-primary)] min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+            <span className="text-sm font-semibold text-text-primary min-w-0">
               Pending tickets
             </span>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {busy ? "…" : `${rows.length} in queue`}
             </span>
           </div>
 
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading verification queue…
             </div>
           ) : rows.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Inbox className="w-5 h-5 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 Verification queue is clear — no pending passes at this stage.
               </p>
             </div>
           ) : (
-            <ul className="divide-y divide-[var(--border)] min-w-0">
+            <ul className="divide-y divide-border min-w-0">
               {rows.map((row) => {
                 const ticket = row.ticket_number ?? row.id;
                 const key = `${ticket}:APPROVE`;
@@ -160,21 +160,21 @@ function PassVerificationInner() {
                 return (
                   <li key={row.id} className="px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between min-w-0">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                      <p className="text-sm font-semibold text-text-primary truncate">
                         {row.student?.name || safeText(row.student?.unique_id, "Unknown applicant")}
                         {roll && (
-                          <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                          <span className="ml-1.5 font-mono text-xs text-text-muted">
                             {roll}
                           </span>
                         )}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
+                      <p className="text-xs text-text-muted mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0">
                         <span className="font-mono">{ticket}</span>
                         <span className="uppercase">
                           {safeText(row.workflow_type).replace(/_/g, " ")}
                         </span>
                         {sla && (
-                          <span className={slaBreached ? "text-rose-400 font-semibold" : ""}>
+                          <span className={slaBreached ? "text-action-danger font-semibold" : ""}>
                             SLA {new Date(sla).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                             {slaBreached ? " · breached" : ""}
                           </span>
@@ -189,14 +189,14 @@ function PassVerificationInner() {
                           value={rejectComment}
                           onChange={(e) => setRejectComment(e.target.value)}
                           placeholder="Reason for rejection (required)"
-                          className="w-full sm:w-56 min-h-[44px] rounded-lg border border-rose-500/40 bg-[var(--bg-base)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
+                          className="w-full sm:w-56 min-h-[44px] rounded-lg border border-rose-500/40 bg-bg-base px-2.5 py-1.5 text-xs text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-rose-500/40 outline-none"
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => handleRejectConfirm(ticket)}
                             disabled={!rejectComment.trim() || actingTicket === rejectKey}
-                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
+                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-action-danger px-3 py-1.5 text-xs font-bold text-white hover:bg-action-danger disabled:opacity-50 transition-colors"
                           >
                             {actingTicket === rejectKey ? (
                               <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />
@@ -211,7 +211,7 @@ function PassVerificationInner() {
                               setRejectingTicket(null);
                               setRejectComment("");
                             }}
-                            className="min-h-[44px] inline-flex items-center rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                            className="min-h-[44px] inline-flex items-center rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
                           >
                             Cancel
                           </button>
@@ -223,7 +223,7 @@ function PassVerificationInner() {
                           type="button"
                           onClick={() => void act(ticket, "APPROVE")}
                           disabled={actingTicket === key}
-                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-black hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-action-success px-3 py-1.5 text-xs font-bold text-black hover:bg-action-success disabled:opacity-50 transition-colors"
                         >
                           {actingTicket === key ? (
                             <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" />
@@ -238,7 +238,7 @@ function PassVerificationInner() {
                             setRejectingTicket(ticket);
                             setRejectComment("");
                           }}
-                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition-colors"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 transition-colors"
                         >
                           <X className="w-3 h-3" />
                           Reject
@@ -252,7 +252,7 @@ function PassVerificationInner() {
           )}
 
           {!busy && rows.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex items-center gap-1.5 min-w-0">
+            <div className="px-4 py-2.5 border-t border-border text-xs text-text-muted flex items-center gap-1.5 min-w-0">
               <Clock className="w-3.5 h-3.5 shrink-0" />
               Auto-refreshes every 30 seconds.
             </div>

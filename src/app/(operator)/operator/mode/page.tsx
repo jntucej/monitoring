@@ -44,14 +44,14 @@ function ModeCard({
       className={`w-full min-h-[44px] text-left rounded-xl border p-4 transition-all ${
         selected
           ? `${color} border-current bg-current/10`
-          : "border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--border)]"
+          : "border-border bg-bg-elevated hover:border-border"
       } ${disabled && !selected ? "opacity-40 cursor-not-allowed" : ""}`}
     >
       <div className="flex items-center gap-3">
-        <Icon className={`w-5 h-5 shrink-0 ${selected ? "text-current" : "text-[var(--text-muted)]"}`} />
+        <Icon className={`w-5 h-5 shrink-0 ${selected ? "text-current" : "text-text-muted"}`} />
         <div className="min-w-0">
-          <p className={`text-sm font-bold ${selected ? "text-current" : "text-[var(--text-primary)]"}`}>{label}</p>
-          <p className={`text-xs mt-0.5 ${selected ? "text-current/80" : "text-[var(--text-muted)]"}`}>{description}</p>
+          <p className={`text-sm font-bold ${selected ? "text-current" : "text-text-primary"}`}>{label}</p>
+          <p className={`text-xs mt-0.5 ${selected ? "text-current/80" : "text-text-muted"}`}>{description}</p>
         </div>
         {selected && <ShieldCheck className="w-4 h-4 shrink-0 ml-auto" />}
       </div>
@@ -125,14 +125,14 @@ function OperatorModeInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="min-w-0">
-        <h2 className="text-lg font-bold text-[var(--text-primary)]">Gate Mode</h2>
-        <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
+        <h2 className="text-lg font-bold text-text-primary">Gate Mode</h2>
+        <p className="text-xs text-text-muted mt-1 min-w-0">
           Change the gate operating mode. Active mode applies to all gates.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300 flex items-center gap-2 min-w-0">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
           <button type="button" onClick={() => void loadMode()} className="ml-auto min-h-[44px] inline-flex items-center text-xs font-semibold hover:underline shrink-0">Retry</button>
@@ -140,32 +140,32 @@ function OperatorModeInner() {
       )}
 
       {submitMsg && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300 min-w-0">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-action-success min-w-0">
           {submitMsg}
         </div>
       )}
 
       <OperatorWidgetBoundary title="Current Mode">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-4 min-w-0">
           {loading ? (
-            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading…
             </div>
           ) : mode ? (
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6 text-[var(--action-primary)] shrink-0" />
+              <ShieldCheck className="w-6 h-6 text-action-primary shrink-0" />
               <div>
-                <p className="text-sm font-bold text-[var(--text-primary)]">
+                <p className="text-sm font-bold text-text-primary">
                   {modes.find((m) => m.mode === mode)?.label || mode}
                 </p>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5">
                   {modes.find((m) => m.mode === mode)?.description}
                 </p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">Unable to determine gate mode.</p>
+            <p className="text-sm text-text-muted">Unable to determine gate mode.</p>
           )}
         </div>
       </OperatorWidgetBoundary>
@@ -180,9 +180,9 @@ function OperatorModeInner() {
               description={m.description}
               icon={m.icon}
               color={
-                m.mode === "OPEN" ? "text-emerald-500 border-emerald-500"
-                : m.mode === "CURFEW" ? "text-indigo-400 border-indigo-400"
-                : "text-amber-500 border-amber-500"
+                m.mode === "OPEN" ? "text-action-success border-[var(--action-success)]"
+                : m.mode === "CURFEW" ? "text-action-primary border-action-primary"
+                : "text-action-warning border-action-warning"
               }
               selected={mode === m.mode}
               disabled={submitting}
@@ -191,7 +191,7 @@ function OperatorModeInner() {
           ))}
 
           <div className="space-y-1.5 pt-2 min-w-0">
-            <label htmlFor="mode-reason" className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+            <label htmlFor="mode-reason" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
               Reason (optional)
             </label>
             <input
@@ -201,7 +201,7 @@ function OperatorModeInner() {
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Scheduled system update"
               disabled={submitting}
-              className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
+              className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
             />
           </div>
 
@@ -212,7 +212,7 @@ function OperatorModeInner() {
               if (selected) void handleSetMode(selected.mode);
             }}
             disabled={submitting || !mode}
-            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

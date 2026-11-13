@@ -158,21 +158,21 @@ export function GateClaimCodePanel() {
   const activeCodes = codes.filter((c) => !c.revoked && !c.used_at);
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-      <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between gap-3">
+    <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)] truncate">
+          <KeyRound className="w-4 h-4 text-action-success shrink-0" />
+          <h2 className="text-sm font-semibold text-text-primary truncate">
             Gate Claim Codes
           </h2>
-          <span className="text-[11px] text-[var(--text-muted)] hidden sm:inline">
+          <span className="text-[11px] text-text-muted hidden sm:inline">
             generate a code, hand it to the operator, they enter it at the kiosk to claim this gate
           </span>
         </div>
         <button
           type="button"
           onClick={loadCodes}
-          className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]/60 flex items-center"
+          className="p-1.5 rounded-md text-text-muted hover:text-text-primary hover:bg-bg-elevated/60 flex items-center"
           title="Refresh"
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -183,12 +183,12 @@ export function GateClaimCodePanel() {
       <div className="p-4 space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <label className="flex-1 min-w-0">
-            <span className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1">Gate</span>
+            <span className="block text-[11px] font-semibold text-text-muted mb-1">Gate</span>
             <select
               value={selectedGateId}
               onChange={(e) => setSelectedGateId(e.target.value)}
               disabled={gates.length === 0}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-emerald-500/40 outline-none disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-lg bg-bg-surface border border-border text-sm text-text-primary focus:ring-2 focus:ring-emerald-500/40 outline-none disabled:opacity-50"
             >
               {gates.length === 0 && <option value="">No active gates</option>}
               {gates.map((g) => (
@@ -199,7 +199,7 @@ export function GateClaimCodePanel() {
             </select>
           </label>
           <label className="flex-1 min-w-0">
-            <span className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1">
+            <span className="block text-[11px] font-semibold text-text-muted mb-1">
               Operator name (optional, shown in the list)
             </span>
             <input
@@ -207,7 +207,7 @@ export function GateClaimCodePanel() {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. Ravi"
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-emerald-500/40 outline-none"
+              className="w-full px-3 py-2 rounded-lg bg-bg-surface border border-border text-sm text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-emerald-500/40 outline-none"
             />
           </label>
           <div className="flex items-end">
@@ -215,7 +215,7 @@ export function GateClaimCodePanel() {
               type="button"
               onClick={generate}
               disabled={!selectedGateId || generating}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold flex items-center gap-2 transition"
+              className="px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold flex items-center gap-2 transition"
             >
               {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
               Generate 6-digit code
@@ -224,28 +224,28 @@ export function GateClaimCodePanel() {
         </div>
 
         {error && (
-          <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
+          <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-action-danger text-xs font-medium">
             {error}
           </div>
         )}
 
         {freshCode && (
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
+            <div className="flex items-center gap-2 text-xs font-semibold text-action-success">
               <ShieldCheck className="w-4 h-4" />
               New 6-digit code for <span className="font-bold">{freshCode.gateName}</span> — valid until{" "}
               {formatExpiry(freshCode.expiresAt)}
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <code className="flex-1 px-3 py-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] font-mono text-3xl tracking-[0.4em] text-emerald-300 select-all text-center">
+              <code className="flex-1 px-3 py-3 rounded-lg bg-bg-elevated border border-border font-mono text-3xl tracking-[0.4em] text-action-success select-all text-center">
                 {freshCode.code}
               </code>
               <button
                 type="button"
                 onClick={() => copyCode(freshCode.code)}
-                className="px-4 py-3 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-[var(--text-primary)] text-xs font-bold flex items-center justify-center gap-2 transition min-w-[84px]"
+                className="px-4 py-3 rounded-lg bg-bg-elevated hover:bg-bg-elevated text-text-primary text-xs font-bold flex items-center justify-center gap-2 transition min-w-[84px]"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-action-success" /> : <Copy className="w-4 h-4" />}
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
@@ -259,16 +259,16 @@ export function GateClaimCodePanel() {
 
       {/* Active codes list */}
       <div className="px-4 pb-4">
-        <div className="flex items-center gap-2 mb-2 text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+        <div className="flex items-center gap-2 mb-2 text-[11px] font-semibold text-text-muted uppercase tracking-wide">
           <ListOrdered className="w-3.5 h-3.5" />
           Active codes ({activeCodes.length})
         </div>
         {loadingCodes ? (
-          <div className="p-4 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <div className="p-4 flex items-center gap-2 text-xs text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading…
           </div>
         ) : activeCodes.length === 0 ? (
-          <div className="p-4 text-xs text-[var(--text-muted)]">
+          <div className="p-4 text-xs text-text-muted">
             No active claim codes. Generate one above — its plaintext is not recoverable after that.
           </div>
         ) : (
@@ -276,13 +276,13 @@ export function GateClaimCodePanel() {
             {activeCodes.map((c) => (
               <li key={c.id} className="py-2.5 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm text-[var(--text-primary)] font-medium truncate">
+                  <div className="text-sm text-text-primary font-medium truncate">
                     {c.gate_name || c.gate_id}
                     {c.operator_name_label ? (
-                      <span className="ml-2 text-[11px] text-[var(--text-muted)]">for {c.operator_name_label}</span>
+                      <span className="ml-2 text-[11px] text-text-muted">for {c.operator_name_label}</span>
                     ) : null}
                   </div>
-                  <div className="text-[11px] text-[var(--text-muted)]">
+                  <div className="text-[11px] text-text-muted">
                     expires {formatExpiry(c.expires_at)}
                   </div>
                 </div>
@@ -290,7 +290,7 @@ export function GateClaimCodePanel() {
                   type="button"
                   onClick={() => revoke(c.id)}
                   disabled={busyRevoke === c.id}
-                  className="px-2.5 py-1.5 rounded-md bg-[var(--bg-elevated)] hover:bg-rose-500/20 hover:text-rose-300 text-[var(--text-muted)] text-[11px] font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                  className="px-2.5 py-1.5 rounded-md bg-bg-elevated hover:bg-rose-500/20 hover:text-action-danger text-text-muted text-[11px] font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
                   title="Revoke this code"
                 >
                   {busyRevoke === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}

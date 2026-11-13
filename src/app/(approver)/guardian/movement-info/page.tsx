@@ -42,27 +42,27 @@ function MovementRow({ scan }: { scan: Scan }) {
     minute: "2-digit",
   });
   return (
-    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-[var(--border)]/50 last:border-0">
+    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border/50 last:border-0">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-            isIn ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400"
+            isIn ? "bg-emerald-500/15 text-action-success" : "bg-rose-500/15 text-action-danger"
           }`}
         >
           {isIn ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-[var(--text-primary)]">
+          <p className="text-sm font-medium text-text-primary">
             {isIn ? "Entry" : "Exit"}
-            {scan.gateName ? <span className="text-[var(--text-muted)] font-normal"> · {scan.gateName}</span> : null}
+            {scan.gateName ? <span className="text-text-muted font-normal"> · {scan.gateName}</span> : null}
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             {scan.isManual ? "Manual entry · " : ""}
             {when}
           </p>
         </div>
       </div>
-      <ArrowRight className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+      <ArrowRight className="w-4 h-4 text-text-muted shrink-0" />
     </div>
   );
 }
@@ -127,10 +127,10 @@ function MovementInfoInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Repeat className="w-6 h-6 text-emerald-400" />
+            <Repeat className="w-6 h-6 text-action-success" />
             Authorised Movement Information
           </p>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-text-muted">
             Recent authorised entry and exit activity recorded at the gates for your wards
           </p>
         </div>
@@ -153,11 +153,11 @@ function MovementInfoInner() {
       )}
 
       {personsLoading ? (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 flex items-center gap-3 text-[var(--text-muted)] text-sm">
+        <div className="rounded-xl border border-border bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading movement records…
         </div>
       ) : total === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-base)]/60 p-8 text-center text-sm text-[var(--text-muted)]">
+        <div className="rounded-xl border border-dashed border-border bg-bg-base/60 p-8 text-center text-sm text-text-muted">
           No wards linked to your account yet. Movement records appear once a student is linked.
         </div>
       ) : (
@@ -174,12 +174,12 @@ function MovementInfoInner() {
                   onClick={() => setSelected(roll)}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors motion-reduce:transition-none ${
                     isActive
-                      ? "border-emerald-400/50 bg-emerald-500/10 text-emerald-400 font-semibold"
-                      : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                      ? "border-emerald-400/50 bg-emerald-500/10 text-action-success font-semibold"
+                      : "border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated"
                   }`}
                 >
                   <span className="truncate max-w-40">{w.fullName || w.name || "Ward"}</span>
-                  <span className="font-mono text-xs text-[var(--text-muted)]">{roll}</span>
+                  <span className="font-mono text-xs text-text-muted">{roll}</span>
                 </button>
               );
             })}
@@ -189,51 +189,51 @@ function MovementInfoInner() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Wards linked", value: String(total), accent: "text-white" },
-              { label: "Entries (recent)", value: String(entries), accent: "text-emerald-400" },
-              { label: "Exits (recent)", value: String(exits), accent: "text-rose-400" },
+              { label: "Entries (recent)", value: String(entries), accent: "text-action-success" },
+              { label: "Exits (recent)", value: String(exits), accent: "text-action-danger" },
               {
                 label: "Last activity",
                 value: scans[0]?.timestamp
                   ? new Date(scans[0].timestamp).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
                   : "—",
-                accent: "text-sky-400",
+                accent: "text-action-info",
               },
             ].map((kpi) => (
-              <div key={kpi.label} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">{kpi.label}</p>
+              <div key={kpi.label} className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{kpi.label}</p>
                 <p className={`text-lg font-bold mt-0.5 ${kpi.accent}`}>{kpi.value}</p>
               </div>
             ))}
           </div>
 
           {/* movement feed */}
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
-            <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between gap-3 flex-wrap">
+          <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+                <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
                   Recent gate movements
                 </h2>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5">
                   {activeWard ? `Showing ${activeWard.fullName || activeWard.name || "ward"} (last 25 movements)` : ""}
                 </p>
               </div>
-              <span className="text-xs text-[var(--text-muted)]">{scans.length} movement(s)</span>
+              <span className="text-xs text-text-muted">{scans.length} movement(s)</span>
             </div>
             {historyError ? (
-              <div className="p-4 text-sm text-rose-300 flex items-center gap-2">
+              <div className="p-4 text-sm text-action-danger flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 {historyError}
               </div>
             ) : historyLoading && scans.length === 0 ? (
-              <div className="p-6 flex items-center gap-3 text-[var(--text-muted)] text-sm">
+              <div className="p-6 flex items-center gap-3 text-text-muted text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" /> Loading movements…
               </div>
             ) : scans.length === 0 ? (
-              <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+              <div className="p-8 text-center text-sm text-text-muted">
                 No gate movements recorded for this ward yet.
               </div>
             ) : (
-              <div className="px-4 py-2 divide-y divide-[var(--border)]/50">
+              <div className="px-4 py-2 divide-y divide-border/50">
                 {scans.map((s, i) => (
                   <MovementRow key={s.id ?? `${s.timestamp}-${i}`} scan={s} />
                 ))}

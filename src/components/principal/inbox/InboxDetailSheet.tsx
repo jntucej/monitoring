@@ -23,7 +23,7 @@ export function InboxDetailSheet({ ticket, onClose, onActionComplete }: InboxDet
     <>
       {/* Mobile: bottom sheet */}
       <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-        <div className="max-h-[85vh] overflow-y-auto bg-[var(--bg-surface)] border-t border-[var(--border)] rounded-t-2xl shadow-2xl p-4 space-y-3">
+        <div className="max-h-[85vh] overflow-y-auto bg-bg-surface border-t border-border rounded-t-2xl shadow-2xl p-4 space-y-3">
           {/* Drag handle */}
           <div className="flex justify-center">
             <div className="w-10 h-1.5 rounded-full bg-[var(--border)]" />
@@ -39,7 +39,7 @@ export function InboxDetailSheet({ ticket, onClose, onActionComplete }: InboxDet
 
       {/* Desktop: side panel */}
       <div className="hidden md:block fixed inset-y-0 right-0 z-50 w-full max-w-md">
-        <div className="h-full overflow-y-auto bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl p-4">
+        <div className="h-full overflow-y-auto bg-bg-surface border-l border-border shadow-2xl p-4">
           <PermissionDetailPanel
             ticket={ticket}
             onClose={onClose}

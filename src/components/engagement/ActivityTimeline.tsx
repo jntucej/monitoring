@@ -41,10 +41,10 @@ interface TimelineData {
 }
 
 const SOURCE_META: Record<Source, { icon: typeof FileText; color: string }> = {
-  request: { icon: FileText, color: "text-amber-400" },
-  event: { icon: CalendarDays, color: "text-sky-400" },
-  notification: { icon: Bell, color: "text-indigo-400" },
-  audit: { icon: History, color: "text-emerald-400" },
+  request: { icon: FileText, color: "text-action-warning" },
+  event: { icon: CalendarDays, color: "text-action-info" },
+  notification: { icon: Bell, color: "text-action-primary" },
+  audit: { icon: History, color: "text-action-success" },
 };
 
 function formatWhen(iso: string | null): string | null {
@@ -94,16 +94,16 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
     <WidgetBoundary title="Activity Timeline">
       <section
         aria-label="Activity timeline"
-        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0"
+        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
       >
-        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-          <ScrollText className="h-4 w-4 text-emerald-400" aria-hidden />
+        <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+          <ScrollText className="h-4 w-4 text-action-success" aria-hidden />
           Your recent activity
         </h2>
 
         {loading && !data ? (
           <div
-            className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]"
+            className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-text-muted"
             role="status"
           >
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
@@ -114,7 +114,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
             {error}
           </div>
         ) : items.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
+          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
             <p className="text-sm">No recent activity yet.</p>
           </div>
@@ -127,7 +127,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
               return (
                 <li
                   key={item.id}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/40 p-3.5"
+                  className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
                 >
                   <div className="flex items-start gap-2.5">
                     <div
@@ -136,11 +136,11 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
                       <Icon className="h-3.5 w-3.5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                      <p className="truncate text-sm font-semibold text-text-primary">
                         {item.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-[var(--text-muted)]">{item.detail}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                      <p className="mt-0.5 text-xs text-text-muted">{item.detail}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-text-muted">
                         <Clock className="h-3 w-3" aria-hidden />
                         {when ?? "—"}
                         {item.ctaHref && (

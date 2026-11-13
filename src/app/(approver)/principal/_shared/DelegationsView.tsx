@@ -37,8 +37,8 @@ export function DelegationsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Delegations Manager</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Delegations Manager</h1>
+        <p className="text-xs text-text-muted">
           Delegated authority rules and institutional scope
         </p>
       </header>
@@ -63,15 +63,15 @@ export function DelegationsView() {
             {delegations.map((d) => (
               <li
                 key={d.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
-                  <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {d.status ?? "ACTIVE"}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">Scope: {d.scope ?? "Full"}</p>
+                <p className="mt-1 text-xs text-text-secondary">Scope: {d.scope ?? "Full"}</p>
               </li>
             ))}
           </ul>
@@ -94,7 +94,7 @@ export function DelegationsView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "ACTIVE"}
                     </span>
                   ),

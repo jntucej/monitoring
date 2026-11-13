@@ -34,9 +34,9 @@ interface QueueData {
 }
 
 const URGENCY_DOT: Record<Urgency, string> = {
-  overdue: "bg-rose-400",
-  due: "bg-amber-400",
-  info: "bg-sky-400",
+  overdue: "bg-action-danger",
+  due: "bg-action-warning",
+  info: "bg-action-info",
 };
 
 function UrgencyDot({ urgency }: { urgency: Urgency }) {
@@ -83,15 +83,15 @@ export function AttentionQueue() {
     <WidgetBoundary title="Attention Queue">
       <section
         aria-label="Attention queue"
-        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0"
+        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <AlertTriangle className="h-4 w-4 text-indigo-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <AlertTriangle className="h-4 w-4 text-action-primary" aria-hidden />
             Needs your attention
           </h2>
           {data ? (
-            <span className="text-[10px] text-[var(--text-muted)]" aria-hidden>
+            <span className="text-[10px] text-text-muted" aria-hidden>
               {items.length} item{items.length === 1 ? "" : "s"}
             </span>
           ) : null}
@@ -99,7 +99,7 @@ export function AttentionQueue() {
 
         {loading && !data ? (
           <div
-            className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]"
+            className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-text-muted"
             role="status"
           >
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
@@ -110,12 +110,12 @@ export function AttentionQueue() {
             {error}
           </div>
         ) : data?.empty ? (
-          <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
-            <CheckCircle className="h-6 w-6 text-emerald-400" aria-hidden />
+          <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
+            <CheckCircle className="h-6 w-6 text-action-success" aria-hidden />
             <p className="text-sm">All clear — nothing needs your attention right now.</p>
           </div>
         ) : items.length === 0 ? (
-          <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
+          <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
             <p className="text-sm">Nothing here yet.</p>
           </div>
@@ -124,16 +124,16 @@ export function AttentionQueue() {
             {items.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/40 p-3.5"
+                className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-1 items-start gap-2">
                     <UrgencyDot urgency={item.urgency} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                      <p className="truncate text-sm font-semibold text-text-primary">
                         {item.title}
                       </p>
-                      <p className="mt-1 text-xs text-[var(--text-muted)]">{item.detail}</p>
+                      <p className="mt-1 text-xs text-text-muted">{item.detail}</p>
                     </div>
                   </div>
                   <a

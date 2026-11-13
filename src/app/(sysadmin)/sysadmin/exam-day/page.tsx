@@ -76,10 +76,10 @@ function SysadminExamDayInner() {
   }
 
   const statusTone = (s: string) => {
-    if (s === "APPROVED") return "bg-emerald-500/15 text-emerald-400";
-    if (s === "PENDING") return "bg-amber-500/15 text-amber-400";
-    if (s === "ESCALATED") return "bg-rose-500/15 text-rose-400";
-    return "bg-[var(--bg-elevated)] text-[var(--text-muted)]";
+    if (s === "APPROVED") return "bg-emerald-500/15 text-action-success";
+    if (s === "PENDING") return "bg-amber-500/15 text-action-warning";
+    if (s === "ESCALATED") return "bg-rose-500/15 text-action-danger";
+    return "bg-bg-elevated text-text-muted";
   };
 
   return (
@@ -93,18 +93,18 @@ function SysadminExamDayInner() {
       {/* Clearance desk */}
       <WidgetBoundary title="Clearance desk">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)]">
-            <p className="text-sm font-semibold text-[var(--text-primary)]">Pending approvals by stage</p>
+          <div className="p-4 border-b border-border">
+            <p className="text-sm font-semibold text-text-primary">Pending approvals by stage</p>
           </div>
           {stageSummary.length === 0 ? (
             <EmptyState icon={<ShieldCheck className="w-6 h-6" />} title="No pending approvals" description="The exam clearance desk is clear." />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {stageSummary.map((s, i) => (
                 <div key={i} className="p-3 flex items-center gap-3">
-                  <span className="flex-1 text-sm text-[var(--text-primary)]">{s.current_stage}</span>
+                  <span className="flex-1 text-sm text-text-primary">{s.current_stage}</span>
                   <span className={`px-2 py-0.5 rounded-full text-[11px] ${statusTone(s.status)}`}>{s.status}</span>
-                  <span className="text-sm font-bold text-[var(--action-primary)] w-8 text-right">{s.count}</span>
+                  <span className="text-sm font-bold text-action-primary w-8 text-right">{s.count}</span>
                 </div>
               ))}
             </div>
@@ -121,25 +121,25 @@ function SysadminExamDayInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Candidate</th>
                     <th className="p-3 text-left">Stage</th>
                     <th className="p-3 text-left">Status</th>
                     <th className="p-3 text-left">SLA</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {authorised.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/40">
+                    <tr key={r.id} className="hover:bg-bg-elevated/40">
                       <td className="p-3">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{r.candidate_name ?? "—"}</p>
-                        <p className="text-[11px] text-[var(--text-muted)] font-mono">{r.roll ? `${r.roll} · ` : ""}{r.candidate_unique_id ?? ""}</p>
+                        <p className="text-sm font-medium text-text-primary">{r.candidate_name ?? "—"}</p>
+                        <p className="text-[11px] text-text-muted font-mono">{r.roll ? `${r.roll} · ` : ""}{r.candidate_unique_id ?? ""}</p>
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">{r.current_stage ?? "—"}</td>
+                      <td className="p-3 text-xs text-text-muted">{r.current_stage ?? "—"}</td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded-full text-[11px] ${statusTone(r.status)}`}>{r.status}</span>
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                      <td className="p-3 text-xs text-text-muted">
                         {r.sla_deadline ? new Date(r.sla_deadline).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                       </td>
                     </tr>
@@ -160,24 +160,24 @@ function SysadminExamDayInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Candidate</th>
                     <th className="p-3 text-left">Roll</th>
                     <th className="p-3 text-left">Status</th>
                     <th className="p-3 text-left">Recorded</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {attendance.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/40">
-                      <td className="p-3 text-sm font-medium text-[var(--text-primary)]">{r.candidate_name ?? "—"}</td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.roll ?? "—"}</td>
+                    <tr key={r.id} className="hover:bg-bg-elevated/40">
+                      <td className="p-3 text-sm font-medium text-text-primary">{r.candidate_name ?? "—"}</td>
+                      <td className="p-3 font-mono text-xs text-text-muted">{r.roll ?? "—"}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.status === "PRESENT" ? "bg-emerald-500/15 text-emerald-400" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.status === "PRESENT" ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
                           {r.status}
                         </span>
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                      <td className="p-3 text-xs text-text-muted">
                         {r.recorded_at ? new Date(r.recorded_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                       </td>
                     </tr>

@@ -104,21 +104,21 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
 
   return (
     <section
-      className="w-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden"
+      className="w-full min-w-0 rounded-xl border border-border bg-bg-surface overflow-hidden"
       aria-label="OIE Handoff"
     >
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-[var(--border)]">
+      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2 min-w-0">
-          <ArrowLeftRight className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-          <h2 className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <ArrowLeftRight className="w-4 h-4 text-action-primary shrink-0" />
+          <h2 className="text-sm font-bold text-text-primary truncate">
             OIE Handoff
           </h2>
-          <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider shrink-0">
+          <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider shrink-0">
             {user?.name ? user.name : "Exam Branch"}
           </span>
         </div>
-        <span className="text-xs text-[var(--text-muted)] shrink-0">
+        <span className="text-xs text-text-muted shrink-0">
           {handoffs.length} item(s)
         </span>
       </header>
@@ -126,20 +126,20 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
       {/* Body */}
       <div className="min-w-0">
         {busy ? (
-          <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)]">
+          <div className="p-4 flex items-center gap-2 text-sm text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
             Loading OIE Handoff…
           </div>
         ) : handoffs.length === 0 ? (
           <div className="p-4">
             <EmptyState
-              icon={<ShieldAlert className="w-5 h-5 text-[var(--text-muted)]" />}
+              icon={<ShieldAlert className="w-5 h-5 text-text-muted" />}
               title="No handoffs"
               description="No exam tickets are currently flagged for OIE handoff in your branch."
             />
           </div>
         ) : (
-          <ul className="divide-y divide-[var(--border)] max-h-[480px] overflow-y-auto min-w-0">
+          <ul className="divide-y divide-border max-h-[480px] overflow-y-auto min-w-0">
             {handoffs.map((item) => {
               const ticket = item.ticket_number;
               const isSending = sending.has(ticket);
@@ -173,28 +173,28 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                   {/* Left: ticket + candidate */}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-xs font-mono font-bold text-[var(--action-primary)] truncate">
+                      <span className="text-xs font-mono font-bold text-action-primary truncate">
                         {ticket}
                       </span>
                       <span
                         className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                           item.status === "PENDING"
-                            ? "text-amber-400 bg-amber-400/10 border border-amber-400/20"
-                            : "text-sky-400 bg-sky-400/10 border border-sky-400/20"
+                            ? "text-action-warning bg-amber-400/10 border border-amber-400/20"
+                            : "text-action-info bg-sky-400/10 border border-sky-400/20"
                         }`}
                       >
                         {item.current_stage}
                       </span>
                     </div>
-                    <div className="mt-1 text-sm font-semibold text-[var(--text-primary)] truncate">
+                    <div className="mt-1 text-sm font-semibold text-text-primary truncate">
                       {candidateName}
                     </div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--text-muted)] min-w-0">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted min-w-0">
                       <span className="inline-flex items-center gap-1">
                         <span className="text-[10px] font-mono uppercase tracking-wider">
                           Roll
                         </span>
-                        <span className="font-mono text-[var(--text-secondary)]">
+                        <span className="font-mono text-text-secondary">
                           {rollNo}
                         </span>
                       </span>
@@ -218,7 +218,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                     type="button"
                     disabled={isSending}
                     onClick={() => void sendToOie(ticket)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--action-primary)]/40 bg-[var(--action-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--action-primary)] hover:bg-[var(--action-primary)]/20 disabled:opacity-50 transition-colors shrink-0"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-action-primary/40 bg-action-primary/10 px-3 py-1.5 text-xs font-semibold text-action-primary hover:bg-action-primary/20 disabled:opacity-50 transition-colors shrink-0"
                   >
                     {isSending ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" />

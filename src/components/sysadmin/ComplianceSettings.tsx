@@ -104,7 +104,7 @@ const api = useApi();
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Compliance & Data Retention</p>
-          <p className="text-sm text-[var(--text-muted)]">Automate GDPR right-to-be-forgotten and data lifecycle policies.</p>
+          <p className="text-sm text-text-muted">Automate GDPR right-to-be-forgotten and data lifecycle policies.</p>
         </div>
         <Button onClick={handleRunRetention} variant="secondary" className="gap-2">
           <Play className="w-4 h-4" /> Run Retention Sweep Now
@@ -113,12 +113,12 @@ const api = useApi();
 
       <Card className="border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold flex items-center gap-2"><Database className="w-5 h-5 text-blue-500" /> Table Retention Lifecycles</CardTitle>
+          <CardTitle className="text-lg font-semibold flex items-center gap-2"><Database className="w-5 h-5 text-action-primary" /> Table Retention Lifecycles</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left min-w-[650px]">
-              <thead className="bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/50 text-[var(--text-muted)]">
+              <thead className="bg-bg-elevated dark:bg-bg-elevated/50 text-text-muted">
                 <tr><th className="p-3">Data Category</th><th className="p-3">Retention Window</th><th className="p-3">Auto Sweep</th><th className="p-3 text-right">Actions</th></tr>
               </thead>
               <tbody className="divide-y">
@@ -141,9 +141,9 @@ const api = useApi();
       </Card>
 
       <Card className="border p-4 space-y-4">
-        <h3 className="font-semibold text-lg flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-purple-500" /> GDPR User Data Tools</h3>
+        <h3 className="font-semibold text-lg flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-unit-c" /> GDPR User Data Tools</h3>
         <div className="flex gap-3">
-          <input value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)} placeholder="Enter User Unique ID / Roll No." className="flex-1 p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]" />
+          <input value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)} placeholder="Enter User Unique ID / Roll No." className="flex-1 p-2 border rounded text-sm bg-white dark:bg-bg-elevated" />
           <Button onClick={handleExport} variant="secondary" size="sm" className="gap-1"><Download className="w-3.5 h-3.5" /> Export Data</Button>
           <Button onClick={handleAnonymize} variant="danger" size="sm" className="gap-1"><UserX className="w-3.5 h-3.5" /> Anonymize PII</Button>
         </div>
@@ -151,7 +151,7 @@ const api = useApi();
         {exportData && (
           <div className="mt-4">
             <div className="text-xs font-semibold mb-1">JSON Data Export:</div>
-            <pre className="p-3 bg-[var(--bg-elevated)] text-green-400 text-xs rounded max-h-48 overflow-y-auto font-mono">{exportData}</pre>
+            <pre className="p-3 bg-bg-elevated text-green-400 text-xs rounded max-h-48 overflow-y-auto font-mono">{exportData}</pre>
           </div>
         )}
       </Card>
@@ -160,8 +160,8 @@ const api = useApi();
         {editingPolicy && (
           <form onSubmit={handleUpdatePolicy} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">Data Category</label>
-              <div className="p-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded text-sm font-semibold capitalize">
+              <label className="block text-xs font-medium text-text-muted mb-1 uppercase">Data Category</label>
+              <div className="p-2.5 bg-bg-elevated border border-border rounded text-sm font-semibold capitalize">
                 {editingPolicy.data_category.replace("_", " ")}
               </div>
             </div>
@@ -178,13 +178,13 @@ const api = useApi();
                 id="auto_delete"
                 checked={editingPolicy.auto_delete}
                 onChange={(e) => setEditingPolicy({ ...editingPolicy, auto_delete: e.target.checked })}
-                className="w-4 h-4 rounded border-[var(--border)] text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-border text-blue-600 focus:ring-action-primary"
               />
-              <label htmlFor="auto_delete" className="text-sm font-medium text-[var(--text-primary)] cursor-pointer">
+              <label htmlFor="auto_delete" className="text-sm font-medium text-text-primary cursor-pointer">
                 Enable Auto Sweep (Purge records older than retention limit)
               </label>
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button type="button" variant="secondary" onClick={() => setEditingPolicy(null)}>Cancel</Button>
               <Button type="submit" variant="primary" loading={savingPolicy}>Save Policy</Button>
             </div>

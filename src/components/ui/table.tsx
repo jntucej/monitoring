@@ -48,15 +48,15 @@ function Table<T extends Record<string, any>>({
   };
 
   return (
-    <div className={cn("overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]", className)}>
+    <div className={cn("overflow-x-auto rounded-lg border border-border bg-bg-surface", className)}>
       <table className="w-full text-sm min-w-[700px]">
         <thead>
-          <tr className="border-b border-[var(--border)] bg-[var(--bg-elevated)]/30">
+          <tr className="border-b border-border bg-bg-elevated/30">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  "px-4 py-3 text-left text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider",
+                  "px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider",
                   col.className
                 )}
               >
@@ -68,7 +68,7 @@ function Table<T extends Record<string, any>>({
         <tbody>
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-8 text-center text-[var(--text-muted)]">
+              <td colSpan={columns.length} className="px-4 py-8 text-center text-text-muted">
                 {loading ? "Loading..." : emptyMessage}
               </td>
             </tr>
@@ -78,12 +78,12 @@ function Table<T extends Record<string, any>>({
                 key={rowKey ? rowKey(row) : i}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
-                  "border-b border-[var(--border)]/40 last:border-0 transition-colors",
-                  onRowClick && "cursor-pointer hover:bg-[var(--bg-elevated)]/40"
+                  "border-b border-border/40 last:border-0 transition-colors",
+                  onRowClick && "cursor-pointer hover:bg-bg-elevated/40"
                 )}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-3 text-[var(--text-primary)]">
+                  <td key={col.key} className="px-4 py-3 text-text-primary">
                     {getRowValue(row, col)}
                   </td>
                 ))}
@@ -93,7 +93,7 @@ function Table<T extends Record<string, any>>({
         </tbody>
       </table>
       {pagination && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border)]/40 text-xs text-[var(--text-muted)]">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border/40 text-xs text-text-muted">
           <span>
             {(pagination.page - 1) * pagination.limit + 1}-
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
@@ -102,7 +102,7 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
               disabled={pagination.page === 1}
-              className="p-1 rounded hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-3 h-3" />
             </button>
@@ -112,7 +112,7 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => onPageChange(pagination.page + 1)}
               disabled={pagination.page * pagination.limit >= pagination.total}
-              className="p-1 rounded hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-3 h-3" />
             </button>

@@ -68,18 +68,18 @@ function ResetPasswordInner() {
 
   if (state === "success") {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-8">
-        <div className="w-full max-w-md space-y-4 rounded-2xl bg-[var(--bg-surface)]/80 border border-[var(--border)] p-6">
-          <div className="flex items-center gap-2 text-emerald-400">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8">
+        <div className="w-full max-w-md space-y-4 rounded-2xl bg-bg-surface/80 border border-border p-6">
+          <div className="flex items-center gap-2 text-action-success">
             <CheckCircle2 className="h-6 w-6" />
-            <h1 className="text-lg font-bold text-[var(--text-primary)]">Password updated</h1>
+            <h1 className="text-lg font-bold text-text-primary">Password updated</h1>
           </div>
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-text-muted">
             Your password has been reset successfully. You can now sign in with your new password.
           </p>
           <Link
             href="/login"
-            className="block w-full rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-center text-sm font-semibold text-white"
+            className="block w-full rounded-lg bg-action-primary px-4 py-2.5 text-center text-sm font-semibold text-white"
           >
             Go to sign in
           </Link>
@@ -89,24 +89,24 @@ function ResetPasswordInner() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-[var(--bg-base)] p-4 sm:p-8">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8">
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="w-full max-w-md space-y-4 rounded-2xl bg-[var(--bg-surface)]/80 border border-[var(--border)] p-6">
+      <div className="w-full max-w-md space-y-4 rounded-2xl bg-bg-surface/80 border border-border p-6">
         <div className="flex items-center gap-2">
-          <KeyRound className="h-5 w-5 text-emerald-400" />
-          <h1 className="text-lg font-bold text-[var(--text-primary)]">Set a new password</h1>
+          <KeyRound className="h-5 w-5 text-action-success" />
+          <h1 className="text-lg font-bold text-text-primary">Set a new password</h1>
         </div>
-        <p className="text-sm text-[var(--text-muted)]">
+        <p className="text-sm text-text-muted">
           {token
             ? "Enter your new password below. This link is one-time and expires in 1 hour."
             : "No reset link detected in the URL. Please use the link your administrator sent you."}
         </p>
 
         {!token ? (
-          <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400">
+          <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
             This page requires a valid <code>?token=</code> parameter from a reset link.
             <div className="mt-2">
-              <Link href="/login" className="text-[var(--action-primary)] underline">
+              <Link href="/login" className="text-action-primary underline">
                 Back to sign in
               </Link>
             </div>
@@ -114,7 +114,7 @@ function ResetPasswordInner() {
         ) : (
           <form onSubmit={submit} className="space-y-4" noValidate>
             <div className="space-y-1">
-              <label htmlFor="new-password" className="text-xs font-medium text-[var(--text-muted)]">
+              <label htmlFor="new-password" className="text-xs font-medium text-text-muted">
                 New password
               </label>
               <div className="relative">
@@ -127,14 +127,14 @@ function ResetPasswordInner() {
                   autoComplete="new-password"
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 pl-9 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
                 />
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)]"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -142,7 +142,7 @@ function ResetPasswordInner() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="confirm-password" className="text-xs font-medium text-[var(--text-muted)]">
+              <label htmlFor="confirm-password" className="text-xs font-medium text-text-muted">
                 Confirm new password
               </label>
               <div className="relative">
@@ -155,16 +155,16 @@ function ResetPasswordInner() {
                   autoComplete="new-password"
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-3 py-2 pl-9 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
                 />
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
             </div>
 
             {error && (
               <div
                 role="alert"
-                className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400"
+                className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
@@ -174,13 +174,13 @@ function ResetPasswordInner() {
             <button
               type="submit"
               disabled={state === "submitting" || !token}
-              className="w-full rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="w-full rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {state === "submitting" ? "Saving…" : "Update password"}
             </button>
 
-            <p className="text-center text-xs text-[var(--text-muted)]">
-              <Link href="/login" className="text-[var(--action-primary)] hover:underline">
+            <p className="text-center text-xs text-text-muted">
+              <Link href="/login" className="text-action-primary hover:underline">
                 Back to sign in
               </Link>
             </p>

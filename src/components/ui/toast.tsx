@@ -40,10 +40,10 @@ const toastIcons: Record<ToastVariant, React.ReactNode> = {
 };
 
 const toastStyles: Record<ToastVariant, string> = {
-  success: "bg-[var(--action-primary)]/10 border-[var(--action-primary)]/30 text-[var(--action-primary)]",
-  error: "bg-[var(--action-danger)]/10 border-[var(--action-danger)]/30 text-[var(--action-danger)]",
-  info: "bg-[var(--action-info)]/10 border-[var(--action-info)]/30 text-[var(--action-info)]",
-  warning: "bg-[var(--action-warning)]/10 border-[var(--action-warning)]/30 text-[var(--action-warning)]",
+  success: "bg-action-primary/10 border-action-primary/30 text-action-primary",
+  error: "bg-action-danger/10 border-action-danger/30 text-action-danger",
+  info: "bg-action-info/10 border-[var(--action-info)]/30 text-action-info",
+  warning: "bg-action-warning/10 border-action-warning/30 text-action-warning",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

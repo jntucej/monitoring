@@ -83,17 +83,17 @@ const SEVERITY_STYLE: Record<
 > = {
   critical: {
     icon: AlertTriangle,
-    accent: "text-rose-400",
+    accent: "text-action-danger",
     row: "border-l-2 border-l-rose-500",
   },
   warning: {
     icon: Info,
-    accent: "text-amber-400",
+    accent: "text-action-warning",
     row: "border-l-2 border-l-amber-500",
   },
   info: {
     icon: CheckCircle,
-    accent: "text-emerald-400",
+    accent: "text-action-success",
     row: "border-l-2 border-l-emerald-500",
   },
 };
@@ -189,7 +189,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
     <section className="min-w-0 w-full">
       <WidgetBoundary title="Incidents">
         {loading && rows.length === 0 ? (
-          <div className="flex items-center gap-2 py-6 text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 py-6 text-sm text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin" />
             Loading incidents&hellip;
           </div>
@@ -219,7 +219,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
               return (
                 <li
                   key={row.id}
-                  className={`rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] p-3 ${style.row} ${
+                  className={`rounded-lg border border-border bg-bg-elevated p-3 ${style.row} ${
                     resolved ? "opacity-50" : ""
                   }`}
                 >
@@ -227,7 +227,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                     <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${style.accent}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                        <p className="text-xs font-bold text-text-primary truncate">
                           {row.candidate_name || row.ticket_number || "Unknown candidate"}
                         </p>
                         <span
@@ -236,17 +236,17 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                           {sev.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-[11px] font-mono text-[var(--text-muted)] truncate">
+                      <p className="text-[11px] font-mono text-text-muted truncate">
                         {row.ticket_number}
                         {row.roll ? ` · roll ${row.roll}` : ""}
                       </p>
-                      <p className="text-[11px] text-[var(--text-secondary)] mt-1">{desc}</p>
+                      <p className="text-[11px] text-text-secondary mt-1">{desc}</p>
                       <div className="flex items-center justify-between gap-2 mt-2 flex-wrap">
-                        <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                        <span className="text-[10px] font-mono text-text-muted">
                           hall: {hall} · {fmtTime(row.updated_at ?? row.created_at)}
                         </span>
                         {resolved ? (
-                          <span className="text-[10px] font-semibold text-emerald-400">
+                          <span className="text-[10px] font-semibold text-action-success">
                             resolved
                           </span>
                         ) : (
@@ -254,7 +254,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void markResolved(row)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-2 py-1 text-[10px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--action-primary)]/40 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-base px-2 py-1 text-[10px] font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 transition-colors disabled:opacity-50"
                           >
                             {busyId === row.id ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -274,7 +274,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
         )}
 
         {rows.length > 0 ? (
-          <p className="mt-3 text-[10px] font-mono text-[var(--text-muted)]">
+          <p className="mt-3 text-[10px] font-mono text-text-muted">
             {unresolvedCount} unresolved · {rows.length} total
           </p>
         ) : null}

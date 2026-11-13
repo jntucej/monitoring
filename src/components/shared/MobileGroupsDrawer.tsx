@@ -45,7 +45,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
-        className="md:hidden fixed top-3 left-3 z-50 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center border border-[var(--border)] bg-[var(--bg-elevated)]/95 backdrop-blur-md text-[var(--text-secondary)] active:scale-95 transition-transform"
+        className="md:hidden fixed top-3 left-3 z-50 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center border border-border bg-bg-elevated/95 backdrop-blur-md text-text-secondary active:scale-95 transition-transform"
       >
         <Menu className="w-4 h-4" />
       </button>
@@ -64,15 +64,15 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         aria-label="Mobile navigation drawer"
         role="dialog"
         aria-modal="true"
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-[var(--bg-elevated)] border-r border-[var(--border)] shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-bg-elevated border-r border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-4 h-4 text-[var(--action-primary)]" />
-            <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide">
+            <LayoutDashboard className="w-4 h-4 text-action-primary" />
+            <span className="text-xs font-bold text-text-primary uppercase tracking-wide">
               Navigation
             </span>
           </div>
@@ -80,7 +80,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
+            className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-surface transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -100,14 +100,14 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
                   aria-expanded={expanded}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                     active
-                      ? "text-[var(--action-primary)] bg-[var(--action-primary)]/10 font-semibold"
-                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                      ? "text-action-primary bg-action-primary/10 font-semibold"
+                      : "text-text-secondary hover:bg-bg-surface hover:text-text-primary"
                   }`}
                 >
                   <GroupIcon className="w-4 h-4 shrink-0" />
                   <span className="flex-1 text-left truncate">{group.label}</span>
                   <span
-                    className={`text-[10px] text-[var(--text-muted)] transition-transform ${
+                    className={`text-[10px] text-text-muted transition-transform ${
                       expanded ? "rotate-90" : ""
                     }`}
                   >
@@ -115,7 +115,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
                   </span>
                 </button>
                 {expanded && (
-                  <div className="ml-4 border-l border-[var(--border)] pl-2 mt-0.5 mb-1">
+                  <div className="ml-4 border-l border-border pl-2 mt-0.5 mb-1">
                     {group.children.map((child) => (
                       <a
                         key={child.href}
@@ -123,8 +123,8 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
                         onClick={() => setOpen(false)}
                         className={`block px-3 py-2 rounded-lg text-xs transition-colors ${
                           childActive(child.href)
-                            ? "text-[var(--action-primary)] font-semibold bg-[var(--action-primary)]/10"
-                            : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                            ? "text-action-primary font-semibold bg-action-primary/10"
+                            : "text-text-secondary hover:bg-bg-surface hover:text-text-primary"
                         }`}
                       >
                         {child.label}

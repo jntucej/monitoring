@@ -23,13 +23,13 @@ interface Row {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "text-[var(--action-warning)] bg-[var(--action-warning)]/10",
-  processing: "text-[var(--action-info)] bg-[var(--action-info)]/10",
-  sent: "text-[var(--action-primary)] bg-[var(--action-primary)]/10",
-  delivered: "text-emerald-400 bg-emerald-400/10",
-  failed: "text-[var(--action-danger)] bg-[var(--action-danger)]/10",
-  dead_letter: "text-rose-400 bg-rose-400/20",
-  expired: "text-[var(--text-muted)] bg-[var(--text-muted)]/10",
+  pending: "text-action-warning bg-action-warning/10",
+  processing: "text-action-info bg-action-info/10",
+  sent: "text-action-primary bg-action-primary/10",
+  delivered: "text-action-success bg-emerald-400/10",
+  failed: "text-action-danger bg-action-danger/10",
+  dead_letter: "text-action-danger bg-rose-400/20",
+  expired: "text-text-muted bg-[var(--text-muted)]/10",
 };
 
 export function SmsQueue() {
@@ -107,7 +107,7 @@ export function SmsQueue() {
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1.5 rounded text-sm"
+          className="border border-border bg-bg-surface px-2 py-1.5 rounded text-sm"
           aria-label="Filter by status"
         >
           <option value="">All statuses</option>
@@ -119,7 +119,7 @@ export function SmsQueue() {
           value={q}
           onChange={(e) => { setQ(e.target.value); setPage(1); }}
           placeholder="Search phone or message…"
-          className="border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 rounded text-sm flex-1 min-w-[160px]"
+          className="border border-border bg-bg-surface px-3 py-1.5 rounded text-sm flex-1 min-w-[160px]"
           aria-label="Search SMS queue"
         />
         <Button
@@ -135,7 +135,7 @@ export function SmsQueue() {
       <Card className="overflow-x-auto safe-x">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+            <tr className="text-left text-xs text-text-muted border-b border-border">
               <th className="px-3 py-2">Phone</th>
               <th className="px-3 py-2">Message</th>
               <th className="px-3 py-2">Status</th>
@@ -148,19 +148,19 @@ export function SmsQueue() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-[var(--text-muted)]">
+                <td colSpan={7} className="px-3 py-8 text-center text-text-muted">
                   Loading…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-[var(--text-muted)]">
+                <td colSpan={7} className="px-3 py-8 text-center text-text-muted">
                   No SMS rows match the current filter.
                 </td>
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} className="border-b border-[var(--border)]/50 hover:bg-[var(--bg-elevated)]">
+                <tr key={r.id} className="border-b border-border/50 hover:bg-bg-elevated">
                   <td className="px-3 py-2 font-mono text-xs">{r.phone_number}</td>
                   <td className="px-3 py-2 max-w-[220px] truncate" title={r.message}>
                     {r.message}
@@ -168,17 +168,17 @@ export function SmsQueue() {
                   <td className="px-3 py-2">
                     <span
                       className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${
-                        STATUS_COLORS[r.status] ?? "text-[var(--text-muted)]"
+                        STATUS_COLORS[r.status] ?? "text-text-muted"
                       }`}
                     >
                       {r.status}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-xs text-[var(--text-muted)]">
+                  <td className="px-3 py-2 text-xs text-text-muted">
                     {r.template_code ?? "—"}
                   </td>
                   <td className="px-3 py-2 text-xs">{r.cost_inr ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs text-[var(--text-muted)]">
+                  <td className="px-3 py-2 text-xs text-text-muted">
                     {new Date(r.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
                   </td>
                   <td className="px-3 py-2">
@@ -212,7 +212,7 @@ export function SmsQueue() {
         </table>
       </Card>
 
-      <div className="flex items-center justify-between text-sm text-[var(--text-muted)]">
+      <div className="flex items-center justify-between text-sm text-text-muted">
         <span>
           {total} row{total !== 1 ? "s" : ""} · page {page} / {totalPages}
         </span>

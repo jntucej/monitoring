@@ -64,17 +64,17 @@ export function TeamRoster() {
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Users className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+          <Users className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">
             Team roster
           </h2>
         </div>
         <Link
           href="/supervisor/team/workers"
-          className="text-[11px] text-[var(--action-primary)] hover:underline"
+          className="text-[11px] text-action-primary hover:underline"
         >
           Full roster →
         </Link>
@@ -87,26 +87,26 @@ export function TeamRoster() {
           {/* Summary strip */}
           <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">
                 On post
               </p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-primary)]">
+              <p className="text-lg font-semibold tabular-nums text-action-primary">
                 {totals?.onPost ?? 0}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">
                 Security on duty
               </p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-info)]">
+              <p className="text-lg font-semibold tabular-nums text-action-info">
                 {totals?.securityOnDuty ?? 0}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              <p className="text-[10px] uppercase tracking-wider text-text-muted">
                 Absent
               </p>
-              <p className="text-lg font-semibold tabular-nums text-[var(--action-danger)]">
+              <p className="text-lg font-semibold tabular-nums text-action-danger">
                 {totals?.absent ?? 0}
               </p>
             </div>
@@ -114,11 +114,11 @@ export function TeamRoster() {
 
           {/* Absent alert */}
           {absent.length > 0 && (
-            <div className="mb-3 rounded-lg bg-[var(--action-danger)]/10 px-3 py-2 text-xs">
-              <p className="font-medium text-[var(--action-danger)]">
+            <div className="mb-3 rounded-lg bg-action-danger/10 px-3 py-2 text-xs">
+              <p className="font-medium text-action-danger">
                 {absent.length} not accounted for
               </p>
-              <p className="text-[10px] text-[var(--text-muted)]">
+              <p className="text-[10px] text-text-muted">
                 {absent.slice(0, 3).map((w) => w.name).join(", ")}
                 {absent.length > 3 && ` +${absent.length - 3} more`}
               </p>
@@ -128,11 +128,11 @@ export function TeamRoster() {
           {/* Grouped by gate */}
           <div className="space-y-2">
             {Array.from(byGate.entries()).slice(0, 4).map(([gate, rows]) => (
-              <div key={gate} className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)]/30 p-2">
+              <div key={gate} className="rounded-lg border border-border bg-bg-base/30 p-2">
                 <div className="mb-1 flex items-center gap-1.5">
-                  <MapPin className="size-3 text-[var(--text-muted)]" />
-                  <span className="text-[11px] font-medium text-[var(--text-primary)]">{gate}</span>
-                  <span className="text-[10px] text-[var(--text-muted)]">
+                  <MapPin className="size-3 text-text-muted" />
+                  <span className="text-[11px] font-medium text-text-primary">{gate}</span>
+                  <span className="text-[10px] text-text-muted">
                     {rows.filter((r) => r.status === "INSIDE").length}/{rows.length}
                   </span>
                 </div>
@@ -141,24 +141,24 @@ export function TeamRoster() {
                     const Icon = ICONS[w.staffCategory] ?? Users;
                     const statusColor =
                       w.status === "INSIDE"
-                        ? "bg-[var(--action-primary)]"
+                        ? "bg-action-primary"
                         : w.status === "OUTSIDE"
-                        ? "bg-[var(--action-warning)]"
-                        : "bg-[var(--action-danger)]";
+                        ? "bg-action-warning"
+                        : "bg-action-danger";
                     return (
                       <li key={w.id} className="flex items-center gap-2 text-[11px]">
                         <span className={`size-1.5 shrink-0 rounded-full ${statusColor}`} />
-                        <Icon className="size-3 text-[var(--text-muted)]" />
-                        <span className="truncate font-medium text-[var(--text-primary)]">
+                        <Icon className="size-3 text-text-muted" />
+                        <span className="truncate font-medium text-text-primary">
                           {w.name}
                         </span>
-                        <span className="ml-auto text-[10px] text-[var(--text-muted)]">
+                        <span className="ml-auto text-[10px] text-text-muted">
                           {LABELS[w.staffCategory] ?? w.staffCategory}
                         </span>
                         {w.phoneTail && (
                           <a
                             href={`tel:***${w.phoneTail}`}
-                            className="text-[var(--action-primary)] hover:underline"
+                            className="text-action-primary hover:underline"
                             aria-label={`Call ${w.name}`}
                           >
                             <Phone className="size-3" />
@@ -168,7 +168,7 @@ export function TeamRoster() {
                     );
                   })}
                   {rows.length > 4 && (
-                    <li className="text-[10px] text-[var(--text-muted)]">
+                    <li className="text-[10px] text-text-muted">
                       +{rows.length - 4} more
                     </li>
                   )}

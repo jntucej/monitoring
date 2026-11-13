@@ -64,20 +64,20 @@ export default function StudentPermissionsPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <ClipboardList className="w-6 h-6 text-[var(--action-primary)]" />
-              <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">My Permissions</p>
+              <ClipboardList className="w-6 h-6 text-action-primary" />
+              <p className="text-xl md:text-2xl font-bold text-text-primary">My Permissions</p>
             </div>
-            <p className="text-xs md:text-sm text-[var(--text-muted)]">Track your requests and approvals</p>
+            <p className="text-xs md:text-sm text-text-muted">Track your requests and approvals</p>
           </div>
           <Link href="/student/permissions/new">
-            <Button className="min-h-[44px] gap-2 bg-[var(--action-primary)] hover:opacity-90 text-white font-semibold">
+            <Button className="min-h-[44px] gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">
               <Plus className="w-4 h-4" /> New Permission
             </Button>
           </Link>
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-[var(--action-danger)]/30 text-[var(--action-danger)] text-xs md:text-sm flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-action-danger/30 text-action-danger text-xs md:text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -94,8 +94,8 @@ export default function StudentPermissionsPage() {
                 onClick={() => setFilter(f)}
                 className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                   filter === f
-                    ? "bg-[var(--action-primary)] text-white shadow"
-                    : "bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-primary text-white shadow"
+                    : "bg-bg-surface border border-border text-text-muted hover:text-text-primary"
                 }`}
               >
                 {f} ({count})
@@ -112,9 +112,9 @@ export default function StudentPermissionsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="glass-card p-12 text-center space-y-3">
-            <Inbox className="w-8 h-8 text-[var(--text-muted)] mx-auto" />
-            <p className="text-sm font-semibold text-[var(--text-primary)]">No permission requests found</p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <Inbox className="w-8 h-8 text-text-muted mx-auto" />
+            <p className="text-sm font-semibold text-text-primary">No permission requests found</p>
+            <p className="text-xs text-text-muted">
               {filter === "ALL" ? "You haven't submitted any permission requests yet." : `No ${filter.toLowerCase()} requests.`}
             </p>
           </div>
@@ -129,10 +129,10 @@ export default function StudentPermissionsPage() {
                     onSelect={(num) => setActiveTicket(num)}
                   />
                   {t.status === "REJECTED" && (
-                    <div className="pt-2 border-t border-[var(--border)] flex justify-end">
+                    <div className="pt-2 border-t border-border flex justify-end">
                       <Link
                         href={`/student/permissions/new?reapply=${encodeURIComponent(ticketNum)}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 text-xs font-semibold hover:bg-amber-500/20 transition w-full sm:w-auto"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-action-warning text-xs font-semibold hover:bg-amber-500/20 transition w-full sm:w-auto"
                       >
                         <Plus className="w-4 h-4" />
                         Reapply (creates a new ticket)

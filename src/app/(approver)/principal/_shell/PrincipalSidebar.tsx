@@ -70,12 +70,12 @@ export function PrincipalSidebar({
   }, [onNavigate]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--bg-surface)]">
-      <header className="shrink-0 border-b border-[var(--border)] px-4 py-3">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+    <div className="flex h-full w-full flex-col bg-bg-surface">
+      <header className="shrink-0 border-b border-border px-4 py-3">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
           Principal
         </p>
-        <p className="text-sm font-semibold text-[var(--text-primary)]">
+        <p className="text-sm font-semibold text-text-primary">
           Oversight Console
         </p>
       </header>
@@ -103,12 +103,12 @@ export function PrincipalSidebar({
         )}
       </nav>
 
-      <footer className="shrink-0 border-t border-[var(--border)] p-2 space-y-1">
+      <footer className="shrink-0 border-t border-border p-2 space-y-1">
         {/* Streak pill */}
         <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
-          <Flame className="size-3.5 text-[var(--action-warning)]" />
-          <span className="text-[var(--text-muted)]">Authority streak</span>
-          <span className="ml-auto font-semibold tabular-nums text-[var(--text-primary)]">
+          <Flame className="size-3.5 text-action-warning" />
+          <span className="text-text-muted">Authority streak</span>
+          <span className="ml-auto font-semibold tabular-nums text-text-primary">
             {usePrincipalRetention.getState().authorityStreak}d
           </span>
         </div>
@@ -121,7 +121,7 @@ export function PrincipalSidebar({
             window.dispatchEvent(new CustomEvent("principal:open-focus-mode"));
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[var(--action-primary)] hover:bg-[var(--action-primary)]/10"
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
         >
           <Target className="size-3.5" />
           Focus mode
@@ -130,7 +130,7 @@ export function PrincipalSidebar({
         <Link
           href="/principal/profile"
           onClick={close}
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
         >
           Account settings
         </Link>
@@ -159,8 +159,8 @@ function LinkRow({
       className={cn(
         "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
         active
-          ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
-          : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+          ? "bg-action-primary/10 font-medium text-action-primary"
+          : "text-text-secondary hover:bg-bg-elevated"
       )}
     >
       <Icon className="size-4 shrink-0" aria-hidden />
@@ -196,15 +196,15 @@ function GroupRow({
         className={cn(
           "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
           active
-            ? "text-[var(--action-primary)]"
-            : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+            ? "text-action-primary"
+            : "text-text-secondary hover:bg-bg-elevated"
         )}
       >
         <Icon className="size-4 shrink-0" aria-hidden />
         <span className="flex-1 text-left">{group.label}</span>
         <Chevron
           className={cn(
-            "size-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+            "size-3.5 shrink-0 transition-transform text-text-muted",
             expanded && "rotate-0"
           )}
         />
@@ -223,8 +223,8 @@ function GroupRow({
                   className={cn(
                     "flex min-h-[44px] items-center rounded-md px-3 py-1.5 text-xs transition",
                     childActive
-                      ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
-                      : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-secondary)]"
+                      ? "bg-action-primary/10 font-medium text-action-primary"
+                      : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
                   )}
                 >
                   {child.label}

@@ -69,7 +69,7 @@ export function AdvancedAnalytics() {
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Advanced Analytics</p>
-          <p className="text-sm text-[var(--text-muted)]">Build queries and custom reports.</p>
+          <p className="text-sm text-text-muted">Build queries and custom reports.</p>
         </div>
         <Button onClick={() => setShowSave(!showSave)} variant="secondary" size="sm" className="gap-2">
           <Save className="w-4 h-4" /> {showSave ? "Cancel" : "Save Definition"}
@@ -101,14 +101,14 @@ export function AdvancedAnalytics() {
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {data.model === "unavailable" && (
-            <div className="lg:col-span-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-300">
+            <div className="lg:col-span-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
               No prediction model available. Showing raw historical movement data only
               ({data.dataPoints} samples). {data.reason}
             </div>
           )}
           <Card className={data.model === "unavailable" ? "lg:col-span-3 border p-4" : "lg:col-span-2 border p-4"}>
             {data.model === "historical-ma" && (
-              <p className="text-xs text-[var(--text-muted)] mb-2">Historical trend (moving average of recorded movement logs). Not a forecast.</p>
+              <p className="text-xs text-text-muted mb-2">Historical trend (moving average of recorded movement logs). Not a forecast.</p>
             )}
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -117,7 +117,7 @@ export function AdvancedAnalytics() {
                   <XAxis dataKey="time" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="var(--action-primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -131,7 +131,7 @@ export function AdvancedAnalytics() {
                       <Badge variant="entry">{b.count}</Badge>
                     </div>
                   ))
-                : <p className="text-xs text-[var(--text-muted)]">No breakdown available.</p>}
+                : <p className="text-xs text-text-muted">No breakdown available.</p>}
             </Card>
           )}
         </div>

@@ -8,8 +8,8 @@ export default function SystemHubPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <p className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">System Operations & Integrations</p>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
+        <p className="text-2xl font-bold tracking-tight text-text-primary">System Operations & Integrations</p>
+        <p className="text-sm text-text-secondary mt-1">
           Monitor service uptime, background job schedulers, webhooks, and UI navigation hierarchies.
         </p>
       </div>
@@ -17,97 +17,97 @@ export default function SystemHubPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Link
           href="/sysadmin/health"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-500">
+            <div className="p-3 rounded-lg bg-emerald-500/10 text-action-success">
               <Activity className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">System Health & Telemetry</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Postgres pool, Auth, Redis cache latencies</p>
+            <h3 className="font-semibold text-sm text-text-primary">System Health & Telemetry</h3>
+            <p className="text-xs text-text-secondary mt-0.5">Postgres pool, Auth, Redis cache latencies</p>
           </div>
         </Link>
 
         <Link
           href="/sysadmin/jobs"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500">
+            <div className="p-3 rounded-lg bg-blue-500/10 text-action-primary">
               <Clock className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Scheduled Cron Jobs</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Nightly curfews, auto-archiving, cleanup</p>
+            <h3 className="font-semibold text-sm text-text-primary">Scheduled Cron Jobs</h3>
+            <p className="text-xs text-text-secondary mt-0.5">Nightly curfews, auto-archiving, cleanup</p>
           </div>
         </Link>
 
         <Link
           href="/sysadmin/integrations"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-purple-500/10 text-purple-500">
+            <div className="p-3 rounded-lg bg-purple-500/10 text-unit-c">
               <Database className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Integration Hub</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">ERP connectors, biometric sync, webhooks</p>
+            <h3 className="font-semibold text-sm text-text-primary">Integration Hub</h3>
+            <p className="text-xs text-text-secondary mt-0.5">ERP connectors, biometric sync, webhooks</p>
           </div>
         </Link>
 
         <Link
           href="/sysadmin/scheduling"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-amber-500/10 text-amber-500">
+            <div className="p-3 rounded-lg bg-amber-500/10 text-action-warning">
               <Sparkles className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Smart Shift Scheduling</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">AI operator rostering & coverage rules</p>
+            <h3 className="font-semibold text-sm text-text-primary">Smart Shift Scheduling</h3>
+            <p className="text-xs text-text-secondary mt-0.5">AI operator rostering & coverage rules</p>
           </div>
         </Link>
 
         <Link
           href="/sysadmin/navigation"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
             <div className="p-3 rounded-lg bg-sky-500/10 text-sky-500">
               <Layout className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Navigation Menu Editor</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Customize role menus & sidebar hierarchies</p>
+            <h3 className="font-semibold text-sm text-text-primary">Navigation Menu Editor</h3>
+            <p className="text-xs text-text-secondary mt-0.5">Customize role menus & sidebar hierarchies</p>
           </div>
         </Link>
 
         <Link
           href="/sysadmin/infrastructure"
-          className="p-5 rounded-xl bg-[var(--surface-default)] border border-[var(--border-subtle)] hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-rose-500/10 text-rose-500">
+            <div className="p-3 rounded-lg bg-rose-500/10 text-action-danger">
               <Server className="w-5 h-5" />
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
+            <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-[var(--text-primary)]">Infrastructure Monitoring</h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">Docker fleet, CPU/memory, container telemetry</p>
+            <h3 className="font-semibold text-sm text-text-primary">Infrastructure Monitoring</h3>
+            <p className="text-xs text-text-secondary mt-0.5">Docker fleet, CPU/memory, container telemetry</p>
           </div>
         </Link>
       </div>

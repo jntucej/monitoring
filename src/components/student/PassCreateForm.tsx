@@ -137,15 +137,15 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-3xl p-6 space-y-4 shadow-2xl">
-        <h2 className="text-lg font-bold text-[var(--text-primary)]">Apply Gate Pass</h2>
+      <div className="w-full max-w-md bg-bg-surface border border-border rounded-3xl p-6 space-y-4 shadow-2xl">
+        <h2 className="text-lg font-bold text-text-primary">Apply Gate Pass</h2>
         <form onSubmit={handleCreatePass} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="pass-category">Pass Category</label>
+            <label className="text-xs font-semibold text-text-secondary" htmlFor="pass-category">Pass Category</label>
             <select id="pass-category"
               value={passType || passTypes[0]?.code || ""}
               onChange={(e) => handlePassTypeChange(e.target.value)}
-              className="w-full p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+              className="w-full p-3 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
               disabled={submitting || loadingPassTypes}
               required
             >
@@ -154,7 +154,7 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
               ))}
             </select>
             {passType && (
-              <p className="text-[11px] text-[var(--text-muted)] mt-1 italic">
+              <p className="text-[11px] text-text-muted mt-1 italic">
                 {passTypes.find((pt) => pt.code === passType)?.description}
               </p>
             )}
@@ -162,44 +162,44 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="from-departure">From (Departure)</label>
+              <label className="text-xs font-semibold text-text-secondary" htmlFor="from-departure">From (Departure)</label>
               <input id="from-departure"
                 type="datetime-local"
                 value={fromTime}
                 onChange={(e) => handleFromTimeChange(e.target.value)}
-                className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+                className="w-full min-h-[44px] p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
                 disabled={submitting}
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="to-return">To (Return)</label>
+              <label className="text-xs font-semibold text-text-secondary" htmlFor="to-return">To (Return)</label>
               <input id="to-return"
                 type="datetime-local"
                 value={toTime}
                 onChange={(e) => setToTime(e.target.value)}
                 max={passType === "day_pass" && fromTime ? `${fromTime.split("T")[0]}T23:59` : undefined}
-                className="w-full min-h-[44px] p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)]"
+                className="w-full min-h-[44px] p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
                 disabled={submitting}
                 required
               />
             </div>
           </div>
           {passType === "day_pass" && (
-            <p className="text-[10px] text-[var(--action-warning)] font-medium">
+            <p className="text-[10px] text-action-warning font-medium">
               * Day Pass requires returning on the same calendar day (by curfew/23:59).
             </p>
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-[var(--text-secondary)]" htmlFor="reason-for-outing-pass">Reason for Outing / Pass</label>
+            <label className="text-xs font-semibold text-text-secondary" htmlFor="reason-for-outing-pass">Reason for Outing / Pass</label>
             <textarea id="reason-for-outing-pass"
               required
               rows={3}
               value={reasonText}
               onChange={(e) => setReasonText(e.target.value)}
               placeholder="State clear purpose for leaving campus..."
-              className="w-full p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold"
+              className="w-full p-3 rounded-xl bg-bg-base border border-border text-xs font-semibold"
               disabled={submitting}
             />
           </div>
@@ -208,14 +208,14 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-xs font-semibold"
+              className="flex-1 py-2.5 rounded-xl bg-bg-elevated border border-border text-xs font-semibold"
               disabled={submitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-xl bg-[var(--action-primary)] text-white font-bold text-xs shadow-md flex items-center justify-center gap-1"
+              className="flex-1 py-2.5 rounded-xl bg-action-primary text-white font-bold text-xs shadow-md flex items-center justify-center gap-1"
               disabled={submitting}
             >
               {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

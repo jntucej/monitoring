@@ -179,18 +179,18 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
   return (
     <WidgetBoundary title="Token verifier">
       <div className="space-y-4">
-        <div className="flex gap-1 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-1">
+        <div className="flex gap-1 rounded-xl border border-border bg-bg-surface/60 p-1">
           <button
             type="button"
             onClick={() => { stopCamera(); setMode("QR"); if (step.kind !== "idle") reset(); }}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${mode === "QR" ? "bg-[var(--action-primary)] text-white" : "text-[var(--text-secondary)]"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${mode === "QR" ? "bg-action-primary text-white" : "text-text-secondary"}`}
           >
             <Camera className="h-4 w-4" /> Scan QR
           </button>
           <button
             type="button"
             onClick={() => { stopCamera(); setMode("MANUAL"); }}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${mode === "MANUAL" ? "bg-[var(--action-primary)] text-white" : "text-[var(--text-secondary)]"}`}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${mode === "MANUAL" ? "bg-action-primary text-white" : "text-text-secondary"}`}
           >
             <KeyRound className="h-4 w-4" /> Manual code
           </button>
@@ -199,11 +199,11 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
         {/* Opaque QR viewfinder — renders only while scanning. */}
         {step.kind === "scanning" && (
           <div className="space-y-2">
-            <div className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-black">
+            <div className="relative overflow-hidden rounded-xl border border-border bg-black">
               <video ref={videoRef} className="h-48 w-full object-cover" muted playsInline />
               <canvas ref={canvasRef} className="hidden" />
             </div>
-            <button type="button" onClick={reset} className="w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm">
+            <button type="button" onClick={reset} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
               Cancel
             </button>
           </div>
@@ -213,7 +213,7 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
           <button
             type="button"
             onClick={() => { setStep({ kind: "scanning" }); void openCamera(); }}
-            className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--border)] py-12 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+            className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-border py-12 text-sm text-text-secondary hover:bg-bg-elevated"
           >
             <Camera className="h-8 w-8" />
             Tap to open the camera and scan the student&#39;s QR token
@@ -225,30 +225,30 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
             onSubmit={(e) => { e.preventDefault(); void verify("MANUAL"); }}
             className="grid gap-3 md:grid-cols-2"
           >
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Roll / Unique ID
               <input
                 value={roll}
                 onChange={(e) => setRoll(e.target.value.toUpperCase())}
                 placeholder="24JJ1A0501"
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-sm"
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 font-mono text-sm"
               />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               6-character code
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="ABC234"
                 maxLength={6}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-sm tracking-widest"
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 font-mono text-sm tracking-widest"
               />
             </label>
             <div className="md:col-span-2">
               <button
                 type="submit"
                 disabled={!roll || code.length !== 6}
-                className="rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+                className="rounded-lg bg-action-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
               >
                 Verify
               </button>
@@ -257,13 +257,13 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
         )}
 
         {step.kind === "verifying" && (
-          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
             <Loader2 className="h-4 w-4 animate-spin" /> Verifying…
           </div>
         )}
 
         {step.kind === "error" && (
-          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">
+          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
             <XCircle className="mr-1 inline h-4 w-4" /> {step.message}
             <button type="button" onClick={reset} className="ml-2 underline">Try again</button>
           </div>
@@ -273,28 +273,28 @@ export function TokenVerifier({ eventId }: { eventId: string }) {
           <SectionCard title="Ready to serve" description={`Verified via ${step.result.method}`}>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1">
-                <div className="text-lg font-semibold text-[var(--text-primary)]">{step.result.name}</div>
-                <div className="font-mono text-sm text-[var(--text-secondary)]">{step.result.uniqueId}</div>
+                <div className="text-lg font-semibold text-text-primary">{step.result.name}</div>
+                <div className="font-mono text-sm text-text-secondary">{step.result.uniqueId}</div>
               </div>
               <div>
-                <div className="text-xs uppercase tracking-wide text-[var(--text-muted)]">Selected items</div>
-                <ul className="mt-1 space-y-1 text-sm text-[var(--text-primary)]">
+                <div className="text-xs uppercase tracking-wide text-text-muted">Selected items</div>
+                <ul className="mt-1 space-y-1 text-sm text-text-primary">
                   {step.result.itemLabels.map((l, i) => (
                     <li key={step.result.itemIds[i]} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {l}
+                      <CheckCircle2 className="h-3 w-3 text-action-success" /> {l}
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
             <div className="mt-4 flex items-center justify-end gap-2">
-              <button type="button" onClick={reset} className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm">
+              <button type="button" onClick={reset} className="rounded-lg border border-border px-3 py-2 text-sm">
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => void serve()}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-white"
+                className="inline-flex items-center gap-2 rounded-lg bg-action-success px-3 py-2 text-sm font-medium text-white"
               >
                 <ScanLine className="h-4 w-4" /> Serve meal
               </button>

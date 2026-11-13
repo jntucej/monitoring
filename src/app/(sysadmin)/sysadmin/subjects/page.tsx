@@ -95,26 +95,26 @@ function AdminSubjectsInner() {
 
       <WidgetBoundary title="Subject catalog">
         <div className="glass-card">
-          <div className="p-4 border-b border-[var(--border)] flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-[var(--action-primary)]" />
+          <div className="p-4 border-b border-border flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-action-primary" />
             <span className="text-sm font-semibold">{subjects.length} subjects</span>
             <div className="ml-auto relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter…"
-                className="pl-8 pr-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs w-40"
+                className="pl-8 pr-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs w-40"
               />
             </div>
           </div>
           <div className="p-4 space-y-4">
             {grouped.length === 0 && (
-              <p className="text-sm text-[var(--text-muted)]">No subjects found.</p>
+              <p className="text-sm text-text-muted">No subjects found.</p>
             )}
             {grouped.map(([deptKey, list]) => (
               <div key={deptKey}>
-                <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <div className="flex items-center gap-2 mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">
                   <Building2 className="w-3.5 h-3.5" />
                   {deptName(deptKey === "__all__" ? null : deptKey)}
                 </div>
@@ -122,17 +122,17 @@ function AdminSubjectsInner() {
                   {list.map((s) => (
                     <div
                       key={s.code}
-                      className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]/40 p-3"
+                      className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated/40 p-3"
                     >
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: s.color || "var(--action-primary)" }}
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">{s.label}</p>
-                        <p className="text-xs font-mono text-[var(--text-muted)]">{s.code}</p>
+                        <p className="text-sm font-medium text-text-primary truncate">{s.label}</p>
+                        <p className="text-xs font-mono text-text-muted">{s.code}</p>
                       </div>
-                      <span className="text-[10px] text-[var(--text-muted)]">{s.isActive ? "Active" : "Off"}</span>
+                      <span className="text-[10px] text-text-muted">{s.isActive ? "Active" : "Off"}</span>
                     </div>
                   ))}
                 </div>

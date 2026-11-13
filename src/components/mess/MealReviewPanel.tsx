@@ -163,15 +163,15 @@ export function MealReviewPanel() {
         {/* Header + current-window status */}
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Meal Reviews</h2>
-            <p className="text-sm text-[var(--text-muted)]">
+            <h2 className="text-lg font-semibold text-text-primary">Meal Reviews</h2>
+            <p className="text-sm text-text-muted">
               Rate meals while their serving window is open.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
@@ -182,20 +182,20 @@ export function MealReviewPanel() {
           className={`rounded-xl border p-4 ${
             anyOpen
               ? "border-emerald-500/30 bg-emerald-500/10"
-              : "border-[var(--border)] bg-[var(--bg-surface)]/60"
+              : "border-border bg-bg-surface/60"
           }`}
         >
           <div className="flex items-center gap-2.5">
             {anyOpen ? (
-              <Clock className="h-5 w-5 shrink-0 text-emerald-400" />
+              <Clock className="h-5 w-5 shrink-0 text-action-success" />
             ) : (
-              <Lock className="h-5 w-5 shrink-0 text-[var(--text-muted)]" />
+              <Lock className="h-5 w-5 shrink-0 text-text-muted" />
             )}
             <div className="min-w-0">
-              <p className={`text-sm font-semibold ${anyOpen ? "text-emerald-300" : "text-[var(--text-secondary)]"}`}>
+              <p className={`text-sm font-semibold ${anyOpen ? "text-action-success" : "text-text-secondary"}`}>
                 {anyOpen ? `Now serving: ${openWindowLabel}` : "No meal window open right now"}
               </p>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-text-muted">
                 {anyOpen
                   ? "You can rate these meals below."
                   : "Reviews are available during today's breakfast, lunch and dinner windows."}
@@ -203,7 +203,7 @@ export function MealReviewPanel() {
             </div>
           </div>
           {error && (
-            <div className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">
+            <div className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
               {error}{" "}
               <button type="button" onClick={() => void load()} className="underline">Retry</button>
             </div>
@@ -226,18 +226,18 @@ export function MealReviewPanel() {
                 className={`rounded-xl border p-4 transition ${
                   phase === "open"
                     ? "border-emerald-500/40 bg-emerald-500/5"
-                    : "border-[var(--border)] bg-[var(--bg-surface)]/60"
+                    : "border-border bg-bg-surface/60"
                 }`}
               >
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-medium text-[var(--text-secondary)]">{MEAL_LABEL[meal]}</span>
+                  <span className="text-sm font-medium text-text-secondary">{MEAL_LABEL[meal]}</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                       phase === "open"
-                        ? "bg-emerald-500/20 text-emerald-300"
+                        ? "bg-emerald-500/20 text-action-success"
                         : phase === "upcoming"
-                        ? "bg-sky-500/20 text-sky-300"
-                        : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                        ? "bg-sky-500/20 text-action-info"
+                        : "bg-bg-elevated text-text-muted"
                     }`}
                   >
                     {phase === "open" ? "Window open" : phase === "upcoming" ? `Opens ${fmtTime(win)}` : `Closed ${fmtTime(winEnd)}`}
@@ -258,7 +258,7 @@ export function MealReviewPanel() {
                             className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs transition ${
                               active
                                 ? opt.tone
-                                : "border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                                : "border-border text-text-muted hover:bg-bg-elevated"
                             }`}
                             title={opt.label}
                           >
@@ -279,16 +279,16 @@ export function MealReviewPanel() {
                         setCommentDraft((prev) => ({ ...prev, [key]: v }));
                         if (selected && v !== (existing?.comment ?? "")) void submit(today, meal, selected);
                       }}
-                      className="mt-2 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-2 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+                      className="mt-2 w-full rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-action-primary"
                     />
                     {savingKey === key && (
-                      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+                      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-text-muted">
                         <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
                       </div>
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <p className="text-xs text-text-muted">
                     {phase === "upcoming"
                       ? `Window opens at ${fmtTime(win)} — you can rate this meal then.`
                       : `Window closed at ${fmtTime(winEnd)} — this meal can no longer be rated.`}
@@ -302,21 +302,21 @@ export function MealReviewPanel() {
         {/* Today's saved reviews */}
         {!error && reviews.length > 0 && (
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-[var(--text-secondary)]">Your reviews today</h3>
+            <h3 className="mb-2 text-sm font-semibold text-text-secondary">Your reviews today</h3>
             <div className="space-y-2">
               {reviews
                 .filter((r) => r.review_date === today)
                 .map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/60 px-3 py-2"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-surface/60 px-3 py-2"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-[var(--text-primary)]">
+                      <p className="text-xs font-semibold text-text-primary">
                         {MEAL_LABEL[r.meal_type]}
-                        {r.comment ? <span className="ml-2 font-normal text-[var(--text-muted)]">{r.comment}</span> : null}
+                        {r.comment ? <span className="ml-2 font-normal text-text-muted">{r.comment}</span> : null}
                       </p>
-                      <p className="text-[10px] text-[var(--text-muted)]">
+                      <p className="text-[10px] text-text-muted">
                         Rated {SATISFACTION_LEVELS.find((s) => s.value === r.satisfaction)?.label ?? r.satisfaction}
                         {r.edit_count ? ` · edited ${r.edit_count}×` : ""}
                       </p>

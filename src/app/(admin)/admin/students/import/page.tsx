@@ -113,22 +113,22 @@ export default function AdminStudentsImportPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4">
               <div>
                 <h3 className="text-base font-semibold">CSV Student Provisioning</h3>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5">
                   Dry-run first, review the preview, then commit. Rows whose roll already exists are marked
                   skipped.
                 </p>
               </div>
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg glass-card hover:bg-[var(--bg-elevated)]"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg glass-card hover:bg-bg-elevated"
               >
-                <Download className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <Download className="w-3.5 h-3.5 text-text-muted" />
                 Student template
               </button>
             </div>
 
             {errorMsg && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-[var(--action-danger)]/20 text-xs text-[var(--action-danger)]">
+              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-action-danger/20 text-xs text-action-danger">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
@@ -136,10 +136,10 @@ export default function AdminStudentsImportPage() {
 
             <div className="glass-card p-4 sm:p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                   CSV input
                 </label>
-                <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[color-mix(in_srgb,var(--action-primary)_12%,transparent)] text-[var(--action-primary)] font-medium cursor-pointer">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[color-mix(in_srgb,var(--action-primary)_12%,transparent)] text-action-primary font-medium cursor-pointer">
                   <Upload className="w-3.5 h-3.5" />
                   Upload .csv
                   <input
@@ -160,17 +160,17 @@ export default function AdminStudentsImportPage() {
                   setCommitResult(null);
                 }}
                 placeholder="Paste student CSV, or upload a .csv file"
-                className="w-full font-mono text-xs p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-sunken)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+                className="w-full font-mono text-xs p-3 rounded-lg border border-border bg-[var(--bg-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
               />
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-[var(--text-muted)]">
-                  Pin the role column to <code className="text-[var(--action-primary)]">student</code> in the CSV.
+                <span className="text-[11px] text-text-muted">
+                  Pin the role column to <code className="text-action-primary">student</code> in the CSV.
                 </span>
                 <button
                   onClick={handleValidate}
                   disabled={validating || !csvText.trim()}
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--action-primary)] text-white hover:opacity-90 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-action-primary text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {validating ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

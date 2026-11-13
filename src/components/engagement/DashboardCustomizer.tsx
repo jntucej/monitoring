@@ -84,14 +84,14 @@ export function DashboardCustomizer() {
     <WidgetBoundary title="Dashboard Customizer">
       <section
         aria-label="Dashboard customizer"
-        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0"
+        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <Layout className="h-4 w-4 text-indigo-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <Layout className="h-4 w-4 text-action-primary" aria-hidden />
             Dashboard Layout
           </h2>
-          <p className="text-[10px] text-[var(--text-muted)]">
+          <p className="text-[10px] text-text-muted">
             Reorder &amp; pin widgets — access is unchanged
           </p>
         </div>
@@ -105,17 +105,17 @@ export function DashboardCustomizer() {
             return (
               <li
                 key={id}
-                className="flex items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/30 p-2.5"
+                className="flex items-center gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/30 p-2.5"
               >
-                <GripVertical className="h-4 w-4 shrink-0 text-[var(--text-muted)] opacity-50" aria-hidden />
+                <GripVertical className="h-4 w-4 shrink-0 text-text-muted opacity-50" aria-hidden />
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-300">
                   <Icon className="h-4 w-4" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-[var(--text-primary)]">
+                  <p className="truncate text-xs font-semibold text-text-primary">
                     {meta.label}
                   </p>
-                  <p className="text-[10px] text-[var(--text-muted)]">
+                  <p className="text-[10px] text-text-muted">
                     Position {index + 1} of {order.length}
                     {pinned ? " · pinned" : ""}
                   </p>
@@ -126,7 +126,7 @@ export function DashboardCustomizer() {
                     onClick={() => move(id, -1)}
                     disabled={index === 0}
                     aria-label={`Move ${meta.label} up`}
-                    className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-1.5 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
+                    className="rounded-md border border-border bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
                   >
                     ↑
                   </button>
@@ -135,7 +135,7 @@ export function DashboardCustomizer() {
                     onClick={() => move(id, 1)}
                     disabled={index === order.length - 1}
                     aria-label={`Move ${meta.label} down`}
-                    className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-1.5 py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
+                    className="rounded-md border border-border bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
                   >
                     ↓
                   </button>
@@ -146,8 +146,8 @@ export function DashboardCustomizer() {
                     aria-label={pinned ? `Unpin ${meta.label}` : `Pin ${meta.label} to top`}
                     className={`rounded-md border px-1.5 py-1 motion-safe:transition-colors motion-reduce:transition-none ${
                       pinned
-                        ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
-                        : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-amber-300"
+                        ? "border-amber-500/40 bg-amber-500/15 text-action-warning"
+                        : "border-border bg-bg-surface text-text-muted hover:text-action-warning"
                     }`}
                   >
                     <Pin className="h-3.5 w-3.5" aria-hidden />
@@ -161,21 +161,21 @@ export function DashboardCustomizer() {
         <div className="mt-4 flex items-center gap-2">
           {confirmReset ? (
             <>
-              <span className="text-[11px] text-[var(--text-muted)]">Reset layout to defaults?</span>
+              <span className="text-[11px] text-text-muted">Reset layout to defaults?</span>
               <button
                 type="button"
                 onClick={() => {
                   resetLayout();
                   setConfirmReset(false);
                 }}
-                className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[11px] font-medium text-rose-300"
+                className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[11px] font-medium text-action-danger"
               >
                 <Check className="h-3 w-3" aria-hidden /> Yes, reset
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
-                className="rounded-md border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-muted)]"
+                className="rounded-md border border-border px-2 py-1 text-[11px] text-text-muted"
               >
                 Cancel
               </button>
@@ -184,25 +184,25 @@ export function DashboardCustomizer() {
             <button
               type="button"
               onClick={() => setConfirmReset(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden />
               Reset layout
             </button>
           )}
-          <p className="ml-auto text-[10px] text-[var(--text-muted)]">
+          <p className="ml-auto text-[10px] text-text-muted">
             Saved locally — only your layout changes.
           </p>
         </div>
 
         {/* Notification preferences (surfacing only; the server still
             enforces all real delivery permissions). */}
-        <div className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/20 p-3.5">
-          <h3 className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
-            <BellRing className="h-4 w-4 text-amber-400" aria-hidden />
+        <div className="mt-5 rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3.5">
+          <h3 className="flex items-center gap-2 text-xs font-bold text-text-primary">
+            <BellRing className="h-4 w-4 text-action-warning" aria-hidden />
             Notification preferences
           </h3>
-          <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">
+          <p className="mt-0.5 text-[10px] text-text-muted">
             Controls how engagement digests are surfaced for you — quiet hours and
             daily summary only.
           </p>
@@ -217,7 +217,7 @@ export function DashboardCustomizer() {
             />
             {notificationPrefs.quietHours && (
               <div className="grid grid-cols-2 gap-2.5 pl-2">
-                <label className="block text-[10px] text-[var(--text-muted)]">
+                <label className="block text-[10px] text-text-muted">
                   From
                   <input
                     type="time"
@@ -225,10 +225,10 @@ export function DashboardCustomizer() {
                     onChange={(e) =>
                       void togglePref({ quietHoursFrom: e.target.value })
                     }
-                    className="mt-0.5 w-full rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 text-xs text-[var(--text-primary)]"
+                    className="mt-0.5 w-full rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
                   />
                 </label>
-                <label className="block text-[10px] text-[var(--text-muted)]">
+                <label className="block text-[10px] text-text-muted">
                   To
                   <input
                     type="time"
@@ -236,7 +236,7 @@ export function DashboardCustomizer() {
                     onChange={(e) =>
                       void togglePref({ quietHoursTo: e.target.value })
                     }
-                    className="mt-0.5 w-full rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 text-xs text-[var(--text-primary)]"
+                    className="mt-0.5 w-full rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
                   />
                 </label>
               </div>
@@ -249,7 +249,7 @@ export function DashboardCustomizer() {
               onToggle={() => void togglePref({ dailySummary: !notificationPrefs.dailySummary })}
             />
             {notificationPrefs.dailySummary && (
-              <label className="block pl-2 text-[10px] text-[var(--text-muted)]">
+              <label className="block pl-2 text-[10px] text-text-muted">
                 Summary time
                 <input
                   type="time"
@@ -257,7 +257,7 @@ export function DashboardCustomizer() {
                   onChange={(e) =>
                     void togglePref({ dailySummaryTime: e.target.value })
                   }
-                  className="mt-0.5 w-36 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] px-2 py-1 text-xs text-[var(--text-primary)]"
+                  className="mt-0.5 w-36 rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
                 />
               </label>
             )}
@@ -298,10 +298,10 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between gap-3 pl-2">
       <div className="flex min-w-0 items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden />
+        <Icon className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
         <div className="min-w-0">
-          <p className="text-xs font-medium text-[var(--text-primary)]">{label}</p>
-          <p className="text-[10px] text-[var(--text-muted)]">{hint}</p>
+          <p className="text-xs font-medium text-text-primary">{label}</p>
+          <p className="text-[10px] text-text-muted">{hint}</p>
         </div>
       </div>
       <button
@@ -313,12 +313,12 @@ function ToggleRow({
         className={`relative h-5 w-9 shrink-0 rounded-full border transition-colors motion-reduce:transition-none ${
           on
             ? "border-emerald-500/50 bg-emerald-500/30"
-            : "border-[var(--border)] bg-[var(--bg-raised)]"
+            : "border-border bg-[var(--bg-raised)]"
         }`}
       >
         <span
           className={`absolute top-0.5 h-3.5 w-3.5 rounded-full transition-[left] motion-reduce:transition-none ${
-            on ? "left-[18px] bg-emerald-400" : "left-0.5 bg-[var(--text-muted)]"
+            on ? "left-[18px] bg-action-success" : "left-0.5 bg-[var(--text-muted)]"
           }`}
         />
       </button>

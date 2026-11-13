@@ -10,21 +10,21 @@ export interface KpiCardProps {
 
 export function KpiCard({ label, value, tone = "neutral", className }: KpiCardProps) {
   const toneClasses = {
-    ok: "text-[var(--action-primary)]",
-    warn: "text-[var(--action-warning)]",
-    danger: "text-[var(--action-danger)]",
-    info: "text-[var(--action-info,#3b82f6)]",
-    neutral: "text-[var(--text-primary)]",
+    ok: "text-action-primary",
+    warn: "text-action-warning",
+    danger: "text-action-danger",
+    info: "text-[var(--action-info,var(--action-primary))]",
+    neutral: "text-text-primary",
   };
 
   return (
     <div
       className={cn(
-        "rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4",
+        "rounded-2xl border border-border bg-bg-surface p-4",
         className
       )}
     >
-      <p className="text-xs font-medium text-[var(--text-muted)]">{label}</p>
+      <p className="text-xs font-medium text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-1 text-2xl font-semibold tabular-nums",

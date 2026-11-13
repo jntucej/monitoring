@@ -121,7 +121,7 @@ const api = useApi();
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 flex items-center gap-2 text-[var(--text-muted)] text-sm">
+      <div className="bg-bg-surface rounded-xl border border-border p-8 flex items-center gap-2 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading ID…
       </div>
     );
@@ -129,10 +129,10 @@ const api = useApi();
 
   if (error || !student) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-8 text-center space-y-2">
-        <AlertCircle className="w-8 h-8 text-[var(--action-danger)] mx-auto opacity-60" />
-        <p className="text-sm font-semibold text-[var(--text-primary)]">Unable to Load ID Card</p>
-        <p className="text-xs text-[var(--text-muted)]">{error || "Student record not found."}</p>
+      <div className="bg-bg-surface rounded-xl border border-border p-8 text-center space-y-2">
+        <AlertCircle className="w-8 h-8 text-action-danger mx-auto opacity-60" />
+        <p className="text-sm font-semibold text-text-primary">Unable to Load ID Card</p>
+        <p className="text-xs text-text-muted">{error || "Student record not found."}</p>
       </div>
     );
   }
@@ -158,9 +158,9 @@ const api = useApi();
   const photoSrc = student.photo || "/avatar-placeholder.png";
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
+    <div className="bg-bg-surface rounded-xl border border-border p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 border-sky-500 overflow-hidden">
+      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 border-[var(--action-info)] overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
@@ -169,11 +169,11 @@ const api = useApi();
       <p className="text-sm sm:text-base md:text-lg font-mono">{student.roll}</p>
 
       {decoded && (
-        <div className="mt-2 sm:mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--bg-base)]/50 rounded-lg text-center">
-          <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)]">
+        <div className="mt-2 sm:mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-bg-base/50 rounded-lg text-center">
+          <p className="text-xs sm:text-sm font-medium text-text-primary">
             {decoded.departmentFullName}
           </p>
-          <p className="text-[9px] sm:text-[10px] text-[var(--text-muted)]">
+          <p className="text-[9px] sm:text-[10px] text-text-muted">
             {decoded.entryMode} • Batch {decoded.admissionYear}
           </p>
         </div>
@@ -182,28 +182,28 @@ const api = useApi();
       {/* Roll Number Breakdown */}
       <div className="mt-4 sm:mt-6 w-full max-w-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[9px] sm:text-xs font-medium text-[var(--text-muted)] uppercase">Roll Number Breakdown</span>
+          <span className="text-[9px] sm:text-xs font-medium text-text-muted uppercase">Roll Number Breakdown</span>
         </div>
         <div className="grid grid-cols-5 gap-px bg-[var(--border)] rounded-lg overflow-hidden">
-          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Year</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.yearCode ?? "—"}</div>
+          <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-text-muted">Year</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.yearCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">College</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.collegeCode ?? "—"}</div>
+          <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-text-muted">College</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.collegeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Entry</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.entryModeCode ?? "—"}</div>
+          <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-text-muted">Entry</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.entryModeCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Dept</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.departmentCode ?? "—"}</div>
+          <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-text-muted">Dept</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.departmentCode ?? "—"}</div>
           </div>
-          <div className="bg-[var(--bg-base)] p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-[var(--text-muted)]">Serial</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-[var(--text-primary)]">{decoded?.serial ?? "—"}</div>
+          <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
+            <div className="text-[8px] sm:text-[9px] text-text-muted">Serial</div>
+            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.serial ?? "—"}</div>
           </div>
         </div>
       </div>
@@ -218,37 +218,37 @@ const api = useApi();
           />
         ) : (
           <div className="h-[140px] w-[140px] flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+            <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
           </div>
         )}
-        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-[var(--text-muted)] font-mono flex items-center gap-1 sm:gap-1.5 bg-[var(--bg-elevated)] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-[var(--border)]">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500" />
+        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-border">
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-action-success" />
           Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
           disabled={downloading || !qrToken}
-          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-white text-[11px] font-bold hover:bg-[var(--bg-elevated)] disabled:opacity-50 transition"
+          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-surface text-white text-[11px] font-bold hover:bg-bg-elevated disabled:opacity-50 transition"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Saving…" : "Save QR as PNG"}
         </button>
       </div>
-      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-1">
-        <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
+      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-text-muted flex items-center gap-1">
+        <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-action-primary" />
         Signed token — refreshes automatically
       </p>
 
       {/* Today's Mess Code */}
       {messToken && (
         <div className="mt-4 sm:mt-6 w-full max-w-sm rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-          <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-1">
+          <p className="text-xs font-semibold text-action-success uppercase tracking-wide mb-1">
             Today&apos;s Mess Code
           </p>
           <p className="text-xs text-emerald-300/80 mb-2">
             Show this code at the mess counter
           </p>
-          <div className="font-mono text-3xl font-black tracking-[0.35em] text-emerald-300 text-center py-2">
+          <div className="font-mono text-3xl font-black tracking-[0.35em] text-action-success text-center py-2">
             {messToken.manualCode || messToken.token_code || "—"}
           </div>
           <p className="text-[10px] text-emerald-400/60 text-center mt-1">

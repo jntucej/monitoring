@@ -37,8 +37,8 @@ export function ShiftHandoverView() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold text-[var(--text-primary)]">Shift Handover</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-xl font-bold text-text-primary">Shift Handover</h1>
+        <p className="text-xs text-text-muted">
           Log shift notes, flag gate exceptions, and hand over duty to the incoming supervisor
         </p>
       </header>
@@ -46,33 +46,33 @@ export function ShiftHandoverView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <HandoverStreak />
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+        <div className="rounded-2xl border border-border bg-bg-surface p-5">
           {done ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle2 className="size-10 text-[var(--action-primary)] mb-2" />
-              <h2 className="text-base font-bold text-[var(--text-primary)]">Handover Submitted</h2>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <CheckCircle2 className="size-10 text-action-primary mb-2" />
+              <h2 className="text-base font-bold text-text-primary">Handover Submitted</h2>
+              <p className="text-xs text-text-muted mt-1">
                 Your notes were logged to the shift audit history. Next supervisor has been notified.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-[var(--text-secondary)]">Handover Notes</label>
+                <label className="text-xs font-semibold text-text-secondary">Handover Notes</label>
                 <textarea
                   required
                   rows={4}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Detail any ongoing gate repairs, guard adjustments, or active alerts..."
-                  className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-base)] p-3 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+                  className="mt-1 w-full rounded-xl border border-border bg-bg-base p-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 text-xs font-semibold text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 text-xs font-semibold text-white transition hover:bg-action-primary/90 disabled:opacity-50"
               >
                 <Send className="size-3.5" />
                 {submitting ? "Submitting..." : "Submit Shift Handover"}

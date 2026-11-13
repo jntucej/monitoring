@@ -194,7 +194,7 @@ export function AnnouncementsManager() {
       <div className="flex justify-between items-center">
         <div>
           <p className="text-2xl font-bold tracking-tight">Announcements</p>
-          <p className="text-sm text-[var(--text-muted)]">Create, schedule, and publish broadcast notifications.</p>
+          <p className="text-sm text-text-muted">Create, schedule, and publish broadcast notifications.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)} className="gap-2">
           <Plus className="w-4 h-4" /> {showCreate ? "Cancel" : "New Broadcast"}
@@ -205,7 +205,7 @@ export function AnnouncementsManager() {
         <Card className="border p-4">
           <form onSubmit={handleCreate} className="space-y-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Megaphone className="w-5 h-5 text-amber-500" /> Create Broadcast
+              <Megaphone className="w-5 h-5 text-action-warning" /> Create Broadcast
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
@@ -277,7 +277,7 @@ export function AnnouncementsManager() {
 
       <div className="space-y-4">
         {announcements.length === 0 && (
-          <Card className="border p-6 text-center text-sm text-[var(--text-muted)]">No announcements yet.</Card>
+          <Card className="border p-6 text-center text-sm text-text-muted">No announcements yet.</Card>
         )}
         {announcements.map((a) => (
           <Card key={a.id} className="border p-4">
@@ -295,19 +295,19 @@ export function AnnouncementsManager() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-[var(--text-muted)] dark:text-[var(--text-secondary)] break-words">{a.message}</p>
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-sm text-text-muted dark:text-text-secondary break-words">{a.message}</p>
+                <p className="text-xs text-text-muted">
                   {a.is_published && !a.scheduled_at ? "Live now" : a.scheduled_at ? `Scheduled for ${new Date(a.scheduled_at).toLocaleString()}` : "Not yet published"}
                 </p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 {!a.is_published && (
                   <Button variant="ghost" size="sm" title="Schedule" onClick={() => scheduleTime(a)}>
-                    <Calendar className="w-4 h-4 text-amber-500" />
+                    <Calendar className="w-4 h-4 text-action-warning" />
                   </Button>
                 )}
                 <Button variant="ghost" size="sm" title={a.is_published ? "Unpublish" : "Publish"} onClick={() => handleTogglePublish(a)}>
-                  {a.is_published ? <EyeOff className="w-4 h-4 text-[var(--text-muted)]" /> : <Eye className="w-4 h-4 text-emerald-500" />}
+                  {a.is_published ? <EyeOff className="w-4 h-4 text-text-muted" /> : <Eye className="w-4 h-4 text-action-success" />}
                 </Button>
                 <Button variant="ghost" size="sm" title="Delete" onClick={() => handleDelete(a)}>
                   <Trash2 className="w-4 h-4 text-red-500" />

@@ -88,7 +88,7 @@ export function EventCard({
           <button
             type="button"
             disabled
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-emerald-300 motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-default"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-action-success motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-default"
           >
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
             Registered
@@ -99,7 +99,7 @@ export function EventCard({
           <button
             type="button"
             disabled
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-[var(--text-muted)] motion-reduce:transition-none"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-text-muted motion-reduce:transition-none"
           >
             <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
             Registering…
@@ -110,7 +110,7 @@ export function EventCard({
           <button
             type="button"
             onClick={() => void handleRegister()}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-300 motion-safe:transition-colors motion-reduce:transition-none"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-action-danger motion-safe:transition-colors motion-reduce:transition-none"
           >
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             Retry registration
@@ -124,7 +124,7 @@ export function EventCard({
             onClick={() => void handleRegister()}
             className={`inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold motion-safe:transition-colors motion-reduce:transition-none ${
               isFull
-                ? "cursor-not-allowed border border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)] opacity-60"
+                ? "cursor-not-allowed border border-border bg-[var(--bg-raised)] text-text-muted opacity-60"
                 : "border border-indigo-500/40 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30"
             }`}
           >
@@ -138,36 +138,36 @@ export function EventCard({
   return (
     <article
       aria-label={`Campus event: ${event.title}`}
-      className="flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 min-w-0"
+      className="flex flex-col rounded-2xl border border-border bg-bg-surface p-4 min-w-0"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-action-info">
             <CalendarDays className="h-4 w-4" aria-hidden />
           </div>
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-[var(--text-primary)]">
+            <h3 className="truncate text-sm font-bold text-text-primary">
               {event.title}
             </h3>
-            <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+            <p className="text-[10px] uppercase tracking-wide text-text-muted">
               {event.category}
             </p>
           </div>
         </div>
         {event.registrationStatus === "attended" && (
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-action-success">
             Attended
           </span>
         )}
       </div>
 
       {event.description && (
-        <p className="mt-2 line-clamp-2 text-xs text-[var(--text-muted)]">
+        <p className="mt-2 line-clamp-2 text-xs text-text-muted">
           {event.description}
         </p>
       )}
 
-      <div className="mt-3 space-y-1.5 text-[11px] text-[var(--text-muted)]">
+      <div className="mt-3 space-y-1.5 text-[11px] text-text-muted">
         <p className="flex items-center gap-1.5">
           <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {formatEventWhen(event.startsAt)}
@@ -192,7 +192,7 @@ export function EventCard({
         {message && (
           <p
             className={`mt-2 text-center text-[11px] ${
-              state === "error" ? "text-rose-300" : "text-[var(--text-muted)]"
+              state === "error" ? "text-action-danger" : "text-text-muted"
             }`}
             role={state === "error" ? "alert" : "status"}
           >

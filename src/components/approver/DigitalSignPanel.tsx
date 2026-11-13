@@ -82,20 +82,20 @@ export function DigitalSignPanel({
     return (
       <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-          <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">
+          <CheckCircle2 className="w-4 h-4 text-action-success" />
+          <span className="text-xs font-bold text-action-success uppercase tracking-wider">
             Digitally Signed
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-          <Hash className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+        <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+          <Hash className="w-3.5 h-3.5 text-text-muted" />
           <span className="font-mono">{String(digitalSignature).slice(0, 12)}…</span>
         </div>
         <a
           href={docHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-primary)] hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
         >
           <Download className="w-3.5 h-3.5" />
           Download Signed PDF
@@ -107,7 +107,7 @@ export function DigitalSignPanel({
   // Awaiting the student's upload.
   if (awaitingDoc) {
     return (
-      <p className="text-xs text-[var(--text-muted)] italic">
+      <p className="text-xs text-text-muted italic">
         Waiting for student to upload document.
       </p>
     );
@@ -120,14 +120,14 @@ export function DigitalSignPanel({
         href={docHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--action-primary)] hover:underline"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
       >
         <Eye className="w-3.5 h-3.5" />
         Preview PDF
       </a>
 
       <div className="space-y-1">
-        <label htmlFor="sign-note" className="text-[11px] text-[var(--text-muted)] font-medium">
+        <label htmlFor="sign-note" className="text-[11px] text-text-muted font-medium">
           Signature note (optional)
         </label>
         <input
@@ -138,14 +138,14 @@ export function DigitalSignPanel({
           onChange={(e) => setNote(e.target.value)}
           disabled={signing}
           placeholder="Optional note (max 200 characters)"
-          className="w-full p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
+          className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
         />
       </div>
 
       {error && (
         <div className="flex items-start gap-2 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30">
-          <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-          <p className="text-xs text-rose-500 font-medium">{error}</p>
+          <AlertCircle className="w-4 h-4 text-action-danger shrink-0 mt-0.5" />
+          <p className="text-xs text-action-danger font-medium">{error}</p>
         </div>
       )}
 

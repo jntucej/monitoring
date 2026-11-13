@@ -46,14 +46,14 @@ export default function AttendancePage() {
 
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+      <h1 className="text-lg font-semibold text-text-primary">
         Attendance
       </h1>
       <div
         className={`rounded-2xl border-2 border-[var(--${tone})] p-6 text-center`}
       >
-        <p className="text-5xl font-bold text-[var(--text-primary)]">{pct}%</p>
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+        <p className="text-5xl font-bold text-text-primary">{pct}%</p>
+        <p className="mt-1 text-sm text-text-secondary">
           {s
             ? `${s.present} present · ${s.absent} absent · ${s.total} total days`
             : "No data this month"}

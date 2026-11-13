@@ -49,22 +49,22 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
     : "No recent gate activity";
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex items-center justify-between gap-3 flex-wrap min-w-0">
+    <div className="rounded-xl border border-border bg-bg-surface p-4 flex items-center justify-between gap-3 flex-wrap min-w-0">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="relative w-12 h-12 rounded-full border-2 border-[var(--border-strong)] overflow-hidden shrink-0">
+        <div className="relative w-12 h-12 rounded-full border-2 border-border overflow-hidden shrink-0">
           {ward.photoUrl ? (
              
             <img src={ward.photoUrl} alt={name} className="rounded-full w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg font-semibold">
+            <div className="w-full h-full bg-emerald-500/20 text-action-success flex items-center justify-center text-lg font-semibold">
               {name?.[0] ?? "?"}
             </div>
           )}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{name}</p>
-          <p className="text-xs font-mono text-[var(--text-muted)]">{roll || "—"}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5 flex items-center gap-1">
+          <p className="text-sm font-semibold text-text-primary truncate">{name}</p>
+          <p className="text-xs font-mono text-text-muted">{roll || "—"}</p>
+          <p className="text-xs text-text-muted mt-0.5 flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             {lastSeen}
           </p>
@@ -72,7 +72,7 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
       </div>
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ${
-          isIn ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400"
+          isIn ? "bg-emerald-500/15 text-action-success" : "bg-rose-500/15 text-action-danger"
         }`}
       >
         {isIn ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
@@ -87,12 +87,12 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
 function ActivityFeed({ activities, wardName }: { activities: Scan[]; wardName: string | null }) {
   if (activities.length === 0) {
     return (
-      <p className="text-sm text-[var(--text-muted)]">No recent gate activity recorded.</p>
+      <p className="text-sm text-text-muted">No recent gate activity recorded.</p>
     );
   }
   return (
     <div className="space-y-3">
-      <p className="text-xs text-[var(--text-muted)]">
+      <p className="text-xs text-text-muted">
         {wardName ? `Recent gate activity for ${wardName}` : "Recent gate activity"}
       </p>
       <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -100,12 +100,12 @@ function ActivityFeed({ activities, wardName }: { activities: Scan[]; wardName: 
           const isIn = a.direction === "IN";
           return (
             <div key={a.id} className="flex items-center justify-between gap-3">
-              <div className={`flex items-center gap-2 text-sm ${isIn ? "text-emerald-400" : "text-rose-400"}`}>
+              <div className={`flex items-center gap-2 text-sm ${isIn ? "text-action-success" : "text-action-danger"}`}>
                 {isIn ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                 <span className="font-medium">{isIn ? "Entry" : "Exit"}</span>
-                <span className="text-[var(--text-muted)] text-xs">{a.gateName}</span>
+                <span className="text-text-muted text-xs">{a.gateName}</span>
               </div>
-              <span className="text-xs text-[var(--text-muted)] shrink-0">
+              <span className="text-xs text-text-muted shrink-0">
                 {new Date(a.timestamp).toLocaleString("en-IN", {
                   weekday: "short",
                   hour: "2-digit",
@@ -209,10 +209,10 @@ function ChildStatusInner() {
     <div className="min-w-0 space-y-6">
       <div>
         <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-          <MapPin className="w-6 h-6 text-emerald-400" />
+          <MapPin className="w-6 h-6 text-action-success" />
           Child Status
         </p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+        <p className="mt-1 text-sm text-text-muted">
           Where your wards are right now and their recent gate activity
         </p>
       </div>
@@ -234,11 +234,11 @@ function ChildStatusInner() {
       )}
 
       {anyLoading ? (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 flex items-center gap-3 text-[var(--text-muted)] text-sm">
+        <div className="rounded-xl border border-border bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading ward status…
         </div>
       ) : wards.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--bg-base)]/60 p-8 text-center text-sm text-[var(--text-muted)]">
+        <div className="rounded-xl border border-dashed border-border bg-bg-base/60 p-8 text-center text-sm text-text-muted">
           No wards linked to your account yet.
         </div>
       ) : (
@@ -251,7 +251,7 @@ function ChildStatusInner() {
       )}
 
       <WidgetBoundary title="Recent Gate Activity">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+        <div className="rounded-xl border border-border bg-bg-surface p-4">
           <ActivityFeed activities={activity} wardName={activityWard} />
         </div>
       </WidgetBoundary>

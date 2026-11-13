@@ -91,37 +91,37 @@ function Node({
     <div>
       <button
         onClick={() => hasChildren && onToggle(node.code)}
-        className="flex items-center gap-2 w-full min-h-[44px] text-left rounded-lg px-2 py-1.5 hover:bg-[var(--bg-surface)]/60 group"
+        className="flex items-center gap-2 w-full min-h-[44px] text-left rounded-lg px-2 py-1.5 hover:bg-bg-surface/60 group"
       >
         {hasChildren ? (
           isOpen ? (
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+            <ChevronRight className="w-3.5 h-3.5 text-text-muted" />
           )
         ) : (
           <span className="w-3.5" />
         )}
-        <ShieldCheck className="w-4 h-4 text-[var(--action-primary)]" />
-        <span className="text-sm font-medium text-[var(--text-primary)]">
+        <ShieldCheck className="w-4 h-4 text-action-primary" />
+        <span className="text-sm font-medium text-text-primary">
           {node.display_name}
         </span>
-        <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-surface)]/80 text-[var(--text-muted)]">
+        <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
           {node.code}
         </span>
         <span className="ml-auto flex items-center gap-2 text-xs">
-          <span className="tabular-nums text-[var(--text-muted)]">
+          <span className="tabular-nums text-text-muted">
             {node.user_count} users
           </span>
-          <span className="flex items-center gap-1 tabular-nums text-[var(--action-primary)]">
+          <span className="flex items-center gap-1 tabular-nums text-action-primary">
             <Users className="w-3 h-3" /> {node.on_campus}
           </span>
           <span
-            className="w-12 h-1.5 rounded-full bg-[var(--bg-surface)]/60 overflow-hidden hidden sm:block"
+            className="w-12 h-1.5 rounded-full bg-bg-surface/60 overflow-hidden hidden sm:block"
             title={`${Math.round(activePct)}% on campus`}
           >
             <span
-              className="block h-full bg-[var(--action-primary)]"
+              className="block h-full bg-action-primary"
               style={{ width: `${Math.min(100, activePct)}%` }}
             />
           </span>
@@ -129,7 +129,7 @@ function Node({
       </button>
 
       {hasChildren && isOpen && (
-        <div className="ml-4 border-l border-[var(--border)] pl-2">
+        <div className="ml-4 border-l border-border pl-2">
           {node.children.map((c) => (
             <Node key={c.code} node={c} expanded={expanded} onToggle={onToggle} />
           ))}
@@ -213,7 +213,7 @@ function AdminRolesInner() {
       />
 
       {error && (
-        <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">
+        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
@@ -221,26 +221,26 @@ function AdminRolesInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Roles defined
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <p className="text-2xl font-bold text-text-primary tabular-nums">
             {data?.totals.roles ?? 0}
           </p>
         </div>
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <Users className="w-3.5 h-3.5" /> Total users
           </div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <p className="text-2xl font-bold text-text-primary tabular-nums">
             {data?.totals.users ?? 0}
           </p>
         </div>
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1">
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <Network className="w-3.5 h-3.5" /> On campus
           </div>
-          <p className="text-2xl font-bold text-[var(--action-primary)] tabular-nums">
+          <p className="text-2xl font-bold text-action-primary tabular-nums">
             {data?.totals.onCampus ?? 0}
           </p>
         </div>
@@ -249,29 +249,29 @@ function AdminRolesInner() {
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roles…"
-            className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+            className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
           />
         </div>
         <button
           onClick={expandAll}
-          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 flex items-center justify-center"
+          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Expand all
         </button>
         <button
           onClick={collapseAll}
-          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 flex items-center justify-center"
+          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Collapse all
         </button>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60 justify-center"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 justify-center"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -282,7 +282,7 @@ function AdminRolesInner() {
         <div className="lg:col-span-2">
           <WidgetBoundary title="Hierarchy">
             <div className="glass-card p-4">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
                 Role hierarchy
               </h2>
 
@@ -291,24 +291,24 @@ function AdminRolesInner() {
                   {filteredNodes.map((n) => (
                     <li
                       key={n.code}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-[var(--bg-surface)]/40 min-h-[44px]"
+                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-bg-surface/40 min-h-[44px]"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <ShieldCheck className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-                        <span className="text-sm text-[var(--text-primary)] truncate">
+                        <ShieldCheck className="w-4 h-4 text-action-primary shrink-0" />
+                        <span className="text-sm text-text-primary truncate">
                           {n.display_name}
                         </span>
-                        <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-[var(--bg-surface)]/80 text-[var(--text-muted)]">
+                        <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
                           {n.code}
                         </span>
                       </div>
-                      <span className="text-xs text-[var(--text-muted)] tabular-nums shrink-0">
+                      <span className="text-xs text-text-muted tabular-nums shrink-0">
                         {n.user_count} users
                       </span>
                     </li>
                   ))}
                   {!filteredNodes.length && (
-                    <li className="text-xs text-[var(--text-muted)] py-4 text-center">
+                    <li className="text-xs text-text-muted py-4 text-center">
                       No roles match
                     </li>
                   )}
@@ -329,7 +329,7 @@ function AdminRolesInner() {
         {/* Membership */}
         <WidgetBoundary title="Membership">
           <div className="glass-card p-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
               Membership by role
             </h2>
             <ul className="space-y-1.5 max-h-[500px] overflow-y-auto">
@@ -343,16 +343,16 @@ function AdminRolesInner() {
                   return (
                     <li key={n.code} className="text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="text-[var(--text-primary)] truncate">
+                        <span className="text-text-primary truncate">
                           {n.display_name}
                         </span>
-                        <span className="tabular-nums text-[var(--text-muted)]">
+                        <span className="tabular-nums text-text-muted">
                           {n.user_count} · {n.on_campus}
                         </span>
                       </div>
-                      <div className="h-1.5 mt-1 rounded-full bg-[var(--bg-surface)]/60 overflow-hidden">
+                      <div className="h-1.5 mt-1 rounded-full bg-bg-surface/60 overflow-hidden">
                         <div
-                          className="h-full bg-[var(--action-primary)]"
+                          className="h-full bg-action-primary"
                           style={{ width: `${Math.min(100, pct)}%` }}
                         />
                       </div>
@@ -362,7 +362,7 @@ function AdminRolesInner() {
             </ul>
             <Link
               href="/sysadmin/roles"
-              className="mt-3 flex items-center justify-center gap-1 text-xs text-[var(--action-primary)] hover:underline min-h-[44px]"
+              className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h-[44px]"
             >
               Full sysadmin role panel <ArrowUpRight className="w-3 h-3" />
             </Link>

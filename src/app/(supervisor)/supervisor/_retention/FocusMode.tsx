@@ -144,22 +144,22 @@ export function FocusMode({
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-2xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl sm:p-8">
-        <header className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
+      <div className="relative w-full max-w-2xl rounded-3xl border border-border bg-bg-surface p-6 shadow-2xl sm:p-8">
+        <header className="mb-6 flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[var(--action-primary)] animate-pulse" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-primary)]">
+            <span className="size-2 rounded-full bg-action-primary animate-pulse" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-text-primary">
               Supervisor Focus Mode
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-text-muted">
               {remaining} remaining
             </span>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
             >
               ✕
             </button>
@@ -168,19 +168,19 @@ export function FocusMode({
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="size-6 animate-spin text-[var(--action-primary)]" />
+            <Loader2 className="size-6 animate-spin text-action-primary" />
           </div>
         ) : !current ? (
           <div className="flex h-64 flex-col items-center justify-center text-center">
-            <p className="text-lg font-semibold text-[var(--text-primary)]">
+            <p className="text-lg font-semibold text-text-primary">
               Queue is completely clear
             </p>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
+            <p className="mt-1 text-xs text-text-muted">
               No open escalations or urgent alerts left.
             </p>
             <button
               onClick={onClose}
-              className="mt-6 min-h-[44px] rounded-xl bg-[var(--action-primary)] px-5 py-2 text-sm font-medium text-white"
+              className="mt-6 min-h-[44px] rounded-xl bg-action-primary px-5 py-2 text-sm font-medium text-white"
             >
               Exit Focus Mode
             </button>
@@ -195,7 +195,7 @@ export function FocusMode({
               className="space-y-6"
             >
               <div className="flex items-center justify-between">
-                <span className="rounded-full bg-[var(--bg-elevated)] px-2.5 py-1 text-[11px] font-semibold uppercase text-[var(--text-muted)]">
+                <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-[11px] font-semibold uppercase text-text-muted">
                   {current.kind} · {current.ticket}
                 </span>
                 {current.slaDeadline && (
@@ -204,19 +204,19 @@ export function FocusMode({
               </div>
 
               <div>
-                <p className="text-xl font-bold leading-snug text-[var(--text-primary)]">
+                <p className="text-xl font-bold leading-snug text-text-primary">
                   {current.subject}
                 </p>
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                <p className="mt-1 text-xs text-text-muted">
                   Reported {current.age}
                 </p>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-[var(--border)]">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   disabled={busy}
                   onClick={() => act("resolve")}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-3 text-sm font-medium text-white transition hover:bg-[var(--action-primary)]/90 disabled:opacity-50"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
                 >
                   <Check className="size-4" />
                   Resolve / Clear (A)
@@ -224,14 +224,14 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("escalate")}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] py-3 text-sm font-medium text-[var(--text-primary)] transition hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
                 >
                   <ArrowUpRight className="size-4" />
                   Escalate higher (E)
                 </button>
               </div>
 
-              <footer className="flex items-center justify-center gap-4 text-[11px] text-[var(--text-muted)]">
+              <footer className="flex items-center justify-center gap-4 text-[11px] text-text-muted">
                 <span className="flex items-center gap-1">
                   <Keyboard className="size-3" /> Shortcuts: <kbd className="rounded border px-1">A</kbd> resolve, <kbd className="rounded border px-1">E</kbd> escalate, <kbd className="rounded border px-1">Esc</kbd> exit
                 </span>

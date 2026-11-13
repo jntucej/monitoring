@@ -91,7 +91,7 @@ export function MyTicketsPanel({
           {backHref && (
             <Link
               href={backHref}
-              className="rounded-md p-1.5 hover:bg-[var(--bg-elevated)]"
+              className="rounded-md p-1.5 hover:bg-bg-elevated"
               aria-label="Back"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -100,7 +100,7 @@ export function MyTicketsPanel({
           <div>
             <h1 className="text-fluid-lg font-semibold">{title}</h1>
             {subtitle && (
-              <p className="text-xs text-[var(--text-muted)]">{subtitle}</p>
+              <p className="text-xs text-text-muted">{subtitle}</p>
             )}
           </div>
         </div>
@@ -110,7 +110,7 @@ export function MyTicketsPanel({
             type="button"
             onClick={() => void refresh()}
             disabled={loading}
-            className="rounded-md p-2 hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+            className="rounded-md p-2 hover:bg-bg-elevated disabled:opacity-50"
             aria-label="Refresh tickets"
           >
             {loading
@@ -120,7 +120,7 @@ export function MyTicketsPanel({
           {canCreate && newTicketHref && (
             <Link
               href={newTicketHref}
-              className="flex items-center gap-1.5 rounded-md bg-[var(--action-primary)] px-3 py-2 text-sm text-white"
+              className="flex items-center gap-1.5 rounded-md bg-action-primary px-3 py-2 text-sm text-white"
             >
               <Plus className="h-4 w-4" />
               New Ticket
@@ -139,7 +139,7 @@ export function MyTicketsPanel({
 
       {/* Filter tabs */}
       <div className="flex flex-wrap items-center gap-2">
-        <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+        <Filter className="h-3.5 w-3.5 text-text-muted" />
         {FILTERS.map((f) => (
           <button
             key={f}
@@ -147,8 +147,8 @@ export function MyTicketsPanel({
             onClick={() => setFilter(f)}
             className={`rounded-full px-3 py-1 text-xs transition ${
               filter === f
-                ? "bg-[var(--action-primary)] text-white"
-                : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                ? "bg-action-primary text-white"
+                : "bg-bg-elevated text-text-muted hover:text-text-primary"
             }`}
           >
             {f}
@@ -158,13 +158,13 @@ export function MyTicketsPanel({
 
       {/* Error banner */}
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/10 p-3 text-sm text-[var(--action-danger)]">
+        <div className="flex items-center gap-2 rounded-md border border-action-danger/40 bg-action-danger/10 p-3 text-sm text-action-danger">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1 truncate">{error}</span>
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-xs"
+            className="rounded-md bg-bg-elevated px-2 py-1 text-xs"
           >
             Retry
           </button>
@@ -192,7 +192,7 @@ export function MyTicketsPanel({
             canCreate && newTicketHref ? (
               <Link
                 href={newTicketHref}
-                className="inline-flex items-center gap-1.5 rounded-md bg-[var(--action-primary)] px-3 py-2 text-sm text-white"
+                className="inline-flex items-center gap-1.5 rounded-md bg-action-primary px-3 py-2 text-sm text-white"
               >
                 <Plus className="h-4 w-4" />
                 New Ticket

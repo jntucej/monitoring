@@ -391,7 +391,7 @@ export function BotPanel() {
       style={panelStyle}
       className={[
         "fixed z-[100] flex flex-col overflow-hidden",
-        "bg-[var(--bg-elevated)]/98 backdrop-blur-2xl border border-[var(--border)] shadow-[0_24px_64px_rgba(0,0,0,0.5)]",
+        "bg-bg-elevated/98 backdrop-blur-2xl border border-border shadow-[0_24px_64px_rgba(0,0,0,0.5)]",
         "mb-[env(safe-area-inset-bottom)]",
         isMobile
           ? "inset-x-0 bottom-0 rounded-t-2xl"
@@ -441,7 +441,7 @@ export function BotPanel() {
       />
 
       {(error || stt.error === "permission") && (
-        <div className="relative z-10 px-3 py-2 text-[11px] bg-rose-500/10 text-rose-500 border-b border-[var(--border)]">
+        <div className="relative z-10 px-3 py-2 text-[11px] bg-rose-500/10 text-action-danger border-b border-border">
           {stt.error === "permission"
             ? "Microphone permission denied. Enable it in your browser settings to use voice."
             : error?.startsWith("HTTP 401")
@@ -457,7 +457,7 @@ export function BotPanel() {
       )}
 
       {!stt.supported && isMobile && (
-        <div className="relative z-10 px-3 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border-b border-[var(--border)]">
+        <div className="relative z-10 px-3 py-1.5 text-[10px] text-text-muted bg-bg-elevated border-b border-border">
           {t.micUnsupported}
         </div>
       )}
@@ -466,7 +466,7 @@ export function BotPanel() {
         <div
           role="status"
           aria-live="polite"
-          className="relative z-10 mx-3 mb-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-[11px] text-[var(--text-secondary)]"
+          className="relative z-10 mx-3 mb-1 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-[11px] text-text-secondary"
         >
           <div className="flex items-center justify-between gap-2">
             <span>Voice mode uses your microphone. Enable it?</span>
@@ -477,7 +477,7 @@ export function BotPanel() {
                   setVoiceModeConfirmed(true);
                   setVoicePrompt(false);
                 }}
-                className="text-emerald-500 hover:underline underline-offset-2"
+                className="text-action-success hover:underline underline-offset-2"
               >
                 Enable
               </button>
@@ -486,7 +486,7 @@ export function BotPanel() {
                   setVoiceModeConfirmed(true); // remember: don't ask again
                   setVoicePrompt(false);
                 }}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="text-text-muted hover:text-text-primary"
                 aria-label="Not now"
               >
                 Not now
@@ -500,9 +500,9 @@ export function BotPanel() {
         <div
           role="group"
           aria-label="Choose your language"
-          className="relative z-10 mx-3 my-2 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3"
+          className="relative z-10 mx-3 my-2 rounded-xl border border-border bg-bg-elevated p-3"
         >
-          <p className="text-xs font-medium text-[var(--text-primary)] mb-2">
+          <p className="text-xs font-medium text-text-primary mb-2">
             Choose your language
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -514,8 +514,8 @@ export function BotPanel() {
                 // profile PUT — one call covers both.
                 void persistLangChoice("en");
               }}
-              className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs
-                         hover:bg-[var(--bg-base)] transition active:scale-[0.98]"
+              className="rounded-lg border border-border px-3 py-2 text-xs
+                         hover:bg-bg-base transition active:scale-[0.98]"
             >
               English
             </button>
@@ -525,13 +525,13 @@ export function BotPanel() {
                 setLangPromptPending(false);
                 void persistLangChoice("te");
               }}
-              className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs
-                         hover:bg-[var(--bg-base)] transition active:scale-[0.98]"
+              className="rounded-lg border border-border px-3 py-2 text-xs
+                         hover:bg-bg-base transition active:scale-[0.98]"
             >
               తెలుగు
             </button>
           </div>
-          <p className="text-[10px] text-[var(--text-muted)] mt-2">
+          <p className="text-[10px] text-text-muted mt-2">
             You can change this anytime from the language icon above.
           </p>
         </div>
@@ -542,7 +542,7 @@ export function BotPanel() {
           role="alert"
           aria-live="assertive"
           className="relative z-10 mx-3 my-1.5 flex items-center justify-between gap-2 rounded-lg
-                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-300"
+                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-action-warning"
         >
           <span>Start a new chat? Your current history will be cleared.</span>
           <div className="flex items-center gap-2 shrink-0">
@@ -552,13 +552,13 @@ export function BotPanel() {
                 resetChat();
                 tts.stop();
               }}
-              className="text-amber-300 hover:underline underline-offset-2"
+              className="text-action-warning hover:underline underline-offset-2"
             >
               Clear
             </button>
             <button
               onClick={() => setConfirmPending(false)}
-              className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="text-text-muted hover:text-text-primary"
             >
               Cancel
             </button>

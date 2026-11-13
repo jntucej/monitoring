@@ -63,21 +63,21 @@ export function SmartSchedulingAssistant() {
     }
   };
 
-  if (loading) return <div className="p-4 text-xs text-[var(--text-secondary)]">Analyzing historical scan data for smart schedule optimizations...</div>;
+  if (loading) return <div className="p-4 text-xs text-text-secondary">Analyzing historical scan data for smart schedule optimizations...</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-amber-400" />
+        <Sparkles className="h-5 w-5 text-action-warning" />
         <h2 className="text-base font-bold">AI Smart Scheduling Recommendations</h2>
       </div>
 
       <div className="space-y-3">
         {suggestions.length === 0 ? (
-          <Card className="p-4 text-xs text-[var(--text-secondary)]">All smart schedule optimizations applied.</Card>
+          <Card className="p-4 text-xs text-text-secondary">All smart schedule optimizations applied.</Card>
         ) : (
           suggestions.map((sug) => (
-            <Card key={sug.id} className="p-4 space-y-3 border border-[var(--border)]">
+            <Card key={sug.id} className="p-4 space-y-3 border border-border">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export function SmartSchedulingAssistant() {
                     </Badge>
                     <h3 className="font-bold text-sm">{sug.title}</h3>
                   </div>
-                  <p className="text-xs text-[var(--text-primary)]">{sug.recommendation}</p>
+                  <p className="text-xs text-text-primary">{sug.recommendation}</p>
                 </div>
                 <Button
                   variant="primary"
@@ -100,7 +100,7 @@ export function SmartSchedulingAssistant() {
                 </Button>
               </div>
 
-              <p className="text-xs text-[var(--text-secondary)] bg-[var(--bg-surface-elevated)] p-2.5 rounded">
+              <p className="text-xs text-text-secondary bg-[var(--bg-surface-elevated)] p-2.5 rounded">
                 💡 <span className="font-semibold">Data Insight:</span> {sug.reasoning}
               </p>
             </Card>

@@ -65,19 +65,19 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 min-w-0">
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">{title}</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-text-primary">{title}</h1>
           {description && (
-            <p className="text-xs text-[var(--text-secondary)] mt-0.5">{description}</p>
+            <p className="text-xs text-text-secondary mt-0.5">{description}</p>
           )}
           {!loading && (
-            <p className="text-[11px] text-[var(--text-muted)] mt-1">{total} items</p>
+            <p className="text-[11px] text-text-muted mt-1">{total} items</p>
           )}
         </div>
         <button
           type="button"
           onClick={() => { clearCache(); refresh(); }}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -86,7 +86,7 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -96,16 +96,16 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
       {loading && tickets.length === 0 && (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
+            <div key={i} className="h-20 rounded-xl bg-bg-elevated animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Empty */}
       {!loading && !error && tickets.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-12 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-2">
-          <Inbox className="w-8 h-8 text-[var(--text-muted)]" />
-          <p className="text-sm text-[var(--text-secondary)]">No tickets match your filters.</p>
+        <div className="flex flex-col items-center justify-center p-12 rounded-2xl bg-bg-surface border border-border space-y-2">
+          <Inbox className="w-8 h-8 text-text-muted" />
+          <p className="text-sm text-text-secondary">No tickets match your filters.</p>
         </div>
       )}
 

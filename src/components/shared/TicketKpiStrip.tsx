@@ -20,9 +20,9 @@ export interface TicketKpiStripProps {
 
 export function TicketKpiStrip({ counts, loading }: TicketKpiStripProps) {
   const items = [
-    { label: "Pending",   value: counts?.pending   ?? 0, icon: Clock,         tint: "text-amber-500"   },
-    { label: "Approved",  value: counts?.approved  ?? 0, icon: CheckCircle2,  tint: "text-emerald-500" },
-    { label: "Rejected",  value: counts?.rejected  ?? 0, icon: XCircle,       tint: "text-rose-500"    },
+    { label: "Pending",   value: counts?.pending   ?? 0, icon: Clock,         tint: "text-action-warning"   },
+    { label: "Approved",  value: counts?.approved  ?? 0, icon: CheckCircle2,  tint: "text-action-success" },
+    { label: "Rejected",  value: counts?.rejected  ?? 0, icon: XCircle,       tint: "text-action-danger"    },
     { label: "Completed", value: counts?.completed ?? 0, icon: FileText,      tint: "text-sky-500"     },
   ];
 
@@ -31,9 +31,9 @@ export function TicketKpiStrip({ counts, loading }: TicketKpiStripProps) {
       {items.map((it) => (
         <div
           key={it.label}
-          className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+          className="rounded-xl border border-border bg-bg-surface p-3"
         >
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
             {loading
               ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
               : <it.icon className={`h-3.5 w-3.5 ${it.tint}`} />}

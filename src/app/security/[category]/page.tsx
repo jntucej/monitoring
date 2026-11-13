@@ -62,7 +62,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
           title: "Identity Parameters",
           categoryName: "Container 1",
           icon: UserCheck,
-          accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+          accent: "text-action-success bg-emerald-500/10 border-emerald-500/30",
           metrics: [
             { label: "Status", value: "Verified" },
             { label: "Account", value: user?.name || "User" },
@@ -91,7 +91,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
           title: "Security Parameters",
           categoryName: "Container 3",
           icon: KeyRound,
-          accent: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+          accent: "text-action-primary bg-indigo-500/10 border-indigo-500/30",
           metrics: [
             { label: "PIN Lock", value: "Verified" },
             { label: "Biometrics", value: "WebAuthn Ready" },
@@ -104,7 +104,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
           title: "Privacy Parameters",
           categoryName: "Container 4",
           icon: Database,
-          accent: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+          accent: "text-unit-c bg-purple-500/10 border-purple-500/30",
           metrics: [
             { label: "Encryption", value: "AES-256-GCM" },
             { label: "RLS Isolation", value: "PostgreSQL RLS" },
@@ -117,7 +117,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
           title: "Network Parameters",
           categoryName: "Container 5",
           icon: Globe2,
-          accent: "text-sky-400 bg-sky-500/10 border-sky-500/30",
+          accent: "text-action-info bg-sky-500/10 border-sky-500/30",
           metrics: [
             { label: "Platform", value: typeof window !== "undefined" ? window.navigator.platform : "Web Browser" },
             { label: "Telemetry Feed", value: wsConnected ? "Live WS" : "Standby" },
@@ -147,23 +147,23 @@ export default function SecurityCategoryPage({ params }: PageProps) {
 
   return (
     <AuthGuard>
-      <div className="min-h-dvh bg-[var(--bg-base)] text-[var(--text-primary)] p-4 md:p-6 space-y-4 max-w-3xl mx-auto select-none">
+      <div className="min-h-dvh bg-bg-base text-text-primary p-4 md:p-6 space-y-4 max-w-3xl mx-auto select-none">
         
         {/* Navigation Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/security")}
-              className="p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+              className="p-2 rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary transition-all cursor-pointer"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <span className="text-[10px] font-mono font-bold text-emerald-400">
+              <span className="text-[10px] font-mono font-bold text-action-success">
                 {details.categoryName}
               </span>
-              <h1 className="text-base md:text-lg font-bold tracking-tight text-[var(--text-primary)]">
+              <h1 className="text-base md:text-lg font-bold tracking-tight text-text-primary">
                 {details.title}
               </h1>
             </div>
@@ -172,7 +172,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
 
         {/* Parameters Grid */}
         <div className="space-y-2">
-          <h2 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+          <h2 className="text-xs font-bold text-text-muted uppercase tracking-wider">
             Container Parameters ({details.metrics.length})
           </h2>
 
@@ -180,10 +180,10 @@ export default function SecurityCategoryPage({ params }: PageProps) {
             {details.metrics.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 flex items-center justify-between gap-2"
+                className="rounded-xl border border-border bg-bg-surface p-3 flex items-center justify-between gap-2"
               >
-                <span className="text-xs text-[var(--text-muted)] font-medium">{item.label}</span>
-                <span className="text-xs font-bold font-mono text-[var(--text-primary)]">
+                <span className="text-xs text-text-muted font-medium">{item.label}</span>
+                <span className="text-xs font-bold font-mono text-text-primary">
                   {item.value}
                 </span>
               </div>
@@ -192,13 +192,13 @@ export default function SecurityCategoryPage({ params }: PageProps) {
         </div>
 
         {/* Compact Audit Log */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)]">
+        <div className="rounded-xl border border-border bg-bg-surface p-3.5 space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-text-muted">
             <span>Security Audit Log</span>
-            <span className="text-[10px] font-mono text-emerald-400">STATUS: OK</span>
+            <span className="text-[10px] font-mono text-action-success">STATUS: OK</span>
           </div>
 
-          <div className="bg-[var(--bg-base)] rounded-lg p-2.5 border border-[var(--border)]/60 font-mono text-[11px] space-y-1 text-[var(--text-muted)] max-h-32 overflow-y-auto">
+          <div className="bg-bg-base rounded-lg p-2.5 border border-border/60 font-mono text-[11px] space-y-1 text-text-muted max-h-32 overflow-y-auto">
             {logs.map((log, i) => (
               <div key={i} className="flex items-center gap-1.5 text-emerald-400/90">
                 <span>✓</span>

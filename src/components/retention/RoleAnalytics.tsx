@@ -95,23 +95,23 @@ export function RoleAnalytics() {
 
   return (
     <WidgetBoundary title="Role Analytics">
-      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-emerald-400" />
-            <h3 className="text-sm font-medium text-[var(--text-primary)]">Role Analytics</h3>
-            <span className="text-xs text-[var(--text-muted)] capitalize">{chartRole}</span>
+            <BarChart3 className="h-4 w-4 text-action-success" />
+            <h3 className="text-sm font-medium text-text-primary">Role Analytics</h3>
+            <span className="text-xs text-text-muted capitalize">{chartRole}</span>
           </div>
 
           {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/40 px-2 py-1">
-              <Filter className="h-3 w-3 text-[var(--text-muted)]" />
+            <div className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1">
+              <Filter className="h-3 w-3 text-text-muted" />
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value as "7d" | "30d")}
-                className="bg-transparent text-[11px] text-[var(--text-secondary)] focus:outline-none"
+                className="bg-transparent text-[11px] text-text-secondary focus:outline-none"
                 aria-label="Date range"
               >
                 <option value="7d">7 days</option>
@@ -123,7 +123,7 @@ export function RoleAnalytics() {
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/40 px-2 py-1 text-[11px] text-[var(--text-secondary)] focus:outline-none"
+                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-[11px] text-text-secondary focus:outline-none"
                 aria-label="Department"
               >
                 <option value="">All depts</option>
@@ -139,7 +139,7 @@ export function RoleAnalytics() {
               <select
                 value={gate}
                 onChange={(e) => setGate(e.target.value)}
-                className="rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/40 px-2 py-1 text-[11px] text-[var(--text-secondary)] focus:outline-none"
+                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-[11px] text-text-secondary focus:outline-none"
                 aria-label="Gate"
               >
                 <option value="">All gates</option>
@@ -157,7 +157,7 @@ export function RoleAnalytics() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-[var(--bg-elevated)]/20" />
+              <div key={i} className="h-16 animate-pulse rounded-lg bg-bg-elevated/20" />
             ))}
           </div>
         ) : (
@@ -165,9 +165,9 @@ export function RoleAnalytics() {
             {metrics.map((m) => (
               <div
                 key={m.key}
-                className="rounded-lg border border-[var(--border)]/40 bg-[var(--bg-elevated)]/30 p-3"
+                className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
               >
-                <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                <p className="text-[10px] text-text-muted flex items-center gap-1">
                   {m.key === "active_alerts" && <AlertTriangle className="h-3 w-3" />}
                   {m.key.includes("turnaround") || m.key.includes("resolution") ? (
                     <Clock className="h-3 w-3" />
@@ -176,9 +176,9 @@ export function RoleAnalytics() {
                   )}
                   {m.label}
                 </p>
-                <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
+                <p className="mt-1 text-lg font-semibold text-text-primary">
                   {m.value}
-                  {m.unit && <span className="text-xs text-[var(--text-muted)] ml-1">{m.unit}</span>}
+                  {m.unit && <span className="text-xs text-text-muted ml-1">{m.unit}</span>}
                 </p>
               </div>
             ))}
@@ -187,8 +187,8 @@ export function RoleAnalytics() {
 
         {/* Chart */}
         {seriesData.length > 0 ? (
-          <div className="rounded-lg border border-[var(--border)]/40 bg-[var(--bg-elevated)]/30 p-3">
-            <p className="text-[10px] text-[var(--text-muted)] mb-2">{chartConfig.title}</p>
+          <div className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3">
+            <p className="text-[10px] text-text-muted mb-2">{chartConfig.title}</p>
             <ChartRenderer
               type={chartConfig.type}
               data={seriesData}
@@ -199,7 +199,7 @@ export function RoleAnalytics() {
           </div>
         ) : (
           !loading && (
-            <p className="text-xs text-[var(--text-muted)] py-6 text-center">
+            <p className="text-xs text-text-muted py-6 text-center">
               No data available for the selected filters.
             </p>
           )

@@ -37,8 +37,8 @@ export function StudentDirectoryView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Student Directory</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Student Directory</h1>
+        <p className="text-xs text-text-muted">
           Department enrolled students and residential status
         </p>
       </header>
@@ -62,20 +62,20 @@ export function StudentDirectoryView() {
             {students.map((s) => (
               <li
                 key={s.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{s.name}</p>
-                    <p className="font-mono text-xs text-[var(--text-muted)]">
+                    <p className="font-mono text-xs text-text-muted">
                       {s.roll ?? s.uniqueId ?? "—"}
                     </p>
                   </div>
-                  <span className="rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">
+                  <span className="rounded-full bg-bg-elevated border border-border px-2 py-0.5 text-[10px] text-text-secondary">
                     {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
                   </span>
                 </div>
-                <div className="mt-2 text-xs text-[var(--text-muted)]">
+                <div className="mt-2 text-xs text-text-muted">
                   {s.hostelBlock ? `Hostel: ${s.hostelBlock}-${s.roomNumber ?? ""}` : "Day Scholar"}
                 </div>
               </li>
@@ -89,7 +89,7 @@ export function StudentDirectoryView() {
                 {
                   header: "Roll / ID",
                   accessor: (r) => (
-                    <span className="font-mono text-xs text-[var(--text-secondary)]">
+                    <span className="font-mono text-xs text-text-secondary">
                       {r.roll ?? r.uniqueId ?? "—"}
                     </span>
                   ),

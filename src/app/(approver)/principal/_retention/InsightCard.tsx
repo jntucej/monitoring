@@ -30,12 +30,12 @@ export function InsightCard({
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--action-info)]/30 bg-[var(--action-info)]/5 p-4 sm:p-5">
+    <section className="rounded-2xl border border-[var(--action-info)]/30 bg-action-info/5 p-4 sm:p-5">
       <header className="mb-2 flex items-center gap-2">
-        <Lightbulb className="size-4 text-[var(--action-info)]" />
-        <h2 className="text-sm font-semibold text-[var(--action-info)]">{title}</h2>
+        <Lightbulb className="size-4 text-action-info" />
+        <h2 className="text-sm font-semibold text-action-info">{title}</h2>
       </header>
-      <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{body}</p>
+      <p className="text-xs leading-relaxed text-text-secondary">{body}</p>
     </section>
   );
 }

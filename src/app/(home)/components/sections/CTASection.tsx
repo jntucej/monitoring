@@ -54,7 +54,7 @@ export function CTASection() {
         >
           Sign in to your campus
         </div>
-        <p className="mx-auto mt-4 max-w-lg text-[var(--home-text-secondary,#9CA3AF)]">
+        <p className="mx-auto mt-4 max-w-lg text-[var(--home-text-secondary,var(--text-muted))]">
           Use the account issued by your department or the administrator.
           {COLLEGE.primaryCTA ? "" : ""}
         </p>
@@ -63,7 +63,7 @@ export function CTASection() {
             onClick={() => router.push("/login")}
             strength={0.05}
             radius={80}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
           >
             <LogIn className="h-4 w-4" />
             Sign in

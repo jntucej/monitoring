@@ -24,12 +24,12 @@ function fmtLastActivity(iso: string | null): string {
 export function GateWall({ gates }: { gates: Gate[] }) {
   if (gates.length === 0) {
     return (
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
-          <DoorOpen className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Gates</h2>
+          <DoorOpen className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">Gates</h2>
         </header>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="text-xs text-text-muted">
           No gates assigned to you.
         </p>
       </section>
@@ -37,15 +37,15 @@ export function GateWall({ gates }: { gates: Gate[] }) {
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <DoorOpen className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Gates</h2>
+          <DoorOpen className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">Gates</h2>
         </div>
         <Link
           href="/supervisor/gates/live"
-          className="text-[11px] text-[var(--action-primary)] hover:underline"
+          className="text-[11px] text-action-primary hover:underline"
         >
           Full view →
         </Link>
@@ -59,29 +59,29 @@ export function GateWall({ gates }: { gates: Gate[] }) {
               key={g.id}
               className={`flex items-center gap-3 rounded-lg border p-2.5 ${
                 online
-                  ? "border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5"
-                  : "border-[var(--action-warning)]/30 bg-[var(--action-warning)]/5"
+                  ? "border-action-primary/30 bg-action-primary/5"
+                  : "border-action-warning/30 bg-action-warning/5"
               }`}
             >
               {online ? (
-                <DoorOpen className="size-4 text-[var(--action-primary)]" />
+                <DoorOpen className="size-4 text-action-primary" />
               ) : (
-                <DoorClosed className="size-4 text-[var(--action-warning)]" />
+                <DoorClosed className="size-4 text-action-warning" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[var(--text-primary)]">
+                <p className="truncate text-sm font-medium text-text-primary">
                   {g.name}
                 </p>
-                <p className="text-[10px] text-[var(--text-muted)]">
+                <p className="text-[10px] text-text-muted">
                   {fmtLastActivity(g.lastActivity)}
                 </p>
               </div>
               <div className="flex items-center gap-1 text-xs">
-                <Users className="size-3 text-[var(--text-muted)]" />
+                <Users className="size-3 text-text-muted" />
                 <span className="font-medium tabular-nums">{g.onPost}</span>
               </div>
               {!online && (
-                <AlertTriangle className="size-3.5 text-[var(--action-warning)]" />
+                <AlertTriangle className="size-3.5 text-action-warning" />
               )}
             </li>
           );

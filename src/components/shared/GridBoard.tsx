@@ -118,11 +118,11 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
   return (
     <WidgetBoundary title="Tickets by status">
       {loading && empty ? (
-        <div className="flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]">
+        <div className="flex items-center justify-center gap-2 py-8 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading tickets&hellip;
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
           {error}
         </div>
       ) : empty ? (
@@ -137,20 +137,20 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
             return (
               <section
                 key={col}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3 min-w-0"
+                className="rounded-xl border border-border bg-bg-elevated p-3 min-w-0"
                 aria-label={`${col} tickets`}
               >
                 <header className="flex items-center justify-between px-1 pb-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     {col}
                   </h3>
-                  <span className="text-[10px] font-mono tabular-nums text-[var(--text-muted)]">
+                  <span className="text-[10px] font-mono tabular-nums text-text-muted">
                     {colTickets.length}
                   </span>
                 </header>
                 <ul className="space-y-2">
                   {colTickets.length === 0 ? (
-                    <li className="px-1 py-3 text-[11px] text-[var(--text-muted)]">
+                    <li className="px-1 py-3 text-[11px] text-text-muted">
                       No tickets
                     </li>
                   ) : (
@@ -159,20 +159,20 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
                         <button
                           type="button"
                           onClick={() => onSelect?.(ticketToBoardRow(t))}
-                          className="w-full text-left rounded-lg border border-[var(--border)] bg-[var(--bg-base)] p-3 min-w-0 hover:border-[var(--action-primary)]/40 transition-colors"
+                          className="w-full text-left rounded-lg border border-border bg-bg-base p-3 min-w-0 hover:border-action-primary/40 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2 min-w-0">
-                            <span className="text-[11px] font-mono font-semibold text-[var(--text-primary)] truncate">
+                            <span className="text-[11px] font-mono font-semibold text-text-primary truncate">
                               {t.ticket_number}
                             </span>
-                            <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">
+                            <span className="text-[10px] font-mono text-text-muted shrink-0">
                               {t.status}
                             </span>
                           </div>
-                          <p className="text-xs font-semibold text-[var(--text-primary)] truncate mt-1">
+                          <p className="text-xs font-semibold text-text-primary truncate mt-1">
                             {t.student_name || "—"}
                           </p>
-                          <p className="text-[11px] text-[var(--text-muted)] truncate">
+                          <p className="text-[11px] text-text-muted truncate">
                             {t.workflow_type}
                           </p>
                           <div className="mt-2">

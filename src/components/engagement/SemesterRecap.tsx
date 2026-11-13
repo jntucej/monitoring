@@ -67,8 +67,8 @@ function drawRecapCanvas(r: RecapData): string {
 
   // Gradient background
   const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, "#312e81");
-  grad.addColorStop(1, "#1e1b4b");
+  grad.addColorStop(0, "var(--unit-c)");
+  grad.addColorStop(1, "var(--bg-base)");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
@@ -81,7 +81,7 @@ function drawRecapCanvas(r: RecapData): string {
   ctx.fillText(r.periodLabel, 48, 40);
 
   // Name + role
-  ctx.fillStyle = "#e0e7ff";
+  ctx.fillStyle = "var(--unit-c)";
   ctx.font = "bold 28px sans-serif";
   ctx.fillText(r.userName, 48, 68);
   ctx.font = "500 14px sans-serif";
@@ -90,12 +90,12 @@ function drawRecapCanvas(r: RecapData): string {
 
   // Stat tiles row
   const tiles: Array<{ label: string; value: string; accent: string }> = [
-    { label: "Events joined", value: String(r.eventsRegistered), accent: "#38bdf8" },
-    { label: "Badges earned", value: String(r.earnedAchievements.length), accent: "#fbbf24" },
+    { label: "Events joined", value: String(r.eventsRegistered), accent: "var(--unit-a)" },
+    { label: "Badges earned", value: String(r.earnedAchievements.length), accent: "var(--action-warning)" },
     {
       label: "Goals done",
       value: `${r.completedGoals}/${r.totalGoals}`,
-      accent: "#a78bfa",
+      accent: "var(--unit-c)",
     },
   ];
   const tileW = (W - 96) / 3;
@@ -123,7 +123,7 @@ function drawRecapCanvas(r: RecapData): string {
     ctx.font = "600 12px sans-serif";
     ctx.fillText("EVENTS", 48, listY);
     ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#c7d2fe";
+    ctx.fillStyle = "var(--unit-c)";
     r.completedEvents.slice(0, 5).forEach((ev, i) => {
       ctx.fillText("• " + ev, 56, listY + 24 + i * 24);
     });
@@ -136,7 +136,7 @@ function drawRecapCanvas(r: RecapData): string {
     ctx.font = "600 12px sans-serif";
     ctx.fillText("BADGES", 48, badgeStartY);
     ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#c7d2fe";
+    ctx.fillStyle = "var(--unit-c)";
     r.earnedAchievements.slice(0, 5).forEach((a, i) => {
       ctx.fillText("🏆 " + a.title, 56, badgeStartY + 24 + i * 24);
     });
@@ -225,10 +225,10 @@ export function SemesterRecap() {
               <Sparkles className="h-4 w-4" aria-hidden />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[var(--text-primary)]">
+              <h2 className="text-sm font-bold text-text-primary">
                 {data?.periodLabel ?? "Semester Recap"}
               </h2>
-              <p className="text-[10px] text-[var(--text-muted)]">
+              <p className="text-[10px] text-text-muted">
                 Your highlight card — no sensitive details included
               </p>
             </div>
@@ -240,7 +240,7 @@ export function SemesterRecap() {
             className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
           >
             {copied ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
+              <CheckCircle2 className="h-3.5 w-3.5 text-action-success" aria-hidden />
             ) : (
               <Share2 className="h-3.5 w-3.5" aria-hidden />
             )}
@@ -258,7 +258,7 @@ export function SemesterRecap() {
         </div>
 
         {loading && !data ? (
-          <div className="mt-6 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]" role="status">
+          <div className="mt-6 flex items-center justify-center gap-2 py-8 text-sm text-text-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
             Building your recap…
           </div>
@@ -266,36 +266,36 @@ export function SemesterRecap() {
           <div className="mt-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : data ? (
           <>
-            <p className="mt-4 text-lg font-bold text-[var(--text-primary)]">
+            <p className="mt-4 text-lg font-bold text-text-primary">
               {data.userName}
-              <span className="ml-2 rounded-full bg-[var(--bg-raised)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              <span className="ml-2 rounded-full bg-[var(--bg-raised)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">
                 {data.role}
               </span>
             </p>
 
             <div className="mt-4 grid grid-cols-3 gap-2.5">
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-3 text-center">
-                <CalendarDays className="mx-auto h-4 w-4 text-sky-400" aria-hidden />
+              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+                <CalendarDays className="mx-auto h-4 w-4 text-action-info" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">{data.eventsRegistered}</p>
-                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                <p className="text-[10px] uppercase tracking-wide text-text-muted">
                   Events joined
                 </p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-3 text-center">
-                <Award className="mx-auto h-4 w-4 text-amber-400" aria-hidden />
+              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+                <Award className="mx-auto h-4 w-4 text-action-warning" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.earnedAchievements.length}
                 </p>
-                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                <p className="text-[10px] uppercase tracking-wide text-text-muted">
                   Badges earned
                 </p>
               </div>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-3 text-center">
-                <Target className="mx-auto h-4 w-4 text-violet-400" aria-hidden />
+              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+                <Target className="mx-auto h-4 w-4 text-unit-c" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.completedGoals}/{data.totalGoals}
                 </p>
-                <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                <p className="text-[10px] uppercase tracking-wide text-text-muted">
                   Goals done
                 </p>
               </div>
@@ -304,11 +304,11 @@ export function SemesterRecap() {
             {(data.completedEvents.length > 0 || data.earnedAchievements.length > 0) && (
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {data.completedEvents.length > 0 && (
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/50 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                  <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                       Events
                     </p>
-                    <ul className="mt-1.5 space-y-1 text-xs text-[var(--text-primary)]">
+                    <ul className="mt-1.5 space-y-1 text-xs text-text-primary">
                       {data.completedEvents.slice(0, 5).map((ev) => (
                         <li key={ev} className="truncate">
                           • {ev}
@@ -318,11 +318,11 @@ export function SemesterRecap() {
                   </div>
                 )}
                 {data.earnedAchievements.length > 0 && (
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/50 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                  <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                       Badges
                     </p>
-                    <ul className="mt-1.5 space-y-1 text-xs text-[var(--text-primary)]">
+                    <ul className="mt-1.5 space-y-1 text-xs text-text-primary">
                       {data.earnedAchievements.slice(0, 5).map((a) => (
                         <li key={a.code} className="truncate">
                           🏆 {a.title}
@@ -335,7 +335,7 @@ export function SemesterRecap() {
             )}
 
             {!shareable && (
-              <p className="mt-4 text-xs text-[var(--text-muted)]">
+              <p className="mt-4 text-xs text-text-muted">
                 Nothing to share yet — register for an event, set a goal or earn a
                 badge to light up your recap.
               </p>

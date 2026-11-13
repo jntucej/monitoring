@@ -31,11 +31,11 @@ const STATUS_STYLE: Record<
   string,
   { chip: string; label: string; icon: "ok" | "bad" | "clock" }
 > = {
-  VALID: { chip: "bg-emerald-500/15 text-emerald-400 border-emerald-500/40", label: "Valid", icon: "ok" },
-  EXPIRED: { chip: "bg-rose-500/15 text-rose-400 border-rose-500/40", label: "Expired", icon: "bad" },
+  VALID: { chip: "bg-emerald-500/15 text-action-success border-emerald-500/40", label: "Valid", icon: "ok" },
+  EXPIRED: { chip: "bg-rose-500/15 text-action-danger border-rose-500/40", label: "Expired", icon: "bad" },
   USED: { chip: "bg-zinc-500/15 text-zinc-400 border-zinc-500/40", label: "Used", icon: "bad" },
   PENDING: {
-    chip: "bg-amber-500/15 text-amber-400 border-amber-500/40",
+    chip: "bg-amber-500/15 text-action-warning border-amber-500/40",
     label: "Pending approval",
     icon: "clock",
   },
@@ -45,7 +45,7 @@ function statusMeta(status: string | undefined) {
   const key = status ? String(status).toUpperCase() : "";
   return (
     STATUS_STYLE[key] ?? {
-      chip: "bg-amber-500/15 text-amber-400 border-amber-500/40",
+      chip: "bg-amber-500/15 text-action-warning border-amber-500/40",
       label: status || "Unknown",
       icon: "clock" as const,
     }
@@ -58,14 +58,14 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
 
   return (
     <div
-      className={`rounded-xl border p-3 bg-[var(--bg-surface)] ${
-        meta.icon === "bad" ? "border-rose-500/40" : "border-[var(--border)]"
+      className={`rounded-xl border p-3 bg-bg-surface ${
+        meta.icon === "bad" ? "border-rose-500/40" : "border-border"
       }`}
       aria-label="Pass preview"
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Ticket className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+          <Ticket className="h-4 w-4 shrink-0 text-text-muted" />
           <span className="font-mono text-xs font-bold truncate">{pass.ticket_number}</span>
         </div>
         <span
@@ -74,7 +74,7 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
           {meta.label}
         </span>
       </div>
-      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-[var(--text-muted)]">
+      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-text-muted">
         <dt className="flex items-center gap-1">
           <Clock className="h-3 w-3" aria-hidden /> Issued
         </dt>
@@ -95,22 +95,22 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
         </dd>
       </dl>
       {pass.reason && (
-        <p className="mt-1.5 text-[11px] text-[var(--text-secondary)]">
+        <p className="mt-1.5 text-[11px] text-text-secondary">
           Reason: <strong>{pass.reason}</strong>
           {reason && pass.reason !== reason ? (
-            <span className="ml-2 text-amber-400">
+            <span className="ml-2 text-action-warning">
               (requested: {reason})
             </span>
           ) : null}
         </p>
       )}
       {pass.status?.toUpperCase() === "EXPIRED" && (
-        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-rose-400">
+        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-action-danger">
           <XCircle className="h-3 w-3" aria-hidden /> This pass has lapsed — flag the scan.
         </p>
       )}
       {pass.status?.toUpperCase() === "VALID" && (
-        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-emerald-400">
+        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-action-success">
           <CheckCircle2 className="h-3 w-3" aria-hidden /> Pass is live — safe to proceed.
         </p>
       )}

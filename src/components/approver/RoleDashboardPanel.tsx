@@ -58,7 +58,7 @@ function defaultMapKpis(data: unknown): KpiDef[] {
 }
 
 const TONE_CLASSES = {
-  neutral: "border-[var(--border)] bg-[var(--bg-elevated,var(--bg-surface))]",
+  neutral: "border-border bg-[var(--bg-elevated,var(--bg-surface))]",
   ok: "border-emerald-500/30 bg-emerald-500/5",
   warn: "border-amber-500/30 bg-amber-500/5",
   danger: "border-rose-500/30 bg-rose-500/5",
@@ -99,23 +99,23 @@ export function RoleDashboardPanel({
   }, [endpoint, mapKpis, raw]);
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated,var(--bg-surface))] p-5">
+    <section className="rounded-xl border border-border bg-[var(--bg-elevated,var(--bg-surface))] p-5">
       <header className="flex items-center gap-2 mb-4">
         {Icon && (
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <Icon className="w-4 h-4 text-emerald-400" />
+            <Icon className="w-4 h-4 text-action-success" />
           </div>
         )}
         <h2 className="text-base font-semibold tracking-tight">{title}</h2>
       </header>
 
       {!endpoint && (
-        <div className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center space-y-1">
-          <Inbox className="w-6 h-6 mx-auto text-[var(--text-muted)]" />
-          <p className="text-sm text-[var(--text-secondary)]">
+        <div className="rounded-lg border border-dashed border-border p-6 text-center space-y-1">
+          <Inbox className="w-6 h-6 mx-auto text-text-muted" />
+          <p className="text-sm text-text-secondary">
             KPI panel coming soon
           </p>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             The backend endpoint for this role is not yet wired.
           </p>
         </div>
@@ -124,7 +124,7 @@ export function RoleDashboardPanel({
       {endpoint && resource.loading && kpis.length === 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-lg border border-[var(--border)] p-3 space-y-2">
+            <div key={i} className="rounded-lg border border-border p-3 space-y-2">
               <div className="h-2.5 w-1/2 bg-[var(--text-muted)]/10 rounded animate-pulse" />
               <div className="h-6 w-2/3 bg-[var(--text-muted)]/10 rounded animate-pulse" />
             </div>
@@ -133,7 +133,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && resource.error && kpis.length === 0 && (
-        <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-sm text-rose-300">
+        <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-sm text-action-danger">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Could not load KPIs: {resource.error}{" "}
@@ -148,7 +148,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && !resource.loading && !resource.error && kpis.length === 0 && (
-        <div className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--text-muted)]">
+        <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
           No metrics available yet
         </div>
       )}
@@ -160,12 +160,12 @@ export function RoleDashboardPanel({
               key={i}
               className={`rounded-lg border p-3 ${TONE_CLASSES[k.tone ?? "neutral"]}`}
             >
-              <p className="text-[11px] uppercase tracking-wide text-[var(--text-muted)] truncate">
+              <p className="text-[11px] uppercase tracking-wide text-text-muted truncate">
                 {k.label}
               </p>
               <p className="text-xl font-semibold tabular-nums mt-1">{k.value}</p>
               {k.hint && (
-                <p className="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
+                <p className="text-[11px] text-text-muted mt-0.5 truncate">
                   {k.hint}
                 </p>
               )}
@@ -175,7 +175,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && resource.loading && kpis.length > 0 && (
-        <div className="flex items-center justify-end gap-1.5 mt-2 text-[10px] text-[var(--text-muted)]">
+        <div className="flex items-center justify-end gap-1.5 mt-2 text-[10px] text-text-muted">
           <Loader2 className="w-3 h-3 animate-spin" />
           refreshing
         </div>

@@ -43,40 +43,40 @@ export function StaffStatusBar({ counts, refreshing = false }: StaffStatusBarPro
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Staff status bar"
     >
       {/* Left: shift · tasks · leaves · last scan */}
       <div className="flex items-center gap-4 min-w-0 flex-wrap">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-          <span className="text-[var(--text-muted)]">shift</span>
-          <span className="font-mono tabular-nums font-bold text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-success shrink-0" />
+          <span className="text-text-muted">shift</span>
+          <span className="font-mono tabular-nums font-bold text-action-success">
             {counts?.shift || "—"}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="inline-flex items-center gap-1.5 text-text-muted">
           <Briefcase className="w-3.5 h-3.5" />
           <span>tasks</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.tasks ?? 0}
           </span>
         </span>
 
-        <span className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+        <span className="inline-flex items-center gap-1.5 text-text-muted">
           <UserCheck className="w-3.5 h-3.5" />
           <span>leave pending</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.leavesPending ?? 0}
           </span>
         </span>
 
         {lastScanText ? (
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-[var(--text-muted)]">
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted">
             <Clock className="w-3.5 h-3.5" />
             <span>last scan</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <span className="font-mono tabular-nums text-text-secondary">
               {lastScanText}
             </span>
           </span>
@@ -86,7 +86,7 @@ export function StaffStatusBar({ counts, refreshing = false }: StaffStatusBarPro
       {/* Right: refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
       </div>
     </footer>

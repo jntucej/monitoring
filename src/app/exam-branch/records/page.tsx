@@ -35,15 +35,15 @@ interface PermissionsResponse {
 function statusBadge(status: string): string {
   switch (status) {
     case "PENDING":
-      return "bg-amber-500/15 text-amber-300";
+      return "bg-amber-500/15 text-action-warning";
     case "APPROVED":
     case "RESOLVED":
-      return "bg-emerald-500/15 text-emerald-300";
+      return "bg-emerald-500/15 text-action-success";
     case "REJECTED":
     case "DENIED":
-      return "bg-rose-500/15 text-rose-300";
+      return "bg-rose-500/15 text-action-danger";
     default:
-      return "bg-[var(--bg-elevated)]/50 text-[var(--text-secondary)]";
+      return "bg-bg-elevated/50 text-text-secondary";
   }
 }
 
@@ -92,7 +92,7 @@ function ExamBranchRecordsInner() {
       {/* Back link */}
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -100,15 +100,15 @@ function ExamBranchRecordsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Records unavailable: {error}</span>
@@ -126,35 +126,35 @@ function ExamBranchRecordsInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Records Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Records</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Total Records</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalCount}</p>
-            <p className="text-xs text-[var(--text-muted)]">All exam workflow requests</p>
+            <p className="text-xs text-text-muted">All exam workflow requests</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Pending</p>
-            <p className="mt-1 text-2xl font-bold text-amber-400">{pendingCount}</p>
-            <p className="text-xs text-[var(--text-muted)]">Awaiting stage action</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Pending</p>
+            <p className="mt-1 text-2xl font-bold text-action-warning">{pendingCount}</p>
+            <p className="text-xs text-text-muted">Awaiting stage action</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Resolved</p>
-            <p className="mt-1 text-2xl font-bold text-emerald-400">{resolvedCount}</p>
-            <p className="text-xs text-[var(--text-muted)]">Approved or rejected</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Resolved</p>
+            <p className="mt-1 text-2xl font-bold text-action-success">{resolvedCount}</p>
+            <p className="text-xs text-text-muted">Approved or rejected</p>
           </div>
         </div>
       </WidgetBoundary>
 
       {/* Records list */}
       <WidgetBoundary title="Candidate & Examination Records">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ClipboardList className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ClipboardList className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Examination Records
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">{requests.length} shown</span>
+            <span className="text-xs text-text-muted shrink-0">{requests.length} shown</span>
           </div>
 
           {busy ? (
@@ -162,15 +162,15 @@ function ExamBranchRecordsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-12 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <UserCheck className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No examination records yet.</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <UserCheck className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">No examination records yet.</p>
+              <p className="text-xs text-text-muted mt-1">
                 Records appear when exam workflow requests are created.
               </p>
             </div>
@@ -179,7 +179,7 @@ function ExamBranchRecordsInner() {
               {requests.slice(0, 50).map((req) => (
                 <li key={req.id} className="px-4 py-3 flex flex-col gap-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    <span className="font-mono text-xs text-[var(--text-secondary)]">
+                    <span className="font-mono text-xs text-text-secondary">
                       {req.ticket_number}
                     </span>
                     <span
@@ -187,11 +187,11 @@ function ExamBranchRecordsInner() {
                     >
                       {req.status}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-text-muted">
                       stage: {req.current_stage}
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] min-w-0">
+                  <p className="text-xs text-text-muted min-w-0">
                     {new Date(req.created_at).toLocaleString([], {
                       month: "short",
                       day: "numeric",
@@ -204,7 +204,7 @@ function ExamBranchRecordsInner() {
                 </li>
               ))}
               {requests.length > 50 && (
-                <li className="px-4 py-2 text-xs text-[var(--text-muted)] text-center">
+                <li className="px-4 py-2 text-xs text-text-muted text-center">
                   + {requests.length - 50} more records (refresh to see latest)
                 </li>
               )}

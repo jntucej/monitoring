@@ -39,10 +39,10 @@ import { OperatorWidgetBoundary } from "./OperatorWidgetBoundary";
  */
 
 const URGENCY_META: Record<NotificationUrgency, { label: string; icon: React.ComponentType<{ className?: string }>; accent: string }> = {
-  urgent: { label: "Urgent", icon: AlertTriangle, accent: "text-[var(--action-danger)]" },
-  approval: { label: "Approval", icon: CheckCircle2, accent: "text-[var(--action-primary)]" },
-  overdue: { label: "Overdue", icon: Clock, accent: "text-[var(--action-warning)]" },
-  info: { label: "Info", icon: Info, accent: "text-[var(--action-info)]" },
+  urgent: { label: "Urgent", icon: AlertTriangle, accent: "text-action-danger" },
+  approval: { label: "Approval", icon: CheckCircle2, accent: "text-action-primary" },
+  overdue: { label: "Overdue", icon: Clock, accent: "text-action-warning" },
+  info: { label: "Info", icon: Info, accent: "text-action-info" },
 };
 
 const URGENCY_ORDER: NotificationUrgency[] = ["urgent", "overdue", "approval", "info"];
@@ -228,10 +228,10 @@ export function OperatorNotifications({
   }, [store, items]);
 
   const badge = (
-    <span className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
+    <span className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated transition-colors">
       <Bell className="h-5 w-5" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--action-danger)] px-1 text-[10px] font-bold text-white">
+        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action-danger px-1 text-[10px] font-bold text-white">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
@@ -250,19 +250,19 @@ export function OperatorNotifications({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-full sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="absolute right-0 mt-2 w-full sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
           {/* Header */}
-          <div className="flex items-center justify-between gap-2 border-b border-[var(--border)] p-3">
+          <div className="flex items-center justify-between gap-2 border-b border-border p-3">
             <div className="flex items-center gap-2 min-w-0">
-              <Bell className="h-4 w-4 text-[var(--action-primary)] shrink-0" />
-              <span className="text-sm font-semibold text-[var(--text-primary)]">Notifications</span>
+              <Bell className="h-4 w-4 text-action-primary shrink-0" />
+              <span className="text-sm font-semibold text-text-primary">Notifications</span>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--action-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-action-primary hover:bg-bg-elevated transition-colors"
                 >
                   <CheckCheck className="h-3 w-3" /> Mark all read
                 </button>
@@ -271,7 +271,7 @@ export function OperatorNotifications({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close notifications"
-                className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
+                className="rounded-lg p-1.5 text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -282,12 +282,12 @@ export function OperatorNotifications({
           <div className="flex-1 overflow-y-auto p-3 space-y-4">
             {notifLoading && items.length === 0 ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-[var(--text-muted)]" />
+                <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <CheckCircle2 className="h-8 w-8 text-[var(--text-muted)]" />
-                <p className="mt-2 text-xs text-[var(--text-muted)]">No notifications</p>
+                <CheckCircle2 className="h-8 w-8 text-text-muted" />
+                <p className="mt-2 text-xs text-text-muted">No notifications</p>
               </div>
             ) : (
               URGENCY_ORDER.map((urgency) => {
@@ -301,7 +301,7 @@ export function OperatorNotifications({
                       <span className={`text-[11px] font-semibold uppercase tracking-wide ${meta.accent}`}>
                         {meta.label}
                       </span>
-                      <span className="text-[11px] text-[var(--text-muted)]">({group.length})</span>
+                      <span className="text-[11px] text-text-muted">({group.length})</span>
                     </div>
                     <div className="space-y-2">
                       {group.map((item) => {
@@ -313,27 +313,27 @@ export function OperatorNotifications({
                             onClick={() => handleMarkRead(item.id)}
                             className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
                               isRead
-                                ? "border-[var(--border)] bg-[var(--bg-surface)] opacity-60"
-                                : "border-[var(--border)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-surface)]"
+                                ? "border-border bg-bg-surface opacity-60"
+                                : "border-border bg-bg-elevated hover:bg-bg-surface"
                             }`}
                           >
                             <div className="min-w-0 flex-1">
-                              <p className="text-xs font-medium text-[var(--text-primary)] truncate">
+                              <p className="text-xs font-medium text-text-primary truncate">
                                 {item.title}
                               </p>
                               {item.message ? (
-                                <p className="mt-0.5 text-[11px] text-[var(--text-muted)] line-clamp-2">
+                                <p className="mt-0.5 text-[11px] text-text-muted line-clamp-2">
                                   {item.message}
                                 </p>
                               ) : null}
                               {item.createdAt ? (
-                                <p className="mt-1 text-[10px] text-[var(--text-muted)]">
+                                <p className="mt-1 text-[10px] text-text-muted">
                                   {getTimeAgo(item.createdAt)}
                                 </p>
                               ) : null}
                             </div>
                             {!isRead && (
-                              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--action-primary)]" />
+                              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-action-primary" />
                             )}
                           </button>
                         );
@@ -355,13 +355,13 @@ export function OperatorNotifications({
 
   return (
     <OperatorWidgetBoundary title="OperatorNotifications">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 sm:p-5">
+      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-[var(--action-primary)]" />
-            <h3 className="text-sm font-semibold text-[var(--text-primary)]">OperatorNotifications</h3>
+            <Bell className="h-4 w-4 text-action-primary" />
+            <h3 className="text-sm font-semibold text-text-primary">OperatorNotifications</h3>
           </div>
-          <span className="text-xs text-[var(--text-muted)]">{unreadCount} unread</span>
+          <span className="text-xs text-text-muted">{unreadCount} unread</span>
         </div>
         {inner}
       </div>

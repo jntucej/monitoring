@@ -17,10 +17,10 @@ interface ComplaintRow { id?: string; status?: string; [k: string]: unknown; }
 type ComplaintsData = ComplaintRow[] | { data?: { complaints?: ComplaintRow[] } };
 
 function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : "text-[var(--text-primary)]";
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] p-4 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+    <div className="rounded-xl border border-border bg-[var(--bg-elev-1)] p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
@@ -46,33 +46,33 @@ export default function EmoLandingPage() {
 
       <Link
         href="/emo/complaints"
-        className="group flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
+        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
       >
         <div className="flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <AlertTriangle className="w-5 h-5 text-action-warning" />
           <div>
             <div className="font-semibold">Complaint Queue</div>
-            <div className="text-xs text-[var(--text-muted)]">
+            <div className="text-xs text-text-muted">
               Power outages, UPS failures, lab wiring hazards
             </div>
           </div>
         </div>
-        <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--action-primary)]" />
+        <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-primary" />
       </Link>
       <Link
         href="/emo/complaints?status=resolved"
-        className="group flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
+        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
       >
         <div className="flex items-center gap-3">
-          <Wrench className="w-5 h-5 text-emerald-400" />
+          <Wrench className="w-5 h-5 text-action-success" />
           <div>
             <div className="font-semibold">Resolved</div>
-            <div className="text-xs text-[var(--text-muted)]">
+            <div className="text-xs text-text-muted">
               Closed maintenance tickets
             </div>
           </div>
         </div>
-        <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--action-primary)]" />
+        <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-primary" />
       </Link>
 
       <WidgetBoundary name="ComplaintConsole" title="Complaint Console">

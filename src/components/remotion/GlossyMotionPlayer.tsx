@@ -39,14 +39,14 @@ export function GlossyMotionPlayer({
   if (!mounted || !isGlossy || isMobileOrLowFps) {
     const statusColor =
       status === "entry"
-        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/30"
+        ? "text-action-success bg-emerald-500/10 border-emerald-500/30"
         : status === "exit"
-        ? "text-rose-500 bg-rose-500/10 border-rose-500/30"
-        : "text-amber-500 bg-amber-500/10 border-amber-500/30";
+        ? "text-action-danger bg-rose-500/10 border-rose-500/30"
+        : "text-action-warning bg-amber-500/10 border-amber-500/30";
 
     return (
       <div
-        className={`relative w-full h-full min-h-[140px] rounded-2xl border bg-[var(--bg-surface)]/60 p-4 flex flex-col items-center justify-center text-center ${statusColor} ${className}`}
+        className={`relative w-full h-full min-h-[140px] rounded-2xl border bg-bg-surface/60 p-4 flex flex-col items-center justify-center text-center ${statusColor} ${className}`}
       >
         <div className="w-10 h-10 rounded-full border border-current flex items-center justify-center animate-pulse mb-2">
           <div className="w-3 h-3 rounded-full bg-current" />

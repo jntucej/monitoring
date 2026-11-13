@@ -36,17 +36,17 @@ export function MorningBrief({
       : `${pending} left — you're ${pct}% through today's target.`;
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-[var(--action-primary)]/10">
-            <Icon className="size-5 text-[var(--action-primary)]" aria-hidden />
+          <div className="flex size-10 items-center justify-center rounded-full bg-action-primary/10">
+            <Icon className="size-5 text-action-primary" aria-hidden />
           </div>
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">
+            <p className="text-sm font-medium text-text-primary">
               {t.greeting}, {user?.name?.split(" ")[0] ?? "Principal"}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xs text-text-muted">
               {new Date().toLocaleDateString("en-IN", {
                 weekday: "long",
                 day: "numeric",
@@ -58,19 +58,19 @@ export function MorningBrief({
         <StreakBadge />
       </div>
 
-      <p className="mt-3 text-sm text-[var(--text-secondary)]">{message}</p>
+      <p className="mt-3 text-sm text-text-secondary">{message}</p>
 
       {target > 0 && (
         <div className="mt-3">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[var(--text-muted)]">Today&#39;s progress</span>
-            <span className="font-medium text-[var(--text-primary)] tabular-nums">
+            <span className="text-text-muted">Today&#39;s progress</span>
+            <span className="font-medium text-text-primary tabular-nums">
               {cleared} / {target}
             </span>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-bg-elevated">
             <div
-              className="h-full rounded-full bg-[var(--action-primary)] transition-[width] duration-500"
+              className="h-full rounded-full bg-action-primary transition-[width] duration-500"
               style={{ width: `${pct}%` }}
             />
           </div>

@@ -64,9 +64,9 @@ type LookupState = "idle" | "loading" | "found" | "notfound" | "error";
 
 function StatusBadge({ status }: { status: string }) {
   const s = (status ?? "").toUpperCase();
-  if (s === "ACTIVE") return <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-emerald-400">Active</span>;
-  if (s === "SUSPENDED" || s === "LOCKED") return <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-rose-400">{s}</span>;
-  return <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-400">{s}</span>;
+  if (s === "ACTIVE") return <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-success">Active</span>;
+  if (s === "SUSPENDED" || s === "LOCKED") return <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-danger">{s}</span>;
+  return <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-warning">{s}</span>;
 }
 
 function OperatorLookupInner() {
@@ -156,16 +156,16 @@ function OperatorLookupInner() {
         <button
           type="button"
           onClick={() => setVoiceOpen(true)}
-          className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-primary transition-colors"
         >
           <Mic className="h-3.5 w-3.5" aria-hidden />
           Voice lookup
         </button>
         <VoiceAssistantModal onExecuteCommand={handleVoiceCommand} />
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 space-y-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-3 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
             <div className="space-y-1.5 min-w-0">
-              <label htmlFor="lookup-name" className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+              <label htmlFor="lookup-name" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                 Name on ID
               </label>
               <input
@@ -174,11 +174,11 @@ function OperatorLookupInner() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
-              <label htmlFor="lookup-id" className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+              <label htmlFor="lookup-id" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
                 Roll / Employee / ID Number
               </label>
               <input
@@ -188,7 +188,7 @@ function OperatorLookupInner() {
                 onChange={(e) => setIdNumber(e.target.value.toUpperCase())}
                 onKeyDown={(e) => { if (e.key === "Enter") void runLookup(); }}
                 placeholder="e.g. 24JJ1A0501"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] font-mono text-sm text-[var(--text-primary)] uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ function OperatorLookupInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
@@ -210,14 +210,14 @@ function OperatorLookupInner() {
 
       {/* Results */}
       {lookupState === "loading" && (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-5 flex items-center gap-3 text-sm text-[var(--text-muted)] min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated p-5 flex items-center gap-3 text-sm text-text-muted min-w-0">
           <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
           Looking up {lastQuery}…
         </div>
       )}
 
       {lookupState === "error" && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 flex items-start gap-3 text-sm text-rose-300 min-w-0">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 flex items-start gap-3 text-sm text-action-danger min-w-0">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <div className="min-w-0">
             <p className="font-semibold">Lookup failed</p>
@@ -228,10 +228,10 @@ function OperatorLookupInner() {
 
       {lookupState === "notfound" && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3 text-sm min-w-0">
-          <XCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <XCircle className="w-5 h-5 text-action-warning shrink-0 mt-0.5" />
           <div className="min-w-0">
-            <p className="font-semibold text-amber-300">No match for <span className="font-mono">{lastQuery}</span></p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Double-check the number, or deny entry and log the incident.</p>
+            <p className="font-semibold text-action-warning">No match for <span className="font-mono">{lastQuery}</span></p>
+            <p className="text-xs text-text-muted mt-1">Double-check the number, or deny entry and log the incident.</p>
           </div>
         </div>
       )}
@@ -242,24 +242,24 @@ function OperatorLookupInner() {
             result.status === "ACTIVE" ? "border-emerald-500/30 bg-emerald-500/10" : "border-rose-500/40 bg-rose-500/10"
           }`}>
             <div className="flex items-start gap-3 min-w-0">
-              <span className={`shrink-0 ${result.status === "ACTIVE" ? "text-emerald-400" : "text-rose-400"}`}>
+              <span className={`shrink-0 ${result.status === "ACTIVE" ? "text-action-success" : "text-action-danger"}`}>
                 {result.status === "ACTIVE" ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
-                  <p className="text-sm font-bold text-[var(--text-primary)]">{result.name}</p>
+                  <p className="text-sm font-bold text-text-primary">{result.name}</p>
                   <StatusBadge status={result.status} />
                 </div>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
-                  <div><dt className="text-[var(--text-muted)]">Type</dt><dd className="text-[var(--text-primary)] font-medium capitalize">{result.personType}</dd></div>
-                  <div><dt className="text-[var(--text-muted)]">ID / Roll</dt><dd className="font-mono text-[var(--text-primary)]">{result.uniqueId}</dd></div>
-                  {result.department && <div><dt className="text-[var(--text-muted)]">Department</dt><dd className="text-[var(--text-primary)]">{result.department}</dd></div>}
-                  {result.year != null && <div><dt className="text-[var(--text-muted)]">Year</dt><dd className="text-[var(--text-primary)]">{result.year}</dd></div>}
-                  {result.roomNumber && <div><dt className="text-[var(--text-muted)]">Room</dt><dd className="text-[var(--text-primary)]">{result.roomNumber}</dd></div>}
-                  {result.designation && <div><dt className="text-[var(--text-muted)]">Designation</dt><dd className="text-[var(--text-primary)]">{result.designation}</dd></div>}
+                  <div><dt className="text-text-muted">Type</dt><dd className="text-text-primary font-medium capitalize">{result.personType}</dd></div>
+                  <div><dt className="text-text-muted">ID / Roll</dt><dd className="font-mono text-text-primary">{result.uniqueId}</dd></div>
+                  {result.department && <div><dt className="text-text-muted">Department</dt><dd className="text-text-primary">{result.department}</dd></div>}
+                  {result.year != null && <div><dt className="text-text-muted">Year</dt><dd className="text-text-primary">{result.year}</dd></div>}
+                  {result.roomNumber && <div><dt className="text-text-muted">Room</dt><dd className="text-text-primary">{result.roomNumber}</dd></div>}
+                  {result.designation && <div><dt className="text-text-muted">Designation</dt><dd className="text-text-primary">{result.designation}</dd></div>}
                   <div>
-                    <dt className="text-[var(--text-muted)]">Campus</dt>
-                    <dd className={result.onCampus ? "text-emerald-400 font-semibold" : "text-[var(--text-primary)]"}>
+                    <dt className="text-text-muted">Campus</dt>
+                    <dd className={result.onCampus ? "text-action-success font-semibold" : "text-text-primary"}>
                       {result.onCampus ? "On campus" : "Off campus"}
                     </dd>
                   </div>
@@ -270,45 +270,45 @@ function OperatorLookupInner() {
 
           {/* Last scan + gate status */}
           <OperatorWidgetBoundary title="Last Scan & Gate Status">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
+            <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
               {lastScanLoading ? (
-                <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+                <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
                   <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
                   Loading scan history…
                 </div>
               ) : lastScanError ? (
-                <div className="p-4 text-sm text-rose-400 min-w-0">Could not load scan history.</div>
+                <div className="p-4 text-sm text-action-danger min-w-0">Could not load scan history.</div>
               ) : lastScanData?.data ? (
                 <div className="p-4 space-y-2 min-w-0">
                   <div className="flex items-center justify-between gap-2 min-w-0">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         {lastScanData.data.direction === "IN" ? (
-                          <ArrowDownLeft className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <ArrowDownLeft className="w-4 h-4 text-action-success shrink-0" />
                         ) : (
-                          <ArrowUpRight className="w-4 h-4 text-rose-400 shrink-0" />
+                          <ArrowUpRight className="w-4 h-4 text-action-danger shrink-0" />
                         )}
-                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                        <p className="text-sm font-semibold text-text-primary">
                           {lastScanData.data.direction === "IN" ? "Entry" : "Exit"} · {fmtTime(lastScanData.data.timestamp)}
                         </p>
                       </div>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">{lastScanData.data.gate_name || "—"}</p>
+                      <p className="text-xs text-text-muted mt-0.5">{lastScanData.data.gate_name || "—"}</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                      <span className="text-xs text-[var(--text-muted)]">
+                      <Clock className="w-3.5 h-3.5 text-text-muted" />
+                      <span className="text-xs text-text-muted">
                         {new Date(lastScanData.data.timestamp).toLocaleDateString([], { month: "short", day: "numeric" })}
                       </span>
                     </div>
                   </div>
                   {lastScanData.data.reason && (
-                    <p className="text-xs text-[var(--text-muted)]">Reason: {lastScanData.data.reason}</p>
+                    <p className="text-xs text-text-muted">Reason: {lastScanData.data.reason}</p>
                   )}
                 </div>
               ) : (
                 <div className="p-6 text-center min-w-0">
-                  <Clock className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-                  <p className="text-sm text-[var(--text-muted)]">No scan history for this person.</p>
+                  <Clock className="w-5 h-5 text-text-muted mx-auto mb-2" />
+                  <p className="text-sm text-text-muted">No scan history for this person.</p>
                 </div>
               )}
             </div>

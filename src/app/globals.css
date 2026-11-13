@@ -1,5 +1,48 @@
 @import "tailwindcss";
 
+/* Register design tokens as Tailwind v4 theme colors so that
+   bg-bg-base, text-text-muted, border-border, bg-action-primary,
+   bg-action-danger, bg-action-warning, bg-action-info,
+   bg-action-success, bg-unit-a/b/c all resolve to bare utilities.
+   The CSS vars themselves are defined in :root below; this block
+   just tells Tailwind to generate the utility classes. */
+@theme {
+  /* Backgrounds */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  /* Borders */
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--border-subtle, var(--border));
+
+  /* Action / semantic colors */
+  --color-action-primary: var(--action-primary);
+  --color-action-danger: var(--action-danger);
+  --color-action-warning: var(--action-warning);
+  --color-action-info: var(--action-info);
+  --color-action-success: var(--action-success);
+
+  /* Alerts */
+  --color-alert-critical: var(--alert-critical);
+  --color-alert-warning: var(--alert-warning);
+  --color-alert-success: var(--alert-success);
+
+  /* Unit accents */
+  --color-unit-a: var(--unit-a);
+  --color-unit-b: var(--unit-b);
+  --color-unit-c: var(--unit-c);
+
+  /* Focus */
+  --color-focus-ring: var(--focus-ring);
+}
+
 /* ============================================================
    DESIGN TOKENS — Student Gate Monitoring System
    Apple-Inspired HIG Design System: Calm, Restrained, Precise

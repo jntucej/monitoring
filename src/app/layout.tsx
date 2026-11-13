@@ -78,8 +78,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+    { media: "(prefers-color-scheme: light)", color: "#fff" },
+    { media: "(prefers-color-scheme: dark)", color: "var(--bg-base)" },
   ],
 };
 
@@ -134,13 +134,13 @@ try {
       <body>
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[var(--action-primary)] focus:text-white focus:rounded focus:text-sm focus:font-medium"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-action-primary focus:text-white focus:rounded focus:text-sm focus:font-medium"
         >
           Skip to main content
         </a>
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--action-primary)] focus:px-4 focus:py-2 focus:text-white"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-action-primary focus:px-4 focus:py-2 focus:text-white"
         >
           Skip to main content
         </a>

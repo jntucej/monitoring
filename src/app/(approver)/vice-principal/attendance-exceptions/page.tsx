@@ -57,8 +57,8 @@ function VpAttendanceExceptionsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Attendance Exceptions">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-          <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               Today&apos;s Staff Attendance Exceptions
@@ -66,7 +66,7 @@ function VpAttendanceExceptionsInner() {
           </div>
 
           {error && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
               Exception data unavailable: {error}
             </div>
           )}
@@ -74,38 +74,38 @@ function VpAttendanceExceptionsInner() {
           {loading && !resp ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-16 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
+                <div key={i} className="h-16 rounded-lg bg-bg-elevated/60 animate-pulse" />
               ))}
             </div>
           ) : !exceptions ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No exception data recorded yet.</p>
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">No exception data recorded yet.</p>
             </div>
           ) : (
             <>
               {/* KPI row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-                <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
-                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                    <UserX className="w-4 h-4 text-rose-400" />
+                <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+                  <div className="flex items-center gap-2 text-text-muted">
+                    <UserX className="w-4 h-4 text-action-danger" />
                     <span className="text-xs uppercase tracking-wide">Absent</span>
                   </div>
-                  <p className="text-xl font-bold text-rose-400">{summary?.absentCount ?? 0}</p>
+                  <p className="text-xl font-bold text-action-danger">{summary?.absentCount ?? 0}</p>
                 </div>
-                <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
-                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                    <Clock4 className="w-4 h-4 text-amber-400" />
+                <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+                  <div className="flex items-center gap-2 text-text-muted">
+                    <Clock4 className="w-4 h-4 text-action-warning" />
                     <span className="text-xs uppercase tracking-wide">Late Check-ins</span>
                   </div>
-                  <p className="text-xl font-bold text-amber-400">{summary?.lateCount ?? 0}</p>
+                  <p className="text-xl font-bold text-action-warning">{summary?.lateCount ?? 0}</p>
                 </div>
-                <div className="rounded-lg bg-[var(--bg-elevated)]/40 p-3 min-w-0">
-                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                    <Flag className="w-4 h-4 text-sky-400" />
+                <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+                  <div className="flex items-center gap-2 text-text-muted">
+                    <Flag className="w-4 h-4 text-action-info" />
                     <span className="text-xs uppercase tracking-wide">Flagged Staff</span>
                   </div>
-                  <p className="text-xl font-bold text-sky-400">{summary?.flaggedCount ?? 0}</p>
+                  <p className="text-xl font-bold text-action-info">{summary?.flaggedCount ?? 0}</p>
                 </div>
               </div>
 
@@ -113,18 +113,18 @@ function VpAttendanceExceptionsInner() {
                 <div className="space-y-4 min-w-0">
                   {exceptions.absent.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-rose-400 mb-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-action-danger mb-2">
                         Absent ({exceptions.absent.length})
                       </p>
                       <ul className="space-y-1">
                         {exceptions.absent.map((e) => (
                           <li
                             key={`a-${e.id}`}
-                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-border/60 bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
-                            <span className="text-xs text-[var(--text-muted)]">{e.department}</span>
-                            <span className="text-xs font-mono text-[var(--text-muted)]">{e.uniqueId}</span>
+                            <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-xs text-text-muted">{e.department}</span>
+                            <span className="text-xs font-mono text-text-muted">{e.uniqueId}</span>
                           </li>
                         ))}
                       </ul>
@@ -132,18 +132,18 @@ function VpAttendanceExceptionsInner() {
                   )}
                   {exceptions.late.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-amber-400 mb-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-action-warning mb-2">
                         Late ({exceptions.late.length})
                       </p>
                       <ul className="space-y-1">
                         {exceptions.late.map((e) => (
                           <li
                             key={`l-${e.id}`}
-                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-border/60 bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
-                            <span className="text-xs text-[var(--text-muted)]">{e.department}</span>
-                            <span className="text-xs text-amber-300">
+                            <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-xs text-text-muted">{e.department}</span>
+                            <span className="text-xs text-action-warning">
                               in at {e.firstInTime || "—"}
                             </span>
                           </li>
@@ -153,17 +153,17 @@ function VpAttendanceExceptionsInner() {
                   )}
                   {exceptions.flagged.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-sky-400 mb-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-action-info mb-2">
                         Flagged ({exceptions.flagged.length})
                       </p>
                       <ul className="space-y-1">
                         {exceptions.flagged.map((e) => (
                           <li
                             key={`f-${e.id}`}
-                            className="rounded-lg border border-[var(--border)]/60 bg-[var(--bg-surface)]/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="rounded-lg border border-border/60 bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
                           >
-                            <span className="text-[var(--text-secondary)] truncate min-w-0 flex-1">{e.fullName}</span>
-                            <span className="text-xs text-sky-300">{e.flagStatus}</span>
+                            <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
+                            <span className="text-xs text-action-info">{e.flagStatus}</span>
                           </li>
                         ))}
                       </ul>
@@ -171,7 +171,7 @@ function VpAttendanceExceptionsInner() {
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-[var(--text-muted)]">
+                <p className="text-sm text-text-muted">
                   No exceptions today — all staff present and on time.
                 </p>
               )}

@@ -32,7 +32,7 @@ export function Spinner({
       className={`flex items-center justify-center ${className}`}
     >
       <div
-        className={`animate-spin rounded-full border-[var(--accent,#6366f1)] border-t-transparent ${SIZES[size]}`}
+        className={`animate-spin rounded-full border-[var(--accent,var(--action-primary))] border-t-transparent ${SIZES[size]}`}
         aria-hidden="true"
       />
     </div>
@@ -42,9 +42,9 @@ export function Spinner({
 export function PageSkeleton({ lines = 3, className = "" }: { lines?: number; className?: string }) {
   return (
     <div className={`w-full space-y-3 ${className}`} role="status" aria-label="Loading page">
-      <div className="h-4 w-1/3 animate-pulse rounded bg-[var(--bg-elevated)]" />
+      <div className="h-4 w-1/3 animate-pulse rounded bg-bg-elevated" />
       {Array.from({ length: lines }, (_, i) => (
-        <div key={i} className="h-3 animate-pulse rounded bg-[var(--bg-elevated)]" style={{ width: `${80 - i * 12}%` }} />
+        <div key={i} className="h-3 animate-pulse rounded bg-bg-elevated" style={{ width: `${80 - i * 12}%` }} />
       ))}
     </div>
   );
@@ -52,9 +52,9 @@ export function PageSkeleton({ lines = 3, className = "" }: { lines?: number; cl
 
 export function WidgetSkeleton({ className = "" }: { className?: string }) {
   return (
-    <div className={`space-y-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 ${className}`} role="status" aria-label="Loading widget">
-      <div className="h-4 w-1/2 animate-pulse rounded bg-[var(--bg-elevated)]" />
-      <div className="h-3 w-3/4 animate-pulse rounded bg-[var(--bg-elevated)]" />
+    <div className={`space-y-2 rounded-xl border border-border bg-bg-surface p-4 ${className}`} role="status" aria-label="Loading widget">
+      <div className="h-4 w-1/2 animate-pulse rounded bg-bg-elevated" />
+      <div className="h-3 w-3/4 animate-pulse rounded bg-bg-elevated" />
     </div>
   );
 }
@@ -65,7 +65,7 @@ export function TableSkeleton({ rows = 5, cols = 4, className = "" }: { rows?: n
       {Array.from({ length: rows }, (_, r) => (
         <div key={r} className="flex gap-3">
           {Array.from({ length: cols }, (_, c) => (
-            <div key={c} className="h-4 flex-1 animate-pulse rounded bg-[var(--bg-elevated)]" />
+            <div key={c} className="h-4 flex-1 animate-pulse rounded bg-bg-elevated" />
           ))}
         </div>
       ))}

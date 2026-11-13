@@ -71,27 +71,27 @@ function AdminEventsInner() {
               description="Campus events appear here once they are published."
             />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <CalendarDays className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">{r.title}</p>
+                      <p className="text-sm font-semibold text-text-primary">{r.title}</p>
                       {r.category && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--action-primary)]/10 border border-[var(--action-primary)]/20 text-[var(--action-primary)]">{r.category}</span>
+                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-action-primary/10 border border-action-primary/20 text-action-primary">{r.category}</span>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {r.location ? `${r.location} · ` : ""}
                       {r.startsAt ? new Date(r.startsAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}
                     </p>
-                    {r.description && <p className="text-xs text-[var(--text-secondary)] mt-1.5 line-clamp-2">{r.description}</p>}
+                    {r.description && <p className="text-xs text-text-secondary mt-1.5 line-clamp-2">{r.description}</p>}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs text-[var(--text-muted)]">{r.registrations}/{r.capacity ?? "∞"} registered</p>
+                    <p className="text-xs text-text-muted">{r.registrations}/{r.capacity ?? "∞"} registered</p>
                   </div>
                 </div>
               ))}

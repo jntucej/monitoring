@@ -57,7 +57,7 @@ export function ClassRoster({
 
   if (loading && !overview) {
     return (
-      <div className="flex items-center justify-center gap-2 py-12 text-sm text-[var(--text-muted)]">
+      <div className="flex items-center justify-center gap-2 py-12 text-sm text-text-muted">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading class&hellip;
       </div>
     );
@@ -74,12 +74,12 @@ export function ClassRoster({
             description={msg}
           />
         ) : (
-          <div className="py-4 px-3 text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg">
+          <div className="py-4 px-3 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg">
             Failed to load this class: {msg}
             <button
               type="button"
               onClick={() => void refresh()}
-              className="ml-3 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              className="ml-3 rounded-md border border-border bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary hover:text-text-primary"
             >
               Retry
             </button>
@@ -111,35 +111,35 @@ export function ClassRoster({
       {/* Class header */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2 min-w-0">
-          <GraduationCap className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-          <span className="font-mono font-semibold text-[var(--text-primary)] truncate">
+          <GraduationCap className="w-4 h-4 text-action-primary shrink-0" />
+          <span className="font-mono font-semibold text-text-primary truncate">
             {`Y${cls.year}-${cls.section}`}
             {cls.name ? ` · ${cls.name}` : ""}
           </span>
           {subject ? (
-            <span className="inline-flex items-center gap-1 text-[var(--text-muted)]">
+            <span className="inline-flex items-center gap-1 text-text-muted">
               <BookOpen className="w-3.5 h-3.5" />
               <span className="font-mono">{subject}</span>
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-3 text-[var(--text-muted)]">
+        <div className="flex items-center gap-3 text-text-muted">
           <span className="inline-flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="tabular-nums text-emerald-400 font-bold">{present}</span> present
+            <CheckCircle2 className="w-3.5 h-3.5 text-action-success" />
+            <span className="tabular-nums text-action-success font-bold">{present}</span> present
           </span>
           <span className="inline-flex items-center gap-1">
-            <XCircle className="w-3.5 h-3.5 text-rose-500" />
-            <span className="tabular-nums text-rose-400 font-bold">{absent}</span> absent
+            <XCircle className="w-3.5 h-3.5 text-action-danger" />
+            <span className="tabular-nums text-action-danger font-bold">{absent}</span> absent
           </span>
           <span className="tabular-nums">/ {total}</span>
         </div>
       </div>
 
       {/* Today's attendance note for the caller's subject */}
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-[11px] text-[var(--text-muted)]">
+      <div className="rounded-lg border border-border bg-bg-elevated px-3 py-2 text-[11px] text-text-muted">
         Today&apos;s attendance for{" "}
-        <span className="font-mono font-semibold text-[var(--action-primary)]">
+        <span className="font-mono font-semibold text-action-primary">
           {subject ?? "your subject"}
         </span>
         : {present} present, {absent} absent of {total} students.
@@ -159,19 +159,19 @@ export function ClassRoster({
               key={stu.id}
               type="button"
               onClick={() => handleSelect(stu)}
-              className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 min-w-0 text-left hover:border-[var(--action-primary)]/40 transition-colors"
+              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0 text-left hover:border-action-primary/40 transition-colors"
             >
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate text-[var(--text-primary)]">
+                <p className="text-sm font-semibold truncate text-text-primary">
                   {stu.name || "Unnamed student"}
                 </p>
-                <p className="text-[11px] font-mono text-[var(--text-muted)]">
+                <p className="text-[11px] font-mono text-text-muted">
                   Roll {stu.roll || "—"}
                   {stu.year != null ? ` · Y${stu.year}` : ""}
                   {stu.section ? ` · ${stu.section}` : ""}
                 </p>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 shrink-0 text-[var(--text-muted)]" />
+              <ArrowRight className="w-3.5 h-3.5 shrink-0 text-text-muted" />
             </button>
           ))
         )}

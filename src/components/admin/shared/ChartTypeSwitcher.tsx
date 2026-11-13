@@ -29,7 +29,7 @@ export function ChartTypeSwitcher({
   compact?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-1">
+    <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-bg-surface p-1">
       {CHART_TYPE_OPTIONS.map((c) => {
         const Icon = c.icon;
         const active = value === c.id;
@@ -42,8 +42,8 @@ export function ChartTypeSwitcher({
             aria-pressed={active}
             className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
               active
-                ? "bg-emerald-500/15 text-emerald-500 shadow-sm"
-                : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                ? "bg-emerald-500/15 text-action-success shadow-sm"
+                : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />

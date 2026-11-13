@@ -93,8 +93,8 @@ function NavItem({ href, label, icon: Icon }: { href: string; label: string; ico
       href={href}
       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
         isActive
-          ? "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+          ? "bg-action-primary/10 text-action-primary"
+          : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
       }`}
     >
       {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
@@ -124,7 +124,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 transform bg-[var(--bg-surface)] border-r border-[var(--border)] transition-transform duration-200 ease-in-out
+          fixed inset-y-0 left-0 z-50 w-64 transform bg-bg-surface border-r border-border transition-transform duration-200 ease-in-out
           md:relative md:translate-x-0
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
@@ -140,9 +140,9 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
         </div>
 
         {/* Desktop sidebar header */}
-        <div className="hidden md:flex h-14 items-center gap-2 border-b border-[var(--border)] px-4">
-          <Crown className="h-5 w-5 text-amber-400" />
-          <span className="text-sm font-semibold text-[var(--text-primary)]">Principal</span>
+        <div className="hidden md:flex h-14 items-center gap-2 border-b border-border px-4">
+          <Crown className="h-5 w-5 text-action-warning" />
+          <span className="text-sm font-semibold text-text-primary">Principal</span>
         </div>
 
         {/* Navigation */}
@@ -161,7 +161,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
           ))}
 
           {/* Profile section */}
-          <div className="mt-6 border-t border-[var(--border)] pt-4">
+          <div className="mt-6 border-t border-border pt-4">
             <PrincipalSidebarCategory title="PROFILE" icon={<UserCircle className="h-4 w-4" />} defaultOpen={false}>
               <NavItem href="/principal/governance/delegations" label="Settings" icon={Settings} />
               <NavItem href="/principal/profile" label="Profile" icon={UserCircle} />
@@ -170,8 +170,8 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-[var(--border)] p-4">
-          <p className="text-[10px] text-[var(--text-muted)]">
+        <div className="border-t border-border p-4">
+          <p className="text-[10px] text-text-muted">
             Campus Management System v1.0
           </p>
         </div>

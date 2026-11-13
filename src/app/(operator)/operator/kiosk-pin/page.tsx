@@ -81,11 +81,11 @@ export default function OperatorKioskPinPage() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
       <div className="mx-auto max-w-md space-y-5">
         <div>
-          <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-emerald-400" />
+          <h1 className="text-lg font-bold text-text-primary flex items-center gap-2">
+            <KeyRound className="w-5 h-5 text-action-success" />
             Kiosk PIN
           </h1>
-          <p className="text-xs text-[var(--text-muted)] mt-1.5">
+          <p className="text-xs text-text-muted mt-1.5">
             Enter the operator PIN for this terminal to start a kiosk session.
             {user?.gateId
               ? " You already have a gate assigned and can proceed to the desk after sign-in."
@@ -93,9 +93,9 @@ export default function OperatorKioskPinPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 space-y-4">
+        <div className="rounded-xl border border-border bg-bg-surface p-5 space-y-4">
           <label className="block">
-            <span className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1.5 uppercase tracking-wide">
+            <span className="block text-[11px] font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
               Operator PIN
             </span>
             <input
@@ -111,20 +111,20 @@ export default function OperatorKioskPinPage() {
                 if (e.key === "Enter") submit();
               }}
               placeholder="••••••"
-              className="w-full px-4 py-3 rounded-lg bg-[#0b1220] border border-[var(--border)] text-2xl font-mono tracking-[0.3em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-emerald-500/40 outline-none"
+              className="w-full px-4 py-3 rounded-lg bg-bg-base border border-border text-2xl font-mono tracking-[0.3em] text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-emerald-500/40 outline-none"
               disabled={submitting}
             />
           </label>
 
           {error && (
-            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-start gap-2">
+            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-action-danger text-xs font-medium flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && !error && (
-            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-2">
+            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-action-success text-xs font-medium flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               Kiosk session started. Taking you to your desk…
             </div>
@@ -134,7 +134,7 @@ export default function OperatorKioskPinPage() {
             type="button"
             onClick={submit}
             disabled={submitting || pin.length === 0}
-            className="w-full min-h-[44px] rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
+            className="w-full min-h-[44px] rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
           >
             {submitting ? (
               <>

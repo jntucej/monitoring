@@ -54,7 +54,7 @@ function SysadminConsentInner() {
         onRefresh={load}
       />
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex items-center gap-2">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -67,18 +67,18 @@ function SysadminConsentInner() {
           iconTone="accent"
         >
           {stats.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)]">No consent records yet.</p>
+            <p className="text-sm text-text-secondary">No consent records yet.</p>
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {stats.map((s) => (
                 <div key={s.scope} className="p-3 flex items-center gap-3">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{s.scope}</p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-sm font-medium text-text-primary">{s.scope}</p>
+                    <p className="text-xs text-text-muted">
                       {s.granted} active · {s.revoked} revoked · {s.total} total
                     </p>
                   </div>
-                  <span className="px-2 py-1 rounded-lg bg-[var(--action-primary)]/10 border border-[var(--action-primary)]/20 text-[11px] text-[var(--action-primary)]">
+                  <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] text-action-primary">
                     {s.total > 0 ? `${Math.round((s.granted / s.total) * 100)}% active` : "—"}
                   </span>
                 </div>
@@ -94,7 +94,7 @@ function SysadminConsentInner() {
           icon={ScrollText}
           iconTone="default"
         >
-          <div className="divide-y divide-[var(--border)]">
+          <div className="divide-y divide-border">
             {[
               { cat: "Gate movement logs",   scope: "All enrolled students",          retention: "Session + 30 days" },
               { cat: "Biometric templates",  scope: "Students with biometric enrolled", retention: "Active + 90 days" },
@@ -103,10 +103,10 @@ function SysadminConsentInner() {
             ].map((row) => (
               <div key={row.cat} className="p-3 flex items-center gap-3">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{row.cat}</p>
-                  <p className="text-xs text-[var(--text-muted)]">Scope: {row.scope}</p>
+                  <p className="text-sm font-medium text-text-primary">{row.cat}</p>
+                  <p className="text-xs text-text-muted">Scope: {row.scope}</p>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-[var(--action-primary)]/10 border border-[var(--action-primary)]/20 text-[11px] text-[var(--action-primary)] shrink-0">
+                <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] text-action-primary shrink-0">
                   {row.retention}
                 </span>
               </div>

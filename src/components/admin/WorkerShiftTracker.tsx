@@ -47,40 +47,40 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-text-muted">
             <span>On-Duty Workers</span>
-            <HardHat className="w-4 h-4 text-amber-500" />
+            <HardHat className="w-4 h-4 text-action-warning" />
           </div>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{summary.onShift}</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">out of {summary.totalActive} total</p>
+          <p className="text-2xl font-bold text-action-warning mt-1">{summary.onShift}</p>
+          <p className="text-[11px] text-text-muted mt-0.5">out of {summary.totalActive} total</p>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Shift Adherence</span>
-            <CheckCircle className="w-4 h-4 text-emerald-500" />
+            <CheckCircle className="w-4 h-4 text-action-success" />
           </div>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{summary.shiftAdherenceRate}%</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">on-time arrival rate</p>
+          <p className="text-2xl font-bold text-action-success mt-1">{summary.shiftAdherenceRate}%</p>
+          <p className="text-[11px] text-text-muted mt-0.5">on-time arrival rate</p>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Late Check-Ins</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
+            <AlertTriangle className="w-4 h-4 text-action-danger" />
           </div>
-          <p className="text-2xl font-bold text-rose-400 mt-1">{summary.lateArrivals}</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">delayed arrival</p>
+          <p className="text-2xl font-bold text-action-danger mt-1">{summary.lateArrivals}</p>
+          <p className="text-[11px] text-text-muted mt-0.5">delayed arrival</p>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Off Shift</span>
-            <Clock className="w-4 h-4 text-blue-500" />
+            <Clock className="w-4 h-4 text-action-primary" />
           </div>
-          <p className="text-2xl font-bold text-blue-400 mt-1">{summary.offShift}</p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">completed / off duty</p>
+          <p className="text-2xl font-bold text-action-primary mt-1">{summary.offShift}</p>
+          <p className="text-[11px] text-text-muted mt-0.5">completed / off duty</p>
         </div>
       </div>
       {/* Filter and Table Section */}
@@ -93,7 +93,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
               placeholder="Search worker..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-bg-surface border border-border text-xs"
             />
           </div>
 
@@ -101,7 +101,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
             <select
               value={filterContractor}
               onChange={(e) => setFilterContractor(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs"
+              className="px-3 py-2 rounded-xl bg-bg-surface border border-border text-xs"
             >
               <option value="ALL">All Contractors</option>
               {contractors.map((c) => (
@@ -111,7 +111,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs"
+              className="px-3 py-2 rounded-xl bg-bg-surface border border-border text-xs"
             >
               <option value="ALL">All Statuses</option>
               <option value="on_shift">On Shift</option>
@@ -120,11 +120,11 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
           </div>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[650px]">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[11px] font-bold text-muted-foreground uppercase tracking-wider bg-[var(--bg-elevated)]/50">
+                <tr className="border-b border-border text-[11px] font-bold text-muted-foreground uppercase tracking-wider bg-bg-elevated/50">
                   <th className="py-3 px-4">Worker</th>
                   <th className="py-3 px-4">Contractor</th>
                   <th className="py-3 px-4">Shift</th>
@@ -133,25 +133,25 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
                   <th className="py-3 px-4">Progress</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)] text-xs">
+              <tbody className="divide-y divide-border text-xs">
                 {filteredShifts.map((s) => (
-                  <tr key={s.id} className="hover:bg-[var(--bg-elevated)]/30 transition">
+                  <tr key={s.id} className="hover:bg-bg-elevated/30 transition">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-foreground">{s.workerName}</div>
-                      <div className="font-mono text-[10px] text-amber-400">{s.workerId}</div>
+                      <div className="font-mono text-[10px] text-action-warning">{s.workerId}</div>
                     </td>
                     <td className="py-3.5 px-4 font-medium">{s.contractor}</td>
                     <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground">{s.scheduledShift}</td>
                     <td className="py-3.5 px-4 font-mono font-bold">{s.checkIn || "--"}</td>
                     <td className="py-3.5 px-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.status === "on_shift" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-[var(--bg-elevated)]0/10 text-[var(--text-muted)] border border-[var(--border)]/20"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${s.status === "on_shift" ? "bg-emerald-500/10 text-action-success border border-emerald-500/20" : "bg-bg-elevated0/10 text-text-muted border border-border/20"}`}>
                         {s.status.replace("_", " ")}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 min-w-[120px]">
                       <div className="text-[10px] text-muted-foreground mb-1">{s.hoursLogged} / 8 hrs</div>
-                      <div className="w-full bg-[var(--bg-elevated)]/30 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(s.hoursLogged / 8) * 100}%` }} />
+                      <div className="w-full bg-bg-elevated/30 rounded-full h-1.5 overflow-hidden">
+                        <div className="h-full bg-action-success rounded-full" style={{ width: `${(s.hoursLogged / 8) * 100}%` }} />
                       </div>
                     </td>
                   </tr>

@@ -106,7 +106,7 @@ function AdminLockdownInner() {
             iconTone="accent"
           >
             <div className="space-y-3">
-              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-300 flex items-start gap-2.5">
+              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-action-danger flex items-start gap-2.5">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   Gates are in lockdown mode. Unauthorized movement is being blocked
@@ -114,11 +114,11 @@ function AdminLockdownInner() {
                 </span>
               </div>
               {active.message && (
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-sm text-text-secondary">
                   <strong>Message:</strong> {active.message}
                 </p>
               )}
-              <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
+              <div className="text-xs text-text-muted flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
                 Since {new Date(active.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
               </div>
@@ -126,7 +126,7 @@ function AdminLockdownInner() {
                 <button
                   onClick={() => setConfirmLift(true)}
                   disabled={busy}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
                   Lift Lockdown
@@ -141,7 +141,7 @@ function AdminLockdownInner() {
             icon={ShieldOff}
             iconTone="default"
           >
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-secondary">
               The campus is in normal operation. Use the broadcast form below to initiate
               an emergency lockdown.
             </p>
@@ -162,11 +162,11 @@ function AdminLockdownInner() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <label>
-                    <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">Scope</span>
+                    <span className="text-xs font-semibold text-text-secondary block mb-1">Scope</span>
                     <select
                       value={draft.scope}
                       onChange={(e) => setDraft((d) => ({ ...d, scope: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
                     >
                       <option value="all-gates">All gates</option>
                       <option value="entry">Entry gates</option>
@@ -175,7 +175,7 @@ function AdminLockdownInner() {
                     </select>
                   </label>
                   <label className="sm:col-span-2">
-                    <span className="text-xs font-semibold text-[var(--text-secondary)] block mb-1">
+                    <span className="text-xs font-semibold text-text-secondary block mb-1">
                       Broadcast message (optional)
                     </span>
                     <input
@@ -183,7 +183,7 @@ function AdminLockdownInner() {
                       value={draft.message}
                       onChange={(e) => setDraft((d) => ({ ...d, message: e.target.value }))}
                       placeholder="e.g. Emergency: seal campus"
-                      className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--action-primary)]"
+                      className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
                     />
                   </label>
                 </div>
@@ -199,7 +199,7 @@ function AdminLockdownInner() {
                     type="button"
                     onClick={() => setConfirmBroadcast(true)}
                     disabled={busy}
-                    className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
+                    className="px-5 py-2.5 rounded-xl bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
                   >
                     {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldAlert className="w-4 h-4" />}
                     Broadcast Lockdown

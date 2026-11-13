@@ -113,13 +113,13 @@ function AdminOverviewInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
       <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} />
       {/* Hero */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8">
+      <div className="rounded-2xl border border-border bg-bg-surface p-6 sm:p-8">
         <div className="flex items-start gap-4">
           <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 shrink-0">
-            <Shield className="w-7 h-7 text-emerald-400" />
+            <Shield className="w-7 h-7 text-action-success" />
           </div>
           <div className="flex-1">
-            <p className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl">
               Central command for campus access control. Monitor real-time gate telemetry, track
               student/faculty/staff/worker movement, manage security alerts, and enforce lockdown
               protocols across all entry points.
@@ -131,15 +131,15 @@ function AdminOverviewInner() {
       {/* Grid of Key Admin Functions */}
       <WidgetBoundary name="LiveOverview" title="Operational Metrics">
         <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">
             Operational Metrics
           </h2>
           {error ? (
-            <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-300">
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-action-danger">
               {error}
             </div>
           ) : !data ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 text-sm text-[var(--text-muted)]">
+            <div className="rounded-xl border border-border bg-bg-surface p-6 text-sm text-text-muted">
               Loading overview…
             </div>
           ) : (
@@ -150,16 +150,16 @@ function AdminOverviewInner() {
                   <Link
                     key={card.label}
                     href={card.href}
-                    className="group rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
+                    className="group rounded-xl border border-border bg-bg-surface p-4 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 text-action-success">
                         <Icon className="w-4 h-4" />
                       </div>
-                      <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success group-hover:translate-x-1 transition-all" />
                     </div>
-                    <p className="mt-3 text-2xl font-black text-[var(--text-primary)]">{fmt(card.value)}</p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">{card.label}</p>
+                    <p className="mt-3 text-2xl font-black text-text-primary">{fmt(card.value)}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{card.label}</p>
                   </Link>
                 );
               })}
@@ -168,21 +168,21 @@ function AdminOverviewInner() {
 
           {data?.recentAuditEvents && data.recentAuditEvents.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" /> Recent Campus Events
               </h3>
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] divide-y divide-[var(--border)]">
+              <div className="rounded-xl border border-border bg-bg-surface divide-y divide-border">
                 {data.recentAuditEvents.map((e) => (
                   <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-1.5 text-emerald-400">
+                      <code className="text-xs bg-bg-elevated border border-border rounded px-1.5 py-1.5 text-action-success">
                         {e.action}
                       </code>
-                      <p className="text-xs text-[var(--text-muted)] mt-1 truncate">
+                      <p className="text-xs text-text-muted mt-1 truncate">
                         {e.userName || e.userRole || "system"}
                       </p>
                     </div>
-                    <span className="text-[11px] text-[var(--text-muted)] whitespace-nowrap shrink-0">
+                    <span className="text-[11px] text-text-muted whitespace-nowrap shrink-0">
                       {e.timestamp ? new Date(e.timestamp).toLocaleString("en-IN") : "—"}
                     </span>
                   </div>
@@ -205,7 +205,7 @@ function AdminOverviewInner() {
 
       {/* Module Cards */}
       <div>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Modules</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">Modules</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { href: "/admin", icon: "Activity", label: "Live Dashboard", desc: "Real-time campus status & gate telemetry" },
@@ -223,21 +223,21 @@ function AdminOverviewInner() {
               <Link
                 key={i}
                 href={mod.href}
-                className="group p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all cursor-pointer"
+                className="group p-4 rounded-xl border border-border bg-bg-surface hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-action-success group-hover:scale-110 transition-transform">
                       {IconComp && <IconComp className="w-4 h-4" />}
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors">
+                      <p className="font-semibold text-sm text-text-primary group-hover:text-action-success transition-colors">
                         {mod.label}
                       </p>
-                      <p className="text-xs text-[var(--text-muted)] mt-0.5">{mod.desc}</p>
+                      <p className="text-xs text-text-muted mt-0.5">{mod.desc}</p>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-emerald-400 group-hover:translate-x-1 transition-all shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success group-hover:translate-x-1 transition-all shrink-0" />
                 </div>
               </Link>
             );
@@ -257,9 +257,9 @@ function AdminOverviewInner() {
 
       {/* Info Strip */}
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-center gap-3">
-        <Info className="w-5 h-5 text-amber-400 shrink-0" />
+        <Info className="w-5 h-5 text-action-warning shrink-0" />
         <div>
-          <p className="text-xs font-semibold text-amber-400">Command Overview</p>
+          <p className="text-xs font-semibold text-action-warning">Command Overview</p>
           <p className="text-[11px] text-amber-300/70 mt-0.5">
             All modules pull from the same live telemetry feed. The Dashboard page shows real-time
             status; drill into individual modules for deeper management.

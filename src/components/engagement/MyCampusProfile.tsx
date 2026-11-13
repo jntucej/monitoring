@@ -51,10 +51,10 @@ interface ProfileData {
 
 function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Inbox }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-3 text-center">
-      <Icon className="mx-auto h-4 w-4 text-[var(--text-muted)]" aria-hidden />
+    <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+      <Icon className="mx-auto h-4 w-4 text-text-muted" aria-hidden />
       <p className="mt-1 text-xl font-bold tabular-nums">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-text-muted">{label}</p>
     </div>
   );
 }
@@ -95,14 +95,14 @@ export function MyCampusProfile() {
 
   return (
     <WidgetBoundary title="My Campus Profile">
-      <section aria-label="My campus profile" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="My campus profile" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-500/15 text-action-primary">
             <User className="h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0">
-            <p className="truncate font-semibold text-[var(--text-primary)]">{displayName}</p>
-            <p className="flex flex-wrap items-center gap-1 text-xs text-[var(--text-muted)]">
+            <p className="truncate font-semibold text-text-primary">{displayName}</p>
+            <p className="flex flex-wrap items-center gap-1 text-xs text-text-muted">
               {displayRoll && (
                 <span className="rounded bg-[var(--bg-raised)] px-1.5 py-0.5 font-mono text-[10px]">{displayRoll}</span>
               )}
@@ -117,7 +117,7 @@ export function MyCampusProfile() {
         </div>
 
         {loading && !data ? (
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-[var(--text-muted)]" role="status">
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-text-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Loading your campus profile…
           </div>
@@ -144,35 +144,35 @@ export function MyCampusProfile() {
 
             <div className="mt-4 space-y-2.5">
               {data.latestAnnouncement ? (
-                <div className="flex items-start gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/40 p-3">
-                  <Megaphone className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden />
+                <div className="flex items-start gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3">
+                  <Megaphone className="mt-0.5 h-4 w-4 shrink-0 text-action-warning" aria-hidden />
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[var(--text-primary)]">
+                    <p className="text-xs font-semibold text-text-primary">
                       Latest announcement: {data.latestAnnouncement.title}
                     </p>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-muted)]">
+                    <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">
                       {data.latestAnnouncement.message}
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-[var(--text-muted)]">No active announcements.</p>
+                <p className="text-xs text-text-muted">No active announcements.</p>
               )}
 
               {data.latestAchievement ? (
-                <div className="flex items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/40 p-3">
-                  <Award className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden />
+                <div className="flex items-center gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3">
+                  <Award className="h-4 w-4 shrink-0 text-action-success" aria-hidden />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-[var(--text-primary)]">
+                    <p className="text-xs font-semibold text-text-primary">
                       Latest achievement: {data.latestAchievement.title}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+                    <p className="text-[10px] uppercase tracking-wide text-text-muted">
                       {data.latestAchievement.tier} · earned {new Date(data.latestAchievement.earnedAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-[var(--text-muted)]">No achievements earned yet.</p>
+                <p className="text-xs text-text-muted">No achievements earned yet.</p>
               )}
             </div>
           </>

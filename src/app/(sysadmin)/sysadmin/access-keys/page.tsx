@@ -174,41 +174,41 @@ export default function SysAdminAccessKeysPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <KeyRound className="w-5 h-5 text-emerald-400" />
+            <KeyRound className="w-5 h-5 text-action-success" />
           </div>
           <div>
-            <p className="text-xl font-bold text-[var(--text-primary)]">Access Keys</p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xl font-bold text-text-primary">Access Keys</p>
+            <p className="text-xs text-text-muted">
               One-time enrollment codes for student bootstrap, mobile pairing and PIN reset. {activeCount} active.
             </p>
           </div>
         </div>
 
         {/* Generate by roll */}
-        <div className="border border-[var(--border)] rounded-xl bg-[var(--bg-surface)] p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-emerald-400" /> Generate code for a student
+        <div className="border border-border rounded-xl bg-bg-surface p-4 space-y-3">
+          <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-action-success" /> Generate code for a student
           </h2>
           <div className="grid sm:grid-cols-[1fr_auto_auto] gap-3 items-end">
             <div>
-              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide">Roll / Employee ID</label>
+              <label className="block text-[11px] font-semibold text-text-muted mb-1 uppercase tracking-wide">Roll / Employee ID</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   type="text"
                   value={rollInput}
                   onChange={(e) => setRollInput(e.target.value.toUpperCase())}
                   placeholder="e.g. 24JJ1A0501"
-                  className="w-full pl-9 pr-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg font-mono text-sm text-[var(--text-primary)] placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-9 pr-3 py-2 bg-bg-base border border-border rounded-lg font-mono text-sm text-text-primary placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
+              <label className="block text-[11px] font-semibold text-text-muted mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
               <select id="purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"
+                className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)]"
               >
                 {PURPOSES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
@@ -216,54 +216,54 @@ export default function SysAdminAccessKeysPage() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
               {generating ? "Generating…" : "Generate"}
             </button>
           </div>
-          {genError && <p className="text-xs text-rose-400">{genError}</p>}
+          {genError && <p className="text-xs text-action-danger">{genError}</p>}
         </div>
 
         {/* Generated code display */}
         {generated && (
           <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/30 space-y-2">
-            <div className="text-[11px] uppercase font-bold text-[var(--text-muted)] tracking-wider flex items-center justify-between">
+            <div className="text-[11px] uppercase font-bold text-text-muted tracking-wider flex items-center justify-between">
               <span>New code for {generated.userName ? `${generated.userName} (` : ""}{generated.userRoll}{generated.userName ? ")" : ""}</span>
-              <span className="flex items-center gap-1 text-emerald-400 normal-case font-mono text-xs">
+              <span className="flex items-center gap-1 text-action-success normal-case font-mono text-xs">
                 <Clock className="w-3.5 h-3.5" /> {formatTs(generated.expiresAt)}
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-3xl font-mono font-black tracking-[0.3em] text-emerald-400 select-all">{generated.code}</span>
-              <button onClick={copyCode} className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded border border-emerald-500/30">
+              <span className="text-3xl font-mono font-black tracking-[0.3em] text-action-success select-all">{generated.code}</span>
+              <button onClick={copyCode} className="inline-flex items-center gap-1.5 text-xs text-action-success hover:text-action-success px-2 py-1 rounded border border-emerald-500/30">
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="text-[11px] text-amber-300">Share at <code className="font-mono">/bootstrap</code> with the student&apos;s roll number and this code.</p>
+            <p className="text-[11px] text-action-warning">Share at <code className="font-mono">/bootstrap</code> with the student&apos;s roll number and this code.</p>
           </div>
         )}
 
         {/* Active codes table */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Recently issued codes</h2>
-            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+            <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Recently issued codes</h2>
+            <button onClick={loadCodes} className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
             </button>
           </div>
 
           {loadError && (
-            <div className="mb-3 px-4 py-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 text-sm">
+            <div className="mb-3 px-4 py-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-action-danger text-sm">
               {loadError}
             </div>
           )}
 
-          <div className="border border-[var(--border)] rounded-xl overflow-hidden">
+          <div className="border border-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[var(--bg-base)] text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                <tr className="bg-bg-base text-[10px] uppercase tracking-wider text-text-muted">
                   <th className="px-4 py-2.5 text-left">User</th>
                   <th className="px-4 py-2.5 text-left">Purpose</th>
                   <th className="px-4 py-2.5 text-left">Issued</th>
@@ -272,16 +272,16 @@ export default function SysAdminAccessKeysPage() {
                   <th className="px-4 py-2.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                    <td colSpan={6} className="px-4 py-10 text-center text-text-muted">
                       <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Loading codes…
                     </td>
                   </tr>
                 ) : codes.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)] text-xs">
+                    <td colSpan={6} className="px-4 py-10 text-center text-text-muted text-xs">
                       No recently issued codes. Generate one above using a roll number.
                     </td>
                   </tr>
@@ -292,19 +292,19 @@ export default function SysAdminAccessKeysPage() {
                     const used = !!c.used_at;
                     const status = used ? "Used" : expired ? "Expired" : "Active";
                     return (
-                      <tr key={c.id} className="hover:bg-[var(--bg-base)]/50">
+                      <tr key={c.id} className="hover:bg-bg-base/50">
                         <td className="px-4 py-2.5">
-                          <div className="font-mono text-xs text-emerald-400">{c.user_roll || c.user_id?.slice(0, 8)}</div>
-                          {c.user_name && <div className="text-[11px] text-[var(--text-muted)]">{c.user_name}</div>}
+                          <div className="font-mono text-xs text-action-success">{c.user_roll || c.user_id?.slice(0, 8)}</div>
+                          {c.user_name && <div className="text-[11px] text-text-muted">{c.user_name}</div>}
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-[var(--text-secondary)]">{c.purpose}</td>
-                        <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.created_at)}</td>
-                        <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">{formatTs(c.expires_at)}</td>
+                        <td className="px-4 py-2.5 text-xs text-text-secondary">{c.purpose}</td>
+                        <td className="px-4 py-2.5 text-xs text-text-muted">{formatTs(c.created_at)}</td>
+                        <td className="px-4 py-2.5 text-xs text-text-muted">{formatTs(c.expires_at)}</td>
                         <td className="px-4 py-2.5">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                            status === "Active" ? "bg-emerald-500/15 text-emerald-400"
-                            : status === "Used" ? "bg-[var(--bg-elevated)]/15 text-[var(--text-muted)]"
-                            : "bg-rose-500/15 text-rose-400"
+                            status === "Active" ? "bg-emerald-500/15 text-action-success"
+                            : status === "Used" ? "bg-bg-elevated/15 text-text-muted"
+                            : "bg-rose-500/15 text-action-danger"
                           }`}>
                             {status}
                           </span>
@@ -314,7 +314,7 @@ export default function SysAdminAccessKeysPage() {
                             <button
                               onClick={() => handleInvalidate(c.id)}
                               title="Invalidate this code"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-rose-300 hover:bg-rose-500/10 border border-rose-500/30"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-action-danger hover:bg-rose-500/10 border border-rose-500/30"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Invalidate
                             </button>

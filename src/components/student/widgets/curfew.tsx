@@ -14,14 +14,14 @@ export default function CurfewCard({ payload }: StudentWidgetProps) {
   const data = payload.curfew as CurfewPayload;
   if (!data) return null;
   const { score } = data.today;
-  const ring = score >= 90 ? "text-emerald-400" : score >= 70 ? "text-amber-400" : "text-rose-400";
+  const ring = score >= 90 ? "text-action-success" : score >= 70 ? "text-action-warning" : "text-action-danger";
   const TrendIcon = data.trend === "up" ? TrendingUp : data.trend === "down" ? TrendingDown : Minus;
-  const trendColor = data.trend === "up" ? "text-emerald-400" : data.trend === "down" ? "text-rose-400" : "text-[var(--text-muted)]";
+  const trendColor = data.trend === "up" ? "text-action-success" : data.trend === "down" ? "text-action-danger" : "text-text-muted";
   const circ = 2 * Math.PI * 40;
   const off = circ * (1 - score / 100);
 
   return (
-    <article className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+    <article className="rounded-2xl border border-border bg-bg-surface p-5">
       <header className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Curfew Score</h3>
         <span className={`flex items-center gap-1 text-xs ${trendColor}`}>
@@ -39,21 +39,21 @@ export default function CurfewCard({ payload }: StudentWidgetProps) {
         </svg>
         <div>
           <p className="text-3xl font-semibold tabular-nums">{score}</p>
-          <p className="text-xs text-[var(--text-muted)]">30-day avg {data.thirtyDayAvg}</p>
+          <p className="text-xs text-text-muted">30-day avg {data.thirtyDayAvg}</p>
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl border border-[var(--border)] py-2">
-          <dt className="text-[10px] uppercase text-[var(--text-muted)]">On time</dt>
-          <dd className="text-sm font-semibold text-emerald-400 tabular-nums">{data.today.onTime}</dd>
+        <div className="rounded-xl border border-border py-2">
+          <dt className="text-[10px] uppercase text-text-muted">On time</dt>
+          <dd className="text-sm font-semibold text-action-success tabular-nums">{data.today.onTime}</dd>
         </div>
-        <div className="rounded-xl border border-[var(--border)] py-2">
-          <dt className="text-[10px] uppercase text-[var(--text-muted)]">Late</dt>
-          <dd className="text-sm font-semibold text-amber-400 tabular-nums">{data.today.late}</dd>
+        <div className="rounded-xl border border-border py-2">
+          <dt className="text-[10px] uppercase text-text-muted">Late</dt>
+          <dd className="text-sm font-semibold text-action-warning tabular-nums">{data.today.late}</dd>
         </div>
-        <div className="rounded-xl border border-[var(--border)] py-2">
-          <dt className="text-[10px] uppercase text-[var(--text-muted)]">Violations</dt>
-          <dd className="text-sm font-semibold text-rose-400 tabular-nums">{data.today.violations}</dd>
+        <div className="rounded-xl border border-border py-2">
+          <dt className="text-[10px] uppercase text-text-muted">Violations</dt>
+          <dd className="text-sm font-semibold text-action-danger tabular-nums">{data.today.violations}</dd>
         </div>
       </dl>
     </article>

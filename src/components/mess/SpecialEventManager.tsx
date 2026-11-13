@@ -122,12 +122,12 @@ export function SpecialEventManager() {
       <div className="space-y-6">
         <SectionCard title="Announce a special event" description="Students see it from the announcement time and can respond until the deadline.">
           <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Title
               <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Event date
               <input type="date" value={eventDate} min={today}
                 onChange={(e) => {
@@ -135,43 +135,43 @@ export function SpecialEventManager() {
                   setAnnouncementAt(defaultAnnouncement(e.target.value));
                   setInterestDeadline(defaultDeadline(e.target.value));
                 }}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Meal
               <select value={mealType} onChange={(e) => setMealType(e.target.value as MealType)}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm">
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm">
                 {MEAL_TYPES.map((m) => <option key={m} value={m}>{MEAL_LABEL[m]}</option>)}
               </select>
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Notes (optional)
               <input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Announce at
               <input type="datetime-local" value={announcementAt}
                 onChange={(e) => setAnnouncementAt(e.target.value)}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-text-secondary">
               Interest deadline
               <input type="datetime-local" value={interestDeadline}
                 onChange={(e) => setInterestDeadline(e.target.value)}
-                className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
 
-            <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)] md:col-span-2">
+            <label className="flex items-center gap-2 text-sm text-text-secondary md:col-span-2">
               <input type="checkbox" checked={hostelOnly} onChange={(e) => setHostelOnly(e.target.checked)} />
               Hostel students only (day scholars are blocked from tokens)
             </label>
 
             <div className="md:col-span-2">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-[var(--text-secondary)]">Items</span>
+                <span className="text-sm font-medium text-text-secondary">Items</span>
                 <button type="button" onClick={() => setItems((p) => [...p, emptyItem()])}
-                  className="inline-flex items-center gap-1 text-xs text-[var(--action-primary)]">
+                  className="inline-flex items-center gap-1 text-xs text-action-primary">
                   <Plus className="h-3.5 w-3.5" /> Add item
                 </button>
               </div>
@@ -180,20 +180,20 @@ export function SpecialEventManager() {
                   <div key={idx} className="grid grid-cols-12 gap-2">
                     <input value={it.code} onChange={(e) => updateItem(idx, { code: e.target.value.toUpperCase() })}
                       placeholder="CODE" maxLength={20}
-                      className="col-span-2 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2 py-1.5 text-xs font-mono" />
+                      className="col-span-2 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs font-mono" />
                     <input value={it.label} onChange={(e) => updateItem(idx, { label: e.target.value })}
                       placeholder="Label (e.g. Chicken Biryani)" maxLength={80}
-                      className="col-span-5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2 py-1.5 text-xs" />
+                      className="col-span-5 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs" />
                     <select value={it.category} onChange={(e) => updateItem(idx, { category: e.target.value as SpecialItemCategory })}
-                      className="col-span-3 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2 py-1.5 text-xs">
+                      className="col-span-3 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs">
                       {SPECIAL_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
-                    <label className="col-span-1 flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                    <label className="col-span-1 flex items-center gap-1 text-[10px] text-text-muted">
                       <input type="checkbox" checked={it.isPrimary} onChange={(e) => updateItem(idx, { isPrimary: e.target.checked })} />
                       Primary
                     </label>
                     <button type="button" onClick={() => setItems((p) => p.filter((_, i) => i !== idx))}
-                      className="col-span-1 text-rose-400 hover:text-rose-300" aria-label="Remove item">
+                      className="col-span-1 text-action-danger hover:text-action-danger" aria-label="Remove item">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -203,7 +203,7 @@ export function SpecialEventManager() {
 
             <div className="md:col-span-2">
               <button type="submit" disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+                className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarDays className="h-4 w-4" />}
                 Create event
               </button>
@@ -217,37 +217,37 @@ export function SpecialEventManager() {
         >
           <div className="flex items-center justify-end mb-3">
             <button type="button" onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)]">
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary">
               <RefreshCw className="h-4 w-4" /> Refresh
             </button>
           </div>
           {loading && <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>}
-          {error && <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
-          {!loading && !error && events.length === 0 && <p className="text-sm text-[var(--text-muted)]">No special events yet.</p>}
+          {error && <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">{error}</div>}
+          {!loading && !error && events.length === 0 && <p className="text-sm text-text-muted">No special events yet.</p>}
           <div className="space-y-2">
             {events.map((ev) => {
               const status = effectiveEventStatus(ev);
               return (
-                <div key={ev.id} className="rounded-lg border border-[var(--border)] p-3">
+                <div key={ev.id} className="rounded-lg border border-border p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <div className="text-sm font-semibold text-[var(--text-primary)]">{ev.title}</div>
-                      <div className="text-xs text-[var(--text-muted)]">
+                      <div className="text-sm font-semibold text-text-primary">{ev.title}</div>
+                      <div className="text-xs text-text-muted">
                         {ev.eventDate} · {MEAL_LABEL[ev.mealType]} · {status}
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <button type="button" onClick={() => setActiveEventId(activeEventId === ev.id ? null : ev.id)}
-                        className="rounded-md border border-[var(--border)] px-2 py-1 text-xs">
+                        className="rounded-md border border-border px-2 py-1 text-xs">
                         {activeEventId === ev.id ? "Hide counts" : "View counts"}
                       </button>
                       {status !== "CANCELLED" && (
                         <button type="button" onClick={() => void setStatus(ev.id, "CLOSED")}
-                          className="rounded-md border border-[var(--border)] px-2 py-1 text-xs">Close</button>
+                          className="rounded-md border border-border px-2 py-1 text-xs">Close</button>
                       )}
                       {status !== "CANCELLED" && (
                         <button type="button" onClick={() => void setStatus(ev.id, "CANCELLED")}
-                          className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-rose-300">Cancel</button>
+                          className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-action-danger">Cancel</button>
                       )}
                     </div>
                   </div>

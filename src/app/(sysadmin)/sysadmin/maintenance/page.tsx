@@ -13,10 +13,10 @@ export default function MaintenancePage() {
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center gap-2">
-          <Wrench className="w-5 h-5 text-[var(--action-primary)]" />
+          <Wrench className="w-5 h-5 text-action-primary" />
           <div>
-            <h1 className="text-lg font-semibold text-[var(--text-primary)]">Maintenance</h1>
-            <p className="text-xs text-[var(--text-muted)]">
+            <h1 className="text-lg font-semibold text-text-primary">Maintenance</h1>
+            <p className="text-xs text-text-muted">
               30-day windows · scheduled / in-progress · notifications
             </p>
           </div>

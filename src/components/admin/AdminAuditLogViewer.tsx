@@ -124,7 +124,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">Scope</span>
+          <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">Scope</span>
           {(["campus", "all"] as const).map((s) => {
             const disabled = s === "all" && !canViewAll;
             return (
@@ -143,8 +143,8 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
                 }
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   scope === s
-                    ? "bg-[var(--action-primary)] text-white"
-                    : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"
+                    ? "bg-action-primary text-white"
+                    : "bg-bg-surface text-text-muted border border-border"
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
               >
                 {s === "campus" ? "Campus" : "All (sysadmin)"}
@@ -157,21 +157,21 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           <button
             onClick={() => setReloadKey((k) => k + 1)}
             disabled={loading}
-            className="p-1.5 text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md flex items-center gap-1.5 hover:bg-[var(--bg-base)]"
+            className="p-1.5 text-xs bg-bg-elevated border border-border rounded-md flex items-center gap-1.5 hover:bg-bg-base"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           </button>
           <button
             onClick={handleExport}
             disabled={items.length === 0}
-            className="p-1.5 text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded-md flex items-center gap-1.5 hover:bg-[var(--bg-base)] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-1.5 text-xs bg-bg-elevated border border-border rounded-md flex items-center gap-1.5 hover:bg-bg-base disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Download className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      <p className="text-[11px] text-[var(--text-muted)]">
+      <p className="text-[11px] text-text-muted">
         {scope === "campus"
           ? "Campus scope hides infra-noise actions (auth, MFA, sessions, backups, retention, migrations, metrics, security, RLS)."
           : "All scope shows the complete trail. This view requires the sysadmin role."}
@@ -183,25 +183,25 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           placeholder="Action (e.g. GATE_ONLINE)"
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]"
+          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
         />
         <input
           value={userIdFilter}
           onChange={(e) => setUserIdFilter(e.target.value)}
           placeholder="User ID"
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]"
+          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
         />
         <input
           type="date"
           value={fromFilter}
           onChange={(e) => setFromFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]"
+          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
         />
         <input
           type="date"
           value={toFilter}
           onChange={(e) => setToFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]"
+          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             setPage(1);
             setReloadKey((k) => k + 1);
           }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--action-primary)] text-white"
+          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-action-primary text-white"
         >
           Apply
         </button>
@@ -222,26 +222,26 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             setToFilter("");
             setPage(1);
           }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"
+          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-bg-surface text-text-muted border border-border"
         >
           Reset
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
         {error ? (
-          <div className="p-6 text-rose-400 text-sm flex items-center gap-2">
+          <div className="p-6 text-action-danger text-sm flex items-center gap-2">
             <History className="w-4 h-4" /> {error}
           </div>
         ) : loading ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">Loading audit telemetry...</div>
+          <div className="p-8 text-center text-sm text-text-muted">Loading audit telemetry...</div>
         ) : items.length === 0 ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">No audit records found.</div>
+          <div className="p-8 text-center text-sm text-text-muted">No audit records found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[750px]">
-              <thead className="bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] uppercase font-semibold border-b border-[var(--border)]">
+              <thead className="bg-bg-elevated text-xs text-text-muted uppercase font-semibold border-b border-border">
                 <tr>
                   <th className="py-2.5 px-4">Timestamp</th>
                   <th className="py-2.5 px-4">Action</th>
@@ -250,20 +250,20 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
                   <th className="py-2.5 px-4">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {items.map((l) => (
-                  <tr key={l.id || l.timestamp} className="hover:bg-[var(--bg-elevated)]">
-                    <td className="py-2.5 px-4 text-xs text-[var(--text-muted)] whitespace-nowrap">
+                  <tr key={l.id || l.timestamp} className="hover:bg-bg-elevated">
+                    <td className="py-2.5 px-4 text-xs text-text-muted whitespace-nowrap">
                       {l.timestamp ? new Date(l.timestamp).toLocaleString("en-IN") : "—"}
                     </td>
                     <td className="py-2.5 px-4">
-                      <code className="text-xs bg-[var(--bg-elevated)] border border-[var(--border)] rounded px-1.5 py-0.5 text-emerald-400">
+                      <code className="text-xs bg-bg-elevated border border-border rounded px-1.5 py-0.5 text-action-success">
                         {l.action}
                       </code>
                     </td>
                     <td className="py-2.5 px-4 text-xs">{l.userName || l.userId || "N/A"}</td>
-                    <td className="py-2.5 px-4 text-xs text-[var(--text-muted)]">{l.userRole || "—"}</td>
-                    <td className="py-2.5 px-4 text-xs text-[var(--text-muted)] max-w-xs">
+                    <td className="py-2.5 px-4 text-xs text-text-muted">{l.userRole || "—"}</td>
+                    <td className="py-2.5 px-4 text-xs text-text-muted max-w-xs">
                       <span className="line-clamp-2">{JSON.stringify(l.details ?? {})}</span>
                     </td>
                   </tr>
@@ -273,13 +273,13 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           </div>
         )}
 
-        <div className="p-3 border-t border-[var(--border)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="p-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
           <span>Total: {total} items</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page <= 1}
-              className="p-1 rounded border border-[var(--border)] disabled:opacity-40"
+              className="p-1 rounded border border-border disabled:opacity-40"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -287,7 +287,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages}
-              className="p-1 rounded border border-[var(--border)] disabled:opacity-40"
+              className="p-1 rounded border border-border disabled:opacity-40"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

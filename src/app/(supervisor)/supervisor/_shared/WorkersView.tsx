@@ -84,20 +84,20 @@ export function WorkersView() {
     <div className="space-y-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--text-primary)]">Workers & Security</h1>
-          <p className="text-xs text-[var(--text-muted)]">
+          <h1 className="text-xl font-bold text-text-primary">Workers & Security</h1>
+          <p className="text-xs text-text-muted">
             Full roster of security guards, maintenance, and facility staff
           </p>
         </div>
         {totals && (
           <div className="flex gap-3 text-xs">
-            <span className="rounded-full bg-[var(--action-primary)]/10 px-3 py-1 font-medium text-[var(--action-primary)]">
+            <span className="rounded-full bg-action-primary/10 px-3 py-1 font-medium text-action-primary">
               {totals.onPost} on post
             </span>
-            <span className="rounded-full bg-[var(--action-info)]/10 px-3 py-1 font-medium text-[var(--action-info)]">
+            <span className="rounded-full bg-action-info/10 px-3 py-1 font-medium text-action-info">
               {totals.securityOnDuty} security
             </span>
-            <span className="rounded-full bg-[var(--action-danger)]/10 px-3 py-1 font-medium text-[var(--action-danger)]">
+            <span className="rounded-full bg-action-danger/10 px-3 py-1 font-medium text-action-danger">
               {totals.absent} absent
             </span>
           </div>
@@ -107,13 +107,13 @@ export function WorkersView() {
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-3 top-2.5 size-4 text-[var(--text-muted)]" />
+          <Search className="absolute left-3 top-2.5 size-4 text-text-muted" />
           <input
             type="text"
             placeholder="Search workers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] py-2 pl-9 pr-3 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+            className="w-full min-h-[44px] rounded-xl border border-border bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function WorkersView() {
           <select
             value={selectedGate}
             onChange={(e) => setSelectedGate(e.target.value)}
-            className="min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
+            className="min-h-[44px] rounded-xl border border-border bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
             <option value="all">All Gates</option>
             {gates.map((g) => (
@@ -134,15 +134,15 @@ export function WorkersView() {
       </div>
 
       {/* Category chips */}
-      <div className="flex flex-wrap gap-1.5 border-b border-[var(--border)] pb-3">
+      <div className="flex flex-wrap gap-1.5 border-b border-border pb-3">
         {CATEGORIES.map((c) => (
           <button
             key={c.id}
             onClick={() => setCategory(c.id)}
             className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-medium transition ${
               category === c.id
-                ? "bg-[var(--action-primary)] text-white"
-                : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                ? "bg-action-primary text-white"
+                : "bg-bg-surface text-text-secondary hover:bg-bg-elevated"
             }`}
           >
             {c.label}
@@ -153,36 +153,36 @@ export function WorkersView() {
       {loading && filtered.length === 0 ? (
         <ListSkeleton />
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-8 text-center text-xs text-[var(--text-muted)]">
+        <div className="rounded-2xl border border-border bg-bg-surface p-8 text-center text-xs text-text-muted">
           No workers match your filter.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
-          <ul className="divide-y divide-[var(--border)]">
+        <div className="overflow-hidden rounded-2xl border border-border bg-bg-surface">
+          <ul className="divide-y divide-border">
             {filtered.map((w) => {
               const Icon = ICONS[w.staffCategory] ?? Users;
               const statusColor =
                 w.status === "INSIDE"
-                  ? "bg-[var(--action-primary)]"
+                  ? "bg-action-primary"
                   : w.status === "OUTSIDE"
-                  ? "bg-[var(--action-warning)]"
-                  : "bg-[var(--action-danger)]";
+                  ? "bg-action-warning"
+                  : "bg-action-danger";
               return (
                 <li
                   key={w.id}
                   onClick={() => setActiveWorker(w)}
-                  className="flex cursor-pointer items-center gap-3 p-3 text-xs transition hover:bg-[var(--bg-elevated)]"
+                  className="flex cursor-pointer items-center gap-3 p-3 text-xs transition hover:bg-bg-elevated"
                 >
                   <span className={`size-2 shrink-0 rounded-full ${statusColor}`} />
-                  <Icon className="size-4 shrink-0 text-[var(--text-muted)]" />
+                  <Icon className="size-4 shrink-0 text-text-muted" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-[var(--text-primary)]">{w.name}</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">
+                    <p className="truncate font-semibold text-text-primary">{w.name}</p>
+                    <p className="text-[11px] text-text-muted">
                       {w.designation ?? w.staffCategory} {w.firstInTime && `· in at ${new Date(w.firstInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
+                    <span className="flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary">
                       <MapPin className="size-3" />
                       {w.gateName ?? "Unassigned"}
                     </span>
@@ -190,7 +190,7 @@ export function WorkersView() {
                       <a
                         href={`tel:***${w.phoneTail}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="rounded-lg p-1.5 text-[var(--action-primary)] hover:bg-[var(--action-primary)]/10"
+                        className="rounded-lg p-1.5 text-action-primary hover:bg-action-primary/10"
                         title={`Call ${w.name}`}
                       >
                         <Phone className="size-3.5" />
@@ -212,38 +212,38 @@ export function WorkersView() {
             onClick={() => setActiveWorker(null)}
             aria-hidden="true"
           />
-          <div className="relative z-10 w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between border-b border-[var(--border)] pb-3">
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-bg-surface p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-[var(--text-primary)]">{activeWorker.name}</h3>
-                <p className="text-xs text-[var(--text-muted)]">{activeWorker.designation ?? activeWorker.staffCategory}</p>
+                <h3 className="text-base font-bold text-text-primary">{activeWorker.name}</h3>
+                <p className="text-xs text-text-muted">{activeWorker.designation ?? activeWorker.staffCategory}</p>
               </div>
               <button
                 onClick={() => setActiveWorker(null)}
                 aria-label="Close"
-                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>
             </div>
             <div className="space-y-3 text-xs">
               <div>
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Staff Category</p>
-                <p className="font-medium text-[var(--text-primary)]">{activeWorker.staffCategory}</p>
+                <p className="text-[10px] uppercase text-text-muted">Staff Category</p>
+                <p className="font-medium text-text-primary">{activeWorker.staffCategory}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Assigned Gate</p>
-                <p className="font-medium text-[var(--text-primary)]">{activeWorker.gateName ?? "Unassigned"}</p>
+                <p className="text-[10px] uppercase text-text-muted">Assigned Gate</p>
+                <p className="font-medium text-text-primary">{activeWorker.gateName ?? "Unassigned"}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Status</p>
-                <p className="font-medium text-[var(--text-primary)]">{activeWorker.status}</p>
+                <p className="text-[10px] uppercase text-text-muted">Status</p>
+                <p className="font-medium text-text-primary">{activeWorker.status}</p>
               </div>
               {activeWorker.phoneTail && (
                 <div className="pt-3">
                   <a
                     href={`tel:***${activeWorker.phoneTail}`}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] py-2.5 font-medium text-white transition hover:bg-[var(--action-primary)]/90"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
                   >
                     <Phone className="size-4" />
                     Call Worker (***{activeWorker.phoneTail})

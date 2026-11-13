@@ -65,8 +65,8 @@ export function ContextCard() {
 
   if (curfew === "none") {
     return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-        <div className="flex items-center gap-2 text-[var(--text-muted)]">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="flex items-center gap-2 text-text-muted">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
           <span className="text-sm">
             You&apos;re all clear. Nothing needs action right now.
@@ -84,12 +84,12 @@ export function ContextCard() {
           aria-hidden
         />
         <div className="flex-1">
-          <p className="text-sm font-medium text-[var(--text-primary)]">
+          <p className="text-sm font-medium text-text-primary">
             {curfew === "not-returned"
               ? "You're outside after curfew."
               : "You were late today."}
           </p>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          <p className="mt-1 text-sm text-text-secondary">
             {ackDone
               ? "Warden notified. Return within 15 minutes."
               : "Tap below to let your warden know you're on your way."}
@@ -105,7 +105,7 @@ export function ContextCard() {
           )}
         </Button>
         {firstGuardian?.guardianName ? (
-          <span className="text-xs text-[var(--text-muted)]">
+          <span className="text-xs text-text-muted">
             Guardian: {firstGuardian.guardianName}
           </span>
         ) : null}

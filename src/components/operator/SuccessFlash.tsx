@@ -63,7 +63,7 @@ export function SuccessFlash({ onClick, onDismiss, autoDismissMs = 500, children
       onClick={handleTap}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[var(--action-primary)] text-black select-none cursor-pointer"
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-action-primary text-black select-none cursor-pointer"
     >
       <motion.div
         initial={{ scale: 0 }}
@@ -86,7 +86,7 @@ export function SuccessFlash({ onClick, onDismiss, autoDismissMs = 500, children
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             transition={{ delay: 0.3 }}
-            className="mt-2 text-xs font-semibold uppercase tracking-wider bg-[var(--bg-elevated)]/10 px-3 py-1 rounded-full text-[var(--text-primary)]"
+            className="mt-2 text-xs font-semibold uppercase tracking-wider bg-bg-elevated/10 px-3 py-1 rounded-full text-text-primary"
           >
             {reason ? `${reason} · ` : ""}Next scan ready
           </motion.p>

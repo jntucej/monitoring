@@ -99,11 +99,11 @@ const api = useApi();
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Layout className="w-6 h-6 text-blue-400" />
+            <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+              <Layout className="w-6 h-6 text-action-primary" />
               Dynamic Sidebar Navigation Editor
             </p>
-            <p className="text-sm text-[var(--text-muted)]">
+            <p className="text-sm text-text-muted">
               Customize sidebar links, labels, group headers, and icons dynamically per role
             </p>
           </div>
@@ -119,7 +119,7 @@ const api = useApi();
                 order: navItems.length + 1,
               })
             }
-            className="px-4 py-2 min-h-[44px] bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="px-4 py-2 min-h-[44px] bg-action-primary hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Nav Item
           </button>
@@ -129,8 +129,8 @@ const api = useApi();
           <div
             className={`p-4 rounded-xl border text-sm flex items-center gap-2 ${
               statusMsg.type === "success"
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-rose-500/10 border-rose-500/30 text-rose-400"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-action-success"
+                : "bg-rose-500/10 border-rose-500/30 text-action-danger"
             }`}
           >
             {statusMsg.type === "success" ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
@@ -147,8 +147,8 @@ const api = useApi();
               onClick={() => setSelectedRole(role)}
               className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider transition ${
                 selectedRole === role
-                  ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
-                  : "bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-white"
+                  ? "bg-action-primary text-white shadow-lg shadow-blue-500/20"
+                  : "bg-bg-surface border border-border text-text-muted hover:text-white"
               }`}
             >
               {role}
@@ -156,15 +156,15 @@ const api = useApi();
           ))}
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-[var(--text-muted)] text-sm animate-pulse">
+            <div className="p-8 text-center text-text-muted text-sm animate-pulse">
               Loading navigation manifest for {selectedRole}…
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[700px]">
-                <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)] text-[var(--text-muted)] uppercase text-xs">
+                <thead className="bg-bg-elevated border-b border-border text-text-muted uppercase text-xs">
                   <tr>
                     <th className="p-4">Order</th>
                     <th className="p-4">Group Header</th>
@@ -174,29 +174,29 @@ const api = useApi();
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {navItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-[var(--bg-elevated)]/50 transition">
-                      <td className="p-4 font-mono text-xs text-[var(--text-muted)]">{item.order}</td>
-                      <td className="p-4 font-medium text-[var(--text-muted)]">{item.groupLabel}</td>
-                      <td className="p-4 font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-400" />
+                    <tr key={item.id} className="hover:bg-bg-elevated/50 transition">
+                      <td className="p-4 font-mono text-xs text-text-muted">{item.order}</td>
+                      <td className="p-4 font-medium text-text-muted">{item.groupLabel}</td>
+                      <td className="p-4 font-semibold text-text-primary flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-action-primary" />
                         {item.label}
                       </td>
-                      <td className="p-4 font-mono text-xs text-blue-400">{item.href}</td>
-                      <td className="p-4 font-mono text-xs text-[var(--text-muted)]">{item.icon}</td>
+                      <td className="p-4 font-mono text-xs text-action-primary">{item.href}</td>
+                      <td className="p-4 font-mono text-xs text-text-muted">{item.icon}</td>
                       <td className="p-4 text-right space-x-2">
                         <button
                           type="button"
                           onClick={() => setEditingItem(item)}
-                          className="p-1.5 rounded-lg bg-[var(--bg-elevated)] hover:text-blue-400 transition"
+                          className="p-1.5 rounded-lg bg-bg-elevated hover:text-action-primary transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => item.id && handleDelete(item.id)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition"
+                          className="p-1.5 rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -211,14 +211,14 @@ const api = useApi();
 
         {editingItem && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-              <h3 className="text-lg font-bold text-[var(--text-primary)]">
+            <div className="bg-bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+              <h3 className="text-lg font-bold text-text-primary">
                 {editingItem.id ? "Edit Nav Item" : "New Nav Item"} ({selectedRole})
               </h3>
 
               <form onSubmit={handleSave} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                     Group Label
                   </label>
                   <input
@@ -227,12 +227,12 @@ const api = useApi();
                     value={editingItem.groupLabel || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, groupLabel: e.target.value })}
                     placeholder="e.g. Monitoring"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                     Link Label
                   </label>
                   <input
@@ -241,12 +241,12 @@ const api = useApi();
                     value={editingItem.label || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, label: e.target.value })}
                     placeholder="e.g. Live Gates"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                  <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                     Target Href
                   </label>
                   <input
@@ -255,13 +255,13 @@ const api = useApi();
                     value={editingItem.href || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, href: e.target.value })}
                     placeholder="e.g. /sysadmin/gates"
-                    className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Lucide Icon Name
                     </label>
                     <input
@@ -270,11 +270,11 @@ const api = useApi();
                       value={editingItem.icon || ""}
                       onChange={(e) => setEditingItem({ ...editingItem, icon: e.target.value })}
                       placeholder="e.g. DoorOpen"
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">
+                    <label className="block text-xs font-semibold text-text-muted uppercase mb-1">
                       Display Order
                     </label>
                     <input
@@ -282,22 +282,22 @@ const api = useApi();
                       required
                       value={editingItem.order ?? 1}
                       onChange={(e) => setEditingItem({ ...editingItem, order: Number(e.target.value) })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm font-mono text-[var(--text-primary)] focus:outline-none focus:border-blue-400"
+                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+                <div className="flex justify-end gap-2 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setEditingItem(null)}
-                    className="px-4 py-2 min-h-[44px] bg-[var(--bg-elevated)] text-[var(--text-muted)] rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h-[44px] bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 min-h-[44px] bg-blue-500 text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
+                    className="px-4 py-2 min-h-[44px] bg-action-primary text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
                   >
                     Save Item
                   </button>

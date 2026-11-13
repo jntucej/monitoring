@@ -86,22 +86,22 @@ function DesktopSidebar({
   return (
     <aside
       aria-label="Primary navigation"
-      className={`hidden md:flex fixed inset-y-0 left-0 z-nav flex-col bg-[var(--bg-surface)]/95 backdrop-blur-xl border-r border-[var(--border)] select-none transition-all duration-300 glass-nav-rail ${
+      className={`hidden md:flex fixed inset-y-0 left-0 z-nav flex-col bg-bg-surface/95 backdrop-blur-xl border-r border-border select-none transition-all duration-300 glass-nav-rail ${
         isSidebarCollapsed ? "w-16" : "w-64"
       }`}
     >
       {/* Brand Header */}
-      <div className="px-3 py-3 border-b border-[var(--border)] flex items-center justify-between min-h-[64px]">
+      <div className="px-3 py-3 border-b border-border flex items-center justify-between min-h-[64px]">
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-xl bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center shrink-0 font-bold border border-[var(--action-primary)]/30">
+          <div className="w-9 h-9 rounded-xl bg-action-primary/20 text-action-primary flex items-center justify-center shrink-0 font-bold border border-action-primary/30">
             <ShieldCheck className="w-5 h-5" />
           </div>
           {!isSidebarCollapsed && (
             <div className="min-w-0 transition-opacity duration-200">
-              <p className="text-sm font-bold tracking-tight text-[var(--text-primary)] truncate">
+              <p className="text-sm font-bold tracking-tight text-text-primary truncate">
                 Gate Monitor
               </p>
-              <p className="text-[10px] font-mono uppercase text-[var(--text-muted)] truncate">
+              <p className="text-[10px] font-mono uppercase text-text-muted truncate">
                 {currentRole}
               </p>
             </div>
@@ -110,7 +110,7 @@ function DesktopSidebar({
         <button
           type="button"
           onClick={toggleSidebarCollapse}
-          className={`p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+          className={`p-1.5 text-text-muted hover:text-text-primary hover:bg-bg-elevated rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
             isSidebarCollapsed ? "mx-auto" : ""
           }`}
           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -125,7 +125,7 @@ function DesktopSidebar({
         {processedNav.map((group) => (
           <div key={group.groupLabel}>
             {!isSidebarCollapsed ? (
-              <p className="px-3 pb-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+              <p className="px-3 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider">
                 {group.groupLabel}
               </p>
             ) : (
@@ -142,14 +142,14 @@ function DesktopSidebar({
                       href={item.href}
                       className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-xs font-medium transition-all ${
                         active
-                          ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)] font-semibold border border-[var(--action-primary)]/30"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                          ? "bg-action-primary/15 text-action-primary font-semibold border border-action-primary/30"
+                          : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated"
                       }`}
                       aria-label={item.label}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
                     </Link>
-                    <span className="absolute left-full ml-2 px-2.5 py-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-50 text-[var(--text-primary)]">
+                    <span className="absolute left-full ml-2 px-2.5 py-1 bg-bg-elevated border border-border rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-50 text-text-primary">
                       {item.label}
                     </span>
                   </div>
@@ -159,15 +159,15 @@ function DesktopSidebar({
                     href={item.href}
                     className={`min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       active
-                        ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)] font-semibold border border-[var(--action-primary)]/30"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                        ? "bg-action-primary/15 text-action-primary font-semibold border border-action-primary/30"
+                        : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated"
                     }`}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
                     <div className="flex-1 flex items-center justify-between truncate">
                       <span className="truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] uppercase">
+                        <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
                           {item.badge}
                         </span>
                       )}
@@ -181,17 +181,17 @@ function DesktopSidebar({
       </nav>
 
       {/* User Footer */}
-      <div className="p-3 border-t border-[var(--border)] flex items-center justify-between">
+      <div className="p-3 border-t border-border flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold shrink-0 border border-[var(--action-primary)]/30">
+          <div className="w-8 h-8 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-xs font-bold shrink-0 border border-action-primary/30">
             {user?.name ? user.name.charAt(0).toUpperCase() : currentRole.charAt(0).toUpperCase()}
           </div>
           {!isSidebarCollapsed && (
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+              <p className="text-xs font-semibold text-text-primary truncate">
                 {user?.name || "User"}
               </p>
-              <p className="text-[10px] text-[var(--text-muted)] capitalize truncate">
+              <p className="text-[10px] text-text-muted capitalize truncate">
                 {currentRole}
               </p>
             </div>
@@ -200,7 +200,7 @@ function DesktopSidebar({
         {!isSidebarCollapsed && (
           <button
             onClick={logout}
-            className="p-1.5 text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+            className="p-1.5 text-text-muted hover:text-action-danger hover:bg-rose-500/10 rounded-lg transition-colors"
             title="Sign Out"
             aria-label="Sign Out"
           >
@@ -250,25 +250,25 @@ function MobileDrawer({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="md:hidden fixed inset-y-0 left-0 z-sheet w-72 max-w-[85vw] flex flex-col bg-[var(--bg-surface)] border-r border-[var(--border)] shadow-2xl"
+            className="md:hidden fixed inset-y-0 left-0 z-sheet w-72 max-w-[85vw] flex flex-col bg-bg-surface border-r border-border shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation menu"
           >
             {/* Drawer Header */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center font-bold border border-[var(--action-primary)]/30">
+                <div className="w-9 h-9 rounded-xl bg-action-primary/20 text-action-primary flex items-center justify-center font-bold border border-action-primary/30">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-[var(--text-primary)]">Gate Monitor</h2>
-                  <p className="text-[10px] font-mono uppercase text-[var(--text-muted)]">{currentRole}</p>
+                  <h2 className="text-sm font-bold text-text-primary">Gate Monitor</h2>
+                  <p className="text-[10px] font-mono uppercase text-text-muted">{currentRole}</p>
                 </div>
               </div>
               <button
                 onClick={toggleMobileSidebar}
-                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-xl transition-colors active:scale-95"
+                className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated rounded-xl transition-colors active:scale-95"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -279,7 +279,7 @@ function MobileDrawer({
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
               {processedNav.map((group) => (
                 <div key={group.groupLabel}>
-                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 px-1">
+                  <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2 px-1">
                     {group.groupLabel}
                   </p>
                   <div className="space-y-1">
@@ -294,14 +294,14 @@ function MobileDrawer({
                           onClick={() => setMobileSidebarOpen(false)}
                           className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
                             active
-                              ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)] font-semibold border border-[var(--action-primary)]/30"
-                              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                              ? "bg-action-primary/15 text-action-primary font-semibold border border-action-primary/30"
+                              : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated"
                           }`}
                         >
                           <Icon className="w-5 h-5 shrink-0" />
                           <span className="truncate flex-1">{item.label}</span>
                           {item.badge && (
-                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] uppercase">
+                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
                               {item.badge}
                             </span>
                           )}
@@ -314,16 +314,16 @@ function MobileDrawer({
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-[var(--border)] flex items-center justify-between bg-[var(--bg-elevated)]/50">
+            <div className="p-4 border-t border-border flex items-center justify-between bg-bg-elevated/50">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center font-bold text-sm shrink-0 border border-[var(--action-primary)]/30">
+                <div className="w-9 h-9 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center font-bold text-sm shrink-0 border border-action-primary/30">
                   {user?.name ? user.name.charAt(0).toUpperCase() : currentRole.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                  <p className="text-xs font-semibold text-text-primary truncate">
                     {user?.name || "User"}
                   </p>
-                  <p className="text-[10px] text-[var(--text-muted)] capitalize truncate">
+                  <p className="text-[10px] text-text-muted capitalize truncate">
                     {currentRole}
                   </p>
                 </div>
@@ -333,7 +333,7 @@ function MobileDrawer({
                   setMobileSidebarOpen(false);
                   logout();
                 }}
-                className="p-2 text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
+                className="p-2 text-text-muted hover:text-action-danger hover:bg-rose-500/10 rounded-xl transition-colors"
                 title="Sign Out"
                 aria-label="Sign Out"
               >
@@ -358,7 +358,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
   return (
     <nav
       aria-label="Mobile navigation bar"
-      className="glass-nav-dock fixed bottom-0 inset-x-0 z-nav flex md:hidden bg-[var(--bg-surface)]/95 backdrop-blur-xl border-t border-[var(--border)] pb-safe select-none shadow-2xl"
+      className="glass-nav-dock fixed bottom-0 inset-x-0 z-nav flex md:hidden bg-bg-surface/95 backdrop-blur-xl border-t border-border pb-safe select-none shadow-2xl"
       style={{ willChange: "transform" }}
     >
       <div className="w-full max-w-md mx-auto grid grid-cols-5 h-14 items-center px-1">
@@ -366,7 +366,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
         <button
           type="button"
           onClick={toggleMobileSidebar}
-          className="flex flex-col items-center justify-center h-full w-full py-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] active-tap transition-all min-h-[44px]"
+          className="flex flex-col items-center justify-center h-full w-full py-1 text-text-muted hover:text-text-primary active-tap transition-all min-h-[44px]"
           aria-label="Open Navigation Drawer"
           title="Navigation Menu"
         >
@@ -386,14 +386,14 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
               title={item.label}
               className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h-[44px] ${
                 active
-                  ? "text-[var(--action-primary)] font-bold"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  ? "text-action-primary font-bold"
+                  : "text-text-muted hover:text-text-primary"
               }`}
             >
               <Icon className={`w-5 h-5 shrink-0 transition-transform ${active ? "scale-110" : ""}`} />
               <span
                 className={`w-1.5 h-1.5 rounded-full mt-1 transition-all ${
-                  active ? "bg-[var(--action-primary)] opacity-100 scale-100 shadow-[0_0_6px_var(--action-primary)]" : "opacity-0 scale-0"
+                  active ? "bg-action-primary opacity-100 scale-100 shadow-[0_0_6px_var(--action-primary)]" : "opacity-0 scale-0"
                 }`}
               />
             </Link>

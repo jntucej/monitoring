@@ -46,10 +46,10 @@ type StatusFilter = "ALL" | "COMPLETED" | "APPROVED" | "REJECTED" | "ESCALATED";
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
-        <Inbox className="w-5 h-5 text-[var(--text-muted)]" />
-        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
+        <Inbox className="w-5 h-5 text-text-muted" />
+        <p className="max-w-md text-sm text-text-muted">{message}</p>
       </div>
     </div>
   );
@@ -57,7 +57,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -75,17 +75,17 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 
 function StatusPill({ status }: { status: string }) {
   const cls: Record<string, string> = {
-    COMPLETED: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
-    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
-    REJECTED: "border-rose-400/30 bg-rose-400/10 text-rose-400",
-    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-purple-400",
-    CANCELLED: "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]",
-    PENDING: "border-amber-400/30 bg-amber-400/10 text-amber-400",
+    COMPLETED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
+    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
+    REJECTED: "border-rose-400/30 bg-rose-400/10 text-action-danger",
+    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-unit-c",
+    CANCELLED: "border-border/30 bg-bg-elevated/10 text-text-muted",
+    PENDING: "border-amber-400/30 bg-amber-400/10 text-action-warning",
   };
   return (
     <span
       className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
-        cls[status] ?? "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]"
+        cls[status] ?? "border-border/30 bg-bg-elevated/10 text-text-muted"
       }`}
     >
       {status}
@@ -103,7 +103,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
     <div className="overflow-x-auto min-w-0">
       <table className="w-full text-sm min-w-[720px]">
         <thead>
-          <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+          <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>
             <th className="text-left px-4 py-3">Candidate</th>
             <th className="text-left px-4 py-3">Final Status</th>
@@ -115,19 +115,19 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           {rows.slice(0, 20).map((r) => {
             const stageCount = Array.isArray(r.stage_history) ? r.stage_history.length : 0;
             return (
-              <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
+              <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
                 <td className="px-4 py-3">
                   <a
                     href={`/permissions/${r.ticket_number}`}
-                    className="text-white font-mono text-xs whitespace-nowrap hover:text-emerald-400"
+                    className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
                   >
                     {r.ticket_number}
                   </a>
                 </td>
-                <td className="px-4 py-3 text-[var(--text-secondary)] min-w-0">
+                <td className="px-4 py-3 text-text-secondary min-w-0">
                   {r.student?.name || "—"}
                   {r.student?.student_details?.roll ? (
-                    <span className="ml-2 text-xs text-[var(--text-muted)]">
+                    <span className="ml-2 text-xs text-text-muted">
                       {r.student.student_details.roll}
                     </span>
                   ) : null}
@@ -135,10 +135,10 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
                 <td className="px-4 py-3">
                   <StatusPill status={r.status} />
                 </td>
-                <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                   {r.updated_at ? new Date(r.updated_at).toLocaleString() : "—"}
                 </td>
-                <td className="px-4 py-3 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                <td className="px-4 py-3 text-text-muted text-xs whitespace-nowrap">
                   {stageCount > 0 ? `${stageCount} stage(s)` : "—"}
                 </td>
               </tr>
@@ -191,15 +191,15 @@ function DecisionHistoryInner() {
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -226,8 +226,8 @@ function DecisionHistoryInner() {
               onClick={() => setFilter(btn.value)}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                 isActive
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                  : "border-[var(--border)] bg-[var(--bg-elevated)]/50 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-action-success"
+                  : "border-border bg-bg-elevated/50 text-text-muted hover:bg-bg-elevated"
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
@@ -238,13 +238,13 @@ function DecisionHistoryInner() {
       </div>
 
       <WidgetBoundary title="Decision History">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <History className="w-4 h-4 text-sky-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <History className="w-4 h-4 text-action-info shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Exam Approval Decisions
             </span>
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+            <span className="ml-auto text-xs text-text-muted shrink-0">
               {filteredRows.length} record(s)
             </span>
           </div>
@@ -255,7 +255,7 @@ function DecisionHistoryInner() {
           ) : (
             <HistoryTable rows={filteredRows} />
           )}
-          <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
+          <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
             Records show the final disposition of exam permission tickets that passed
             through the OIE stage. Stage history is retained for audit purposes.
           </div>

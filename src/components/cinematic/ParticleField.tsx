@@ -23,7 +23,7 @@ const LAYERS = [
   { count:  8, rMin: 1.2, rMax: 2.0, aMin: 0.20, aMax: 0.32, speed: 0.055 },
 ];
 
-export function ParticleField({ color = "#67e8f9", className = "" }: ParticleFieldProps) {
+export function ParticleField({ color = "var(--unit-a)", className = "" }: ParticleFieldProps) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {

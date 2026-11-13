@@ -97,7 +97,7 @@ export function MyEventToken({ eventId }: { eventId: string }) {
 
   if (error || !data || !meta) {
     return (
-      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-action-danger">
         {error ?? "Could not load token"}
         <Link href="/student/mess" className="ml-2 underline">Back</Link>
       </div>
@@ -110,47 +110,47 @@ export function MyEventToken({ eventId }: { eventId: string }) {
     <WidgetBoundary title="My meal token">
       <SectionCard title={meta.title} description={`${meta.eventDate} · ${MEAL_LABEL[meta.mealType]}`}>
         <div className="space-y-4">
-          <div className="rounded-xl border border-[var(--border)] p-4">
-            <div className="mb-2 text-xs uppercase tracking-wide text-[var(--text-muted)]">Manual code</div>
+          <div className="rounded-xl border border-border p-4">
+            <div className="mb-2 text-xs uppercase tracking-wide text-text-muted">Manual code</div>
             <div className="flex items-center gap-3">
-              <div className="font-mono text-4xl tracking-[0.35em] text-[var(--text-primary)] font-black">
+              <div className="font-mono text-4xl tracking-[0.35em] text-text-primary font-black">
                 {data.token.manualCode || "••••••"}
               </div>
               <button
                 type="button"
                 onClick={() => void copyCode()}
                 disabled={!data.token.manualCode}
-                className="inline-flex items-center rounded-md border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-secondary)] disabled:opacity-50"
+                className="inline-flex items-center rounded-md border border-border px-3 py-2 text-xs text-text-secondary disabled:opacity-50"
                 aria-label="Copy code"
               >
                 <Copy className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-3 text-xs text-[var(--text-muted)]">
+            <p className="mt-3 text-xs text-text-muted">
               {data.token.manualCode
                 ? "Show this code at the mess counter. It works even if you don't have your phone."
                 : "Your code was shown once when you first got the token. Ask the mess in-charge to re-issue it if you've lost it."}
             </p>
           </div>
 
-          <div className="rounded-xl border border-[var(--border)] p-3">
-            <div className="mb-1 text-xs uppercase tracking-wide text-[var(--text-muted)]">Your items</div>
-            <ul className="space-y-1 text-sm text-[var(--text-primary)]">
+          <div className="rounded-xl border border-border p-3">
+            <div className="mb-1 text-xs uppercase tracking-wide text-text-muted">Your items</div>
+            <ul className="space-y-1 text-sm text-text-primary">
               {data.token.itemLabels.map((label, i) => (
                 <li key={data.token.itemIds[i]} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-400" /> {label}
+                  <CheckCircle2 className="h-3 w-3 text-action-success" /> {label}
                 </li>
               ))}
             </ul>
           </div>
 
           {expired && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-300">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-action-warning">
               <Lock className="mr-1 inline h-3 w-3" /> This token has expired.
             </div>
           )}
 
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-300">
+          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-action-success">
             <ShieldCheck className="mr-1 inline h-3 w-3" />
             Single-use. Once served, it cannot be reused.
           </div>

@@ -42,12 +42,12 @@ export function BulkActionsBar({
   };
 
   return (
-    <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-3 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="bg-bg-elevated border border-border rounded-xl p-3 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center bg-[var(--action-primary)] text-white text-xs font-bold rounded-full h-6 min-w-6 px-1.5">
+        <span className="inline-flex items-center justify-center bg-action-primary text-white text-xs font-bold rounded-full h-6 min-w-6 px-1.5">
           {selectedCount}
         </span>
-        <span className="text-sm font-medium text-[var(--text-primary)]">
+        <span className="text-sm font-medium text-text-primary">
           {selectedCount === 1 ? "item selected" : "items selected"}
         </span>
       </div>
@@ -59,7 +59,7 @@ export function BulkActionsBar({
             placeholder={`Reason for bulk ${promptAction}...`}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)] w-full sm:w-64"
+            className="px-3 py-1.5 text-xs rounded-lg border border-border bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary w-full sm:w-64"
           />
           <div className="flex items-center gap-2">
             <Button
@@ -122,7 +122,7 @@ export function BulkActionsBar({
             variant="ghost"
             onClick={onClear}
             disabled={isLoading}
-            className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="text-text-muted hover:text-text-primary"
           >
             Clear
           </Button>

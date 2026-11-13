@@ -66,21 +66,21 @@ export default function StudentPassesPage() {
       case "APPROVED":
       case "COMPLETED":
         return {
-          icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
-          bg: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300",
+          icon: <CheckCircle2 className="w-5 h-5 text-action-success" />,
+          bg: "bg-emerald-500/10 border-emerald-500/20 text-action-success",
           text: "Approved",
         };
       case "REJECTED":
         return {
-          icon: <XCircle className="w-5 h-5 text-rose-400" />,
-          bg: "bg-rose-500/10 border-rose-500/20 text-rose-300",
+          icon: <XCircle className="w-5 h-5 text-action-danger" />,
+          bg: "bg-rose-500/10 border-rose-500/20 text-action-danger",
           text: "Rejected",
         };
       case "PENDING":
       default:
         return {
-          icon: <Clock className="w-5 h-5 text-amber-400" />,
-          bg: "bg-amber-500/10 border-amber-500/20 text-amber-300",
+          icon: <Clock className="w-5 h-5 text-action-warning" />,
+          bg: "bg-amber-500/10 border-amber-500/20 text-action-warning",
           text: "Pending Approval",
         };
     }
@@ -92,27 +92,27 @@ export default function StudentPassesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/student" className="min-h-[44px] inline-flex items-center justify-center p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors" aria-label="Back to student hub">
+            <Link href="/student" className="min-h-[44px] inline-flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <p className="text-xs text-[var(--text-muted)]">Digital Gate Passes</p>
+            <p className="text-xs text-text-muted">Digital Gate Passes</p>
           </div>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             Apply, track and show QR passes at campus security gates
           </p>
         </div>
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--action-primary)] text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="min-h-[44px] px-4 py-2.5 rounded-xl bg-action-primary text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Apply Gate Pass</span>
         </button>
       </div>
 
-      <div className="p-3.5 rounded-xl bg-[var(--action-info)]/10 border border-[var(--action-info)]/20 text-xs text-[var(--action-info)] flex items-center gap-2">
-        <Sparkles className="w-4 h-4 shrink-0 text-[var(--action-info)]" />
+      <div className="p-3.5 rounded-xl bg-action-info/10 border border-[var(--action-info)]/20 text-xs text-action-info flex items-center gap-2">
+        <Sparkles className="w-4 h-4 shrink-0 text-action-info" />
         <span>
           <strong>Daily Outing:</strong> Standard local outings do not require a gate pass. Apply for a pass only when requesting <strong>Day Pass</strong> or <strong>Home Out</strong> leave.
         </span>
@@ -121,13 +121,13 @@ export default function StudentPassesPage() {
       {/* Pass list */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-[var(--action-primary)] animate-spin" />
+          <Loader2 className="w-8 h-8 text-action-primary animate-spin" />
         </div>
       ) : passes.length === 0 ? (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-12 text-center space-y-3">
-          <AlertCircle className="w-12 h-12 text-[var(--text-muted)] mx-auto" />
-          <h3 className="text-base font-bold text-[var(--text-primary)]">No passes found</h3>
-          <p className="text-xs text-[var(--text-muted)] max-w-sm mx-auto">
+        <div className="bg-bg-surface border border-border rounded-2xl p-12 text-center space-y-3">
+          <AlertCircle className="w-12 h-12 text-text-muted mx-auto" />
+          <h3 className="text-base font-bold text-text-primary">No passes found</h3>
+          <p className="text-xs text-text-muted max-w-sm mx-auto">
             You haven&apos;t requested any gate passes yet. Tap &quot;Apply Gate Pass&quot; to create one.
           </p>
         </div>
@@ -139,16 +139,16 @@ export default function StudentPassesPage() {
             return (
               <div
                 key={pass.id}
-                className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-4 relative overflow-hidden"
+                className="bg-bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4 relative overflow-hidden"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="p-2 rounded-xl bg-[var(--action-primary)]/10 text-[var(--action-primary)] border border-[var(--action-primary)]/20">
+                    <span className="p-2 rounded-xl bg-action-primary/10 text-action-primary border border-action-primary/20">
                       <QrCode className="w-5 h-5" />
                     </span>
                     <div>
-                      <h3 className="text-sm font-bold text-[var(--text-primary)]">{passTitle}</h3>
-                      <p className="text-[10px] font-mono text-[var(--text-muted)]">{pass.id}</p>
+                      <h3 className="text-sm font-bold text-text-primary">{passTitle}</h3>
+                      <p className="text-[10px] font-mono text-text-muted">{pass.id}</p>
                     </div>
                   </div>
 
@@ -160,16 +160,16 @@ export default function StudentPassesPage() {
 
                 <div className="space-y-2 text-xs">
                   <div>
-                    <span className="text-[var(--text-muted)] font-semibold">Valid Period: </span>
-                    <span className="font-medium text-[var(--text-secondary)]">
+                    <span className="text-text-muted font-semibold">Valid Period: </span>
+                    <span className="font-medium text-text-secondary">
                       {new Date(pass.from).toLocaleString([], { dateStyle: "short", timeStyle: "short" })} to{" "}
                       {new Date(pass.to).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}
                     </span>
                   </div>
                   {pass.description && (
                     <div>
-                      <span className="text-[var(--text-muted)] font-semibold">Details: </span>
-                      <span className="font-medium text-[var(--text-primary)]">
+                      <span className="text-text-muted font-semibold">Details: </span>
+                      <span className="font-medium text-text-primary">
                         {pass.description}
                       </span>
                     </div>
@@ -177,8 +177,8 @@ export default function StudentPassesPage() {
                 </div>
 
                 {(pass.status === "ACTIVE" || pass.finalStatus === "APPROVED") && (
-                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-emerald-500 flex items-center gap-1">
+                  <div className="pt-2 border-t border-border flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-action-success flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5" />
                       Ready to scan at campus gates
                     </span>
@@ -192,7 +192,7 @@ export default function StudentPassesPage() {
                           to: pass.to,
                         })
                       }
-                      className="px-3 py-1.5 rounded-lg bg-[var(--action-primary)] text-white text-xs font-bold hover:opacity-95 flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+                      className="px-3 py-1.5 rounded-lg bg-action-primary text-white text-xs font-bold hover:opacity-95 flex items-center gap-1.5 transition active:scale-95 shadow-sm"
                     >
                       <QrCode className="w-3.5 h-3.5" />
                       <span>Show QR Pass</span>

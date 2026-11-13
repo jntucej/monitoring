@@ -53,7 +53,7 @@ function FacultyInner() {
 
   if (error) {
     return (
-      <div className="p-6 text-sm text-rose-400">
+      <div className="p-6 text-sm text-action-danger">
         Failed to load class scope: {error}
       </div>
     );
@@ -61,7 +61,7 @@ function FacultyInner() {
 
   if (loading && classes.length === 0) {
     return (
-      <div className="flex items-center gap-2 p-6 text-sm text-[var(--text-muted)]">
+      <div className="flex items-center gap-2 p-6 text-sm text-text-muted">
         <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />
         Resolving your class&hellip;
       </div>
@@ -92,8 +92,8 @@ function FacultyInner() {
       <PageHeader title="Faculty" subtitle="Class scope & HOD-stage queue" />
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-center gap-1.5">
+        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
             <PencilLine className="w-3.5 h-3.5" /> Your classes
           </p>
           <div className="flex flex-wrap gap-1.5 min-w-0">
@@ -105,8 +105,8 @@ function FacultyInner() {
                   href={`/faculty?class_id=${c.id}`}
                   className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                     isActive
-                      ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)] border border-[var(--action-primary)]/30"
-                      : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-base)]"
+                      ? "bg-action-primary/15 text-action-primary border border-action-primary/30"
+                      : "bg-bg-elevated text-text-secondary hover:bg-bg-base"
                   }`}
                 >
                   Year {c.year} &middot; {c.section}
@@ -118,11 +118,11 @@ function FacultyInner() {
         </div>
       ) : activeClass ? (
         /* Single resolved class banner */
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5" /> Your class
           </p>
-          <p className="text-sm font-semibold text-[var(--text-primary)] mt-1">
+          <p className="text-sm font-semibold text-text-primary mt-1">
             Year {activeClass.year} &middot; {activeClass.section}
             {activeClass.name ? ` · ${activeClass.name}` : ""}
           </p>

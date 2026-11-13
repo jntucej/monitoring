@@ -7,13 +7,13 @@ export interface UrgencyDotProps {
 
 export function UrgencyDot({ urgency = "neutral", className }: UrgencyDotProps) {
   const dotClasses: Record<string, string> = {
-    critical: "bg-[var(--action-danger)]",
-    danger: "bg-[var(--action-danger)]",
-    high: "bg-[var(--action-warning)]",
-    warn: "bg-[var(--action-warning)]",
-    medium: "bg-[var(--action-info,#3b82f6)]",
-    info: "bg-[var(--action-info,#3b82f6)]",
-    low: "bg-[var(--action-primary)]",
+    critical: "bg-action-danger",
+    danger: "bg-action-danger",
+    high: "bg-action-warning",
+    warn: "bg-action-warning",
+    medium: "bg-[var(--action-info,var(--action-primary))]",
+    info: "bg-[var(--action-info,var(--action-primary))]",
+    low: "bg-action-primary",
     neutral: "bg-[var(--text-muted)]",
   };
 

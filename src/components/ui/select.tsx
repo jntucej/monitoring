@@ -32,19 +32,19 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
           disabled={disabled}
           onClick={() => !disabled && setOpen(!open)}
           className={cn(
-            "w-full h-11 px-4 rounded-md bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]",
-            error && "border-[var(--action-danger)] focus:ring-[var(--action-danger)]",
+            "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]",
+            error && "border-action-danger focus:ring-action-danger",
             disabled && "opacity-40 cursor-not-allowed",
             className
           )}
         >
-          <span className={value ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}>
+          <span className={value ? "text-text-primary" : "text-text-muted"}>
             {selectedLabel}
           </span>
-          <ChevronDown className="w-4 h-4 text-[var(--text-muted)]" />
+          <ChevronDown className="w-4 h-4 text-text-muted" />
         </button>
         {open && (
-          <div className="absolute top-12 z-20 w-full bg-[var(--bg-surface)] border border-[var(--border)] rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute top-12 z-20 w-full bg-bg-surface border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
             {options.map((opt) => (
               <button
                 key={opt.value}
@@ -54,8 +54,8 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
                   setOpen(false);
                 }}
                 className={cn(
-                  "w-full px-4 py-2 text-left text-sm hover:bg-[var(--bg-elevated)] transition-colors",
-                  value === opt.value && "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
+                  "w-full px-4 py-2 text-left text-sm hover:bg-bg-elevated transition-colors",
+                  value === opt.value && "bg-action-primary/10 text-action-primary"
                 )}
               >
                 {opt.label}
@@ -63,7 +63,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
             ))}
           </div>
         )}
-        {error && <p className="mt-1 text-sm text-[var(--action-danger)]">⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}</p>}
+        {error && <p className="mt-1 text-sm text-action-danger">⚠️ {typeof error === "string" ? error : (error as any)?.message || String(error)}</p>}
       </div>
     );
   }

@@ -30,10 +30,10 @@ interface Posture {
 }
 
 const tone: Record<Check["status"], string> = {
-  ok: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  warn: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-  fail: "text-rose-400 bg-rose-500/10 border-rose-500/30",
-  unknown: "text-slate-400 bg-slate-500/10 border-slate-500/30",
+  ok: "text-action-success bg-emerald-500/10 border-emerald-500/30",
+  warn: "text-action-warning bg-amber-500/10 border-amber-500/30",
+  fail: "text-action-danger bg-rose-500/10 border-rose-500/30",
+  unknown: "text-text-muted bg-slate-500/10 border-slate-500/30",
 };
 
 function IconFor({ s }: { s: Check["status"] }) {
@@ -55,10 +55,10 @@ export default function SecurityPosturePage() {
   }, [data]);
 
   if (loading && !data) {
-    return <div className="p-6 text-sm text-slate-400">Loading security posture…</div>;
+    return <div className="p-6 text-sm text-text-muted">Loading security posture…</div>;
   }
   if (error && !data) {
-    return <div className="p-6 text-sm text-rose-400">Error: {error}</div>;
+    return <div className="p-6 text-sm text-action-danger">Error: {error}</div>;
   }
 
   const posture = data!;
@@ -72,7 +72,7 @@ export default function SecurityPosturePage() {
         actions={
           <button
             onClick={refresh}
-            className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm inline-flex items-center gap-2"
+            className="rounded-md border border-border px-3 py-1.5 text-sm inline-flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
@@ -99,7 +99,7 @@ export default function SecurityPosturePage() {
 
       {Object.entries(grouped).map(([batch, checks]) => (
         <section key={batch} className="mt-6">
-          <h2 className="text-xs uppercase tracking-wider text-slate-500 mb-2">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted mb-2">
             Batch {batch}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

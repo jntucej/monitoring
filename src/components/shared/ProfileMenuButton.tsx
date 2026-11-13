@@ -43,11 +43,11 @@ interface ProfileMenuButtonProps {
 type AccentId = "emerald" | "rose" | "sky" | "amber" | "violet";
 
 const ACCENTS: Record<AccentId, { label: string; swatch: string; ring: string }> = {
-  emerald: { label: "Emerald", swatch: "bg-emerald-500", ring: "ring-emerald-500" },
-  rose:    { label: "Rose",    swatch: "bg-rose-500",    ring: "ring-rose-500" },
-  sky:     { label: "Sky",     swatch: "bg-sky-500",     ring: "ring-sky-500" },
-  amber:   { label: "Amber",   swatch: "bg-amber-500",   ring: "ring-amber-500" },
-  violet:  { label: "Violet",  swatch: "bg-violet-500",  ring: "ring-violet-500" },
+  emerald: { label: "Emerald", swatch: "bg-action-success", ring: "ring-action-success" },
+  rose:    { label: "Rose",    swatch: "bg-action-danger",    ring: "ring-action-danger" },
+  sky:     { label: "Sky",     swatch: "bg-action-info",     ring: "ring-[var(--action-info)]" },
+  amber:   { label: "Amber",   swatch: "bg-action-warning",   ring: "ring-[var(--action-warning)]" },
+  violet:  { label: "Violet",  swatch: "bg-unit-c",  ring: "ring-unit-c" },
 };
 
 // Per-account (localStorage) so it never collides with the app-wide theme.
@@ -142,8 +142,8 @@ export function ProfileMenuButton({
         aria-label="Open profile menu"
         aria-expanded={open}
         className={cn(
-          "group relative inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] p-1 transition-all hover:bg-[var(--bg-elevated)]",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]",
+          "group relative inline-flex items-center gap-2 rounded-full border border-border bg-bg-surface p-1 transition-all hover:bg-bg-elevated",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary",
           compact ? "w-9 h-9 justify-center" : "w-9 h-9 sm:w-auto sm:pr-3 sm:pl-1"
         )}
       >
@@ -154,16 +154,16 @@ export function ProfileMenuButton({
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
           />
         ) : (
-          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--action-primary)]/20 text-[var(--action-primary)] flex items-center justify-center text-xs font-bold ring-2 ring-[var(--action-primary)]/25">
+          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-xs font-bold ring-2 ring-action-primary/25">
             {initials || "U"}
           </span>
         )}
         {!compact && (
           <span className="hidden sm:block text-left min-w-0">
-            <span className="block text-xs font-semibold text-[var(--text-primary)] truncate max-w-[140px]">
+            <span className="block text-xs font-semibold text-text-primary truncate max-w-[140px]">
               {user?.name || "Account"}
             </span>
-            <span className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] capitalize">
+            <span className="block text-[10px] uppercase tracking-wider text-text-muted capitalize">
               {role || "user"}
             </span>
           </span>
@@ -171,26 +171,26 @@ export function ProfileMenuButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-72 max-w-xs rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
+        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-72 max-w-xs rounded-2xl border border-border bg-bg-surface shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
           {/* Identity */}
-          <div className="px-4 py-3 border-b border-[var(--border)]">
-            <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm font-bold text-text-primary truncate">
               {user?.name || "Account"}
             </p>
-            <p className="text-xs text-[var(--text-muted)] truncate">
+            <p className="text-xs text-text-muted truncate">
               {user?.email || (role ? role : "signed in")}
             </p>
           </div>
 
           {/* Appearance & Backgrounds */}
-          <div className="px-4 py-3 border-b border-[var(--border)] space-y-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+          <div className="px-4 py-3 border-b border-border space-y-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <Sparkles className="w-3 h-3" /> Appearance &amp; Backgrounds
             </p>
 
             {/* Theme switcher (live app theme, reactive + persisted) */}
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-[var(--text-secondary)]">Theme</span>
+              <span className="text-xs text-text-secondary">Theme</span>
               <div className="flex items-center gap-1">
                 {(["dark", "light", "glass"] as const).map((t) => {
                   const Icon = t === "dark" ? Moon : t === "light" ? Sun : Sparkles;
@@ -204,8 +204,8 @@ export function ProfileMenuButton({
                       className={cn(
                         "w-8 h-8 min-w-[32px] min-h-[32px] sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all",
                         active
-                          ? "bg-[var(--action-primary)] text-white shadow-sm"
-                          : "bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border)]"
+                          ? "bg-action-primary text-white shadow-sm"
+                          : "bg-bg-elevated text-text-muted hover:text-text-primary border border-border"
                       )}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -218,8 +218,8 @@ export function ProfileMenuButton({
             {/* Account accent / background tint */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[var(--text-secondary)]">Accent</span>
-                <span className="text-[10px] text-[var(--text-muted)] capitalize">
+                <span className="text-xs text-text-secondary">Accent</span>
+                <span className="text-[10px] text-text-muted capitalize">
                   {ACCENTS[accent].label}
                 </span>
               </div>
@@ -297,11 +297,11 @@ function MenuRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors text-left"
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors text-left"
     >
-      <Icon className="w-4 h-4 text-[var(--text-muted)]" />
+      <Icon className="w-4 h-4 text-text-muted" />
       <span className="flex-1 truncate">{label}</span>
-      {hint && <span className="text-[10px] text-[var(--text-muted)]">{hint}</span>}
+      {hint && <span className="text-[10px] text-text-muted">{hint}</span>}
     </button>
   );
 }
@@ -315,11 +315,11 @@ function MenuRow({
 function applyAccent(id: AccentId) {
   if (typeof document === "undefined") return;
   const map: Record<AccentId, string> = {
-    emerald: "#10b981",
-    rose: "#f43f5e",
-    sky: "#0ea5e9",
-    amber: "#f59e0b",
-    violet: "#8b5cf6",
+    emerald: "var(--action-success)",
+    rose: "var(--alert-critical)",
+    sky: "var(--action-info)",
+    amber: "var(--action-warning)",
+    violet: "var(--unit-c)",
   };
   document.documentElement.style.setProperty("--account-accent", map[id]);
 }

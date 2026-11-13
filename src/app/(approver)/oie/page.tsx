@@ -18,10 +18,10 @@ import { PageHeader } from "@/components/shared/PageHeader";
 
 
 function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-amber-400" : "text-[var(--text-primary)]";
+  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev-1)] p-4 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">{label}</div>
+    <div className="rounded-xl border border-border bg-[var(--bg-elev-1)] p-4 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );

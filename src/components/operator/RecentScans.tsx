@@ -29,17 +29,17 @@ const Row = memo(function Row({
     <button
       type="button"
       onClick={() => onSelect?.(scan)}
-      className="w-full flex items-center justify-between text-xs py-3 px-2 border-b border-[var(--border)]/30 last:border-b-0 hover:bg-[var(--bg-base)] rounded-xl transition-colors text-left min-h-[44px]"
+      className="w-full flex items-center justify-between text-xs py-3 px-2 border-b border-border/30 last:border-b-0 hover:bg-bg-base rounded-xl transition-colors text-left min-h-[44px]"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === "IN" ? "bg-emerald-500/10 text-emerald-400" : "bg-[var(--action-danger)]/10 text-[var(--action-danger)]"}`}>
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === "IN" ? "bg-emerald-500/10 text-action-success" : "bg-action-danger/10 text-action-danger"}`}>
           <User className="w-4.5 h-4.5" />
         </div>
         <div className="min-w-0">
-          <p className="font-bold text-[var(--text-primary)] truncate">{scan.name}</p>
-          <p className="text-[11px] text-[var(--text-muted)] font-mono">{scan.roll}</p>
+          <p className="font-bold text-text-primary truncate">{scan.name}</p>
+          <p className="text-[11px] text-text-muted font-mono">{scan.roll}</p>
           {scan.operatorName ? (
-            <p className="text-[10px] text-[var(--text-secondary)] inline-flex items-center gap-1">
+            <p className="text-[10px] text-text-secondary inline-flex items-center gap-1">
               <ShieldCheck className="w-3 h-3" /> by {scan.operatorName}
             </p>
           ) : null}
@@ -47,7 +47,7 @@ const Row = memo(function Row({
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <div className="text-right">
-          <div className={`flex items-center gap-1 text-[11px] font-bold ${scan.direction === "IN" ? "text-emerald-400" : "text-[var(--action-danger)]"}`}>
+          <div className={`flex items-center gap-1 text-[11px] font-bold ${scan.direction === "IN" ? "text-action-success" : "text-action-danger"}`}>
             {scan.direction === "IN" ? (
               <>
                 <ArrowDownLeft className="w-3.5 h-3.5" />
@@ -60,11 +60,11 @@ const Row = memo(function Row({
               </>
             )}
           </div>
-          <p className="text-[10px] text-[var(--text-muted)]">
+          <p className="text-[10px] text-text-muted">
             {new Date(scan.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
           </p>
         </div>
-        <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+        <ChevronRight className="w-4 h-4 text-text-muted" />
       </div>
     </button>
   );
@@ -88,15 +88,15 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
   const newestId = filteredScans[0]?.id;
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border)] p-5 space-y-4 shadow-sm">
+    <div className="bg-bg-surface rounded-2xl border border-border p-5 space-y-4 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-sm text-[var(--text-primary)]">Recent Access Activity</h3>
-          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Tap any record to open the person overview.</p>
+          <h3 className="font-semibold text-sm text-text-primary">Recent Access Activity</h3>
+          <p className="text-[10px] text-text-muted mt-0.5">Tap any record to open the person overview.</p>
         </div>
 
         {/* Live Filter Stream */}
-        <div className="flex items-center gap-1 bg-[var(--bg-elevated)] p-1 rounded-xl border border-[var(--border)] self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
+        <div className="flex items-center gap-1 bg-bg-elevated p-1 rounded-xl border border-border self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
           {(["ALL", "IN", "OUT", "FLAGGED"] as ScanFilter[]).map((tab) => {
             const isActive = filter === tab;
             return (
@@ -107,13 +107,13 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider transition-all ${
                   isActive
                     ? tab === "IN"
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                      ? "bg-emerald-500/20 text-action-success border border-emerald-500/30"
                       : tab === "OUT"
-                      ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                      ? "bg-rose-500/20 text-action-danger border border-rose-500/30"
                       : tab === "FLAGGED"
-                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                      : "bg-[var(--action-primary)] text-white"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-amber-500/20 text-action-warning border border-amber-500/30"
+                      : "bg-action-primary text-white"
+                    : "text-text-muted hover:text-text-primary"
                 }`}
               >
                 {tab}
@@ -140,7 +140,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
             )
           )
         ) : (
-          <div className="text-center py-6 text-[var(--text-muted)] text-xs">
+          <div className="text-center py-6 text-text-muted text-xs">
             No gate scans registered for filter &quot;{filter}&quot;.
           </div>
         )}

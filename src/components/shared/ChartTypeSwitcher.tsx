@@ -48,8 +48,8 @@ export function ChartTypeSwitcher({
         aria-label={opt.label}
         className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
           active
-            ? "bg-emerald-500/15 text-emerald-500 shadow-sm"
-            : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+            ? "bg-emerald-500/15 text-action-success shadow-sm"
+            : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
         }`}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -66,17 +66,17 @@ export function ChartTypeSwitcher({
           value={value}
           onChange={(e) => onChange(e.target.value as ChartType)}
           aria-label="Chart type"
-          className="appearance-none rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] py-1.5 pl-3 pr-8 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-emerald-500/40"
+          className="appearance-none rounded-lg border border-border bg-bg-surface py-1.5 pl-3 pr-8 text-xs font-medium text-text-primary outline-none focus:border-emerald-500/40"
         >
           {CHART_TYPE_OPTIONS.map((c) => (
             <option key={c.id} value={c.id}>{c.label}</option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
       </div>
 
       {/* Full icon-button row (sm+) */}
-      <div className="hidden sm:flex flex-wrap items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-1">
+      <div className="hidden sm:flex flex-wrap items-center gap-1 rounded-lg border border-border bg-bg-surface p-1">
         {CHART_TYPE_OPTIONS.map(iconBtn)}
       </div>
     </div>

@@ -26,16 +26,16 @@ export function InboxBatchBar({
   if (selectedCount === 0) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-30 bg-[var(--bg-surface)] border-t border-[var(--border)] shadow-lg">
+    <div className="fixed bottom-0 inset-x-0 z-30 bg-bg-surface border-t border-border shadow-lg">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-semibold text-[var(--text-primary)]">
+          <span className="text-xs font-semibold text-text-primary">
             {selectedCount} selected
           </span>
           {lastResult && (
             <span
               className={`text-xs ${
-                lastResult.fail > 0 ? "text-amber-500" : "text-emerald-500"
+                lastResult.fail > 0 ? "text-action-warning" : "text-action-success"
               }`}
             >
               {lastResult.ok} ok, {lastResult.fail} failed

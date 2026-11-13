@@ -89,19 +89,19 @@ export function BiometricPrompt({
       aria-label="Biometric verification"
       className="fixed inset-x-0 bottom-0 z-80 mx-auto w-full max-w-md p-4"
     >
-      <div className="rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface)] p-4 shadow-2xl">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 shadow-2xl">
         <div className="flex items-center gap-2">
           {busy ? (
-            <Loader2 className="h-5 w-5 animate-spin text-[var(--action-primary)]" aria-hidden />
+            <Loader2 className="h-5 w-5 animate-spin text-action-primary" aria-hidden />
           ) : (
-            <Fingerprint className="h-5 w-5 text-[var(--action-primary)]" aria-hidden />
+            <Fingerprint className="h-5 w-5 text-action-primary" aria-hidden />
           )}
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">
+          <h3 className="text-sm font-bold text-text-primary">
             Thumbprint required
           </h3>
-          <ShieldQuestion className="ml-auto h-4 w-4 text-[var(--text-muted)]" aria-hidden />
+          <ShieldQuestion className="ml-auto h-4 w-4 text-text-muted" aria-hidden />
         </div>
-        <p className="mt-2 text-xs text-[var(--text-secondary)]">{caption}</p>
+        <p className="mt-2 text-xs text-text-secondary">{caption}</p>
 
         {mode === "thumb" && (
           <div className="mt-3">

@@ -22,18 +22,18 @@ export function DrawerItem({ href, label, icon: Icon, active: _active = false }:
       href={href}
       className={cn(
         "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors",
-        "hover:bg-[var(--bg-elevated)] active:scale-[0.99]",
+        "hover:bg-bg-elevated active:scale-[0.99]",
         isActive
-          ? "text-[var(--action-primary)] bg-[var(--action-primary)]/10 border-l-2 border-[var(--action-primary)]"
-          : "text-[var(--text-secondary)] border-l-2 border-transparent"
+          ? "text-action-primary bg-action-primary/10 border-l-2 border-action-primary"
+          : "text-text-secondary border-l-2 border-transparent"
       )}
       style={{ height: "48px" }}
       aria-current={isActive ? "page" : undefined}
     >
-      <Icon className={cn("w-5 h-5 shrink-0", isActive && "text-[var(--action-primary)]")} />
+      <Icon className={cn("w-5 h-5 shrink-0", isActive && "text-action-primary")} />
       <span className="flex-1 truncate">{label}</span>
       {isActive && (
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
       )}
     </Link>
   );

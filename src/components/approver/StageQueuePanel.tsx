@@ -159,14 +159,14 @@ export function StageQueuePanel({
   }, [refresh]);
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+    <section className="rounded-xl border border-border bg-bg-surface p-4">
       <header className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h2>
+        <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
         <button
           type="button"
           onClick={retry}
           disabled={loading}
-          className="rounded-md p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] disabled:opacity-50"
+          className="rounded-md p-1.5 text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:opacity-50"
           aria-label="Refresh queue"
           title="Refresh queue"
         >
@@ -181,7 +181,7 @@ export function StageQueuePanel({
       {error && (
         <div
           role="alert"
-          className="mb-3 rounded-md border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/10 p-2 text-xs text-[var(--action-danger)]"
+          className="mb-3 rounded-md border border-action-danger/40 bg-action-danger/10 p-2 text-xs text-action-danger"
         >
           {error}
         </div>
@@ -189,7 +189,7 @@ export function StageQueuePanel({
       {actionError && (
         <div
           role="alert"
-          className="mb-3 rounded-md border border-[var(--action-warning)]/40 bg-[var(--action-warning)]/10 p-2 text-xs text-[var(--action-warning)]"
+          className="mb-3 rounded-md border border-action-warning/40 bg-action-warning/10 p-2 text-xs text-action-warning"
         >
           {actionError}
         </div>
@@ -202,7 +202,7 @@ export function StageQueuePanel({
         />
       ) : (
         <WidgetBoundary key={refreshKey} title={`${title} list`}>
-          <ul className="divide-y divide-[var(--border)]">
+          <ul className="divide-y divide-border">
             {visibleRows.map((row) => {
               const actionable = canAct(row);
               const busy = busyId === row.ticket_number;
@@ -210,20 +210,20 @@ export function StageQueuePanel({
                 <li key={row.id} className="flex items-center gap-3 py-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <div className="truncate font-mono text-xs text-[var(--text-muted)]">
+                      <div className="truncate font-mono text-xs text-text-muted">
                         {row.ticket_number}
                       </div>
                       <LevelBadge row={row} fallbackStage={row.current_stage} />
                       <ForwardedFromChip row={row} />
                       <DirectBadge row={row} />
                     </div>
-                    <div className="truncate text-sm text-[var(--text-primary)]">
+                    <div className="truncate text-sm text-text-primary">
                       {row.student?.name ?? "—"}
                       {row.student?.student_details?.roll
                         ? ` · ${row.student.student_details.roll}`
                         : ""}
                     </div>
-                    <div className="text-[10px] text-[var(--text-muted)]">
+                    <div className="text-[10px] text-text-muted">
                       Stage: {row.current_stage}
                       {!actionable ? " · view only" : ""}
                     </div>
@@ -235,7 +235,7 @@ export function StageQueuePanel({
                         type="button"
                         disabled={busy}
                         onClick={() => void handle(row, "APPROVE")}
-                        className="rounded-md bg-[var(--action-primary)] px-2 py-1 text-xs text-white disabled:opacity-50"
+                        className="rounded-md bg-action-primary px-2 py-1 text-xs text-white disabled:opacity-50"
                         aria-label={`Approve ${row.ticket_number}`}
                         title="Approve"
                       >
@@ -249,7 +249,7 @@ export function StageQueuePanel({
                         type="button"
                         disabled={busy}
                         onClick={() => void handle(row, "REJECT")}
-                        className="rounded-md bg-[var(--action-danger)] px-2 py-1 text-xs text-white disabled:opacity-50"
+                        className="rounded-md bg-action-danger px-2 py-1 text-xs text-white disabled:opacity-50"
                         aria-label={`Reject ${row.ticket_number}`}
                         title="Reject"
                       >
@@ -260,7 +260,7 @@ export function StageQueuePanel({
                           type="button"
                           disabled={busy}
                           onClick={() => void handle(row, "FORWARD")}
-                          className="rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-xs text-[var(--text-secondary)] disabled:opacity-50"
+                          className="rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-secondary disabled:opacity-50"
                           aria-label={`Forward ${row.ticket_number}`}
                           title="Forward to next stage"
                         >
@@ -269,7 +269,7 @@ export function StageQueuePanel({
                       )}
                     </div>
                   ) : (
-                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-[var(--bg-elevated)] px-2 py-1 text-[10px] text-[var(--text-muted)]">
+                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-bg-elevated px-2 py-1 text-[10px] text-text-muted">
                       <Eye className="h-3 w-3" aria-hidden /> View only
                     </span>
                   )}

@@ -89,19 +89,19 @@ export function ActiveSessions() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--bg-surface)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border shadow-sm">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-sky-400" /> Active User Sessions
+            <Users className="w-6 h-6 text-action-info" /> Active User Sessions
           </h2>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-text-muted mt-1">
             Real-time view of currently authenticated users across web & mobile hardware
           </p>
         </div>
         <button
           onClick={() => fetchSessions(false)}
           disabled={loading || refreshing}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading || refreshing ? "animate-spin" : ""}`} />
           {refreshing && !loading ? "Refreshing…" : "Refresh List"}
@@ -109,21 +109,21 @@ export function ActiveSessions() {
       </div>
 
       {/* Sessions Table */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden">
+      <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="py-12 text-center text-xs text-[var(--text-muted)]">Fetching active session tokens...</div>
+          <div className="py-12 text-center text-xs text-text-muted">Fetching active session tokens...</div>
         ) : sessions.length === 0 ? (
-          <div className="py-12 text-center text-xs text-[var(--text-muted)]">No active sessions detected.</div>
+          <div className="py-12 text-center text-xs text-text-muted">No active sessions detected.</div>
         ) : (
           <div className="overflow-x-auto">
             {refreshing && (
-              <div className="px-4 py-1.5 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)]/40 flex items-center gap-1.5">
+              <div className="px-4 py-1.5 text-[10px] text-text-muted bg-bg-elevated/40 flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3 animate-spin" /> Refreshing in background…
               </div>
             )}
             <table className="w-full text-left text-xs min-w-[650px]">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] bg-[var(--bg-elevated)]/40">
+                <tr className="border-b border-border text-text-muted bg-bg-elevated/40">
                   <th className="p-4">User</th>
                   <th className="p-4">Role</th>
                   <th className="p-4">Session Token</th>
@@ -131,27 +131,27 @@ export function ActiveSessions() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {sessions.map((sess) => (
-                  <tr key={sess.userId} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
+                  <tr key={sess.userId} className="hover:bg-bg-elevated/30 transition-colors">
                     <td className="p-4 font-bold text-white">
                       {sess.name}
-                      <span className="block text-[10px] text-[var(--text-muted)] font-normal">{sess.email}</span>
+                      <span className="block text-[10px] text-text-muted font-normal">{sess.email}</span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-500/20 text-action-info border border-sky-500/30 uppercase">
                         {sess.role}
                       </span>
                     </td>
                     <td className="p-4 font-mono text-[10px] text-purple-300">{sess.sessionTokenTruncated}</td>
-                    <td className="p-4 font-mono text-[10px] text-[var(--text-muted)]">
+                    <td className="p-4 font-mono text-[10px] text-text-muted">
                       {new Date(sess.lastActive).toLocaleString()}
                     </td>
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleRevokeSession(sess.userId, sess.name)}
                         disabled={revokingId === sess.userId}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-rose-300 hover:bg-rose-600 hover:text-white font-bold text-[10px] transition-all disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-action-danger hover:bg-action-danger hover:text-white font-bold text-[10px] transition-all disabled:opacity-50"
                       >
                         <LogOut className="w-3 h-3" /> Force Logout
                       </button>

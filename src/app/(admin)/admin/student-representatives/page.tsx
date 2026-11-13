@@ -102,14 +102,14 @@ export default function RepsPage() {
             className="border rounded p-2 text-sm flex-1 min-h-[44px]"
           />
         </div>
-        <button type="submit" className="px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-[44px]">
+        <button type="submit" className="px-4 py-2 rounded bg-bg-surface text-white text-sm col-span-1 sm:col-span-2 font-medium min-h-[44px]">
           Appoint representative
         </button>
       </form>
 
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left border-b bg-[var(--bg-elevated)]">
+          <thead className="text-left border-b bg-bg-elevated">
             <tr>
               <th className="p-3">Name</th>
               <th className="p-3">Roll</th>
@@ -121,7 +121,7 @@ export default function RepsPage() {
           </thead>
           <tbody className="divide-y">
             {rows.map((r) => (
-              <tr key={r.id} className="hover:bg-[var(--bg-elevated)]">
+              <tr key={r.id} className="hover:bg-bg-elevated">
                 <td className="p-3 font-medium">{r.studentName}</td>
                 <td className="p-3 font-mono">{r.studentRoll}</td>
                 <td className="p-3">{r.scopeType}:{r.scopeId}</td>
@@ -131,7 +131,7 @@ export default function RepsPage() {
                   <button
                     type="button"
                     onClick={() => setRevokeId(r.id)}
-                    className="text-xs text-rose-600 hover:underline font-medium"
+                    className="text-xs text-action-danger hover:underline font-medium"
                   >
                     Revoke
                   </button>
@@ -140,7 +140,7 @@ export default function RepsPage() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-[var(--text-muted)]">No student representatives appointed.</td>
+                <td colSpan={6} className="p-6 text-center text-text-muted">No student representatives appointed.</td>
               </tr>
             )}
           </tbody>

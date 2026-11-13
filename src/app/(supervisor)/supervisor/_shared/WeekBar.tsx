@@ -45,20 +45,20 @@ export function WeekBar() {
   const data = useSyncExternalStore(subscribe, getSnapshot, () => emptySnapshot);
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)]/50 px-3 py-2 text-[11px]">
-      <span className="text-[var(--text-muted)]">
-        <span className="font-semibold text-[var(--text-primary)]">{data.sessionDecisions}</span> decisions this session
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated/50 px-3 py-2 text-[11px]">
+      <span className="text-text-muted">
+        <span className="font-semibold text-text-primary">{data.sessionDecisions}</span> decisions this session
         {data.todayWinsCount > 0 && (
           <>
             {" · "}
-            <span className="font-semibold text-[var(--text-primary)]">{data.todayWinsCount}</span> today
+            <span className="font-semibold text-text-primary">{data.todayWinsCount}</span> today
           </>
         )}
       </span>
       <div className="flex items-center gap-2">
         {data.teachingStreak > 0 && (
           <div
-            className="flex items-center gap-1 rounded-full border border-[var(--action-info,#3b82f6)]/30 bg-[var(--action-info,#3b82f6)]/10 px-2 py-0.5 text-[10px] text-[var(--action-info,#3b82f6)]"
+            className="flex items-center gap-1 rounded-full border border-[var(--action-info,var(--action-primary))]/30 bg-[var(--action-info,var(--action-primary))]/10 px-2 py-0.5 text-[10px] text-[var(--action-info,var(--action-primary))]"
             title="Class marking streak"
           >
             <GraduationCap className="size-3" aria-hidden />
@@ -67,7 +67,7 @@ export function WeekBar() {
         )}
         {data.facultyStreak > 0 && (
           <div
-            className="flex items-center gap-1 rounded-full border border-[var(--action-warning)]/30 bg-[var(--action-warning)]/10 px-2 py-0.5 text-[10px] text-[var(--action-warning)]"
+            className="flex items-center gap-1 rounded-full border border-action-warning/30 bg-action-warning/10 px-2 py-0.5 text-[10px] text-action-warning"
             title="Zero-escalation faculty streak"
           >
             <Flame className="size-3" aria-hidden />

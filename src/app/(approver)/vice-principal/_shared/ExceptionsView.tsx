@@ -50,8 +50,8 @@ export function ExceptionsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Attendance exceptions</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Attendance exceptions</h1>
+        <p className="text-xs text-text-muted">
           {total} exception{total === 1 ? "" : "s"} today
         </p>
       </header>
@@ -69,15 +69,15 @@ export function ExceptionsView() {
       ) : (
         <div className="space-y-3">
           {absent.length > 0 && (
-            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
-              <header className="border-b border-[var(--border)] px-4 py-3">
+            <section className="rounded-2xl border border-border bg-bg-surface">
+              <header className="border-b border-border px-4 py-3">
                 <h2 className="text-sm font-semibold">Absent today ({absent.length})</h2>
               </header>
-              <ul className="divide-y divide-[var(--border)]">
+              <ul className="divide-y divide-border">
                 {absent.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
                     <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-[var(--text-muted)]">
+                    <span className="text-text-muted">
                       {p.designation ?? p.role}
                     </span>
                   </li>
@@ -87,15 +87,15 @@ export function ExceptionsView() {
           )}
 
           {late.length > 0 && (
-            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
-              <header className="border-b border-[var(--border)] px-4 py-3">
+            <section className="rounded-2xl border border-border bg-bg-surface">
+              <header className="border-b border-border px-4 py-3">
                 <h2 className="text-sm font-semibold">Late arrivals ({late.length})</h2>
               </header>
-              <ul className="divide-y divide-[var(--border)]">
+              <ul className="divide-y divide-border">
                 {late.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
                     <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-[var(--action-warning)]">{p.minutesLate}m late</span>
+                    <span className="text-action-warning">{p.minutesLate}m late</span>
                   </li>
                 ))}
               </ul>
@@ -103,15 +103,15 @@ export function ExceptionsView() {
           )}
 
           {flagged.length > 0 && (
-            <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
-              <header className="border-b border-[var(--border)] px-4 py-3">
+            <section className="rounded-2xl border border-border bg-bg-surface">
+              <header className="border-b border-border px-4 py-3">
                 <h2 className="text-sm font-semibold">Flagged ({flagged.length})</h2>
               </header>
-              <ul className="divide-y divide-[var(--border)]">
+              <ul className="divide-y divide-border">
                 {flagged.map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
                     <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-[var(--action-danger)]">{p.reason}</span>
+                    <span className="text-action-danger">{p.reason}</span>
                   </li>
                 ))}
               </ul>

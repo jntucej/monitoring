@@ -91,7 +91,7 @@ export function SpecialItemSelector() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-action-danger">
         {error}
         <button type="button" onClick={() => void load()} className="ml-2 underline">Retry</button>
       </div>
@@ -113,15 +113,15 @@ export function SpecialItemSelector() {
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Special Items</h2>
-            <p className="text-sm text-[var(--text-muted)]">
+            <h2 className="text-lg font-semibold text-text-primary">Special Items</h2>
+            <p className="text-sm text-text-muted">
               Choose the special items you want. You can change your selection until the deadline.
             </p>
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
@@ -141,18 +141,18 @@ export function SpecialItemSelector() {
           );
 
           return (
-            <div key={ev.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4">
+            <div key={ev.id} className="rounded-xl border border-border bg-bg-surface/60 p-4">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <h3 className="text-base font-semibold text-[var(--text-primary)]">{ev.title}</h3>
-                  <p className="text-xs text-[var(--text-muted)]">
+                  <h3 className="text-base font-semibold text-text-primary">{ev.title}</h3>
+                  <p className="text-xs text-text-muted">
                     {ev.eventDate} · {MEAL_LABEL[ev.mealType]}
                     {ev.notes ? ` · ${ev.notes}` : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${
-                    open ? "border-emerald-500/40 text-emerald-300" : "border-[var(--border)]/40 text-[var(--text-muted)]"
+                    open ? "border-emerald-500/40 text-action-success" : "border-border/40 text-text-muted"
                   }`}>
                     <Clock className="h-3 w-3" />
                     {open ? countdownLabel(ev.interestDeadline) : status}
@@ -163,7 +163,7 @@ export function SpecialItemSelector() {
               {(Object.keys(grouped) as SpecialItemCategory[]).map((cat) =>
                 grouped[cat].length === 0 ? null : (
                   <div key={cat} className="mb-3">
-                    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+                    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                       {CAT_LABEL[cat]}
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -176,7 +176,7 @@ export function SpecialItemSelector() {
                             disabled={!open}
                             onClick={() => toggle(ev.id, it.id)}
                             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition ${
-                              isOn ? CAT_TONE[cat] : "border-[var(--border)] text-[var(--text-secondary)]"
+                              isOn ? CAT_TONE[cat] : "border-border text-text-secondary"
                             } ${!open ? "opacity-60" : "hover:brightness-110"}`}
                           >
                             {isOn ? <CheckCircle2 className="h-4 w-4" /> : <span className="h-4 w-4 rounded-full border border-current" />}
@@ -191,12 +191,12 @@ export function SpecialItemSelector() {
 
               {open && (
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs text-[var(--text-muted)]">{selected.size} selected</span>
+                  <span className="text-xs text-text-muted">{selected.size} selected</span>
                   <button
                     type="button"
                     disabled={savingEventId === ev.id}
                     onClick={() => void save(ev)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[var(--action-primary)] px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
                   >
                     {savingEventId === ev.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Save selection
@@ -206,7 +206,7 @@ export function SpecialItemSelector() {
 
               {canGetToken && ev.myItemIds.length > 0 && (
                 <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2">
-                  <div className="text-xs text-[var(--text-secondary)]">
+                  <div className="text-xs text-text-secondary">
                     Serving window is open. Get your token to redeem your meal.
                   </div>
                   <Link

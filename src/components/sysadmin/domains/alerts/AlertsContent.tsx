@@ -61,7 +61,7 @@ function KpiChip({
   return (
     <div
       className={cn(
-        "rounded-lg border p-3 bg-[var(--bg-surface)]",
+        "rounded-lg border p-3 bg-bg-surface",
       )}
       style={{ borderColor: "var(--border)" }}
     >
@@ -89,7 +89,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
 
   return (
     <li
-      className="flex items-center gap-3 rounded-lg border p-3 bg-[var(--bg-surface)]"
+      className="flex items-center gap-3 rounded-lg border p-3 bg-bg-surface"
       style={{ borderColor: "var(--border)" }}
     >
       {/* severity ribbon */}
@@ -197,7 +197,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
       {/* KPI chips row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <div
-          className="rounded-lg border p-3 bg-[var(--bg-surface)]"
+          className="rounded-lg border p-3 bg-bg-surface"
           style={{ borderColor: "var(--border)" }}
         >
           <div className="flex items-center justify-between">
@@ -222,7 +222,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* Signature visual: 24h severity stacked-area strip */}
       <div
-        className="rounded-lg border p-4 bg-[var(--bg-surface)]"
+        className="rounded-lg border p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -296,7 +296,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* Live feed with 30-min heat strip on each row */}
       <div
-        className="rounded-lg border p-4 bg-[var(--bg-surface)]"
+        className="rounded-lg border p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -354,7 +354,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* 7-day rule heat matrix */}
       <div
-        className="rounded-lg border p-4 bg-[var(--bg-surface)]"
+        className="rounded-lg border p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">

@@ -96,8 +96,8 @@ export default function UserSupportPage() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <p className="font-medium text-[var(--text-secondary)] mb-3">Help & Support</p>
-          <p className="text-[var(--text-muted)]">Report gate issues or request support.</p>
+          <p className="font-medium text-text-secondary mb-3">Help & Support</p>
+          <p className="text-text-muted">Report gate issues or request support.</p>
         </div>
         <Button onClick={() => setShowModal(!showModal)} className="gap-2">
           <Plus className="w-4 h-4" /> {showModal ? "Cancel" : "Raise Ticket"}
@@ -105,24 +105,24 @@ export default function UserSupportPage() {
       </div>
 
       {showModal && (
-        <Card className="border p-4 bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)]/40">
+        <Card className="border p-4 bg-bg-elevated dark:bg-bg-elevated/40">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-blue-500" /> New Support Request</h3>
+            <h3 className="font-semibold text-lg flex items-center gap-2"><LifeBuoy className="w-5 h-5 text-action-primary" /> New Support Request</h3>
             <div className="grid-cols-1 md:grid-cols-2 gap-4">
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]">
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-2 border rounded text-sm bg-white dark:bg-bg-elevated">
                 <option value="gate_access">Gate Access Issue</option>
                 <option value="id_card">ID Card / Scanner</option>
                 <option value="pass_request">Pass Query</option>
                 <option value="system_issue">System Bug</option>
               </select>
-              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]">
+              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-2 border rounded text-sm bg-white dark:bg-bg-elevated">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
             </div>
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="w-full p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]" placeholder="Subject" />
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="w-full p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]" placeholder="Explain issue..." />
+            <input value={subject} onChange={(e) => setSubject(e.target.value)} required className="w-full p-2 border rounded text-sm bg-white dark:bg-bg-elevated" placeholder="Subject" />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} className="w-full p-2 border rounded text-sm bg-white dark:bg-bg-elevated" placeholder="Explain issue..." />
             <Button type="submit" size="sm">Submit Ticket</Button>
           </form>
         </Card>
@@ -130,9 +130,9 @@ export default function UserSupportPage() {
 
       <Card className="border p-4">
         <h3 className="font-semibold text-base flex items-center gap-2 mb-1">
-          <Send className="w-4 h-4 text-emerald-500" /> Developer
+          <Send className="w-4 h-4 text-action-success" /> Developer
         </h3>
-        <p className="text-[var(--text-muted)] dark:text-[var(--text-muted)] mb-3">
+        <p className="text-text-muted dark:text-text-muted mb-3">
           Suggestion, improvement, or anything that doesn&#39;t fit a ticket? Write it here.
           It goes straight to the developer with your name and role attached.
         </p>
@@ -143,7 +143,7 @@ export default function UserSupportPage() {
             rows={3}
             maxLength={2000}
             required
-            className="w-full p-2 border rounded text-sm bg-white dark:bg-[var(--bg-elevated)]"
+            className="w-full p-2 border rounded text-sm bg-white dark:bg-bg-elevated"
             placeholder="e.g. The gate page would load faster if…"
           />
           <div className="flex items-center gap-3">
@@ -151,7 +151,7 @@ export default function UserSupportPage() {
               {devSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               {devSending ? "Sending…" : "Send"}
             </Button>
-            <span className="text-[var(--text-muted)]">{devMessage.length}/2000</span>
+            <span className="text-text-muted">{devMessage.length}/2000</span>
           </div>
         </form>
       </Card>
@@ -162,12 +162,12 @@ export default function UserSupportPage() {
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-xs bg-[var(--bg-elevated)] dark:bg-[var(--bg-elevated)] px-2 py-0.5 rounded">{t.ticket_number}</span>
+                  <span className="font-bold text-xs bg-bg-elevated dark:bg-bg-elevated px-2 py-0.5 rounded">{t.ticket_number}</span>
                   <h3 className="font-semibold text-base">{t.subject}</h3>
                   <Badge variant={t.status === "open" ? "entry" : "success"} className="capitalize">{t.status}</Badge>
                 </div>
-                <p className="text-[var(--text-muted)] dark:text-[var(--text-secondary)] mt-1">{t.description}</p>
-                <div className="text-[var(--text-muted)] mt-2 flex items-center gap-2">
+                <p className="text-text-muted dark:text-text-secondary mt-1">{t.description}</p>
+                <div className="text-text-muted mt-2 flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5" /> {new Date(t.created_at).toLocaleString()}
                 </div>
               </div>

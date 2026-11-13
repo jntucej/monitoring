@@ -24,16 +24,16 @@ export const PrincipalConfirm = memo(function PrincipalConfirm({
   const color = variant === "danger" ? "rose" : variant === "info" ? "sky" : "amber";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-bg-surface p-6 shadow-xl">
         <div className="flex items-center gap-3">
           <AlertTriangle className={`h-5 w-5 text-${color}-400`} />
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
         </div>
-        <p className="mt-3 text-xs text-[var(--text-muted)]">{message}</p>
+        <p className="mt-3 text-xs text-text-muted">{message}</p>
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+            className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-bg-elevated"
           >
             {cancelLabel}
           </button>

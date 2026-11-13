@@ -47,7 +47,7 @@ export function PwaInstallPrompt() {
     <div
       role="dialog"
       aria-label="Install Gate Monitor"
-      className="fixed inset-x-4 bottom-20 z-40 rounded-xl bg-[var(--accent,#6366f1)] p-4 text-white shadow-lg md:hidden"
+      className="fixed inset-x-4 bottom-20 z-40 rounded-xl bg-[var(--accent,var(--action-primary))] p-4 text-white shadow-lg md:hidden"
     >
       <p className="font-semibold">Install Gate Monitor</p>
       <p className="text-sm opacity-90">Open faster. Get gate-out alerts.</p>
@@ -60,7 +60,7 @@ export function PwaInstallPrompt() {
             }
             setShow(false);
           }}
-          className="min-h-[44px] flex-1 rounded-lg bg-white font-medium text-[var(--accent,#6366f1)]"
+          className="min-h-[44px] flex-1 rounded-lg bg-white font-medium text-[var(--accent,var(--action-primary))]"
         >
           Install
         </button>

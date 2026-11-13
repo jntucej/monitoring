@@ -62,12 +62,12 @@ const api = useApi();
   };
 
   if (loading) return (
-    <div className="flex items-center gap-2 p-6 text-sm text-[var(--text-secondary)]">
+    <div className="flex items-center gap-2 p-6 text-sm text-text-secondary">
       <RefreshCw className="w-4 h-4 animate-spin" /> Loading...
     </div>
   );
   if (!stats) return (
-    <div className="p-6 text-rose-400 text-sm">
+    <div className="p-6 text-action-danger text-sm">
       Failed to load. <button onClick={fetchStats} className="underline">Retry</button>
     </div>
   );
@@ -77,31 +77,31 @@ const api = useApi();
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold text-[var(--text-secondary)] uppercase">Failed Logins (24h)</CardTitle>
-            <ShieldAlert className="h-4 w-4 text-amber-400" />
+            <CardTitle className="text-xs font-semibold text-text-secondary uppercase">Failed Logins (24h)</CardTitle>
+            <ShieldAlert className="h-4 w-4 text-action-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[var(--text-primary)]">{stats?.failedLogins24h || 0}</div>
+            <div className="text-2xl font-bold text-text-primary">{stats?.failedLogins24h || 0}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold text-[var(--text-secondary)] uppercase">Active Sessions</CardTitle>
+            <CardTitle className="text-xs font-semibold text-text-secondary uppercase">Active Sessions</CardTitle>
             <Lock className="h-4 w-4 text-cyan-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[var(--text-primary)]">{stats?.activeSessions || 0}</div>
+            <div className="text-2xl font-bold text-text-primary">{stats?.activeSessions || 0}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold text-[var(--text-secondary)] uppercase">IP Policy</CardTitle>
-            <Globe className="h-4 w-4 text-purple-400" />
+            <CardTitle className="text-xs font-semibold text-text-secondary uppercase">IP Policy</CardTitle>
+            <Globe className="h-4 w-4 text-unit-c" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-semibold text-[var(--text-primary)]">{stats?.ipAllowlistEnabled ? "Allowlist" : "Open"}</div>
+            <div className="text-lg font-semibold text-text-primary">{stats?.ipAllowlistEnabled ? "Allowlist" : "Open"}</div>
           </CardContent>
         </Card>
       </div>
@@ -112,12 +112,12 @@ const api = useApi();
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="allowed-subnets-ips">Allowed Subnets / IPs</label>
+            <label className="block text-xs font-medium text-text-secondary mb-1" htmlFor="allowed-subnets-ips">Allowed Subnets / IPs</label>
             <input id="allowed-subnets-ips"
               type="text"
               value={ipInput}
               onChange={(e) => setIpInput(e.target.value)}
-              className="w-full rounded-md bg-[var(--bg-surface)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text-primary)]"
+              className="w-full rounded-md bg-bg-surface border border-border px-3 py-2 text-xs text-text-primary"
             />
           </div>
 

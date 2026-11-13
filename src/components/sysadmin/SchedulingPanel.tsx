@@ -47,21 +47,21 @@ const CATEGORY_META: Record<
     label: "Gate Hours",
     description: "Adjust gate hours based on observed patterns.",
     icon: DoorOpen,
-    accent: "text-emerald-400",
+    accent: "text-action-success",
     surface: "bg-emerald-500/10 border-emerald-500/30",
   },
   operator_shifts: {
     label: "Operator Shifts",
     description: "Adjust operator shifts based on observed patterns.",
     icon: Users,
-    accent: "text-emerald-400",
+    accent: "text-action-success",
     surface: "bg-emerald-500/10 border-emerald-500/30",
   },
   curfew_adjustment: {
     label: "Curfew Adjustment",
     description: "Adjust curfew adjustment based on observed patterns.",
     icon: Moon,
-    accent: "text-emerald-400",
+    accent: "text-action-success",
     surface: "bg-emerald-500/10 border-emerald-500/30",
   },
 } as const;
@@ -73,10 +73,10 @@ interface ImpactTier {
 }
 
 function impactTier(score: number): ImpactTier {
-  if (score >= 80) return { label: "Critical", accent: "text-rose-400",    bar: "bg-rose-500" };
-  if (score >= 60) return { label: "High",     accent: "text-amber-400",   bar: "bg-amber-500" };
-  if (score >= 40) return { label: "Medium",   accent: "text-sky-400",     bar: "bg-sky-500" };
-  return               { label: "Low",      accent: "text-[var(--text-muted)]",   bar: "bg-[var(--bg-elevated)]" };
+  if (score >= 80) return { label: "Critical", accent: "text-action-danger",    bar: "bg-action-danger" };
+  if (score >= 60) return { label: "High",     accent: "text-action-warning",   bar: "bg-action-warning" };
+  if (score >= 40) return { label: "Medium",   accent: "text-action-info",     bar: "bg-action-info" };
+  return               { label: "Low",      accent: "text-text-muted",   bar: "bg-bg-elevated" };
 }
 
 /* ─────────────────────────── Types ─────────────────────────── */
@@ -203,7 +203,7 @@ export function SchedulingPanel() {
       />
 
       {suggestions.error ? (
-        <div role="alert" className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">
+        <div role="alert" className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <div>
             <p className="font-medium">Could not load ai smart scheduling assistant</p>
@@ -220,7 +220,7 @@ export function SchedulingPanel() {
             value={stats.total}
             
             hint="Total items for the current model run"
-            accent="text-emerald-400"
+            accent="text-action-success"
           />
           <KpiCard
             icon={TrendingUp}
@@ -228,7 +228,7 @@ export function SchedulingPanel() {
             value={stats.avgImpact}
                         suffix={"/ 100"}
             hint="Avg. impact for the current model run"
-            accent="text-sky-400"
+            accent="text-action-info"
           />
           <KpiCard
             icon={Target}
@@ -236,7 +236,7 @@ export function SchedulingPanel() {
             value={stats.highPriority}
             
             hint="High priority for the current model run"
-            accent="text-amber-400"
+            accent="text-action-warning"
           />
           <KpiCard
             icon={History}
@@ -244,7 +244,7 @@ export function SchedulingPanel() {
             value={applied.length}
             
             hint="Applied today for the current model run"
-            accent="text-violet-400"
+            accent="text-unit-c"
           />
         </section>
       </WidgetBoundary>
@@ -252,12 +252,12 @@ export function SchedulingPanel() {
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <WidgetBoundary title="items-list">
-            <section aria-label="Recommendations" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
-              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-4 py-3">
+            <section aria-label="Recommendations" className="rounded-xl border border-border bg-bg-surface">
+              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-[var(--action-primary)]" aria-hidden />
-                  <h2 className="text-sm font-semibold text-[var(--text-primary)]">Recommendations</h2>
-                  <span className="rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs tabular-nums text-[var(--text-muted)]">
+                  <Sparkles className="h-4 w-4 text-action-primary" aria-hidden />
+                  <h2 className="text-sm font-semibold text-text-primary">Recommendations</h2>
+                  <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-xs tabular-nums text-text-muted">
                     {rows.length} of {stats.total}
                   </span>
                 </div>
@@ -267,7 +267,7 @@ export function SchedulingPanel() {
                 {suggestions.loading && !suggestions.data ? (
                   <div className="space-y-2 p-2" aria-busy="true">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="h-24 animate-pulse rounded-lg bg-[var(--bg-elevated)]" />
+                      <div key={i} className="h-24 animate-pulse rounded-lg bg-bg-elevated" />
                     ))}
                   </div>
                 ) : rows.length === 0 ? (
@@ -298,52 +298,52 @@ export function SchedulingPanel() {
 
         <aside className="space-y-4 lg:col-span-1">
           <WidgetBoundary title="model-info">
-            <section aria-label="Model information" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+            <section aria-label="Model information" className="rounded-xl border border-border bg-bg-surface p-4">
               <header className="mb-3 flex items-center gap-2">
-                <Brain className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />
-                <h2 className="text-sm font-semibold text-[var(--text-primary)]">Model</h2>
+                <Brain className="h-4 w-4 text-text-muted" aria-hidden />
+                <h2 className="text-sm font-semibold text-text-primary">Model</h2>
               </header>
               <dl className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <dt className="text-[var(--text-muted)]">Version</dt>
-                  <dd className="tabular-nums text-[var(--text-primary)]">{suggestions.data?.model.version ?? "—"}</dd>
+                  <dt className="text-text-muted">Version</dt>
+                  <dd className="tabular-nums text-text-primary">{suggestions.data?.model.version ?? "—"}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-[var(--text-muted)]">Samples</dt>
-                  <dd className="tabular-nums text-[var(--text-primary)]">
+                  <dt className="text-text-muted">Samples</dt>
+                  <dd className="tabular-nums text-text-primary">
                     {suggestions.data?.model.samples ? fmtInt(suggestions.data.model.samples) : "—"}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-[var(--text-muted)]">Last trained</dt>
-                  <dd className="text-[var(--text-primary)]">{lastUpdated}</dd>
+                  <dt className="text-text-muted">Last trained</dt>
+                  <dd className="text-text-primary">{lastUpdated}</dd>
                 </div>
               </dl>
-              <p className="mt-3 flex items-start gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-2 text-xs text-[var(--text-muted)]">
-                <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden />
+              <p className="mt-3 flex items-start gap-1.5 rounded-md border border-border bg-bg-elevated p-2 text-xs text-text-muted">
+                <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-action-success" aria-hidden />
                 Suggestions are advisory. Every applied change is audit-logged with the acting admin and a before/after snapshot.
               </p>
             </section>
           </WidgetBoundary>
 
           <WidgetBoundary title="recent-applications">
-            <section aria-label="Recently applied changes" className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+            <section aria-label="Recently applied changes" className="rounded-xl border border-border bg-bg-surface p-4">
               <header className="mb-3 flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[var(--text-muted)]" aria-hidden />
-                <h2 className="text-sm font-semibold text-[var(--text-primary)]">Applied this session</h2>
+                <Activity className="h-4 w-4 text-text-muted" aria-hidden />
+                <h2 className="text-sm font-semibold text-text-primary">Applied this session</h2>
               </header>
               {applied.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)]">
+                <p className="text-xs text-text-muted">
                   No changes applied yet. Applied changes appear here with a timestamp and actor.
                 </p>
               ) : (
                 <ul className="space-y-2" role="list">
                   {applied.map((a) => (
-                    <li key={`${a.id}-${a.appliedAt}`} className="flex items-start gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] p-2">
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden />
+                    <li key={`${a.id}-${a.appliedAt}`} className="flex items-start gap-2 rounded-md border border-border bg-bg-elevated p-2">
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action-success" aria-hidden />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-[var(--text-primary)]">{a.title}</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">
+                        <p className="truncate text-xs font-medium text-text-primary">{a.title}</p>
+                        <p className="text-[10px] text-text-muted">
                           {CATEGORY_META[a.category].label} · {fmtRelative(a.appliedAt)} · {a.actor}
                         </p>
                       </div>
@@ -388,16 +388,16 @@ function KpiCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+    <div className="rounded-xl border border-border bg-bg-surface p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
+        <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
         <Icon className={`h-4 w-4 ${accent}`} aria-hidden />
       </div>
-      <p className="mt-2 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+      <p className="mt-2 text-2xl font-semibold tabular-nums text-text-primary">
         {fmtInt(value)}
-        {suffix ? <span className="ml-1 text-sm font-normal text-[var(--text-muted)]">{suffix}</span> : null}
+        {suffix ? <span className="ml-1 text-sm font-normal text-text-muted">{suffix}</span> : null}
       </p>
-      <p className="mt-1 text-[11px] leading-snug text-[var(--text-muted)]">{hint}</p>
+      <p className="mt-1 text-[11px] leading-snug text-text-muted">{hint}</p>
     </div>
   );
 }
@@ -421,14 +421,14 @@ function ItemCard({
   const Chevron = expanded ? ChevronDown : ChevronRight;
 
   return (
-    <article className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] transition-colors hover:border-[var(--border-strong)]">
+    <article className="rounded-lg border border-border bg-bg-elevated transition-colors hover:border-border">
       <header className="flex items-start gap-3 p-3">
         <button
           type="button"
           onClick={onToggle}
           aria-label={expanded ? "Collapse item" : "Expand item"}
           aria-expanded={expanded}
-          className="mt-0.5 rounded-md p-1 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+          className="mt-0.5 rounded-md p-1 text-text-muted hover:bg-bg-surface hover:text-text-primary"
         >
           <Chevron className="h-4 w-4" aria-hidden />
         </button>
@@ -439,16 +439,16 @@ function ItemCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-[var(--text-primary)]">{item.title}</h3>
+            <h3 className="truncate text-sm font-semibold text-text-primary">{item.title}</h3>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${meta.surface} ${meta.accent}`}>
               {meta.label}
             </span>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-muted)]">{item.recommendation}</p>
+          <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{item.recommendation}</p>
 
           <div className="mt-2 flex items-center gap-2">
             <div
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--bg-surface)]"
+              className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-surface"
               role="progressbar"
               aria-valuenow={item.impact_score}
               aria-valuemin={0}
@@ -467,7 +467,7 @@ function ItemCard({
             type="button"
             onClick={onToggle}
             aria-label="Preview reasoning"
-            className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+            className="rounded-md p-1.5 text-text-muted hover:bg-bg-surface hover:text-text-primary"
           >
             <Eye className="h-4 w-4" aria-hidden />
           </button>
@@ -476,7 +476,7 @@ function ItemCard({
             onClick={onApply}
             disabled={applying}
             aria-label={`Apply ${item.title}`}
-            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-action-success hover:bg-emerald-500/20 disabled:opacity-50"
           >
             {applying ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : <Check className="h-3 w-3" aria-hidden />}
             {applying ? "Applying" : "Apply"}
@@ -485,24 +485,24 @@ function ItemCard({
       </header>
 
       {expanded ? (
-        <div className="border-t border-[var(--border)] p-3 text-xs">
+        <div className="border-t border-border p-3 text-xs">
           <div className="space-y-3">
             <div>
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">AI reasoning</p>
-              <p className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-2 leading-relaxed text-[var(--text-secondary)]">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">AI reasoning</p>
+              <p className="rounded-md border border-border bg-bg-surface p-2 leading-relaxed text-text-secondary">
                 {item.reasoning}
               </p>
             </div>
             <div>
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">Suggested change</p>
-              <div className="flex flex-wrap items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-2">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">Suggested change</p>
+              <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-surface p-2">
                 <ChangeChip label="Target" value={item.suggested_action?.target ?? "—"} />
                 {item.suggested_action?.before ? <ChangeChip label="Before" value={item.suggested_action.before} /> : null}
-                {item.suggested_action?.before ? <ArrowRight className="h-3 w-3 text-[var(--text-muted)]" aria-hidden /> : null}
+                {item.suggested_action?.before ? <ArrowRight className="h-3 w-3 text-text-muted" aria-hidden /> : null}
                 {item.suggested_action?.after ? <ChangeChip label="After" value={item.suggested_action.after} /> : null}
               </div>
             </div>
-            <div className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-2 text-[var(--text-muted)]">
+            <div className="rounded-md border border-border bg-bg-surface p-2 text-text-muted">
               <p className="flex items-start gap-1.5">
                 <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
                 Category: {meta.label} — {meta.description}
@@ -517,9 +517,9 @@ function ItemCard({
 
 function ChangeChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-2 py-0.5">
-      <span className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">{label}</span>
-      <span className="text-xs font-medium tabular-nums text-[var(--text-primary)]">{value}</span>
+    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-bg-elevated px-2 py-0.5">
+      <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
+      <span className="text-xs font-medium tabular-nums text-text-primary">{value}</span>
     </span>
   );
 }

@@ -62,7 +62,7 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
         <div
           role="radiogroup"
           aria-label="Theme selection"
-          className="flex items-center p-0.5 sm:p-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-inner relative shrink-0"
+          className="flex items-center p-0.5 sm:p-1 rounded-full bg-bg-elevated border border-border shadow-inner relative shrink-0"
         >
           {themes.map((t) => {
             const isActive = currentTheme === t.id;
@@ -74,14 +74,14 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
                 aria-checked={isActive}
                 onClick={() => handleThemeChange(t.id as any)}
                 className={`relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
-                  isActive ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  isActive ? "text-text-primary" : "text-text-muted hover:text-text-primary"
                 }`}
                 aria-label={`Switch to ${t.label} theme`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="operator-theme-toggle-bubble"
-                    className="absolute inset-0 bg-[var(--bg-surface)] rounded-full shadow-sm border border-[var(--border-strong)] z-0"
+                    className="absolute inset-0 bg-bg-surface rounded-full shadow-sm border border-border z-0"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
                 )}
@@ -95,7 +95,7 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
         <button
           onClick={() => setShowFeedback(true)}
           title="Report Theme Issue"
-          className="p-1 sm:p-1.5 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
+          className="p-1 sm:p-1.5 rounded-full text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
         >
           <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
@@ -103,22 +103,22 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
 
       {showFeedback && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-semibold text-[var(--text-primary)]">Report Theme Issue</h3>
-            <p className="text-sm text-[var(--text-muted)]">
+          <div className="w-full max-w-md bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-semibold text-text-primary">Report Theme Issue</h3>
+            <p className="text-sm text-text-muted">
               If the {lastTheme || currentTheme} theme has visual issues, please describe them.
             </p>
             <textarea
               id="operator-theme-feedback"
               rows={4}
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-base)] p-3 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+              className="w-full rounded-lg border border-border bg-bg-base p-3 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/40"
               placeholder="Describe the issue..."
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowFeedback(false)}
-                className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
               >
                 Cancel
               </button>
@@ -139,7 +139,7 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
                   }
                   setShowFeedback(false);
                 }}
-                className="rounded-lg bg-[var(--action-primary)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition"
+                className="rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition"
               >
                 Submit
               </button>

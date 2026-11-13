@@ -400,12 +400,12 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
       aria-label="Supervisor command palette"
     >
       <div
-        className="w-full max-w-md bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
-          <Search className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+          <Search className="w-4 h-4 text-text-muted shrink-0" />
           <input
             ref={inputRef}
             value={query}
@@ -415,25 +415,25 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
             }}
             onKeyDown={onListKeyDown}
             placeholder={`Supervisor command (role: ${role})…`}
-            className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none min-w-0"
+            className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
             aria-label="Supervisor command input"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)] shrink-0">
+          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
             esc
           </kbd>
         </div>
 
         {/* Parsed-command preview */}
         {parsedPreview && parsedPreview.action !== "UNKNOWN" ? (
-          <div className="px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-elevated)] text-[11px] text-[var(--text-secondary)]">
-            <span className="font-mono font-bold text-[var(--action-primary)]">
+          <div className="px-4 py-2 border-b border-border bg-bg-elevated text-[11px] text-text-secondary">
+            <span className="font-mono font-bold text-action-primary">
               {parsedPreview.action}
             </span>
             {parsedPreview.action === "APPROVE" ? (
               parsedPreview.ticket ? (
                 <span className="ml-1.5 font-mono">{parsedPreview.ticket}</span>
               ) : (
-                <span className="ml-1.5 text-[var(--text-muted)] italic">[ticket required]</span>
+                <span className="ml-1.5 text-text-muted italic">[ticket required]</span>
               )
             ) : null}
             {parsedPreview.action === "ESCALATE" ? (
@@ -441,10 +441,10 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
                 {parsedPreview.ticket ? (
                   <span className="ml-1.5 font-mono">{parsedPreview.ticket}</span>
                 ) : (
-                  <span className="ml-1.5 text-[var(--text-muted)] italic">[ticket required]</span>
+                  <span className="ml-1.5 text-text-muted italic">[ticket required]</span>
                 )}
                 {parsedPreview.targetRole ? (
-                  <span className="ml-1.5 text-[var(--text-muted)]">to {parsedPreview.targetRole}</span>
+                  <span className="ml-1.5 text-text-muted">to {parsedPreview.targetRole}</span>
                 ) : null}
               </>
             ) : null}
@@ -453,12 +453,12 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
                 {parsedPreview.alertId ? (
                   <span className="ml-1.5 font-mono">{parsedPreview.alertId}</span>
                 ) : (
-                  <span className="ml-1.5 text-[var(--text-muted)] italic">[alert required]</span>
+                  <span className="ml-1.5 text-text-muted italic">[alert required]</span>
                 )}
                 {parsedPreview.assignee ? (
-                  <span className="ml-1.5 text-[var(--text-muted)]">to {parsedPreview.assignee}</span>
+                  <span className="ml-1.5 text-text-muted">to {parsedPreview.assignee}</span>
                 ) : (
-                  <span className="ml-1.5 text-[var(--text-muted)] italic">[user required]</span>
+                  <span className="ml-1.5 text-text-muted italic">[user required]</span>
                 )}
               </>
             ) : null}
@@ -466,26 +466,26 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
               parsedPreview.alertId ? (
                 <span className="ml-1.5 font-mono">{parsedPreview.alertId}</span>
               ) : (
-                <span className="ml-1.5 text-[var(--text-muted)] italic">[alert required]</span>
+                <span className="ml-1.5 text-text-muted italic">[alert required]</span>
               )
             ) : null}
             {parsedPreview.action === "HANDOVER" ? (
               parsedPreview.handoverText ? (
-                <span className="ml-1.5 text-[var(--text-muted)] italic truncate">
+                <span className="ml-1.5 text-text-muted italic truncate">
                   &ldquo;{parsedPreview.handoverText}&rdquo;
                 </span>
               ) : (
-                <span className="ml-1.5 text-[var(--text-muted)] italic">[shift note]</span>
+                <span className="ml-1.5 text-text-muted italic">[shift note]</span>
               )
             ) : null}
-            {busy ? <span className="ml-2 text-[var(--text-muted)]">processing…</span> : null}
+            {busy ? <span className="ml-2 text-text-muted">processing…</span> : null}
           </div>
         ) : null}
 
         {/* Command list */}
         <ul role="listbox" aria-label="Supervisor commands" className="max-h-64 overflow-y-auto py-1">
           {filtered.length === 0 ? (
-            <li className="px-4 py-6 text-center text-xs text-[var(--text-muted)]">
+            <li className="px-4 py-6 text-center text-xs text-text-muted">
               No matching commands
             </li>
           ) : (
@@ -500,14 +500,14 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
                     onClick={() => handleSelect(cmd)}
                     onMouseEnter={() => setActive(idx)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors disabled:opacity-50 ${
-                      isActive ? "bg-[var(--action-primary)]/10" : "hover:bg-[var(--bg-elevated)]"
+                      isActive ? "bg-action-primary/10" : "hover:bg-bg-elevated"
                     }`}
                   >
                     <span
                       className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                         isActive
-                          ? "bg-[var(--action-primary)]/20 text-[var(--action-primary)]"
-                          : "bg-[var(--bg-elevated)] text-[var(--text-secondary)]"
+                          ? "bg-action-primary/20 text-action-primary"
+                          : "bg-bg-elevated text-text-secondary"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -515,17 +515,17 @@ export function SupervisorCommandBar({ role, open, onClose }: SupervisorCommandB
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-sm font-semibold ${
-                          isActive ? "text-[var(--action-primary)]" : "text-[var(--text-primary)]"
+                          isActive ? "text-action-primary" : "text-text-primary"
                         }`}
                       >
                         {cmd.label}
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)] truncate font-mono">
+                      <p className="text-[11px] text-text-muted truncate font-mono">
                         {cmd.hint}
                       </p>
                     </div>
                     {isActive ? (
-                      <ChevronRight className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-action-primary shrink-0" />
                     ) : null}
                   </button>
                 </li>

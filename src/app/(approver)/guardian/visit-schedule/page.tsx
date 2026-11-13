@@ -47,14 +47,14 @@ interface CalendarResponse {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  examination: "#8b5cf6",
-  workshop: "#3b82f6",
-  event: "#10b981",
-  department: "#f59e0b",
-  hostel: "#06b6d4",
-  staff_duty: "#ef4444",
-  maintenance: "#84cc16",
-  admin_deadline: "#ec4899",
+  examination: "var(--unit-c)",
+  workshop: "var(--action-primary)",
+  event: "var(--action-success)",
+  department: "var(--action-warning)",
+  hostel: "var(--action-info)",
+  staff_duty: "var(--action-danger)",
+  maintenance: "var(--action-success)",
+  admin_deadline: "var(--unit-c)",
 };
 
 function monthKey(d: Date): string {
@@ -125,10 +125,10 @@ function VisitScheduleInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-emerald-400" />
+            <Calendar className="w-6 h-6 text-action-success" />
             Visit Schedule
           </p>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-text-muted">
             Planned campus events, deadlines and visits
           </p>
         </div>
@@ -150,15 +150,15 @@ function VisitScheduleInner() {
         </div>
       )}
 
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 min-w-0">
+      <div className="rounded-xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
         {/* header row */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Calendar className="h-4 w-4 text-emerald-400 shrink-0" />
-            <span className="text-sm font-medium text-[var(--text-primary)]">
+            <Calendar className="h-4 w-4 text-action-success shrink-0" />
+            <span className="text-sm font-medium text-text-primary">
               {monthLabel}
             </span>
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-text-muted">
               ({upcoming.length} upcoming)
             </span>
           </div>
@@ -166,7 +166,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
+              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -174,7 +174,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors motion-reduce:transition-none"
+              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
@@ -182,7 +182,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={() => setView(view === "list" ? "month" : "list")}
-              className="px-2.5 py-1 rounded-lg text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors motion-reduce:transition-none"
+              className="px-2.5 py-1 rounded-lg text-xs text-text-muted hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
             >
               {view === "list" ? "Month view" : "List view"}
             </button>
@@ -200,7 +200,7 @@ function VisitScheduleInner() {
                   type="button"
                   onClick={() => void toggleFollow(cat.code, !isFollowed)}
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs transition-colors motion-reduce:transition-none ${
-                    isFollowed ? "" : "border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+                    isFollowed ? "" : "border border-border text-text-muted hover:bg-bg-elevated"
                   }`}
                   style={
                     isFollowed
@@ -221,33 +221,33 @@ function VisitScheduleInner() {
         )}
 
         {loading ? (
-          <div className="py-10 flex items-center justify-center text-sm text-[var(--text-muted)]">
+          <div className="py-10 flex items-center justify-center text-sm text-text-muted">
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
             Loading campus calendar…
           </div>
         ) : upcoming.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)] py-6 text-center">
+          <p className="text-sm text-text-muted py-6 text-center">
             No upcoming campus events this month.
           </p>
         ) : view === "list" ? (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {upcoming.map((ev) => {
-              const color = CATEGORY_COLORS[ev.category] ?? "#6b7280";
+              const color = CATEGORY_COLORS[ev.category] ?? "var(--text-muted)";
               const isFollowed = followed.includes(ev.category);
               return (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 rounded-xl border border-[var(--border)]/60 bg-[var(--bg-base)]/40 p-3"
+                  className="flex items-start gap-3 rounded-xl border border-border/60 bg-bg-base/40 p-3"
                 >
                   <div
                     className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: color }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                    <p className="text-sm font-medium text-text-primary truncate">
                       {ev.title}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {new Date(ev.date).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
@@ -261,11 +261,11 @@ function VisitScheduleInner() {
                   <button
                     type="button"
                     onClick={() => void toggleFollow(ev.category, !isFollowed)}
-                    className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors motion-reduce:transition-none shrink-0"
+                    className="p-1.5 text-text-muted hover:text-text-primary transition-colors motion-reduce:transition-none shrink-0"
                     aria-label="Toggle reminder for this category"
                   >
                     {isFollowed ? (
-                      <Bell className="h-4 w-4 text-emerald-400" />
+                      <Bell className="h-4 w-4 text-action-success" />
                     ) : (
                       <Bell className="h-4 w-4" />
                     )}
@@ -279,7 +279,7 @@ function VisitScheduleInner() {
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {groupedMonth(events).map(([day, dayEvents]) => (
               <div key={day}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-1.5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-1.5">
                   {new Date(day + "T00:00:00").toLocaleDateString("en-IN", {
                     weekday: "short",
                     day: "2-digit",
@@ -288,7 +288,7 @@ function VisitScheduleInner() {
                 </p>
                 <div className="space-y-1.5">
                   {dayEvents.map((ev) => {
-                    const color = CATEGORY_COLORS[ev.category] ?? "#6b7280";
+                    const color = CATEGORY_COLORS[ev.category] ?? "var(--text-muted)";
                     return (
                       <div
                         key={ev.id}

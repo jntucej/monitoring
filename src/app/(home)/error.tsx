@@ -15,7 +15,7 @@ export default function HomeError({
   }, [error]);
 
   return (
-    <div className="min-h-dvh flex-col items-center justify-center bg-[#070B14] px-6 text-white">
+    <div className="min-h-dvh flex-col items-center justify-center bg-bg-base px-6 text-white">
       <h2 className="mb-4 text-2xl font-light tracking-tight">The story encountered a silence.</h2>
       <p className="mb-8 max-w-sm text-white/60">
         Something unexpected occurred while rendering the gate monitor.

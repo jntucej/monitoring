@@ -35,8 +35,8 @@ export function ExamsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Examination Oversight</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Examination Oversight</h1>
+        <p className="text-xs text-text-muted">
           Exam clearance queues, attendance, and hall exceptions
         </p>
       </header>
@@ -61,15 +61,15 @@ export function ExamsView() {
             {exceptions.map((e, idx) => (
               <li
                 key={e.id ?? idx}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
-                  <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {e.status ?? "PENDING"}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">{e.reason ?? "Exam hall clearance"}</p>
+                <p className="mt-1 text-xs text-text-secondary">{e.reason ?? "Exam hall clearance"}</p>
               </li>
             ))}
           </ul>
@@ -92,7 +92,7 @@ export function ExamsView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-[var(--action-primary)]/10 px-2 py-0.5 text-xs text-[var(--action-primary)]">
+                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "PENDING"}
                     </span>
                   ),

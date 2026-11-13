@@ -56,8 +56,8 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
   return (
     <form
       onSubmit={submit}
-      className="border-t border-[var(--border)] p-2.5 flex items-end gap-1.5
-                 bg-[var(--bg-surface)]/80 backdrop-blur-md"
+      className="border-t border-border p-2.5 flex items-end gap-1.5
+                 bg-bg-surface/80 backdrop-blur-md"
       style={{ paddingBottom: "calc(0.625rem + env(safe-area-inset-bottom, 0px))" }}
     >
       <button
@@ -70,20 +70,20 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         className={`relative h-10 w-10 shrink-0 rounded-full flex items-center justify-center transition
           disabled:opacity-40 disabled:cursor-not-allowed active:scale-95
           ${listening
-            ? "bg-rose-500 text-white shadow-lg"
-            : "bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"}`}
+            ? "bg-action-danger text-white shadow-lg"
+            : "bg-bg-elevated text-text-secondary hover:text-text-primary"}`}
       >
         {listening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
         {listening && (
           <motion.span
-            className="absolute inset-0 rounded-full border-2 border-rose-500"
+            className="absolute inset-0 rounded-full border-2 border-action-danger"
             animate={{ scale: [1, 1.4], opacity: [0.7, 0] }}
             transition={{ duration: 1.1, repeat: Infinity }}
           />
         )}
         {listening && micRemainingSeconds != null && (
           <span
-            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-semibold flex items-center justify-center leading-none"
+            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-action-danger text-white text-[9px] font-semibold flex items-center justify-center leading-none"
             aria-label={`${micRemainingSeconds} seconds remaining`}
           >
             {micRemainingSeconds}
@@ -105,13 +105,13 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         aria-label={t.placeholder}
         enterKeyHint="send"
         className="flex-1 resize-none bg-transparent outline-none text-sm px-2 py-2.5
-                   max-h-32 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
+                   max-h-32 text-text-primary placeholder:text-text-muted
                    [scrollbar-width:thin]"
       />
 
       {streaming ? (
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)]" role="status" aria-live="polite">
+          <div className="flex items-center gap-1.5 text-[10px] text-text-muted" role="status" aria-live="polite">
             <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
             <span className="whitespace-nowrap">Generating… {streamingSeconds}s</span>
           </div>
@@ -119,7 +119,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
             type="button"
             onClick={onStop}
             aria-label={t.stop}
-            className="h-8 px-2.5 rounded-lg bg-[var(--bg-elevated)] text-[11px] text-[var(--text-secondary)]
+            className="h-8 px-2.5 rounded-lg bg-bg-elevated text-[11px] text-text-secondary
                        active:scale-95 transition inline-flex items-center gap-1"
           >
             <Square className="h-3 w-3 fill-current" /> {t.stop}
@@ -130,7 +130,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
           type="submit"
           disabled={!value.trim()}
           aria-label={t.send}
-          className="h-10 w-10 shrink-0 rounded-lg bg-emerald-500 hover:bg-emerald-600
+          className="h-10 w-10 shrink-0 rounded-lg bg-action-success hover:bg-action-success
                      disabled:opacity-40 disabled:cursor-not-allowed
                      flex items-center justify-center transition active:scale-95"
         >

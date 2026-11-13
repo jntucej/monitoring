@@ -42,7 +42,7 @@ export function TrustBand() {
         <h2 className="text-3xl font-bold md:text-4xl">
           Built for institutions, not demos
         </h2>
-        <p className="mt-2 text-[var(--home-text-secondary,#9CA3AF)]">
+        <p className="mt-2 text-[var(--home-text-secondary,var(--text-muted))]">
           The guarantees that keep a campus honest.
         </p>
       </div>
@@ -54,12 +54,12 @@ export function TrustBand() {
             whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.5, delay: i * 0.05 }}
-            className="border-l-2 border-[var(--home-accent-steel,#0EA5E9)] pl-5"
+            className="border-l-2 border-[var(--home-accent-steel,var(--action-info))] pl-5"
           >
-            <h3 className="font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+            <h3 className="font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
               {p.title}
             </h3>
-            <p className="mt-1 text-sm text-[var(--home-text-muted,#6B7280)]">
+            <p className="mt-1 text-sm text-[var(--home-text-muted,var(--text-muted))]">
               {p.copy}
             </p>
           </motion.div>

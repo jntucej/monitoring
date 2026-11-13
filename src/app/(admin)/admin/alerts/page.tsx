@@ -11,10 +11,10 @@ import { getAuthHeaders } from "@/lib/utils";
 import type { Alert } from "@/lib/types";
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  critical: { bg: "bg-rose-500/10 border-rose-500/30", text: "text-rose-400", label: "Critical Breach" },
-  high: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-amber-400", label: "High Suspicious" },
-  medium: { bg: "bg-blue-500/10 border-blue-500/30", text: "text-blue-400", label: "Medium Alert" },
-  low: { bg: "bg-[var(--bg-elevated)]/10 border-[var(--border)]/30", text: "text-[var(--text-muted)]", label: "Low Priority" },
+  critical: { bg: "bg-rose-500/10 border-rose-500/30", text: "text-action-danger", label: "Critical Breach" },
+  high: { bg: "bg-amber-500/10 border-amber-500/30", text: "text-action-warning", label: "High Suspicious" },
+  medium: { bg: "bg-blue-500/10 border-blue-500/30", text: "text-action-primary", label: "Medium Alert" },
+  low: { bg: "bg-bg-elevated/10 border-border/30", text: "text-text-muted", label: "Low Priority" },
 };
 
 import { fmtRelative } from "@/lib/formatters";
@@ -96,15 +96,15 @@ function AdminAlertsInner() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">Alert Center</h1>
-          <p className="text-sm text-[var(--text-muted)]">
+          <h1 className="text-lg font-semibold text-text-primary">Alert Center</h1>
+          <p className="text-sm text-text-muted">
             Unresolved alerts plus those resolved in the last 7 days.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={load}
-            className="p-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+            className="p-2 rounded-lg bg-bg-surface border border-border text-text-muted hover:bg-bg-elevated"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -115,8 +115,8 @@ function AdminAlertsInner() {
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize ${
                 filter === f
-                  ? "bg-[var(--action-primary)] text-white"
-                  : "bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]"
+                  ? "bg-action-primary text-white"
+                  : "bg-bg-surface text-text-muted border border-border"
               }`}
             >
               {f}
@@ -126,18 +126,18 @@ function AdminAlertsInner() {
       </div>
 
       <WidgetBoundary title="Alerts">
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-          <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+        <div className="bg-bg-surface rounded-xl border border-border">
+          <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="font-semibold flex items-center gap-2">
-              <Bell className="w-5 h-5 text-[var(--action-warning)]" />
+              <Bell className="w-5 h-5 text-action-warning" />
               <span>Alerts</span>
             </h3>
-            <span className="text-sm text-[var(--text-muted)]">
+            <span className="text-sm text-text-muted">
               {loading ? "Loading…" : `${visible.length} alert${visible.length === 1 ? "" : "s"}`}
             </span>
           </div>
           {loading && visible.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[var(--text-muted)]">Loading alerts…</div>
+            <div className="p-8 text-center text-sm text-text-muted">Loading alerts…</div>
           ) : (
           <DataTable
             columns={[
@@ -153,8 +153,8 @@ function AdminAlertsInner() {
                         {a.resolved ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                       </div>
                       <div>
-                        <p className="font-medium text-[var(--text-primary)]">{a.title}</p>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5">{a.message}</p>
+                        <p className="font-medium text-text-primary">{a.title}</p>
+                        <p className="text-xs text-text-muted mt-0.5">{a.message}</p>
                       </div>
                     </div>
                   );
@@ -170,9 +170,9 @@ function AdminAlertsInner() {
                         {style.label}
                       </span>
                       {a.studentRoll && (
-                        <span className="text-[10px] font-mono text-[var(--text-muted)]">{a.studentRoll}</span>
+                        <span className="text-[10px] font-mono text-text-muted">{a.studentRoll}</span>
                       )}
-                      {a.gateId && <span className="text-[10px] text-[var(--text-muted)]">at gate {a.gateId}</span>}
+                      {a.gateId && <span className="text-[10px] text-text-muted">at gate {a.gateId}</span>}
                     </div>
                   );
                 },
@@ -180,7 +180,7 @@ function AdminAlertsInner() {
               {
                 header: "Time",
                 accessor: (a: Alert) => (
-                  <span className="text-xs text-[var(--text-muted)]">{timeAgo(a.timestamp)}</span>
+                  <span className="text-xs text-text-muted">{timeAgo(a.timestamp)}</span>
                 ),
               },
               {
@@ -190,7 +190,7 @@ function AdminAlertsInner() {
                     <button
                       onClick={() => setConfirmTarget(a)}
                       disabled={busyId === a.id}
-                      className="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 inline-flex items-center gap-1 disabled:opacity-50"
+                      className="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-action-success hover:bg-emerald-500/20 inline-flex items-center gap-1 disabled:opacity-50"
                     >
                       <Check className="w-3 h-3" />
                       {busyId === a.id ? "Resolving…" : "Resolve"}

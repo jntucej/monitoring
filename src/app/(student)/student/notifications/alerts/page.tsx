@@ -32,12 +32,12 @@ function Inner() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+        <h1 className="text-lg font-semibold text-text-primary">
           Alerts
         </h1>
         <Link
           href="/student/notifications"
-          className="text-xs text-[var(--text-secondary)] underline"
+          className="text-xs text-text-secondary underline"
         >
           All notifications
         </Link>
@@ -53,19 +53,19 @@ function Inner() {
           {list.map((n) => (
             <li
               key={n.id}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+              className="rounded-xl border border-border bg-bg-surface p-3"
             >
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">
+                <span className="text-sm font-medium text-text-primary">
                   {n.title}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              <p className="mt-1 text-sm text-text-secondary">
                 {n.body}
               </p>
               {n.createdAt && (
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                <p className="mt-1 text-xs text-text-muted">
                   {fmtDateTime(n.createdAt)}
                 </p>
               )}

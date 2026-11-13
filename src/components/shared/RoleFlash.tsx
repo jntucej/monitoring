@@ -94,8 +94,8 @@ export function RoleFlash({ role, onNavigate, label, icon: Icon }: RoleFlashProp
       animate={controls}
       className={cn(
         "group/flash relative flex items-center gap-3 rounded-xl border p-3.5 text-left transition-colors",
-        "border-[var(--border)] bg-[var(--bg-surface)]",
-        "hover:border-[var(--text-muted)] hover:bg-[var(--bg-elevated)]",
+        "border-border bg-bg-surface",
+        "hover:border-[var(--text-muted)] hover:bg-bg-elevated",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]",
         "active:scale-[0.98] min-h-[44px] min-w-[44px]"
       )}
@@ -104,17 +104,17 @@ export function RoleFlash({ role, onNavigate, label, icon: Icon }: RoleFlashProp
         initial={false}
         animate={{ scale: dismissed ? 1 : 1, x: dismissed ? 0 : nudge * (direction === "right" ? 1 : -1) }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--action-primary)]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-bg-elevated text-action-primary"
       >
         {Icon ? <Icon className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
       </motion.span>
-      <span className="text-sm font-semibold text-[var(--text-primary)]">
+      <span className="text-sm font-semibold text-text-primary">
         {label}
         {/* Trailing chevron only appears on hover/focus — task-path cue. */}
         <span
           aria-hidden
           className={cn(
-            "ml-1 inline-block text-[var(--text-muted)] transition-opacity",
+            "ml-1 inline-block text-text-muted transition-opacity",
             "opacity-0 group-hover/flash:opacity-100 group-focus-visible/flash:opacity-100"
           )}
         >

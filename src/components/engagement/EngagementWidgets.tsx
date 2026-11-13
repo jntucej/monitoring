@@ -59,32 +59,32 @@ function NotificationPrefsSummary() {
   return (
     <section
       aria-label="Notification preferences summary"
-      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0"
+      className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
     >
-      <h2 className="text-sm font-bold text-[var(--text-primary)]">
+      <h2 className="text-sm font-bold text-text-primary">
         Notification preferences
       </h2>
-      <ul className="mt-3 space-y-2 text-xs text-[var(--text-muted)]">
+      <ul className="mt-3 space-y-2 text-xs text-text-muted">
         <li>
-          <strong className="text-[var(--text-primary)]">Quiet hours</strong>:{" "}
+          <strong className="text-text-primary">Quiet hours</strong>:{" "}
           {prefs.quietHours
             ? `${prefs.quietHoursFrom}–${prefs.quietHoursTo}${quietActive ? " · active now" : ""}`
             : "off"}
         </li>
         <li>
-          <strong className="text-[var(--text-primary)]">Daily summary</strong>:{" "}
+          <strong className="text-text-primary">Daily summary</strong>:{" "}
           {prefs.dailySummary ? `at ${prefs.dailySummaryTime}` : "off"}
         </li>
         <li>
-          <strong className="text-[var(--text-primary)]">Event reminders</strong>:{" "}
+          <strong className="text-text-primary">Event reminders</strong>:{" "}
           {prefs.eventReminders ? "on" : "off"}
         </li>
         <li>
-          <strong className="text-[var(--text-primary)]">Announcement alerts</strong>:{" "}
+          <strong className="text-text-primary">Announcement alerts</strong>:{" "}
           {prefs.announcementAlerts ? "on" : "off"}
         </li>
       </ul>
-      <p className="mt-3 text-[10px] text-[var(--text-muted)]">
+      <p className="mt-3 text-[10px] text-text-muted">
         Preferences only change how digests are surfaced to you — delivery
         permissions are always enforced by the server.
       </p>

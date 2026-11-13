@@ -44,8 +44,8 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
   useEffect(() => { void load(); }, [load]);
 
   if (loading)
-    return <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]"><Loader2 className="h-4 w-4 animate-spin" /> Loading counts…</div>;
-  if (error) return <div className="text-sm text-rose-300">{error}</div>;
+    return <div className="flex items-center gap-2 text-sm text-text-muted"><Loader2 className="h-4 w-4 animate-spin" /> Loading counts…</div>;
+  if (error) return <div className="text-sm text-action-danger">{error}</div>;
 
   const itemById = new Map(items.map((i) => [i.id, i]));
 
@@ -54,7 +54,7 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-muted)]">
+            <tr className="text-left text-xs uppercase tracking-wide text-text-muted">
               <th className="py-1 pr-3">Item</th>
               <th className="py-1 pr-3">Category</th>
               <th className="py-1 pr-3">Count</th>
@@ -62,12 +62,12 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
           </thead>
           <tbody>
             {items.map((it) => (
-              <tr key={it.id} className="border-t border-[var(--border)]">
-                <td className="py-1.5 pr-3 text-[var(--text-primary)]">
-                  {it.label} <span className="font-mono text-xs text-[var(--text-muted)]">({it.code})</span>
+              <tr key={it.id} className="border-t border-border">
+                <td className="py-1.5 pr-3 text-text-primary">
+                  {it.label} <span className="font-mono text-xs text-text-muted">({it.code})</span>
                 </td>
-                <td className="py-1.5 pr-3 text-[var(--text-secondary)]">{CAT_LABEL[it.category]}</td>
-                <td className="py-1.5 pr-3 font-semibold text-[var(--text-primary)]">{it.count}</td>
+                <td className="py-1.5 pr-3 text-text-secondary">{CAT_LABEL[it.category]}</td>
+                <td className="py-1.5 pr-3 font-semibold text-text-primary">{it.count}</td>
               </tr>
             ))}
           </tbody>
@@ -76,7 +76,7 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-[var(--text-muted)]">
+            <tr className="text-left text-xs uppercase tracking-wide text-text-muted">
               <th className="py-1 pr-3">Student</th>
               <th className="py-1 pr-3">Roll</th>
               <th className="py-1 pr-3">Selections</th>
@@ -84,18 +84,18 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
           </thead>
           <tbody>
             {students.length === 0 && (
-              <tr><td colSpan={3} className="py-2 text-[var(--text-muted)]">No students have registered yet.</td></tr>
+              <tr><td colSpan={3} className="py-2 text-text-muted">No students have registered yet.</td></tr>
             )}
             {students.map((s) => (
-              <tr key={s.userId} className="border-t border-[var(--border)]">
-                <td className="py-1.5 pr-3 text-[var(--text-primary)]">{s.name}</td>
-                <td className="py-1.5 pr-3 font-mono text-xs text-[var(--text-secondary)]">{s.uniqueId}</td>
+              <tr key={s.userId} className="border-t border-border">
+                <td className="py-1.5 pr-3 text-text-primary">{s.name}</td>
+                <td className="py-1.5 pr-3 font-mono text-xs text-text-secondary">{s.uniqueId}</td>
                 <td className="py-1.5 pr-3">
                   <div className="flex flex-wrap gap-1">
                     {s.itemIds.map((id) => {
                       const it = itemById.get(id);
                       return (
-                        <span key={id} className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
+                        <span key={id} className="rounded-full border border-border px-2 py-0.5 text-xs text-text-secondary">
                           {it?.label ?? id}
                         </span>
                       );

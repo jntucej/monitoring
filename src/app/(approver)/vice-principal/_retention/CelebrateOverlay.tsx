@@ -37,10 +37,10 @@ export function CelebrateOverlay({ queueEmpty }: { queueEmpty: boolean }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="rounded-2xl bg-[var(--bg-surface)] px-8 py-6 text-center shadow-2xl"
+            className="rounded-2xl bg-bg-surface px-8 py-6 text-center shadow-2xl"
           >
-            <p className="text-2xl font-bold text-[var(--action-primary)]">Queue cleared</p>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
+            <p className="text-2xl font-bold text-action-primary">Queue cleared</p>
+            <p className="mt-1 text-sm text-text-muted">
               {sessionDecisions} decision{sessionDecisions === 1 ? "" : "s"} this session
             </p>
           </motion.div>

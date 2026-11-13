@@ -126,40 +126,40 @@ const api = useApi();
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-2xl font-bold">Attendance</p>
-          <p className="text-[var(--text-muted)]">Daily student attendance records</p>
+          <p className="text-text-muted">Daily student attendance records</p>
         </div>
         <div className="flex items-center gap-2">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-1.5 min-h-[44px] rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] text-sm"
+            className="px-3 py-1.5 min-h-[44px] rounded-lg bg-bg-surface border border-border text-sm"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 text-center">
-          <p className="text-2xl font-bold text-emerald-400">{stats.present}</p>
-          <p className="text-xs text-[var(--text-muted)]">Present</p>
+        <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <p className="text-2xl font-bold text-action-success">{stats.present}</p>
+          <p className="text-xs text-text-muted">Present</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 text-center">
-          <p className="text-2xl font-bold text-amber-400">{stats.late}</p>
-          <p className="text-xs text-[var(--text-muted)]">Late</p>
+        <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <p className="text-2xl font-bold text-action-warning">{stats.late}</p>
+          <p className="text-xs text-text-muted">Late</p>
         </div>
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-4 text-center">
-          <p className="text-2xl font-bold text-rose-400">{stats.absent}</p>
-          <p className="text-xs text-[var(--text-muted)]">Absent</p>
+        <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <p className="text-2xl font-bold text-action-danger">{stats.absent}</p>
+          <p className="text-xs text-text-muted">Absent</p>
         </div>
       </div>
 
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+      <div className="bg-bg-surface rounded-xl border border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="font-semibold flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-[var(--action-primary)]" />
+            <CalendarDays className="w-5 h-5 text-action-primary" />
             {new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
           </h3>
-          <span className="text-sm text-[var(--text-muted)]">
+          <span className="text-sm text-text-muted">
             {loading ? "Loading…" : `${rows.length} record${rows.length === 1 ? "" : "s"}`}
           </span>
         </div>
@@ -167,12 +167,12 @@ const api = useApi();
         mobileLayout="cards"
         columns={[
           { header: "Student", accessor: (r) => r.name, className: "font-medium" },
-          { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-[var(--text-muted)]" },
+          { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-text-muted" },
           { header: "Status", accessor: (r) => (
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-              r.status === "present" ? "bg-emerald-500/10 text-emerald-400" :
-              r.status === "absent" ? "bg-rose-500/10 text-rose-400" :
-              "bg-amber-500/10 text-amber-400"
+              r.status === "present" ? "bg-emerald-500/10 text-action-success" :
+              r.status === "absent" ? "bg-rose-500/10 text-action-danger" :
+              "bg-amber-500/10 text-action-warning"
             }`}>
               {r.status === "present" ? <CheckCircle2 className="w-3.5 h-3.5" /> :
                r.status === "absent" ? <XCircle className="w-3.5 h-3.5" /> :
@@ -180,8 +180,8 @@ const api = useApi();
               <span className="capitalize">{r.status}</span>
             </span>
           ) },
-          { header: "Time In", accessor: (r) => fmtTime(r.timeIn), className: "text-[var(--text-muted)]" },
-          { header: "Time Out", accessor: (r) => fmtTime(r.timeOut), className: "text-[var(--text-muted)]" },
+          { header: "Time In", accessor: (r) => fmtTime(r.timeIn), className: "text-text-muted" },
+          { header: "Time Out", accessor: (r) => fmtTime(r.timeOut), className: "text-text-muted" },
         ]}
         data={rows}
         loading={loading}

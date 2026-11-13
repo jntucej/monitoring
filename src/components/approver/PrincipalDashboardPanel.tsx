@@ -41,9 +41,9 @@ interface PrincipalDashboardResponse {
 
 function severityTone(severity: string): string {
   const s = (severity || "").toLowerCase();
-  if (s === "critical") return "text-rose-400";
-  if (s === "high") return "text-amber-400";
-  return "text-[var(--text-secondary)]";
+  if (s === "critical") return "text-action-danger";
+  if (s === "high") return "text-action-warning";
+  return "text-text-secondary";
 }
 
 function fmtTime(iso: string | null | undefined): string {
@@ -74,24 +74,24 @@ export function PrincipalDashboardPanel() {
   const pendingApprovals = data?.data?.pendingApprovals ?? 0;
 
   return (
-    <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0">
+    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <Radio className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <Radio className="w-4 h-4 text-action-primary shrink-0" />
+          <span className="text-sm font-bold text-text-primary truncate">
             Principal Dashboard
           </span>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border border-border bg-bg-elevated text-text-secondary">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-warning" />
           {pendingApprovals} pending
         </span>
       </div>
 
       {/* Body: recent alerts (top-priority items) or EmptyState */}
       {loading ? (
-        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-3">
+        <div className="flex items-center gap-2 text-xs text-text-muted py-3">
           <Loader2 className="w-4 h-4 animate-spin" />
           Loading dashboard…
         </div>
@@ -100,13 +100,13 @@ export function PrincipalDashboardPanel() {
           {alerts.map((a) => (
             <li
               key={a.id}
-              className="flex items-start justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 min-w-0"
+              className="flex items-start justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                <p className="text-xs font-semibold text-text-primary truncate">
                   {a.title || a.message || "Alert"}
                 </p>
-                <p className="text-[10px] font-mono text-[var(--text-muted)] truncate">
+                <p className="text-[10px] font-mono text-text-muted truncate">
                   {a.gate_name || a.gate_id || "campus"} · {a.severity}
                 </p>
               </div>
@@ -114,7 +114,7 @@ export function PrincipalDashboardPanel() {
                 <span className={`text-[10px] font-mono font-bold uppercase ${severityTone(a.severity)}`}>
                   {a.severity}
                 </span>
-                <p className="text-[10px] font-mono text-[var(--text-muted)]">
+                <p className="text-[10px] font-mono text-text-muted">
                   {fmtTime(a.timestamp)}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export function PrincipalDashboardPanel() {
           className="mb-0"
           title="No active alerts"
           description="Top-priority items will appear here when alerts are raised."
-          icon={<ShieldAlert className="w-4 h-4 text-[var(--text-muted)]" />}
+          icon={<ShieldAlert className="w-4 h-4 text-text-muted" />}
         />
       )}
     </section>

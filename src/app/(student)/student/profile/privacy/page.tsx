@@ -103,22 +103,22 @@ export default function PrivacyPage() {
       <h1 className="text-xl font-semibold flex items-center gap-2">
         <ShieldCheck className="w-5 h-5" aria-hidden="true" /> Privacy &amp; Consent
       </h1>
-      <p className="text-sm text-[var(--text-muted)]">
+      <p className="text-sm text-text-muted">
         You control how your data is used. Required consents cannot be disabled — they are
         necessary to provide campus services. All others are optional and can be revoked at
         any time.
       </p>
 
       {error && (
-        <Card className="p-4 border-[var(--action-danger)]/30 bg-[var(--action-danger)]/10">
-          <p className="text-sm text-[var(--action-danger)]">{error}</p>
+        <Card className="p-4 border-action-danger/30 bg-action-danger/10">
+          <p className="text-sm text-action-danger">{error}</p>
         </Card>
       )}
 
       {loading ? (
-        <p className="text-sm text-[var(--text-muted)]">Loading consent records…</p>
+        <p className="text-sm text-text-muted">Loading consent records…</p>
       ) : (
-        <Card className="divide-y divide-[var(--border)]">
+        <Card className="divide-y divide-border">
           {Object.entries(SCOPES).map(([scope, meta]) => {
             const c = consents.find((x) => x.scope === scope);
             const isGranted = !!c?.granted;
@@ -127,14 +127,14 @@ export default function PrivacyPage() {
               <div key={scope} className="p-4 flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
-                  <p className="text-sm text-[var(--text-muted)] mt-1">{meta.description}</p>
+                  <p className="text-sm text-text-muted mt-1">{meta.description}</p>
                   {meta.required && (
-                    <p className="text-xs text-[var(--action-warning)] mt-2">
+                    <p className="text-xs text-action-warning mt-2">
                       Required — cannot be disabled.
                     </p>
                   )}
                   {isGranted && c?.grantedAt && (
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
+                    <p className="text-xs text-text-muted mt-1">
                       Granted {new Date(c.grantedAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}
                     </p>
                   )}
@@ -162,7 +162,7 @@ export default function PrivacyPage() {
         </Card>
       )}
 
-      <p className="text-xs text-[var(--text-muted)] space-y-1">
+      <p className="text-xs text-text-muted space-y-1">
         For questions about how your data is processed, contact the Data Protection Officer
         at <a className="underline" href="mailto:dpo@jntuhcej.ac.in">dpo@jntuhcej.ac.in</a>.
         <br />

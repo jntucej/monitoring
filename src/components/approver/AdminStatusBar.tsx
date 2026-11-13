@@ -57,7 +57,7 @@ export function AdminStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Admin status bar"
     >
       {/* Left: alerts summary */}
@@ -65,15 +65,15 @@ export function AdminStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0">
           <span
             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              hasAttention ? "bg-amber-400" : "bg-emerald-400"
+              hasAttention ? "bg-action-warning" : "bg-action-success"
             }`}
           />
-          <span className="text-[var(--text-muted)]">Admin</span>
+          <span className="text-text-muted">Admin</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink">
-          <Bell className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">
+          <Bell className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">
             {active} active alerts · {pending} pending · {records} records
           </span>
         </span>
@@ -82,13 +82,13 @@ export function AdminStatusBar({
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

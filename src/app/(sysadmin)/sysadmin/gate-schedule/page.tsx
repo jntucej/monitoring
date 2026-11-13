@@ -82,7 +82,7 @@ function SysadminGateScheduleInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Rule</th>
                     <th className="p-3 text-left">Gate</th>
                     <th className="p-3 text-left">Day</th>
@@ -91,18 +91,18 @@ function SysadminGateScheduleInner() {
                     <th className="p-3 text-center">Priority</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {rules.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-elevated)]/40">
-                      <td className="p-3 font-medium text-[var(--text-primary)]">{r.name}</td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{r.gate_id ?? "all"}</td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                    <tr key={r.id} className="hover:bg-bg-elevated/40">
+                      <td className="p-3 font-medium text-text-primary">{r.name}</td>
+                      <td className="p-3 font-mono text-xs text-text-muted">{r.gate_id ?? "all"}</td>
+                      <td className="p-3 text-xs text-text-muted">
                         {r.day_of_week != null ? ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][r.day_of_week] : "—"}
                       </td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">
+                      <td className="p-3 font-mono text-xs text-text-muted">
                         {r.start_time ? `${r.start_time}–${r.end_time ?? ""}` : "—"}
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)] capitalize">{r.policy ?? "—"}</td>
+                      <td className="p-3 text-xs text-text-muted capitalize">{r.policy ?? "—"}</td>
                       <td className="p-3 text-center text-xs">{r.priority ?? "—"}</td>
                     </tr>
                   ))}
@@ -122,12 +122,12 @@ function SysadminGateScheduleInner() {
               description="Holidays are added in the sysadmin gate configuration."
             />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {holidays.map((h) => (
                 <div key={h.id} className="p-3 flex items-center gap-3">
-                  <CalendarX className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
-                  <p className="flex-1 text-sm text-[var(--text-primary)]">{h.name}</p>
-                  <p className="text-xs font-mono text-[var(--text-muted)]">
+                  <CalendarX className="w-4 h-4 text-text-muted shrink-0" />
+                  <p className="flex-1 text-sm text-text-primary">{h.name}</p>
+                  <p className="text-xs font-mono text-text-muted">
                     {new Date(h.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                   </p>
                 </div>

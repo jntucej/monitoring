@@ -73,12 +73,12 @@ function SecurityReinforcedInner() {
 
   const statusClass = (s?: string) =>
     s === "healthy"
-      ? "bg-emerald-500/20 text-emerald-400"
+      ? "bg-emerald-500/20 text-action-success"
       : s === "degraded"
-        ? "bg-amber-500/20 text-amber-400"
+        ? "bg-amber-500/20 text-action-warning"
         : s === "unhealthy"
-          ? "bg-rose-500/20 text-rose-400"
-          : "bg-[var(--bg-elevated)]/40 text-[var(--text-muted)]";
+          ? "bg-rose-500/20 text-action-danger"
+          : "bg-bg-elevated/40 text-text-muted";
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6 min-w-0">
@@ -97,16 +97,16 @@ function SecurityReinforcedInner() {
       )}
 
       <WidgetBoundary title="Security Posture">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-surface p-4 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              <ShieldCheck className="w-4 h-4 text-action-success" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                 Live posture
               </span>
             </div>
-            <span className="text-[11px] text-[var(--text-muted)]">
-              signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span>
+            <span className="text-[11px] text-text-muted">
+              signed in as <span className="font-mono text-text-secondary">{role}</span>
             </span>
           </div>
 
@@ -115,50 +115,50 @@ function SecurityReinforcedInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg bg-[var(--bg-elevated)] animate-pulse"
+                  className="h-16 rounded-lg bg-bg-elevated animate-pulse"
                 />
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 min-w-0">
-              <div className="rounded-lg bg-[var(--bg-elevated)] p-3 min-w-0">
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Overall</p>
+              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+                <p className="text-[10px] uppercase text-text-muted">Overall</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.status)}`}>
                     {posture?.status ?? "unknown"}
                   </span>
                 </p>
               </div>
-              <div className="rounded-lg bg-[var(--bg-elevated)] p-3 min-w-0">
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Redis</p>
+              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+                <p className="text-[10px] uppercase text-text-muted">Redis</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.redis?.status)}`}>
                     {posture?.redis?.status ?? "unknown"}
                   </span>
                 </p>
               </div>
-              <div className="rounded-lg bg-[var(--bg-elevated)] p-3 min-w-0">
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Database</p>
+              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+                <p className="text-[10px] uppercase text-text-muted">Database</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.database?.status)}`}>
                     {posture?.database?.status ?? "unknown"}
                   </span>
                 </p>
                 {typeof posture?.database?.latencyMs === "number" && (
-                  <p className="text-[10px] text-[var(--text-muted)] mt-1 tabular-nums">
+                  <p className="text-[10px] text-text-muted mt-1 tabular-nums">
                     {posture.database.latencyMs} ms
                   </p>
                 )}
               </div>
-              <div className="rounded-lg bg-[var(--bg-elevated)] p-3 min-w-0">
-                <p className="text-[10px] uppercase text-[var(--text-muted)]">Gateways</p>
+              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+                <p className="text-[10px] uppercase text-text-muted">Gateways</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.gateways?.status)}`}>
                     {posture?.gateways?.status ?? "unknown"}
                   </span>
                 </p>
                 {typeof posture?.gateways?.online === "number" && (
-                  <p className="text-[10px] text-[var(--text-muted)] mt-1 tabular-nums">
+                  <p className="text-[10px] text-text-muted mt-1 tabular-nums">
                     {posture.gateways.online} online · {posture.gateways.offline ?? 0} offline
                   </p>
                 )}
@@ -174,16 +174,16 @@ function SecurityReinforcedInner() {
             <Link
               key={href}
               href={href}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 min-w-0 hover:bg-[var(--bg-elevated)] transition-colors group"
+              className="rounded-xl border border-border bg-bg-surface p-4 min-w-0 hover:bg-bg-elevated transition-colors group"
             >
-              <div className="flex items-center gap-2 text-[var(--text-secondary)] min-w-0">
+              <div className="flex items-center gap-2 text-text-secondary min-w-0">
                 <Icon className="w-4 h-4 shrink-0" />
                 <span className="text-xs font-semibold uppercase tracking-wide truncate">
                   {title}
                 </span>
-                <ArrowUpRight className="w-3.5 h-3.5 ml-auto text-[var(--text-muted)] group-hover:text-[var(--action-primary)] transition-colors" />
+                <ArrowUpRight className="w-3.5 h-3.5 ml-auto text-text-muted group-hover:text-action-primary transition-colors" />
               </div>
-              <p className="mt-2 text-xs text-[var(--text-muted)]">{sub}</p>
+              <p className="mt-2 text-xs text-text-muted">{sub}</p>
             </Link>
           ))}
         </div>

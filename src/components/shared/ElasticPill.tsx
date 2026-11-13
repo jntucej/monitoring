@@ -23,10 +23,10 @@ export function ElasticPill({
   icon,
 }: ElasticPillProps) {
   const colorStyles = {
-    emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20",
-    rose: "bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20",
-    amber: "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20",
-    slate: "bg-[var(--bg-elevated)]/10 border-[var(--border)]/30 text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/20",
+    emerald: "bg-emerald-500/10 border-emerald-500/30 text-action-success hover:bg-emerald-500/20",
+    rose: "bg-rose-500/10 border-rose-500/30 text-action-danger hover:bg-rose-500/20",
+    amber: "bg-amber-500/10 border-amber-500/30 text-action-warning hover:bg-amber-500/20",
+    slate: "bg-bg-elevated/10 border-border/30 text-text-secondary hover:bg-bg-elevated/20",
     indigo: "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20",
   };
 

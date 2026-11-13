@@ -50,13 +50,13 @@ export const BotBubble = memo(function BotBubble({
     >
       <div className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed
         ${isUser
-          ? "bg-emerald-500 text-white rounded-br-md"
+          ? "bg-action-success text-white rounded-br-md"
           : isError
-            ? "bg-rose-500/10 border border-rose-500/30 text-[var(--text-primary)] rounded-bl-md"
-            : "bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-bl-md"}`}
+            ? "bg-rose-500/10 border border-rose-500/30 text-text-primary rounded-bl-md"
+            : "bg-bg-elevated text-text-primary rounded-bl-md"}`}
       >
         {isError && (
-          <div className="flex items-center gap-1.5 mb-1.5 text-rose-500 text-xs font-medium">
+          <div className="flex items-center gap-1.5 mb-1.5 text-action-danger text-xs font-medium">
             <AlertCircle className="h-3.5 w-3.5" />
             <span>Error</span>
           </div>
@@ -79,7 +79,7 @@ export const BotBubble = memo(function BotBubble({
         </div>
 
         {!isUser && cites.length > 0 && !isStreaming && (
-          <div className="mt-2 pt-2 border-t border-[var(--border)]">
+          <div className="mt-2 pt-2 border-t border-border">
             <CitationChip cites={cites} />
           </div>
         )}
@@ -89,7 +89,7 @@ export const BotBubble = memo(function BotBubble({
             {isError ? (
               <button
                 onClick={retryThis}
-                className="inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)] hover:text-emerald-500 transition"
+                className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-action-success transition"
               >
                 <RotateCcw className="h-3 w-3" /> {retryLabel}
               </button>
@@ -102,7 +102,7 @@ export const BotBubble = memo(function BotBubble({
                   onClick={() => onRetry(m.__retryOf ?? "")}
                   aria-label="Regenerate response"
                   title="Regenerate"
-                  className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                  className="text-text-muted hover:text-action-success transition active:scale-95"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                 </button>
@@ -112,7 +112,7 @@ export const BotBubble = memo(function BotBubble({
                   onClick={() => void navigator.clipboard.writeText(m.content)}
                   aria-label="Copy response"
                   title="Copy"
-                  className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                  className="text-text-muted hover:text-action-success transition active:scale-95"
                 >
                   <Copy className="h-3.5 w-3.5" />
                 </button>
@@ -122,7 +122,7 @@ export const BotBubble = memo(function BotBubble({
                     aria-label="Good response"
                     aria-pressed={m.feedback === 1}
                     onClick={() => give(1)}
-                    className="text-[var(--text-muted)] hover:text-emerald-500 transition active:scale-95"
+                    className="text-text-muted hover:text-action-success transition active:scale-95"
                   >
                     <ThumbsUp aria-hidden="true" className="h-3.5 w-3.5" />
                   </button>
@@ -130,7 +130,7 @@ export const BotBubble = memo(function BotBubble({
                     aria-label="Poor response"
                     aria-pressed={m.feedback === -1}
                     onClick={() => give(-1)}
-                    className="text-[var(--text-muted)] hover:text-rose-500 transition active:scale-95"
+                    className="text-text-muted hover:text-action-danger transition active:scale-95"
                   >
                     <ThumbsDown aria-hidden="true" className="h-3.5 w-3.5" />
                   </button>
@@ -140,7 +140,7 @@ export const BotBubble = memo(function BotBubble({
                   <motion.span
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[10px] text-[var(--text-muted)]"
+                    className="text-[10px] text-text-muted"
                   >
                     {thanksLabel}
                   </motion.span>
@@ -148,7 +148,7 @@ export const BotBubble = memo(function BotBubble({
               </>
             )}
             {!thanked && !isError && !canGiveFeedback && (
-              <span className="text-[10px] text-[var(--text-muted)] opacity-60">Offline</span>
+              <span className="text-[10px] text-text-muted opacity-60">Offline</span>
             )}
           </div>
         )}

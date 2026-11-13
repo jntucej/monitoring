@@ -80,7 +80,7 @@ function ExamBranchDocsInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -88,15 +88,15 @@ function ExamBranchDocsInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Docs unavailable: {error}</span>
@@ -113,31 +113,31 @@ function ExamBranchDocsInner() {
 
       {/* Search + category filter */}
       <WidgetBoundary title="Documentation Filter">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0 space-y-3">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0 space-y-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
             <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search exam documentation…"
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] pl-9 pr-3 py-2 text-sm text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-lg border border-border bg-bg-surface pl-9 pr-3 py-2 text-sm text-text-secondary placeholder:text-text-muted focus:border-[var(--action-success)] focus:outline-none"
                 aria-label="Search exam documentation"
               />
             </div>
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-              <span className="text-xs text-[var(--text-muted)] shrink-0">Categories:</span>
+              <span className="text-xs text-text-muted shrink-0">Categories:</span>
               {categories.map((cat) => (
                 <span
                   key={cat}
-                  className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs"
+                  className="inline-flex items-center rounded-full bg-bg-elevated text-text-muted px-2 py-0.5 text-xs"
                 >
                   {cat}
                 </span>
               ))}
               {categories.length === 0 && (
-                <span className="text-xs text-[var(--text-muted)]">none</span>
+                <span className="text-xs text-text-muted">none</span>
               )}
             </div>
           </div>
@@ -146,20 +146,20 @@ function ExamBranchDocsInner() {
 
       {/* API docs link */}
       <WidgetBoundary title="API Documentation">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-3 min-w-0">
-            <ExternalLink className="w-5 h-5 text-sky-400 shrink-0" />
+            <ExternalLink className="w-5 h-5 text-action-info shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white">
                 Gate Monitor API Reference
               </p>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-text-muted">
                 OpenAPI 3.0 spec for all system endpoints
               </p>
             </div>
             <Link
               href="/exam-branch/docs"
-              className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] shrink-0"
+              className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated shrink-0"
             >
               <ExternalLink className="w-3 h-3" /> Open
             </Link>
@@ -169,15 +169,15 @@ function ExamBranchDocsInner() {
 
       {/* Exam documentation list */}
       <WidgetBoundary title="Examination Documentation">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
+              <BookOpen className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Exam Branch Documentation
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {examDocs.length} document(s)
             </span>
           </div>
@@ -187,17 +187,17 @@ function ExamBranchDocsInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-16 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : examDocs.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <FileText className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <FileText className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">
                 No exam documentation found.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Exam policy documents are published by authorised roles and
                 appear here automatically. Try clearing the search or check
                 with the OIE.
@@ -212,17 +212,17 @@ function ExamBranchDocsInner() {
                       <span className="text-sm font-medium text-white min-w-0 flex-1 truncate">
                         {doc.title}
                       </span>
-                      <span className="inline-flex items-center rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] px-2 py-0.5 text-xs shrink-0">
+                      <span className="inline-flex items-center rounded-full bg-bg-elevated text-text-muted px-2 py-0.5 text-xs shrink-0">
                         {doc.category}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)] shrink-0">
+                      <span className="text-xs text-text-muted shrink-0">
                         v{doc.version}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] min-w-0 line-clamp-2">
+                    <p className="text-xs text-text-muted min-w-0 line-clamp-2">
                       {doc.body}
                     </p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)] min-w-0">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted min-w-0">
                       <span>Owner: {doc.ownerRole}</span>
                       <span>
                         Updated{" "}

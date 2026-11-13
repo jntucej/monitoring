@@ -222,7 +222,7 @@ export default function OperatorActionsPage() {
                   onClick={() => toggleControl(c.name, !c.enabled, c.enabled ? "Re-enabled via dashboard" : "Disabled via dashboard")}
                   className="rounded px-2 py-1 text-xs font-medium"
                   style={{
-                    background: c.enabled ? "var(--action-danger)" : "var(--action-success, #1a7f37)",
+                    background: c.enabled ? "var(--action-danger)" : "var(--action-success, var(--action-success))",
                     color: "#fff",
                     opacity: toggling === c.name ? 0.5 : 1,
                   }}
@@ -271,7 +271,7 @@ export default function OperatorActionsPage() {
           Failed to load actions: {String(error)}
         </div>
       ) : actions.length === 0 ? (
-        <div className="rounded-md border p-6 text-center text-sm text-[var(--text-secondary)]">
+        <div className="rounded-md border p-6 text-center text-sm text-text-secondary">
           No {filter === "all" ? "" : filter + " "}operator actions.
         </div>
       ) : (
@@ -306,7 +306,7 @@ export default function OperatorActionsPage() {
                       </span>
                       <span className="text-sm font-medium">{a.title}</span>
                     </div>
-                    <div className="mt-1 text-xs text-[var(--text-secondary)]">
+                    <div className="mt-1 text-xs text-text-secondary">
                       kind: {a.kind} · source: {a.source} · status: {a.status}
                       {a.autoRunSeconds > 0 && ` · auto-runs in ${a.autoRunSeconds}s`}
                       {a.decidedAt && ` · decided ${new Date(a.decidedAt).toLocaleString()}`}

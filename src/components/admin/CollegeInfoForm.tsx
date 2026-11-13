@@ -79,17 +79,17 @@ export function CollegeInfoForm() {
   };
 
   const inputCls =
-    "w-full px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]";
+    "w-full px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary";
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+      <div className="bg-bg-surface rounded-xl border border-border p-6">
         <h3 className="font-semibold flex items-center gap-2 mb-4">
-          <Settings className="w-5 h-5 text-[var(--action-warning)]" />
+          <Settings className="w-5 h-5 text-action-warning" />
           College Info
         </h3>
         <div className="flex justify-center p-6">
-          <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
         </div>
       </div>
     );
@@ -98,20 +98,20 @@ export function CollegeInfoForm() {
   return (
     <form
       onSubmit={handleSave}
-      className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex flex-col h-full"
+      className="bg-bg-surface rounded-xl border border-border p-6 flex flex-col h-full"
     >
       <h3 className="font-semibold flex items-center gap-2 mb-4">
-        <Settings className="w-5 h-5 text-[var(--action-warning)]" />
+        <Settings className="w-5 h-5 text-action-warning" />
         College Info
       </h3>
 
       <div className="space-y-4 flex-1">
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Name</label>
+          <label className="block text-sm mb-1 text-text-primary">Name</label>
           <input type="text" value={data.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="short-name">Short Name</label>
+          <label className="block text-sm mb-1 text-text-primary" htmlFor="short-name">Short Name</label>
           <input id="short-name"
             type="text"
             value={data.shortName}
@@ -120,7 +120,7 @@ export function CollegeInfoForm() {
           />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="address">Address</label>
+          <label className="block text-sm mb-1 text-text-primary" htmlFor="address">Address</label>
           <textarea id="address"
             value={data.address}
             onChange={(e) => update("address", e.target.value)}
@@ -129,11 +129,11 @@ export function CollegeInfoForm() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm mb-1 text-[var(--text-primary)]">Phone</label>
+            <label className="block text-sm mb-1 text-text-primary">Phone</label>
             <input type="tel" value={data.phone} onChange={(e) => update("phone", e.target.value)} className={inputCls} />
           </div>
           <div>
-            <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="email">Email</label>
+            <label className="block text-sm mb-1 text-text-primary" htmlFor="email">Email</label>
             <input id="email"
               type="email"
               value={data.email}
@@ -143,11 +143,11 @@ export function CollegeInfoForm() {
           </div>
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Logo URL</label>
+          <label className="block text-sm mb-1 text-text-primary">Logo URL</label>
           <input type="url" value={data.logo} onChange={(e) => update("logo", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="accreditation">Accreditation</label>
+          <label className="block text-sm mb-1 text-text-primary" htmlFor="accreditation">Accreditation</label>
           <input id="accreditation"
             type="text"
             value={data.accreditation}
@@ -156,11 +156,11 @@ export function CollegeInfoForm() {
           />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]">Website</label>
+          <label className="block text-sm mb-1 text-text-primary">Website</label>
           <input type="url" value={data.website} onChange={(e) => update("website", e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm mb-1 text-[var(--text-primary)]" htmlFor="principal">Principal</label>
+          <label className="block text-sm mb-1 text-text-primary" htmlFor="principal">Principal</label>
           <input id="principal"
             type="text"
             value={data.principal}
@@ -172,7 +172,7 @@ export function CollegeInfoForm() {
         {message && (
           <div
             className={`flex items-center gap-2 text-sm font-medium ${
-              message.type === "success" ? "text-emerald-400" : "text-rose-400"
+              message.type === "success" ? "text-action-success" : "text-action-danger"
             }`}
           >
             {message.type === "success" ? (
@@ -185,11 +185,11 @@ export function CollegeInfoForm() {
         )}
       </div>
 
-      <div className="flex justify-end mt-6 pt-4 border-t border-[var(--border)]">
+      <div className="flex justify-end mt-6 pt-4 border-t border-border">
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--action-primary)] text-white font-medium hover:brightness-110 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-white font-medium hover:brightness-110 disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Changes

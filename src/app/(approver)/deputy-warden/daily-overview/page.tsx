@@ -66,17 +66,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -93,10 +93,10 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0 hover:bg-[var(--bg-elevated)]/50 transition-colors"
+      className="rounded-xl border border-border bg-bg-base p-4 min-w-0 hover:bg-bg-elevated/50 transition-colors"
     >
       <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="text-xs text-[var(--text-muted)] mt-1">{sub}</p>
+      <p className="text-xs text-text-muted mt-1">{sub}</p>
     </Link>
   );
 }
@@ -166,15 +166,15 @@ function DeputyWardenDailyOverviewInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {(presenceError || outpassError) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">
@@ -199,7 +199,7 @@ function DeputyWardenDailyOverviewInner() {
             label="On Campus"
             value={onCampusTotal}
             sub="People inside all active gates (live presence matrix)"
-            accent="text-emerald-400"
+            accent="text-action-success"
             loading={presenceLoading && !presence}
           />
           <StatCard
@@ -207,7 +207,7 @@ function DeputyWardenDailyOverviewInner() {
             label="Pending at Warden Stage"
             value={pendingTotal}
             sub="Hostel / outpass requests awaiting principal review"
-            accent="text-amber-400"
+            accent="text-action-warning"
             loading={outpassLoading && !outpassQueue}
           />
           <StatCard
@@ -215,7 +215,7 @@ function DeputyWardenDailyOverviewInner() {
             label="SLA Breached"
             value={slaBreached}
             sub="Warden-stage requests past their 48h deadline"
-            accent="text-rose-400"
+            accent="text-action-danger"
             loading={outpassLoading && !outpassQueue}
           />
           <StatCard
@@ -231,11 +231,11 @@ function DeputyWardenDailyOverviewInner() {
 
       {/* Authority note */}
       <WidgetBoundary title="Authority Scope">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
-            <Gavel className="w-5 h-5 text-sky-400 shrink-0" />
-            <p className="text-sm text-[var(--text-secondary)] min-w-0">
-              Deputy-warden approvals are effective only <span className="font-semibold text-sky-300">within an explicit delegation or standing policy scope</span> issued by the
+            <Gavel className="w-5 h-5 text-action-info shrink-0" />
+            <p className="text-sm text-text-secondary min-w-0">
+              Deputy-warden approvals are effective only <span className="font-semibold text-action-info">within an explicit delegation or standing policy scope</span> issued by the
               principal/warden. Without recorded delegation data, review actions surface as
               read-only here and are escalated to the warden stage.
             </p>

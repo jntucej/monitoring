@@ -68,10 +68,10 @@ function SysadminCronInner() {
   }
 
   const statusTone = (s: string) => {
-    if (s === "success" || s === "completed") return "bg-emerald-500/15 text-emerald-400";
-    if (s === "failed" || s === "error") return "bg-rose-500/15 text-rose-400";
-    if (s === "running") return "bg-[var(--action-primary)]/15 text-[var(--action-primary)]";
-    return "bg-[var(--bg-elevated)] text-[var(--text-muted)]";
+    if (s === "success" || s === "completed") return "bg-emerald-500/15 text-action-success";
+    if (s === "failed" || s === "error") return "bg-rose-500/15 text-action-danger";
+    if (s === "running") return "bg-action-primary/15 text-action-primary";
+    return "bg-bg-elevated text-text-muted";
   };
 
   return (
@@ -94,7 +94,7 @@ function SysadminCronInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Job</th>
                     <th className="p-3 text-left">Cron</th>
                     <th className="p-3 text-center">Status</th>
@@ -102,23 +102,23 @@ function SysadminCronInner() {
                     <th className="p-3 text-left">Next run</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {jobs.map((j) => (
-                    <tr key={j.id} className="hover:bg-[var(--bg-elevated)]/40">
+                    <tr key={j.id} className="hover:bg-bg-elevated/40">
                       <td className="p-3">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{j.name}</p>
-                        {j.description && <p className="text-xs text-[var(--text-muted)] mt-0.5">{j.description}</p>}
+                        <p className="text-sm font-medium text-text-primary">{j.name}</p>
+                        {j.description && <p className="text-xs text-text-muted mt-0.5">{j.description}</p>}
                       </td>
-                      <td className="p-3 font-mono text-xs text-[var(--text-muted)]">{j.cron_expression ?? "—"}</td>
+                      <td className="p-3 font-mono text-xs text-text-muted">{j.cron_expression ?? "—"}</td>
                       <td className="p-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[11px] ${j.enabled ? "bg-emerald-500/15 text-emerald-400" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] ${j.enabled ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
                           {j.enabled ? "Enabled" : "Disabled"}
                         </span>
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                      <td className="p-3 text-xs text-text-muted">
                         {j.last_run ? new Date(j.last_run).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "Never"}
                       </td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">
+                      <td className="p-3 text-xs text-text-muted">
                         {j.next_run ? new Date(j.next_run).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
                       </td>
                     </tr>
@@ -139,18 +139,18 @@ function SysadminCronInner() {
               description="Run history appears here after the first execution."
             />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {runs.map((r) => (
                 <div key={r.id} className="p-3 flex items-center gap-3">
                   <span className={`px-2 py-0.5 rounded-full text-[11px] shrink-0 ${statusTone(r.status)}`}>
                     {r.status}
                   </span>
-                  <p className="flex-1 text-xs text-[var(--text-muted)]">
+                  <p className="flex-1 text-xs text-text-muted">
                     {r.scheduledJobs_id ?? "job"}
                     {r.records_affected != null ? ` · ${r.records_affected} records` : ""}
                     {r.duration_ms != null ? ` · ${r.duration_ms}ms` : ""}
                   </p>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                  <span className="text-xs text-text-muted font-mono">
                     {r.start_time ? new Date(r.start_time).toLocaleTimeString() : ""}
                   </span>
                 </div>

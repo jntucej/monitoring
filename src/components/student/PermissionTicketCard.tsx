@@ -26,16 +26,16 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 const WORKFLOW_BADGES: Record<string, { label: string; className: string }> = {
-  hostel: { label: "Hostel", className: "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20" },
+  hostel: { label: "Hostel", className: "bg-indigo-500/10 text-action-primary border border-indigo-500/20" },
   exam: { label: "Exam", className: "bg-teal-500/10 text-teal-500 border border-teal-500/20" },
-  memo: { label: "Memo", className: "bg-violet-500/10 text-violet-500 border border-violet-500/20" },
-  staff_leave: { label: "Staff Leave", className: "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20" },
+  memo: { label: "Memo", className: "bg-violet-500/10 text-unit-c border border-violet-500/20" },
+  staff_leave: { label: "Staff Leave", className: "bg-bg-elevated/10 text-text-muted border border-border/20" },
 };
 
 const STATUS_CLASSES: Record<string, string> = {
-  PENDING: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
-  APPROVED: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
-  REJECTED: "bg-rose-500/10 text-rose-500 border border-rose-500/20",
+  PENDING: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+  APPROVED: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+  REJECTED: "bg-rose-500/10 text-action-danger border border-rose-500/20",
   ESCALATED: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
   COMPLETED: "bg-sky-500/10 text-sky-500 border border-sky-500/20",
 };
@@ -48,21 +48,21 @@ const STATUS_CLASSES: Record<string, string> = {
 export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardProps) {
   const workflow = WORKFLOW_BADGES[ticket.workflow_type] || {
     label: ticket.workflow_type,
-    className: "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20",
+    className: "bg-bg-elevated/10 text-text-muted border border-border/20",
   };
-  const statusClass = STATUS_CLASSES[ticket.status] || "bg-[var(--bg-elevated)]/10 text-[var(--text-muted)] border border-[var(--border)]/20";
+  const statusClass = STATUS_CLASSES[ticket.status] || "bg-bg-elevated/10 text-text-muted border border-border/20";
   const stageLabel = STAGE_LABELS[ticket.current_stage] || ticket.current_stage;
   const history = ticket.stage_history || [];
   const latest = history[history.length - 1];
 
   return (
     <div
-      className="group bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 transition-all duration-150 hover:border-[var(--text-muted)] hover:shadow-sm"
+      className="group bg-bg-surface border border-border rounded-xl p-4 transition-all duration-150 hover:border-[var(--text-muted)] hover:shadow-sm"
     >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] font-mono text-sm font-bold text-[var(--action-primary)] tracking-wide">
+          <span className="px-2.5 py-1 rounded-lg bg-bg-elevated border border-border font-mono text-sm font-bold text-action-primary tracking-wide">
             {ticket.ticket_number}
           </span>
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${workflow.className}`}>
@@ -75,23 +75,23 @@ export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardP
       </div>
 
       {/* Body */}
-      <div className="mt-3 space-y-1.5 text-xs text-[var(--text-secondary)]">
+      <div className="mt-3 space-y-1.5 text-xs text-text-secondary">
         <div className="flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          Stage: <span className="font-semibold text-[var(--text-primary)]">{stageLabel}</span>
+          <Shield className="w-3.5 h-3.5 text-text-muted" />
+          Stage: <span className="font-semibold text-text-primary">{stageLabel}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
+        <div className="flex items-center gap-1.5 text-text-muted">
           <Clock className="w-3.5 h-3.5" />
           {formatDateTime(ticket.created_at)}
         </div>
         {ticket.document_required && (
-          <div className="flex items-center gap-1.5 text-amber-500 font-medium">
+          <div className="flex items-center gap-1.5 text-action-warning font-medium">
             <FileText className="w-3.5 h-3.5" />
             {ticket.document_url ? "Document attached" : "Document required"}
           </div>
         )}
         {latest?.comment && (
-          <div className="flex items-start gap-1.5 pt-1 text-[var(--text-muted)] italic">
+          <div className="flex items-start gap-1.5 pt-1 text-text-muted italic">
             <MessageSquare className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span className="line-clamp-2">&ldquo;{latest.comment}&rdquo;</span>
           </div>
@@ -103,7 +103,7 @@ export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardP
         <button
           type="button"
           onClick={() => onSelect(ticket.ticket_number)}
-          className="mt-3 flex items-center gap-1 text-xs font-semibold text-[var(--action-primary)] hover:underline"
+          className="mt-3 flex items-center gap-1 text-xs font-semibold text-action-primary hover:underline"
         >
           View Details
           <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />

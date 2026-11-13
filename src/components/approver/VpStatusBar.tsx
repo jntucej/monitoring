@@ -32,7 +32,7 @@ export function VpStatusBar({ counts, lastScan, refreshing }: VpStatusBarProps) 
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-1.5 border-t border-[var(--border)] bg-[var(--bg-base)]/90 backdrop-blur-sm text-[11px] font-mono min-w-0"
+      className="flex items-center gap-3 px-4 py-1.5 border-t border-border bg-bg-base/90 backdrop-blur-sm text-[11px] font-mono min-w-0"
       role="status"
       aria-live="polite"
     >
@@ -40,27 +40,27 @@ export function VpStatusBar({ counts, lastScan, refreshing }: VpStatusBarProps) 
         <span className="relative flex h-2 w-2">
           <span
             className={`absolute inline-flex h-full w-full rounded-full ${
-              refreshing ? "animate-ping bg-emerald-400/60" : "bg-emerald-400"
+              refreshing ? "animate-ping bg-emerald-400/60" : "bg-action-success"
             } opacity-75`}
           />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-action-success" />
         </span>
-        <span className="text-[var(--text-secondary)] font-semibold">Vice Principal</span>
+        <span className="text-text-secondary font-semibold">Vice Principal</span>
       </span>
 
       <span className="flex items-center gap-3 flex-wrap min-w-0">
-        <span className="text-[var(--text-secondary)]">
-          <span className="text-sky-400 font-bold">{pending}</span> pending
+        <span className="text-text-secondary">
+          <span className="text-action-info font-bold">{pending}</span> pending
         </span>
-        <span className="text-[var(--text-secondary)]">
-          <span className="text-amber-400 font-bold">{active}</span> active
+        <span className="text-text-secondary">
+          <span className="text-action-warning font-bold">{active}</span> active
         </span>
-        <span className="text-[var(--text-secondary)]">
-          <span className="text-emerald-400 font-bold">{records}</span> records
+        <span className="text-text-secondary">
+          <span className="text-action-success font-bold">{records}</span> records
         </span>
       </span>
 
-      <span className="ml-auto flex items-center gap-1.5 shrink-0 text-[var(--text-muted)]">
+      <span className="ml-auto flex items-center gap-1.5 shrink-0 text-text-muted">
         {refreshing ? (
           <Loader2 className="w-3 h-3 animate-spin" />
         ) : (

@@ -114,15 +114,15 @@ export function RoleHierarchyGraph({
           } ${
             isRoot
               ? "border-emerald-500/40 bg-emerald-500/[0.08]"
-              : "border-[var(--border)] bg-[var(--bg-surface)]/40 hover:bg-[var(--bg-surface)]"
+              : "border-border bg-bg-surface/40 hover:bg-bg-surface"
           }`}
         >
           <button
             type="button"
             onClick={() => hasChildren && setExpanded((p) => ({ ...p, [node.code]: !p[node.code] }))}
             disabled={!hasChildren}
-            className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text-muted)] ${
-              hasChildren ? "hover:bg-[var(--bg-elevated)] cursor-pointer" : "opacity-0 cursor-default"
+            className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-text-muted ${
+              hasChildren ? "hover:bg-bg-elevated cursor-pointer" : "opacity-0 cursor-default"
             }`}
             aria-label={hasChildren ? (isExpanded ? "Collapse" : "Expand") : undefined}
           >
@@ -133,29 +133,29 @@ export function RoleHierarchyGraph({
                 <ChevronRight className="w-4 h-4" />
               )
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-elevated)]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-bg-elevated" />
             )}
           </button>
 
           {isRoot ? (
-            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 shrink-0 text-action-success" />
           ) : (
-            <Building2 className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
+            <Building2 className="w-4 h-4 shrink-0 text-text-muted" />
           )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`font-mono text-xs font-bold ${isRoot ? "text-emerald-400" : "text-[var(--text-muted)]"}`}>
+              <span className={`font-mono text-xs font-bold ${isRoot ? "text-action-success" : "text-text-muted"}`}>
                 {node.code}
               </span>
               {hasChildren && (
-                <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                <span className="text-[10px] text-text-muted uppercase tracking-wider">
                   {node.children.length} sub-role{node.children.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
             <div className="mt-0.5 flex items-center gap-3 flex-wrap">
-              <span className="inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
+              <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">
                 <Users className="w-3 h-3" />
                 <span className="font-mono font-bold text-white tabular-nums">{members}</span>
                 user{members === 1 ? "" : "s"}
@@ -163,7 +163,7 @@ export function RoleHierarchyGraph({
               {showOnCampus && (
                 <span
                   className={`inline-flex items-center gap-1 text-[11px] ${
-                    onCampus > 0 ? "text-emerald-400" : "text-[var(--text-muted)]"
+                    onCampus > 0 ? "text-action-success" : "text-text-muted"
                   }`}
                 >
                   <Lock className="w-3 h-3" />
@@ -176,10 +176,10 @@ export function RoleHierarchyGraph({
         </div>
 
         {hasChildren && isExpanded && (
-          <div className={`ml-4 border-l-2 border-[var(--border)] pl-4 ${compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}`}>
+          <div className={`ml-4 border-l-2 border-border pl-4 ${compact ? "mt-1.5 space-y-1.5" : "mt-2 space-y-2"}`}>
             {node.children.map((child) => (
               <div key={child.code} className="relative">
-                <div className="absolute -left-4 top-1/2 h-0.5 w-4 bg-[var(--bg-elevated)]" />
+                <div className="absolute -left-4 top-1/2 h-0.5 w-4 bg-bg-elevated" />
                 {renderNode(child)}
               </div>
             ))}
@@ -193,16 +193,16 @@ export function RoleHierarchyGraph({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-secondary)]">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-[11px] text-text-secondary">
+            <ShieldCheck className="w-3.5 h-3.5 text-action-success" />
             {totals.roles} roles
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] text-[var(--text-secondary)]">
-            <Users className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-[11px] text-text-secondary">
+            <Users className="w-3.5 h-3.5 text-action-success" />
             {totals.members} total users
           </span>
           {showOnCampus && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-300">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-action-success">
               <Lock className="w-3.5 h-3.5" />
               {totals.onCampus} in campus
             </span>
@@ -212,14 +212,14 @@ export function RoleHierarchyGraph({
           <button
             type="button"
             onClick={expandAll}
-            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-secondary)] hover:text-white hover:border-[var(--border)] transition"
+            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-secondary hover:text-white hover:border-border transition"
           >
             Expand All
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-secondary)] hover:text-white hover:border-[var(--border)] transition"
+            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-secondary hover:text-white hover:border-border transition"
           >
             Collapse All
           </button>

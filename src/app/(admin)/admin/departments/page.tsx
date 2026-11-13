@@ -65,7 +65,7 @@ function AdminDepartmentsInner() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-xs text-[var(--text-muted)] border-b border-[var(--border)]">
+                  <tr className="text-xs text-text-muted border-b border-border">
                     <th className="p-3 text-left">Code</th>
                     <th className="p-3 text-left">Department</th>
                     <th className="p-3 text-left">HOD</th>
@@ -74,16 +74,16 @@ function AdminDepartmentsInner() {
                     <th className="p-3 text-center">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--border)]">
+                <tbody className="divide-y divide-border">
                   {rows.map((r) => (
-                    <tr key={r.code} className="hover:bg-[var(--bg-elevated)]/40">
-                      <td className="p-3 font-mono text-xs text-[var(--text-secondary)]">{r.code}</td>
-                      <td className="p-3 text-sm font-semibold text-[var(--text-primary)]">{r.name}</td>
-                      <td className="p-3 text-xs text-[var(--text-muted)]">{r.hod || "—"}</td>
+                    <tr key={r.code} className="hover:bg-bg-elevated/40">
+                      <td className="p-3 font-mono text-xs text-text-secondary">{r.code}</td>
+                      <td className="p-3 text-sm font-semibold text-text-primary">{r.name}</td>
+                      <td className="p-3 text-xs text-text-muted">{r.hod || "—"}</td>
                       <td className="p-3 text-center">{r.facultyCount}</td>
                       <td className="p-3 text-center">{r.totalStudents}</td>
                       <td className="p-3 text-center">
-                        <span className="px-2 py-0.5 rounded-lg bg-[var(--action-primary)]/10 border border-[var(--action-primary)]/20 text-[11px] font-bold text-[var(--action-primary)]">
+                        <span className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] font-bold text-action-primary">
                           {r.facultyCount + r.totalStudents}
                         </span>
                       </td>

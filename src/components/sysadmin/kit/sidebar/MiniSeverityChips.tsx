@@ -37,7 +37,7 @@ export function MiniSeverityChips({ counts, label, onClick, className }: MiniSev
           </span>
         );
       })}
-      {entries.length === 0 && <span className="text-[8px] text-[var(--text-muted)]">0</span>}
+      {entries.length === 0 && <span className="text-[8px] text-text-muted">0</span>}
     </button>
   );
 }

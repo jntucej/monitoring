@@ -142,7 +142,7 @@ export const BotMessages = memo(function BotMessages({
         {listening && (
           <div className="flex justify-end">
             <div className="max-w-[88%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-sm
-                            bg-emerald-500/15 text-[var(--text-primary)] italic">
+                            bg-emerald-500/15 text-text-primary italic">
               {interim || t.listening}
               <span className="ml-1 animate-pulse">▍</span>
             </div>
@@ -150,7 +150,7 @@ export const BotMessages = memo(function BotMessages({
         )}
 
         {streaming && messages[messages.length - 1]?.content === "" && (
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] px-1">
+          <div className="flex items-center gap-1.5 text-[11px] text-text-muted px-1">
             <Sparkles className="h-3 w-3 animate-pulse" /> {t.thinking}
           </div>
         )}
@@ -161,10 +161,10 @@ export const BotMessages = memo(function BotMessages({
           onClick={scrollToBottom}
           aria-label="Scroll to latest"
           className="absolute bottom-3 right-3 h-8 w-8 rounded-full
-                     bg-[var(--bg-elevated)] border border-[var(--border)]
+                     bg-bg-elevated border border-border
                      flex items-center justify-center shadow-lg active:scale-95 transition"
         >
-          <ArrowDown className="h-4 w-4 text-[var(--text-secondary)]" />
+          <ArrowDown className="h-4 w-4 text-text-secondary" />
         </button>
       )}
     </div>

@@ -17,7 +17,7 @@ export default async function Image() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          background: "linear-gradient(135deg, var(--bg-base) 0%, #1e293b 100%)",
           padding: "64px",
           fontFamily: "system-ui, -apple-system, sans-serif",
           color: "white",
@@ -29,7 +29,7 @@ export default async function Image() {
               width: "56px",
               height: "56px",
               borderRadius: "12px",
-              background: "#10b981",
+              background: "var(--action-success)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -41,7 +41,7 @@ export default async function Image() {
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ fontSize: "22px", fontWeight: 600 }}>JNTUH UCEJ</div>
-            <div style={{ fontSize: "14px", color: "#94a3b8" }}>
+            <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>
               Campus Access Portal
             </div>
           </div>
@@ -60,7 +60,7 @@ export default async function Image() {
           <div
             style={{
               fontSize: "24px",
-              color: "#cbd5e1",
+              color: "var(--text-secondary)",
               lineHeight: 1.4,
               maxWidth: "1000px",
             }}
@@ -73,7 +73,7 @@ export default async function Image() {
             display: "flex",
             gap: "20px",
             fontSize: "16px",
-            color: "#94a3b8",
+            color: "var(--text-muted)",
           }}
         >
           <div>NAAC A+ (3.29)</div>

@@ -63,14 +63,14 @@ export function ActivePassCard() {
 
   if (passes.length === 0) {
     return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-        <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="flex items-center gap-2 text-text-secondary">
           <Ticket className="h-5 w-5" aria-hidden />
           <span className="text-sm">No active pass</span>
         </div>
         <Link
           href="/student/permissions/new"
-          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--action-primary)]"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-action-primary"
         >
           Apply for one <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
@@ -80,8 +80,8 @@ export function ActivePassCard() {
 
   if (passes.length > 1) {
     return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
-        <div className="flex items-center gap-2 text-[var(--text-primary)]">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="flex items-center gap-2 text-text-primary">
           <Ticket className="h-5 w-5" aria-hidden />
           <span className="text-sm font-medium">
             You have {passes.length} active passes
@@ -89,7 +89,7 @@ export function ActivePassCard() {
         </div>
         <Link
           href="/student/passes"
-          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--action-primary)]"
+          className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-action-primary"
         >
           See all <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
@@ -99,10 +99,10 @@ export function ActivePassCard() {
 
   // Single pass — inline QR.
   return (
-    <div className="rounded-2xl border border-[var(--action-primary)]/40 bg-[var(--bg-surface)] p-4">
+    <div className="rounded-2xl border border-action-primary/40 bg-bg-surface p-4">
       <div className="mb-2 flex items-center gap-2">
-        <QrCode className="h-4 w-4 text-[var(--action-primary)]" aria-hidden />
-        <span className="text-sm font-medium text-[var(--text-primary)]">
+        <QrCode className="h-4 w-4 text-action-primary" aria-hidden />
+        <span className="text-sm font-medium text-text-primary">
           {single!.reason}
         </span>
       </div>
@@ -115,7 +115,7 @@ export function ActivePassCard() {
       )}
       <Link
         href={`/student/passes/${encodeURIComponent(single!.id)}`}
-        className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[var(--action-primary)]"
+        className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-action-primary"
       >
         Details <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>

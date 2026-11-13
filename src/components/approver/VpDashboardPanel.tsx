@@ -91,14 +91,14 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
 
   return (
     <section
-      className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0"
+      className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0"
       aria-label="VP dashboard panel"
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <Inbox className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <Inbox className="w-4 h-4 text-action-primary shrink-0" />
+          <span className="text-sm font-bold text-text-primary truncate">
             VP Dashboard
           </span>
         </div>
@@ -106,7 +106,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           aria-label="Refresh VP dashboard"
         >
           {loading ? (
@@ -120,15 +120,15 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
 
       {/* Counts */}
       <div className="flex flex-wrap gap-3 mb-3 text-[11px]">
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-sky-400 bg-sky-400/10 border-sky-400/20">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-info bg-sky-400/10 border-sky-400/20">
           <ShieldAlert className="w-3 h-3" />
           {pendingApprovals} pending
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-amber-400 bg-amber-400/10 border-amber-400/20">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-warning bg-amber-400/10 border-amber-400/20">
           <ShieldAlert className="w-3 h-3" />
           {alerts.length} active alerts
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-emerald-400 bg-emerald-400/10 border-emerald-400/20">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-success bg-emerald-400/10 border-emerald-400/20">
           <CheckCircle className="w-3 h-3" />
           {pendingApprovals + alerts.length} records
         </span>
@@ -136,7 +136,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
 
       {/* Top-priority items list */}
       {loading && topItems.length === 0 ? (
-        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-4 justify-center">
+        <div className="flex items-center gap-2 text-xs text-text-muted py-4 justify-center">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading VP dashboard…</span>
         </div>
@@ -144,21 +144,21 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
         <EmptyState
           title="No active alerts"
           description="The VP dashboard is clear. No pending alerts to triage."
-          icon={<CheckCircle className="w-5 h-5 text-emerald-400" />}
+          icon={<CheckCircle className="w-5 h-5 text-action-success" />}
         />
       ) : (
         <ul className="space-y-1.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {topItems.map((item) => {
             const priorityTone =
               item.severity?.toUpperCase() === "CRITICAL"
-                ? "text-rose-400 bg-rose-400/10 border-rose-400/20"
+                ? "text-action-danger bg-rose-400/10 border-rose-400/20"
                 : item.severity?.toUpperCase() === "HIGH"
-                  ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                  : "text-[var(--text-muted)] bg-[var(--bg-base)] border-[var(--border)]";
+                  ? "text-action-warning bg-amber-400/10 border-amber-400/20"
+                  : "text-text-muted bg-bg-base border-border";
             return (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 min-w-0"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -167,15 +167,15 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
                     >
                       {item.severity?.toUpperCase() ?? "—"}
                     </span>
-                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                    <span className="text-xs font-semibold text-text-primary truncate">
                       {item.title ?? item.message ?? item.id}
                     </span>
                   </div>
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] truncate mt-0.5">
+                  <p className="text-[10px] font-mono text-text-muted truncate mt-0.5">
                     {item.gate_name ?? "Campus"} · {item.resolved ? "RESOLVED" : "ACTIVE"}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-[var(--text-muted)]">
+                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-text-muted">
                   <Clock className="w-3 h-3" />
                   {fmt(item.timestamp)}
                 </span>
@@ -186,7 +186,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
       )}
 
       {/* Footer hint */}
-      <p className="mt-3 text-[10px] text-[var(--text-muted)]">
+      <p className="mt-3 text-[10px] text-text-muted">
         VP scope = delegated oversight. No hostel/branch filter. Data refreshed every 15s.
       </p>
     </section>

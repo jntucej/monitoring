@@ -147,18 +147,18 @@ function ScanPageInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5">
       {/* Header */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-4 sm:p-5">
+      <div className="rounded-2xl border border-border bg-bg-elevated p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <ScanLine className="w-5 h-5 text-emerald-400" />
+              <ScanLine className="w-5 h-5 text-action-success" />
             </div>
             <div className="min-w-0">
               <p className="text-base sm:text-lg font-black text-white truncate">Token Scanner</p>
-              <p className="text-[11px] text-[var(--text-muted)]">Scan or enter a mess token code to serve</p>
+              <p className="text-[11px] text-text-muted">Scan or enter a mess token code to serve</p>
             </div>
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+          <span className="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-action-success text-[10px] font-black uppercase tracking-wider">
             <Camera className="w-3 h-3" /> Scan
           </span>
         </div>
@@ -168,7 +168,7 @@ function ScanPageInner() {
       <WidgetBoundary title="Scanner">
         <button
           onClick={() => setShowScanner(true)}
-          className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black uppercase tracking-wider transition"
+          className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-action-success hover:bg-action-success text-white text-sm font-black uppercase tracking-wider transition"
         >
           <ScanLine className="w-4 h-4" /> Open Camera Scanner
         </button>
@@ -176,23 +176,23 @@ function ScanPageInner() {
 
       {/* Manual entry fallback */}
       <WidgetBoundary title="Manual entry">
-        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] p-4 sm:p-5 space-y-3">
+        <div className="rounded-2xl border border-border bg-bg-elevated p-4 sm:p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[var(--bg-elevated)]/10 border border-[var(--border)]/20 flex items-center justify-center">
-              <KeyRound className="w-4 h-4 text-[var(--text-muted)]" />
+            <div className="w-8 h-8 rounded-xl bg-bg-elevated/10 border border-border/20 flex items-center justify-center">
+              <KeyRound className="w-4 h-4 text-text-muted" />
             </div>
             <span className="text-xs font-bold text-white uppercase tracking-wider">
               Manual Entry
             </span>
           </div>
-          <p className="text-[11px] text-[var(--text-muted)]">
+          <p className="text-[11px] text-text-muted">
             No camera? Type the code shown on the student&apos;s token screen and confirm.
           </p>
           <button
             onClick={() => setManualOpen((o) => !o)}
-            className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] text-[11px] font-bold transition"
+            className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-[11px] font-bold transition"
           >
-            <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
+            <KeyRound className="w-3.5 h-3.5 text-action-success" />
             {manualOpen ? "Hide entry form" : "Enter token code"}
           </button>
 
@@ -204,12 +204,12 @@ function ScanPageInner() {
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder="e.g. M2610-4F7A2"
                 autoFocus
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-bg-surface border border-border text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]"
               />
               <button
                 type="submit"
                 disabled={manualChecking || !manualCode.trim()}
-                className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-bold transition"
+                className="w-full inline-flex min-h-[44px] items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
               >
                 {manualChecking ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -225,13 +225,13 @@ function ScanPageInner() {
 
       {/* Result / status panel */}
       <WidgetBoundary title="Token result">
-        <div className="rounded-2xl border border-[var(--border)] bg-[#0d1220] overflow-hidden">
+        <div className="rounded-2xl border border-border bg-bg-elevated overflow-hidden">
           {state.kind === "idle" && (
             <div className="p-10 text-center space-y-2">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-[var(--bg-elevated)]/10 border border-[var(--border)]/20 flex items-center justify-center">
-                <ScanLine className="w-6 h-6 text-[var(--text-muted)]" />
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-bg-elevated/10 border border-border/20 flex items-center justify-center">
+                <ScanLine className="w-6 h-6 text-text-muted" />
               </div>
-              <p className="text-xs text-[var(--text-muted)]">
+              <p className="text-xs text-text-muted">
                 Scan a token or type its code above to load details here.
               </p>
             </div>
@@ -239,9 +239,9 @@ function ScanPageInner() {
 
           {state.kind === "loading" && (
             <div className="p-10 text-center space-y-3">
-              <Loader2 className="w-8 h-8 mx-auto text-emerald-400 animate-spin" />
-              <p className="text-xs text-[var(--text-muted)]">
-                Looking up <span className="font-mono text-emerald-400">{state.code}</span>…
+              <Loader2 className="w-8 h-8 mx-auto text-action-success animate-spin" />
+              <p className="text-xs text-text-muted">
+                Looking up <span className="font-mono text-action-success">{state.code}</span>…
               </p>
             </div>
           )}
@@ -249,19 +249,19 @@ function ScanPageInner() {
           {state.kind === "error" && (
             <div className="p-6 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/15 text-action-danger border border-rose-500/30 flex items-center justify-center shrink-0">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-rose-300">Token invalid or error</p>
-                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                  <p className="text-sm font-bold text-action-danger">Token invalid or error</p>
+                  <p className="text-[11px] text-text-muted mt-0.5">
                     Code <span className="font-mono">{state.code}</span> — {state.message}
                   </p>
                 </div>
               </div>
               <button
                 onClick={reset}
-                className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] text-[11px] font-bold transition"
+                className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-2 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-[11px] font-bold transition"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Try again
               </button>
@@ -283,12 +283,12 @@ function ScanPageInner() {
                 {isServed ? (
                   <>
                     <CheckCircle2
-                      className={`w-14 h-14 mx-auto mb-2 text-emerald-400 ${
-                        state.token.primaryItem === "NON_VEG" ? "text-rose-400" : ""
+                      className={`w-14 h-14 mx-auto mb-2 text-action-success ${
+                        state.token.primaryItem === "NON_VEG" ? "text-action-danger" : ""
                       }`}
                     />
-                    <p className="text-2xl font-black text-emerald-400">SERVED</p>
-                    <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                    <p className="text-2xl font-black text-action-success">SERVED</p>
+                    <p className="text-[11px] text-text-muted mt-1">
                       Served at {fmtTs(state.servedAt)}
                     </p>
                   </>
@@ -296,20 +296,20 @@ function ScanPageInner() {
                   <div>
                     <div className="flex items-center justify-center gap-2 mb-1">
                       {state.token.primaryItem === "NON_VEG" ? (
-                        <Beef className="w-6 h-6 text-rose-400" />
+                        <Beef className="w-6 h-6 text-action-danger" />
                       ) : (
-                        <Leaf className="w-6 h-6 text-emerald-400" />
+                        <Leaf className="w-6 h-6 text-action-success" />
                       )}
                       <span
                         className={`text-4xl font-black tracking-widest ${
-                          state.token.primaryItem === "NON_VEG" ? "text-rose-400" : "text-emerald-400"
+                          state.token.primaryItem === "NON_VEG" ? "text-action-danger" : "text-action-success"
                         }`}
                       >
                         {state.token.primaryItem === "NON_VEG" ? "NON-VEG" : "VEG"}
                       </span>
                     </div>
                     {!state.token.valid && (
-                      <p className="text-xs font-bold text-rose-300 mt-1">
+                      <p className="text-xs font-bold text-action-danger mt-1">
                         {state.token.reason ?? "This token is not servable"}
                       </p>
                     )}
@@ -318,16 +318,16 @@ function ScanPageInner() {
               </div>
 
               {/* Student + sub items */}
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]/40 p-4 space-y-3">
+              <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center shrink-0">
-                    <User className="w-5 h-5 text-[var(--text-muted)]" />
+                  <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-text-muted" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-white truncate">
                       {state.token.studentName ?? "Unknown student"}
                     </p>
-                    <p className="text-[11px] text-[var(--text-muted)] font-mono">
+                    <p className="text-[11px] text-text-muted font-mono">
                       Roll {state.token.studentRoll ?? "—"}
                     </p>
                   </div>
@@ -335,14 +335,14 @@ function ScanPageInner() {
 
                 {(state.token.subItemLabels?.length ?? 0) > 0 && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
                       Sub items
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {state.token.subItemLabels!.map((l) => (
                         <span
                           key={l}
-                          className="px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] text-[10px] font-semibold text-[var(--text-secondary)]"
+                          className="px-2 py-0.5 rounded-full bg-bg-elevated border border-border text-[10px] font-semibold text-text-secondary"
                         >
                           {l}
                         </span>
@@ -352,12 +352,12 @@ function ScanPageInner() {
                 )}
 
                 {state.token.revokedAt && (
-                  <p className="text-[11px] text-rose-400 font-semibold">
+                  <p className="text-[11px] text-action-danger font-semibold">
                     Token was revoked at {fmtTs(state.token.revokedAt)}
                   </p>
                 )}
                 {state.token.expiresAt && (
-                  <p className="text-[11px] text-[var(--text-muted)]">
+                  <p className="text-[11px] text-text-muted">
                     Expires {fmtTs(state.token.expiresAt)}
                   </p>
                 )}
@@ -371,8 +371,8 @@ function ScanPageInner() {
                     disabled={state.serving}
                     className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white text-sm font-black uppercase tracking-wider transition disabled:opacity-50 ${
                       state.token.primaryItem === "NON_VEG"
-                        ? "bg-rose-600 hover:bg-rose-500"
-                        : "bg-emerald-600 hover:bg-emerald-500"
+                        ? "bg-action-danger hover:bg-action-danger"
+                        : "bg-action-success hover:bg-action-success"
                     }`}
                   >
                     {state.serving ? (
@@ -385,7 +385,7 @@ function ScanPageInner() {
                 )}
                 <button
                   onClick={reset}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] text-xs font-bold transition"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-xs font-bold transition"
                 >
                   <RotateCcw className="w-4 h-4" /> New Scan
                 </button>
@@ -416,7 +416,7 @@ export default function MessScanPage() {
     <Suspense
       fallback={
         <div className="p-8 flex items-center justify-center min-h-[50vh]">
-          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

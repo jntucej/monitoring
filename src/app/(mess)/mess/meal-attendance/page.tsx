@@ -39,7 +39,7 @@ interface AttendanceResponse {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -56,9 +56,9 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
 }
 
 function rateColor(rate: number): string {
-  if (rate >= 80) return "text-emerald-400";
-  if (rate >= 50) return "text-amber-400";
-  return "text-rose-400";
+  if (rate >= 80) return "text-action-success";
+  if (rate >= 50) return "text-action-warning";
+  return "text-action-danger";
 }
 
 function fmtDate(d: string | null | undefined): string {
@@ -102,15 +102,15 @@ function MessMealAttendanceInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -121,38 +121,38 @@ function MessMealAttendanceInner() {
       )}
 
       <WidgetBoundary title="Meal Attendance">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <Users className="w-4 h-4 text-emerald-400 shrink-0" />
+              <Users className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Meal Attendance</span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">{d ? fmtDate(d.mealDate) : "—"}</span>
+            <span className="text-xs text-text-muted shrink-0">{d ? fmtDate(d.mealDate) : "—"}</span>
           </div>
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading meal attendance…
             </div>
           ) : blocks.length > 0 ? (
             <div className="min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Declared Present</p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">{d?.totals?.declared}</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Declared Present</p>
+                  <p className="mt-1 text-lg font-bold text-action-info">{d?.totals?.declared}</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Confirmed Served</p>
-                  <p className="mt-1 text-lg font-bold text-emerald-400">{d?.totals?.confirmed}</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Confirmed Served</p>
+                  <p className="mt-1 text-lg font-bold text-action-success">{d?.totals?.confirmed}</p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Veg / Non-Veg</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Veg / Non-Veg</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {d?.totals?.veg} / {d?.totals?.nonVeg}
                   </p>
                 </div>
-                <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Attendance Rate</p>
+                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Attendance Rate</p>
                   <p className={`mt-1 text-lg font-bold ${rateColor(d?.totals?.attendanceRate ?? 0)}`}>
                     {d?.totals?.attendanceRate}%
                   </p>
@@ -162,7 +162,7 @@ function MessMealAttendanceInner() {
               <div className="overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[560px]">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-4 py-2.5">Hostel Block</th>
                       <th className="text-left px-4 py-2.5">Declared</th>
                       <th className="text-left px-4 py-2.5">Confirmed</th>
@@ -172,14 +172,14 @@ function MessMealAttendanceInner() {
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {blocks.map((b) => (
-                      <tr key={b.hostelBlock} className="hover:bg-[var(--bg-elevated)]/30 transition-colors">
-                        <td className="px-4 py-3 text-[var(--text-secondary)] font-medium whitespace-nowrap flex items-center gap-2 min-w-0">
-                          <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                      <tr key={b.hostelBlock} className="hover:bg-bg-elevated/30 transition-colors">
+                        <td className="px-4 py-3 text-text-secondary font-medium whitespace-nowrap flex items-center gap-2 min-w-0">
+                          <Building2 className="w-3.5 h-3.5 text-text-muted shrink-0" />
                           <span className="truncate">{b.hostelBlock}</span>
                         </td>
-                        <td className="px-4 py-3 text-[var(--text-muted)]">{b.declared}</td>
-                        <td className="px-4 py-3 text-emerald-400 font-medium">{b.confirmed}</td>
-                        <td className="px-4 py-3 text-[var(--text-muted)] whitespace-nowrap">
+                        <td className="px-4 py-3 text-text-muted">{b.declared}</td>
+                        <td className="px-4 py-3 text-action-success font-medium">{b.confirmed}</td>
+                        <td className="px-4 py-3 text-text-muted whitespace-nowrap">
                           {b.veg} / {b.nonVeg}
                         </td>
                         <td className={`px-4 py-3 font-semibold whitespace-nowrap ${rateColor(b.attendanceRate)}`}>
@@ -191,10 +191,10 @@ function MessMealAttendanceInner() {
                 </table>
               </div>
 
-              <div className="px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--text-muted)] min-w-0">
+              <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
                 Attendance is computed from mess preferences (declared present) vs confirmed
                 servings recorded at the{" "}
-                <Link href="/mess/scan" className="text-emerald-400 hover:underline">
+                <Link href="/mess/scan" className="text-action-success hover:underline">
                   Token Scanner
                 </Link>
                 .
@@ -202,8 +202,8 @@ function MessMealAttendanceInner() {
             </div>
           ) : (
             <div className="p-8 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted max-w-md mx-auto">
                 No attendance data for this meal day. Records appear once students declare
                 attendance and meals are confirmed.
               </p>

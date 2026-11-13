@@ -93,7 +93,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
         : "var(--action-primary)";
 
   const body = (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col gap-2">
+    <div className="rounded-2xl border border-border bg-bg-surface p-4 flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span
@@ -107,7 +107,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
                
             />
           </span>
-          <span className="text-xs font-medium text-[var(--text-muted)] truncate">
+          <span className="text-xs font-medium text-text-muted truncate">
             {tile.label}
           </span>
         </div>
@@ -129,7 +129,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
         {tile.value}
       </div>
       {tile.hint && (
-        <div className="text-[11px] text-[var(--text-muted)] -mt-1">
+        <div className="text-[11px] text-text-muted -mt-1">
           {tile.hint}
         </div>
       )}
@@ -139,7 +139,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
   return tile.href ? (
     <Link
       href={tile.href}
-      className="block hover:ring-2 hover:ring-[var(--action-primary)]/30 rounded-2xl transition-shadow"
+      className="block hover:ring-2 hover:ring-action-primary/30 rounded-2xl transition-shadow"
     >
       {body}
     </Link>
@@ -280,7 +280,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
       {/* ── Status hero */}
       <section
         aria-label="System status"
-        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 flex flex-wrap items-center gap-4"
+        className="rounded-2xl border border-border bg-bg-surface p-5 flex flex-wrap items-center gap-4"
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <span
@@ -304,12 +304,12 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
             >
               {STATUS_LABEL[status]}
             </p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
+            <p className="text-xs text-text-muted mt-0.5 truncate">
               {health.length || 0} services · {STATUS_LABEL[status].toLowerCase()}
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)]">
+        <div className="flex flex-wrap items-center gap-4 text-xs text-text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span
               className="inline-block size-2 rounded-full"
@@ -334,14 +334,14 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section
           aria-label="Service topology"
-          className="lg:col-span-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
+          className="lg:col-span-2 rounded-2xl border border-border bg-bg-surface p-4"
         >
           <div className="flex items-center gap-2 mb-3">
-            <Server className="h-4 w-4 text-[var(--text-muted)]" />
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+            <Server className="h-4 w-4 text-text-muted" />
+            <h2 className="text-sm font-semibold text-text-primary">
               Service topology
             </h2>
-            <span className="text-[11px] text-[var(--text-muted)] ml-auto">
+            <span className="text-[11px] text-text-muted ml-auto">
               click a node to inspect
             </span>
           </div>
@@ -363,22 +363,22 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
 
         <section
           aria-label="Attention queue"
-          className="lg:col-span-1 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 flex flex-col"
+          className="lg:col-span-1 rounded-2xl border border-border bg-bg-surface p-4 flex flex-col"
         >
           <div className="flex items-center gap-2 mb-3">
-            <Clock className="h-4 w-4 text-[var(--text-muted)]" />
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+            <Clock className="h-4 w-4 text-text-muted" />
+            <h2 className="text-sm font-semibold text-text-primary">
               Attention
             </h2>
           </div>
 
           {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-              <CheckCircle2 className="h-8 w-8 text-[var(--action-primary)] mb-3" />
-              <p className="text-sm font-medium text-[var(--text-primary)]">
+              <CheckCircle2 className="h-8 w-8 text-action-primary mb-3" />
+              <p className="text-sm font-medium text-text-primary">
                 All systems nominal
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Nothing needs attention right now.
               </p>
             </div>
@@ -396,8 +396,8 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
                     <Link
                       href={it.href}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl border border-[var(--border)] p-3",
-                        "hover:border-[var(--action-primary)]/40 hover:bg-[var(--bg-elevated)] transition-colors"
+                        "flex items-center gap-3 rounded-xl border border-border p-3",
+                        "hover:border-action-primary/40 hover:bg-bg-elevated transition-colors"
                       )}
                     >
                       <span
@@ -409,10 +409,10 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
                         <it.icon className="h-4 w-4" style={{ color: c }} />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium text-[var(--text-primary)] truncate">
+                        <span className="block text-sm font-medium text-text-primary truncate">
                           {it.title}
                         </span>
-                        <span className="block text-[11px] text-[var(--text-muted)] truncate">
+                        <span className="block text-[11px] text-text-muted truncate">
                           {it.detail}
                         </span>
                       </span>
@@ -432,7 +432,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
 function ChevronLink() {
   return (
     <svg
-      className="h-4 w-4 shrink-0 text-[var(--text-muted)]"
+      className="h-4 w-4 shrink-0 text-text-muted"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

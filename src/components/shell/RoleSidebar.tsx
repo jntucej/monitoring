@@ -73,12 +73,12 @@ export function RoleSidebar({
   const Footer = manifest.footer;
 
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--bg-surface)]">
-      <header className="shrink-0 border-b border-[var(--border)] px-4 py-3">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+    <div className="flex h-full w-full flex-col bg-bg-surface">
+      <header className="shrink-0 border-b border-border px-4 py-3">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
           {manifest.brand.short}
         </p>
-        <p className="text-sm font-semibold text-[var(--text-primary)]">
+        <p className="text-sm font-semibold text-text-primary">
           {manifest.brand.long}
         </p>
       </header>
@@ -110,13 +110,13 @@ export function RoleSidebar({
         )}
       </nav>
 
-      <footer className="shrink-0 border-t border-[var(--border)] p-2 space-y-1">
+      <footer className="shrink-0 border-t border-border p-2 space-y-1">
         {Footer && <Footer />}
         {manifest.hasProfile !== false && (
           <Link
             href={`${manifest.rootHref}/profile`}
             onClick={close}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]"
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
           >
             Account settings
           </Link>
@@ -144,8 +144,8 @@ function LinkRow({
       className={cn(
         "mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
         active
-          ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
-          : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+          ? "bg-action-primary/10 font-medium text-action-primary"
+          : "text-text-secondary hover:bg-bg-elevated"
       )}
     >
       <Icon className="size-4 shrink-0" aria-hidden />
@@ -183,13 +183,13 @@ function GroupRow({
         className={cn(
           "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
           active
-            ? "text-[var(--action-primary)]"
-            : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+            ? "text-action-primary"
+            : "text-text-secondary hover:bg-bg-elevated"
         )}
       >
         <Icon className="size-4 shrink-0" aria-hidden />
         <span className="flex-1 text-left">{group.label}</span>
-        <Chevron className="size-3.5 shrink-0 text-[var(--text-muted)]" />
+        <Chevron className="size-3.5 shrink-0 text-text-muted" />
       </button>
 
       {expanded && (
@@ -205,8 +205,8 @@ function GroupRow({
                   className={cn(
                     "block rounded-md px-3 py-1.5 text-xs transition",
                     childActive
-                      ? "bg-[var(--action-primary)]/10 font-medium text-[var(--action-primary)]"
-                      : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-secondary)]"
+                      ? "bg-action-primary/10 font-medium text-action-primary"
+                      : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
                   )}
                 >
                   {child.label}

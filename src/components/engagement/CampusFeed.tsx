@@ -76,7 +76,7 @@ function formatWhen(iso: string | null): string | null {
 function VerifiedBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400"
+      className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-action-success"
       title="Published by an administrator"
     >
       <ShieldCheck className="h-3 w-3" aria-hidden />
@@ -156,10 +156,10 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
 
   return (
     <WidgetBoundary title="Campus Feed">
-      <section aria-label="Campus feed" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="Campus feed" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <Megaphone className="h-4 w-4 text-indigo-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <Megaphone className="h-4 w-4 text-action-primary" aria-hidden />
             Campus Feed
           </h2>
           <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Feed filter">
@@ -173,7 +173,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
                   filter === f.id
                     ? "bg-indigo-500/20 text-indigo-300"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    : "text-text-muted hover:text-text-primary"
                 }`}
               >
                 {f.label}
@@ -183,7 +183,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
         </div>
 
         {filter === "followed" && data ? (
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
+          <p className="mt-2 text-xs text-text-muted">
             {data.followedCount === 0
               ? "You haven't followed any announcements yet."
               : `${data.followedCount} followed announcement${data.followedCount === 1 ? "" : "s"}.`}
@@ -191,14 +191,14 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
         ) : null}
 
         {loading && !data ? (
-          <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]" role="status">
+          <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-text-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
             Loading feed…
           </div>
         ) : error && !data ? (
           <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : items.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
+          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
             <p className="text-sm">Nothing here yet.</p>
           </div>
@@ -207,16 +207,16 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
             {items.map((item) => (
               <li
                 key={item.key}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]/40 p-3.5"
+                className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
                     {item.kind === "announcement" ? (
-                      <Megaphone className="h-4 w-4 shrink-0 text-amber-400" aria-hidden />
+                      <Megaphone className="h-4 w-4 shrink-0 text-action-warning" aria-hidden />
                     ) : (
-                      <CalendarDays className="h-4 w-4 shrink-0 text-sky-400" aria-hidden />
+                      <CalendarDays className="h-4 w-4 shrink-0 text-action-info" aria-hidden />
                     )}
-                    <p className="truncate text-sm font-semibold text-[var(--text-primary)]">{item.title}</p>
+                    <p className="truncate text-sm font-semibold text-text-primary">{item.title}</p>
                     {item.isOfficial && <VerifiedBadge />}
                     {item.followed && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
@@ -226,8 +226,8 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                     )}
                   </div>
                 </div>
-                <p className="mt-1.5 line-clamp-2 text-xs text-[var(--text-muted)]">{item.body}</p>
-                <p className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                <p className="mt-1.5 line-clamp-2 text-xs text-text-muted">{item.body}</p>
+                <p className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-text-muted">
                   <User className="h-3 w-3" aria-hidden />
                   {item.meta}
                   <span aria-hidden>·</span>

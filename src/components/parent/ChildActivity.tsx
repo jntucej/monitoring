@@ -61,30 +61,30 @@ const api = useApi();
   }, [load]);
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <h3 className="font-semibold mb-4">Recent Activity</h3>
       <div className="space-y-4">
         {error ? (
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30">
-            <div className="flex items-center gap-2 text-sm text-rose-300 font-medium">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="flex items-center gap-2 text-sm text-action-danger font-medium">
+              <AlertCircle className="w-4 h-4 text-action-danger shrink-0" />
               <span>Could not load activity.</span>
             </div>
             <button
               onClick={load}
-              className="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+              className="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
             >
               Retry
             </button>
           </div>
         ) : loading ? (
-          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading activity…
           </div>
         ) : !childRoll ? (
-          <p className="text-sm text-[var(--text-muted)]">No linked students.</p>
+          <p className="text-sm text-text-muted">No linked students.</p>
         ) : activities.length === 0 ? (
-          <p className="text-sm text-[var(--text-muted)]">No recent activity.</p>
+          <p className="text-sm text-text-muted">No recent activity.</p>
         ) : (
           activities.map((a) => {
             const isIn = a.direction === "IN";
@@ -95,13 +95,13 @@ const api = useApi();
             });
             return (
               <div key={a.id} className="flex items-center justify-between">
-                <div className={`flex items-center gap-2 font-medium ${isIn ? "text-emerald-500" : "text-rose-500"}`}>
+                <div className={`flex items-center gap-2 font-medium ${isIn ? "text-action-success" : "text-action-danger"}`}>
                   {isIn ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
                   <span className="capitalize">{a.direction === "IN" ? "Entry" : "Exit"}</span>
                 </div>
                 <div className="text-right">
                   <p className="text-sm">{t}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{a.gateName}</p>
+                  <p className="text-xs text-text-muted">{a.gateName}</p>
                 </div>
               </div>
             );

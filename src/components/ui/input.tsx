@@ -27,14 +27,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={uid}
-            className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase"
+            className="block text-xs font-medium text-text-muted mb-1 uppercase"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
               {icon}
             </div>
           )}
@@ -45,9 +45,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={error ? "true" : undefined}
             aria-describedby={describedBy}
             className={cn(
-              "w-full h-11 px-4 rounded-md bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:border-transparent",
+              "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary placeholder-[var(--text-muted)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] focus:border-transparent",
               icon && "pl-10",
-              error && "border-[var(--action-danger)] focus:ring-[var(--action-danger)]",
+              error && "border-action-danger focus:ring-action-danger",
               className
             )}
             {...props}
@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p
             id={errorId}
             role="alert"
-            className="mt-1 text-sm text-[var(--action-danger)] flex items-center gap-1"
+            className="mt-1 text-sm text-action-danger flex items-center gap-1"
           >
             ⚠️{" "}
             {typeof error === "string"
@@ -66,7 +66,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {helper && !error && (
-          <p id={helperId} className="mt-1 text-xs text-[var(--text-muted)]">
+          <p id={helperId} className="mt-1 text-xs text-text-muted">
             {helper}
           </p>
         )}

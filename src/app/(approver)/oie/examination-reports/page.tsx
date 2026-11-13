@@ -46,27 +46,27 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-8 text-center min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
-        <Inbox className="w-5 h-5 text-[var(--text-muted)]" />
-        <p className="max-w-md text-sm text-[var(--text-muted)]">{message}</p>
+        <Inbox className="w-5 h-5 text-text-muted" />
+        <p className="max-w-md text-sm text-text-muted">{message}</p>
       </div>
     </div>
   );
@@ -74,7 +74,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -142,15 +142,15 @@ function ExaminationReportsInner() {
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       <Link
         href="/oie"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
@@ -179,11 +179,11 @@ function ExaminationReportsInner() {
                 value={
                   <span>
                     {m.value}
-                    {m.unit ? <span className="text-sm text-[var(--text-muted)] ml-1">{m.unit}</span> : null}
+                    {m.unit ? <span className="text-sm text-text-muted ml-1">{m.unit}</span> : null}
                   </span>
                 }
                 sub={m.key}
-                accent={i === 0 ? "text-emerald-400" : i === 1 ? "text-sky-400" : i === 2 ? "text-amber-400" : "text-white"}
+                accent={i === 0 ? "text-action-success" : i === 1 ? "text-action-info" : i === 2 ? "text-action-warning" : "text-white"}
                 loading={loading && !data}
               />
             ))
@@ -195,9 +195,9 @@ function ExaminationReportsInner() {
 
       {/* Series chart */}
       <WidgetBoundary title="Daily Activity Trend">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <TrendingUp className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               30-Day Examination Activity
             </span>
@@ -220,17 +220,17 @@ function ExaminationReportsInner() {
                       }}
                       title={`${s.label}: ${s.value}`}
                     />
-                    <span className="text-[10px] text-[var(--text-muted)] rotate-0">{s.label}</span>
+                    <span className="text-[10px] text-text-muted rotate-0">{s.label}</span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-[var(--text-muted)]">
+              <p className="mt-3 text-xs text-text-muted">
                 {seriesLabels.length} days with recorded activity in the last 30 days.
               </p>
             </div>
           ) : (
             <div className="p-8 text-center">
-              <p className="text-sm text-[var(--text-muted)]">No daily trend data for this period yet.</p>
+              <p className="text-sm text-text-muted">No daily trend data for this period yet.</p>
             </div>
           )}
         </div>

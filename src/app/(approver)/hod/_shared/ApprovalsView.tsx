@@ -37,8 +37,8 @@ export function ApprovalsView({
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
+        <p className="text-xs text-text-muted">
           {rows.length} request{rows.length === 1 ? "" : "s"}
         </p>
       </header>
@@ -54,20 +54,20 @@ export function ApprovalsView({
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="w-full min-h-[44px] rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left"
+                  className="w-full min-h-[44px] rounded-xl border border-border bg-bg-surface p-3 text-left"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
                         {item.student?.name ?? "Unknown"}
                       </p>
-                      <p className="text-[11px] text-[var(--text-muted)]">
+                      <p className="text-[11px] text-text-muted">
                         {item.ticket_number} · {item.workflow_type}
                       </p>
                     </div>
                     <SlaBadge slaDeadline={item.sla_deadline ?? null} status={item.status} />
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-[var(--text-secondary)]">
+                  <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
                     {item.reason ?? item.workflow_type}
                   </p>
                 </button>

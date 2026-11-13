@@ -20,7 +20,7 @@ const LONG_PRESS_MS = 420;
 const BotPanel = dynamic(() => import("./BotPanel").then((m) => m.BotPanel), {
   ssr: false,
   loading: () => (
-    <div className="fixed bottom-24 right-6 h-[520px] w-[380px] rounded-2xl bg-[var(--bg-surface)]/70 animate-pulse" />
+    <div className="fixed bottom-24 right-6 h-[520px] w-[380px] rounded-2xl bg-bg-surface/70 animate-pulse" />
   ),
 });
 
@@ -126,7 +126,7 @@ export function FloatingBot() {
       {/* Hold-to-speak hint (only when closed and idle) */}
       {!open && (
         <div
-          className="fixed z-[79] text-[10px] uppercase tracking-wider text-[var(--text-muted)] pointer-events-none select-none"
+          className="fixed z-[79] text-[10px] uppercase tracking-wider text-text-muted pointer-events-none select-none"
           style={
             pos.x < 0
               ? { right: 30, bottom: 104 }
@@ -149,7 +149,7 @@ export function FloatingBot() {
           type="button"
           id="bot-launcher-btn"
           aria-label="Hold to speak, tap to open assistant"
-          className="relative w-16 h-16 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] shadow-[0_8px_24px_rgba(0,0,0,0.35)] flex items-center justify-center active:scale-95 transition-transform"
+          className="relative w-16 h-16 rounded-full bg-bg-surface border border-border shadow-[0_8px_24px_rgba(0,0,0,0.35)] flex items-center justify-center active:scale-95 transition-transform"
         >
           {/* Hold-progress ring */}
           <svg

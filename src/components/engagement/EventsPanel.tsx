@@ -45,16 +45,16 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
 
   return (
     <WidgetBoundary title="Campus Events">
-      <section aria-label="Campus events" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 min-w-0">
+      <section aria-label="Campus events" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
-            <CalendarDays className="h-4 w-4 text-sky-400" aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <CalendarDays className="h-4 w-4 text-action-info" aria-hidden />
             Campus Events
           </h2>
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] motion-safe:transition-colors motion-reduce:transition-none"
+            className="rounded-lg px-2 py-1 text-[11px] font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             aria-label="Refresh events"
           >
             Refresh
@@ -62,7 +62,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
         </div>
 
         {loading && events.length === 0 ? (
-          <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-[var(--text-muted)]" role="status">
+          <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-text-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
             Loading events…
           </div>
@@ -71,7 +71,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
             {error}
           </div>
         ) : shown.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-[var(--text-muted)]">
+          <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
             <p className="text-sm">No upcoming campus events.</p>
           </div>
@@ -105,7 +105,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
           </div>
         )}
         {events.length > limit ? (
-          <p className="mt-3 text-center text-[11px] text-[var(--text-muted)]">
+          <p className="mt-3 text-center text-[11px] text-text-muted">
             Showing {shown.length} of {events.length} events
           </p>
         ) : null}

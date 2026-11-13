@@ -38,11 +38,11 @@ export function PersonList() {
   }, [query, typeFilter]);
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-      <div className="p-4 border-b border-[var(--border)] flex flex-wrap justify-between items-center gap-3">
+    <div className="bg-bg-surface rounded-xl border border-border">
+      <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-3">
         <div>
           <h3 className="font-semibold text-white">Campus Directory</h3>
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             {query || typeFilter !== "all" ? "Filtered results" : `Total Registered: ${persons.length}`}
           </p>
         </div>
@@ -50,7 +50,7 @@ export function PersonList() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)]"
+            className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary"
           >
             <option value="all">All Types</option>
             <option value="student">Student</option>
@@ -61,13 +61,13 @@ export function PersonList() {
             <option value="parent">Parent</option>
           </select>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by ID, name, dept..."
-              className="pl-9 pr-4 py-2 w-56 bg-[var(--bg-base)] border border-[var(--border)] rounded-lg text-sm"
+              className="pl-9 pr-4 py-2 w-56 bg-bg-base border border-border rounded-lg text-sm"
             />
           </div>
         </div>
@@ -75,9 +75,9 @@ export function PersonList() {
 
       <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
         {loading ? (
-          <div className="text-center py-8 text-[var(--text-muted)] text-sm">Loading...</div>
+          <div className="text-center py-8 text-text-muted text-sm">Loading...</div>
         ) : persons.length === 0 ? (
-          <div className="text-center py-8 text-[var(--text-muted)] text-sm">
+          <div className="text-center py-8 text-text-muted text-sm">
             {query || typeFilter !== "all" ? "No matching records found" : "No persons registered"}
           </div>
         ) : (
@@ -85,24 +85,24 @@ export function PersonList() {
             return (
               <div
                 key={person.id}
-                className="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-[var(--border)] transition-all"
+                className="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-border transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center border border-[var(--border)]">
-                    <User className="w-5 h-5 text-[var(--text-secondary)]" />
+                  <div className="w-10 h-10 rounded-full bg-bg-elevated flex items-center justify-center border border-border">
+                    <User className="w-5 h-5 text-text-secondary" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-white">{person.fullName || person.name}</p>
                       <PersonBadge type={person.personType} />
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] font-mono">{person.uniqueId || person.roll}</p>
+                    <p className="text-xs text-text-muted font-mono">{person.uniqueId || person.roll}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-[var(--text-secondary)]">{person.department || person.designation || "N/A"}</p>
+                  <p className="text-xs text-text-secondary">{person.department || person.designation || "N/A"}</p>
                   <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${
-                    person.status === "active" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                    person.status === "active" ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"
                   }`}>
                     {person.status}
                   </span>

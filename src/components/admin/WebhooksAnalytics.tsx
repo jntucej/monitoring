@@ -19,10 +19,10 @@ import {sampleWebhooksDataset, buildForecastSeries, WEBHOOKS_CHARTS, type Webhoo
 
 /* ─── Severity colours ───────────────────────────────────────────────────── */
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "#38bdf8",
-  medium: "#fbbf24",
-  high: "#f97316",
-  critical: "#ef4444",
+  low: "var(--unit-a)",
+  medium: "var(--action-warning)",
+  high: "var(--action-warning)",
+  critical: "var(--action-danger)",
 };
 
 /* ─── KPI card ───────────────────────────────────────────────────────────── */
@@ -33,12 +33,12 @@ function KpiCard({
   tint: string; sub?: string;
 }) {
   return (
-    <div className="glass-card rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+    <div className="glass-card rounded-xl border border-border bg-bg-surface p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">{value}</p>
-          {sub && <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{sub}</p>}
+          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
+          {sub && <p className="mt-0.5 text-[11px] text-text-muted">{sub}</p>}
         </div>
         <div className="flex h-9 w-9 items-center justify-center rounded-lg"
              style={{ background: `${tint}22`, color: tint }}>
@@ -70,7 +70,7 @@ function ChartCard({
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
         <div>
           <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-          {description && <p className="mt-0.5 text-xs text-[var(--text-muted)]">{description}</p>}
+          {description && <p className="mt-0.5 text-xs text-text-muted">{description}</p>}
         </div>
         <div className="flex items-center gap-2">
           {right}
@@ -205,7 +205,7 @@ export function WebhooksAnalytics() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {demoOnly && (
-        <div role="status" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-amber-300">
+        <div role="status" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-action-warning">
           DEMO DATA — webhook-deliveries analytics is not enabled in this environment.
           The figures below are a synthetic sample, not measured data.
           Enable <code className="font-mono">ALLOW_DEMO_ANALYTICS=true</code> or
@@ -215,12 +215,12 @@ export function WebhooksAnalytics() {
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-500">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-action-success">
             <Brain className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xl font-semibold text-[var(--text-primary)]">Webhooks</p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-xl font-semibold text-text-primary">Webhooks</p>
+            <p className="text-xs text-text-muted">
               Forecasts, confidence intervals, anomaly detection &amp; model metrics
             </p>
           </div>
@@ -237,7 +237,7 @@ export function WebhooksAnalytics() {
             <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
           <Button size="sm" onClick={handleRetrain} disabled={retraining || loading}
-                  className="bg-emerald-600 hover:bg-emerald-500">
+                  className="bg-action-success hover:bg-action-success">
             <Zap className={`mr-1.5 h-3.5 w-3.5 ${retraining ? "animate-pulse" : ""}`} />
             {retraining ? "Retraining…" : "Retrain Model"}
           </Button>
@@ -247,13 +247,13 @@ export function WebhooksAnalytics() {
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiCard label="Active Forecasts" value={String(dataset.predictions.length)}
-                 sub={`Next: ${nextWindow}`} icon={Activity} tint="#10b981" />
+                 sub={`Next: ${nextWindow}`} icon={Activity} tint="var(--action-success)" />
         <KpiCard label="Model Confidence" value={`${avgConfidence}%`}
-                 sub="Weighted avg interval" icon={Target} tint="#3b82f6" />
+                 sub="Weighted avg interval" icon={Target} tint="var(--action-primary)" />
         <KpiCard label="Anomalies Detected" value={String(dataset.anomalies.length)}
-                 sub={`${criticalCount} critical`} icon={AlertTriangle} tint="#f59e0b" />
+                 sub={`${criticalCount} critical`} icon={AlertTriangle} tint="var(--action-warning)" />
         <KpiCard label="Data Points" value={String(forecast.length)}
-                 sub="Last 14 days" icon={Clock} tint="#8b5cf6" />
+                 sub="Last 14 days" icon={Clock} tint="var(--unit-c)" />
       </div>
 
       {/* Hero chart */}
@@ -261,10 +261,10 @@ export function WebhooksAnalytics() {
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
+              <TrendingUp className="h-4 w-4 text-action-success" />
               Demand Forecast — Actual vs Predicted
             </CardTitle>
-            <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            <p className="mt-0.5 text-xs text-text-muted">
               Switch between 8 chart types. Confidence band shows lower/upper bounds.
             </p>
           </div>
@@ -278,10 +278,10 @@ export function WebhooksAnalytics() {
               xKey="date"
               height={340}
               series={[
-                { key: "predicted", label: "Predicted", color: "#10b981", type: "area" },
-                { key: "actual",    label: "Actual",    color: "#3b82f6", type: "line" },
-                { key: "high",      label: "Upper CI",  color: "#f59e0b", type: "line" },
-                { key: "low",       label: "Lower CI",  color: "#ef4444", type: "line" },
+                { key: "predicted", label: "Predicted", color: "var(--action-success)", type: "area" },
+                { key: "actual",    label: "Actual",    color: "var(--action-primary)", type: "line" },
+                { key: "high",      label: "Upper CI",  color: "var(--action-warning)", type: "line" },
+                { key: "low",       label: "Lower CI",  color: "var(--action-danger)", type: "line" },
               ]}
             />
           </WidgetBoundary>
@@ -310,22 +310,22 @@ export function WebhooksAnalytics() {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTriangle className="h-4 w-4 text-action-warning" />
             Detected Anomalies
             <Badge variant="offline" className="ml-2">{dataset.anomalies.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {dataset.anomalies.length === 0 ? (
-            <div className="flex items-center gap-3 rounded-lg border border-dashed border-[var(--border)] p-6 text-sm text-[var(--text-muted)]">
-              <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <div className="flex items-center gap-3 rounded-lg border border-dashed border-border p-6 text-sm text-text-muted">
+              <CheckCircle className="h-5 w-5 text-action-success" />
               No anomalies detected. All metrics are within expected bounds.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wide text-[var(--text-muted)]">
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                     <th className="px-3 py-2">Metric</th>
                     <th className="px-3 py-2">Severity</th>
                     <th className="px-3 py-2 text-right">Actual</th>
@@ -336,8 +336,8 @@ export function WebhooksAnalytics() {
                 </thead>
                 <tbody>
                   {dataset.anomalies.slice(0, 12).map((a) => (
-                    <tr key={a.id} className="border-b border-[var(--border)]/50 transition-colors hover:bg-[var(--bg-elevated)]">
-                      <td className="px-3 py-2.5 font-medium text-[var(--text-primary)]">{a.metric}</td>
+                    <tr key={a.id} className="border-b border-border/50 transition-colors hover:bg-bg-elevated">
+                      <td className="px-3 py-2.5 font-medium text-text-primary">{a.metric}</td>
                       <td className="px-3 py-2.5">
                         <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
                               style={{ background: `${SEVERITY_COLORS[a.severity]}22`, color: SEVERITY_COLORS[a.severity] }}>
@@ -345,14 +345,14 @@ export function WebhooksAnalytics() {
                           {a.severity}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-right tabular-nums text-[var(--text-primary)]">{a.actual_value.toFixed(1)}</td>
-                      <td className="px-3 py-2.5 text-right tabular-nums text-[var(--text-muted)]">{a.expected_value.toFixed(1)}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{a.actual_value.toFixed(1)}</td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">{a.expected_value.toFixed(1)}</td>
                       <td className="px-3 py-2.5 text-right tabular-nums">
-                        <span className={a.z_score >= 3 ? "font-semibold text-rose-500" : "text-[var(--text-primary)]"}>
+                        <span className={a.z_score >= 3 ? "font-semibold text-action-danger" : "text-text-primary"}>
                           {a.z_score.toFixed(2)}
                         </span>
                       </td>
-                      <td className="px-3 py-2.5 text-xs text-[var(--text-muted)]">
+                      <td className="px-3 py-2.5 text-xs text-text-muted">
                         {new Date(a.timestamp).toLocaleString()}
                       </td>
                     </tr>

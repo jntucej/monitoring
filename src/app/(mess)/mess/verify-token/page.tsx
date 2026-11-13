@@ -46,7 +46,7 @@ export default function VerifyTokenPage() {
         {!loading && !activeEventId && (
           <SectionCard title="Choose an event">
             {events.length === 0 && (
-              <p className="text-sm text-[var(--text-muted)]">No active events.</p>
+              <p className="text-sm text-text-muted">No active events.</p>
             )}
             <div className="grid gap-2">
               {events.map((ev) => (
@@ -54,15 +54,15 @@ export default function VerifyTokenPage() {
                   key={ev.id}
                   type="button"
                   onClick={() => setActiveEventId(ev.id)}
-                  className="flex min-h-[44px] items-center justify-between rounded-lg border border-[var(--border)] px-3 py-2 text-left text-sm hover:bg-[var(--bg-elevated)]"
+                  className="flex min-h-[44px] items-center justify-between rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-bg-elevated"
                 >
                   <span>
-                    <span className="font-medium text-[var(--text-primary)]">{ev.title}</span>
-                    <span className="ml-2 text-[var(--text-muted)]">
+                    <span className="font-medium text-text-primary">{ev.title}</span>
+                    <span className="ml-2 text-text-muted">
                       {ev.eventDate} · {MEAL_LABEL[ev.mealType]}
                     </span>
                   </span>
-                  <ScanLine className="h-4 w-4 text-[var(--text-muted)]" />
+                  <ScanLine className="h-4 w-4 text-text-muted" />
                 </button>
               ))}
             </div>
@@ -73,7 +73,7 @@ export default function VerifyTokenPage() {
             <button
               type="button"
               onClick={() => setActiveEventId(null)}
-              className="mb-3 inline-flex min-h-[44px] items-center text-sm text-[var(--text-secondary)] underline"
+              className="mb-3 inline-flex min-h-[44px] items-center text-sm text-text-secondary underline"
             >
               ← Change event
             </button>

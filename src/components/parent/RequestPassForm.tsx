@@ -95,18 +95,18 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+    <div className="bg-bg-surface rounded-xl border border-border p-6">
       <h3 className="font-semibold mb-4">Request a Pass</h3>
       <form className="space-y-4" onSubmit={submit}>
         <div>
-          <label htmlFor="passType" className="block text-sm font-medium text-[var(--text-secondary)]">
+          <label htmlFor="passType" className="block text-sm font-medium text-text-secondary">
             Pass Type
           </label>
           <select
             id="passType"
             value={passType || passTypes[0]?.code || ""}
             onChange={(e) => setPassType(e.target.value)}
-            className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] py-2 pl-3 pr-10 text-base text-[var(--text-primary)] focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-border bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus:border-[var(--action-info)] focus:outline-none focus:ring-[var(--action-info)] sm:text-sm"
             disabled={loadingPassTypes}
             required
           >
@@ -115,35 +115,35 @@ const api = useApi();
             ))}
           </select>
           {passType && (
-            <p className="text-xs text-[var(--text-muted)] mt-1 italic">
+            <p className="text-xs text-text-muted mt-1 italic">
               {passTypes.find((pt) => pt.code === passType)?.description}
             </p>
           )}
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label htmlFor="from" className="block text-sm font-medium text-[var(--text-secondary)]">From</label>
+            <label htmlFor="from" className="block text-sm font-medium text-text-secondary">From</label>
             <input
               id="from"
               type="datetime-local"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] sm:text-sm p-2"
+              className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-text-primary sm:text-sm p-2"
             />
           </div>
           <div>
-            <label htmlFor="to" className="block text-sm font-medium text-[var(--text-secondary)]">To</label>
+            <label htmlFor="to" className="block text-sm font-medium text-text-secondary">To</label>
             <input
               id="to"
               type="datetime-local"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="mt-1 block w-full rounded-md border-[var(--border-strong)] text-[var(--text-primary)] sm:text-sm p-2 bg-[var(--bg-elevated)]"
+              className="mt-1 block w-full rounded-md border-border text-text-primary sm:text-sm p-2 bg-bg-elevated"
             />
           </div>
         </div>
         <div>
-          <label htmlFor="reason" className="block text-sm font-medium text-[var(--text-secondary)]">
+          <label htmlFor="reason" className="block text-sm font-medium text-text-secondary">
             Reason
           </label>
           <textarea
@@ -152,19 +152,19 @@ const api = useApi();
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="Optional details for the admin…"
-            className="mt-1 block w-full rounded-md border-[var(--border-strong)] bg-[var(--bg-elevated)] text-white shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-white shadow-sm focus:border-[var(--action-info)] focus:ring-[var(--action-info)] sm:text-sm"
           ></textarea>
         </div>
         <button
           type="submit"
           disabled={busy}
-          className="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-[var(--action-info)] focus:ring-offset-2 disabled:opacity-50"
         >
           {busy ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Ticket className="mr-2 h-5 w-5" />}
           Request Pass
         </button>
         {success && (
-          <div className={`text-sm ${success.startsWith("✅") ? "text-emerald-400" : "text-rose-400"} flex items-center gap-1.5`}>
+          <div className={`text-sm ${success.startsWith("✅") ? "text-action-success" : "text-action-danger"} flex items-center gap-1.5`}>
             {success.startsWith("✅") && <CheckCircle2 className="w-4 h-4" />}
             <span>{success}</span>
           </div>

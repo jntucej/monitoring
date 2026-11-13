@@ -49,7 +49,7 @@ export function PrincipalStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Principal status bar"
     >
       {/* Left: principal summary */}
@@ -57,29 +57,29 @@ export function PrincipalStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0">
           <span
             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              refreshing ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+              refreshing ? "bg-action-warning animate-pulse" : "bg-action-success"
             }`}
           />
-          <span className="font-semibold text-[var(--text-primary)]">Principal</span>
+          <span className="font-semibold text-text-primary">Principal</span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">pending approvals</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="text-text-muted">pending approvals</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.pending ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">active</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <span className="text-text-muted">active</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.active ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">records</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-secondary)]">
+          <span className="text-text-muted">records</span>
+          <span className="font-mono tabular-nums font-bold text-text-secondary">
             {counts?.records ?? 0}
           </span>
         </span>
@@ -88,13 +88,13 @@ export function PrincipalStatusBar({
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

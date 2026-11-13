@@ -87,21 +87,21 @@ export function DockerFleetPanel() {
   };
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
-      <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
+    <div className="rounded-xl border border-border bg-bg-surface">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
           <p className="text-sm font-bold flex items-center gap-2">
-            <Server className="w-4 h-4 text-emerald-400" />
+            <Server className="w-4 h-4 text-action-success" />
             Docker Fleet
           </p>
-          <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+          <p className="text-[11px] text-text-muted mt-0.5">
             {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
           </p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-base)] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-bg-elevated border border-border hover:bg-bg-base disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -109,18 +109,18 @@ export function DockerFleetPanel() {
       </div>
 
       {error ? (
-        <div className="p-4 m-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+        <div className="p-4 m-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
           Monitoring stack unreachable: {error}
         </div>
       ) : rows.length === 0 ? (
-        <div className="p-6 text-center text-xs text-[var(--text-muted)]">
+        <div className="p-6 text-center text-xs text-text-muted">
           {loading ? "Loading fleet…" : "No gate_* or mon_* containers found"}
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-left">
+              <tr className="border-b border-border text-text-muted text-left">
                 <th className="py-2.5 px-4 font-medium">Container</th>
                 <th className="py-2.5 px-4 font-medium">State</th>
                 <th className="py-2.5 px-4 font-medium text-right">CPU %</th>
@@ -129,14 +129,14 @@ export function DockerFleetPanel() {
                 <th className="py-2.5 px-4 font-medium text-right">Logs</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody className="divide-y divide-border">
               {rows.map((row) => (
-                <tr key={row.name} className="hover:bg-[var(--bg-elevated)]/40">
-                  <td className="py-2.5 px-4 font-mono text-[var(--text-primary)]">{row.name}</td>
+                <tr key={row.name} className="hover:bg-bg-elevated/40">
+                  <td className="py-2.5 px-4 font-mono text-text-primary">{row.name}</td>
                   <td className="py-2.5 px-4">
                     <span className="inline-flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${row.up ? "bg-emerald-400" : "bg-rose-400"}`} />
-                      <span className={row.up ? "text-emerald-400" : "text-rose-400"}>
+                      <span className={`w-2 h-2 rounded-full ${row.up ? "bg-action-success" : "bg-action-danger"}`} />
+                      <span className={row.up ? "text-action-success" : "text-action-danger"}>
                         {row.up ? "Up" : "Down"}
                       </span>
                     </span>
@@ -145,9 +145,9 @@ export function DockerFleetPanel() {
                   <td className="py-2.5 px-4 text-right font-mono">{fmtMem(row.memoryBytes)}</td>
                   <td className="py-2.5 px-4 text-right font-mono">
                     {row.restarts > 0 ? (
-                      <span className="text-amber-400">{row.restarts}</span>
+                      <span className="text-action-warning">{row.restarts}</span>
                     ) : (
-                      <span className="text-[var(--text-muted)]">0</span>
+                      <span className="text-text-muted">0</span>
                     )}
                   </td>
                   <td className="py-2.5 px-4 text-right">
@@ -162,12 +162,12 @@ export function DockerFleetPanel() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[var(--text-muted)] hover:text-emerald-400"
+                        className="inline-flex items-center gap-1 text-text-muted hover:text-action-success"
                       >
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
-                      <span className="text-[var(--text-muted)]">—</span>
+                      <span className="text-text-muted">—</span>
                     )}
                   </td>
                 </tr>

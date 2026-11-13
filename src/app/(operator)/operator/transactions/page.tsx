@@ -92,12 +92,12 @@ function OperatorTransactionsInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <ListOrdered className="w-5 h-5 text-[var(--action-primary)] shrink-0" />
-            <h2 className="text-lg font-bold text-[var(--text-primary)] truncate">
+            <ListOrdered className="w-5 h-5 text-action-primary shrink-0" />
+            <h2 className="text-lg font-bold text-text-primary truncate">
               Today&rsquo;s Gate Transactions
             </h2>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1 min-w-0">
+          <p className="text-xs text-text-muted mt-1 min-w-0">
             {data?.data?.gateScoped
               ? "Scoped to your assigned gate · Asia/Kolkata day"
               : "All active gates · Asia/Kolkata day"}
@@ -108,7 +108,7 @@ function OperatorTransactionsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Transactions unavailable: {error}</span>
@@ -124,17 +124,17 @@ function OperatorTransactionsInner() {
       )}
 
       <OperatorWidgetBoundary title="Movement Log">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] overflow-hidden min-w-0">
+        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
           {/* Counts strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px border-b border-[var(--border)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px border-b border-border">
             {[
-              { label: "Total", value: counts?.total ?? 0, tone: "text-[var(--text-primary)]" },
-              { label: "Entries", value: counts?.entries ?? 0, tone: "text-emerald-400" },
-              { label: "Exits", value: counts?.exits ?? 0, tone: "text-rose-400" },
-              { label: "Manual", value: counts?.manual ?? 0, tone: "text-amber-400" },
+              { label: "Total", value: counts?.total ?? 0, tone: "text-text-primary" },
+              { label: "Entries", value: counts?.entries ?? 0, tone: "text-action-success" },
+              { label: "Exits", value: counts?.exits ?? 0, tone: "text-action-danger" },
+              { label: "Manual", value: counts?.manual ?? 0, tone: "text-action-warning" },
             ].map((s) => (
               <div key={s.label} className="px-4 py-3 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
                   {s.label}
                 </p>
                 <p className={`text-xl font-bold tabular-nums mt-0.5 ${s.tone}`}>
@@ -145,7 +145,7 @@ function OperatorTransactionsInner() {
           </div>
 
           {/* Direction filter */}
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-[var(--border)] min-w-0">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-border min-w-0">
             {(["ALL", "IN", "OUT"] as DirectionFilter[]).map((f) => (
               <button
                 key={f}
@@ -153,27 +153,27 @@ function OperatorTransactionsInner() {
                 onClick={() => setFilter(f)}
                 className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
-                    ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-primary/15 text-action-primary"
+                    : "text-text-muted hover:text-text-primary"
                 }`}
               >
                 {f === "ALL" ? "All" : f === "IN" ? "Entries" : "Exits"}
               </button>
             ))}
-            <span className="ml-auto text-xs text-[var(--text-muted)] shrink-0">
+            <span className="ml-auto text-xs text-text-muted shrink-0">
               {busy ? "…" : `${filtered.length} shown`}
             </span>
           </div>
 
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading today&rsquo;s movements…
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <Inbox className="w-5 h-5 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 No {filter === "ALL" ? "" : filter === "IN" ? "entry" : "exit"} transactions
                 recorded yet today.
               </p>
@@ -181,39 +181,39 @@ function OperatorTransactionsInner() {
           ) : (
             <>
               {/* Mobile: stacked cards — no horizontal scroll */}
-              <ul className="sm:hidden divide-y divide-[var(--border)]">
+              <ul className="sm:hidden divide-y divide-border">
                 {filtered.map((r) => (
                   <li key={r.id} className="px-3 py-3 space-y-1.5">
                     <div className="flex items-center justify-between gap-2 min-w-0">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                        <p className="text-sm font-semibold text-text-primary truncate">
                           {r.name || "—"}
                           {r.roll && (
-                            <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">{r.roll}</span>
+                            <span className="ml-1.5 font-mono text-xs text-text-muted">{r.roll}</span>
                           )}
                         </p>
-                        <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                        <p className="text-[11px] text-text-muted mt-0.5">
                           {fmtTime(r.timestamp)} · {r.gate_name || r.gate_id || "—"}
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {r.direction === "IN" ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 text-action-success text-xs font-semibold">
                             <ArrowDownLeft className="w-3.5 h-3.5" /> In
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-rose-400 text-xs font-semibold">
+                          <span className="inline-flex items-center gap-1 text-action-danger text-xs font-semibold">
                             <ArrowUpRight className="w-3.5 h-3.5" /> Out
                           </span>
                         )}
                         {r.scan_type ? (
-                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-amber-400">Manual</span>
+                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-action-warning">Manual</span>
                         ) : r.is_correction ? (
-                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-[10px] text-rose-400">Correction</span>
+                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-[10px] text-action-danger">Correction</span>
                         ) : null}
                       </div>
                     </div>
-                    {r.reason && <p className="text-xs text-[var(--text-muted)]">Reason: {r.reason}</p>}
+                    {r.reason && <p className="text-xs text-text-muted">Reason: {r.reason}</p>}
                   </li>
                 ))}
               </ul>
@@ -222,7 +222,7 @@ function OperatorTransactionsInner() {
               <div className="hidden sm:block overflow-x-auto min-w-0">
                 <table className="w-full text-sm min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                    <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-3 py-2 font-semibold">Time</th>
                       <th className="text-left px-3 py-2 font-semibold">Person</th>
                       <th className="text-left px-3 py-2 font-semibold">Direction</th>
@@ -231,53 +231,53 @@ function OperatorTransactionsInner() {
                       <th className="text-left px-3 py-2 font-semibold">Type</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)]">
+                  <tbody className="divide-y divide-border">
                     {filtered.map((r) => (
-                      <tr key={r.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs whitespace-nowrap">
+                      <tr key={r.id} className="hover:bg-bg-surface transition-colors">
+                        <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                           {fmtTime(r.timestamp)}
                         </td>
-                        <td className="px-3 py-2.5 text-[var(--text-primary)] min-w-0">
+                        <td className="px-3 py-2.5 text-text-primary min-w-0">
                           <span className="font-semibold">{r.name || "—"}</span>
                           {r.roll && (
-                            <span className="ml-1.5 font-mono text-xs text-[var(--text-muted)]">
+                            <span className="ml-1.5 font-mono text-xs text-text-muted">
                               {r.roll}
                             </span>
                           )}
                           {r.person_type && (
-                            <span className="ml-1.5 rounded-full border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] uppercase">
+                            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-text-muted uppercase">
                               {r.person_type}
                             </span>
                           )}
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
                           {r.direction === "IN" ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 text-action-success text-xs font-semibold">
                               <ArrowDownLeft className="w-3.5 h-3.5" /> Entry
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-rose-400 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 text-action-danger text-xs font-semibold">
                               <ArrowUpRight className="w-3.5 h-3.5" /> Exit
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
+                        <td className="px-3 py-2.5 text-text-muted text-xs">
                           {r.reason || "—"}
                         </td>
-                        <td className="px-3 py-2.5 text-[var(--text-muted)] text-xs">
+                        <td className="px-3 py-2.5 text-text-muted text-xs">
                           {r.gate_name || r.gate_id || "—"}
                         </td>
                         <td className="px-3 py-2.5 text-xs">
                           {r.scan_type ? (
-                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-amber-400 font-medium">
+                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-action-warning font-medium">
                               Manual
                             </span>
                           ) : r.is_correction ? (
-                            <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-rose-400 font-medium">
+                            <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-action-danger font-medium">
                               Correction
                             </span>
                           ) : (
-                            <span className="text-[var(--text-muted)]">Scan</span>
+                            <span className="text-text-muted">Scan</span>
                           )}
                         </td>
                       </tr>
@@ -286,7 +286,7 @@ function OperatorTransactionsInner() {
                 </table>
               </div>
 
-              <div className="px-3 py-2.5 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex items-center gap-1.5 min-w-0">
+              <div className="px-3 py-2.5 border-t border-border text-xs text-text-muted flex items-center gap-1.5 min-w-0">
                 <Clock className="w-3.5 h-3.5 shrink-0" />
                 Auto-refreshes every 30 seconds.
               </div>

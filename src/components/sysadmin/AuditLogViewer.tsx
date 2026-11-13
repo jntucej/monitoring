@@ -97,17 +97,17 @@ const api = useApi();
         loading={loading} exportDisabled={logs.length === 0}
       />
 
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
         {error ? (
-          <div className="p-6 text-rose-400 text-sm">{error}</div>
+          <div className="p-6 text-action-danger text-sm">{error}</div>
         ) : loading ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">Loading audit telemetry...</div>
+          <div className="p-8 text-center text-sm text-text-muted">Loading audit telemetry...</div>
         ) : logs.length === 0 ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">No audit records found.</div>
+          <div className="p-8 text-center text-sm text-text-muted">No audit records found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[750px]">
-              <thead className="bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] uppercase font-semibold border-b border-[var(--border)]">
+              <thead className="bg-bg-elevated text-xs text-text-muted uppercase font-semibold border-b border-border">
                 <tr>
                   <th className="py-2.5 px-4">Timestamp</th>
                   <th className="py-2.5 px-4">Action</th>
@@ -116,20 +116,20 @@ const api = useApi();
                   <th className="py-2.5 px-4">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {logs.map((l) => <AuditLogRow key={l.id || l.timestamp} log={l} />)}
               </tbody>
             </table>
           </div>
         )}
 
-        <div className="p-3 border-t border-[var(--border)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+        <div className="p-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
           <span>Total: {total} items</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page <= 1}
-              className="p-1 rounded border border-[var(--border)] disabled:opacity-40"
+              className="p-1 rounded border border-border disabled:opacity-40"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -137,7 +137,7 @@ const api = useApi();
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages}
-              className="p-1 rounded border border-[var(--border)] disabled:opacity-40"
+              className="p-1 rounded border border-border disabled:opacity-40"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

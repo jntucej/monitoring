@@ -47,8 +47,8 @@ export function ClassesView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Class Schedule</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Class Schedule</h1>
+        <p className="text-xs text-text-muted">
           Department timetable, assigned periods, and attendance status
         </p>
       </header>
@@ -76,28 +76,28 @@ export function ClassesView() {
             {items.map((item, idx) => (
               <li
                 key={item.id ?? idx}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">
                       {item.subjectName ?? item.subjectCode ?? "Period " + (item.periodNumber ?? idx + 1)}
                     </p>
-                    <p className="text-[11px] text-[var(--text-muted)]">
+                    <p className="text-[11px] text-text-muted">
                       {item.className ?? (item.year ? `Y${item.year} - Sec ${item.section ?? "A"}` : "Class")} · Room {item.roomNumber ?? "—"}
                     </p>
                   </div>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       item.attendanceMarked
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "bg-amber-500/10 text-amber-400"
+                        ? "bg-emerald-500/10 text-action-success"
+                        : "bg-amber-500/10 text-action-warning"
                     }`}
                   >
                     {item.attendanceMarked ? "Marked" : "Pending"}
                   </span>
                 </div>
-                <div className="mt-2 text-xs text-[var(--text-muted)]">
+                <div className="mt-2 text-xs text-text-muted">
                   {item.startTime ? `${item.startTime} - ${item.endTime ?? ""}` : "All day"}
                 </div>
               </li>
@@ -129,7 +129,7 @@ export function ClassesView() {
                   accessor: (r) => (
                     <span
                       className={`text-xs font-semibold ${
-                        r.attendanceMarked ? "text-emerald-400" : "text-amber-400"
+                        r.attendanceMarked ? "text-action-success" : "text-action-warning"
                       }`}
                     >
                       {r.attendanceMarked ? "Marked" : "Pending"}

@@ -15,9 +15,9 @@ import { useUIStore } from "@/stores/uiStore";
  * The overlay fades via opacity only (transform-safe, no layout shift).
  */
 const THEME_BASE: Record<"dark" | "light" | "glass", string> = {
-  dark: "#0a0d13",
-  light: "#eef1f5",
-  glass: "#edf4fe",
+  dark: "var(--bg-base)",
+  light: "var(--text-primary)",
+  glass: "var(--bg-surface)",
 };
 
 type ThemeName = "dark" | "light" | "glass";

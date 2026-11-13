@@ -58,39 +58,39 @@ export function ExamBranchStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
       aria-label="Exam Branch status bar"
     >
       {/* Left: branch · pending · handoff · discrepancies */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)] shrink-0" />
-          <span className="text-[var(--text-muted)] uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0" />
+          <span className="text-text-muted uppercase tracking-wider">
             {branch ?? "branch"}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">pending</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <span className="text-text-muted">pending</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {pending}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">handoff</span>
-          <span className="font-mono tabular-nums font-bold text-sky-400">
+          <span className="text-text-muted">handoff</span>
+          <span className="font-mono tabular-nums font-bold text-action-info">
             {handoff}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="text-[var(--text-muted)]">discrepancies</span>
+          <span className="text-text-muted">discrepancies</span>
           <span
             className={`font-mono tabular-nums font-bold ${
               discrepancies > 0
-                ? "text-rose-400"
-                : "text-[var(--text-secondary)]"
+                ? "text-action-danger"
+                : "text-text-secondary"
             }`}
           >
             {discrepancies}
@@ -101,13 +101,13 @@ export function ExamBranchStatusBar({
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

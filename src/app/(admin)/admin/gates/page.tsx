@@ -154,15 +154,15 @@ export default function AdminGatesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-lg font-bold text-[var(--text-primary)]">Gates</h1>
-          <p className="text-sm text-[var(--text-muted)]">
+          <h1 className="text-lg font-bold text-text-primary">Gates</h1>
+          <p className="text-sm text-text-muted">
             Manage gate roster, create gates, and monitor real-time terminal status.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreate((v) => !v)}
-          className="flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shrink-0"
+          className="flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           {showCreate ? "Hide Create Form" : "Create Gate"}
@@ -170,7 +170,7 @@ export default function AdminGatesPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -178,20 +178,20 @@ export default function AdminGatesPage() {
 
       {/* Campus Gate Operations Mode */}
       <WidgetBoundary title="Campus Gate Operations Mode">
-        <div className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
+        <div className="p-5 rounded-2xl bg-bg-surface border border-border space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                 Current Operating State
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5 ${
                     gateMode === "OPEN"
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
                       : gateMode === "CURFEW"
-                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                      : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                      ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
+                      : "bg-rose-500/10 text-action-danger border border-rose-500/20"
                   }`}
                 >
                   {gateMode === "OPEN" && <Check className="w-3.5 h-3.5" />}
@@ -199,7 +199,7 @@ export default function AdminGatesPage() {
                   {gateMode === "MAINTENANCE" && <Wrench className="w-3.5 h-3.5" />}
                   {gateMode}
                 </span>
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-xs text-text-muted">
                   {gateMode === "OPEN" && "All campus gates operating normally. Scans allowed."}
                   {gateMode === "CURFEW" && "Night curfew active. Scans require supervisor override."}
                   {gateMode === "MAINTENANCE" && "Gate maintenance in progress. Routine scans paused."}
@@ -214,8 +214,8 @@ export default function AdminGatesPage() {
                 onClick={() => handleSetGateMode("OPEN")}
                 className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "OPEN"
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-success text-white shadow-sm"
+                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export default function AdminGatesPage() {
                 className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "CURFEW"
                     ? "bg-amber-600 text-white shadow-sm"
-                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
                 }`}
               >
                 <Moon className="w-3.5 h-3.5" />
@@ -240,8 +240,8 @@ export default function AdminGatesPage() {
                 onClick={() => handleSetGateMode("MAINTENANCE")}
                 className={`px-3 py-2 min-h-[44px] rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                   gateMode === "MAINTENANCE"
-                    ? "bg-rose-600 text-white shadow-sm"
-                    : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-danger text-white shadow-sm"
+                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
                 }`}
               >
                 <Wrench className="w-3.5 h-3.5" />
@@ -255,43 +255,43 @@ export default function AdminGatesPage() {
       {/* Create form */}
       {showCreate && (
         <WidgetBoundary title="Create Gate">
-          <form onSubmit={createGate} className="p-5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] space-y-4">
-            <h2 className="font-bold text-sm text-[var(--text-primary)]">New Gate</h2>
+          <form onSubmit={createGate} className="p-5 rounded-2xl bg-bg-surface border border-border space-y-4">
+            <h2 className="font-bold text-sm text-text-primary">New Gate</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <label className="block">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">Gate Code *</span>
+                <span className="text-xs font-semibold text-text-muted">Gate Code *</span>
                 <input
                   value={createForm.gateCode}
                   onChange={(e) => setCreateForm({ ...createForm, gateCode: e.target.value })}
                   required
                   placeholder="e.g. G-MAIN"
-                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:border-[var(--action-success)]"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">Name</span>
+                <span className="text-xs font-semibold text-text-muted">Name</span>
                 <input
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="Main Gate"
-                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:border-[var(--action-success)]"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">Location</span>
+                <span className="text-xs font-semibold text-text-muted">Location</span>
                 <input
                   value={createForm.location}
                   onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="Campus"
-                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:border-[var(--action-success)]"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">Type</span>
+                <span className="text-xs font-semibold text-text-muted">Type</span>
                 <select
                   value={createForm.type}
                   onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
-                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:border-[var(--action-success)]"
                 >
                   <option value="standard">standard</option>
                   <option value="staff">staff</option>
@@ -300,11 +300,11 @@ export default function AdminGatesPage() {
                 </select>
               </label>
               <label className="block">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">Audience</span>
+                <span className="text-xs font-semibold text-text-muted">Audience</span>
                 <select
                   value={createForm.audience}
                   onChange={(e) => setCreateForm({ ...createForm, audience: e.target.value })}
-                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-sm text-[var(--text-primary)] outline-none focus:border-emerald-500"
+                  className="mt-1 w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:border-[var(--action-success)]"
                 >
                   <option value="all">all</option>
                   <option value="staff">staff</option>
@@ -315,7 +315,7 @@ export default function AdminGatesPage() {
             <button
               type="submit"
               disabled={creating || !createForm.gateCode.trim()}
-              className="px-4 py-2 min-h-[44px] rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
+              className="px-4 py-2 min-h-[44px] rounded-xl bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               {creating ? "Creating..." : "Create Gate"}
@@ -329,10 +329,10 @@ export default function AdminGatesPage() {
         {loadingGates && gates.length === 0 ? (
           <PageLoading />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)]">
+          <div className="overflow-x-auto rounded-2xl bg-bg-surface border border-border">
             <table className="w-full text-xs text-left border-collapse min-w-[640px]">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
+                <tr className="border-b border-border text-text-muted uppercase tracking-wider font-semibold">
                   <th className="pb-3 px-4">Code</th>
                   <th className="pb-3 px-4">Name</th>
                   <th className="pb-3 px-4">Location</th>
@@ -342,10 +342,10 @@ export default function AdminGatesPage() {
                   <th className="pb-3 px-4">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-border">
                 {gates.length === 0 && !loadingGates ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-[var(--text-muted)]">
+                    <td colSpan={7} className="py-8 text-center text-text-muted">
                       No gates found. Use the form above to create one.
                     </td>
                   </tr>
@@ -353,26 +353,26 @@ export default function AdminGatesPage() {
                   gates.map((g) => {
                     const isSentinel = g.gateCode.toUpperCase() === SENTINEL_GATE_CODE;
                     return (
-                      <tr key={g.id} className="hover:bg-[var(--bg-elevated)]/50 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-[var(--text-primary)]">
+                      <tr key={g.id} className="hover:bg-bg-elevated/50 transition-colors">
+                        <td className="py-3 px-4 font-mono font-bold text-text-primary">
                           <span className="flex items-center gap-1.5">
-                            {isSentinel && <Lock className="w-3 h-3 text-amber-400" />}
+                            {isSentinel && <Lock className="w-3 h-3 text-action-warning" />}
                             {g.gateCode}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-[var(--text-primary)]">{g.name}</td>
-                        <td className="py-3 px-4 text-[var(--text-muted)]">{g.location}</td>
-                        <td className="py-3 px-4 text-[var(--text-muted)]">{g.type}</td>
-                        <td className="py-3 px-4 text-[var(--text-muted)]">{g.audience ?? "all"}</td>
+                        <td className="py-3 px-4 text-text-primary">{g.name}</td>
+                        <td className="py-3 px-4 text-text-muted">{g.location}</td>
+                        <td className="py-3 px-4 text-text-muted">{g.type}</td>
+                        <td className="py-3 px-4 text-text-muted">{g.audience ?? "all"}</td>
                         <td className="py-3 px-4">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${g.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${g.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                             {g.isActive ? "ACTIVE" : "INACTIVE"}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-[var(--text-muted)]">
+                        <td className="py-3 px-4 text-text-muted">
                           <Link
                             href={`/admin/gates/${g.id}`}
-                            className="px-2.5 py-1 min-h-[44px] inline-flex items-center rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-[11px] font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition"
+                            className="px-2.5 py-1 min-h-[44px] inline-flex items-center rounded-lg bg-bg-elevated border border-border text-[11px] font-semibold text-text-primary hover:bg-bg-base transition"
                           >
                             Details & Status
                           </Link>

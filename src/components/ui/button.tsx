@@ -11,11 +11,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-[var(--action-primary)] text-white shadow-sm hover:brightness-110",
-        secondary: "bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--bg-elevated)]",
-        danger: "bg-[var(--action-danger)] text-white shadow-sm hover:brightness-110",
-        ghost: "hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]",
-        icon: "h-10 w-10 p-0 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]",
+        primary: "bg-action-primary text-white shadow-sm hover:brightness-110",
+        secondary: "bg-bg-surface text-text-primary border border-border hover:bg-bg-elevated",
+        danger: "bg-action-danger text-white shadow-sm hover:brightness-110",
+        ghost: "hover:bg-bg-surface text-text-secondary",
+        icon: "h-10 w-10 p-0 text-text-secondary hover:bg-bg-surface",
       },
       size: {
         sm: "h-8 px-3 text-xs",

@@ -21,7 +21,7 @@ export type TabId = "app" | "database" | "infra" | "redis";
 function KpiNumber({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
   return (
     <div
-      className="rounded-lg border p-3 bg-[var(--bg-surface)]"
+      className="rounded-lg border p-3 bg-bg-surface"
       style={{ borderColor: "var(--border)" }}
     >
       <p className="text-[11px] uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>{label}</p>

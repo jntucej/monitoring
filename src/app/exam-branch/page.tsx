@@ -109,7 +109,7 @@ function ExamBranchPassQueueInner() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       <Link
         href="/exam-branch"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -117,15 +117,15 @@ function ExamBranchPassQueueInner() {
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Pass queue unavailable: {error}</span>
@@ -143,26 +143,26 @@ function ExamBranchPassQueueInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Pass Queue Stats">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">In Queue</p>
-            <p className="mt-1 text-2xl font-bold text-amber-400">{pendingCount}</p>
-            <p className="text-xs text-[var(--text-muted)]">Exam passes awaiting OIE clearance</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">In Queue</p>
+            <p className="mt-1 text-2xl font-bold text-action-warning">{pendingCount}</p>
+            <p className="text-xs text-text-muted">Exam passes awaiting OIE clearance</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Overdue (SLA)</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Overdue (SLA)</p>
             <p
               className={`mt-1 text-2xl font-bold ${
-                overdueCount > 0 ? "text-rose-400" : "text-[var(--text-muted)]"
+                overdueCount > 0 ? "text-action-danger" : "text-text-muted"
               }`}
             >
               {overdueCount}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Past SLA deadline — escalate to OIE</p>
+            <p className="text-xs text-text-muted">Past SLA deadline — escalate to OIE</p>
           </div>
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-            <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">Total Pending</p>
+          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-wide">Total Pending</p>
             <p className="mt-1 text-2xl font-bold text-white">{total}</p>
-            <p className="text-xs text-[var(--text-muted)]">All pending exam-stage requests</p>
+            <p className="text-xs text-text-muted">All pending exam-stage requests</p>
           </div>
         </div>
       </WidgetBoundary>
@@ -172,7 +172,7 @@ function ExamBranchPassQueueInner() {
         className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 min-w-0"
         role="note"
       >
-        <p className="flex items-center gap-2 text-xs text-sky-300 font-medium">
+        <p className="flex items-center gap-2 text-xs text-action-info font-medium">
           <ShieldCheck className="w-4 h-4 shrink-0" />
           Pass clearances require OIE approval. Exam branch cannot self-clear.
         </p>
@@ -191,15 +191,15 @@ function ExamBranchPassQueueInner() {
 
       {/* Queue list */}
       <WidgetBoundary title="Exam Pass Queue">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ListChecks className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ListChecks className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
                 Passes Awaiting Clearance
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">{requests.length} shown</span>
+            <span className="text-xs text-text-muted shrink-0">{requests.length} shown</span>
           </div>
 
           {busy ? (
@@ -207,17 +207,17 @@ function ExamBranchPassQueueInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 animate-pulse motion-reduce:animate-none"
+                  className="h-14 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <ListChecks className="w-8 h-8 mx-auto text-[var(--text-muted)] mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <ListChecks className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">
                 No exam passes in the queue.
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
+              <p className="text-xs text-text-muted mt-1">
                 Passes appear here when a candidate enters the exam clearance
                 workflow.
               </p>
@@ -232,22 +232,22 @@ function ExamBranchPassQueueInner() {
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    <span className="font-mono text-xs text-[var(--text-secondary)]">
+                    <span className="font-mono text-xs text-text-secondary">
                       {req.ticket_number}
                     </span>
-                    <span className="inline-flex items-center rounded-full bg-amber-500/15 text-amber-300 px-2 py-0.5 text-xs">
+                    <span className="inline-flex items-center rounded-full bg-amber-500/15 text-action-warning px-2 py-0.5 text-xs">
                       PENDING
                     </span>
                     {isOverdue(req.sla_deadline) && (
-                      <span className="inline-flex items-center rounded-full bg-rose-500/15 text-rose-300 px-2 py-0.5 text-xs font-semibold">
+                      <span className="inline-flex items-center rounded-full bg-rose-500/15 text-action-danger px-2 py-0.5 text-xs font-semibold">
                         SLA EXCEEDED
                       </span>
                     )}
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-text-muted">
                       stage: {req.current_stage}
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] min-w-0">
+                  <p className="text-xs text-text-muted min-w-0">
                     {new Date(req.created_at).toLocaleString([], {
                       month: "short",
                       day: "numeric",
@@ -263,7 +263,7 @@ function ExamBranchPassQueueInner() {
                     type="button"
                     disabled={forwarding === req.id}
                     onClick={() => void sendToOie(req)}
-                    className="mt-1 self-start rounded-md border border-sky-400/40 px-2 py-1 text-xs text-sky-300 hover:bg-sky-500/10 disabled:opacity-50"
+                    className="mt-1 self-start rounded-md border border-sky-400/40 px-2 py-1 text-xs text-action-info hover:bg-sky-500/10 disabled:opacity-50"
                   >
                     {forwarding === req.id ? "Forwarding…" : "Send to OIE"}
                   </button>

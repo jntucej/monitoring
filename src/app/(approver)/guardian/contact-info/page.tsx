@@ -96,10 +96,10 @@ function ContactInfoInner() {
     <div className="min-w-0 space-y-6">
       <div>
         <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-400" />
+          <ShieldCheck className="w-6 h-6 text-action-success" />
           Contact Information
         </p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+        <p className="mt-1 text-sm text-text-muted">
           Your account contact details as registered on the campus portal
         </p>
       </div>
@@ -113,13 +113,13 @@ function ContactInfoInner() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* read-only summary card */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-4">
-          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-4">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Registered details
           </h2>
 
           {loading ? (
-            <div className="flex items-center gap-3 text-sm text-[var(--text-muted)] py-4">
+            <div className="flex items-center gap-3 text-sm text-text-muted py-4">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading profile…
             </div>
           ) : p ? (
@@ -131,21 +131,21 @@ function ContactInfoInner() {
                 { icon: ShieldCheck, label: "Role", value: p.role || "—" },
               ].map((row) => (
                 <div key={row.label} className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center shrink-0">
-                    <row.icon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-9 h-9 rounded-lg bg-bg-elevated border border-border flex items-center justify-center shrink-0">
+                    <row.icon className="w-4 h-4 text-action-success" />
                   </div>
                   <div className="min-w-0">
-                    <dt className="text-xs text-[var(--text-muted)]">{row.label}</dt>
-                    <dd className="text-sm text-[var(--text-primary)] truncate">{row.value}</dd>
+                    <dt className="text-xs text-text-muted">{row.label}</dt>
+                    <dd className="text-sm text-text-primary truncate">{row.value}</dd>
                   </div>
                 </div>
               ))}
             </dl>
           ) : (
-            <p className="text-sm text-[var(--text-muted)]">No profile data available.</p>
+            <p className="text-sm text-text-muted">No profile data available.</p>
           )}
 
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             Email changes, password resets, PIN changes and role changes must go through the
             dedicated account endpoints or the campus admin office.
           </p>
@@ -154,14 +154,14 @@ function ContactInfoInner() {
         {/* update form */}
         <form
           onSubmit={submit}
-          className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-4"
+          className="rounded-xl border border-border bg-bg-surface p-4 space-y-4"
         >
-          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Update name &amp; phone
           </h2>
 
           <div>
-            <label htmlFor="contactName" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+            <label htmlFor="contactName" className="block text-xs font-medium text-text-secondary mb-1">
               Full name
             </label>
             <input
@@ -173,12 +173,12 @@ function ContactInfoInner() {
               required
               minLength={2}
               maxLength={100}
-              className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
             />
           </div>
 
           <div>
-            <label htmlFor="contactPhone" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+            <label htmlFor="contactPhone" className="block text-xs font-medium text-text-secondary mb-1">
               Phone
             </label>
             <input
@@ -188,14 +188,14 @@ function ContactInfoInner() {
               onChange={(e) => setPhone(e.target.value)}
               disabled={busy || loading}
               placeholder="+91 90000 00000"
-              className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+              className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
             />
           </div>
 
           <button
             type="submit"
             disabled={busy || loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {busy ? "Saving…" : "Save changes"}
@@ -205,8 +205,8 @@ function ContactInfoInner() {
             <div
               className={`rounded-lg border p-3 text-sm flex items-start gap-2 ${
                 msg.ok
-                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                  : "border-rose-400/30 bg-rose-400/10 text-rose-300"
+                  ? "border-emerald-400/30 bg-emerald-400/10 text-action-success"
+                  : "border-rose-400/30 bg-rose-400/10 text-action-danger"
               }`}
             >
               <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />

@@ -28,16 +28,16 @@ export function Scorecard({
   const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
   const trendClass =
     delta > 0
-      ? "text-[var(--action-primary)]"
+      ? "text-action-primary"
       : delta < 0
-      ? "text-[var(--action-danger)]"
-      : "text-[var(--text-muted)]";
+      ? "text-action-danger"
+      : "text-text-muted";
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">Your scorecard</h2>
-        <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        <h2 className="text-sm font-semibold text-text-primary">Your scorecard</h2>
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">
           this week
         </span>
       </header>
@@ -56,21 +56,21 @@ export function Scorecard({
         />
         <Stat
           icon={Zap}
-          iconClass="text-[var(--action-warning)]"
+          iconClass="text-action-warning"
           label="Avg response"
           value={formatMs(avgResponseSec * 1000)}
           hint="this week"
         />
         <Stat
           icon={Award}
-          iconClass="text-[var(--action-primary)]"
+          iconClass="text-action-primary"
           label="Fastest"
           value={formatMs(bests.fastestResponseMs)}
           hint="personal best"
         />
         <Stat
           icon={Award}
-          iconClass="text-[var(--action-info)]"
+          iconClass="text-action-info"
           label="Session"
           value={sessionDecisions}
           hint="decisions today"
@@ -97,10 +97,10 @@ function Stat({
     <div>
       <div className="mb-1 flex items-center gap-1.5">
         <Icon className={`size-3.5 ${iconClass}`} aria-hidden />
-        <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{label}</p>
+        <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
       </div>
-      <p className="text-xl font-semibold tabular-nums text-[var(--text-primary)]">{value}</p>
-      <p className="text-[10px] text-[var(--text-muted)]">{hint}</p>
+      <p className="text-xl font-semibold tabular-nums text-text-primary">{value}</p>
+      <p className="text-[10px] text-text-muted">{hint}</p>
     </div>
   );
 }

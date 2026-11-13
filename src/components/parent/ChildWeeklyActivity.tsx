@@ -122,7 +122,7 @@ export function ChildWeeklyActivity() {
 
   if (loading && !hasData) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex items-center gap-3 text-[var(--text-muted)] text-sm">
+      <div className="bg-bg-surface rounded-xl border border-border p-6 flex items-center gap-3 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading weekly activity…
       </div>
     );
@@ -135,18 +135,18 @@ export function ChildWeeklyActivity() {
         const maxCount = c.bars.reduce((m, b) => Math.max(m, b.inCount + b.outCount), 0);
         const heightPct = (n: number) => (maxCount ? Math.max(6, Math.round((n / maxCount) * 100)) : 0);
         return (
-          <div key={c.roll} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-5">
+          <div key={c.roll} className="bg-bg-surface rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-emerald-500" />
+                <BarChart3 className="w-4 h-4 text-action-success" />
                 7-Day Gate Activity — {c.name}
               </h3>
-              <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
+              <div className="flex items-center gap-3 text-[11px] text-text-muted">
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" /> In ({c.totalIn})
+                  <span className="w-2.5 h-2.5 rounded-sm bg-action-success inline-block" /> In ({c.totalIn})
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-rose-500 inline-block" /> Out ({c.totalOut})
+                  <span className="w-2.5 h-2.5 rounded-sm bg-action-danger inline-block" /> Out ({c.totalOut})
                 </span>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function ChildWeeklyActivity() {
                 const total = b.inCount + b.outCount;
                 return (
                   <div key={b.date} className="flex-1 flex flex-col items-center gap-1" title={`${b.date}: ${b.inCount} in / ${b.outCount} out`}>
-                    <div className="text-[10px] text-[var(--text-muted)]">{total || ""}</div>
+                    <div className="text-[10px] text-text-muted">{total || ""}</div>
                     <div className="w-full flex flex-col justify-end" style={{ height: `${heightPct(total)}px` }}>
                       <div
                         className="w-full rounded-t bg-emerald-500/90"
@@ -167,14 +167,14 @@ export function ChildWeeklyActivity() {
                         style={{ height: `${Math.min(100, (b.outCount / Math.max(total, 1)) * 100)}%` }}
                       />
                     </div>
-                    <div className={`text-[10px] ${b.isToday ? "text-emerald-500 font-semibold" : "text-[var(--text-muted)]"}`}>
+                    <div className={`text-[10px] ${b.isToday ? "text-action-success font-semibold" : "text-text-muted"}`}>
                       {b.isToday ? "Today" : b.day}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-3 text-[11px] text-[var(--text-muted)] flex items-center gap-1">
+            <div className="mt-3 text-[11px] text-text-muted flex items-center gap-1">
               <ArrowRight className="w-3 h-3" />
               {c.totalIn + c.totalOut === 0
                 ? "No gate activity recorded in the last 7 days."

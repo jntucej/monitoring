@@ -95,7 +95,7 @@ export function Modules() {
         <h2 className="text-3xl font-bold md:text-4xl">
           Eight modules, one system
         </h2>
-        <p className="mt-2 text-[var(--home-text-secondary,#9CA3AF)]">
+        <p className="mt-2 text-[var(--home-text-secondary,var(--text-muted))]">
           Every service on campus, connected by a single permission model.
         </p>
       </div>
@@ -114,15 +114,15 @@ export function Modules() {
                 animate={reduced ? undefined : { opacity: 1, y: 0 }}
                 exit={reduced ? undefined : { opacity: 0, y: -8 }}
                 transition={{ duration: 0.28 }}
-                className="rounded-3xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-10"
+                className="rounded-3xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-10"
               >
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--home-text-muted,#6B7280)]">
+                <p className="text-xs uppercase tracking-[0.2em] text-[var(--home-text-muted,var(--text-muted))]">
                   Module {String(activeIndex + 1).padStart(2, "0")}
                 </p>
-                <h3 className="mt-4 text-2xl font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+                <h3 className="mt-4 text-2xl font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
                   {active.title}
                 </h3>
-                <p className="mt-3 text-[var(--home-text-secondary,#9CA3AF)]">
+                <p className="mt-3 text-[var(--home-text-secondary,var(--text-muted))]">
                   {active.copy}
                 </p>
               </motion.div>
@@ -145,17 +145,17 @@ export function Modules() {
               className={
                 "rounded-2xl border p-6 transition-colors " +
                 (i === activeIndex
-                  ? "border-[var(--home-accent-indigo,#6366F1)] bg-[var(--home-bg-elev-1,#0F172A)]"
+                  ? "border-[var(--home-accent-indigo,var(--action-primary))] bg-[var(--home-bg-elev-1,var(--bg-base))]"
                   : "border-[var(--home-border-soft,rgba(255,255,255,0.08))]")
               }
             >
-              <span className="text-xs text-[var(--home-text-muted,#6B7280)]">
+              <span className="text-xs text-[var(--home-text-muted,var(--text-muted))]">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h3 className="mt-1 font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+              <h3 className="mt-1 font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
                 {m.title}
               </h3>
-              <p className="mt-1 text-sm text-[var(--home-text-muted,#6B7280)]">
+              <p className="mt-1 text-sm text-[var(--home-text-muted,var(--text-muted))]">
                 {m.copy}
               </p>
             </motion.li>

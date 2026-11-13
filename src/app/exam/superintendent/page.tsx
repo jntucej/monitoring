@@ -67,7 +67,7 @@ function ExamSuperintendentAccessInner() {
       {/* Back link */}
       <Link
         href="/exam/superintendent"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
       </Link>
@@ -75,15 +75,15 @@ function ExamSuperintendentAccessInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Exam access data unavailable: {error}</span>
@@ -99,13 +99,13 @@ function ExamSuperintendentAccessInner() {
       )}
 
       <WidgetBoundary title="Exam Access">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <KeyRound className="w-4 h-4 text-emerald-400 shrink-0" />
+              <KeyRound className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white">Who Is Authorised for Exam Access</span>
             </div>
-            <span className="text-xs text-[var(--text-muted)] shrink-0">
+            <span className="text-xs text-text-muted shrink-0">
               {authorised.length} active clearance record(s)
             </span>
           </div>
@@ -114,21 +114,21 @@ function ExamSuperintendentAccessInner() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 min-w-0">
             {busy ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-14 animate-pulse rounded-lg bg-[var(--bg-elevated)]/40" />
+                <div key={i} className="h-14 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))
             ) : stageSummary.length === 0 ? (
-              <div className="col-span-full rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/30 p-4 text-center min-w-0">
-                <ShieldCheck className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-                <p className="text-sm text-[var(--text-muted)]">No exam workflow records in the clearance pipeline right now.</p>
+              <div className="col-span-full rounded-lg border border-border bg-bg-surface/30 p-4 text-center min-w-0">
+                <ShieldCheck className="w-5 h-5 text-text-muted mx-auto mb-2" />
+                <p className="text-sm text-text-muted">No exam workflow records in the clearance pipeline right now.</p>
               </div>
             ) : (
               stageSummary.slice(0, 8).map((s, i) => (
-                <div key={`${s.current_stage}-${s.status}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide">
+                <div key={`${s.current_stage}-${s.status}-${i}`} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide">
                     {s.current_stage ?? "unknown"} / {s.status ?? "any"}
                   </p>
-                  <p className="mt-1 text-lg font-bold text-sky-400">{s.count ?? 0}</p>
-                  <p className="text-xs text-[var(--text-muted)]">exam clearance requests</p>
+                  <p className="mt-1 text-lg font-bold text-action-info">{s.count ?? 0}</p>
+                  <p className="text-xs text-text-muted">exam clearance requests</p>
                 </div>
               ))
             )}
@@ -136,17 +136,17 @@ function ExamSuperintendentAccessInner() {
 
           {/* Authorised list */}
           <div className="px-4 pb-4 min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">Recent Authorisations</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">Recent Authorisations</p>
             {!busy && authorised.length === 0 && (
-              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/30 p-6 text-center min-w-0">
-                <p className="text-sm text-[var(--text-muted)]">No authorised exam access records in view.</p>
+              <div className="rounded-lg border border-border bg-bg-surface/30 p-6 text-center min-w-0">
+                <p className="text-sm text-text-muted">No authorised exam access records in view.</p>
               </div>
             )}
             {authorised.length > 0 && (
               <div className="overflow-x-auto min-w-0">
                 <table className="w-full text-left text-sm min-w-[560px]">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-xs text-[var(--text-muted)] uppercase">
+                    <tr className="border-b border-border text-xs text-text-muted uppercase">
                       <th className="py-2 pr-3 font-medium">Candidate</th>
                       <th className="py-2 pr-3 font-medium">Roll / ID</th>
                       <th className="py-2 pr-3 font-medium">Stage</th>
@@ -156,26 +156,26 @@ function ExamSuperintendentAccessInner() {
                   </thead>
                   <tbody>
                     {authorised.slice(0, 25).map((row, i) => (
-                      <tr key={row.id ?? i} className="border-b border-[var(--border)]/50">
-                        <td className="py-2 pr-3 text-[var(--text-secondary)]">{row.candidate_name ?? "—"}</td>
-                        <td className="py-2 pr-3 text-[var(--text-muted)]">
+                      <tr key={row.id ?? i} className="border-b border-border/50">
+                        <td className="py-2 pr-3 text-text-secondary">{row.candidate_name ?? "—"}</td>
+                        <td className="py-2 pr-3 text-text-muted">
                           {row.roll_number ?? row.candidate_unique_id ?? "—"}
                         </td>
-                        <td className="py-2 pr-3 text-[var(--text-muted)]">{row.current_stage ?? "—"}</td>
+                        <td className="py-2 pr-3 text-text-muted">{row.current_stage ?? "—"}</td>
                         <td className="py-2 pr-3">
                           <span
                             className={`text-xs font-semibold ${
                               row.status === "APPROVED"
-                                ? "text-emerald-400"
+                                ? "text-action-success"
                                 : row.status === "ESCALATED"
-                                  ? "text-amber-400"
-                                  : "text-[var(--text-secondary)]"
+                                  ? "text-action-warning"
+                                  : "text-text-secondary"
                             }`}
                           >
                             {row.status ?? "PENDING"}
                           </span>
                         </td>
-                        <td className="py-2 text-[var(--text-muted)]">recent</td>
+                        <td className="py-2 text-text-muted">recent</td>
                       </tr>
                     ))}
                   </tbody>

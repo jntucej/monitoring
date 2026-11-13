@@ -81,24 +81,24 @@ export function MyWorkPanel() {
 
   return (
     <WidgetBoundary title="My Work">
-      <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0">
+      <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
-            <ClipboardList className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-            <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+            <ClipboardList className="w-4 h-4 text-action-primary shrink-0" />
+            <span className="text-sm font-bold text-text-primary truncate">
               My Work Items
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border text-[var(--text-secondary)] bg-[var(--bg-base)] border-[var(--border)] shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border text-text-secondary bg-bg-base border-border shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
             {tasks.length} open
           </span>
         </div>
 
         {/* Body */}
         {loading && !data ? (
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-4">
+          <div className="flex items-center gap-2 text-xs text-text-muted py-4">
             <Loader2 className="w-4 h-4 animate-spin" />
             Loading work items…
           </div>
@@ -107,22 +107,22 @@ export function MyWorkPanel() {
             {tasks.map((t) => (
               <li
                 key={t.id}
-                className="rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 min-w-0"
+                className="rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0"
               >
                 <div className="flex items-center justify-between gap-2 min-w-0">
-                  <p className="text-xs font-mono font-semibold text-[var(--text-primary)] truncate">
+                  <p className="text-xs font-mono font-semibold text-text-primary truncate">
                     {t.ticket || t.id}
                   </p>
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0 uppercase">
+                  <span className="text-[10px] font-mono text-text-muted shrink-0 uppercase">
                     {t.status ?? "PENDING"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 min-w-0 mt-1">
-                  <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                  <p className="text-[11px] text-text-secondary truncate">
                     {t.type ? `${t.type} · ` : ""}
                     stage: {t.stage ?? "—"}
                   </p>
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">
+                  <p className="text-[10px] font-mono text-text-muted shrink-0">
                     due {fmt(t.createdAt)}
                   </p>
                 </div>
@@ -133,18 +133,18 @@ export function MyWorkPanel() {
           <EmptyState
             title="No open work items"
             description="Your open maintenance work orders will appear here when assigned."
-            icon={<Inbox className="w-6 h-6 text-[var(--text-muted)]" />}
+            icon={<Inbox className="w-6 h-6 text-text-muted" />}
           />
         )}
 
         {/* Footer: last update */}
-        <div className="mt-3 pt-3 border-t border-[var(--border)] flex items-center justify-between gap-2 min-w-0">
-          <span className="text-[11px] text-[var(--text-muted)] truncate">
+        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2 min-w-0">
+          <span className="text-[11px] text-text-muted truncate">
             {data?.data?.completedLastWeek
               ? `${data.data.completedLastWeek} completed last week`
               : "No recent completions"}
           </span>
-          <span className="text-[11px] font-mono text-[var(--text-muted)] shrink-0">
+          <span className="text-[11px] font-mono text-text-muted shrink-0">
             last update {fmt(lastUpdate)}
           </span>
         </div>

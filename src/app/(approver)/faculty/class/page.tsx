@@ -57,7 +57,7 @@ function FacultyClassIndexInner() {
   return (
     <div className="space-y-3 p-2 min-w-0">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
           <GraduationCap className="w-3.5 h-3.5" /> My Classes
         </p>
         <div className="flex gap-1">
@@ -65,8 +65,8 @@ function FacultyClassIndexInner() {
             onClick={() => setRole("class_teacher")}
             className={`px-2 py-0.5 text-[10px] rounded-full border transition-colors ${
               role === "class_teacher"
-                ? "border-[var(--action-primary)] text-[var(--action-primary)] bg-[var(--action-primary)]/10"
-                : "border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                ? "border-action-primary text-action-primary bg-action-primary/10"
+                : "border-border text-text-muted hover:text-text-primary"
             }`}
           >
             Taught
@@ -75,8 +75,8 @@ function FacultyClassIndexInner() {
             onClick={() => setRole("all")}
             className={`px-2 py-0.5 text-[10px] rounded-full border transition-colors ${
               role === "all"
-                ? "border-[var(--action-primary)] text-[var(--action-primary)] bg-[var(--action-primary)]/10"
-                : "border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                ? "border-action-primary text-action-primary bg-action-primary/10"
+                : "border-border text-text-muted hover:text-text-primary"
             }`}
           >
             All
@@ -89,19 +89,19 @@ function FacultyClassIndexInner() {
           <Link
             key={c.id}
             href={`/faculty/class/${encodeURIComponent(c.id)}`}
-            className="flex items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 hover:border-[var(--action-primary)]/40 hover:bg-[var(--bg-elevated)] transition-colors"
+            className="flex items-center justify-between gap-2 rounded-xl border border-border bg-bg-surface p-3 hover:border-action-primary/40 hover:bg-bg-elevated transition-colors"
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+              <p className="text-sm font-semibold text-text-primary truncate">
                 Year {c.year} &middot; {c.section}
                 {c.name ? ` · ${c.name}` : ""}
               </p>
-              <p className="text-[10px] text-[var(--text-muted)] font-mono">
+              <p className="text-[10px] text-text-muted font-mono">
                 {c.capacity != null ? `cap ${c.capacity}` : "—"}
                 {c.subjectCodes?.length ? ` · ${c.subjectCodes.join(", ")}` : ""}
               </p>
             </div>
-            <ArrowRight className="w-4 h-4 shrink-0 text-[var(--text-muted)]" />
+            <ArrowRight className="w-4 h-4 shrink-0 text-text-muted" />
           </Link>
         ))}
       </div>

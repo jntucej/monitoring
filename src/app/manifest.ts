@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: COLLEGE.portalPurpose,
     start_url: "/",
     display: "standalone",
-    background_color: "#0f172a",
-    theme_color: "#10b981",
+    background_color: "var(--bg-base)",
+    theme_color: "var(--action-success)",
     orientation: "portrait-primary",
     lang: "en-IN",
     icons: [

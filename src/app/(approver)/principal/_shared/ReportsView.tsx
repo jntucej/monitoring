@@ -30,8 +30,8 @@ export function ReportsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Governance Reports</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Governance Reports</h1>
+        <p className="text-xs text-text-muted">
           7-day digest of campus decisions and workflow distribution
         </p>
       </header>
@@ -52,11 +52,11 @@ export function ReportsView() {
             {breakdown.map((item) => (
               <li
                 key={item.workflow_type}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{item.workflow_type}</p>
-                  <span className="font-semibold tabular-nums text-[var(--action-primary)]">
+                  <span className="font-semibold tabular-nums text-action-primary">
                     {item.count}
                   </span>
                 </div>

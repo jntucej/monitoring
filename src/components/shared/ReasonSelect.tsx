@@ -126,7 +126,7 @@ export function ReasonSelect({
         disabled={disabled || loading}
         required={required}
         className={cn(
-          "w-full h-11 px-3.5 rounded-md bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
+          "w-full h-11 px-3.5 rounded-md bg-bg-surface border border-border text-text-primary text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
           className
         )}
       >
@@ -135,9 +135,9 @@ export function ReasonSelect({
         </option>
 
         {standardReasons.length > 0 && (
-          <optgroup label="Standard" className="bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold">
+          <optgroup label="Standard" className="bg-bg-surface text-text-primary font-semibold">
             {standardReasons.map((reason) => (
-              <option key={`std_${reason.code}`} value={reason.code} className="font-normal text-[var(--text-primary)] py-1">
+              <option key={`std_${reason.code}`} value={reason.code} className="font-normal text-text-primary py-1">
                 {reason.label}
               </option>
             ))}
@@ -145,9 +145,9 @@ export function ReasonSelect({
         )}
 
         {dedupedCustomReasons.length > 0 && (
-          <optgroup label="Custom" className="bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold">
+          <optgroup label="Custom" className="bg-bg-surface text-text-primary font-semibold">
             {dedupedCustomReasons.map((reason) => (
-              <option key={`cust_${reason.code}`} value={reason.code} className="font-normal text-[var(--text-primary)] py-1">
+              <option key={`cust_${reason.code}`} value={reason.code} className="font-normal text-text-primary py-1">
                 {reason.label}
               </option>
             ))}

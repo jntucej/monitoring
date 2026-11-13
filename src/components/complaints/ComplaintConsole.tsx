@@ -55,7 +55,7 @@ export function ComplaintConsole({
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">{title}</h1>
         {role === "student" && (
-          <Link href="/student/complaints/new" className="px-4 py-2 rounded bg-[var(--bg-surface)] text-white text-sm">
+          <Link href="/student/complaints/new" className="px-4 py-2 rounded bg-bg-surface text-white text-sm">
             Raise complaint
           </Link>
         )}
@@ -79,26 +79,26 @@ export function ComplaintConsole({
       </div>
 
       {loading ? (
-        <p className="text-sm text-[var(--text-muted)]">Loading…</p>
+        <p className="text-sm text-text-muted">Loading…</p>
       ) : complaints.length === 0 ? (
-        <p className="text-sm text-[var(--text-muted)]">No complaints found.</p>
+        <p className="text-sm text-text-muted">No complaints found.</p>
       ) : (
         <div className="border rounded divide-y bg-white">
           {complaints.map((c) => (
-            <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-[var(--bg-elevated)] transition">
+            <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-bg-elevated transition">
               <div className="flex justify-between items-start">
                 <div>
-                  <span className="font-mono text-xs text-[var(--text-muted)]">{c.complaintNumber}</span>
-                  <h2 className="font-medium text-[var(--text-primary)]">{c.title}</h2>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
+                  <h2 className="font-medium text-text-primary">{c.title}</h2>
+                  <p className="text-xs text-text-muted mt-0.5">
                     {c.categoryLabel} · Owner: <span className="font-mono">{c.currentOwnerRole}</span>
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-bg-elevated text-text-secondary">
                     {c.status}
                   </span>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-text-muted mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             </Link>

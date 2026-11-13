@@ -88,7 +88,7 @@ export function ScanConfirmation({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.16 }}
-      className="pointer-events-auto w-full max-w-md mx-auto bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 shadow-xl space-y-3"
+      className="pointer-events-auto w-full max-w-md mx-auto bg-bg-surface border border-border rounded-2xl p-4 shadow-xl space-y-3"
     >
       <div className="flex items-center gap-3">
         <img
@@ -96,20 +96,20 @@ export function ScanConfirmation({
           alt={student.name || "Student"}
           width={56}
           height={56}
-          className="w-14 h-14 rounded-xl object-cover shrink-0 border border-[var(--border)]"
+          className="w-14 h-14 rounded-xl object-cover shrink-0 border border-border"
         />
         <div className="min-w-0 flex-1">
-          <p className="font-bold text-sm text-[var(--text-primary)] truncate">
+          <p className="font-bold text-sm text-text-primary truncate">
             {student.name || student.roll || student.uniqueId}
           </p>
-          <p className="text-xs font-mono text-[var(--text-muted)] truncate">
+          <p className="text-xs font-mono text-text-muted truncate">
             {student.roll || student.studentDetails?.roll || student.uniqueId}
           </p>
           <span
             className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mt-1 ${
               entryTypeToUse === "day_scholar"
-                ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
-                : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                ? "bg-sky-500/15 text-action-info border-sky-500/30"
+                : "bg-emerald-500/15 text-action-success border-emerald-500/30"
             }`}
           >
             {entryBadge}
@@ -119,8 +119,8 @@ export function ScanConfirmation({
           <span
             className={`text-[10px] font-bold px-2 py-1 rounded-full border ${
               campusStatus === "IN"
-                ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                ? "bg-emerald-500/15 text-action-success border-emerald-500/30"
+                : "bg-amber-500/15 text-action-warning border-amber-500/30"
             }`}
           >
             {campusStatus === "IN" ? "On campus" : "Out"}
@@ -135,7 +135,7 @@ export function ScanConfirmation({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] py-2"
+            className="flex items-center justify-center gap-2 text-xs text-text-muted py-2"
           >
             <Clock className="w-3.5 h-3.5" />
             Verify photo · {countdown}s
@@ -155,7 +155,7 @@ export function ScanConfirmation({
               primaryButtonId ?? undefined
             )
           }
-          className="w-full min-h-[52px] rounded-xl bg-[var(--action-primary)] text-black font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full min-h-[52px] rounded-xl bg-action-primary text-black font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {recommendation?.direction === "OUT" ? (
             <LogOut className="w-5 h-5" />
@@ -178,7 +178,7 @@ export function ScanConfirmation({
                 alt.payload.buttonId ?? undefined
               )
             }
-            className="w-full min-h-[44px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
+            className="w-full min-h-[44px] rounded-xl bg-bg-elevated border border-border text-text-secondary font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
           >
             <Check className="w-4 h-4" />
             {alt.label}
@@ -188,7 +188,7 @@ export function ScanConfirmation({
         <button
           type="button"
           onClick={onCancel}
-          className="w-full min-h-[40px] rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          className="w-full min-h-[40px] rounded-xl text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
         >
           Cancel & resume scanning
         </button>

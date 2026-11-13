@@ -80,16 +80,16 @@ export function HostelDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p className="text-2xl font-bold text-[var(--text-primary)]">Hostel Dashboard</p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Live hostel permissions — boys, girls, stages, overdue, biometric.</p>
+          <p className="text-2xl font-bold text-text-primary">Hostel Dashboard</p>
+          <p className="text-sm text-text-muted mt-1">Live hostel permissions — boys, girls, stages, overdue, biometric.</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] border border-[var(--border)] px-3 py-1.5 rounded-lg">Last refreshed: {new Date().toLocaleTimeString()}</span>
+          <span className="text-xs text-text-muted bg-bg-surface border border-border px-3 py-1.5 rounded-lg">Last refreshed: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
       {loading && !data ? (
-        <div className="flex h-64 items-center justify-center text-[var(--text-muted)]">Loading...</div>
+        <div className="flex h-64 items-center justify-center text-text-muted">Loading...</div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -108,46 +108,46 @@ export function HostelDashboard() {
           </div>
 
           <CardDiv className="p-5">
-            <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Stage Funnel</h2>
+            <h2 className="text-sm font-semibold text-text-primary mb-4">Stage Funnel</h2>
             <div className="h-[260px]"><StageFunnel data={stageData} /></div>
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs text-[var(--text-muted)]">
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs text-text-muted">
               {stageData.map((s) => (
                 <div key={s.stage} className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.count > 0 ? "var(--action-primary)" : "var(--border)" }} />
                   <span>{s.stage.replace(/_/g, " ")}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{s.count}</span>
+                  <span className="font-semibold text-text-primary">{s.count}</span>
                 </div>
               ))}
             </div>
           </CardDiv>
 
           <CardDiv className="p-5">
-  <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Overdue Requests (&gt; 48h)</h2>
+  <h2 className="text-sm font-semibold text-text-primary mb-4">Overdue Requests (&gt; 48h)</h2>
   {data?.overdue && data.overdue.length > 0 ? (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[var(--border)]">
-            <th className="text-left py-2 pb-3 font-medium text-[var(--text-muted)]">Ticket</th>
-            <th className="text-left py-2 pb-3 font-medium text-[var(--text-muted)]">Student</th>
-            <th className="text-left py-2 pb-3 font-medium text-[var(--text-muted)]">Stage</th>
-            <th className="text-left py-2 pb-3 font-medium text-[var(--text-muted)]">Age (hours)</th>
+          <tr className="border-b border-border">
+            <th className="text-left py-2 pb-3 font-medium text-text-muted">Ticket</th>
+            <th className="text-left py-2 pb-3 font-medium text-text-muted">Student</th>
+            <th className="text-left py-2 pb-3 font-medium text-text-muted">Stage</th>
+            <th className="text-left py-2 pb-3 font-medium text-text-muted">Age (hours)</th>
           </tr>
         </thead>
         <tbody>
           {data.overdue.map((o) => (
-            <tr key={o.ticket} className="border-b border-[var(--border)]">
-              <td className="py-2.5 text-[var(--text-primary)]">{o.ticket}</td>
-              <td className="py-2.5 text-[var(--text-muted)]">{o.student}</td>
-              <td className="py-2.5 text-[var(--text-muted)]">{o.stage.replace(/_/g, " ")}</td>
-              <td className="py-2.5 text-[var(--text-muted)]">{o.ageHours.toFixed(1)}h</td>
+            <tr key={o.ticket} className="border-b border-border">
+              <td className="py-2.5 text-text-primary">{o.ticket}</td>
+              <td className="py-2.5 text-text-muted">{o.student}</td>
+              <td className="py-2.5 text-text-muted">{o.stage.replace(/_/g, " ")}</td>
+              <td className="py-2.5 text-text-muted">{o.ageHours.toFixed(1)}h</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   ) : (
-    <div className="text-center py-8 text-[var(--text-muted)]">No overdue requests.</div>
+    <div className="text-center py-8 text-text-muted">No overdue requests.</div>
   )}
 </CardDiv>
 
@@ -156,8 +156,8 @@ export function HostelDashboard() {
               <div className="flex items-center gap-4">
                 <RadialMeter value={data ? ((data.biometric.hostelDone / Math.max(1, data.biometric.hostelTotal)) * 100) : 0} label="Hostel Biometric Done" sublabel={`${data?.biometric.hostelDone ?? 0} / ${data?.biometric.hostelTotal ?? 0}`} size={100} thickness={8} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">Hostel Biometric</div>
-                  <div className="text-xs text-[var(--text-muted)]">Completed at hostel stage.</div>
+                  <div className="text-sm font-semibold text-text-primary">Hostel Biometric</div>
+                  <div className="text-xs text-text-muted">Completed at hostel stage.</div>
                 </div>
               </div>
             </CardDiv>
@@ -165,8 +165,8 @@ export function HostelDashboard() {
               <div className="flex items-center gap-4">
                 <RadialMeter value={data ? ((data.biometric.gateDone / Math.max(1, data.biometric.gateTotal)) * 100) : 0} label="Gate Biometric Done" sublabel={`${data?.biometric.gateDone ?? 0} / ${data?.biometric.gateTotal ?? 0}`} size={100} thickness={8} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-[var(--text-primary)]">Gate Biometric</div>
-                  <div className="text-xs text-[var(--text-muted)]">Completed at main gate.</div>
+                  <div className="text-sm font-semibold text-text-primary">Gate Biometric</div>
+                  <div className="text-xs text-text-muted">Completed at main gate.</div>
                 </div>
               </div>
             </CardDiv>
@@ -210,7 +210,7 @@ interface CardDivProps {
 
 export function CardDiv({ children, className = "" }: CardDivProps) {
   return (
-    <div className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 ${className}`}>
+    <div className={`rounded-xl border border-border bg-bg-surface p-4 ${className}`}>
       {children}
     </div>
   );

@@ -33,7 +33,7 @@ function parseInline(text: string): ReactElement[] {
       out.push(
         <code
           key={`c${m.index}`}
-          className="px-1 py-0.5 rounded bg-[var(--bg-base)] text-[var(--text-primary)] text-[0.85em] font-mono"
+          className="px-1 py-0.5 rounded bg-bg-base text-text-primary text-[0.85em] font-mono"
         >
           {full.slice(1, -1)}
         </code>,
@@ -48,7 +48,7 @@ function parseInline(text: string): ReactElement[] {
         if (/^https?:\/\//.test(url)) {
           out.push(
             <a key={`a${m.index}`} href={url} target="_blank" rel="noopener noreferrer"
-               className="text-emerald-500 hover:underline underline-offset-2">
+               className="text-action-success hover:underline underline-offset-2">
               {label}
             </a>,
           );

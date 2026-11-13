@@ -119,16 +119,16 @@ export function HostelForwardModal({
       size="md"
     >
       <div className="space-y-4">
-        <p className="text-xs text-[var(--text-secondary)]">
+        <p className="text-xs text-text-secondary">
           Forward this request to a higher hostel approval level.
         </p>
 
         <div>
-          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+          <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
             Forward to level
           </label>
           {targetRoles.length === 0 ? (
-            <p className="text-xs text-[var(--text-muted)] italic">
+            <p className="text-xs text-text-muted italic">
               No higher level available (you are already at the top).
             </p>
           ) : (
@@ -142,7 +142,7 @@ export function HostelForwardModal({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+          <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
             Comment (required)
           </label>
           <textarea
@@ -150,13 +150,13 @@ export function HostelForwardModal({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             placeholder="Explain why this request needs a higher level"
-            className="w-full text-sm p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--action-primary)]"
+            className="w-full text-sm p-2 rounded-lg border border-border bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
         {stepupRequired && (
           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
-            <div className="flex items-center gap-1.5 text-amber-500 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 text-action-warning text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
               Step-up password required
             </div>
@@ -170,7 +170,7 @@ export function HostelForwardModal({
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs">
+          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
             {error}
           </div>
         )}

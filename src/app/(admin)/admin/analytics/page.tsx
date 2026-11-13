@@ -45,11 +45,11 @@ interface AnalyticsData {
 }
 
 const CHART_PALETTE = {
-  primary: "#10b981",
-  info: "#3b82f6",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-  violet: "#8b5cf6",
+  primary: "var(--action-success)",
+  info: "var(--action-primary)",
+  warning: "var(--action-warning)",
+  danger: "var(--action-danger)",
+  violet: "var(--unit-c)",
 };
 
 async function fetchAnalytics(days = 14): Promise<AnalyticsData> {
@@ -212,7 +212,7 @@ function AdminAnalyticsInner() {
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] p-1 text-xs">
+            <div className="inline-flex rounded-xl bg-bg-surface border border-border p-1 text-xs">
               {(([7, 14, 30] as const)).map((days) => (
                 <button
                   key={days}
@@ -220,8 +220,8 @@ function AdminAnalyticsInner() {
                   onClick={() => setRange(days)}
                   className={`px-3 py-1 min-h-[44px] rounded-lg font-medium transition flex items-center justify-center ${
                     range === days
-                      ? "bg-[var(--action-primary)] text-white shadow"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-action-primary text-white shadow"
+                      : "text-text-muted hover:text-text-primary"
                   }`}
                 >
                   {days}d
@@ -232,14 +232,14 @@ function AdminAnalyticsInner() {
               type="button"
               onClick={exportCsv}
               disabled={!data || data.daily.length === 0}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
               type="button"
               onClick={load}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
@@ -249,7 +249,7 @@ function AdminAnalyticsInner() {
       />
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-sm flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-sm flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -259,11 +259,11 @@ function AdminAnalyticsInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <WidgetBoundary title="Total Entries">
           <div className="glass-card p-4 space-y-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" /> Total Entries ({range}d)
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-action-success" /> Total Entries ({range}d)
             </p>
             {data ? (
-              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+              <p className="text-2xl font-black text-text-primary tabular-nums">
                 {data.totals.entries.toLocaleString()}
               </p>
             ) : (
@@ -274,11 +274,11 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Total Exits">
           <div className="glass-card p-4 space-y-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-rose-400" /> Total Exits ({range}d)
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-action-danger" /> Total Exits ({range}d)
             </p>
             {data ? (
-              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+              <p className="text-2xl font-black text-text-primary tabular-nums">
                 {data.totals.exits.toLocaleString()}
               </p>
             ) : (
@@ -289,11 +289,11 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Peak On-Campus">
           <div className="glass-card p-4 space-y-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-blue-400" /> Peak On-Campus
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-action-primary" /> Peak On-Campus
             </p>
             {data ? (
-              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+              <p className="text-2xl font-black text-text-primary tabular-nums">
                 {data.totals.peakOnCampus.toLocaleString()}
               </p>
             ) : (
@@ -304,11 +304,11 @@ function AdminAnalyticsInner() {
 
         <WidgetBoundary title="Average Daily Volume">
           <div className="glass-card p-4 space-y-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-purple-400" /> Daily Avg Volume
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-unit-c" /> Daily Avg Volume
             </p>
             {data ? (
-              <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+              <p className="text-2xl font-black text-text-primary tabular-nums">
                 {Math.round((data.totals.entries + data.totals.exits) / Math.max(1, data.daily.length)).toLocaleString()}
               </p>
             ) : (
@@ -324,8 +324,8 @@ function AdminAnalyticsInner() {
           <div className="glass-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Gate Traffic Flow</h3>
-                <p className="text-xs text-[var(--text-muted)]">Entries versus exits over time</p>
+                <h3 className="text-sm font-semibold text-text-primary">Gate Traffic Flow</h3>
+                <p className="text-xs text-text-muted">Entries versus exits over time</p>
               </div>
               <ChartTypeSwitcher value={trafficType} onChange={setTrafficType} />
             </div>
@@ -347,8 +347,8 @@ function AdminAnalyticsInner() {
           <div className="glass-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">On-Campus Occupancy</h3>
-                <p className="text-xs text-[var(--text-muted)]">Net population count present on grounds</p>
+                <h3 className="text-sm font-semibold text-text-primary">On-Campus Occupancy</h3>
+                <p className="text-xs text-text-muted">Net population count present on grounds</p>
               </div>
               <ChartTypeSwitcher value={campusType} onChange={setCampusType} />
             </div>
@@ -370,8 +370,8 @@ function AdminAnalyticsInner() {
           <div className="glass-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Students by Department</h3>
-                <p className="text-xs text-[var(--text-muted)]">Active departmental headcounts</p>
+                <h3 className="text-sm font-semibold text-text-primary">Students by Department</h3>
+                <p className="text-xs text-text-muted">Active departmental headcounts</p>
               </div>
               <ChartTypeSwitcher value={roleType} onChange={setRoleType} />
             </div>
@@ -393,8 +393,8 @@ function AdminAnalyticsInner() {
           <div className="glass-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Active Users by Role</h3>
-                <p className="text-xs text-[var(--text-muted)]">Breakdown of operational accounts</p>
+                <h3 className="text-sm font-semibold text-text-primary">Active Users by Role</h3>
+                <p className="text-xs text-text-muted">Breakdown of operational accounts</p>
               </div>
               <ChartTypeSwitcher value={roleType} onChange={setRoleType} />
             </div>

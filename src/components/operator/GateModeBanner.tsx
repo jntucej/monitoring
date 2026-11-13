@@ -44,7 +44,7 @@ function pillForMode(mode: GateMode, lockdown: LockdownInfo | null) {
     return {
       label: "LOCKDOWN",
       Icon: ShieldAlert,
-      tone: "bg-[var(--action-danger)] text-white",
+      tone: "bg-action-danger text-white",
       pulse: true,
     };
   }
@@ -53,14 +53,14 @@ function pillForMode(mode: GateMode, lockdown: LockdownInfo | null) {
       return {
         label: "CURFEW",
         Icon: Moon,
-        tone: "bg-amber-500/20 text-amber-400 border border-amber-500/40",
+        tone: "bg-amber-500/20 text-action-warning border border-amber-500/40",
         pulse: false,
       };
     case "MAINTENANCE":
       return {
         label: "MAINTENANCE",
         Icon: Wrench,
-        tone: "bg-amber-500/20 text-amber-400 border border-amber-500/40",
+        tone: "bg-amber-500/20 text-action-warning border border-amber-500/40",
         pulse: false,
       };
     case "OPEN":
@@ -68,7 +68,7 @@ function pillForMode(mode: GateMode, lockdown: LockdownInfo | null) {
       return {
         label: "OPEN",
         Icon: CheckCircle2,
-        tone: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40",
+        tone: "bg-emerald-500/20 text-action-success border border-emerald-500/40",
         pulse: false,
       };
   }
@@ -134,7 +134,7 @@ export function GateModeBanner({
           <button
             type="button"
             onClick={() => setOverrideOpen(true)}
-            className="text-[11px] text-amber-400 underline underline-offset-2"
+            className="text-[11px] text-action-warning underline underline-offset-2"
           >
             Override
           </button>
@@ -161,7 +161,7 @@ export function GateModeBanner({
       {lockdown && (
         <div
           role="alert"
-          className="mt-1 max-w-md rounded-md border border-[var(--action-danger)] bg-[var(--action-danger)]/10 px-2 py-1 text-[11px] text-[var(--action-danger)]"
+          className="mt-1 max-w-md rounded-md border border-action-danger bg-action-danger/10 px-2 py-1 text-[11px] text-action-danger"
         >
           <strong>Campus lockdown.</strong>{" "}
           {lockdown.message ?? "Scans are disabled until an administrator lifts the lockdown."}
@@ -182,7 +182,7 @@ export function GateModeBanner({
         size="sm"
       >
         <form onSubmit={submitOverride} className="space-y-3">
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-secondary">
             Gate mode is <strong>MAINTENANCE</strong> and scans are currently
             disabled. Overriding records the reason in the audit log and is
             visible to supervisors.
@@ -197,7 +197,7 @@ export function GateModeBanner({
             required
           />
           {error && (
-            <p role="alert" className="text-sm text-[var(--action-danger)]">
+            <p role="alert" className="text-sm text-action-danger">
               {error}
             </p>
           )}

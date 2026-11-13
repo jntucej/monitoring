@@ -45,12 +45,12 @@ interface PermissionListData {
 function statusPill(status?: string) {
   const s = (status ?? "PENDING").toUpperCase();
   if (s === "APPROVED" || s === "COMPLETED")
-    return "border-emerald-400/30 bg-emerald-400/10 text-emerald-400";
+    return "border-emerald-400/30 bg-emerald-400/10 text-action-success";
   if (s === "REJECTED" || s === "CANCELLED")
-    return "border-rose-400/30 bg-rose-400/10 text-rose-400";
+    return "border-rose-400/30 bg-rose-400/10 text-action-danger";
   if (s === "PENDING")
-    return "border-amber-400/30 bg-amber-400/10 text-amber-400";
-  return "border-[var(--border)]/30 bg-[var(--bg-elevated)]/10 text-[var(--text-muted)]";
+    return "border-amber-400/30 bg-amber-400/10 text-action-warning";
+  return "border-border/30 bg-bg-elevated/10 text-text-muted";
 }
 
 function toLocalInputValue(iso: string): string {
@@ -179,17 +179,17 @@ function PassLeaveSubmissionInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Send className="w-6 h-6 text-emerald-400" />
+            <Send className="w-6 h-6 text-action-success" />
             Pass &amp; Leave Request Submission
           </p>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-text-muted">
             Submit a pass or leave request for a linked ward
           </p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-sm text-amber-200 flex items-start gap-2.5">
-        <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+      <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-sm text-action-warning flex items-start gap-2.5">
+        <Info className="w-4 h-4 shrink-0 mt-0.5 text-action-warning" />
         <p>
           <strong className="font-semibold text-amber-100">Submission only — no approval authority.</strong>{" "}
           You may submit pass/leave requests on behalf of your wards, but approval is handled by
@@ -210,20 +210,20 @@ function PassLeaveSubmissionInner() {
         {/* ── submission form ── */}
         <form
           onSubmit={submit}
-          className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-4"
+          className="rounded-xl border border-border bg-bg-surface p-4 space-y-4"
         >
-          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             New request
           </h2>
 
           {wards.length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)] py-2">
+            <p className="text-sm text-text-muted py-2">
               No wards linked to your account.
             </p>
           ) : (
             <>
               <div>
-                <label htmlFor="ward" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label htmlFor="ward" className="block text-xs font-medium text-text-secondary mb-1">
                   Linked ward
                 </label>
                 <select
@@ -231,7 +231,7 @@ function PassLeaveSubmissionInner() {
                   value={wardId}
                   onChange={(e) => setWardId(e.target.value)}
                   disabled={busy}
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
                 >
                   {wards.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -242,7 +242,7 @@ function PassLeaveSubmissionInner() {
               </div>
 
               <div>
-                <label htmlFor="passType" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label htmlFor="passType" className="block text-xs font-medium text-text-secondary mb-1">
                   Request type
                 </label>
                 <select
@@ -250,7 +250,7 @@ function PassLeaveSubmissionInner() {
                   value={passType}
                   onChange={(e) => setPassType(e.target.value)}
                   disabled={busy || passTypesLoading}
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
                 >
                   {passTypes.map((t) => (
                     <option key={t.code} value={t.code}>
@@ -259,7 +259,7 @@ function PassLeaveSubmissionInner() {
                   ))}
                 </select>
                 {passType && (
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     {passTypes.find((t) => t.code === passType)?.description}
                   </p>
                 )}
@@ -267,7 +267,7 @@ function PassLeaveSubmissionInner() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="from" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="from" className="block text-xs font-medium text-text-secondary mb-1">
                     From
                   </label>
                   <input
@@ -277,11 +277,11 @@ function PassLeaveSubmissionInner() {
                     onChange={(e) => setFrom(e.target.value)}
                     min={toLocalInputValue(new Date().toISOString())}
                     disabled={busy}
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
                   />
                 </div>
                 <div>
-                  <label htmlFor="to" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="to" className="block text-xs font-medium text-text-secondary mb-1">
                     To
                   </label>
                   <input
@@ -290,13 +290,13 @@ function PassLeaveSubmissionInner() {
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
                     disabled={busy}
-                    className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="reason" className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
+                <label htmlFor="reason" className="block text-xs font-medium text-text-secondary mb-1">
                   Reason / notes
                 </label>
                 <textarea
@@ -306,14 +306,14 @@ function PassLeaveSubmissionInner() {
                   rows={3}
                   placeholder="Reason for the pass or leave (optional)"
                   disabled={busy}
-                  className="w-full rounded-lg border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={busy || wards.length === 0}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold w-full sm:w-auto"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold w-full sm:w-auto"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {busy ? "Submitting…" : "Submit request"}
@@ -323,8 +323,8 @@ function PassLeaveSubmissionInner() {
                 <div
                   className={`rounded-lg border p-3 text-sm ${
                     submitMsg.ok
-                      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                      : "border-rose-400/30 bg-rose-400/10 text-rose-300"
+                      ? "border-emerald-400/30 bg-emerald-400/10 text-action-success"
+                      : "border-rose-400/30 bg-rose-400/10 text-action-danger"
                   } flex items-start gap-2`}
                 >
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
@@ -336,22 +336,22 @@ function PassLeaveSubmissionInner() {
         </form>
 
         {/* ── ward request status list ── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 space-y-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3 min-w-0">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
+            <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Ward request status
             </h2>
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-text-muted">
               {pendingRows.length} pending
             </span>
           </div>
 
           {permsLoading && rows.length === 0 ? (
-            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] py-2">
+            <div className="flex items-center gap-2 text-sm text-text-muted py-2">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[var(--border)] p-6 text-center text-sm text-[var(--text-muted)]">
+            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
               No requests found for your wards.
             </div>
           ) : (
@@ -359,13 +359,13 @@ function PassLeaveSubmissionInner() {
               {rows.slice(0, 12).map((r) => (
                 <div
                   key={r.id}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)]/50 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0"
+                  className="rounded-lg border border-border bg-bg-base/50 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] font-mono">
+                    <p className="text-sm font-medium text-text-primary font-mono">
                       {r.ticket_number || r.id.slice(0, 8)}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-text-muted">
                       {r.workflow_type || "—"}
                       {r.created_at ? ` · ${new Date(r.created_at).toLocaleDateString("en-IN")}` : ""}
                     </p>
@@ -378,7 +378,7 @@ function PassLeaveSubmissionInner() {
                     </span>
                     <Link
                       href={`/guardian/request-status?ticket=${encodeURIComponent(r.ticket_number ?? r.id)}`}
-                      className="text-xs text-emerald-400 hover:underline"
+                      className="text-xs text-action-success hover:underline"
                     >
                       View timeline
                     </Link>

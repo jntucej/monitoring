@@ -73,7 +73,7 @@ export function Hero() {
       {/* Eyebrow. This is NOT the LCP element; a small blur-reveal is
           allowed here. The h1 below is the LCP and stays clean. */}
       <motion.p
-        className="mb-3 text-sm uppercase tracking-[0.35em] text-[var(--home-accent-indigo,#6366F1)]"
+        className="mb-3 text-sm uppercase tracking-[0.35em] text-[var(--home-accent-indigo,var(--action-primary))]"
         initial={reduced ? false : { opacity: 0, filter: "blur(8px)", y: 6 }}
         animate={reduced ? undefined : { opacity: 1, filter: "blur(0px)", y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
@@ -95,7 +95,7 @@ export function Hero() {
 
       {/* Sub-headline — blur-reveal is fine here (not the LCP element). */}
       <motion.p
-        className="mt-6 max-w-2xl text-lg text-[var(--home-text-secondary,#9CA3AF)] md:text-xl"
+        className="mt-6 max-w-2xl text-lg text-[var(--home-text-secondary,var(--text-muted))] md:text-xl"
         initial={reduced ? false : { opacity: 0, filter: "blur(8px)", y: 6 }}
         animate={reduced ? undefined : { opacity: 1, filter: "blur(0px)", y: 0 }}
         transition={{ duration: 0.6, delay: 0.12 }}
@@ -109,7 +109,7 @@ export function Hero() {
           onClick={() => router.push("/login")}
           strength={0.05}
           radius={80}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,#6366F1)] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
         >
           <LogIn className="h-4 w-4" />
           {COLLEGE.primaryCTA}
@@ -117,7 +117,7 @@ export function Hero() {
         <button
           type="button"
           onClick={() => scrollTo("home-access-flow")}
-          className="inline-flex items-center gap-2 rounded-xl border border-[var(--home-border-hard,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,#F3F4F6)] hover:bg-white/5"
+          className="inline-flex items-center gap-2 rounded-xl border border-[var(--home-border-hard,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,var(--bg-surface))] hover:bg-white/5"
         >
           How it works
           <ArrowRight className="h-4 w-4" />

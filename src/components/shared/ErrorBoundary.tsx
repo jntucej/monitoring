@@ -28,14 +28,14 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return this.props.fallback ?? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)]">
-          <AlertTriangle className="w-16 h-16 text-amber-500 mb-4 animate-bounce" />
-          <h2 className="text-xl font-semibold mb-2 text-[var(--text-primary)]">Something went wrong</h2>
-          <p className="text-[var(--text-muted)] mb-6 max-w-md text-sm">
+          <AlertTriangle className="w-16 h-16 text-action-warning mb-4 animate-bounce" />
+          <h2 className="text-xl font-semibold mb-2 text-text-primary">Something went wrong</h2>
+          <p className="text-text-muted mb-6 max-w-md text-sm">
             {this.state.error?.message ?? 'An unexpected error occurred in this view.'}
           </p>
           <button
             onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-lg transition"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-semibold shadow-lg transition"
           >
             <RefreshCw className="w-4 h-4" /> Reload Page
           </button>

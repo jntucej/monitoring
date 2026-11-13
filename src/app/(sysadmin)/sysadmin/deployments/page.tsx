@@ -13,10 +13,10 @@ export default function DeploymentsPage() {
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center gap-2">
-          <GitBranch className="w-5 h-5 text-[var(--action-primary)]" />
+          <GitBranch className="w-5 h-5 text-action-primary" />
           <div>
-            <h1 className="text-lg font-semibold text-[var(--text-primary)]">Deployments</h1>
-            <p className="text-xs text-[var(--text-muted)]">
+            <h1 className="text-lg font-semibold text-text-primary">Deployments</h1>
+            <p className="text-xs text-text-muted">
               Release history · health gate · rollbacks · lead time
             </p>
           </div>

@@ -67,7 +67,7 @@ function LocalTooltip({ label, children }: { label: string; children: React.Reac
       {children}
       <span
         role="tooltip"
-        className="absolute left-full ml-3 px-2.5 py-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-50 text-[var(--text-primary)]"
+        className="absolute left-full ml-3 px-2.5 py-1 bg-bg-elevated border border-border rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-50 text-text-primary"
       >
         {label}
       </span>
@@ -111,7 +111,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
   return (
     <nav
       aria-label="Primary navigation"
-      className="relative hidden md:flex flex-col items-center gap-1 py-3 px-1.5 w-14 shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md"
+      className="relative hidden md:flex flex-col items-center gap-1 py-3 px-1.5 w-14 shrink-0 border-r border-border bg-bg-surface/95 backdrop-blur-md"
     >
       {/* Dashboard (board) */}
       <LocalTooltip label="Dashboard">
@@ -121,8 +121,8 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
           aria-current={pathname === roleRoot ? "page" : undefined}
           className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
             pathname === roleRoot
-              ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
-              : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+              ? "bg-action-primary/15 text-action-primary"
+              : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
@@ -150,18 +150,18 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                 onClick={() => setOpenGroupId(open ? null : group.id)}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                   active
-                    ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-primary/15 text-action-primary"
+                    : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 }`}
               >
                 <GroupIcon className="w-4 h-4" />
               </button>
               {active && (
-                <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--action-primary)]" />
+                <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-action-primary" />
               )}
               {/* Desktop flyout */}
               <div
-                className={`absolute left-full top-0 z-50 ml-2 w-56 rounded-xl border bg-[var(--bg-elevated)] shadow-xl overflow-hidden transition-opacity ${
+                className={`absolute left-full top-0 z-50 ml-2 w-56 rounded-xl border bg-bg-elevated shadow-xl overflow-hidden transition-opacity ${
                   open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
                 style={{ borderColor: "var(--border)" }}
@@ -186,8 +186,8 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                       onClick={() => setOpenGroupId(null)}
                       className={`flex items-center gap-2 px-3 py-2 text-xs transition-colors ${
                         childActive
-                          ? "text-[var(--action-primary)] font-semibold bg-[var(--action-primary)]/10"
-                          : "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+                          ? "text-action-primary font-semibold bg-action-primary/10"
+                          : "text-text-secondary hover:bg-bg-surface hover:text-text-primary"
                       }`}
                     >
                       <span className="truncate">{child.label}</span>
@@ -210,8 +210,8 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                 aria-current={isActive ? "page" : undefined}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
                   isActive
-                    ? "bg-[var(--action-primary)]/15 text-[var(--action-primary)]"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                    ? "bg-action-primary/15 text-action-primary"
+                    : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
                 }`}
               >
                 <Icon className="w-4 h-4" />

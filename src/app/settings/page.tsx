@@ -11,8 +11,8 @@ export default function SettingsHubPage() {
       <div className="mx-auto max-w-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 min-w-0">
         {/* Page title — global DynamicHeader renders the app header */}
         <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)] mb-3">Settings</p>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
+          <p className="text-sm font-medium text-text-secondary mb-3">Settings</p>
+          <p className="text-sm text-text-muted mt-1">
             Manage your account, security, and notifications.
           </p>
         </div>
@@ -42,16 +42,16 @@ function SettingTile({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 hover:bg-[var(--bg-elevated)] transition"
+      className="flex items-center gap-4 rounded-2xl border border-border bg-bg-surface p-4 hover:bg-bg-elevated transition"
     >
-      <div className="p-2.5 rounded-xl bg-[var(--action-primary)]/10 text-[var(--action-primary)]">
+      <div className="p-2.5 rounded-xl bg-action-primary/10 text-action-primary">
         {icon}
       </div>
       <div className="flex-1">
-        <p className="text-sm font-medium text-[var(--text-primary)]">{title}</p>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">{description}</p>
+        <p className="text-sm font-medium text-text-primary">{title}</p>
+        <p className="text-xs text-text-muted mt-0.5">{description}</p>
       </div>
-      <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+      <ChevronRight className="w-4 h-4 text-text-muted" />
     </Link>
   );
 }

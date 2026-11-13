@@ -36,8 +36,8 @@ interface AnalyticsData {
   byRole: Array<{ role: string; count: number }>;
 }
 const CHART_PALETTE = {
-  primary: "#10b981", info: "#3b82f6", warning: "#f59e0b",
-  danger: "#ef4444", violet: "#8b5cf6",
+  primary: "var(--action-success)", info: "var(--action-primary)", warning: "var(--action-warning)",
+  danger: "var(--action-danger)", violet: "var(--unit-c)",
 };
 
 async function fetchAnalytics(days = 14): Promise<AnalyticsData> {
@@ -119,38 +119,38 @@ function SysAdminAnalyticsInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader title="Analytics" subtitle="Traffic, occupancy, and demographic breakdowns" onRefresh={load} />
-      {error && <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">{error}</div>}
+      {error && <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">{error}</div>}
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex flex-wrap gap-1 glass-card p-1">
           {([7, 14, 30] as const).map((d) => (
-            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h-[44px] rounded-lg flex items-center justify-center ${range === d ? "bg-[var(--action-primary)] text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}>
+            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h-[44px] rounded-lg flex items-center justify-center ${range === d ? "bg-action-primary text-white" : "text-text-muted hover:text-text-primary"}`}>
               {d}d
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><Download className="w-3.5 h-3.5" /> CSV</button>
-          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-[var(--border)] hover:bg-[var(--bg-surface)]/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
+          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60"><Download className="w-3.5 h-3.5" /> CSV</button>
+          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1"><TrendingUp className="w-3.5 h-3.5 text-[var(--action-primary)]" /> Total entries</div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{data?.totals.entries.toLocaleString() ?? "—"}</p>
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><TrendingUp className="w-3.5 h-3.5 text-action-primary" /> Total entries</div>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.entries.toLocaleString() ?? "—"}</p>
         </div>
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1"><TrendingUp className="w-3.5 h-3.5 text-[var(--action-danger)]" /> Total exits</div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{data?.totals.exits.toLocaleString() ?? "—"}</p>
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><TrendingUp className="w-3.5 h-3.5 text-action-danger" /> Total exits</div>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.exits.toLocaleString() ?? "—"}</p>
         </div>
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1"><Users className="w-3.5 h-3.5 text-[var(--action-info)]" /> Peak on campus</div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{data?.totals.peakOnCampus ?? "—"}</p>
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><Users className="w-3.5 h-3.5 text-action-info" /> Peak on campus</div>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.peakOnCampus ?? "—"}</p>
         </div>
         <div className="glass-card p-4">
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-1"><Activity className="w-3.5 h-3.5 text-amber-400" /> Peak hour</div>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">{data?.totals.peakHour ?? "—"}</p>
+          <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><Activity className="w-3.5 h-3.5 text-action-warning" /> Peak hour</div>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.peakHour ?? "—"}</p>
         </div>
       </div>
 

@@ -38,7 +38,7 @@ function KpiTile({
   return (
     <div
       className={cn(
-        "rounded-lg border p-3 bg-[var(--bg-surface)]",
+        "rounded-lg border p-3 bg-bg-surface",
       )}
       style={{ borderColor: "var(--border)" }}
     >
@@ -127,7 +127,7 @@ export interface JobsContentProps {
 export function JobsContent({ data }: JobsContentProps) {
   if (!data) {
     return (
-      <div className="rounded-lg border p-4 text-sm text-[var(--text-muted)]">
+      <div className="rounded-lg border p-4 text-sm text-text-muted">
         No job data available.
       </div>
     );
@@ -163,7 +163,7 @@ export function JobsContent({ data }: JobsContentProps) {
 
       {/* Signature visual: runs matrix (jobs × days) */}
       <div
-        className="rounded-lg border p-4 bg-[var(--bg-surface)]"
+        className="rounded-lg border p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">

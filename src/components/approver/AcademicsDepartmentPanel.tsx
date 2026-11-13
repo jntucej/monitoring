@@ -59,20 +59,20 @@ function Kpi({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+    <div className="rounded-xl border border-border bg-bg-surface p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-wide text-[var(--text-muted)]">
+        <span className="text-[11px] uppercase tracking-wide text-text-muted">
           {label}
         </span>
         <span className={`h-7 w-7 rounded-lg grid place-items-center ${tint}`} aria-hidden="true">
           <Icon className="h-3.5 w-3.5" />
         </span>
       </div>
-      <div className="mt-2 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+      <div className="mt-2 text-2xl font-semibold tabular-nums text-text-primary">
         {value}
       </div>
       {sub && (
-        <div className="mt-1 text-[11px] text-[var(--text-muted)]">{sub}</div>
+        <div className="mt-1 text-[11px] text-text-muted">{sub}</div>
       )}
     </div>
   );
@@ -213,10 +213,10 @@ export function AcademicsDepartmentPanel({
     <section className="space-y-4" aria-labelledby="academics-dept-heading">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-[var(--action-info)]" aria-hidden="true" />
+          <Building2 className="h-5 w-5 text-action-info" aria-hidden="true" />
           <h2
             id="academics-dept-heading"
-            className="text-lg font-semibold text-[var(--text-primary)]"
+            className="text-lg font-semibold text-text-primary"
           >
             {title}
           </h2>
@@ -228,14 +228,14 @@ export function AcademicsDepartmentPanel({
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" aria-hidden="true" />
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" aria-hidden="true" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search department or HOD…"
               aria-label="Search department or HOD"
-              className="h-8 w-56 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] pl-8 pr-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--action-info)]/40"
+              className="h-8 w-56 rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--action-info)]/40"
             />
           </div>
           <Button
@@ -258,7 +258,7 @@ export function AcademicsDepartmentPanel({
       {error && (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-rose-300"
+          className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-action-danger"
         >
           <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
           <span>{error}</span>
@@ -276,13 +276,13 @@ export function AcademicsDepartmentPanel({
       {/* ── KPI strip ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Kpi label="Departments" value={fmtInt(totals.departments)} icon={Building2}
-             tint="bg-sky-500/10 text-sky-400" />
+             tint="bg-sky-500/10 text-action-info" />
         <Kpi label="Students" value={fmtInt(totals.students)} icon={GraduationCap}
-             tint="bg-emerald-500/10 text-emerald-400" />
+             tint="bg-emerald-500/10 text-action-success" />
         <Kpi label="Faculty" value={fmtInt(totals.faculty)} icon={Users}
-             tint="bg-violet-500/10 text-violet-400" />
+             tint="bg-violet-500/10 text-unit-c" />
         <Kpi label="Ratio (1:N)" value={ratioLabel(totals.ratio)} icon={Scale}
-             tint="bg-amber-500/10 text-amber-400"
+             tint="bg-amber-500/10 text-action-warning"
              sub="students per faculty" />
       </div>
 
@@ -305,7 +305,7 @@ export function AcademicsDepartmentPanel({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border)]">
+                    <tr className="text-left text-[11px] uppercase tracking-wide text-text-muted border-b border-border">
                       <th className="px-4 py-2.5" scope="col">Code</th>
                       <th className="px-4 py-2.5" scope="col">Department</th>
                       <th className="px-4 py-2.5" scope="col">HOD</th>
@@ -322,12 +322,12 @@ export function AcademicsDepartmentPanel({
                       return (
                         <tr
                           key={d.code}
-                          className="border-b border-[var(--border)]/60 hover:bg-[var(--bg-elevated)]/40"
+                          className="border-b border-border/60 hover:bg-bg-elevated/40"
                         >
-                          <td className="px-4 py-2.5 font-mono text-xs text-[var(--text-muted)]">
+                          <td className="px-4 py-2.5 font-mono text-xs text-text-muted">
                             {d.code}
                           </td>
-                          <td className="px-4 py-2.5 text-[var(--text-primary)]">
+                          <td className="px-4 py-2.5 text-text-primary">
                             {d.name}
                           </td>
                           <td className="px-4 py-2.5">
@@ -339,14 +339,14 @@ export function AcademicsDepartmentPanel({
                                   value={hodDraft}
                                   onChange={(e) => setHodDraft(e.target.value)}
                                   aria-label={`New HOD name for ${d.name}`}
-                                  className="h-7 w-40 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-2 text-xs text-[var(--text-primary)]"
+                                  className="h-7 w-40 rounded-md border border-border bg-bg-elevated px-2 text-xs text-text-primary"
                                   placeholder="HOD name"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => void saveHod(d.code)}
                                   disabled={isSaving}
-                                  className="h-7 w-7 grid place-items-center rounded-md bg-emerald-500/15 text-emerald-400 disabled:opacity-50"
+                                  className="h-7 w-7 grid place-items-center rounded-md bg-emerald-500/15 text-action-success disabled:opacity-50"
                                   aria-label={`Save HOD for ${d.name}`}
                                 >
                                   {isSaving ? (
@@ -358,7 +358,7 @@ export function AcademicsDepartmentPanel({
                                 <button
                                   type="button"
                                   onClick={cancelEdit}
-                                  className="h-7 w-7 grid place-items-center rounded-md bg-rose-500/15 text-rose-400"
+                                  className="h-7 w-7 grid place-items-center rounded-md bg-rose-500/15 text-action-danger"
                                   aria-label={`Cancel editing HOD for ${d.name}`}
                                 >
                                   <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -366,7 +366,7 @@ export function AcademicsDepartmentPanel({
                               </div>
                             ) : (
                               <div className="flex items-center gap-2">
-                                <span className={d.hod ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] italic"}>
+                                <span className={d.hod ? "text-text-primary" : "text-text-muted italic"}>
                                   {d.hod?.name ?? "Vacant"}
                                 </span>
                                 {canEditHod && (
@@ -376,24 +376,24 @@ export function AcademicsDepartmentPanel({
                                     className="opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100 transition-opacity"
                                     aria-label={`Edit HOD for ${d.name}`}
                                   >
-                                    <Pencil className="h-3 w-3 text-[var(--text-muted)]" aria-hidden="true" />
+                                    <Pencil className="h-3 w-3 text-text-muted" aria-hidden="true" />
                                   </button>
                                 )}
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-2.5 text-right tabular-nums text-[var(--text-primary)]">
+                          <td className="px-4 py-2.5 text-right tabular-nums text-text-primary">
                             {fmtInt(d.facultyCount)}
                           </td>
-                          <td className="px-4 py-2.5 text-right tabular-nums text-[var(--text-primary)]">
+                          <td className="px-4 py-2.5 text-right tabular-nums text-text-primary">
                             {fmtInt(d.studentCount)}
                           </td>
-                          <td className="px-4 py-2.5 text-right tabular-nums text-[var(--text-muted)]">
+                          <td className="px-4 py-2.5 text-right tabular-nums text-text-muted">
                             {ratioLabel(computeRatio(d.studentCount, d.facultyCount))}
                           </td>
                           <td className="px-4 py-2.5 text-right tabular-nums">
-                            <span className="text-emerald-400">{fmtInt(d.onCampus)}</span>
-                            <span className="text-[var(--text-muted)] text-xs ml-1">
+                            <span className="text-action-success">{fmtInt(d.onCampus)}</span>
+                            <span className="text-text-muted text-xs ml-1">
                               ({fmtInt(d.inToday)} in / {fmtInt(d.outToday)} out)
                             </span>
                           </td>
@@ -408,7 +408,7 @@ export function AcademicsDepartmentPanel({
         </Card>
       </WidgetBoundary>
 
-      <p className="text-[11px] text-[var(--text-muted)] text-right">
+      <p className="text-[11px] text-text-muted text-right">
         {totals.live ? "Live data" : "Seed fallback"} · updated{" "}
         {payload ? new Date(payload.generatedAt).toLocaleTimeString() : "—"}
       </p>

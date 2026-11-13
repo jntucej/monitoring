@@ -66,8 +66,8 @@ export function GlassParticles({
     particles.length === 0
   ) return null;
 
-  // Neutral floating shards — NEVER use Emerald (#10b981) or Rose (#f43f5e) in ambient backgrounds!
-  const colorClass = isDark ? "bg-white/10" : "bg-[var(--bg-elevated)]/10";
+  // Neutral floating shards — NEVER use Emerald (var(--action-success)) or Rose (var(--alert-critical)) in ambient backgrounds!
+  const colorClass = isDark ? "bg-white/10" : "bg-bg-elevated/10";
 
   // Speed multiplier derived from live gate traffic (faster breathing at high traffic)
   const speedMultiplier = Math.max(0.4, Math.min(2.5, gateTraffic / 40));

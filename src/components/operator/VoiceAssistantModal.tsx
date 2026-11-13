@@ -97,7 +97,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
           onClick={toggleListening}
           className="gap-2 text-xs font-bold"
         >
-          {isListening ? <MicOff className="h-4 w-4 animate-pulse text-rose-400" /> : <Mic className="h-4 w-4 text-purple-400" />}
+          {isListening ? <MicOff className="h-4 w-4 animate-pulse text-action-danger" /> : <Mic className="h-4 w-4 text-unit-c" />}
           {isListening ? "Listening..." : "Voice Assistant"}
         </Button>
 
@@ -107,7 +107,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
             placeholder="or type command e.g. 'entry 24JJ1A0501'"
-            className="px-2.5 py-1 text-xs rounded-lg bg-[var(--bg-base)] border border-[var(--border)] font-mono text-[var(--text-primary)] outline-none focus:ring-1 focus:ring-purple-500"
+            className="px-2.5 py-1 text-xs rounded-lg bg-bg-base border border-border font-mono text-text-primary outline-none focus:ring-1 focus:ring-[var(--unit-c)]"
           />
           <button type="submit" className="p-1 rounded-md bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30">
             <Sparkles className="w-3.5 h-3.5" />

@@ -41,12 +41,12 @@ export function BetweenClasses({
   // No classes today
   if (schedule.length === 0) {
     return (
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
-          <Clock className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Teaching day</h2>
+          <Clock className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">Teaching day</h2>
         </header>
-        <p className="text-xs text-[var(--text-muted)]">No classes scheduled today.</p>
+        <p className="text-xs text-text-muted">No classes scheduled today.</p>
       </section>
     );
   }
@@ -55,41 +55,41 @@ export function BetweenClasses({
   const canClearApprovals = timeUntilNext !== null && timeUntilNext > 8 * 60_000;
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clock className="size-4 text-[var(--action-info)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Teaching day</h2>
+          <Clock className="size-4 text-action-info" />
+          <h2 className="text-sm font-semibold text-text-primary">Teaching day</h2>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        <span className="text-[10px] uppercase tracking-wider text-text-muted">
           {schedule.filter((s) => s.marked).length}/{schedule.length} marked
         </span>
       </header>
 
       {current && (
-        <div className="mb-3 rounded-lg bg-[var(--action-primary)]/10 p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-[var(--action-primary)]">
+        <div className="mb-3 rounded-lg bg-action-primary/10 p-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-action-primary">
             In class now
           </p>
-          <p className="mt-0.5 text-sm font-medium text-[var(--text-primary)]">
+          <p className="mt-0.5 text-sm font-medium text-text-primary">
             {current.subject} · {current.section}
           </p>
-          <p className="text-[11px] text-[var(--text-muted)]">
+          <p className="text-[11px] text-text-muted">
             {current.room ?? "No room"} · ends {current.endsAt}
           </p>
         </div>
       )}
 
       {next && canClearApprovals && (
-        <div className="mb-3 rounded-lg bg-[var(--action-warning)]/10 p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-[var(--action-warning)]">
+        <div className="mb-3 rounded-lg bg-action-warning/10 p-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-action-warning">
             You have time
           </p>
-          <p className="mt-0.5 text-sm font-medium text-[var(--text-primary)]">
+          <p className="mt-0.5 text-sm font-medium text-text-primary">
             {Math.round(timeUntilNext! / 60_000)} minutes until {next.subject}
           </p>
           {pendingCount > 0 && (
-            <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+            <p className="mt-0.5 text-[11px] text-text-secondary">
               {pendingCount} approval{pendingCount === 1 ? "" : "s"} waiting.
             </p>
           )}
@@ -97,14 +97,14 @@ export function BetweenClasses({
       )}
 
       {next && !canClearApprovals && (
-        <div className="mb-3 rounded-lg bg-[var(--bg-elevated)] p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+        <div className="mb-3 rounded-lg bg-bg-elevated p-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-text-muted">
             Next class
           </p>
-          <p className="mt-0.5 text-sm font-medium text-[var(--text-primary)]">
+          <p className="mt-0.5 text-sm font-medium text-text-primary">
             {next.subject} · {next.section}
           </p>
-          <p className="text-[11px] text-[var(--text-muted)]">
+          <p className="text-[11px] text-text-muted">
             Starts {next.startsAt} · {next.room ?? "No room"}
           </p>
         </div>
@@ -117,16 +117,16 @@ export function BetweenClasses({
             <span
               className={`size-1.5 shrink-0 rounded-full ${
                 s.marked
-                  ? "bg-[var(--action-primary)]"
+                  ? "bg-action-primary"
                   : "bg-[var(--text-muted)]"
               }`}
             />
-            <span className="tabular-nums text-[var(--text-muted)]">{s.startsAt}</span>
-            <span className="flex-1 truncate text-[var(--text-secondary)]">
+            <span className="tabular-nums text-text-muted">{s.startsAt}</span>
+            <span className="flex-1 truncate text-text-secondary">
               {s.subject}
             </span>
             {s.marked && (
-              <span className="text-[10px] text-[var(--action-primary)]">marked</span>
+              <span className="text-[10px] text-action-primary">marked</span>
             )}
           </li>
         ))}
@@ -135,7 +135,7 @@ export function BetweenClasses({
       {pendingCount > 0 && (
         <a
           href="/hod/approvals/pending"
-          className="mt-3 flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5 px-3 py-2 text-xs font-medium text-[var(--action-primary)] transition hover:bg-[var(--action-primary)]/10"
+          className="mt-3 flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-action-primary/30 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
         >
           Clear {pendingCount} approval{pendingCount === 1 ? "" : "s"} now
           <ArrowRight className="size-3" />

@@ -49,9 +49,9 @@ interface StaffStats {
 }
 
 const ROLE_COLOR: Record<StaffRole, string> = {
-  faculty: "#10b981",
-  staff: "#14b8a6",
-  worker: "#94a3b8",
+  faculty: "var(--action-success)",
+  staff: "var(--action-success)",
+  worker: "var(--text-muted)",
 };
 
 const ROLE_ICON: Record<StaffRole, typeof Briefcase> = {
@@ -225,7 +225,7 @@ function AdminStaffInner() {
       />
 
       {error && (
-        <div className="glass-card border border-[var(--action-danger)]/30 p-3 text-sm text-[var(--action-danger)]">
+        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
@@ -233,8 +233,8 @@ function AdminStaffInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Total staff</p>
-          <p className="text-2xl font-bold text-[var(--text-primary)] tabular-nums">
+          <p className="text-xs text-text-muted">Total staff</p>
+          <p className="text-2xl font-bold text-text-primary tabular-nums">
             {stats?.total ?? rows.length}
           </p>
           <MiniSparkline
@@ -250,20 +250,20 @@ function AdminStaffInner() {
           />
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Faculty</p>
-          <p className="text-2xl font-bold text-emerald-400 tabular-nums">
+          <p className="text-xs text-text-muted">Faculty</p>
+          <p className="text-2xl font-bold text-action-success tabular-nums">
             {roleCounts.faculty}
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Staff</p>
+          <p className="text-xs text-text-muted">Staff</p>
           <p className="text-2xl font-bold text-teal-400 tabular-nums">
             {roleCounts.staff}
           </p>
         </div>
         <div className="glass-card p-4">
-          <p className="text-xs text-[var(--text-muted)]">Workers</p>
-          <p className="text-2xl font-bold text-[var(--text-secondary)] tabular-nums">
+          <p className="text-xs text-text-muted">Workers</p>
+          <p className="text-2xl font-bold text-text-secondary tabular-nums">
             {roleCounts.worker}
           </p>
           <MiniStackedBar label="by role" segments={roleSegments} />
@@ -275,7 +275,7 @@ function AdminStaffInner() {
         <WidgetBoundary title="Filters">
           <aside className="glass-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Role
               </h3>
               <div className="flex flex-wrap gap-1.5">
@@ -288,7 +288,7 @@ function AdminStaffInner() {
                       className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border transition ${
                         roleFilter.includes(r)
                           ? "border-transparent text-white"
-                          : "border-[var(--border)] text-[var(--text-primary)]"
+                          : "border-border text-text-primary"
                       }`}
                       style={roleFilter.includes(r) ? { background: ROLE_COLOR[r] } : undefined}
                     >
@@ -302,7 +302,7 @@ function AdminStaffInner() {
 
             {(stats?.byDepartment?.length ?? 0) > 0 && (
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                   By department
                 </h3>
                 <ul className="space-y-1 text-xs">
@@ -310,8 +310,8 @@ function AdminStaffInner() {
                     .slice(0, 8)
                     .map((d) => (
                       <li key={d.code} className="flex items-center justify-between">
-                        <span className="text-[var(--text-primary)]">{d.code}</span>
-                        <span className="tabular-nums text-[var(--text-muted)]">{d.count}</span>
+                        <span className="text-text-primary">{d.code}</span>
+                        <span className="tabular-nums text-text-muted">{d.count}</span>
                       </li>
                     ))}
                 </ul>
@@ -324,7 +324,7 @@ function AdminStaffInner() {
                   setRoleFilter([]);
                   setQuery("");
                 }}
-                className="text-xs text-[var(--action-primary)] hover:underline flex items-center gap-1"
+                className="text-xs text-action-primary hover:underline flex items-center gap-1"
               >
                 <X className="w-3 h-3" /> Clear filters
               </button>
@@ -335,19 +335,19 @@ function AdminStaffInner() {
         {/* Table */}
         <div className="lg:col-span-3 space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, email, or department…"
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/40 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--action-primary)]/40"
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 
           <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[640px]">
-                <thead className="bg-[var(--bg-surface)]/60 text-[var(--text-muted)] text-xs uppercase tracking-wide">
+                <thead className="bg-bg-surface/60 text-text-muted text-xs uppercase tracking-wide">
                   <tr>
                     <th className="text-left px-4 py-2.5 font-medium">Name</th>
                     <th className="text-left px-4 py-2.5 font-medium">Role</th>
@@ -360,7 +360,7 @@ function AdminStaffInner() {
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                      <td colSpan={6} className="px-4 py-10 text-center text-text-muted">
                         No staff match this view
                       </td>
                     </tr>
@@ -369,7 +369,7 @@ function AdminStaffInner() {
                     <tr
                       key={r.id}
                       onClick={() => router.push(`/admin/staff/${r.id}`)}
-                      className="border-t border-[var(--border)] hover:bg-[var(--bg-surface)]/40 cursor-pointer"
+                      className="border-t border-border hover:bg-bg-surface/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
@@ -380,10 +380,10 @@ function AdminStaffInner() {
                             {initials(r.name)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[var(--text-primary)] font-medium truncate">
+                            <p className="text-text-primary font-medium truncate">
                               {r.name}
                             </p>
-                            <p className="text-[11px] text-[var(--text-muted)] truncate flex items-center gap-1">
+                            <p className="text-[11px] text-text-muted truncate flex items-center gap-1">
                               <Mail className="w-3 h-3" /> {r.email ?? "—"}
                             </p>
                           </div>
@@ -401,22 +401,22 @@ function AdminStaffInner() {
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-xs">{r.department ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-xs text-[var(--text-muted)]">
+                      <td className="px-4 py-2.5 text-xs text-text-muted">
                         {r.designation ?? "—"}
                       </td>
                       <td className="px-4 py-2.5 text-xs">
                         <span
                           className={
                             r.status === "ACTIVE"
-                              ? "text-[var(--action-primary)]"
-                              : "text-amber-400"
+                              ? "text-action-primary"
+                              : "text-action-warning"
                           }
                         >
                           {r.status}
                         </span>
                       </td>
                       <td className="px-4 py-2.5">
-                        <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+                        <ChevronRight className="w-4 h-4 text-text-muted" />
                       </td>
                     </tr>
                   ))}
@@ -434,7 +434,7 @@ function AdminStaffInner() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setActive(null)}
           />
-          <aside className="relative w-full max-w-md h-full glass-card border-l border-[var(--border)] p-5 overflow-y-auto">
+          <aside className="relative w-full max-w-md h-full glass-card border-l border-border p-5 overflow-y-auto">
             <header className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div
@@ -444,15 +444,15 @@ function AdminStaffInner() {
                   {initials(active.name)}
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                  <h2 className="text-lg font-semibold text-text-primary">
                     {active.name}
                   </h2>
-                  <p className="text-xs text-[var(--text-muted)]">{active.email ?? "—"}</p>
+                  <p className="text-xs text-text-muted">{active.email ?? "—"}</p>
                 </div>
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-[var(--bg-surface)]/60"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-bg-surface/60"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -460,25 +460,25 @@ function AdminStaffInner() {
 
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <dt className="text-[var(--text-muted)]">Role</dt>
-                <dd className="text-[var(--text-primary)]">{active.role}</dd>
+                <dt className="text-text-muted">Role</dt>
+                <dd className="text-text-primary">{active.role}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Status</dt>
-                <dd className="text-[var(--action-primary)]">{active.status}</dd>
+                <dt className="text-text-muted">Status</dt>
+                <dd className="text-action-primary">{active.status}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Department</dt>
-                <dd className="text-[var(--text-primary)]">{active.department ?? "—"}</dd>
+                <dt className="text-text-muted">Department</dt>
+                <dd className="text-text-primary">{active.department ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-[var(--text-muted)]">Designation</dt>
-                <dd className="text-[var(--text-primary)]">{active.designation ?? "—"}</dd>
+                <dt className="text-text-muted">Designation</dt>
+                <dd className="text-text-primary">{active.designation ?? "—"}</dd>
               </div>
               {active.phone && (
                 <div className="col-span-2">
-                  <dt className="text-[var(--text-muted)]">Phone</dt>
-                  <dd className="text-[var(--text-primary)]">{active.phone}</dd>
+                  <dt className="text-text-muted">Phone</dt>
+                  <dd className="text-text-primary">{active.phone}</dd>
                 </div>
               )}
             </dl>

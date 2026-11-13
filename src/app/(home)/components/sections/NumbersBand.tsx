@@ -56,15 +56,15 @@ export function NumbersBand() {
             transition={{ duration: 0.5, delay: i * 0.05 }}
             className="text-center"
           >
-            <p className="text-4xl font-bold text-[var(--home-text-primary,#F3F4F6)] md:text-5xl">
+            <p className="text-4xl font-bold text-[var(--home-text-primary,var(--bg-surface))] md:text-5xl">
               <RollingDigits value={n.value} cellHeight={52} />
               {n.suffix && (
-                <span className="text-2xl text-[var(--home-text-muted,#6B7280)]">
+                <span className="text-2xl text-[var(--home-text-muted,var(--text-muted))]">
                   {n.suffix}
                 </span>
               )}
             </p>
-            <p className="mt-2 text-xs uppercase tracking-wider text-[var(--home-text-muted,#6B7280)]">
+            <p className="mt-2 text-xs uppercase tracking-wider text-[var(--home-text-muted,var(--text-muted))]">
               {n.label}
             </p>
           </motion.div>

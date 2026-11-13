@@ -399,14 +399,14 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
   return (
     <aside
       className={cn(
-        "shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)] flex flex-col",
+        "shrink-0 border-r border-border bg-bg-surface flex flex-col",
         widthClass,
         "transition-[width] duration-200"
       )}
       aria-label="Admin navigation"
     >
       {/* Top bar: brand + collapse toggle + expand/collapse all */}
-      <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--border)]">
+      <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
         <button
           type="button"
           onClick={() => (forceExpanded ? undefined : setCollapsed((v) => !v))}
@@ -414,8 +414,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
           aria-expanded={!isCollapsed}
           className={cn(
             "inline-flex items-center justify-center rounded-md p-1.5",
-            "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]",
+            "text-text-muted hover:text-text-primary hover:bg-bg-elevated",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary",
             "transition-colors"
           )}
         >
@@ -427,7 +427,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
               type="button"
               onClick={collapseAll}
               title="Collapse all"
-              className="inline-flex items-center justify-center rounded p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]"
+              className="inline-flex items-center justify-center rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
             >
               <ChevronsDownUp className="h-4 w-4" />
             </button>
@@ -435,7 +435,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
               type="button"
               onClick={expandAll}
               title="Expand all"
-              className="inline-flex items-center justify-center rounded p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]"
+              className="inline-flex items-center justify-center rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
             >
               <ChevronsUpDown className="h-4 w-4" />
             </button>
@@ -444,7 +444,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                 type="button"
                 onClick={() => setShowAll(true)}
                 title="Show all categories"
-                className="mx-1 rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)]"
+                className="mx-1 rounded border border-border px-2 py-1 text-[11px] text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 Show all
               </button>
@@ -470,7 +470,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                     if (!forceExpanded) setCollapsed(false);
                     onNavigate?.();
                   }}
-                  className="flex items-center justify-center rounded-md h-9 w-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+                  className="flex items-center justify-center rounded-md h-9 w-full text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                 >
                   <Icon className="h-4 w-4" />
                 </Link>
@@ -485,7 +485,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                   type="button"
                   onClick={() => toggleCat(cat.id)}
                   aria-expanded={isOpen}
-                  className="flex items-center gap-1.5 flex-1 min-w-0 py-0.5 hover:text-[var(--text-primary)] text-[var(--text-muted)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-primary)] rounded"
+                  className="flex items-center gap-1.5 flex-1 min-w-0 py-0.5 hover:text-text-primary text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary rounded"
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="text-xs font-medium uppercase tracking-wider truncate flex-1 text-left">
@@ -533,21 +533,21 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                             className={cn(
                               "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
                               isGroupActive
-                                ? "text-[var(--text-primary)] font-medium"
-                                : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                ? "text-text-primary font-medium"
+                                : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                             )}
                           >
                             <span className="flex-1 truncate">{pageTitle}</span>
                             <ChevronRight
                               className={cn(
-                                "h-3.5 w-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+                                "h-3.5 w-3.5 shrink-0 transition-transform text-text-muted",
                                 isGroupOpen ? "rotate-90" : "rotate-0"
                               )}
                               aria-hidden="true"
                             />
                           </button>
                           {isGroupOpen && (
-                            <ul className="pl-2.5 space-y-0.5 border-l border-[var(--border)] ml-3 my-0.5">
+                            <ul className="pl-2.5 space-y-0.5 border-l border-border ml-3 my-0.5">
                               {page.children.map((child) => {
                                 const childId = child.id || child.href || child.route || child.label || "";
                                 const childHref = child.href || (child.route ? `/admin/${child.route}` : "/admin");
@@ -566,8 +566,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                                       className={cn(
                                         "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
                                         isChildActive
-                                          ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
-                                          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                          ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
+                                          : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                                       )}
                                     >
                                       <span className="flex-1 truncate">{childTitle}</span>
@@ -576,8 +576,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                                           className={cn(
                                             "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[16px] h-[16px] px-1",
                                             isChildActive
-                                              ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-[var(--text-primary)]"
-                                              : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                                              ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
+                                              : "bg-bg-elevated text-text-muted"
                                           )}
                                           title={`${childTitle}: ${liveCount} live`}
                                         >
@@ -610,8 +610,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                             "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm",
                             "transition-colors",
                             isActive
-                              ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
-                              : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                              ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
+                              : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                           )}
                         >
                           <span className="flex-1 truncate">{pageTitle}</span>
@@ -620,8 +620,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                               className={cn(
                                 "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[18px] h-[18px] px-1",
                                 isActive
-                                  ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-[var(--text-primary)]"
-                                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"
+                                  ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
+                                  : "bg-bg-elevated text-text-muted"
                               )}
                               title={`${pageTitle}: ${liveCount} live`}
                             >
@@ -640,7 +640,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
 
         {/* Personal footer routes (manifest `personal`) */}
         {!isCollapsed && personalRoutes.length > 0 && (
-          <div className="border-t border-[var(--border)] mt-2 pt-2 px-1">
+          <div className="border-t border-border mt-2 pt-2 px-1">
             {personalRoutes.map((p) => {
               const pId = p.id || p.href || p.route || p.label || "";
               const pTitle = p.title || p.label || "";
@@ -665,21 +665,21 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                       className={cn(
                         "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
                         isGroupActive
-                          ? "text-[var(--text-primary)] font-medium"
-                          : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                          ? "text-text-primary font-medium"
+                          : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                       )}
                     >
                       <span className="flex-1 truncate">{pTitle}</span>
                       <ChevronRight
                         className={cn(
-                          "h-3.5 w-3.5 shrink-0 transition-transform text-[var(--text-muted)]",
+                          "h-3.5 w-3.5 shrink-0 transition-transform text-text-muted",
                           isGroupOpen ? "rotate-90" : "rotate-0"
                         )}
                         aria-hidden="true"
                       />
                     </button>
                     {isGroupOpen && (
-                      <ul className="pl-2.5 space-y-0.5 border-l border-[var(--border)] ml-3 my-0.5">
+                      <ul className="pl-2.5 space-y-0.5 border-l border-border ml-3 my-0.5">
                         {p.children.map((child) => {
                           const childId = child.id || child.href || child.route || child.label || "";
                           const childHref = child.href || (child.route ? `/admin/${child.route}` : "/admin");
@@ -695,8 +695,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                                 className={cn(
                                   "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
                                   isChildActive
-                                    ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
-                                    : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                                    ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
+                                    : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                                 )}
                               >
                                 <span className="flex-1 truncate">{childTitle}</span>
@@ -721,8 +721,8 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
                   className={cn(
                     "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
                     isActive
-                      ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-[var(--text-primary)] font-medium"
-                      : "text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+                      ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
+                      : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
                   )}
                 >
                   <span className="flex-1 truncate">{pTitle}</span>
@@ -738,7 +738,7 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
       </nav>
 
       {/* Account footer: profile button + appearance + sign out */}
-      <div className="shrink-0 border-t border-[var(--border)] p-2">
+      <div className="shrink-0 border-t border-border p-2">
         <ProfileMenuButton consoleRoot="/admin" compact={isCollapsed} />
       </div>
     </aside>

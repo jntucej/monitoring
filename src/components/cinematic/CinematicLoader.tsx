@@ -31,7 +31,7 @@ export function CinematicLoader({
 
   if (reduce || !mounted) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#070B14] text-white">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-bg-base text-white">
         <div className="relative z-10 flex flex-col items-center">
           <p className="mb-12 text-[10px] uppercase tracking-[0.4em] text-white/40">
             {COPY[mode].label}
@@ -55,11 +55,11 @@ export function CinematicLoader({
         if (skippable && (e.key === "Enter" || e.key === " ")) onSkip?.();
       }}
       aria-label={skippable ? "Skip loading" : undefined}
-      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#070B14] text-white focus:outline-none ${
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-bg-base text-white focus:outline-none ${
         skippable ? "cursor-pointer" : ""
       }`}
     >
-      <ParticleField color="#67e8f9" />
+      <ParticleField color="var(--unit-a)" />
       <FilmGrain opacity={0.04} />
 
       <div className="relative z-10 flex flex-col items-center">

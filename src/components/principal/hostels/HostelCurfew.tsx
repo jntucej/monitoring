@@ -34,20 +34,20 @@ export function HostelCurfewRow({ row, overdue }: { row: CurfewRow; overdue: boo
       className={`flex items-center gap-2 p-2.5 rounded-lg text-xs ${
         overdue
           ? "bg-rose-500/10 border border-rose-500/20"
-          : "bg-[var(--bg-elevated)] border border-[var(--border)]"
+          : "bg-bg-elevated border border-border"
       }`}
     >
       {overdue ? (
-        <Clock className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+        <Clock className="w-3.5 h-3.5 text-action-danger shrink-0" />
       ) : (
-        <Home className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+        <Home className="w-3.5 h-3.5 text-action-success shrink-0" />
       )}
-      <span className="font-mono text-[var(--text-primary)] shrink-0">{row.ticket_number}</span>
-      <span className="text-[var(--text-primary)] truncate flex-1">{row.name}</span>
-      <span className="text-[var(--text-muted)] shrink-0">({row.roll})</span>
+      <span className="font-mono text-text-primary shrink-0">{row.ticket_number}</span>
+      <span className="text-text-primary truncate flex-1">{row.name}</span>
+      <span className="text-text-muted shrink-0">({row.roll})</span>
       <span
         className={`text-[10px] font-semibold shrink-0 ${
-          overdue ? "text-rose-400" : "text-emerald-400"
+          overdue ? "text-action-danger" : "text-action-success"
         }`}
       >
         {overdue ? `Overdue ${fmtMinutes(row.minutes)}` : `Back in ${fmtMinutes(row.minutes)}`}
@@ -82,15 +82,15 @@ export function HostelCurfew() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Curfew & Returns">
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
-        <div className="flex items-center gap-2 text-[var(--text-muted)] mb-3">
+      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+        <div className="flex items-center gap-2 text-text-muted mb-3">
           <Moon className="w-4 h-4 text-violet-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">
             Students expected back / overdue
           </span>
         </div>
 
-        {error && <p className="text-xs text-rose-400 mb-2">{error}</p>}
+        {error && <p className="text-xs text-action-danger mb-2">{error}</p>}
 
         {!data && !error && (
           <div className="space-y-2">
@@ -101,11 +101,11 @@ export function HostelCurfew() {
         {data && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-rose-400 mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-action-danger mb-2">
                 Overdue ({data.summary.overdueCount})
               </h3>
               {data.overdue.length === 0 ? (
-                <p className="text-xs text-emerald-400 py-1">All returns on time.</p>
+                <p className="text-xs text-action-success py-1">All returns on time.</p>
               ) : (
                 <ul className="space-y-1.5">
                   {data.overdue.slice(0, 10).map((r) => (
@@ -116,11 +116,11 @@ export function HostelCurfew() {
             </div>
 
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-emerald-400 mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-action-success mb-2">
                 Due Back Soon ({data.summary.upcomingCount})
               </h3>
               {data.upcoming.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)] py-1">No returns scheduled in the next 6 hours.</p>
+                <p className="text-xs text-text-muted py-1">No returns scheduled in the next 6 hours.</p>
               ) : (
                 <ul className="space-y-1.5">
                   {data.upcoming.slice(0, 10).map((r) => (

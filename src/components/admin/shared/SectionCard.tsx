@@ -32,30 +32,30 @@ export function SectionCard({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-lg",
+        "rounded-2xl border border-border bg-bg-surface p-5 sm:p-6 shadow-lg",
         className
       )}
     >
       {showHeader && (
-        <div className="flex items-center gap-3 border-b border-[var(--border)] pb-4 mb-5">
+        <div className="flex items-center gap-3 border-b border-border pb-4 mb-5">
           {Icon && (
             <div
               className={cn(
                 "p-2 rounded-xl shrink-0",
                 iconTone === "accent"
-                  ? "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-secondary)]"
+                  ? "bg-action-primary/10 text-action-primary"
+                  : "bg-bg-elevated text-text-secondary"
               )}
             >
               <Icon className="w-4 h-4" />
             </div>
           )}
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-[var(--text-primary)] truncate">
+            <h3 className="text-sm font-bold text-text-primary truncate">
               {title}
             </h3>
             {description && (
-              <p className="text-xs text-[var(--text-muted)] truncate">{description}</p>
+              <p className="text-xs text-text-muted truncate">{description}</p>
             )}
           </div>
         </div>

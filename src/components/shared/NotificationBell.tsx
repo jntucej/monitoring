@@ -16,10 +16,10 @@ const PRIORITY_ICONS = {
 };
 
 const PRIORITY_COLORS = {
-  low: 'text-blue-500',
+  low: 'text-action-primary',
   medium: 'text-yellow-500',
   high: 'text-orange-500',
-  critical: 'text-rose-500',
+  critical: 'text-action-danger',
 };
 
 // Roles the /api/notifications route actually serves. Polling for any
@@ -140,12 +140,12 @@ export function NotificationBell() {
         animate={isGlossyMotion && unreadCount > 0 ? { rotate: [0, -15, 15, -10, 10, 0] } : {}}
         transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 5 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] rounded-xl transition-all border border-transparent hover:border-[var(--border)] active:scale-95 focus:outline-none"
+        className="relative p-2 text-text-muted hover:text-text-primary hover:bg-[var(--bg-card)] rounded-xl transition-all border border-transparent hover:border-border active:scale-95 focus:outline-none"
         aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-action-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -158,14 +158,14 @@ export function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]"
+            className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-sm bg-bg-surface border border-border rounded-2xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]"
           >
             {/* Header */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--bg-card)]/50">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-[var(--bg-card)]/50">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-[var(--text-primary)] text-sm">Notifications</h3>
+                <h3 className="font-semibold text-text-primary text-sm">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 text-xs bg-rose-500/10 text-rose-400 rounded-full font-medium border border-rose-500/20">
+                  <span className="px-2 py-0.5 text-xs bg-rose-500/10 text-action-danger rounded-full font-medium border border-rose-500/20">
                     {unreadCount} new
                   </span>
                 )}
@@ -174,7 +174,7 @@ export function NotificationBell() {
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors"
+                    className="text-xs text-text-muted hover:text-text-primary flex items-center gap-1 transition-colors"
                     title="Mark all as read"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
@@ -185,13 +185,13 @@ export function NotificationBell() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex border-b border-[var(--border)] bg-[var(--bg-base)]/50 px-4 py-2 gap-2 text-xs">
+            <div className="flex border-b border-border bg-bg-base/50 px-4 py-2 gap-2 text-xs">
               <button
                 onClick={() => setFilter('all')}
                 className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
                   filter === 'all'
-                    ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    ? 'bg-[var(--bg-card)] text-text-primary shadow-sm'
+                    : 'text-text-muted hover:text-text-primary'
                 }`}
               >
                 All ({notifications.length})
@@ -200,8 +200,8 @@ export function NotificationBell() {
                 onClick={() => setFilter('unread')}
                 className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
                   filter === 'unread'
-                    ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    ? 'bg-[var(--bg-card)] text-text-primary shadow-sm'
+                    : 'text-text-muted hover:text-text-primary'
                 }`}
               >
                 Unread ({unreadCount})
@@ -209,20 +209,20 @@ export function NotificationBell() {
             </div>
 
             {/* Notification List */}
-            <div className="overflow-y-auto flex-1 divide-y divide-[var(--border)]">
+            <div className="overflow-y-auto flex-1 divide-y divide-border">
               {loading && notifications.length === 0 ? (
-                <div className="p-8 text-center text-xs text-[var(--text-muted)]">
+                <div className="p-8 text-center text-xs text-text-muted">
                   Loading notifications...
                 </div>
               ) : filteredNotifications.length === 0 ? (
-                <div className="p-8 text-center text-[var(--text-muted)] flex flex-col items-center gap-2">
+                <div className="p-8 text-center text-text-muted flex flex-col items-center gap-2">
                   <Bell className="w-8 h-8 opacity-20" />
                   <p className="text-xs">No notifications yet</p>
                 </div>
               ) : (
                 filteredNotifications.map((n) => {
                   const Icon = PRIORITY_ICONS[n.priority] || Bell;
-                  const color = PRIORITY_COLORS[n.priority] || 'text-[var(--text-muted)]';
+                  const color = PRIORITY_COLORS[n.priority] || 'text-text-muted';
 
                   return (
                     <div
@@ -231,25 +231,25 @@ export function NotificationBell() {
                         !n.readAt ? 'bg-[var(--bg-card)]/30' : ''
                       }`}
                     >
-                      <div className={`p-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] mt-0.5 shrink-0 ${color}`}>
+                      <div className={`p-2 rounded-xl bg-bg-base border border-border mt-0.5 shrink-0 ${color}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`text-xs font-semibold truncate ${!n.readAt ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
+                          <h4 className={`text-xs font-semibold truncate ${!n.readAt ? 'text-text-primary' : 'text-text-muted'}`}>
                             {n.title}
                           </h4>
-                          <span className="text-[10px] text-[var(--text-muted)] shrink-0">
+                          <span className="text-[10px] text-text-muted shrink-0">
                             {getTimeAgo(n.createdAt || (n as any).created_at)}
                           </span>
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed">
                           {n.message}
                         </p>
                         {(n as any).action_url && (
                           <a
                             href={(n as any).action_url}
-                            className="inline-flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 mt-2 font-medium"
+                            className="inline-flex items-center gap-1 text-[11px] text-action-info hover:text-action-info mt-2 font-medium"
                           >
                             View details
                             <ExternalLink className="w-3 h-3" />
@@ -259,7 +259,7 @@ export function NotificationBell() {
                       {!n.readAt && (
                         <button
                           onClick={() => handleMarkRead(n.id)}
-                          className="text-[var(--text-muted)] hover:text-emerald-400 p-1 rounded-lg hover:bg-[var(--bg-base)] transition-colors mt-0.5 shrink-0"
+                          className="text-text-muted hover:text-action-success p-1 rounded-lg hover:bg-bg-base transition-colors mt-0.5 shrink-0"
                           title="Mark as read"
                         >
                           <Check className="w-3.5 h-3.5" />

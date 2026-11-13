@@ -63,28 +63,28 @@ function SysadminRetentionInner() {
         <div className="glass-card">
           {rows.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-sm text-[var(--text-muted)]">No retention policies configured.</p>
+              <p className="text-sm text-text-muted">No retention policies configured.</p>
             </div>
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <Clock className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-[var(--text-primary)]">{r.name}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.is_active ? "bg-emerald-500/15 text-emerald-400" : "bg-[var(--bg-elevated)] text-[var(--text-muted)]"}`}>
+                      <p className="text-sm font-semibold text-text-primary">{r.name}</p>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.is_active ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
                         {r.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    <p className="text-xs text-text-muted mt-0.5">
                       {r.ttl_days ? `TTL: ${r.ttl_days} days` : "No TTL"}
                       {r.applies_to ? ` · applies to ${r.applies_to}` : ""}
                     </p>
                     {r.last_run_at && (
-                      <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                      <p className="text-[11px] text-text-muted mt-1">
                         Last run: {new Date(r.last_run_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}
@@ -103,7 +103,7 @@ function SysadminRetentionInner() {
           icon={FileText}
           iconTone="default"
         >
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-secondary">
             Retention runs are executed on the schedule defined in the policy. Each run
             de-provisions or deletes records past their TTL. Run history is recorded in the
             audit log.

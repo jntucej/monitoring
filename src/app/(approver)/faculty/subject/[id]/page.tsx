@@ -46,7 +46,7 @@ function SubjectClassDrilldownInner() {
               <button
                 type="button"
                 onClick={() => router.replace("/faculty/subject", { scroll: false })}
-                className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary transition-colors"
               >
                 <ArrowRight className="w-3 h-3 rotate-180" /> Back to subject picker
               </button>

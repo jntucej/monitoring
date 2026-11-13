@@ -54,23 +54,23 @@ export function ExamSuperintendentStatusBar({
   const examDay = counts?.examDay;
   const dayTone =
     examDay === "active"
-      ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
+      ? "text-action-success bg-emerald-400/10 border-emerald-400/20"
       : examDay === "closed"
-        ? "text-rose-400 bg-rose-400/10 border-rose-400/20"
-        : "text-[var(--text-muted)] bg-[var(--bg-base)] border-[var(--border)]";
+        ? "text-action-danger bg-rose-400/10 border-rose-400/20"
+        : "text-text-muted bg-bg-base border-border";
 
   const DayIcon = examDay === "active" ? DoorOpen : DoorClosed;
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-[var(--border)] bg-[var(--bg-surface)]/95 backdrop-blur-md text-[11px] text-[var(--text-secondary)] select-none min-w-0 overflow-x-auto"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none min-w-0 overflow-x-auto"
       aria-label="Exam superintendent status bar"
     >
       {/* Left: exam day · halls · incidents · candidates */}
       <div className="flex items-center gap-4 min-w-0 shrink">
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--action-primary)]" />
-          <span className="text-[var(--text-muted)]">Exam desk</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
+          <span className="text-text-muted">Exam desk</span>
         </span>
 
         <span
@@ -81,25 +81,25 @@ export function ExamSuperintendentStatusBar({
         </span>
 
         <span className="inline-flex items-center gap-1.5 shrink-0">
-          <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">halls open</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <Building2 className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">halls open</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.halls ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 shrink-0">
-          <ShieldAlert className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">incidents</span>
-          <span className="font-mono tabular-nums font-bold text-amber-400">
+          <ShieldAlert className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">incidents</span>
+          <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.incidents ?? 0}
           </span>
         </span>
 
         <span className="inline-flex items-center gap-1.5 shrink-0">
-          <Users className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-          <span className="text-[var(--text-muted)]">candidates</span>
-          <span className="font-mono tabular-nums font-bold text-[var(--text-primary)]">
+          <Users className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-text-muted">candidates</span>
+          <span className="font-mono tabular-nums font-bold text-text-primary">
             {counts?.candidates ?? 0}
           </span>
         </span>
@@ -108,13 +108,13 @@ export function ExamSuperintendentStatusBar({
       {/* Right: last updated + refresh indicator */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
         ) : null}
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-            <span className="text-[var(--text-muted)]">last updated</span>
-            <span className="font-mono tabular-nums text-[var(--text-secondary)]">
+            <Clock className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-text-muted">last updated</span>
+            <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
           </span>

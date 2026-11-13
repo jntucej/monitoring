@@ -52,10 +52,10 @@ export function MoonGlow({ hue = "indigo", stars = 0 }: MoonGlowProps) {
     scrollYProgress,
     [0, 0.2, 0.6, 1],
     [
-      "linear-gradient(180deg, #070B14 0%, #0F172A 100%)",
-      "linear-gradient(180deg, #04060B 0%, #090D16 100%)",
-      "linear-gradient(180deg, #020306 0%, #05070C 100%)",
-      "linear-gradient(180deg, #010204 0%, #020306 100%)",
+      "linear-gradient(180deg, var(--bg-base) 0%, var(--bg-base) 100%)",
+      "linear-gradient(180deg, #04060B 0%, var(--bg-base) 100%)",
+      "linear-gradient(180deg, var(--bg-base) 0%, #05070C 100%)",
+      "linear-gradient(180deg, var(--bg-base) 0%, var(--bg-base) 100%)",
     ]
   );
 
@@ -114,7 +114,7 @@ export function MoonGlow({ hue = "indigo", stars = 0 }: MoonGlowProps) {
                   top: `${s.y}%`,
                   width: `${s.size}px`,
                   height: `${s.size}px`,
-                  background: "#eaf2ff",
+                  background: "var(--bg-surface)",
                   boxShadow: `0 0 ${s.size * 3}px rgba(200,220,255,0.5)`,
                   "--mg-star-min": s.minOpacity,
                   "--mg-star-max": s.maxOpacity,

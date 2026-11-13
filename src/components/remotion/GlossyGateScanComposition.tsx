@@ -10,7 +10,7 @@ export interface GlossyGateScanCompositionProps {
 
 export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps> = ({
   status = "entry",
-  primaryColor: _primaryColor = "#10b981",
+  primaryColor: _primaryColor = "var(--action-success)",
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -43,18 +43,18 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
 
   const glowColor =
     status === "entry"
-      ? "#10b981"
+      ? "var(--action-success)"
       : status === "exit"
-      ? "#f43f5e"
+      ? "var(--alert-critical)"
       : status === "warning"
-      ? "#f59e0b"
-      : "#3b82f6";
+      ? "var(--action-warning)"
+      : "var(--action-primary)";
 
   return (
-    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden rounded-2xl bg-[var(--bg-elevated)]/40 backdrop-blur-md border border-white/10 p-4">
+    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden rounded-2xl bg-bg-elevated/40 backdrop-blur-md border border-white/10 p-4">
       {/* Laser Scanning Line Wave */}
       <div
-        className="absolute left-0 right-0 h-[2px] pointer-events-none shadow-[0_0_15px_#10b981]"
+        className="absolute left-0 right-0 h-[2px] pointer-events-none shadow-[0_0_15px_var(--action-success)]"
         style={{
           top: `${scanLineY}%`,
           background: `linear-gradient(90deg, transparent 0%, ${glowColor} 50%, transparent 100%)`,

@@ -45,8 +45,8 @@ export function FacultyAttendanceView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Faculty Attendance</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Faculty Attendance</h1>
+        <p className="text-xs text-text-muted">
           Today&#39;s check-in status, punctuality, and exceptions
         </p>
       </header>
@@ -70,29 +70,29 @@ export function FacultyAttendanceView() {
             {records.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{r.fullName}</p>
-                    <p className="text-[11px] text-[var(--text-muted)]">{r.designation}</p>
+                    <p className="text-[11px] text-text-muted">{r.designation}</p>
                   </div>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       r.status === "PRESENT" || r.status === "INSIDE"
-                        ? "bg-emerald-500/10 text-emerald-400"
+                        ? "bg-emerald-500/10 text-action-success"
                         : r.status === "ABSENT"
-                        ? "bg-rose-500/10 text-rose-400"
-                        : "bg-amber-500/10 text-amber-400"
+                        ? "bg-rose-500/10 text-action-danger"
+                        : "bg-amber-500/10 text-action-warning"
                     }`}
                   >
                     {r.status}
                   </span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <div className="mt-2 flex items-center justify-between text-xs text-text-muted">
                   <span>First in: {r.firstInTime ?? "—"}</span>
                   {r.punctualityStatus === "LATE" && (
-                    <span className="text-[var(--action-warning)] font-medium">Late</span>
+                    <span className="text-action-warning font-medium">Late</span>
                   )}
                 </div>
               </li>
@@ -110,10 +110,10 @@ export function FacultyAttendanceView() {
                     <span
                       className={`text-xs font-semibold ${
                         r.status === "PRESENT" || r.status === "INSIDE"
-                          ? "text-emerald-400"
+                          ? "text-action-success"
                           : r.status === "ABSENT"
-                          ? "text-rose-400"
-                          : "text-amber-400"
+                          ? "text-action-danger"
+                          : "text-action-warning"
                       }`}
                     >
                       {r.status}
@@ -126,8 +126,8 @@ export function FacultyAttendanceView() {
                     <span
                       className={
                         r.punctualityStatus === "LATE"
-                          ? "text-[var(--action-warning)] font-medium"
-                          : "text-[var(--text-muted)]"
+                          ? "text-action-warning font-medium"
+                          : "text-text-muted"
                       }
                     >
                       {r.punctualityStatus ?? "—"}

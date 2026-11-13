@@ -185,11 +185,11 @@ const api = useApi();
       <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <MessageSquarePlus className="w-6 h-6 text-purple-400" />
+            <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
+              <MessageSquarePlus className="w-6 h-6 text-unit-c" />
               Custom Permission Reasons
             </p>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">
+            <p className="text-sm text-text-secondary mt-1">
               Configure workflow-specific permission reasons across Hostel, Exam, Memo, and Staff Leave.
             </p>
           </div>
@@ -201,13 +201,13 @@ const api = useApi();
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
           <button
             type="button"
             onClick={() => setActiveTab("all")}
             className={cn(
               "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2",
-              activeTab === "all" ? "bg-[var(--action-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]"
+              activeTab === "all" ? "bg-action-primary text-white" : "bg-bg-surface text-text-secondary border border-border"
             )}
           >
             All Workflows ({reasons.length})
@@ -219,7 +219,7 @@ const api = useApi();
               onClick={() => setActiveTab(opt.value)}
               className={cn(
                 "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2",
-                activeTab === opt.value ? "bg-[var(--action-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]"
+                activeTab === opt.value ? "bg-action-primary text-white" : "bg-bg-surface text-text-secondary border border-border"
               )}
             >
               <opt.icon className="w-3.5 h-3.5" />
@@ -230,37 +230,37 @@ const api = useApi();
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Search reasons or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-3 rounded-md bg-[var(--bg-surface)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
+              className="w-full h-10 pl-9 pr-3 rounded-md bg-bg-surface border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
             />
           </div>
-          <span className="text-xs text-[var(--text-muted)]">Showing {filteredReasons.length} reasons</span>
+          <span className="text-xs text-text-muted">Showing {filteredReasons.length} reasons</span>
         </div>
 
         <Card>
-          <CardHeader className="pb-3 border-b border-[var(--border)]">
+          <CardHeader className="pb-3 border-b border-border">
             <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="w-4 h-4 text-[var(--action-primary)]" />
+              <Tag className="w-4 h-4 text-action-primary" />
               Configured Reasons
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {loading && reasons.length === 0 ? (
-              <div className="p-8 text-center text-sm text-[var(--text-muted)]">Loading reasons...</div>
+              <div className="p-8 text-center text-sm text-text-muted">Loading reasons...</div>
             ) : filteredReasons.length === 0 ? (
-              <div className="p-12 text-center text-[var(--text-muted)]">
+              <div className="p-12 text-center text-text-muted">
                 <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-60" />
-                <p className="text-sm font-semibold text-[var(--text-primary)]">No reasons found</p>
+                <p className="text-sm font-semibold text-text-primary">No reasons found</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-[var(--bg-elevated)] border-b border-[var(--border)] text-xs text-[var(--text-muted)] uppercase tracking-wider">
+                  <thead className="bg-bg-elevated border-b border-border text-xs text-text-muted uppercase tracking-wider">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Reason Label</th>
                       <th className="px-5 py-3 font-semibold">Code</th>
@@ -269,25 +269,25 @@ const api = useApi();
                       <th className="px-5 py-3 font-semibold text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)]">
+                  <tbody className="divide-y divide-border">
                     {filteredReasons.map((item) => (
-                      <tr key={item.id} className="hover:bg-[var(--bg-surface)]/50 transition-colors">
-                        <td className="px-5 py-3.5 font-medium text-[var(--text-primary)]">{item.label}</td>
-                        <td className="px-5 py-3.5 font-mono text-xs text-[var(--text-secondary)]">{item.code}</td>
+                      <tr key={item.id} className="hover:bg-bg-surface/50 transition-colors">
+                        <td className="px-5 py-3.5 font-medium text-text-primary">{item.label}</td>
+                        <td className="px-5 py-3.5 font-mono text-xs text-text-secondary">{item.code}</td>
                         <td className="px-5 py-3.5">
                           <span
                             className={cn(
                               "inline-flex items-center px-2 py-0.5 rounded text-xs capitalize font-medium border",
-                              item.workflow_type === "hostel" && "border-purple-500/30 text-purple-400 bg-purple-500/10",
-                              item.workflow_type === "exam" && "border-blue-500/30 text-blue-400 bg-blue-500/10",
-                              item.workflow_type === "memo" && "border-amber-500/30 text-amber-400 bg-amber-500/10",
-                              item.workflow_type === "staff_leave" && "border-emerald-500/30 text-emerald-400 bg-emerald-500/10"
+                              item.workflow_type === "hostel" && "border-purple-500/30 text-unit-c bg-purple-500/10",
+                              item.workflow_type === "exam" && "border-blue-500/30 text-action-primary bg-blue-500/10",
+                              item.workflow_type === "memo" && "border-amber-500/30 text-action-warning bg-amber-500/10",
+                              item.workflow_type === "staff_leave" && "border-emerald-500/30 text-action-success bg-emerald-500/10"
                             )}
                           >
                             {item.workflow_type.replace("_", " ")}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 text-xs text-[var(--text-muted)] whitespace-nowrap">
+                        <td className="px-5 py-3.5 text-xs text-text-muted whitespace-nowrap">
                           {item.created_at ? formatDate(item.created_at) : "Default"}
                         </td>
                         <td className="px-5 py-3.5 text-right whitespace-nowrap">
@@ -295,7 +295,7 @@ const api = useApi();
                             <Button variant="ghost" size="sm" onClick={() => openEditModal(item)} className="h-8 w-8 p-0" aria-label="Edit">
                               <Edit2 className="w-3.5 h-3.5" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmItem(item)} className="h-8 w-8 p-0 text-rose-400 hover:bg-rose-500/10" aria-label="Delete">
+                            <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmItem(item)} className="h-8 w-8 p-0 text-action-danger hover:bg-rose-500/10" aria-label="Delete">
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
@@ -312,7 +312,7 @@ const api = useApi();
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalMode === "create" ? "Add Custom Reason" : "Edit Custom Reason"} size="md">
           <form onSubmit={handleSave} className="space-y-4 p-4">
             <div className="w-full">
-              <label className="block text-xs font-medium text-[var(--text-muted)] mb-1 uppercase">
+              <label className="block text-xs font-medium text-text-muted mb-1 uppercase">
                 Workflow Type
               </label>
               <Select
@@ -342,7 +342,7 @@ const api = useApi();
               required
               helper="Lowercase alphanumeric and underscores only (/^[a-z0-9_]+$/)."
             />
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--border)]">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
               <Button type="button" variant="secondary" size="sm" onClick={() => setIsModalOpen(false)} disabled={submitting}>
                 Cancel
               </Button>
@@ -355,10 +355,10 @@ const api = useApi();
 
         <Modal isOpen={!!deleteConfirmItem} onClose={() => setDeleteConfirmItem(null)} title="Confirm Deletion" size="sm">
           <div className="p-4 space-y-4">
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-secondary">
               Are you sure you want to delete reason <strong>{deleteConfirmItem?.label}</strong> ({deleteConfirmItem?.code})?
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
               <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteConfirmItem(null)} disabled={submitting}>
                 Cancel
               </Button>

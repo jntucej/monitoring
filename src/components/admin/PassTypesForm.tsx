@@ -100,35 +100,35 @@ export function PassTypesForm() {
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6">
+      <div className="bg-bg-surface rounded-xl border border-border p-6">
         <h3 className="font-semibold flex items-center gap-2 mb-4">
-          <FileBadge className="w-5 h-5 text-[var(--action-primary)]" />
+          <FileBadge className="w-5 h-5 text-action-primary" />
           Pass Types
         </h3>
         <div className="flex justify-center p-6">
-          <Loader2 className="w-6 h-6 animate-spin text-[var(--text-muted)]" />
+          <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
         </div>
       </div>
     );
   }
 
   const inputCls =
-    "w-full px-2 py-1.5 bg-[var(--bg-base)] border border-[var(--border)] rounded text-xs text-[var(--text-primary)]";
+    "w-full px-2 py-1.5 bg-bg-base border border-border rounded text-xs text-text-primary";
 
   return (
     <form
       onSubmit={handleSave}
-      className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] p-6 flex flex-col h-full"
+      className="bg-bg-surface rounded-xl border border-border p-6 flex flex-col h-full"
     >
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold flex items-center gap-2">
-          <FileBadge className="w-5 h-5 text-[var(--action-primary)]" />
+          <FileBadge className="w-5 h-5 text-action-primary" />
           Pass Types
         </h3>
         <button
           type="button"
           onClick={addType}
-          className="text-xs flex items-center gap-1 bg-[var(--bg-base)] px-2 py-1 rounded border border-[var(--border)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)]"
+          className="text-xs flex items-center gap-1 bg-bg-base px-2 py-1 rounded border border-border hover:bg-[var(--bg-surface-hover)] text-text-primary"
         >
           <Plus className="w-3 h-3" /> Add Type
         </button>
@@ -136,16 +136,16 @@ export function PassTypesForm() {
 
       <div className="space-y-3 flex-1">
         {data.length === 0 && (
-          <p className="text-xs text-[var(--text-muted)] text-center py-4">No pass types configured.</p>
+          <p className="text-xs text-text-muted text-center py-4">No pass types configured.</p>
         )}
 
         {data.map((item, i) => (
           <div
             key={i}
-            className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-[var(--border)] p-3 rounded-lg bg-[var(--bg-base)]"
+            className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-border p-3 rounded-lg bg-bg-base"
           >
             <div className="md:col-span-3">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="code">Code</label>
+              <label className="block text-[10px] uppercase text-text-muted mb-1" htmlFor="code">Code</label>
               <input id="code"
                 type="text"
                 value={item.code}
@@ -155,7 +155,7 @@ export function PassTypesForm() {
               />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="name">Name</label>
+              <label className="block text-[10px] uppercase text-text-muted mb-1" htmlFor="name">Name</label>
               <input id="name"
                 type="text"
                 value={item.name}
@@ -165,7 +165,7 @@ export function PassTypesForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-[10px] uppercase text-[var(--text-muted)] mb-1" htmlFor="approval-flow">Approval Flow</label>
+              <label className="block text-[10px] uppercase text-text-muted mb-1" htmlFor="approval-flow">Approval Flow</label>
               <input id="approval-flow"
                 type="text"
                 value={item.approvalFlow}
@@ -174,7 +174,7 @@ export function PassTypesForm() {
               />
             </div>
             <div className="md:col-span-3 flex items-center gap-4 pt-4">
-              <label className="text-xs flex items-center gap-1 text-[var(--text-primary)]">
+              <label className="text-xs flex items-center gap-1 text-text-primary">
                 <input
                   type="checkbox"
                   checked={item.requiresApproval}
@@ -183,7 +183,7 @@ export function PassTypesForm() {
                 />
                 Requires Approval
               </label>
-              <label className="text-xs flex items-center gap-1 text-[var(--text-primary)]">
+              <label className="text-xs flex items-center gap-1 text-text-primary">
                 <input
                   type="checkbox"
                   checked={item.isActive}
@@ -197,7 +197,7 @@ export function PassTypesForm() {
               <button
                 type="button"
                 onClick={() => removeType(i)}
-                className="text-rose-500 hover:text-rose-400 p-1"
+                className="text-action-danger hover:text-action-danger p-1"
                 aria-label="Remove pass type"
               >
                 <Trash2 className="w-4 h-4" />
@@ -209,7 +209,7 @@ export function PassTypesForm() {
         {message && (
           <div
             className={`flex items-center gap-2 text-sm font-medium ${
-              message.type === "success" ? "text-emerald-400" : "text-rose-400"
+              message.type === "success" ? "text-action-success" : "text-action-danger"
             }`}
           >
             {message.type === "success" ? (
@@ -222,11 +222,11 @@ export function PassTypesForm() {
         )}
       </div>
 
-      <div className="flex justify-end mt-4 pt-4 border-t border-[var(--border)]">
+      <div className="flex justify-end mt-4 pt-4 border-t border-border">
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--action-primary)] text-white font-medium hover:brightness-110 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-white font-medium hover:brightness-110 disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Pass Types

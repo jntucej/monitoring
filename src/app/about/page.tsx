@@ -47,7 +47,7 @@ export default function AboutPage() {
   ]);
 
   return (
-    <main id="main-content" className="mx-auto max-w-3xl px-4 py-12 text-[var(--text-primary)]">
+    <main id="main-content" className="mx-auto max-w-3xl px-4 py-12 text-text-primary">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
@@ -58,7 +58,7 @@ export default function AboutPage() {
       />
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--action-primary)]"
+        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-action-primary"
       >
         <ArrowLeft className="h-4 w-4" /> Back to home
       </Link>
@@ -66,7 +66,7 @@ export default function AboutPage() {
       <h1 className="mt-6 text-3xl font-bold md:text-4xl">
         About {COLLEGE.officialName}
       </h1>
-      <p className="mt-4 text-[var(--text-secondary)]">
+      <p className="mt-4 text-text-secondary">
         {COLLEGE.officialName} ({COLLEGE.shortName}) was established in{" "}
         {COLLEGE.establishedYear} as a constituent college of Jawaharlal Nehru
         Technological University Hyderabad. It is an autonomous institution
@@ -76,9 +76,9 @@ export default function AboutPage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Award className="h-5 w-5 text-[var(--action-primary)]" /> Accreditation
+          <Award className="h-5 w-5 text-action-primary" /> Accreditation
         </h2>
-        <ul className="mt-3 space-y-2 text-sm text-[var(--text-secondary)]">
+        <ul className="mt-3 space-y-2 text-sm text-text-secondary">
           <li>
             <strong>NAAC:</strong> A+ grade, CGPA 3.29 (2022)
           </li>
@@ -99,20 +99,20 @@ export default function AboutPage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-[var(--action-primary)]" /> Programmes
+          <BookOpen className="h-5 w-5 text-action-primary" /> Programmes
         </h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+          <div className="rounded-xl border border-border bg-bg-surface p-4">
             <h3 className="font-semibold">B.Tech</h3>
-            <ul className="mt-2 space-y-1 text-sm text-[var(--text-secondary)]">
+            <ul className="mt-2 space-y-1 text-sm text-text-secondary">
               {UG.map((p) => (
                 <li key={p}>{p}</li>
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+          <div className="rounded-xl border border-border bg-bg-surface p-4">
             <h3 className="font-semibold">M.Tech</h3>
-            <ul className="mt-2 space-y-1 text-sm text-[var(--text-secondary)]">
+            <ul className="mt-2 space-y-1 text-sm text-text-secondary">
               {PG.map((p) => (
                 <li key={p}>{p}</li>
               ))}
@@ -123,9 +123,9 @@ export default function AboutPage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-[var(--action-primary)]" /> Campus
+          <Building2 className="h-5 w-5 text-action-primary" /> Campus
         </h2>
-        <p className="mt-3 text-sm text-[var(--text-secondary)]">
+        <p className="mt-3 text-sm text-text-secondary">
           The campus is located at Nachupally (Kondagattu), Kodimial Mandal,
           Jagtial District, Telangana. Approximately 90% of students reside in
           campus hostels, with dedicated boys and girls hostel blocks managed
@@ -135,10 +135,10 @@ export default function AboutPage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Users className="h-5 w-5 text-[var(--action-primary)]" /> What the
+          <Users className="h-5 w-5 text-action-primary" /> What the
           portal does
         </h2>
-        <p className="mt-3 text-sm text-[var(--text-secondary)]">
+        <p className="mt-3 text-sm text-text-secondary">
           This portal records campus movement, processes permission and gate-pass
           requests through a defined approval chain, and gives each role access to
           only the data it is authorised for. All actions are audit-logged.
@@ -147,9 +147,9 @@ export default function AboutPage() {
 
       <section className="mt-10">
         <h2 className="text-xl font-semibold">Contact</h2>
-        <div className="mt-4 space-y-3 text-sm text-[var(--text-secondary)]">
+        <div className="mt-4 space-y-3 text-sm text-text-secondary">
           <div className="flex items-start gap-2">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--action-primary)]" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-action-primary" />
             <span>
               {COLLEGE.addressLine1}, {COLLEGE.addressLine2},
               <br />
@@ -157,23 +157,23 @@ export default function AboutPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <Mail className="h-4 w-4 text-action-primary" aria-hidden="true" />
             <EmailLink email={COLLEGE.email} />
-            <span className="text-[var(--text-muted)]" aria-hidden="true">·</span>
+            <span className="text-text-muted" aria-hidden="true">·</span>
             <EmailLink email={COLLEGE.emailAlt} />
           </div>
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-[var(--action-primary)]" aria-hidden="true" />
+            <Phone className="h-4 w-4 text-action-primary" aria-hidden="true" />
             <PhoneLink phone={`+91${COLLEGE.phone}`} label={`+91 ${COLLEGE.phone}`} />
           </div>
         </div>
       </section>
 
-      <div className="mt-10 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 text-sm">
+      <div className="mt-10 rounded-xl border border-border bg-bg-surface p-5 text-sm">
         <strong className="block">Need help?</strong>
-        <p className="mt-1 text-[var(--text-secondary)]">
+        <p className="mt-1 text-text-secondary">
           Visit the{" "}
-          <Link href="/help" className="text-[var(--action-primary)] underline">
+          <Link href="/help" className="text-action-primary underline">
             Help &amp; FAQ
           </Link>{" "}
           page.

@@ -44,7 +44,7 @@ const api = useApi();
 
   return (
     <div className="space-y-3">
-      <label className="text-xs font-semibold text-[var(--text-muted)] uppercase flex items-center gap-1.5">
+      <label className="text-xs font-semibold text-text-muted uppercase flex items-center gap-1.5">
         <Shield className="w-3.5 h-3.5" /> Roles ({roles.length})
       </label>
 
@@ -52,11 +52,11 @@ const api = useApi();
         {roles.map((r) => (
           <span
             key={`${r.role}:${r.scope ?? ""}`}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] text-xs text-[var(--text-primary)]"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-bg-elevated border border-border text-xs text-text-primary"
           >
             <span className="font-mono">{r.role}</span>
-            {r.scope && <span className="text-[10px] text-[var(--text-muted)]">· {r.scope}</span>}
-            <button onClick={() => revoke(r.role, r.scope)} className="text-rose-400 hover:text-rose-300">
+            {r.scope && <span className="text-[10px] text-text-muted">· {r.scope}</span>}
+            <button onClick={() => revoke(r.role, r.scope)} className="text-action-danger hover:text-action-danger">
               <X className="w-3 h-3" />
             </button>
           </span>
@@ -66,7 +66,7 @@ const api = useApi();
       <div className="flex gap-2">
         <select
           value={newRole} onChange={(e) => setNewRole(e.target.value)}
-          className="flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs"
+          className="flex-1 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs"
         >
           <option value="">Add role…</option>
           {ALL_ROLES.filter((r: string) => !roles.some((x: { role: string; scope: string | null }) => x.role === r && !x.scope)).map((r: string) => (
@@ -76,11 +76,11 @@ const api = useApi();
         <input
           value={newScope} onChange={(e) => setNewScope(e.target.value)}
           placeholder="scope (optional)"
-          className="w-32 px-2.5 py-1.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] text-xs"
+          className="w-32 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs"
         />
         <button
           onClick={grant} disabled={!newRole}
-          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-action-success text-white text-xs font-bold disabled:opacity-50"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>

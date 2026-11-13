@@ -20,19 +20,19 @@ interface HealthSnapshot {
 }
 
 const DOT: Record<ComponentStatus, string> = {
-  healthy: "bg-emerald-400",
-  degraded: "bg-amber-400",
-  unhealthy: "bg-rose-400",
-  unknown: "bg-[var(--bg-elevated)]",
+  healthy: "bg-action-success",
+  degraded: "bg-action-warning",
+  unhealthy: "bg-action-danger",
+  unknown: "bg-bg-elevated",
 };
 
 function StatusDot({ status, label, detail }: { status: ComponentStatus; label: string; detail?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2">
+    <div className="flex items-center gap-2 rounded-lg border border-border bg-bg-surface px-3 py-2">
       <span className={`h-2.5 w-2.5 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
       <div>
-        <p className="text-xs font-medium text-[var(--text-primary)]">{label}</p>
-        {detail && <p className="text-[11px] text-[var(--text-muted)]">{detail}</p>}
+        <p className="text-xs font-medium text-text-primary">{label}</p>
+        {detail && <p className="text-[11px] text-text-muted">{detail}</p>}
       </div>
     </div>
   );
@@ -102,11 +102,11 @@ export default function SystemHealthPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-          <Activity className="w-5 h-5 text-emerald-400" />
+          <Activity className="w-5 h-5 text-action-success" />
         </div>
         <div>
-          <h1 className="text-lg font-semibold text-[var(--text-primary)]">System Health</h1>
-          <p className="text-xs text-[var(--text-muted)]">
+          <h1 className="text-lg font-semibold text-text-primary">System Health</h1>
+          <p className="text-xs text-text-muted">
             Live infrastructure status — database, redis, gateways and services.
           </p>
         </div>

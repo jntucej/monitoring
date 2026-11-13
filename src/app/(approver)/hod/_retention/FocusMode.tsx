@@ -141,45 +141,45 @@ export function FocusMode({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-base)]"
+        className="fixed inset-0 z-50 flex flex-col bg-bg-base"
       >
         {/* Top bar */}
-        <header className="flex shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
+        <header className="flex shrink-0 items-center justify-between border-b border-border bg-bg-surface px-4 py-3">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
             </button>
             <div>
-              <p className="text-sm font-semibold text-[var(--text-primary)]">
+              <p className="text-sm font-semibold text-text-primary">
                 Focus mode
               </p>
-              <p className="text-[11px] text-[var(--text-muted)]">
+              <p className="text-[11px] text-text-muted">
                 {remaining > 0 ? `${remaining} of ${total} remaining` : "Queue clear"}
                 {sessionDecisions > 0 && ` · ${sessionDecisions} this session`}
               </p>
             </div>
           </div>
-          <div className="hidden items-center gap-2 text-[11px] text-[var(--text-muted)] sm:flex">
+          <div className="hidden items-center gap-2 text-[11px] text-text-muted sm:flex">
             <Keyboard className="size-3" />
-            <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5">Space</kbd>
+            <kbd className="rounded border border-border px-1.5 py-0.5">Space</kbd>
             approve
-            <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5">X</kbd>
+            <kbd className="rounded border border-border px-1.5 py-0.5">X</kbd>
             reject
-            <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5">E</kbd>
+            <kbd className="rounded border border-border px-1.5 py-0.5">E</kbd>
             escalate
-            <kbd className="rounded border border-[var(--border)] px-1.5 py-0.5">Esc</kbd>
+            <kbd className="rounded border border-border px-1.5 py-0.5">Esc</kbd>
             exit
           </div>
         </header>
 
         {/* Progress bar */}
-        <div className="h-1 shrink-0 bg-[var(--bg-elevated)]">
+        <div className="h-1 shrink-0 bg-bg-elevated">
           <div
-            className="h-full bg-[var(--action-primary)] transition-[width] duration-500"
+            className="h-full bg-action-primary transition-[width] duration-500"
             style={{ width: total > 0 ? `${(index / total) * 100}%` : "0%" }}
           />
         </div>
@@ -189,15 +189,15 @@ export function FocusMode({
           <div className="w-full max-w-2xl">
             {loading && !current ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="size-6 animate-spin text-[var(--text-muted)]" />
+                <Loader2 className="size-6 animate-spin text-text-muted" />
               </div>
             ) : !current ? (
-              <div className="rounded-2xl border-2 border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5 p-8 text-center">
-                <Check className="mx-auto size-12 text-[var(--action-primary)]" />
-                <p className="mt-3 text-lg font-semibold text-[var(--text-primary)]">
+              <div className="rounded-2xl border-2 border-action-primary/30 bg-action-primary/5 p-8 text-center">
+                <Check className="mx-auto size-12 text-action-primary" />
+                <p className="mt-3 text-lg font-semibold text-text-primary">
                   Queue is clear
                 </p>
-                <p className="mt-1 text-sm text-[var(--text-muted)]">
+                <p className="mt-1 text-sm text-text-muted">
                   {sessionDecisions > 0
                     ? `You cleared ${sessionDecisions} item${sessionDecisions === 1 ? "" : "s"} this session.`
                     : "Nothing waiting for you."}
@@ -209,17 +209,17 @@ export function FocusMode({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6"
+                className="rounded-2xl border border-border bg-bg-surface p-5 sm:p-6"
               >
                 <header className="mb-4 flex items-start justify-between">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
+                    <p className="text-[11px] uppercase tracking-wider text-text-muted">
                       {current.workflow_type} · {current.current_stage}
                     </p>
-                    <p className="text-lg font-semibold text-[var(--text-primary)]">
+                    <p className="text-lg font-semibold text-text-primary">
                       {current.student?.name ?? "Unknown"}
                     </p>
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-xs text-text-muted">
                       {current.student?.student_details?.roll ?? "—"} · {current.ticket_number}
                     </p>
                   </div>
@@ -229,7 +229,7 @@ export function FocusMode({
                 </header>
 
                 <div className="space-y-2">
-                  <p className="text-sm text-[var(--text-secondary)]">
+                  <p className="text-sm text-text-secondary">
                     {current.reason ?? current.workflow_type}
                   </p>
                 </div>
@@ -238,7 +238,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("APPROVE")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[var(--action-primary)] px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                     Approve
@@ -246,7 +246,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("REJECT")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/5 px-4 py-3 text-sm font-medium text-[var(--action-danger)] transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-action-danger/40 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
                   >
                     <X className="size-4" />
                     Reject
@@ -254,7 +254,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("ESCALATE")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] transition disabled:opacity-50"
+                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-border bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
                   >
                     <ArrowUpRight className="size-4" />
                     Escalate

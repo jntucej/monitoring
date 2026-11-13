@@ -38,8 +38,8 @@ export function ReportsView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Department Reports</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Department Reports</h1>
+        <p className="text-xs text-text-muted">
           Real-time student movement, campus presence, and activity metrics
         </p>
       </header>
@@ -64,15 +64,15 @@ export function ReportsView() {
             {rows.map((row) => (
               <li
                 key={row.metric}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{row.metric}</p>
-                  <span className="font-semibold tabular-nums text-lg text-[var(--text-primary)]">
+                  <span className="font-semibold tabular-nums text-lg text-text-primary">
                     {row.value}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">{row.description}</p>
+                <p className="text-xs text-text-muted mt-1">{row.description}</p>
               </li>
             ))}
           </ul>
@@ -84,14 +84,14 @@ export function ReportsView() {
                 {
                   header: "Count",
                   accessor: (r) => (
-                    <span className="font-semibold tabular-nums text-[var(--text-primary)]">
+                    <span className="font-semibold tabular-nums text-text-primary">
                       {r.value}
                     </span>
                   ),
                 },
                 {
                   header: "Description",
-                  accessor: (r) => <span className="text-[var(--text-muted)]">{r.description}</span>,
+                  accessor: (r) => <span className="text-text-muted">{r.description}</span>,
                 },
               ]}
               data={rows}

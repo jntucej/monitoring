@@ -53,7 +53,7 @@ export function LevelBadge({ row, fallbackStage }: { row: HostelTicketRow; fallb
   const level = ROLE_LEVELS[stage];
   return (
     <span
-      className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--action-primary)]"
+      className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-bg-elevated border border-border text-action-primary"
       title={`Current level: ${stage}`}
     >
       {level ? `${level} · ${label}` : label}
@@ -72,7 +72,7 @@ export function ForwardedFromChip({ row }: { row: HostelTicketRow }) {
   const fromLabel = fromLevel ? `${fromLevel} · ${from}` : from;
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-action-warning border border-amber-500/20"
       title={row.forward_comment ? `Forward comment: ${row.forward_comment}` : undefined}
     >
       <Forward className="w-3 h-3" aria-hidden />
@@ -88,7 +88,7 @@ export function ForwardedFromChip({ row }: { row: HostelTicketRow }) {
 export function DirectBadge({ row }: { row: HostelTicketRow }) {
   if (!row.direct_generated) return null;
   return (
-    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-action-success border border-emerald-500/20">
       Direct
     </span>
   );

@@ -270,18 +270,18 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
 
   return (
     <section
-      className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]/60 p-4 min-w-0"
+      className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0"
       aria-label="Meal serve panel"
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <UtensilsCrossed className="w-4 h-4 text-[var(--action-primary)] shrink-0" />
-          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+          <UtensilsCrossed className="w-4 h-4 text-action-primary shrink-0" />
+          <span className="text-sm font-bold text-text-primary truncate">
             Meal Serve
           </span>
           {totals ? (
-            <span className="text-[10px] font-mono text-[var(--text-muted)] truncate">
+            <span className="text-[10px] font-mono text-text-muted truncate">
               {totals.confirmed}/{totals.declared} confirmed
             </span>
           ) : null}
@@ -290,7 +290,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           aria-label="Refresh meal serve data"
         >
           {loading ? (
@@ -303,7 +303,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
       </div>
 
       {loading && blocks.length === 0 ? (
-        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] py-4 justify-center">
+        <div className="flex items-center gap-2 text-xs text-text-muted py-4 justify-center">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading meal serve feed…</span>
         </div>
@@ -320,23 +320,23 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
             {blocks.map((b) => (
               <li
                 key={b.hostelBlock}
-                className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 min-w-0"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                    <span className="text-xs font-semibold text-text-primary truncate">
                       {b.hostelBlock}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold border text-emerald-400 bg-emerald-400/10 border-emerald-400/20 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold border text-action-success bg-emerald-400/10 border-emerald-400/20 shrink-0">
                       {b.confirmed} served
                     </span>
                   </div>
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] truncate mt-0.5">
+                  <p className="text-[10px] font-mono text-text-muted truncate mt-0.5">
                     declared {b.declared} · veg {b.veg} / non-veg {b.nonVeg} ·{" "}
                     {b.attendanceRate}%
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-[var(--text-muted)]">
+                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-text-muted">
                   <PackageCheck className="w-3 h-3" />
                   {b.attendanceRate}%
                 </span>
@@ -356,7 +356,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
                 }
               }}
               placeholder="Token code (e.g. 7F3A-9C2D)"
-              className="flex-1 min-w-0 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-2.5 py-1.5 text-xs font-mono text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--action-primary)]/60"
+              className="flex-1 min-w-0 rounded-lg border border-border bg-bg-base px-2.5 py-1.5 text-xs font-mono text-text-primary placeholder:text-text-muted outline-none focus:border-action-primary/60"
               aria-label="Manual serve token code"
               disabled={busy}
             />
@@ -364,7 +364,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
               type="button"
               onClick={() => void handleManualServe()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--action-primary)] text-white text-[11px] font-semibold px-3 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-action-primary text-white text-[11px] font-semibold px-3 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shrink-0"
             >
               {busy ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
@@ -381,7 +381,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
               type="button"
               onClick={() => void handleRevoke()}
               disabled={busy}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-400/40 text-rose-400 hover:bg-rose-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-[11px] font-semibold transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-400/40 text-action-danger hover:bg-rose-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-[11px] font-semibold transition-colors"
             >
               <Ban className="w-3 h-3" />
               Revoke day
@@ -390,7 +390,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
               type="button"
               onClick={() => void handleMarkAllServed()}
               disabled={busy}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-[11px] font-semibold transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-400/40 text-action-success hover:bg-emerald-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-[11px] font-semibold transition-colors"
             >
               <CheckCheck className="w-3 h-3" />
               Finalize day
@@ -398,7 +398,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
           </div>
 
           {/* Footer hint */}
-          <p className="mt-3 text-[10px] text-[var(--text-muted)]">
+          <p className="mt-3 text-[10px] text-text-muted">
             Live data refreshed every 15s. Serve with a token code, revoke
             unused tokens for the active day, or finalize the day&apos;s headcount.
           </p>

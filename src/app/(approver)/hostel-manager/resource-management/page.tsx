@@ -59,17 +59,17 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 flex flex-col gap-2 min-w-0">
-      <div className="flex items-center gap-2 text-[var(--text-muted)] min-w-0">
+    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-[var(--text-muted)]" />
+        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
-      {sub && <p className="text-xs text-[var(--text-muted)] min-w-0">{sub}</p>}
+      {sub && <p className="text-xs text-text-muted min-w-0">{sub}</p>}
     </div>
   );
 }
@@ -130,7 +130,7 @@ function HostelManagerResourceManagementInner() {
       {/* Back link */}
       <Link
         href="/hostel-manager"
-        className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         <ArrowRight className="w-3 h-3 rotate-180" /> Back to Operations Overview
       </Link>
@@ -138,18 +138,18 @@ function HostelManagerResourceManagementInner() {
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)] min-w-0">
-            Signed in as <span className="font-mono text-[var(--text-secondary)]">{role}</span> · tier {tier}
+          <p className="mt-1 text-sm text-text-muted min-w-0">
+            Signed in as <span className="font-mono text-text-secondary">{role}</span> · tier {tier}
             {user?.name ? ` · ${user.name}` : ""}
           </p>
         </div>
       </div>
 
       {/* Authority note */}
-      <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-        <p className="text-sm text-[var(--text-secondary)] min-w-0">
-          The hostel manager owns <span className="font-semibold text-sky-300">resources and facilities</span> —
-          rooms, beds, utilities, and stock. They do <span className="font-semibold text-rose-300">not</span> hold
+      <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <p className="text-sm text-text-secondary min-w-0">
+          The hostel manager owns <span className="font-semibold text-action-info">resources and facilities</span> —
+          rooms, beds, utilities, and stock. They do <span className="font-semibold text-action-danger">not</span> hold
           hostel-disciplinary authority or final outpass power; outpass decisions route through the hostel-manager/principal chain.
         </p>
       </div>
@@ -162,7 +162,7 @@ function HostelManagerResourceManagementInner() {
             label="Students On Campus"
             value={studentOnCampus}
             sub="Residents currently inside active gates"
-            accent="text-sky-400"
+            accent="text-action-info"
             loading={presenceLoading && !presence}
           />
           <StatCard
@@ -170,7 +170,7 @@ function HostelManagerResourceManagementInner() {
             label="Total On Campus"
             value={onCampusTotal}
             sub="All roles across active gates"
-            accent="text-emerald-400"
+            accent="text-action-success"
             loading={presenceLoading && !presence}
           />
           <StatCard
@@ -178,7 +178,7 @@ function HostelManagerResourceManagementInner() {
             label="Stock / Resources"
             value={metricValue("stock") ?? "live"}
             sub="Resource metrics from the manager analytics view"
-            accent="text-amber-400"
+            accent="text-action-warning"
             loading={analyticsLoading && !analytics}
           />
           <StatCard
@@ -194,19 +194,19 @@ function HostelManagerResourceManagementInner() {
 
       {/* Manager analytics metrics */}
       <WidgetBoundary title="Manager Metrics">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center gap-2 min-w-0">
-            <Package className="w-4 h-4 text-amber-400 shrink-0" />
+        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
+          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+            <Package className="w-4 h-4 text-action-warning shrink-0" />
             <span className="text-sm font-semibold text-white">7-Day Resource Metrics</span>
           </div>
           {analyticsLoading && !analytics ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-[var(--text-muted)] min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading…
             </div>
           ) : metrics.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <AlertTriangle className="w-5 h-5 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">
+              <AlertTriangle className="w-5 h-5 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">
                 No manager analytics metrics are available for this role yet. Resource metrics
                 will appear once the analytics view is populated.
               </p>
@@ -214,11 +214,11 @@ function HostelManagerResourceManagementInner() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 min-w-0">
               {metrics.map((m) => (
-                <div key={m.key} className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide truncate">{m.label}</p>
+                <div key={m.key} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <p className="text-xs text-text-muted uppercase tracking-wide truncate">{m.label}</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {m.value}
-                    {m.unit ? <span className="ml-1 text-xs font-normal text-[var(--text-muted)]">{m.unit}</span> : null}
+                    {m.unit ? <span className="ml-1 text-xs font-normal text-text-muted">{m.unit}</span> : null}
                   </p>
                 </div>
               ))}

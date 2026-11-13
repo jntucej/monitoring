@@ -13,13 +13,13 @@ export type BadgeVariant =
   | "error";
 
 const badgeColors: Record<BadgeVariant, string> = {
-  entry: "bg-[var(--action-primary)]/10 text-[var(--action-primary)]",
-  exit: "bg-[var(--action-danger)]/10 text-[var(--action-danger)]",
-  dayout: "bg-[var(--action-warning)]/10 text-[var(--action-warning)]",
-  leave: "bg-[var(--action-info)]/10 text-[var(--action-info)]",
-  offline: "bg-[var(--action-warning)]/10 text-[var(--action-warning)]",
-  success: "bg-[var(--action-primary)]/10 text-[var(--action-primary)]",
-  error: "bg-[var(--action-danger)]/10 text-[var(--action-danger)]",
+  entry: "bg-action-primary/10 text-action-primary",
+  exit: "bg-action-danger/10 text-action-danger",
+  dayout: "bg-action-warning/10 text-action-warning",
+  leave: "bg-action-info/10 text-action-info",
+  offline: "bg-action-warning/10 text-action-warning",
+  success: "bg-action-primary/10 text-action-primary",
+  error: "bg-action-danger/10 text-action-danger",
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {

@@ -18,18 +18,18 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col bg-[var(--bg-base)]">
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-surface)] px-3">
+    <div className="flex h-dvh flex-col bg-bg-base">
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-bg-surface px-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
-            className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+            className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
           >
             <Menu className="size-5" />
           </button>
-          <span className="text-sm font-semibold text-[var(--text-primary)]">
+          <span className="text-sm font-semibold text-text-primary">
             Vice Principal
           </span>
         </div>
@@ -52,14 +52,14 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-[var(--bg-surface)] shadow-xl">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-bg-surface shadow-xl">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <span className="text-sm font-semibold">Navigation</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close navigation"
-                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]"
+                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>

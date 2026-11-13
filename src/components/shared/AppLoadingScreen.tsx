@@ -51,11 +51,11 @@ export function AppLoadingScreen() {
   if (hideRef.current) return null;
 
   const isGlass = theme === "glass";
-  const bg = isGlass ? "bg-[#0a0a14]" : "bg-[var(--bg-base)]";
+  const bg = isGlass ? "bg-[var(--bg-base)]" : "bg-bg-base";
   const cardBg = isGlass
     ? "bg-white/5 backdrop-blur-xl border-white/10"
-    : "bg-[var(--bg-surface)] border-[var(--border)]";
-  const textMuted = "text-[var(--text-muted)]";
+    : "bg-bg-surface border-border";
+  const textMuted = "text-text-muted";
 
   return (
     <div
@@ -65,20 +65,20 @@ export function AppLoadingScreen() {
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center ${bg} transition-opacity duration-300`}
     >
       {/* Animated progress bar (top of screen) */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--bg-elevated)] overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-bg-elevated overflow-hidden">
         <div
-          className="h-full bg-[var(--action-primary)] transition-all ease-out"
+          className="h-full bg-action-primary transition-all ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Brand logo */}
       <div className={`flex items-center justify-center w-16 h-16 rounded-2xl ${cardBg} shadow-2xl`}>
-        <Shield className="w-8 h-8 text-[var(--action-primary)] animate-pulse" />
+        <Shield className="w-8 h-8 text-action-primary animate-pulse" />
       </div>
 
       {/* App name */}
-      <p className="mt-5 text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+      <p className="mt-5 text-lg font-semibold text-text-primary tracking-tight">
         Gate Monitor
       </p>
       <p className={`mt-1 text-xs ${textMuted} flex items-center gap-1.5`}>

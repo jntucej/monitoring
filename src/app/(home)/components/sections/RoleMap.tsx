@@ -130,14 +130,14 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
     >
       <Link
         href={role.href}
-        className="group block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,#0F172A)] p-5"
+        className="group block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-5"
       >
-        <role.Icon className="h-7 w-7 text-[var(--home-accent-indigo,#6366F1)]" />
-        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,#F3F4F6)]">
+        <role.Icon className="h-7 w-7 text-[var(--home-accent-indigo,var(--action-primary))]" />
+        <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
           {role.name}
         </h3>
-        <p className="mt-1 text-sm text-[var(--home-text-muted,#6B7280)]">{role.cap}</p>
-        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-steel,#0EA5E9)] opacity-0 transition group-hover:opacity-100">
+        <p className="mt-1 text-sm text-[var(--home-text-muted,var(--text-muted))]">{role.cap}</p>
+        <span className="mt-3 inline-block text-xs font-semibold text-[var(--home-accent-steel,var(--action-info))] opacity-0 transition group-hover:opacity-100">
           Sign in →
         </span>
       </Link>
@@ -161,7 +161,7 @@ export function RoleMap() {
     >
       <div className="text-center">
         <h2 className="text-3xl font-bold md:text-4xl">Who is this portal for?</h2>
-        <p className="mt-2 text-[var(--home-text-secondary,#9CA3AF)]">
+        <p className="mt-2 text-[var(--home-text-secondary,var(--text-muted))]">
           Every role on campus has a dedicated, permission-scoped dashboard.
         </p>
       </div>

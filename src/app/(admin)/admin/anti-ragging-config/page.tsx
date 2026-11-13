@@ -33,7 +33,7 @@ export default function AntiRaggingConfigPage() {
     else           addToast({ variant: "error",   message: j.error?.message ?? "Failed" });
   };
 
-  if (loading) return <p className="p-6 text-[var(--text-muted)]">Loading…</p>;
+  if (loading) return <p className="p-6 text-text-muted">Loading…</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -48,7 +48,7 @@ export default function AntiRaggingConfigPage() {
           <span className="font-medium text-sm">Enable anti-ragging email alerts</span>
         </label>
         <div>
-          <label className="block text-sm font-medium text-[var(--text-muted)] mb-1" htmlFor="extra-email-addresses-comma-separated">Extra Email Addresses (comma separated)</label>
+          <label className="block text-sm font-medium text-text-muted mb-1" htmlFor="extra-email-addresses-comma-separated">Extra Email Addresses (comma separated)</label>
           <input id="extra-email-addresses-comma-separated"
             type="text"
             value={(config.extra_emails ?? []).join(", ")}
@@ -56,7 +56,7 @@ export default function AntiRaggingConfigPage() {
             className="w-full border rounded p-2 text-sm"
           />
         </div>
-        <button type="submit" className="px-4 py-2 bg-[var(--bg-surface)] text-white rounded text-sm font-medium">
+        <button type="submit" className="px-4 py-2 bg-bg-surface text-white rounded text-sm font-medium">
           Save Configuration
         </button>
       </form>

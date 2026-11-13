@@ -1,4 +1,4 @@
-export function HorizonGlow({ accent = "#67e8f9" }: { accent?: string }) {
+export function HorizonGlow({ accent = "var(--unit-a)" }: { accent?: string }) {
   return (
     <div
       aria-hidden="true"

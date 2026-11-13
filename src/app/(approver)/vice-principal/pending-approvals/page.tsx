@@ -122,8 +122,8 @@ function VpPendingApprovalsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Pending Approvals">
-        <div className="rounded-xl border border-[var(--border)] bg-[#111827] p-4 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] mb-3 min-w-0">
+        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 text-text-muted mb-3 min-w-0">
             <Inbox className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               VP-Stage Queue · {rows.length} pending
@@ -136,12 +136,12 @@ function VpPendingApprovalsInner() {
             </div>
           )}
           {actionError && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
               {actionError}
             </div>
           )}
           {queueError && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
               Queue load failed: {queueError}
             </div>
           )}
@@ -149,14 +149,14 @@ function VpPendingApprovalsInner() {
           {queueLoading && !vpQueue ? (
             <div className="space-y-2 min-w-0">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-14 rounded-lg bg-[var(--bg-elevated)]/60 animate-pulse" />
+                <div key={i} className="h-14 rounded-lg bg-bg-elevated/60 animate-pulse" />
               ))}
             </div>
           ) : grouped.length === 0 ? (
             <div className="p-6 text-center">
-              <Inbox className="w-6 h-6 text-[var(--text-muted)] mx-auto mb-2" />
-              <p className="text-sm text-[var(--text-muted)]">No pending items at the Vice Principal stage.</p>
-              <p className="mt-2 text-xs text-[var(--text-muted)]">
+              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <p className="text-sm text-text-muted">No pending items at the Vice Principal stage.</p>
+              <p className="mt-2 text-xs text-text-muted">
                 <ShieldCheck className="inline w-3.5 h-3.5 mr-1" />
                 When a request lands at the VP stage, approve, reject, or escalate it here.
               </p>
@@ -169,21 +169,21 @@ function VpPendingApprovalsInner() {
                 return (
                   <li
                     key={r.id}
-                    className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]/40 p-3 min-w-0"
+                    className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0"
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-sky-400">{r.ticket_number}</span>
-                      <span className="text-sm text-[var(--text-secondary)] truncate min-w-0 flex-1">
+                      <span className="font-mono text-xs text-action-info">{r.ticket_number}</span>
+                      <span className="text-sm text-text-secondary truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
                         {r.student?.student_details?.roll
                           ? ` · ${r.student.student_details.roll}`
                           : ""}
                       </span>
-                      <span className="text-xs text-[var(--text-muted)] capitalize whitespace-nowrap">
+                      <span className="text-xs text-text-muted capitalize whitespace-nowrap">
                         {r.workflow_type.replace(/_/g, " ")}
                       </span>
                       {slaBreached(r) && (
-                        <span className="text-[10px] font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 whitespace-nowrap">
+                        <span className="text-[10px] font-semibold text-action-danger bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 whitespace-nowrap">
                           SLA breached
                         </span>
                       )}
@@ -194,7 +194,7 @@ function VpPendingApprovalsInner() {
                         onClick={() => void actOnTicket(r, "APPROVE")}
                         disabled={busy || !inScope}
                         title={inScope ? "Approve" : "View-only: outside delegated scope"}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" /> Approve
                       </button>
@@ -203,7 +203,7 @@ function VpPendingApprovalsInner() {
                         onClick={() => void actOnTicket(r, "REJECT")}
                         disabled={busy || !inScope}
                         title={inScope ? "Reject" : "View-only: outside delegated scope"}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <XCircle className="w-3.5 h-3.5" /> Reject
                       </button>
@@ -212,12 +212,12 @@ function VpPendingApprovalsInner() {
                         onClick={() => void actOnTicket(r, "ESCALATE")}
                         disabled={busy}
                         title="Escalate to the next stage (principal)"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-action-warning hover:bg-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
                       </button>
                       {!inScope && (
-                        <span className="text-[11px] text-[var(--text-muted)]">
+                        <span className="text-[11px] text-text-muted">
                           view-only · outside delegated scope
                         </span>
                       )}
@@ -226,7 +226,7 @@ function VpPendingApprovalsInner() {
                 );
               })}
               {rows.length > 12 && (
-                <li className="text-xs text-[var(--text-muted)]">
+                <li className="text-xs text-text-muted">
                   Showing 12 of {rows.length} items.
                 </li>
               )}

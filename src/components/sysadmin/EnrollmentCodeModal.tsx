@@ -76,29 +76,29 @@ const api = useApi();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-          <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-emerald-400" /> Enrollment Code
+      <div className="bg-bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+            <KeyRound className="w-5 h-5 text-action-success" /> Enrollment Code
           </h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)]">
-            <X className="w-5 h-5 text-[var(--text-muted)]" />
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-bg-elevated">
+            <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
-          <p className="text-sm text-[var(--text-secondary)]">
-            Issuing a bootstrap code for <strong className="text-[var(--text-primary)]">{userName}</strong>.
+          <p className="text-sm text-text-secondary">
+            Issuing a bootstrap code for <strong className="text-text-primary">{userName}</strong>.
           </p>
 
           {!issued && (
             <>
               <div>
-                <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1 uppercase" htmlFor="purpose">Purpose</label>
+                <label className="block text-xs font-semibold text-text-muted mb-1 uppercase" htmlFor="purpose">Purpose</label>
                 <select id="purpose"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]"
+                  className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary"
                 >
                   <option value="web_bootstrap">Web onboarding (password + PIN)</option>
                   <option value="mobile">Mobile device pairing (15 min)</option>
@@ -107,12 +107,12 @@ const api = useApi();
                 </select>
               </div>
 
-              {error && <p className="text-xs text-rose-400">{error}</p>}
+              {error && <p className="text-xs text-action-danger">{error}</p>}
 
               <button
                 onClick={issue}
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-action-success hover:bg-action-success text-white text-sm font-bold disabled:opacity-50"
               >
                 {loading ? "Generating…" : "Generate Code"}
               </button>
@@ -121,15 +121,15 @@ const api = useApi();
 
           {issued && (
             <>
-              <div className="p-4 rounded-xl bg-[var(--bg-elevated)] border border-emerald-500/30 text-center space-y-2">
-                <p className="text-[11px] uppercase font-bold text-[var(--text-muted)] tracking-wider">One-Time Code</p>
-                <p className="text-3xl font-mono font-black tracking-[0.35em] text-emerald-400 select-all">
+              <div className="p-4 rounded-xl bg-bg-elevated border border-emerald-500/30 text-center space-y-2">
+                <p className="text-[11px] uppercase font-bold text-text-muted tracking-wider">One-Time Code</p>
+                <p className="text-3xl font-mono font-black tracking-[0.35em] text-action-success select-all">
                   {issued.code}
                 </p>
                 <div className="flex items-center justify-center gap-4 pt-1">
                   <button
                     onClick={copy}
-                    className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+                    className="inline-flex items-center gap-1.5 text-xs text-action-success hover:text-action-success font-medium"
                   >
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? "Code Copied" : "Copy Code"}
@@ -137,7 +137,7 @@ const api = useApi();
                   <span className="text-[var(--border)]">•</span>
                   <button
                     onClick={copyLink}
-                    className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-medium"
+                    className="inline-flex items-center gap-1.5 text-xs text-action-info hover:text-action-info font-medium"
                   >
                     {linkCopied ? <Check className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
                     {linkCopied ? "Link Copied" : "Copy Activation Link"}
@@ -145,20 +145,20 @@ const api = useApi();
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+              <div className="flex items-center gap-2 text-xs text-text-muted">
                 <Clock className="w-3.5 h-3.5" />
                 Expires {new Date(issued.expiresAt).toLocaleString()}
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
-                <p className="font-semibold text-amber-200">Direct Activation Link:</p>
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-action-warning space-y-1">
+                <p className="font-semibold text-action-warning">Direct Activation Link:</p>
                 <p className="font-mono text-[11px] break-all select-all text-amber-300/90">
                   {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
                 </p>
               </div>
 
               {issued.telegramDeepLink && (
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-300 space-y-1">
+                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-action-info space-y-1">
                   <p className="font-semibold text-sky-200">Telegram Deep Link (share with candidate):</p>
                   <p className="font-mono text-[11px] break-all select-all text-sky-300/90">
                     {issued.telegramDeepLink}
@@ -176,7 +176,7 @@ const api = useApi();
                         setTimeout(() => setLinkCopied(false), 1500);
                       } catch {}
                     }}
-                    className="inline-flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-medium"
+                    className="inline-flex items-center gap-1.5 text-xs text-action-info hover:text-action-info font-medium"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     Copy Telegram Link
@@ -186,7 +186,7 @@ const api = useApi();
 
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-primary)] text-sm font-semibold"
+                className="w-full py-2.5 rounded-xl bg-bg-elevated border border-border text-text-primary text-sm font-semibold"
               >
                 Done
               </button>

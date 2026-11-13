@@ -41,12 +41,12 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  submitted: "text-amber-400",
-  acknowledged: "text-blue-400",
-  assigned: "text-purple-400",
+  submitted: "text-action-warning",
+  acknowledged: "text-action-primary",
+  assigned: "text-unit-c",
   in_progress: "text-cyan-400",
-  resolved: "text-emerald-400",
-  feedback: "text-indigo-400",
+  resolved: "text-action-success",
+  feedback: "text-action-primary",
 };
 
 const FEEDBACK_CATEGORIES = [
@@ -126,13 +126,13 @@ export function CampusFeedbackDesk() {
 
   return (
     <WidgetBoundary title="Campus Feedback Desk">
-      <div className="rounded-xl border border-[var(--border)]/50 bg-[var(--bg-elevated)]/40 p-4 sm:p-5">
+      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-cyan-400" />
-            <h3 className="text-sm font-medium text-[var(--text-primary)]">Feedback & Issues</h3>
-            <span className="text-xs text-[var(--text-muted)]">
+            <h3 className="text-sm font-medium text-text-primary">Feedback & Issues</h3>
+            <span className="text-xs text-text-muted">
               {reports.length} report(s)
             </span>
           </div>
@@ -147,20 +147,20 @@ export function CampusFeedbackDesk() {
         </div>
 
         {submitSuccess && (
-          <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-300">
+          <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-action-success">
             Report submitted. You&#39;ll see status updates here.
           </div>
         )}
 
         {/* New Report Form */}
         {showForm && (
-          <div className="mb-4 space-y-3 rounded-lg border border-[var(--border)]/50 bg-[var(--bg-surface)]/40 p-4">
+          <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
             <div>
-              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5" htmlFor="category">Category</label>
+              <label className="block text-[11px] text-text-muted mb-1.5" htmlFor="category">Category</label>
               <select id="category"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 {FEEDBACK_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -170,25 +170,25 @@ export function CampusFeedbackDesk() {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5">
-                Subject <span className="text-rose-400">*</span>
+              <label className="block text-[11px] text-text-muted mb-1.5">
+                Subject <span className="text-action-danger">*</span>
               </label>
               <input
                 type="text"
                 value={formSubject}
                 onChange={(e) => setFormSubject(e.target.value)}
                 placeholder="Brief description of the issue"
-                className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[var(--text-muted)] mb-1.5" htmlFor="details">Details</label>
+              <label className="block text-[11px] text-text-muted mb-1.5" htmlFor="details">Details</label>
               <textarea id="details"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={3}
                 placeholder="Additional context (optional)"
-                className="w-full rounded-lg border border-[var(--border)]/50 bg-[var(--bg-elevated)]/50 px-3 py-2 text-xs text-[var(--text-secondary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
+                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
               />
             </div>
             <button
@@ -209,9 +209,9 @@ export function CampusFeedbackDesk() {
 
         {/* Reports List */}
         {loading ? (
-          <div className="h-24 animate-pulse rounded bg-[var(--bg-elevated)]/20" />
+          <div className="h-24 animate-pulse rounded bg-bg-elevated/20" />
         ) : reports.length === 0 ? (
-          <p className="text-xs text-[var(--text-muted)] py-6 text-center">
+          <p className="text-xs text-text-muted py-6 text-center">
             No reports yet. Be the first to flag an issue.
           </p>
         ) : (
@@ -221,25 +221,25 @@ export function CampusFeedbackDesk() {
               return (
                 <div
                   key={report.id}
-                  className="rounded-lg border border-[var(--border)]/40 bg-[var(--bg-elevated)]/30 p-3"
+                  className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
                 >
                   {/* Subject + Status Badge */}
                   <div className="flex items-start gap-2">
                     <div
-                      className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${STATUS_COLORS[report.status] ?? ""} bg-[var(--bg-elevated)]/50 shrink-0`}
+                      className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${STATUS_COLORS[report.status] ?? ""} bg-bg-elevated/50 shrink-0`}
                     >
                       {STATUS_ICONS[report.status] ?? <AlertTriangle className="h-3.5 w-3.5" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[var(--text-secondary)] truncate">
+                      <p className="text-xs font-medium text-text-secondary truncate">
                         {report.subject}
                       </p>
-                      <p className="text-[10px] text-[var(--text-muted)] capitalize">
+                      <p className="text-[10px] text-text-muted capitalize">
                         {report.category.replace(/_/g, " ")}
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status] ?? "text-[var(--text-muted)]"}`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status] ?? "text-text-muted"}`}
                     >
                       {report.status.replace(/_/g, " ").toUpperCase()}
                     </span>
@@ -257,12 +257,12 @@ export function CampusFeedbackDesk() {
                               className={`h-2 w-2 rounded-full ${
                                 done
                                   ? "bg-cyan-400"
-                                  : "bg-[var(--bg-elevated)]"
+                                  : "bg-bg-elevated"
                               } ${isCurrent ? "ring-2 ring-cyan-400/40" : ""}`}
                             />
                             <span
                               className={`mt-1 text-[8px] ${
-                                done ? "text-cyan-300" : "text-[var(--text-muted)]"
+                                done ? "text-cyan-300" : "text-text-muted"
                               }`}
                             >
                               {step.label}
@@ -271,7 +271,7 @@ export function CampusFeedbackDesk() {
                           {i < STATUS_STEPS.length - 1 && (
                             <div
                               className={`h-px flex-1 ${
-                                i < stepIdx ? "bg-cyan-400/50" : "bg-[var(--bg-elevated)]"
+                                i < stepIdx ? "bg-cyan-400/50" : "bg-bg-elevated"
                               }`}
                             />
                           )}
@@ -283,24 +283,24 @@ export function CampusFeedbackDesk() {
                   {/* Follow-through details */}
                   <div className="mt-3 space-y-1.5">
                     {report.assignedTo && (
-                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                      <p className="text-[10px] text-text-muted flex items-center gap-1">
                         <User className="h-3 w-3" />
-                        Assigned to: <span className="text-[var(--text-secondary)]">{report.assignedTo}</span>
+                        Assigned to: <span className="text-text-secondary">{report.assignedTo}</span>
                       </p>
                     )}
                     {report.reviewerNote && (
-                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                      <p className="text-[10px] text-text-muted flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
                         <span className="line-clamp-2">{report.reviewerNote}</span>
                       </p>
                     )}
                     {report.notes && report.status === "in_progress" && (
-                      <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                      <p className="text-[10px] text-text-muted flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span className="line-clamp-2">{report.notes}</span>
                       </p>
                     )}
-                    <p className="text-[10px] text-[var(--text-muted)]">
+                    <p className="text-[10px] text-text-muted">
                       {new Date(report.createdAt).toLocaleDateString()}
                       {report.resolvedAt
                         ? ` · Resolved ${new Date(report.resolvedAt).toLocaleDateString()}`

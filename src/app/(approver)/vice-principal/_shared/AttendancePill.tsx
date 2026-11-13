@@ -8,10 +8,10 @@ export interface AttendancePillProps {
 export function AttendancePill({ pct, className }: AttendancePillProps) {
   const tone =
     pct >= 85
-      ? "bg-[var(--action-primary)]/10 text-[var(--action-primary)]"
+      ? "bg-action-primary/10 text-action-primary"
       : pct >= 75
-        ? "bg-[var(--action-warning)]/10 text-[var(--action-warning)]"
-        : "bg-[var(--action-danger)]/10 text-[var(--action-danger)]";
+        ? "bg-action-warning/10 text-action-warning"
+        : "bg-action-danger/10 text-action-danger";
 
   return (
     <span

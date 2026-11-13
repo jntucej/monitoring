@@ -24,8 +24,8 @@ export interface SeriesDef {
 }
 
 export const CHART_PALETTE = [
-  "#10b981", "#3b82f6", "#f59e0b", "#ef4444",
-  "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16",
+  "var(--action-success)", "var(--action-primary)", "var(--action-warning)", "var(--action-danger)",
+  "var(--unit-c)", "var(--action-info)", "var(--unit-c)", "var(--action-success)",
 ];
 
 const AXIS = {

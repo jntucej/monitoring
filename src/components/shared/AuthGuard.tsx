@@ -115,18 +115,18 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   if (timedOut && !hasHydrated) {
     router.replace("/login");
     return (
-      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-semibold text-[var(--text-muted)]">Verifying security credentials...</p>
+      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
+        <div className="w-10 h-10 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );
   }
 
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
-      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-[var(--bg-base)] text-[var(--text-primary)]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-semibold text-[var(--text-muted)]">Verifying security credentials...</p>
+      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
+        <div className="w-10 h-10 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );
   }

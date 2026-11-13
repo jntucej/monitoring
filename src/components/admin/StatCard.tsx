@@ -46,7 +46,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           tabIndex={0}
           onClick={handleClick}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
-          className="group relative overflow-hidden bg-[var(--bg-surface)] rounded-xl sm:rounded-2xl border border-[var(--border)] hover:border-indigo-500/50 p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10"
+          className="group relative overflow-hidden bg-bg-surface rounded-xl sm:rounded-2xl border border-border hover:border-indigo-500/50 p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10"
           title={`Click to view context & breakdown for ${label}`}
         >
           {/* Reactive Ambient Back Glow */}
@@ -64,13 +64,13 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
-                <p className="text-[10px] sm:text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider truncate">
+                <p className="text-[10px] sm:text-xs font-semibold text-text-muted uppercase tracking-wider truncate">
                   <span className="sm:hidden text-base">{emoji}</span>
                   <span className="hidden sm:inline">{emoji ? `${emoji} ${label}` : label}</span>
                 </p>
-                <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
               </div>
-              <div className="kpi-number text-lg sm:text-2xl font-extrabold text-[var(--text-primary)] mt-0.5 sm:mt-1">
+              <div className="kpi-number text-lg sm:text-2xl font-extrabold text-text-primary mt-0.5 sm:mt-1">
                 {activeLoading ? (
                   <SineWaveLoader />
                 ) : isNumeric ? (
@@ -80,7 +80,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
                 )}
               </div>
               {trend ? (
-                <p className="text-[10px] sm:text-xs font-medium text-[var(--text-muted)] mt-0.5 sm:mt-1 truncate">{trend}</p>
+                <p className="text-[10px] sm:text-xs font-medium text-text-muted mt-0.5 sm:mt-1 truncate">{trend}</p>
               ) : null}
             </div>
           </div>
@@ -96,7 +96,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           size="md"
         >
           <div className="space-y-4 p-1">
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex items-center gap-4">
+            <div className="p-4 rounded-xl border border-border bg-bg-surface flex items-center gap-4">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                 style={{ backgroundColor: `${color}20`, color }}
@@ -104,18 +104,18 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
                 <Icon className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-[var(--text-primary)]">{label}</h4>
-                <div className="text-2xl font-black text-[var(--text-primary)] mt-0.5">
+                <h4 className="text-sm font-bold text-text-primary">{label}</h4>
+                <div className="text-2xl font-black text-text-primary mt-0.5">
                   {isNumeric ? <CountUp value={numericValue} /> : value}
                 </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-[var(--bg-base)] border border-[var(--border)] space-y-2 text-xs">
-              <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
-                <Activity className="w-4 h-4 text-emerald-400" /> Live Metric Analysis
+            <div className="p-3 rounded-lg bg-bg-base border border-border space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-semibold text-text-primary">
+                <Activity className="w-4 h-4 text-action-success" /> Live Metric Analysis
               </div>
-              <p className="text-[var(--text-muted)] leading-relaxed">
+              <p className="text-text-muted leading-relaxed">
                 {trend ? `Current telemetry status: ${trend}. ` : ""}
                 This floating stat container monitors real-time activity across campus gates. All values update live via automated terminal scanning streams.
               </p>

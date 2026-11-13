@@ -32,8 +32,8 @@ export function AuditView() {
     <div className="space-y-4">
       <WeekBar />
       <header>
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Audit Trail</h1>
-        <p className="text-xs text-[var(--text-muted)]">
+        <h1 className="text-lg font-semibold text-text-primary">Audit Trail</h1>
+        <p className="text-xs text-text-muted">
           Decisions, overrides, and governance records
         </p>
       </header>
@@ -54,15 +54,15 @@ export function AuditView() {
             {logs.map((log) => (
               <li
                 key={log.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3"
+                className="rounded-xl border border-border bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{log.action}</p>
-                  <span className="text-[10px] text-[var(--text-muted)]">
+                  <span className="text-[10px] text-text-muted">
                     {new Date(log.timestamp).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                <p className="mt-1 text-xs text-text-secondary">
                   {log.user_name ?? "System"} ({log.user_role ?? "sys"})
                 </p>
               </li>

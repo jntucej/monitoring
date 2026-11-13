@@ -88,8 +88,8 @@ export function StudentContextPanel({
 
   if (loading && !student) {
     return (
-      <aside className="min-w-0 w-full border-l border-[var(--border)] bg-[var(--bg-surface)] p-4">
-        <div className="flex items-center gap-2 py-6 text-sm text-[var(--text-muted)]">
+      <aside className="min-w-0 w-full border-l border-border bg-bg-surface p-4">
+        <div className="flex items-center gap-2 py-6 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading student…
         </div>
       </aside>
@@ -97,14 +97,14 @@ export function StudentContextPanel({
   }
 
   return (
-    <aside className="min-w-0 w-full border-l border-[var(--border)] bg-[var(--bg-surface)] p-4 md:sticky md:top-4 md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+    <aside className="min-w-0 w-full border-l border-border bg-bg-surface p-4 md:sticky md:top-4 md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+          <p className="text-sm font-semibold text-text-primary truncate">
             {student?.name || "Selected student"}
           </p>
-          <p className="text-[11px] font-mono text-[var(--text-muted)]">
+          <p className="text-[11px] font-mono text-text-muted">
             Roll {student?.roll || "—"}
           </p>
         </div>
@@ -112,7 +112,7 @@ export function StudentContextPanel({
           type="button"
           onClick={onClose}
           aria-label="Close context panel"
-          className="rounded p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+          className="rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated"
         >
           <X className="w-4 h-4" />
         </button>
@@ -121,22 +121,22 @@ export function StudentContextPanel({
       {/* Summary */}
       <div className="grid grid-cols-2 gap-2 mb-4">
         <div className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-3">
-          <div className="flex items-center gap-1.5 text-xs text-emerald-300">
+          <div className="flex items-center gap-1.5 text-xs text-action-success">
             <Clock className="w-3.5 h-3.5" /> Present
           </div>
-          <p className="mt-1 text-xl font-bold text-emerald-400 tabular-nums">{present}</p>
+          <p className="mt-1 text-xl font-bold text-action-success tabular-nums">{present}</p>
         </div>
         <div className="rounded-lg border border-rose-400/30 bg-rose-400/10 p-3">
-          <div className="flex items-center gap-1.5 text-xs text-rose-300">
+          <div className="flex items-center gap-1.5 text-xs text-action-danger">
             <CalendarDays className="w-3.5 h-3.5" /> Absent
           </div>
-          <p className="mt-1 text-xl font-bold text-rose-400 tabular-nums">{absent}</p>
+          <p className="mt-1 text-xl font-bold text-action-danger tabular-nums">{absent}</p>
         </div>
       </div>
 
       {/* Attendance history */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
           Recent attendance
         </p>
         {loading ? (
@@ -153,19 +153,19 @@ export function StudentContextPanel({
             {rows.map((r, i) => (
               <li
                 key={r.id ?? `${r.date}-${i}`}
-                className="flex items-center justify-between gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg-elevated px-3 py-2 text-xs"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <User className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
-                  <span className="text-[var(--text-secondary)] truncate">
+                  <User className="w-3.5 h-3.5 text-text-muted shrink-0" />
+                  <span className="text-text-secondary truncate">
                     {r.date ? new Date(r.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "—"}
                   </span>
                 </div>
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                     r.status === "PRESENT" || r.status === "IN"
-                      ? "bg-emerald-400/15 text-emerald-400"
-                      : "bg-rose-400/15 text-rose-400"
+                      ? "bg-emerald-400/15 text-action-success"
+                      : "bg-rose-400/15 text-action-danger"
                   }`}
                 >
                   {r.status || "—"}
@@ -178,7 +178,7 @@ export function StudentContextPanel({
           <button
             type="button"
             onClick={() => setReloadKey((k) => k + 1)}
-            className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline decoration-dotted"
+            className="text-[11px] text-text-muted hover:text-text-primary underline decoration-dotted"
           >
             Refresh
           </button>

@@ -14,12 +14,12 @@ export interface UpcomingItem {
 export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
   if (items.length === 0) {
     return (
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
-          <Clock className="size-4 text-[var(--text-muted)]" />
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">Due soon</h2>
+          <Clock className="size-4 text-text-muted" />
+          <h2 className="text-sm font-semibold text-text-primary">Due soon</h2>
         </header>
-        <p className="text-xs text-[var(--text-muted)]">
+        <p className="text-xs text-text-muted">
           Nothing due in the next 24 hours.
         </p>
       </section>
@@ -27,10 +27,10 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5">
+    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
-        <Clock className="size-4 text-[var(--action-warning)]" />
-        <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+        <Clock className="size-4 text-action-warning" />
+        <h2 className="text-sm font-semibold text-text-primary">
           Due in next 24h
         </h2>
       </header>
@@ -40,14 +40,14 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
           <li key={item.ticket}>
             <Link
               href={`/supervisor/response/escalations?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex min-h-[44px] items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-[var(--bg-elevated)]"
+              className="flex min-h-[44px] items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-bg-elevated"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-[var(--text-primary)]">{item.subject}</p>
-                <p className="text-[10px] text-[var(--text-muted)]">{item.ticket}</p>
+                <p className="truncate font-medium text-text-primary">{item.subject}</p>
+                <p className="text-[10px] text-text-muted">{item.ticket}</p>
               </div>
               <SlaBadge slaDeadline={item.slaDeadline} status="PENDING" />
-              <ArrowRight className="size-3 shrink-0 text-[var(--text-muted)]" />
+              <ArrowRight className="size-3 shrink-0 text-text-muted" />
             </Link>
           </li>
         ))}

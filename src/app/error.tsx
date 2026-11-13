@@ -48,7 +48,7 @@ export default function RootError({
         padding: "2rem",
         textAlign: "center",
       }}
-      className="bg-[var(--bg-base)] text-[var(--text-primary)]"
+      className="bg-bg-base text-text-primary"
     >
       {chunk ? (
         <>
@@ -66,8 +66,8 @@ export default function RootError({
             style={{
               padding: "0.5rem 1rem",
               borderRadius: "0.5rem",
-              background: "var(--action-primary, #10b981)",
-              color: "#08130f",
+              background: "var(--action-primary, var(--action-success))",
+              color: "var(--bg-base)",
               fontWeight: 600,
               cursor: "pointer",
             }}

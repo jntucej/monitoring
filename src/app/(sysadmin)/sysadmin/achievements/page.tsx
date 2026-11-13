@@ -74,18 +74,18 @@ function SysadminAchievementsInner() {
               description="Earned achievements appear here once awarded."
             />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {earned.map((a) => (
                 <div key={a.code} className="p-3 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
                     <span className="text-lg">{a.icon || "🏆"}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{a.title}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{a.description}</p>
+                    <p className="text-sm font-medium text-text-primary">{a.title}</p>
+                    <p className="text-xs text-text-muted">{a.description}</p>
                   </div>
                   {a.earnedAt && (
-                    <span className="text-[11px] text-[var(--text-muted)] shrink-0">
+                    <span className="text-[11px] text-text-muted shrink-0">
                       {new Date(a.earnedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
                   )}
@@ -101,18 +101,18 @@ function SysadminAchievementsInner() {
           {unearned.length === 0 ? (
             <EmptyState icon={<Star className="w-6 h-6" />} title="All achievements earned" />
           ) : (
-            <div className="divide-y divide-[var(--border)]">
+            <div className="divide-y divide-border">
               {unearned.map((a) => (
                 <div key={a.code} className="p-3 flex items-center gap-3 opacity-70">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-elevated)] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center shrink-0">
                     <span className="text-lg">{a.icon || "⭐"}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-[var(--text-secondary)]">{a.title}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{a.description}</p>
+                    <p className="text-sm font-medium text-text-secondary">{a.title}</p>
+                    <p className="text-xs text-text-muted">{a.description}</p>
                   </div>
                   {a.tier && (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-[var(--bg-elevated)] text-[var(--text-muted)] shrink-0">{a.tier}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted shrink-0">{a.tier}</span>
                   )}
                 </div>
               ))}

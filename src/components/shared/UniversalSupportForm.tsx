@@ -102,16 +102,16 @@ export function UniversalSupportForm({
   };
 
   const selectClass =
-    "rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]";
+    "rounded-md border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary";
   const inputClass =
-    "w-full rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)]";
+    "w-full rounded-md border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary";
 
   return (
     <form
       onSubmit={submit}
-      className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4"
+      className="space-y-3 rounded-xl border border-border bg-bg-surface p-4"
     >
-      <h2 className="text-sm font-semibold text-[var(--text-primary)]">Create Support Request</h2>
+      <h2 className="text-sm font-semibold text-text-primary">Create Support Request</h2>
 
       <label className="sr-only" htmlFor="support-subject">
         Subject
@@ -180,8 +180,8 @@ export function UniversalSupportForm({
           aria-live="polite"
           className={
             msg.kind === "ok"
-              ? "rounded-md border border-[var(--action-primary)]/40 bg-[var(--action-primary)]/10 p-2 text-xs text-[var(--action-primary)]"
-              : "rounded-md border border-[var(--action-danger)]/40 bg-[var(--action-danger)]/10 p-2 text-xs text-[var(--action-danger)]"
+              ? "rounded-md border border-action-primary/40 bg-action-primary/10 p-2 text-xs text-action-primary"
+              : "rounded-md border border-action-danger/40 bg-action-danger/10 p-2 text-xs text-action-danger"
           }
         >
           {msg.text}
@@ -191,7 +191,7 @@ export function UniversalSupportForm({
       <button
         type="submit"
         disabled={busy}
-        className="flex items-center gap-2 rounded-md bg-[var(--action-primary)] px-3 py-2 text-sm text-white disabled:opacity-50"
+        className="flex items-center gap-2 rounded-md bg-action-primary px-3 py-2 text-sm text-white disabled:opacity-50"
       >
         {busy ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

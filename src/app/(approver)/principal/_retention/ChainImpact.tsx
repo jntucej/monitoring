@@ -13,11 +13,11 @@ export function ChainImpact({
 }) {
   if (total === 0) {
     return (
-      <section className="rounded-2xl border border-[var(--action-primary)]/30 bg-[var(--action-primary)]/5 p-4 sm:p-5">
-        <p className="text-sm font-medium text-[var(--action-primary)]">
+      <section className="rounded-2xl border border-action-primary/30 bg-action-primary/5 p-4 sm:p-5">
+        <p className="text-sm font-medium text-action-primary">
           No one is waiting on you
         </p>
-        <p className="mt-1 text-xs text-[var(--text-muted)]">
+        <p className="mt-1 text-xs text-text-muted">
           Your queue is clear — the chain is moving.
         </p>
       </section>
@@ -25,36 +25,36 @@ export function ChainImpact({
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--action-warning)]/30 bg-[var(--action-warning)]/5 p-4 sm:p-5">
+    <section className="rounded-2xl border border-action-warning/30 bg-action-warning/5 p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
-        <Users className="size-4 text-[var(--action-warning)]" />
-        <h2 className="text-sm font-semibold text-[var(--action-warning)]">
+        <Users className="size-4 text-action-warning" />
+        <h2 className="text-sm font-semibold text-action-warning">
           {total} {total === 1 ? "person is" : "people are"} blocked on you
         </h2>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <GraduationCap className="size-4 text-[var(--text-muted)]" />
+          <GraduationCap className="size-4 text-text-muted" />
           <div>
-            <p className="text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+            <p className="text-2xl font-semibold tabular-nums text-text-primary">
               {students}
             </p>
-            <p className="text-[10px] text-[var(--text-muted)]">Students</p>
+            <p className="text-[10px] text-text-muted">Students</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Users className="size-4 text-[var(--text-muted)]" />
+          <Users className="size-4 text-text-muted" />
           <div>
-            <p className="text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
+            <p className="text-2xl font-semibold tabular-nums text-text-primary">
               {faculty}
             </p>
-            <p className="text-[10px] text-[var(--text-muted)]">Faculty & HODs</p>
+            <p className="text-[10px] text-text-muted">Faculty & HODs</p>
           </div>
         </div>
       </div>
 
-      <p className="mt-3 flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+      <p className="mt-3 flex items-center gap-1 text-xs text-text-secondary">
         Every approval you clear moves {total} people forward
         <ArrowRight className="size-3" />
       </p>

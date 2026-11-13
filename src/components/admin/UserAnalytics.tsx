@@ -57,17 +57,17 @@ export function UserAnalytics() {
     document.body.removeChild(link);
   };
 
-  if (loading) return <div className="p-8 text-center text-xs text-[var(--text-secondary)]">Computing Behavioral Engagement Metrics...</div>;
+  if (loading) return <div className="p-8 text-center text-xs text-text-secondary">Computing Behavioral Engagement Metrics...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <p className="text-xl font-bold flex items-center gap-2">
-            <Users className="h-6 w-6 text-blue-400" />
+            <Users className="h-6 w-6 text-action-primary" />
             User & Role Behavioral Analytics
           </p>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-secondary">
             Engagement scoring (0-100), adoption trends by role, and active user analytics.
           </p>
         </div>
@@ -78,23 +78,23 @@ export function UserAnalytics() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <Users className="h-8 w-8 text-emerald-400" />
+          <Users className="h-8 w-8 text-action-success" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Daily Active Users (DAU)</div>
+            <div className="text-xs text-text-secondary">Daily Active Users (DAU)</div>
             <div className="text-2xl font-bold">{trends.dau}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-blue-400" />
+          <TrendingUp className="h-8 w-8 text-action-primary" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">Monthly Active Users (MAU)</div>
+            <div className="text-xs text-text-secondary">Monthly Active Users (MAU)</div>
             <div className="text-2xl font-bold">{trends.mau}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <UserX className="h-8 w-8 text-purple-400" />
+          <UserX className="h-8 w-8 text-unit-c" />
           <div>
-            <div className="text-xs text-[var(--text-secondary)]">DAU / MAU Ratio</div>
+            <div className="text-xs text-text-secondary">DAU / MAU Ratio</div>
             <div className="text-2xl font-bold">
               {trends.mau > 0 ? Math.round((trends.dau / trends.mau) * 100) : 0}%
             </div>
@@ -110,7 +110,7 @@ export function UserAnalytics() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                <tr className="border-b border-border text-text-secondary">
                   <th className="p-2">User / Email</th>
                   <th className="p-2">Role</th>
                   <th className="p-2">Engagement Score</th>
@@ -120,21 +120,21 @@ export function UserAnalytics() {
               </thead>
               <tbody>
                 {metrics.map((u) => (
-                  <tr key={u.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-surface-elevated)]">
+                  <tr key={u.id} className="border-b border-border hover:bg-[var(--bg-surface-elevated)]">
                     <td className="p-2">
                       <div className="font-semibold">{u.name}</div>
-                      <div className="text-[var(--text-secondary)] text-[10px]">{u.email}</div>
+                      <div className="text-text-secondary text-[10px]">{u.email}</div>
                     </td>
-                    <td className="p-2 font-mono text-[var(--text-secondary)]">{u.role}</td>
+                    <td className="p-2 font-mono text-text-secondary">{u.role}</td>
                     <td className="p-2">
                       <Badge variant={u.engagement_score >= 70 ? "success" : u.engagement_score >= 40 ? "leave" : "error"} className="text-xs">
                         {u.engagement_score} / 100
                       </Badge>
                     </td>
-                    <td className="p-2 text-[var(--text-secondary)]">
+                    <td className="p-2 text-text-secondary">
                       {u.login_frequency} logins • {u.scan_frequency} scans
                     </td>
-                    <td className="p-2 text-[var(--text-secondary)]">{new Date(u.last_active_at).toLocaleDateString()}</td>
+                    <td className="p-2 text-text-secondary">{new Date(u.last_active_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>

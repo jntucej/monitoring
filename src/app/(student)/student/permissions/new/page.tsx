@@ -18,10 +18,10 @@ export default function NewPermissionPage() {
         {/* Page title — global DynamicHeader renders the app header */}
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <FilePlus2 className="w-6 h-6 text-[var(--action-primary)]" />
-            <p className="text-xl md:text-2xl font-bold text-[var(--text-primary)]">New Permission Request</p>
+            <FilePlus2 className="w-6 h-6 text-action-primary" />
+            <p className="text-xl md:text-2xl font-bold text-text-primary">New Permission Request</p>
           </div>
-          <p className="text-xs md:text-sm text-[var(--text-muted)]">
+          <p className="text-xs md:text-sm text-text-muted">
             Raise a hostel, exam-document, or department-memo request and track its approval.
           </p>
         </div>
