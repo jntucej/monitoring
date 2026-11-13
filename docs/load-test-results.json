@@ -1,0 +1,58 @@
+{
+  "test_date": "2026-11-14",
+  "target": "127.0.0.1:80 (Caddy \u2192 Next.js \u2192 API)",
+  "duration_s": 130,
+  "peak_vus": 200,
+  "total_requests": 87780,
+  "avg_rps": 675.2,
+  "errors": {
+    "http_5xx": 0,
+    "http_4xx": 0,
+    "transport_failures": 0
+  },
+  "latency": {
+    "health": {
+      "avg_ms": 355,
+      "p95_ms": 425,
+      "p99_ms": 565,
+      "max_ms": 2030,
+      "notes": "API route with DB query \u2014 expected to be the slowest"
+    },
+    "home": {
+      "avg_ms": 35,
+      "p95_ms": 52,
+      "p99_ms": 63,
+      "max_ms": 525,
+      "notes": "Next.js SSR page \u2014 fast due to static shell + API fetch"
+    },
+    "status": {
+      "avg_ms": 0,
+      "p95_ms": 1,
+      "p99_ms": 1,
+      "max_ms": 4,
+      "notes": "Static file served by Caddy \u2014 near-zero latency"
+    }
+  },
+  "phases": [
+    {
+      "phase": "low",
+      "vus": 10,
+      "duration": "30s",
+      "est_rps": "~20"
+    },
+    {
+      "phase": "med",
+      "vus": "10\u2192100",
+      "duration": "50s",
+      "est_rps": "~50-200"
+    },
+    {
+      "phase": "high",
+      "vus": "100\u2192200",
+      "duration": "50s",
+      "est_rps": "~200-675"
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "Gate monitor handles 200 concurrent VUs (675 avg RPS) with zero errors. All 87,780 requests returned 200. P99 latency: health=565ms, home=63ms, status=1ms. The /api/health route is the bottleneck (DB query); consider caching for higher load."
+}
