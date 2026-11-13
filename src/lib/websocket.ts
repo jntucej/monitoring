@@ -20,6 +20,7 @@ export class GateMonitorWS {
 
   private trafficListeners: Set<TrafficCallback> = new Set();
   private statusListeners: Set<StatusCallback> = new Set();
+  private _sseSource: EventSource | null = null;
   private alertListeners: Set<AlertCallback> = new Set();
   private connectionListeners: Set<ConnectionCallback> = new Set();
 
@@ -70,9 +71,9 @@ export class GateMonitorWS {
       this.socket = null;
     }
     // Close SSE fallback if active
-    if ((this as any)._sseSource) {
-      (this as any)._sseSource.close();
-      (this as any)._sseSource = null;
+    if (this._sseSource) {
+      this._sseSource.close();
+      this._sseSource = null;
     }
     if (this.mockGenerator) {
       this.mockGenerator.stop();
@@ -150,10 +151,14 @@ export class GateMonitorWS {
     };
   }
 
-  private handleIncomingMessage(data: any): void {
-    if (data.type === "traffic" && typeof data.traffic === "number") {
+  type IncomingWSMessage =
+    | { type: "traffic"; traffic: number }
+    | { type: "status"; gateId: string; status: string; timestamp?: number }
+    | { type: "alert"; gateId: string; message: string; severity?: string; timestamp?: number };
+  private handleIncomingMessage(data: IncomingWSMessage): void {
+    if (data.type === "traffic") {
       this.trafficListeners.forEach((fn) => fn(data.traffic));
-    } else if (data.type === "status" && data.gateId && data.status) {
+    } else if (data.type === "status") {
       this.statusListeners.forEach((fn) =>
         fn({ gateId: data.gateId, status: data.status, timestamp: data.timestamp || Date.now() })
       );
@@ -254,7 +259,7 @@ export class GateMonitorWS {
     };
 
     // Store reference for cleanup
-    (this as any)._sseSource = eventSource;
+    this._sseSource = eventSource;
   }
 
   /**

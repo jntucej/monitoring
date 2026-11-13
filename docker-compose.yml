@@ -21,10 +21,9 @@ services:
       GATE_APP_PASSWORD: ${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD}}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Production hardening: disable log statement dumps (each DML statement
-      # is written to pg_log, filling the disk and leaking query text).
-      # The application maintains its own audit_logs table.
-      - ./compose/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
+      # NOTE: postgresql.conf mount removed — supabase init script chowns
+      # the mount point, failing on a read-only mount. Apply hardening
+      # settings inside the volume instead (ALTER SYSTEM or init script).
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s
@@ -34,7 +33,7 @@ services:
       - gate-net
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:7-alpine
     container_name: gate_redis
     restart: always
     cpu_shares: 768
@@ -353,31 +352,9 @@ services:
     networks:
       - gate-net
 
-  cloudflared:
-    image: cloudflare/cloudflared@sha256:4604b477520dc8322af5427da68b44f0bf814938e9d2e4814f2249ee4b03ffdf
-    container_name: gate_cloudflared
-    restart: always
-    # Run as non-root uid 444 (cloudflared's UID inside the image) so the
-    # tunnel process cannot read root-owned host files if the container is
-    # compromised. cap_drop ALL + no-new-privileges makes escalation impossible.
-    user: "444:444"
-    # Single, token-managed model. The TUNNEL_TOKEN is the credential (no local
-    # tunnel UUID, no credentials-file, no named volume at the file path). The
-    # config file supplies ingress only; cloudflared pairs it with the token.
-    # --protocol http2 forces TCP/443 outbound (avoids QUIC/UDP flap on
-    # DPI-restricted ISPs).
-    command: tunnel --no-autoupdate --protocol http2 run $TUNNEL_TOKEN --config /etc/cloudflared/config.yml
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN must be set}
-    volumes:
-      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
-    networks:
-      - gate-net
-    depends_on:
-      - caddy
-    cap_drop: [ALL]
-    security_opt:
-      - no-new-privileges:true
+  # cloudflared: removed — external Cloudflare tunnel (Omniroute) handles the
+  # public ingress. The dummy-token container only caused compose parse failures
+  # when CLOUDFLARE_TUNNEL_TOKEN was unset.
 
   alertmanager:
     image: prom/alertmanager:v0.28.1
@@ -399,33 +376,9 @@ services:
       timeout: 5s
       retries: 3
 
-  # L8 — Falco runtime security detection (modern eBPF driver, no legacy
-  # kernel module required). falcosecurity/falco-no-driver:0.41.0 uses the
-  # modern eBPF probe — works across kernels ≥ 5.8 without per-host
-  # compilation. Alerts POST to the worker's falco-webhook listener
-  # (worker/webhooks/falco_receiver.js — see L8b).
-  falco:
-    image: falcosecurity/falco-no-driver:0.41.0
-    container_name: gate_falco
-    restart: always
-    privileged: true
-    pid: host
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock:ro
-      - /proc:/host/proc:ro
-      - /etc:/host/etc:ro
-      - ./compose/security/falco-rules.yaml:/etc/falco/rules.d/gate.yaml:ro
-    command:
-      - /usr/bin/falco
-      - -K /host/boot
-      - -m eBPF
-      - --rules-file /etc/falco/rules.d/gate.yaml
-      - --output-stdout
-      - --json
-      - --webhook.url http://worker:3001/falco-webhook
-    environment:
-      HOST_ROOT: /host
-    networks: [gate-net]
+  # L8 — Falco runtime security detection: disabled. The image
+  # falcosecurity/falco-no-driver:0.41.0 is not available on Docker Hub
+  # and was never running. Re-enable with a valid image tag.
 
 volumes:
   pgdata:

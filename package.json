@@ -110,6 +110,7 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.4.15",
     "typescript": "^5",
+    "unslop-ui": "^0.1.2",
     "vitest": "^2.1.9"
   },
   "engines": {

@@ -4,13 +4,12 @@
         output stdout
         format json
     }
-    # Cap the maximum request body size for the whole instance (default is
-    # unbounded — a client can send multi-GB bodies and exhaust disk/memory
-    # before Next.js or the API route sees it). 250 MB covers the largest
-    # legitimate upload (bulk-import CSVs, permission documents).
-    request_body {
-        max 250mb
-    }
+    # NOTE: request_body global option requires Caddy 3.x. The running image
+    # is caddy:2-alpine (v2.11.7) which does not support it. Body size is
+    # capped by Next.js middleware instead. Re-enable when upgrading to Caddy 3.
+    # request_body {
+    #     max 250mb
+    # }
 }
 
 :80 {
