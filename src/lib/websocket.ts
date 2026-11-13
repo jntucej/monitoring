@@ -14,8 +14,8 @@ type IncomingWSMessage =
   | { type: "alert"; gateId: string; message: string; severity?: string; timestamp?: number };
 
 function incomingStatusToGateStatus(s: string): import("@/context/GlassContext").GateStatus {
-  const valid = ["open", "closed", "restricted", "lockdown", "maintenance"] as const;
-  return (valid as readonly string[]).includes(s) ? s as import("@/context/GlassContext").GateStatus : "closed";
+  const valid: import("@/context/GlassContext").GateStatus[] = ["entry", "exit", "idle", "warning"];
+  return (valid as string[]).includes(s) ? (s as import("@/context/GlassContext").GateStatus) : "idle";
 }
 
 function incomingSeverity(s: string | undefined): "warning" | "info" | "critical" {
