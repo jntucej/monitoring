@@ -8,6 +8,11 @@ type ConnectionCallback = (connected: boolean, isMock?: boolean, exhausted?: boo
 
 export type WSEvent = "traffic" | "status" | "alert" | "connection";
 
+type IncomingWSMessage =
+  | { type: "traffic"; traffic: number }
+  | { type: "status"; gateId: string; status: string; timestamp?: number }
+  | { type: "alert"; gateId: string; message: string; severity?: string; timestamp?: number };
+
 export class GateMonitorWS {
   private url: string;
   private socket: WebSocket | null = null;
@@ -151,10 +156,6 @@ export class GateMonitorWS {
     };
   }
 
-  type IncomingWSMessage =
-    | { type: "traffic"; traffic: number }
-    | { type: "status"; gateId: string; status: string; timestamp?: number }
-    | { type: "alert"; gateId: string; message: string; severity?: string; timestamp?: number };
   private handleIncomingMessage(data: IncomingWSMessage): void {
     if (data.type === "traffic") {
       this.trafficListeners.forEach((fn) => fn(data.traffic));
