@@ -10,7 +10,9 @@ export default function Icon() {
         style={{
           width: "100%",
           height: "100%",
-          background: "var(--action-success)",
+          // unslop-ignore: ImageResponse has no access to CSS variables;
+          // hex is the only option in this render context.
+          background: "#10b981",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
