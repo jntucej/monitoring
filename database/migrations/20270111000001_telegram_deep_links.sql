@@ -134,7 +134,8 @@ ALTER TABLE public.enrollment_codes
 DO $$
 DECLARE
   cdef TEXT;
-  newdef TEXT;
+  all_actions TEXT;
+  sql TEXT;
 BEGIN
   SELECT pg_get_constraintdef(c.oid) INTO cdef
     FROM pg_constraint c
@@ -145,29 +146,18 @@ BEGIN
   IF cdef IS NULL THEN RETURN; END IF;
   IF cdef LIKE '%TELEGRAM_DEEP_LINK_ISSUED%' THEN RETURN; END IF;
 
-  WITH candidates AS (
-    SELECT v.val FROM (VALUES
-      ('TELEGRAM_DEEP_LINK_ISSUED'),
-      ('TELEGRAM_DEEP_LINK_VERIFIED'),
-      ('TELEGRAM_DEEP_LINK_FAILED'),
-      ('TELEGRAM_DEEP_LINK_REPLAYED')
-    ) AS v(val)
-    WHERE NOT (cdef LIKE '%' || v.val || '%')
-  )
-  SELECT COALESCE(string_agg('''' || val || '''', ', '), '') INTO newdef
-    FROM candidates;
+  all_actions := (
+    SELECT string_agg(quote_literal(action), ', ' ORDER BY action)
+    FROM (
+      SELECT DISTINCT action FROM audit_logs
+      UNION ALL
+      VALUES ('TELEGRAM_DEEP_LINK_ISSUED'), ('TELEGRAM_DEEP_LINK_VERIFIED'),
+             ('TELEGRAM_DEEP_LINK_FAILED'), ('TELEGRAM_DEEP_LINK_REPLAYED')
+    ) actions
+  );
 
-  IF newdef IS NOT NULL THEN
-    EXECUTE 'ALTER TABLE public.audit_logs
-      DROP CONSTRAINT IF EXISTS audit_logs_action_known,
-      ADD CONSTRAINT audit_logs_action_known
-        CHECK (action = ANY (ARRAY[' ||
-             (SELECT string_agg(m, ', ') FROM
-                (SELECT trim(both '''' FROM unnest(regexp_matches(cdef, '\((.*)\)', 'g')) AS u)
-                 CROSS JOIN LATERAL unnest(string_to_array(u, ', ')) AS m) sub)
-             || ', ' || newdef || '])'
-      ;
-  END IF;
+  sql := 'ALTER TABLE public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_action_known, ADD CONSTRAINT audit_logs_action_known CHECK (action = ANY (ARRAY[' || all_actions || ']))';
+  EXECUTE sql;
 END $$;
 
 -- ── 5. schema_migrations registration ───────────────────────────────────────
