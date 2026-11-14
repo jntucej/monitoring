@@ -122,6 +122,34 @@ try {
 `,
           }}
         />
+        {/* Un-hide the Next.js streaming SSR wrapper (S:0) immediately.
+            Next.js wraps client component trees in <div hidden id="S:0">
+            during SSR. The wrapper stays hidden until React hydration
+            completes. On slow connections this produces a black screen.
+            This script runs in <head> before paint, so content is
+            visible on first render. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  function unhide(){
+    var s=document.getElementById('S:0');
+    if(s){s.hidden=false;s.removeAttribute('hidden');}
+    document.querySelectorAll('div[hidden]').forEach(function(d){
+      if(d.id==='S:0'||!d.children.length){d.hidden=false;d.removeAttribute('hidden');}
+    });
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',unhide);
+  }else{
+    unhide();
+  }
+  setTimeout(unhide,300);
+  setTimeout(unhide,1000);
+})();
+`,
+          }}
+        />
         {/* JSON-LD blocks are data islands, not executable scripts: they are
           not affected by script-src, so no nonce is required. */}
         <script

@@ -51,33 +51,58 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   }, [hasHydrated, setHasHydrated]);
 
   const pathname = usePathname();
+  // usePathname() returns null on the server / before hydration.
+  // The layout is shared: check the URL directly so the marketing-page
+  // path works on the initial SSR render too.
+  const effectivePath =
+    pathname ??
+    (typeof window !== "undefined" ? window.location.pathname : "/");
   // The home page is a marketing surface: the floating bot widget and the
   // floating theme cycler both add corner UI that overlaps the hero CTA and
   // mount extra listeners/canvases for no functional benefit. Guarded/role
   // consoles keep both.
-  const isMarketing = pathname === "/" || pathname === "";
+  const isMarketing = effectivePath === "/" || effectivePath === "";
   // The gate scanning kiosk (/gate/*) is a hands-free, zero-chrome surface:
   // the circular floating bot button sits on top of the IN/OUT / Manual
   // entry action bar and collides with the "Manual Entry" label — it
   // must be suppressed there.
-  const isGateKiosk = pathname?.startsWith("/gate/") || pathname === "/gate";
+  const isGateKiosk = effectivePath?.startsWith("/gate/") || effectivePath === "/gate";
+
+  const providers = (
+    <GlassProvider initialDark={true}>
+      <NavigationProvider>
+        <ToastProvider>
+          <SafeAreaAppShell>{children}</SafeAreaAppShell>
+          {/* LiveEventToaster: ambient SSE/poll-to-toast layer, gated
+              per-role inside the component — inert for non-alert roles. */}
+          {!isMarketing && <LiveEventToaster />}
+          {!isMarketing && <FloatingBot />}
+          {!isMarketing && !isGateKiosk && <FloatableThemeCycler />}
+        </ToastProvider>
+      </NavigationProvider>
+    </GlassProvider>
+  );
+
+  // Marketing pages (/, /login, /about, /help) must NOT be wrapped in
+  // Suspense — the <div hidden id="S:0"> wrapper that Suspense creates
+  // keeps the entire page invisible until React hydration completes.
+  // On slow connections or cold caches this produces a black screen.
+  // Role consoles keep the Suspense wrapper for their data-fetching
+  // components.
+  const isPublicPage =
+    effectivePath === "/" ||
+    effectivePath === "" ||
+    effectivePath?.startsWith("/login") ||
+    effectivePath === "/about" ||
+    effectivePath === "/help";
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingStates />}>
-        <GlassProvider initialDark={true}>
-        <NavigationProvider>
-          <ToastProvider>
-            <SafeAreaAppShell>{children}</SafeAreaAppShell>
-            {/* LiveEventToaster: ambient SSE/poll-to-toast layer, gated
-                per-role inside the component — inert for non-alert roles. */}
-            {!isMarketing && <LiveEventToaster />}
-            {!isMarketing && <FloatingBot />}
-            {!isMarketing && !isGateKiosk && <FloatableThemeCycler />}
-          </ToastProvider>
-        </NavigationProvider>
-      </GlassProvider>
-      </Suspense>
+      {isPublicPage ? (
+        providers
+      ) : (
+        <Suspense fallback={<LoadingStates />}>{providers}</Suspense>
+      )}
     </ErrorBoundary>
   );
 }
