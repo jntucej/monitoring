@@ -10,8 +10,10 @@ export default defineConfig({
     "docs/**",
     "scripts/**",
     "packages/**",
-    // ImageResponse prerender has no CSS variables — hex literals are the
-    // only option. These two files are the entire legal-hex surface.
+    // File exclusions: only for contexts where CSS vars cannot resolve at
+    // build time (ImageResponse/OG prerender). Adding a third requires
+    // confirming the context is prerender-only — if it renders in the
+    // browser, use a token instead.
     "src/app/opengraph-image.tsx",
     "src/app/icon.tsx",
     "src/app/**/opengraph-image.tsx",

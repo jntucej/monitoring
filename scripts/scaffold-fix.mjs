@@ -79,6 +79,11 @@ function tsNow() {
    ROUTE TEMPLATE
    ═══════════════════════════════════════════════════════════════════════════ */
 
+// DESIGN RULES header goes in generated files:
+// DESIGN RULES (enforced by unslop-ui + pre-commit, zero-baseline):
+// - colors only from @theme tokens: canvas, surface, ink, action-*; no arbitrary values
+// - one surface per section; never nest .surface-card
+//
 function routeTemplate(ctx) {
   const { apiPath, methods, roles, rateLimit, idempotent } = ctx;
   const resourcePascal = pascal((apiPath || "").replace(/\[[^\]]+\]/g, "").split("/").pop() || "resource");
@@ -121,7 +126,11 @@ function routeTemplate(ctx) {
 
   const handlers = methods.map((method) => {
     if (method === "GET") {
-      return `
+      return // DESIGN RULES (enforced by unslop-ui + pre-commit, zero-baseline):
+// - colors only from @theme tokens: canvas, surface, ink, action-*; no arbitrary values
+// - one surface per section; never nest .surface-card
+//
+`
 /**
  * GET ${apiPath}
  * Auth + rate-limit. Reads via service; returns ok<T> envelope.

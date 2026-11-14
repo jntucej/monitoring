@@ -81,12 +81,11 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     </GlassProvider>
   );
 
-  // Marketing pages (/, /login, /about, /help) must NOT be wrapped in
-  // Suspense — the <div hidden id="S:0"> wrapper that Suspense creates
-  // keeps the entire page invisible until React hydration completes.
-  // On slow connections or cold caches this produces a black screen.
-  // Role consoles keep the Suspense wrapper for their data-fetching
-  // components.
+  // Marketing pages skip the Suspense wrapper entirely. The wrapper is what
+  // produces <div hidden id="S:0"> around the whole client tree during SSR —
+  // everything inside it stays invisible until React hydration completes,
+  // which delays LCP on every cold load. Role consoles keep the wrapper
+  // because their data-fetching components need a real Suspense boundary.
   const isPublicPage =
     effectivePath === "/" ||
     effectivePath === "" ||
@@ -97,6 +96,11 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       {isPublicPage ? (
+        // No Suspense boundary on marketing pages — the <div hidden
+        // id="S:0"> wrapper it creates during SSR keeps the whole tree
+        // invisible until hydration, delaying LCP. A head-side unhide
+        // script was the previous workaround and has been removed;
+        // the wrapper itself is the fix.
         providers
       ) : (
         <Suspense fallback={<LoadingStates />}>{providers}</Suspense>

@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     "JNTUH UCEJ",
     "JNTUCEJ",
     "JNTUH University College of Engineering Jagtial",
+    "JNTUH UCEJ",
     "JNTUH College of Engineering Jagtial",
     "JNTU College of Engineering Jagtial",
     "campus portal Jagtial",
     "gate pass JNTUH UCEJ",
     "student portal JNTUH UCEJ",
     "parent portal JNTUH UCEJ",
-    "Jagtial Telangana engineering college",
   ],
   authors: [{ name: COLLEGE.officialName }],
   creator: COLLEGE.officialName,
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   alternates: { canonical: COLLEGE.baseUrl },
   openGraph: {
     type: "website",
-    siteName: COLLEGE.officialName,
+    siteName: COLLEGE.shortName,
     url: COLLEGE.baseUrl,
     title: `${COLLEGE.officialName} Campus Access Portal`,
     description: COLLEGE.portalPurpose,
@@ -91,44 +91,26 @@ export default async function RootLayout({
   // 'strict-dynamic' blocks every dynamically-imported chunk.
   await headers();
   // The edge middleware stamps a per-request CSP nonce on the x-nonce
-  // request header. Next.js SSR reads it back here so the inline script
-  // in <head> carries the matching nonce attribute; 'strict-dynamic'
-  // in the CSP header then permits it without 'unsafe-inline'.
+  // request header. Next.js SSR reads it back here so any inline script
+  // carries the matching nonce; 'strict-dynamic' in the CSP header then
+  // permits it without 'unsafe-inline'.
+  //
+  // NOTE: the S:0 streaming-wrapper unhide script was removed here.
+  // Next.js wraps the client tree in <div hidden id="S:0"> during SSR
+  // and unhides it on client hydration. A head-side inline script was
+  // the previous workaround, but headless Chromium measures NO_FCP
+  // against it (LCP never lands), which is a real LCP regression on
+  // real devices too: content only appears after JS execution.
+  // The correct fix is to keep the Suspense boundary but ensure the
+  // server-rendered HTML of the home page paints without waiting for
+  // hydration — i.e. move the Suspense wrapper out of the critical
+  // path for marketing pages (already done in ClientProviders for
+  // effectivePath marketing routes).
   const h = await headers();
   const nonce = h.get("x-nonce") ?? "";
   return (
-    <html
-      lang="en-IN"
-    >
+    <html lang="en-IN">
       <head>
-        {/* Un-hide the Next.js streaming SSR wrapper (S:0) immediately.
-            Next.js wraps client component trees in <div hidden id="S:0">
-            during SSR. The wrapper stays hidden until React hydration
-            completes. On slow connections this produces a black screen.
-            This script runs in <head> before paint, so content is
-            visible on first render. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-(function(){
-  function unhide(){
-    var s=document.getElementById('S:0');
-    if(s){s.hidden=false;s.removeAttribute('hidden');}
-    document.querySelectorAll('div[hidden]').forEach(function(d){
-      if(d.id==='S:0'||!d.children.length){d.hidden=false;d.removeAttribute('hidden');}
-    });
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',unhide);
-  }else{
-    unhide();
-  }
-  setTimeout(unhide,300);
-  setTimeout(unhide,1000);
-})();
-`,
-          }}
-        />
         {/* JSON-LD blocks are data islands, not executable scripts: they are
           not affected by script-src, so no nonce is required. */}
         <script
@@ -147,7 +129,7 @@ export default async function RootLayout({
         </a>
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-action-primary focus:px-4 focus:py-2 focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-action-primary focus:px-4 focus:py-2 focus:text-white"
         >
           Skip to main content
         </a>
