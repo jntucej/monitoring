@@ -23,9 +23,16 @@ test.describe("CSP + first-paint (public pages)", () => {
     test(`${path}: SSR content paints, no CSP blocks`, async ({ page }) => {
       const violations: string[] = [];
       page.on("console", (msg) => {
-        if (msg.text().toLowerCase().includes("content security policy")) {
-          violations.push(msg.text());
-        }
+        const t = msg.text();
+        if (!/content security policy/i.test(t)) return;
+        // The Cloudflare edge (cf-ray) sometimes injects its own analytics
+        // beacon (static.cloudflareinsights.com/beacon.min.js) into responses.
+        // Our CSP deliberately blocks third-party scripts — a blocked Cloudflare
+        // beacon is expected and is not a regression in our code. The assertion
+        // that catches the P0 class (our own S:0/unhide script being blocked)
+        // must not trip on the edge's injected script.
+        if (/cloudflareinsights\.com\/beacon\.min\.js/i.test(t)) return;
+        violations.push(t);
       });
 
       await page.goto(path);
