@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { LogIn } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { MagneticButton } from "../ui/MagneticButton";
@@ -23,7 +23,7 @@ import { useFocusPull } from "../../motion/useFocusPull";
 
 export function CTASection() {
   const router = useRouter();
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);
 

@@ -4,8 +4,8 @@ import { useRef } from "react";
 import {
   motion,
   AnimatePresence,
-  useReducedMotion,
-} from "framer-motion";
+  } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { useStickyPreview } from "../../motion/useStickyPreview";
 
 /**
@@ -75,7 +75,7 @@ const MODULES: ModuleDef[] = [
 ];
 
 export function Modules() {
-  const reduced = useReducedMotion() ?? false;
+  const reduced = useNoMotion() ?? false;
   const containerRef = useRef<HTMLElement | null>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const activeIndex = useStickyPreview(

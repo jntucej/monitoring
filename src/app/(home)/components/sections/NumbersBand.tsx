@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { useFocusPull } from "../../motion/useFocusPull";
 import { RollingDigits } from "./RollingDigits";
 
@@ -22,7 +22,7 @@ const NUMBERS = [
 ];
 
 export function NumbersBand() {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);
 

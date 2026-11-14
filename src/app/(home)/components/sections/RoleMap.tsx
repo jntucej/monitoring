@@ -5,10 +5,10 @@ import { useRef, useEffect } from "react";
 import {
   motion,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   useTransform,
 } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import {
   Crown,
   Users,
@@ -146,7 +146,7 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
 }
 
 export function RoleMap() {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const coarse = useRef(false);
   useEffect(() => {
     if (typeof window !== "undefined") {

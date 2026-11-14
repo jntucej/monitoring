@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 
 /**
  * TrustBand — deliberately quiet. No gloss, no tilt. Simple fade-in on
@@ -32,7 +32,7 @@ const PILLARS = [
 ];
 
 export function TrustBand() {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   return (
     <section
       aria-label="Trust and security"

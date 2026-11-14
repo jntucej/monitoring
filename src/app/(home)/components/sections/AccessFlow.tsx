@@ -3,10 +3,10 @@
 import { useRef } from "react";
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useTransform,
 } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { useFocusPull } from "../../motion/useFocusPull";
 
 /**
@@ -38,7 +38,7 @@ const PATH_D =
   "M 20 60 C 120 20, 220 100, 320 60 S 520 20, 620 60";
 
 export function AccessFlow() {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const containerRef = useRef<HTMLElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const { letterSpacing, filter } = useFocusPull(titleRef);

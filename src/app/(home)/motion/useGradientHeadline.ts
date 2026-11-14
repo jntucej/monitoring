@@ -7,7 +7,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 /**
  * useGradientHeadline — a MotionValue<string> that returns a CSS
@@ -33,7 +33,14 @@ import { useReducedMotion } from "framer-motion";
 export function useGradientHeadline(
   ref: RefObject<HTMLElement | null>,
 ): MotionValue<string> {
-  const prefersReduced = useReducedMotion();
+  // Client-only: SSR paints the static 50% 50% position. The first paint
+  // must not depend on JS — the gradient shift is a scroll-time delight,
+  // not a first-paint requirement.
+  const [prefersReduced, setPrefersReduced] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReduced(mq.matches);
+  }, []);
 
   // Hooks must run in the same order every render, so the scroll-linked
   // value is always computed; reduced motion simply gates it at use time.

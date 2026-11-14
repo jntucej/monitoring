@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { useLiveData } from "../hooks/useLiveData";
 import { RollingDigits } from "./RollingDigits";
 
@@ -22,7 +22,7 @@ import { RollingDigits } from "./RollingDigits";
  */
 
 export function LiveCountsStrip() {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const live = useLiveData(30_000);
   const s = live?.stats;
 

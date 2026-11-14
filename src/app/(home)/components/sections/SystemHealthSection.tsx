@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { ShieldCheck, Activity, CheckCircle2 } from "lucide-react";
 
 const AUDIT_METRICS = [
@@ -11,6 +12,7 @@ const AUDIT_METRICS = [
 ];
 
 export function SystemHealthSection() {
+  const reduced = useNoMotion();
   return (
     <section aria-label="System Health and Audits" className="mx-auto w-full max-w-6xl px-6 py-16">
       <div className="surface-card bg-white/[0.03] p-8 backdrop-blur-md">
@@ -39,10 +41,10 @@ export function SystemHealthSection() {
           {AUDIT_METRICS.map((item, idx) => (
             <motion.div
               key={item.label}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={reduced ? false : { opacity: 0, y: 10 }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
+              transition={reduced ? undefined : { duration: 0.4, delay: idx * 0.05 }}
               className="surface-card bg-white/5 p-5"
             >
               <div className="flex items-center justify-between">

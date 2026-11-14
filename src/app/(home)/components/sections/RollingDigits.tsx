@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { useDigitRoll } from "../../motion/useDigitRoll";
 
 /**
@@ -23,7 +23,7 @@ export function RollingDigits({
   cellHeight?: number;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useNoMotion();
   const { digits } = useDigitRoll(value);
 
   if (reduced) {

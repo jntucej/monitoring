@@ -96,11 +96,12 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       {isPublicPage ? (
-        // No Suspense boundary on marketing pages — the <div hidden
-        // id="S:0"> wrapper it creates during SSR keeps the whole tree
-        // invisible until hydration, delaying LCP. A head-side unhide
-        // script was the previous workaround and has been removed;
-        // the wrapper itself is the fix.
+        // No Suspense boundary on marketing pages. A <Suspense> here makes
+        // Next.js emit <div hidden id="S:0"> around the whole client tree
+        // during SSR, keeping the hero invisible until hydration — an LCP
+        // regression on every cold load. (The previous head-side unhide
+        // script was the workaround for that; it has been removed, which is
+        // correct — the wrapper is what must not exist in the first place.)
         providers
       ) : (
         <Suspense fallback={<LoadingStates />}>{providers}</Suspense>

@@ -102,7 +102,13 @@ export async function proxy(req: NextRequest) {
       redirect.headers.set('Content-Security-Policy', csp);
       return redirect;
     }
-    const res = NextResponse.next();
+    // Forward x-nonce + x-url so the layout SSR stamps the per-request
+    // CSP nonce on its script tags and knows it is rendering a
+    // marketing path (no S:0 wrapper).
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('x-url', pathname);
+    const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('Content-Security-Policy', csp);
     return res;
   }
@@ -112,6 +118,7 @@ export async function proxy(req: NextRequest) {
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-request-id', requestId);
     requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('x-url', pathname);
     requestHeaders.set('Content-Security-Policy', csp);
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
@@ -187,6 +194,7 @@ export async function proxy(req: NextRequest) {
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-request-id', requestId);
     requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('x-url', pathname);
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
     res.headers.set('Content-Security-Policy', csp);
@@ -211,6 +219,7 @@ export async function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-request-id', requestId);
   requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('x-url', pathname);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.headers.set('x-request-id', requestId);
   res.headers.set('Content-Security-Policy', csp);

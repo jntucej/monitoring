@@ -4,11 +4,11 @@ import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   motion,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
 } from "framer-motion";
+import { useNoMotion } from "../hooks/useNoMotion";
 import { LogIn, ArrowRight } from "lucide-react";
 import { COLLEGE } from "@/lib/college-config";
 import { MagneticButton } from "../ui/MagneticButton";
@@ -36,7 +36,10 @@ const HEADLINE = COLLEGE.shortName; // "JNTUH UCEJ"
 
 export function Hero() {
   const router = useRouter();
-  const reduced = useReducedMotion();
+  // No-motion on the server and first client paint; motion opts in after
+  // mount unless the user prefers reduced motion. This keeps the SSR HTML
+  // fully opaque — the first paint must not depend on JS executing.
+  const reduced = useNoMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
   const headRef = useRef<HTMLSpanElement | null>(null);
 
