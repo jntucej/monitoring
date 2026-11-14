@@ -4,7 +4,6 @@ import "./globals.css";
 import { COLLEGE } from "@/lib/college-config";
 import { organizationJsonLd } from "@/lib/seo";
 import { ClientProviders } from "./ClientProviders";
-import { buildCspHeader } from "@/lib/csp";
 import { PwaInstallPrompt } from "@/components/shared/PwaInstallPrompt";
 
 export const metadata: Metadata = {
@@ -112,7 +111,14 @@ export default async function RootLayout({
   return (
     <html lang="en-IN">
       <head>
-        <meta httpEquiv="Content-Security-Policy" content={buildCspHeader({ nonce, isDev: process.env.NODE_ENV === "development" })} />
+        {/*
+          CSP is served as a response header by the edge middleware, not
+          as a meta tag. The header carries a fresh per-request nonce +
+          strict-dynamic. A meta tag would be a decoy: when both are
+          present the browser enforces the header, and the header's nonce
+          never matches the nonce baked into the static HTML's script
+          tags, so strict-dynamic blocks every chunk load.
+        */}
         {/* JSON-LD blocks are data islands, not executable scripts: they are
           not affected by script-src, so no nonce is required. */}
         <script
