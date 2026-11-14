@@ -44,15 +44,15 @@ export default function CurfewCard({ payload }: StudentWidgetProps) {
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-xl border border-border py-2">
-          <dt className="text-[10px] uppercase text-text-muted">On time</dt>
+          <dt className="text-xs uppercase text-text-muted">On time</dt>
           <dd className="text-sm font-semibold text-action-success tabular-nums">{data.today.onTime}</dd>
         </div>
         <div className="rounded-xl border border-border py-2">
-          <dt className="text-[10px] uppercase text-text-muted">Late</dt>
+          <dt className="text-xs uppercase text-text-muted">Late</dt>
           <dd className="text-sm font-semibold text-action-warning tabular-nums">{data.today.late}</dd>
         </div>
         <div className="rounded-xl border border-border py-2">
-          <dt className="text-[10px] uppercase text-text-muted">Violations</dt>
+          <dt className="text-xs uppercase text-text-muted">Violations</dt>
           <dd className="text-sm font-semibold text-action-danger tabular-nums">{data.today.violations}</dd>
         </div>
       </dl>

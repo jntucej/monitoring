@@ -100,7 +100,7 @@ export function EmptyState({
           <p className="text-xs text-text-muted max-w-xs">{description}</p>
         )}
 
-        {action && <div className="mt-4">{action}</div>}{!action && <p className="mt-4 text-[11px] text-text-muted opacity-60">No action available</p>}
+        {action && <div className="mt-4">{action}</div>}{!action && <p className="mt-4 text-xs text-text-muted opacity-60">No action available</p>}
       </div>
     </>
   );

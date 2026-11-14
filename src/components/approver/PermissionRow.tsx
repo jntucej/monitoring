@@ -116,7 +116,7 @@ export function PermissionRow({
       className={`group relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-xl border transition-all duration-150 ${
         isSelected
           ? "bg-action-primary/5 border-action-primary shadow-sm"
-          : "bg-bg-surface border-border hover:border-[var(--text-muted)] hover:shadow-sm"
+          : "bg-bg-surface border-border hover:bordertext-muted hover:shadow-sm"
       }`}
     >
       <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
@@ -126,7 +126,7 @@ export function PermissionRow({
           className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 mt-0.5 md:mt-0 ${
             isSelected
               ? "bg-action-primary border-action-primary text-white"
-              : "border-border bg-bg-elevated hover:border-[var(--text-muted)]"
+              : "border-border bg-bg-elevated hover:bordertext-muted"
           }`}
           aria-label={`Select ${request.ticket_number}`}
         >
@@ -147,7 +147,7 @@ export function PermissionRow({
               </span>
             )}
             <span
-              className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+              className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                 request.status === "PENDING"
                   ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
                   : request.status === "APPROVED"

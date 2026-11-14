@@ -21,7 +21,7 @@ export const BotBoat = memo(function BotBoat({
   // fill="white"), which disappears on the light / light-blue themes where
   // the button surface is light. --text-primary flips with the theme
   // (near-white on dark themes, near-black on light themes), so the boat
-  // is always legible against its own bg-[var(--bg-surface)] circle.
+  // is always legible against its own bg-surface circle.
   const ink = "var(--text-primary)";
   const inkDim = "color-mix(in srgb, var(--text-primary) 60%, transparent)";
 

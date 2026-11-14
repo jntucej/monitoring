@@ -17,7 +17,7 @@ export function PrincipalStageTag({ stage }: { stage: string | null | undefined 
       : stage.toUpperCase();
   return (
     <span
-      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+      className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${
         stage === "warden_or_principal" || stage === "principal"
           ? "bg-indigo-500/10 text-action-primary border-indigo-500/20"
           : "bg-sky-500/10 text-action-info border-sky-500/20"
@@ -56,7 +56,7 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
       className={`group relative p-3.5 rounded-xl border transition-all duration-150 cursor-pointer min-w-0 ${
         selected
           ? "bg-action-primary/5 border-action-primary shadow-sm"
-          : "bg-bg-surface border-border hover:border-[var(--text-muted)] hover:shadow-sm"
+          : "bg-bg-surface border-border hover:bordertext-muted hover:shadow-sm"
       }`}
     >
       <div className="flex items-start gap-3 min-w-0">

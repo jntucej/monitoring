@@ -188,7 +188,7 @@ function DockerServicesInner() {
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-left text-sm min-w-[560px]">
+              <table className="w-full text-left text-sm min-w140">
                 <thead>
                   <tr className="border-b border-border text-xs text-text-muted uppercase">
                     <th className="px-4 py-2 font-medium">Container</th>

@@ -42,7 +42,7 @@ function KpiTile({
       )}
       style={{ borderColor: "var(--border)" }}
     >
-      <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>
+      <p className="text-xs font-medium uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>
         {label}
       </p>
       <div className="mt-1 flex items-baseline gap-2">
@@ -78,7 +78,7 @@ function RunsMatrix({ data }: { data: JobsData["runs_matrix"] }) {
         <div />
         {/* column headers */}
         {data.cols.map((col, i) => (
-          <div key={i} className="truncate pb-1 text-center text-[9px]" style={{ color: VIZ_THEME.muted }} title={col}>
+          <div key={i} className="truncate pb-1 text-center text-xs" style={{ color: VIZ_THEME.muted }} title={col}>
             {col}
           </div>
         ))}
@@ -87,7 +87,7 @@ function RunsMatrix({ data }: { data: JobsData["runs_matrix"] }) {
           return (
             <div key={rowLabel} style={{ display: "contents" }}>
               <div
-                className="flex items-center truncate pr-2 text-[11px]"
+                className="flex items-center truncate pr-2 text-xs"
                 style={{ color: VIZ_THEME.text, width: 120 }}
                 title={rowLabel}
               >
@@ -170,15 +170,15 @@ export function JobsContent({ data }: JobsContentProps) {
           <p className="text-sm font-semibold" style={{ color: VIZ_THEME.text }}>
             Run matrix
           </p>
-          <div className="flex items-center gap-3 text-[10px]" style={{ color: VIZ_THEME.muted }}>
+          <div className="flex items-center gap-3 text-xs" style={{ color: VIZ_THEME.muted }}>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-[3px]" style={{ background: statusColor("ok") }} /> 2+ runs
+              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: statusColor("ok") }} /> 2+ runs
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-[3px]" style={{ background: statusColor("warn") }} /> 1 run
+              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: statusColor("warn") }} /> 1 run
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-[3px]" style={{ background: "transparent", border: "1px solid var(--border)" }} /> none
+              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "transparent", border: "1px solid var(--border)" }} /> none
             </span>
           </div>
         </div>
@@ -189,7 +189,7 @@ export function JobsContent({ data }: JobsContentProps) {
         ) : (
           <div className="overflow-x-auto">
             <RunsMatrix data={runs_matrix} />
-            <p className="mt-2 text-[10px]" style={{ color: VIZ_THEME.muted }}>
+            <p className="mt-2 text-xs" style={{ color: VIZ_THEME.muted }}>
               Green = 2+ runs · amber = 1 run · empty = no runs that day
             </p>
           </div>

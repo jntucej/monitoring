@@ -17,7 +17,7 @@ function PermissionTicketInner() {
 
   if (!ticket) {
     return (
-      <div className="p-6 text-center text-[var(--text-muted)]">
+      <div className="p-6 text-center text-muted">
         No ticket specified.
       </div>
     );

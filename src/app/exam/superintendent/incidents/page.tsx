@@ -159,7 +159,7 @@ function ExamSuperintendentIncidentsInner() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-medium text-text-secondary truncate">{a.title ?? a.message ?? "Alert"}</p>
                           <span
-                            className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                            className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                               a.severity === "critical"
                                 ? "bg-rose-500/20 text-action-danger"
                                 : a.severity === "warning"

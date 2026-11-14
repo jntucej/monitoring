@@ -72,7 +72,7 @@ export function ConfirmSheet({
         <div className="flex items-center gap-1.5">
           <span className="font-extrabold text-xs uppercase tracking-wider">{student.flagStatus}</span>
         </div>
-        <p className="text-[11px] opacity-90 mt-0.5">
+        <p className="text-xs opacity-90 mt-0.5">
           {student.flagStatus === "UNAUTHORIZED_EXIT" && "Exit attempt without valid pass."}
           {student.flagStatus === "NO_GATE_PASS" && "No approved gate pass on file."}
           {student.flagStatus === "SUSPENDED" && "Account is suspended."}
@@ -113,7 +113,7 @@ export function ConfirmSheet({
           >
             {/* Handle bar */}
             <div className="flex justify-center pt-3 pb-2">
-              <div className="w-12 h-1.5 rounded-full bg-[var(--border)]" />
+              <div className="w-12 h-1.5 rounded-full bgborder" />
             </div>
 
             {/* Header */}
@@ -213,7 +213,7 @@ export function ConfirmSheet({
                       <select
                         value={selectedReason || ""}
                         onChange={(e) => setSelectedReason(e.target.value as ExitReason)}
-                        className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                        className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ringfocus-ring outline-none"
                       >
                         <option value="">Select reason...</option>
                         <option value="daily_outing">Daily Outing</option>

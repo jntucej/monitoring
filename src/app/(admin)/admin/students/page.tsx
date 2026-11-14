@@ -264,7 +264,7 @@ function AdminStudentsInner() {
           <p className="text-2xl font-bold text-action-info tabular-nums">
             {data?.onCampusToday ?? 0}
           </p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-xs text-text-muted">
             {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
           </p>
         </div>
@@ -290,7 +290,7 @@ function AdminStudentsInner() {
                   <button
                     key={d.code}
                     onClick={() => toggleIn(deptFilter, d.code, setDeptFilter)}
-                    className={`text-[11px] px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 rounded-full border transition ${
                       deptFilter.includes(d.code)
                         ? "border-transparent text-white"
                         : "border-border text-text-primary"
@@ -312,7 +312,7 @@ function AdminStudentsInner() {
                   <button
                     key={y.year}
                     onClick={() => toggleIn(yearFilter, y.year, setYearFilter)}
-                    className={`text-[11px] px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 rounded-full border transition ${
                       yearFilter.includes(y.year)
                         ? "border-action-primary bg-action-primary/10 text-action-primary"
                         : "border-border text-text-primary"
@@ -333,7 +333,7 @@ function AdminStudentsInner() {
                   <button
                     key={t}
                     onClick={() => setTypeFilter(t)}
-                    className={`text-[11px] px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 rounded-full border transition ${
                       typeFilter === t
                         ? "border-action-primary bg-action-primary/10 text-action-primary"
                         : "border-border text-text-primary"
@@ -369,13 +369,13 @@ function AdminStudentsInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, roll, or email…"
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+              className="w-full min-h11 pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 
           <div className="glass-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[640px]">
+              <table className="w-full text-sm min-w160">
                 <thead className="bg-bg-surface/60 text-text-muted text-xs uppercase tracking-wide">
                   <tr>
                     <th className="text-left px-4 py-2.5 font-medium">Student</th>
@@ -403,20 +403,20 @@ function AdminStudentsInner() {
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white shrink-0"
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
                             style={{ background: deptColor(r.department) }}
                           >
                             {initials(r.name)}
                           </div>
                           <div className="min-w-0">
                             <p className="text-text-primary font-medium truncate">{r.name}</p>
-                            <p className="text-[11px] text-text-muted font-mono">{r.roll ?? "—"}</p>
+                            <p className="text-xs text-text-muted font-mono">{r.roll ?? "—"}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-2.5">
                         <span
-                          className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-medium"
+                          className="text-xs uppercase tracking-wide px-2 py-0.5 rounded-full font-medium"
                           style={{
                             background: `${deptColor(r.department)}22`,
                             color: deptColor(r.department),
@@ -481,7 +481,7 @@ function AdminStudentsInner() {
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded hover:bg-bg-surface/60"
+                className="p-2 min-h11 min-w11 flex items-center justify-center rounded hover:bg-bg-surface/60"
               >
                 <X className="w-5 h-5" />
               </button>

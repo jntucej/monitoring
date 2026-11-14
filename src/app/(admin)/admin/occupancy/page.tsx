@@ -22,7 +22,7 @@ export default function OccupancyPage() {
               onClick={() => setActiveTab("heatmap")}
               className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
                 activeTab === "heatmap"
-                  ? "border-[var(--action-success)] text-action-success"
+                  ? "borderaction-success text-action-success"
                   : "border-transparent text-text-secondary"
               }`}
             >
@@ -32,7 +32,7 @@ export default function OccupancyPage() {
               onClick={() => setActiveTab("digital-twin")}
               className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
                 activeTab === "digital-twin"
-                  ? "border-[var(--unit-c)] text-unit-c"
+                  ? "borderunit-c text-unit-c"
                   : "border-transparent text-text-secondary"
               }`}
             >

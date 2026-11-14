@@ -159,7 +159,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.facultyId}
               onChange={(e) => setDraft((d) => ({ ...d, facultyId: e.target.value }))}
-              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
+              className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
               required
             >
               <option value="">Select</option>
@@ -171,7 +171,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.classId}
               onChange={(e) => setDraft((d) => ({ ...d, classId: e.target.value }))}
-              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
+              className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
               required
             >
               <option value="">Select</option>
@@ -183,7 +183,7 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.subjectCode}
               onChange={(e) => setDraft((d) => ({ ...d, subjectCode: e.target.value }))}
-              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
+              className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
               required
             >
               <option value="">Select</option>
@@ -195,14 +195,14 @@ function AdminFacultyAssignmentsInner() {
             <select
               value={draft.role}
               onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value as FacultyAssignment["role"] }))}
-              className="w-full min-h-[44px] px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
+              className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
             >
               <option value="subject_faculty">Subject faculty</option>
               <option value="assistant">Assistant</option>
             </select>
           </label>
           <button type="submit" disabled={saving}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h11 rounded-lg bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Assign
           </button>
         </form>
@@ -213,13 +213,13 @@ function AdminFacultyAssignmentsInner() {
           <div className="p-4 border-b border-border flex flex-wrap items-center gap-2">
             <Link2 className="w-4 h-4 text-action-primary" />
             <span className="text-sm font-semibold">{filtered.length} assignments</span>
-            <div className="ml-auto relative min-w-[160px]">
+            <div className="ml-auto relative min-w40">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter…"
-                className="pl-8 pr-3 py-1.5 min-h-[44px] rounded-lg bg-bg-elevated border border-border text-xs w-full sm:w-40"
+                className="pl-8 pr-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs w-full sm:w-40"
               />
             </div>
           </div>
@@ -245,18 +245,18 @@ function AdminFacultyAssignmentsInner() {
                     <td className="p-3">{className(r.classId)}</td>
                     <td className="p-3 text-text-muted">{subjectLabel(r.subjectCode)}</td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted capitalize">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted capitalize">
                         {r.role.replace("_", " ")}
                       </span>
                     </td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${r.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                         {r.isActive ? "Active" : "Off"}
                       </span>
                     </td>
                     <td className="p-3 text-right">
                       <button onClick={() => unassign(r.id)} aria-label="Unassign"
-                        className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-text-muted hover:text-action-danger transition-colors">
+                        className="p-2 min-h11 min-w11 inline-flex items-center justify-center text-text-muted hover:text-action-danger transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>

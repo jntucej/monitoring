@@ -127,17 +127,17 @@ const api = useApi();
               <div key={b.id} className="p-3 flex items-center justify-between bg-bg-elevated/40 text-xs gap-3">
                 <div className="space-y-0.5 min-w-0">
                   <p className="font-semibold text-action-info font-mono truncate">{b.filename}</p>
-                  <p className="text-[10px] text-text-muted">
+                  <p className="text-xs text-text-muted">
                     {new Date(b.createdAt).toLocaleString("en-IN")} &bull; {b.recordCount} records &bull; {b.size > 1048576 ? `${(b.size / 1048576).toFixed(1)} MB` : `${Math.round(b.size / 1024)} KB`}
                   </p>
                   {b.checksum && (
-                    <p className="text-[10px] font-mono text-text-muted truncate max-w-sm">
+                    <p className="text-xs font-mono text-text-muted truncate max-w-sm">
                       SHA-256: <span className="text-emerald-400/90">{b.checksum.slice(0, 16)}…</span>
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/10 text-action-success font-bold border border-emerald-500/20">{b.status}</span>
+                  <span className="px-2 py-0.5 rounded text-xs uppercase bg-emerald-500/10 text-action-success font-bold border border-emerald-500/20">{b.status}</span>
                 </div>
               </div>
             ))}
@@ -151,9 +151,9 @@ const api = useApi();
                   <div key={v.id} className="p-2 flex items-center justify-between bg-bg-surface">
                     <div>
                       <span className="font-semibold text-action-success font-mono">Verified: {v.recordsVerified || v.records_verified || 0} records</span>
-                      <p className="text-[10px] text-text-muted">{new Date(v.verifiedAt || v.created_at || Date.now()).toLocaleString("en-IN")}</p>
+                      <p className="text-xs text-text-muted">{new Date(v.verifiedAt || v.created_at || Date.now()).toLocaleString("en-IN")}</p>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] uppercase bg-emerald-500/20 text-action-success font-bold">{v.status || "PASSED"}</span>
+                    <span className="px-2 py-0.5 rounded text-xs uppercase bg-emerald-500/20 text-action-success font-bold">{v.status || "PASSED"}</span>
                   </div>
                 ))}
               </div>

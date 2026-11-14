@@ -130,7 +130,7 @@ const api = useApi();
             <button
               onClick={fetchTelemetry}
               disabled={isSyncing}
-              className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-[11px] font-bold hover:bg-rose-500/30 transition disabled:opacity-50"
+              className="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition disabled:opacity-50"
             >
               Retry
             </button>
@@ -139,7 +139,7 @@ const api = useApi();
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-text-primary">
-            <thead className="bg-bg-elevated text-[10px] font-bold uppercase tracking-wider text-text-muted border-b border-border">
+            <thead className="bg-bg-elevated text-xs font-bold uppercase tracking-wider text-text-muted border-b border-border">
               <tr>
                 <th className="py-2.5 px-3">Action Event</th>
                 <th className="py-2.5 px-3">User / Executed By</th>
@@ -164,15 +164,15 @@ const api = useApi();
                       </td>
                       <td className="py-2.5 px-3">
                         <div className="flex flex-col gap-0.5">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-action-primary border border-indigo-500/30 w-fit">
+                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/20 text-action-primary border border-indigo-500/30 w-fit">
                             {sysTag}
                           </span>
-                          <span className="text-[10px] text-action-success font-mono">
+                          <span className="text-xs text-action-success font-mono">
                             📍 {gpsText}
                           </span>
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                      <td className="py-2.5 px-3 text-text-muted text-xs">
                         {log.timestamp ? new Date(log.timestamp).toLocaleString() : "—"}
                       </td>
                     </tr>

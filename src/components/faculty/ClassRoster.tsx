@@ -79,7 +79,7 @@ export function ClassRoster({
             <button
               type="button"
               onClick={() => void refresh()}
-              className="ml-3 rounded-md border border-border bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary hover:text-text-primary"
+              className="ml-3 rounded-md border border-border bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary hover:text-text-primary"
             >
               Retry
             </button>
@@ -137,7 +137,7 @@ export function ClassRoster({
       </div>
 
       {/* Today's attendance note for the caller's subject */}
-      <div className="rounded-lg border border-border bg-bg-elevated px-3 py-2 text-[11px] text-text-muted">
+      <div className="rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs text-text-muted">
         Today&apos;s attendance for{" "}
         <span className="font-mono font-semibold text-action-primary">
           {subject ?? "your subject"}
@@ -165,7 +165,7 @@ export function ClassRoster({
                 <p className="text-sm font-semibold truncate text-text-primary">
                   {stu.name || "Unnamed student"}
                 </p>
-                <p className="text-[11px] font-mono text-text-muted">
+                <p className="text-xs font-mono text-text-muted">
                   Roll {stu.roll || "—"}
                   {stu.year != null ? ` · Y${stu.year}` : ""}
                   {stu.section ? ` · ${stu.section}` : ""}

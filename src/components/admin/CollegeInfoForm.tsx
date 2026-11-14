@@ -124,7 +124,7 @@ export function CollegeInfoForm() {
           <textarea id="address"
             value={data.address}
             onChange={(e) => update("address", e.target.value)}
-            className={`${inputCls} min-h-[72px]`}
+            className={`${inputCls} min-h18`}
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

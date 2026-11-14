@@ -18,7 +18,7 @@ const ChartRendererImpl = dynamic(
     ssr: false,
     loading: () => (
       <div
-        className="h-[280px] w-full animate-pulse rounded-lg bg-[var(--bg-surface)]"
+        className="h70 w-full animate-pulse rounded-lg bg-surface"
         role="status"
         aria-label="Loading chart"
       />

@@ -696,7 +696,7 @@ export function Scanner({
                 <h2 className="text-sm font-bold text-white truncate">
                   {gateId ? `Gate ${gateId}` : "Scanner"}
                 </h2>
-                <p className="text-[11px] text-text-muted">Auto-detecting · no re-prompt</p>
+                <p className="text-xs text-text-muted">Auto-detecting · no re-prompt</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -730,7 +730,7 @@ export function Scanner({
             {/* Warn when the phone's browser can't decode 1D/2D barcodes
                 natively so the operator knows live auto-detect is QR-only. */}
             {cameraState === "active" && mode === "all" && !barcodeApiAvailable && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
                 <AlertTriangle className="w-3 h-3" />
                 <span>No native barcode decoder in this browser — QR only · Use Upload below</span>
               </div>
@@ -739,7 +739,7 @@ export function Scanner({
             {cameraState === "active" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
                 <div className="w-40 h-40 rounded-2xl border border-white/15" />
-                <p className="text-[11px] font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
+                <p className="text-xs font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
                   {mode === "qr"
                     ? "Point at a QR code — auto-detecting"
                     : "Point at a barcode (1D/2D) — auto-detecting"}
@@ -774,7 +774,7 @@ export function Scanner({
           {/* Actions — a clearly-separated "if the camera can't read it" row,
               distinct from the page's IN/OUT decision bar. */}
           <div className="p-4 pt-3 bg-bg-surface border-t-2 border-border">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               Can&#39;t see the code?
             </p>
             <input

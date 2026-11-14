@@ -163,7 +163,7 @@ export function SpecialItemSelector() {
               {(Object.keys(grouped) as SpecialItemCategory[]).map((cat) =>
                 grouped[cat].length === 0 ? null : (
                   <div key={cat} className="mb-3">
-                    <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                    <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-text-muted">
                       {CAT_LABEL[cat]}
                     </div>
                     <div className="flex flex-wrap gap-2">

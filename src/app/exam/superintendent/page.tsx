@@ -144,7 +144,7 @@ function ExamSuperintendentAccessInner() {
             )}
             {authorised.length > 0 && (
               <div className="overflow-x-auto min-w-0">
-                <table className="w-full text-left text-sm min-w-[560px]">
+                <table className="w-full text-left text-sm min-w140">
                   <thead>
                     <tr className="border-b border-border text-xs text-text-muted uppercase">
                       <th className="py-2 pr-3 font-medium">Candidate</th>

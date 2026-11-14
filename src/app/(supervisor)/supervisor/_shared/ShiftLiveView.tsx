@@ -19,8 +19,8 @@ export function ShiftLiveView() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold text-[var(--text-primary)]">Live Shift</h1>
-        <p className="text-xs text-[var(--text-muted)]">Active shift progress, gate health, and unresolved items</p>
+        <h1 className="text-xl font-bold text-primary">Live Shift</h1>
+        <p className="text-xs text-muted">Active shift progress, gate health, and unresolved items</p>
       </header>
       <ShiftBar
         startedAt={d?.shift?.startedAt ?? null}

@@ -24,7 +24,7 @@ export function MiniStat({ label, value, tone = "neutral", className }: MiniStat
         className
       )}
     >
-      <p className="text-[11px] font-medium text-text-muted">{label}</p>
+      <p className="text-xs font-medium text-text-muted">{label}</p>
       <p
         className={cn(
           "mt-0.5 text-xl font-semibold tabular-nums",

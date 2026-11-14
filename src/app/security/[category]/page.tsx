@@ -160,7 +160,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <span className="text-[10px] font-mono font-bold text-action-success">
+              <span className="text-xs font-mono font-bold text-action-success">
                 {details.categoryName}
               </span>
               <h1 className="text-base md:text-lg font-bold tracking-tight text-text-primary">
@@ -195,10 +195,10 @@ export default function SecurityCategoryPage({ params }: PageProps) {
         <div className="rounded-xl border border-border bg-bg-surface p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-text-muted">
             <span>Security Audit Log</span>
-            <span className="text-[10px] font-mono text-action-success">STATUS: OK</span>
+            <span className="text-xs font-mono text-action-success">STATUS: OK</span>
           </div>
 
-          <div className="bg-bg-base rounded-lg p-2.5 border border-border/60 font-mono text-[11px] space-y-1 text-text-muted max-h-32 overflow-y-auto">
+          <div className="bg-bg-base rounded-lg p-2.5 border border-border/60 font-mono text-xs space-y-1 text-text-muted max-h-32 overflow-y-auto">
             {logs.map((log, i) => (
               <div key={i} className="flex items-center gap-1.5 text-emerald-400/90">
                 <span>✓</span>

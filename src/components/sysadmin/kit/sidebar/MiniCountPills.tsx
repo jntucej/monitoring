@@ -16,7 +16,7 @@ export function MiniCountPills({ counts, label, onClick, className }: MiniCountP
       aria-label={label}
       className={cn("flex items-center h-4 min-w-0", className)}
     >
-      <span className="text-[9px] font-medium text-[var(--text-muted)] tracking-tight">
+      <span className="text-xs font-medium text-muted tracking-tight">
         {counts.join(" · ")}
       </span>
     </button>

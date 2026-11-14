@@ -10,7 +10,7 @@ import type {PresenceMatrixData} from "./types";
 function PlaceholderBadge({ note }: { note: string }) {
   return (
     <span
-      className="ml-auto inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-action-warning"
+      className="ml-auto inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-action-warning"
       title={note}
     >
       Not connected
@@ -81,7 +81,7 @@ export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matri
         ) : (
           <>
             <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[360px]">
+              <table className="w-full text-sm min-w90">
                 <thead>
                   <tr className="text-text-muted text-xs uppercase tracking-wide border-b border-border">
                     <th className="text-left px-3 py-2">Gate</th>
@@ -104,7 +104,7 @@ export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matri
                 </tbody>
               </table>
             </div>
-            <p className="text-[10px] text-text-muted mt-2">
+            <p className="text-xs text-text-muted mt-2">
               Presence-matrix signal. Staff-level attendance detail is admin-scoped.
             </p>
           </>

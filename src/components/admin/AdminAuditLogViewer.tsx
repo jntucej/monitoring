@@ -171,7 +171,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
         </div>
       </div>
 
-      <p className="text-[11px] text-text-muted">
+      <p className="text-xs text-text-muted">
         {scope === "campus"
           ? "Campus scope hides infra-noise actions (auth, MFA, sessions, backups, retention, migrations, metrics, security, RLS)."
           : "All scope shows the complete trail. This view requires the sysadmin role."}

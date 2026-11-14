@@ -116,7 +116,7 @@ export const BotMessages = memo(function BotMessages({
       >
         {loadingOlder && (
           <div className="flex justify-center py-1" role="status" aria-live="polite">
-            <span className="h-3.5 w-3.5 rounded-full border-2 border-[var(--text-muted)] border-t-transparent animate-spin" />
+            <span className="h-3.5 w-3.5 rounded-full border-2 bordertext-muted border-t-transparent animate-spin" />
           </div>
         )}
         {messages.length === 0 && (
@@ -150,7 +150,7 @@ export const BotMessages = memo(function BotMessages({
         )}
 
         {streaming && messages[messages.length - 1]?.content === "" && (
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted px-1">
+          <div className="flex items-center gap-1.5 text-xs text-text-muted px-1">
             <Sparkles className="h-3 w-3 animate-pulse" /> {t.thinking}
           </div>
         )}

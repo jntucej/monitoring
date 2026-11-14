@@ -85,7 +85,7 @@ function GateArc({
       <p className="mt-2 text-xs font-semibold" style={{ color }}>
         {stateLabel}
       </p>
-      <p className="text-[10px] font-mono" style={{ color: VIZ_THEME.muted }}>
+      <p className="text-xs font-mono" style={{ color: VIZ_THEME.muted }}>
         {code}
       </p>
     </div>
@@ -124,17 +124,17 @@ function IncidentRow({ incident }: { incident: SafetyData["incidents"][number] }
           {incident.title}
         </span>
         <span
-          className="rounded px-1 text-[10px] font-medium"
+          className="rounded px-1 text-xs font-medium"
           style={{ background: "var(--bg-surface)", color: sevColor, border: "1px solid var(--border)" }}
         >
           {sev}
         </span>
-        <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
           {new Date(incident.created_at).toLocaleString()}
         </span>
         {!incident.resolved && (
           <span
-            className="rounded px-1 text-[10px] font-semibold uppercase"
+            className="rounded px-1 text-xs font-semibold uppercase"
             style={{ background: "var(--action-danger)", color: "#fff" }}
           >
             open

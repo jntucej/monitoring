@@ -70,7 +70,7 @@ export function MessInchargeStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Mess status bar"
     >
       {/* Left: <window> open · N served · M no-shows · window closes HH:MM */}
@@ -78,7 +78,7 @@ export function MessInchargeStatusBar({
         <span className="inline-flex items-center gap-1.5 min-w-0 shrink-0">
           <span
             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              counts?.active ? "bg-action-success" : "bg-[var(--text-muted)]"
+              counts?.active ? "bg-action-success" : "bgtext-muted"
             }`}
           />
           <span className="text-text-muted">

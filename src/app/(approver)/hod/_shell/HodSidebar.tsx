@@ -72,7 +72,7 @@ export function HodSidebar({
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
       <header className="shrink-0 border-b border-border px-4 py-3">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           HOD
         </p>
         <p className="text-sm font-semibold text-text-primary">
@@ -154,7 +154,7 @@ function LinkRow({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+        "flex min-h11 items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
         active
           ? "bg-action-primary/10 font-medium text-action-primary"
           : "text-text-secondary hover:bg-bg-elevated"
@@ -191,7 +191,7 @@ function GroupRow({
         onClick={onToggle}
         aria-expanded={expanded}
         className={cn(
-          "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+          "flex min-h11 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
           active
             ? "text-action-primary"
             : "text-text-secondary hover:bg-bg-elevated"
@@ -218,7 +218,7 @@ function GroupRow({
                   onClick={onNavigate}
                   aria-current={childActive ? "page" : undefined}
                   className={cn(
-                    "flex min-h-[44px] items-center rounded-md px-3 py-1.5 text-xs transition",
+                    "flex min-h11 items-center rounded-md px-3 py-1.5 text-xs transition",
                     childActive
                       ? "bg-action-primary/10 font-medium text-action-primary"
                       : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary"

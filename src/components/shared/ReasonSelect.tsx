@@ -126,7 +126,7 @@ export function ReasonSelect({
         disabled={disabled || loading}
         required={required}
         className={cn(
-          "w-full h-11 px-3.5 rounded-md bg-bg-surface border border-border text-text-primary text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
+          "w-full h-11 px-3.5 rounded-md bg-bg-surface border border-border text-text-primary text-sm transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
           className
         )}
       >

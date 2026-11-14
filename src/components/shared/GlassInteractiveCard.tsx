@@ -180,7 +180,7 @@ export function GlassInteractiveCard({
       {/* Specular Highlight Gradient */}
       {isHovered && !isOutdoorOrEmergency && (
         <div className="absolute -inset-[1px] rounded-3xl pointer-events-none z-0">
-          <div className="w-full h-full rounded-3xl border border-white/30 bg-gradient-to-br from-white/15 via-transparent to-white/5" />
+          <div className="w-full h-full rounded-3xl border border-white/30 bg-gradient-to-br from-white/15 to-white/5" />
         </div>
       )}
 

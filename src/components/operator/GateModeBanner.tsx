@@ -119,7 +119,7 @@ export function GateModeBanner({
             if (isMaintenance) setOverrideOpen(true);
           }}
           className={[
-            "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-bold tracking-wide",
+            "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold tracking-wide",
             tone,
             pulse ? "animate-pulse" : "",
             isMaintenance ? "cursor-pointer hover:opacity-90" : "cursor-default",
@@ -134,14 +134,14 @@ export function GateModeBanner({
           <button
             type="button"
             onClick={() => setOverrideOpen(true)}
-            className="text-[11px] text-action-warning underline underline-offset-2"
+            className="text-xs text-action-warning underline underline-offset-2"
           >
             Override
           </button>
         )}
 
         {isCurfew && (
-          <span className="text-[11px] text-amber-400/80">
+          <span className="text-xs text-amber-400/80">
             Scans still allowed — curfew advisory
           </span>
         )}
@@ -150,7 +150,7 @@ export function GateModeBanner({
           <button
             type="button"
             onClick={onDismissLockdown}
-            className="ml-1 inline-flex items-center gap-1 text-[11px] text-white/90 underline underline-offset-2"
+            className="ml-1 inline-flex items-center gap-1 text-xs text-white/90 underline underline-offset-2"
             aria-label="Dismiss lockdown message (scan remains disabled)"
           >
             <X className="h-3 w-3" aria-hidden /> dismiss message
@@ -161,7 +161,7 @@ export function GateModeBanner({
       {lockdown && (
         <div
           role="alert"
-          className="mt-1 max-w-md rounded-md border border-action-danger bg-action-danger/10 px-2 py-1 text-[11px] text-action-danger"
+          className="mt-1 max-w-md rounded-md border border-action-danger bg-action-danger/10 px-2 py-1 text-xs text-action-danger"
         >
           <strong>Campus lockdown.</strong>{" "}
           {lockdown.message ?? "Scans are disabled until an administrator lifts the lockdown."}

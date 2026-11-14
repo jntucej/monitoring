@@ -218,7 +218,7 @@ function AdminAnalyticsInner() {
                   key={days}
                   type="button"
                   onClick={() => setRange(days)}
-                  className={`px-3 py-1 min-h-[44px] rounded-lg font-medium transition flex items-center justify-center ${
+                  className={`px-3 py-1 min-h11 rounded-lg font-medium transition flex items-center justify-center ${
                     range === days
                       ? "bg-action-primary text-white shadow"
                       : "text-text-muted hover:text-text-primary"
@@ -232,14 +232,14 @@ function AdminAnalyticsInner() {
               type="button"
               onClick={exportCsv}
               disabled={!data || data.daily.length === 0}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] rounded-xl bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h11 rounded-xl bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
               type="button"
               onClick={load}
-              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary"
+              className="p-2 min-h11 min-w11 flex items-center justify-center rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
@@ -338,7 +338,7 @@ function AdminAnalyticsInner() {
                 height={280}
               />
             ) : (
-              <Skeleton className="h-[280px] w-full rounded-xl" />
+              <Skeleton className="h70 w-full rounded-xl" />
             )}
           </div>
         </WidgetBoundary>
@@ -361,7 +361,7 @@ function AdminAnalyticsInner() {
                 height={280}
               />
             ) : (
-              <Skeleton className="h-[280px] w-full rounded-xl" />
+              <Skeleton className="h70 w-full rounded-xl" />
             )}
           </div>
         </WidgetBoundary>
@@ -384,7 +384,7 @@ function AdminAnalyticsInner() {
                 height={280}
               />
             ) : (
-              <Skeleton className="h-[280px] w-full rounded-xl" />
+              <Skeleton className="h70 w-full rounded-xl" />
             )}
           </div>
         </WidgetBoundary>
@@ -407,7 +407,7 @@ function AdminAnalyticsInner() {
                 height={280}
               />
             ) : (
-              <Skeleton className="h-[280px] w-full rounded-xl" />
+              <Skeleton className="h70 w-full rounded-xl" />
             )}
           </div>
         </WidgetBoundary>

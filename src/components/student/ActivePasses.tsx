@@ -94,14 +94,14 @@ export function ActivePasses() {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                  <span className="text-xs font-semibold uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
                     {pass.finalStatus}
                   </span>
                   {pass.parentStatus !== 'APPROVED' && (
-                    <span className="text-[9px] opacity-60">Parent: {pass.parentStatus}</span>
+                    <span className="text-xs opacity-60">Parent: {pass.parentStatus}</span>
                   )}
                   {pass.adminStatus !== 'APPROVED' && (
-                    <span className="text-[9px] opacity-60">Admin: {pass.adminStatus}</span>
+                    <span className="text-xs opacity-60">Admin: {pass.adminStatus}</span>
                   )}
                 </div>
               </div>

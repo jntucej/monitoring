@@ -122,7 +122,7 @@ const api = useApi();
           {issued && (
             <>
               <div className="p-4 rounded-xl bg-bg-elevated border border-emerald-500/30 text-center space-y-2">
-                <p className="text-[11px] uppercase font-bold text-text-muted tracking-wider">One-Time Code</p>
+                <p className="text-xs uppercase font-bold text-text-muted tracking-wider">One-Time Code</p>
                 <p className="text-3xl font-mono font-black tracking-[0.35em] text-action-success select-all">
                   {issued.code}
                 </p>
@@ -134,7 +134,7 @@ const api = useApi();
                     {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? "Code Copied" : "Copy Code"}
                   </button>
-                  <span className="text-[var(--border)]">•</span>
+                  <span className="textborder">•</span>
                   <button
                     onClick={copyLink}
                     className="inline-flex items-center gap-1.5 text-xs text-action-info hover:text-action-info font-medium"
@@ -152,7 +152,7 @@ const api = useApi();
 
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-action-warning space-y-1">
                 <p className="font-semibold text-action-warning">Direct Activation Link:</p>
-                <p className="font-mono text-[11px] break-all select-all text-amber-300/90">
+                <p className="font-mono text-xs break-all select-all text-amber-300/90">
                   {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
                 </p>
               </div>
@@ -160,10 +160,10 @@ const api = useApi();
               {issued.telegramDeepLink && (
                 <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-action-info space-y-1">
                   <p className="font-semibold text-sky-200">Telegram Deep Link (share with candidate):</p>
-                  <p className="font-mono text-[11px] break-all select-all text-sky-300/90">
+                  <p className="font-mono text-xs break-all select-all text-sky-300/90">
                     {issued.telegramDeepLink}
                   </p>
-                  <p className="text-[10px] text-sky-400/60">
+                  <p className="text-xs text-sky-400/60">
                     Candidate taps link in Telegram → presses Start → shares their
                     phone number via the bot button. Verification is hard-blocked if
                     the number does not match our records.

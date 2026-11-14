@@ -171,7 +171,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
 
         {/* Footer */}
         <div className="border-t border-border p-4">
-          <p className="text-[10px] text-text-muted">
+          <p className="text-xs text-text-muted">
             Campus Management System v1.0
           </p>
         </div>

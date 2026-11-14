@@ -148,7 +148,7 @@ export function FocusMode({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+              className="flex size-11 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
@@ -157,13 +157,13 @@ export function FocusMode({
               <p className="text-sm font-semibold text-text-primary">
                 Focus mode
               </p>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {remaining > 0 ? `${remaining} of ${total} remaining` : "Queue clear"}
                 {sessionDecisions > 0 && ` · ${sessionDecisions} this session`}
               </p>
             </div>
           </div>
-          <div className="hidden items-center gap-2 text-[11px] text-text-muted sm:flex">
+          <div className="hidden items-center gap-2 text-xs text-text-muted sm:flex">
             <Keyboard className="size-3" />
             <kbd className="rounded border border-border px-1.5 py-0.5">Space</kbd>
             approve
@@ -189,11 +189,11 @@ export function FocusMode({
           <div className="w-full max-w-2xl">
             {loading && !current ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="size-6 animate-spin text-text-muted" />
+                <Loader2 className="size-4 animate-spin text-text-muted" />
               </div>
             ) : !current ? (
               <div className="rounded-2xl border-2 border-action-primary/30 bg-action-primary/5 p-8 text-center">
-                <Check className="mx-auto size-12 text-action-primary" />
+                <Check className="mx-auto size-4 text-action-primary" />
                 <p className="mt-3 text-lg font-semibold text-text-primary">
                   Queue is clear
                 </p>
@@ -213,7 +213,7 @@ export function FocusMode({
               >
                 <header className="mb-4 flex items-start justify-between">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-text-muted">
+                    <p className="text-xs uppercase tracking-wider text-text-muted">
                       {current.workflow_type} · {current.current_stage}
                     </p>
                     <p className="text-lg font-semibold text-text-primary">
@@ -238,7 +238,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("APPROVE")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
+                    className="flex min-h11 items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                     Approve
@@ -246,7 +246,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("REJECT")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-action-danger/40 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
+                    className="flex min-h11 items-center justify-center gap-2 rounded-xl border border-action-danger/40 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
                   >
                     <X className="size-4" />
                     Reject
@@ -254,7 +254,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("ESCALATE")}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-border bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
+                    className="flex min-h11 items-center justify-center gap-2 rounded-xl border border-border bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
                   >
                     <ArrowUpRight className="size-4" />
                     Escalate

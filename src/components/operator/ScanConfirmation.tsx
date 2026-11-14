@@ -106,7 +106,7 @@ export function ScanConfirmation({
             {student.roll || student.studentDetails?.roll || student.uniqueId}
           </p>
           <span
-            className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mt-1 ${
+            className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full border mt-1 ${
               entryTypeToUse === "day_scholar"
                 ? "bg-sky-500/15 text-action-info border-sky-500/30"
                 : "bg-emerald-500/15 text-action-success border-emerald-500/30"
@@ -117,7 +117,7 @@ export function ScanConfirmation({
         </div>
         {campusStatus && (
           <span
-            className={`text-[10px] font-bold px-2 py-1 rounded-full border ${
+            className={`text-xs font-bold px-2 py-1 rounded-full border ${
               campusStatus === "IN"
                 ? "bg-emerald-500/15 text-action-success border-emerald-500/30"
                 : "bg-amber-500/15 text-action-warning border-amber-500/30"
@@ -155,7 +155,7 @@ export function ScanConfirmation({
               primaryButtonId ?? undefined
             )
           }
-          className="w-full min-h-[52px] rounded-xl bg-action-primary text-black font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full min-h13 rounded-xl bg-action-primary text-black font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {recommendation?.direction === "OUT" ? (
             <LogOut className="w-5 h-5" />
@@ -178,7 +178,7 @@ export function ScanConfirmation({
                 alt.payload.buttonId ?? undefined
               )
             }
-            className="w-full min-h-[44px] rounded-xl bg-bg-elevated border border-border text-text-secondary font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
+            className="w-full min-h11 rounded-xl bg-bg-elevated border border-border text-text-secondary font-semibold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
           >
             <Check className="w-4 h-4" />
             {alt.label}
@@ -188,7 +188,7 @@ export function ScanConfirmation({
         <button
           type="button"
           onClick={onCancel}
-          className="w-full min-h-[40px] rounded-xl text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
+          className="w-full min-h10 rounded-xl text-xs font-semibold text-text-muted hover:text-text-primary transition-colors"
         >
           Cancel & resume scanning
         </button>

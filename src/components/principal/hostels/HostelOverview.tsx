@@ -143,15 +143,15 @@ export function HostelOverview() {
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-text-primary">{data.summary.total}</div>
-                <div className="text-[10px] text-text-muted uppercase">Total</div>
+                <div className="text-xs text-text-muted uppercase">Total</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-action-success">{data.summary.occupied}</div>
-                <div className="text-[10px] text-text-muted uppercase">Occupied</div>
+                <div className="text-xs text-text-muted uppercase">Occupied</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-action-primary">{data.summary.available}</div>
-                <div className="text-[10px] text-text-muted uppercase">Available</div>
+                <div className="text-xs text-text-muted uppercase">Available</div>
               </div>
             </div>
 
@@ -166,7 +166,7 @@ export function HostelOverview() {
                     <button
                       type="button"
                       onClick={() => setExpandedBlock(expandedBlock === b.block ? null : b.block)}
-                      className="text-[10px] text-action-primary hover:underline mt-1"
+                      className="text-xs text-action-primary hover:underline mt-1"
                     >
                       {expandedBlock === b.block ? "Hide" : "View students"}
                     </button>

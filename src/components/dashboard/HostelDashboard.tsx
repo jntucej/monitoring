@@ -109,7 +109,7 @@ export function HostelDashboard() {
 
           <CardDiv className="p-5">
             <h2 className="text-sm font-semibold text-text-primary mb-4">Stage Funnel</h2>
-            <div className="h-[260px]"><StageFunnel data={stageData} /></div>
+            <div className="h65"><StageFunnel data={stageData} /></div>
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs text-text-muted">
               {stageData.map((s) => (
                 <div key={s.stage} className="flex items-center gap-2">

@@ -43,7 +43,7 @@ export function StudentDashboardWidgets() {
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 text-[11px] font-bold hover:bg-rose-500/20 transition self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 text-xs font-bold hover:bg-rose-500/20 transition self-start sm:self-auto"
         >
           <RefreshCw className="h-3 w-3" /> Retry
         </button>

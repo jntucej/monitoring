@@ -37,7 +37,7 @@ export const AuditRecords = memo(function AuditRecords({
               <li key={r.id} className="min-w-0 flex items-center gap-2">
                 <FileText className="w-3 h-3 text-text-muted shrink-0" />
                 <span className="text-xs text-text-primary font-medium truncate min-w-0 flex-1">{r.action}</span>
-                <span className="text-[10px] text-text-muted shrink-0">{fmtDate(r.timestamp)} {fmtTime(r.timestamp)}</span>
+                <span className="text-xs text-text-muted shrink-0">{fmtDate(r.timestamp)} {fmtTime(r.timestamp)}</span>
               </li>
             ))}
           </ul>

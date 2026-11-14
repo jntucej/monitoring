@@ -129,7 +129,7 @@ function KpiCard({ tile }: { tile: KpiTile }) {
         {tile.value}
       </div>
       {tile.hint && (
-        <div className="text-[11px] text-text-muted -mt-1">
+        <div className="text-xs text-text-muted -mt-1">
           {tile.hint}
         </div>
       )}
@@ -341,7 +341,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
             <h2 className="text-sm font-semibold text-text-primary">
               Service topology
             </h2>
-            <span className="text-[11px] text-text-muted ml-auto">
+            <span className="text-xs text-text-muted ml-auto">
               click a node to inspect
             </span>
           </div>
@@ -412,7 +412,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
                         <span className="block text-sm font-medium text-text-primary truncate">
                           {it.title}
                         </span>
-                        <span className="block text-[11px] text-text-muted truncate">
+                        <span className="block text-xs text-text-muted truncate">
                           {it.detail}
                         </span>
                       </span>

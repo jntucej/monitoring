@@ -144,13 +144,13 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     {col}
                   </h3>
-                  <span className="text-[10px] font-mono tabular-nums text-text-muted">
+                  <span className="text-xs font-mono tabular-nums text-text-muted">
                     {colTickets.length}
                   </span>
                 </header>
                 <ul className="space-y-2">
                   {colTickets.length === 0 ? (
-                    <li className="px-1 py-3 text-[11px] text-text-muted">
+                    <li className="px-1 py-3 text-xs text-text-muted">
                       No tickets
                     </li>
                   ) : (
@@ -162,17 +162,17 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
                           className="w-full text-left rounded-lg border border-border bg-bg-base p-3 min-w-0 hover:border-action-primary/40 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2 min-w-0">
-                            <span className="text-[11px] font-mono font-semibold text-text-primary truncate">
+                            <span className="text-xs font-mono font-semibold text-text-primary truncate">
                               {t.ticket_number}
                             </span>
-                            <span className="text-[10px] font-mono text-text-muted shrink-0">
+                            <span className="text-xs font-mono text-text-muted shrink-0">
                               {t.status}
                             </span>
                           </div>
                           <p className="text-xs font-semibold text-text-primary truncate mt-1">
                             {t.student_name || "—"}
                           </p>
-                          <p className="text-[11px] text-text-muted truncate">
+                          <p className="text-xs text-text-muted truncate">
                             {t.workflow_type}
                           </p>
                           <div className="mt-2">

@@ -84,7 +84,7 @@ function WorkerWorkOrdersInner() {
                       {o.stage ? ` · ${o.stage}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-action-warning">
+                  <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
                     {o.status ?? "PENDING"}
                   </span>
                 </div>
@@ -108,7 +108,7 @@ function WorkerWorkOrdersInner() {
                       </p>
                     )}
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-action-success">
+                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-action-success">
                     {c.status}
                   </span>
                 </div>

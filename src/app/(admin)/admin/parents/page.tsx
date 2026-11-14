@@ -94,8 +94,8 @@ function AdminParentsInner() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.name}</p>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted uppercase tracking-wide">{r.status}</span>
-                      {r.uniqueId && <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted font-mono">{r.uniqueId}</span>}
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted uppercase tracking-wide">{r.status}</span>
+                      {r.uniqueId && <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted font-mono">{r.uniqueId}</span>}
                     </div>
                     <p className="text-xs text-text-muted font-mono mt-0.5">{r.email}{r.phone ? ` · ${r.phone}` : ""}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -103,7 +103,7 @@ function AdminParentsInner() {
                         <span className="text-xs text-text-muted">No linked children</span>
                       )}
                       {r.children.map((c) => (
-                        <span key={c.id} className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] text-action-primary">
+                        <span key={c.id} className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary">
                           {c.name} {c.roll ? `· ${c.roll}` : ""}
                         </span>
                       ))}

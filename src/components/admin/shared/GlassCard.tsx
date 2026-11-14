@@ -198,7 +198,7 @@ export function GlassCard({
       {/* Specular Highlight Gloss (Replaces Chromatic Aberration) */}
       {isHovered && !prefersReducedMotion && displayMode !== "outdoor" && (
         <div className="absolute -inset-[1px] rounded-2xl pointer-events-none z-0">
-          <div className="w-full h-full rounded-2xl border border-white/30 bg-gradient-to-br from-white/15 via-transparent to-white/5" />
+          <div className="w-full h-full rounded-2xl border border-white/30 bg-gradient-to-br from-white/15 to-white/5" />
         </div>
       )}
 
@@ -243,7 +243,7 @@ export function GlassCard({
         <button
           type="button"
           onClick={() => setActiveGate(isActive ? null : id)}
-          className="mt-4 min-h-[44px] px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-text-secondary hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
+          className="mt-4 min-h11 px-4 py-2.5 text-xs font-mono tracking-wider font-semibold text-text-secondary hover:text-white transition-colors backdrop-blur-sm rounded-xl border border-white/20 hover:border-white/40 bg-white/10 active:scale-95 flex items-center justify-center"
         >
           {isActive ? "Close Focus" : "Focus Gate"}
         </button>

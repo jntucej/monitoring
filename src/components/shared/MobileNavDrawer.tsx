@@ -104,7 +104,7 @@ export function MobileNavDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close navigation"
-            className="inline-flex items-center justify-center rounded-md p-2 min-h-[44px] min-w-[44px] text-text-muted hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            className="inline-flex items-center justify-center rounded-md p-2 min-h11 min-w11 text-text-muted hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
           >
             <X className="h-4 w-4" />
           </button>

@@ -323,7 +323,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
           >
             {t.icon}
             {t.label}
-            <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
+            <span className={`ml-1 px-1.5 py-0.5 rounded text-xs ${
               tab === t.id ? "bg-emerald-500/20 text-action-success" : "bg-bg-elevated text-text-muted"
             }`}>{t.count}</span>
           </button>
@@ -393,7 +393,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                   )}
 
                   <div className="overflow-x-auto rounded-xl border border-border">
-                    <table className="w-full text-sm min-w-[680px]">
+                    <table className="w-full text-sm min-w170">
                       <thead>
                         <tr className="bg-bg-elevated/60 text-text-muted text-xs uppercase tracking-wider">
                           <th className="px-4 py-3 text-left">Roll</th>
@@ -464,7 +464,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <EmptyState icon={<Archive size={24} />} text="No graduated students yet. Use the Auto-Detected tab to mark graduates." />
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-border">
-                  <table className="w-full text-sm min-w-[640px]">
+                  <table className="w-full text-sm min-w160">
                     <thead>
                       <tr className="bg-bg-elevated/60 text-text-muted text-xs uppercase tracking-wider">
                         <th className="px-4 py-3 text-left">Roll</th>
@@ -516,7 +516,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <EmptyState icon={<Ban size={24} />} text="No deprovisioned users found." />
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-border">
-                  <table className="w-full text-sm min-w-[560px]">
+                  <table className="w-full text-sm min-w140">
                     <thead>
                       <tr className="bg-bg-elevated/60 text-text-muted text-xs uppercase tracking-wider">
                         <th className="px-4 py-3 text-left">Roll / Unique ID</th>
@@ -532,7 +532,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                           <td className="px-4 py-3 font-mono text-action-danger">{u.uniqueId || "—"}</td>
                           <td className="px-4 py-3 text-white">{u.name}</td>
                           <td className="px-4 py-3 text-text-secondary">{u.role || "—"}</td>
-                          <td className="px-4 py-3 text-xs text-text-muted max-w-[220px] truncate" title={u.reason || ""}>
+                          <td className="px-4 py-3 text-xs text-text-muted max-w55 truncate" title={u.reason || ""}>
                             {u.reason || "—"}
                           </td>
                           <td className="px-4 py-3 text-right">

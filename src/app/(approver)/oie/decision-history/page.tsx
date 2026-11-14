@@ -101,7 +101,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
   }
   return (
     <div className="overflow-x-auto min-w-0">
-      <table className="w-full text-sm min-w-[720px]">
+      <table className="w-full text-sm min-w180">
         <thead>
           <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Ticket</th>

@@ -389,7 +389,7 @@ function UserManagementPanelBody({
       {/* Table */}
       <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <table className="w-full text-sm min-w200">
             <thead>
               <tr className="border-b border-border text-left text-text-muted bg-white/5">
                 <th className="p-4 font-medium">Name</th>
@@ -567,7 +567,7 @@ function UserManagementPanelBody({
             </div>
 
             <p className="text-sm text-text-muted mb-4">
-              Upload a CSV with a header row (e.g. <code className="text-[11px]">name,email,roll,role,department</code>).
+              Upload a CSV with a header row (e.g. <code className="text-xs">name,email,roll,role,department</code>).
               Validate first, then commit only the valid rows.
             </p>
 

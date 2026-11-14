@@ -140,7 +140,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
                         {item.title}
                       </p>
                       <p className="mt-0.5 text-xs text-text-muted">{item.detail}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-text-muted">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-text-muted">
                         <Clock className="h-3 w-3" aria-hidden />
                         {when ?? "—"}
                         {item.ctaHref && (

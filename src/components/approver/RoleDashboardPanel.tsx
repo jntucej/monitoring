@@ -125,8 +125,8 @@ export function RoleDashboardPanel({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="rounded-lg border border-border p-3 space-y-2">
-              <div className="h-2.5 w-1/2 bg-[var(--text-muted)]/10 rounded animate-pulse" />
-              <div className="h-6 w-2/3 bg-[var(--text-muted)]/10 rounded animate-pulse" />
+              <div className="h-2.5 w-1/2 bgtext-muted/10 rounded animate-pulse" />
+              <div className="h-6 w-2/3 bgtext-muted/10 rounded animate-pulse" />
             </div>
           ))}
         </div>
@@ -160,12 +160,12 @@ export function RoleDashboardPanel({
               key={i}
               className={`rounded-lg border p-3 ${TONE_CLASSES[k.tone ?? "neutral"]}`}
             >
-              <p className="text-[11px] uppercase tracking-wide text-text-muted truncate">
+              <p className="text-xs uppercase tracking-wide text-text-muted truncate">
                 {k.label}
               </p>
               <p className="text-xl font-semibold tabular-nums mt-1">{k.value}</p>
               {k.hint && (
-                <p className="text-[11px] text-text-muted mt-0.5 truncate">
+                <p className="text-xs text-text-muted mt-0.5 truncate">
                   {k.hint}
                 </p>
               )}
@@ -175,7 +175,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && resource.loading && kpis.length > 0 && (
-        <div className="flex items-center justify-end gap-1.5 mt-2 text-[10px] text-text-muted">
+        <div className="flex items-center justify-end gap-1.5 mt-2 text-xs text-text-muted">
           <Loader2 className="w-3 h-3 animate-spin" />
           refreshing
         </div>

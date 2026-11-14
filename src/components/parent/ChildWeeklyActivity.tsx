@@ -141,7 +141,7 @@ export function ChildWeeklyActivity() {
                 <BarChart3 className="w-4 h-4 text-action-success" />
                 7-Day Gate Activity — {c.name}
               </h3>
-              <div className="flex items-center gap-3 text-[11px] text-text-muted">
+              <div className="flex items-center gap-3 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-sm bg-action-success inline-block" /> In ({c.totalIn})
                 </span>
@@ -156,7 +156,7 @@ export function ChildWeeklyActivity() {
                 const total = b.inCount + b.outCount;
                 return (
                   <div key={b.date} className="flex-1 flex flex-col items-center gap-1" title={`${b.date}: ${b.inCount} in / ${b.outCount} out`}>
-                    <div className="text-[10px] text-text-muted">{total || ""}</div>
+                    <div className="text-xs text-text-muted">{total || ""}</div>
                     <div className="w-full flex flex-col justify-end" style={{ height: `${heightPct(total)}px` }}>
                       <div
                         className="w-full rounded-t bg-emerald-500/90"
@@ -167,14 +167,14 @@ export function ChildWeeklyActivity() {
                         style={{ height: `${Math.min(100, (b.outCount / Math.max(total, 1)) * 100)}%` }}
                       />
                     </div>
-                    <div className={`text-[10px] ${b.isToday ? "text-action-success font-semibold" : "text-text-muted"}`}>
+                    <div className={`text-xs ${b.isToday ? "text-action-success font-semibold" : "text-text-muted"}`}>
                       {b.isToday ? "Today" : b.day}
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-3 text-[11px] text-text-muted flex items-center gap-1">
+            <div className="mt-3 text-xs text-text-muted flex items-center gap-1">
               <ArrowRight className="w-3 h-3" />
               {c.totalIn + c.totalOut === 0
                 ? "No gate activity recorded in the last 7 days."

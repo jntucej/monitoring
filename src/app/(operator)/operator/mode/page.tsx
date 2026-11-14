@@ -41,7 +41,7 @@ function ModeCard({
       type="button"
       onClick={onClick}
       disabled={disabled || selected}
-      className={`w-full min-h-[44px] text-left rounded-xl border p-4 transition-all ${
+      className={`w-full min-h11 text-left rounded-xl border p-4 transition-all ${
         selected
           ? `${color} border-current bg-current/10`
           : "border-border bg-bg-elevated hover:border-border"
@@ -135,7 +135,7 @@ function OperatorModeInner() {
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
-          <button type="button" onClick={() => void loadMode()} className="ml-auto min-h-[44px] inline-flex items-center text-xs font-semibold hover:underline shrink-0">Retry</button>
+          <button type="button" onClick={() => void loadMode()} className="ml-auto min-h11 inline-flex items-center text-xs font-semibold hover:underline shrink-0">Retry</button>
         </div>
       )}
 
@@ -180,7 +180,7 @@ function OperatorModeInner() {
               description={m.description}
               icon={m.icon}
               color={
-                m.mode === "OPEN" ? "text-action-success border-[var(--action-success)]"
+                m.mode === "OPEN" ? "text-action-success borderaction-success"
                 : m.mode === "CURFEW" ? "text-action-primary border-action-primary"
                 : "text-action-warning border-action-warning"
               }
@@ -201,7 +201,7 @@ function OperatorModeInner() {
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Scheduled system update"
               disabled={submitting}
-              className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none disabled:opacity-50"
+              className="w-full min-h11 px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none disabled:opacity-50"
             />
           </div>
 
@@ -212,7 +212,7 @@ function OperatorModeInner() {
               if (selected) void handleSetMode(selected.mode);
             }}
             disabled={submitting || !mode}
-            className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full min-h11 inline-flex items-center justify-center rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

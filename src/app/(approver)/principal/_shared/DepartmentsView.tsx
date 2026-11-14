@@ -73,7 +73,7 @@ export function DepartmentsView() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{dept.name}</p>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       HOD: {dept.hodName ?? "—"}
                     </p>
                   </div>
@@ -81,7 +81,7 @@ export function DepartmentsView() {
                     {dept.attendancePct}%
                   </span>
                 </div>
-                <div className="mt-2 flex gap-3 text-[11px] text-text-secondary">
+                <div className="mt-2 flex gap-3 text-xs text-text-secondary">
                   <span>{dept.students} students</span>
                   <span>{dept.faculty} faculty</span>
                   <span>1:{dept.ratio}</span>

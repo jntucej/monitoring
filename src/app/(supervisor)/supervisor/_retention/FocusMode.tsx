@@ -159,7 +159,7 @@ export function FocusMode({
             <button
               onClick={onClose}
               aria-label="Close"
-              className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
+              className="flex size-11 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
             >
               ✕
             </button>
@@ -168,7 +168,7 @@ export function FocusMode({
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="size-6 animate-spin text-action-primary" />
+            <Loader2 className="size-4 animate-spin text-action-primary" />
           </div>
         ) : !current ? (
           <div className="flex h-64 flex-col items-center justify-center text-center">
@@ -180,7 +180,7 @@ export function FocusMode({
             </p>
             <button
               onClick={onClose}
-              className="mt-6 min-h-[44px] rounded-xl bg-action-primary px-5 py-2 text-sm font-medium text-white"
+              className="mt-6 min-h11 rounded-xl bg-action-primary px-5 py-2 text-sm font-medium text-white"
             >
               Exit Focus Mode
             </button>
@@ -195,7 +195,7 @@ export function FocusMode({
               className="space-y-6"
             >
               <div className="flex items-center justify-between">
-                <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-[11px] font-semibold uppercase text-text-muted">
+                <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs font-semibold uppercase text-text-muted">
                   {current.kind} · {current.ticket}
                 </span>
                 {current.slaDeadline && (
@@ -216,7 +216,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("resolve")}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
+                  className="flex min-h11 flex-1 items-center justify-center gap-2 rounded-xl bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
                 >
                   <Check className="size-4" />
                   Resolve / Clear (A)
@@ -224,14 +224,14 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("escalate")}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
+                  className="flex min-h11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
                 >
                   <ArrowUpRight className="size-4" />
                   Escalate higher (E)
                 </button>
               </div>
 
-              <footer className="flex items-center justify-center gap-4 text-[11px] text-text-muted">
+              <footer className="flex items-center justify-center gap-4 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
                   <Keyboard className="size-3" /> Shortcuts: <kbd className="rounded border px-1">A</kbd> resolve, <kbd className="rounded border px-1">E</kbd> escalate, <kbd className="rounded border px-1">Esc</kbd> exit
                 </span>

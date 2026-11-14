@@ -22,7 +22,7 @@ export function HotSpots({ spots }: { spots: HotSpot[] }) {
         </div>
         <Link
           href="/vice-principal/academics/exceptions"
-          className="text-[11px] text-action-primary hover:underline"
+          className="text-xs text-action-primary hover:underline"
         >
           See details
         </Link>

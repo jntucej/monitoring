@@ -28,7 +28,7 @@ export function FacultyCare({
         </div>
         <Link
           href="/hod/faculty/attendance"
-          className="inline-flex min-h-[44px] items-center text-[11px] text-action-primary hover:underline"
+          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
         >
           Details
         </Link>
@@ -41,7 +41,7 @@ export function FacultyCare({
             <p className="text-sm font-medium text-action-primary">
               All {total} faculty checked in today
             </p>
-            <p className="text-[10px] text-text-muted">
+            <p className="text-xs text-text-muted">
               Nobody is left behind.
             </p>
           </div>
@@ -54,7 +54,7 @@ export function FacultyCare({
               <p className="text-sm font-medium text-text-primary">
                 {needsAttention} faculty need attention
               </p>
-              <p className="text-[10px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {presentToday}/{total} present ·{" "}
                 {lateToday > 0 && `${lateToday} late · `}
                 {absentToday > 0 && `${absentToday} absent`}
@@ -65,19 +65,19 @@ export function FacultyCare({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">Present</p>
+              <p className="text-xs uppercase tracking-wider text-text-muted">Present</p>
               <p className="text-lg font-semibold tabular-nums text-action-primary">
                 {presentToday}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">Late</p>
+              <p className="text-xs uppercase tracking-wider text-text-muted">Late</p>
               <p className="text-lg font-semibold tabular-nums text-action-warning">
                 {lateToday}
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">Absent</p>
+              <p className="text-xs uppercase tracking-wider text-text-muted">Absent</p>
               <p className="text-lg font-semibold tabular-nums text-action-danger">
                 {absentToday}
               </p>

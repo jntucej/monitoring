@@ -70,7 +70,7 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
             <p className="text-xs text-text-secondary mt-0.5">{description}</p>
           )}
           {!loading && (
-            <p className="text-[11px] text-text-muted mt-1">{total} items</p>
+            <p className="text-xs text-text-muted mt-1">{total} items</p>
           )}
         </div>
         <button

@@ -161,7 +161,7 @@ function ExceptionsInner() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
+                className={`min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
                     ? "bg-action-primary/15 text-action-primary"
                     : "text-text-muted hover:text-text-primary"
@@ -214,7 +214,7 @@ function ExceptionsInner() {
                               <span className="ml-1.5 font-mono text-xs text-text-muted">{r.roll}</span>
                             )}
                           </p>
-                          <p className="text-[11px] text-text-muted mt-0.5">
+                          <p className="text-xs text-text-muted mt-0.5">
                             {fmtTime(r.timestamp)} · {safeText(r.gate_name ?? r.gate_id)}
                           </p>
                         </div>
@@ -222,7 +222,7 @@ function ExceptionsInner() {
                           {tags.map((t) => (
                             <span
                               key={t}
-                              className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
+                              className={`rounded-full border px-1.5 py-0.5 text-xs font-medium ${
                                 t === "Denied"
                                   ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
                                   : t === "Flagged"
@@ -243,7 +243,7 @@ function ExceptionsInner() {
 
               {/* Desktop: table */}
               <div className="hidden sm:block overflow-x-auto min-w-0">
-                <table className="w-full text-sm min-w-[640px]">
+                <table className="w-full text-sm min-w160">
                   <thead>
                     <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-3 py-2 font-semibold">Time</th>
@@ -280,7 +280,7 @@ function ExceptionsInner() {
                                 tags.map((t) => (
                                   <span
                                     key={t}
-                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
                                       t === "Denied"
                                         ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
                                         : t === "Flagged"
@@ -296,7 +296,7 @@ function ExceptionsInner() {
                               )}
                             </div>
                           </td>
-                          <td className="px-3 py-2.5 text-text-muted text-xs max-w-[220px] truncate">
+                          <td className="px-3 py-2.5 text-text-muted text-xs max-w55 truncate">
                             {r.reason || "—"}
                           </td>
                           <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
@@ -351,7 +351,7 @@ function ExceptionsInner() {
                       {p.ticket_number || p.id}
                     </p>
                   </div>
-                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-action-danger shrink-0">
+                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger shrink-0">
                     REJECTED
                   </span>
                 </li>

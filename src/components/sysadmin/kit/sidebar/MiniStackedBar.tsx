@@ -17,7 +17,7 @@ export function MiniStackedBar({ segments, label, onClick, className }: MiniStac
       aria-label={label}
       className={cn("flex items-center h-4 min-w-0", className)}
     >
-      <div className="w-11 h-[6px] rounded-full overflow-hidden flex bg-[var(--border)]">
+      <div className="w-11 h-[6px] rounded-full overflow-hidden flex bgborder">
         {total > 0 &&
           segments.map((seg, i) => (
             <span

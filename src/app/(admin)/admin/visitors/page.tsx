@@ -108,13 +108,13 @@ function AdminVisitorsInner() {
 
       <WidgetBoundary title="Visitor log">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-2 min-h-[44px]">
+          <div className="p-4 border-b border-border flex items-center gap-2 min-h11">
             <Search className="w-4 h-4 text-text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter visitors…"
-              className="flex-1 min-h-[44px] bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+              className="flex-1 min-h11 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
             />
           </div>
           <div className="overflow-x-auto">
@@ -140,7 +140,7 @@ function AdminVisitorsInner() {
                     <td className="p-3 text-text-muted">{r.host ?? "—"}</td>
                     <td className="p-3 text-text-muted flex items-center gap-1"><MapPin className="w-3 h-3" />{r.gate ?? "—"}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusBadge(r.status)}`}>{r.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(r.status)}`}>{r.status}</span>
                     </td>
                     <td className="p-3 text-xs text-text-muted">
                       {r.checkInAt ? new Date(r.checkInAt).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}

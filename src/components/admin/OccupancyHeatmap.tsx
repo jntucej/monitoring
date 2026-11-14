@@ -142,7 +142,7 @@ export function OccupancyHeatmap() {
           <button onClick={load} className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-bg-elevated" title="Refresh">
             <RefreshCw className="h-4 w-4" />
           </button>
-          <span className="text-[10px] text-text-muted ml-2">
+          <span className="text-xs text-text-muted ml-2">
             {lastUpdated ? `Updated ${new Date(lastUpdated).toLocaleTimeString()}` : "…"}
           </span>
         </div>
@@ -151,19 +151,19 @@ export function OccupancyHeatmap() {
       {/* Summary strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total Inside</div>
+          <div className="text-xs font-bold text-text-muted uppercase tracking-wider">Total Inside</div>
           <div className="text-2xl font-black text-white mt-1">{totalInside}</div>
         </div>
         <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Active Gates</div>
+          <div className="text-xs font-bold text-text-muted uppercase tracking-wider">Active Gates</div>
           <div className="text-2xl font-black text-action-success mt-1">{data?.gates.length ?? 0}</div>
         </div>
         <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Peak Cell</div>
+          <div className="text-xs font-bold text-text-muted uppercase tracking-wider">Peak Cell</div>
           <div className="text-2xl font-black text-action-danger mt-1">{maxCell}</div>
         </div>
         <div className="bg-bg-surface/60 border border-border rounded-xl p-3">
-          <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Roles Tracked</div>
+          <div className="text-xs font-bold text-text-muted uppercase tracking-wider">Roles Tracked</div>
           <div className="text-2xl font-black text-unit-c mt-1">{data?.roles.length ?? 0}</div>
         </div>
       </div>
@@ -178,16 +178,16 @@ export function OccupancyHeatmap() {
       {data && data.gates.length > 0 && (
         <div className="bg-bg-surface/40 border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[520px]">
+            <table className="w-full border-collapse min-w130">
               <thead>
                 <tr>
-                  <th className="sticky left-0 bg-bg-surface z-10 p-2 text-[10px] font-bold text-text-muted uppercase tracking-wider text-left border-r border-border min-w-[100px]">
+                  <th className="sticky left-0 bg-bg-surface z-10 p-2 text-xs font-bold text-text-muted uppercase tracking-wider text-left border-r border-border min-w25">
                     Role ↓ / Gate →
                   </th>
                   {data.gates.map((g) => (
                     <th key={g.id} className="p-2 text-center">
-                      <div className="text-[10px] font-bold text-text-secondary">{g.code || g.name}</div>
-                      <div className="text-[9px] text-text-muted capitalize">{g.audience === "all" ? "main" : g.audience}</div>
+                      <div className="text-xs font-bold text-text-secondary">{g.code || g.name}</div>
+                      <div className="text-xs text-text-muted capitalize">{g.audience === "all" ? "main" : g.audience}</div>
                     </th>
                   ))}
                 </tr>
@@ -208,7 +208,7 @@ export function OccupancyHeatmap() {
                         }`}>
                           {ROLE_LABELS[role] ?? role}
                         </span>
-                        <div className="text-[9px] text-text-muted mt-0.5">{rowMax} peak</div>
+                        <div className="text-xs text-text-muted mt-0.5">{rowMax} peak</div>
                       </td>
                       {data.gates.map((g) => {
                         const v = data.matrix[g.id]?.[role] ?? 0;
@@ -224,7 +224,7 @@ export function OccupancyHeatmap() {
                               title={`${ROLE_LABELS[role] ?? role} at ${g.name}: ${v} inside`}
                             >
                               <span className="text-sm font-black" style={{ color: tc }}>{v}</span>
-                              <span className="text-[8px] font-medium opacity-70" style={{ color: tc }}>{v === 1 ? "person" : "people"}</span>
+                              <span className="text-xs font-medium opacity-70" style={{ color: tc }}>{v === 1 ? "person" : "people"}</span>
                             </button>
                           </td>
                         );
@@ -237,7 +237,7 @@ export function OccupancyHeatmap() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-border text-[10px] text-text-muted">
+          <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-border text-xs text-text-muted">
             <span className="font-bold">Heat:</span>
             {[0.05, 0.15, 0.30, 0.50, 0.70, 0.85, 1.0].map((pct) => (
               <div key={pct} className="flex items-center gap-1">

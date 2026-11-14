@@ -79,7 +79,7 @@ function GanttRow({ row, dayCount }: { row: MaintenanceGanttRow; dayCount: numbe
         {row.title}
       </span>
       <span
-        className="w-14 shrink-0 text-[10px] text-text-muted"
+        className="w-14 shrink-0 text-xs text-text-muted"
       >
         {statusLabel(row.status)}
       </span>
@@ -148,7 +148,7 @@ export function MaintenanceContent(
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* scheduled */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Scheduled
           </p>
           <span className="text-lg font-semibold text-text-primary">
@@ -158,7 +158,7 @@ export function MaintenanceContent(
 
         {/* in-progress */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             In Progress
           </p>
           <span
@@ -173,7 +173,7 @@ export function MaintenanceContent(
 
         {/* next window countdown */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Next Window
           </p>
           <span className="text-lg font-semibold text-text-primary">
@@ -183,7 +183,7 @@ export function MaintenanceContent(
 
         {/* notifications sent */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Notifications
           </p>
           <span className="text-lg font-semibold text-text-primary">
@@ -198,7 +198,7 @@ export function MaintenanceContent(
           <p className="text-sm font-semibold text-text-primary">
             30-Day Maintenance Windows
           </p>
-          <div className="flex items-center gap-3 text-[10px] text-text-muted">
+          <div className="flex items-center gap-3 text-xs text-text-muted">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full inline-block" style={{ background: TYPE_COLORS.scheduled }} />
               Scheduled
@@ -234,7 +234,7 @@ export function MaintenanceContent(
 
             {/* Day labels */}
             <div
-              className="grid gap-px text-[9px] text-text-muted pl-[152px]"
+              className="grid gap-px text-xs text-text-muted pl38"
               style={{ gridTemplateColumns: `repeat(${dayCount}, 1fr)` }}
             >
               {labels.map((lbl, i) =>

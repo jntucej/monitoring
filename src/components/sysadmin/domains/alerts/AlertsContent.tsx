@@ -66,7 +66,7 @@ function KpiChip({
       style={{ borderColor: "var(--border)" }}
     >
       <p
-        className="text-[11px] font-medium uppercase tracking-wide"
+        className="text-xs font-medium uppercase tracking-wide"
         style={{ color: VIZ_THEME.muted }}
       >
         {label}
@@ -102,7 +102,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase shrink-0"
+            className="rounded px-1.5 py-0.5 text-xs font-bold uppercase shrink-0"
             style={{ color, border: `1px solid ${color}` }}
           >
             {sev || "unknown"}
@@ -128,7 +128,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
             className="shrink-0"
           />
           <span
-            className="text-[11px] truncate min-w-0"
+            className="text-xs truncate min-w-0"
             style={{ color: VIZ_THEME.muted }}
           >
             {row.gate ? `Gate ${row.gate} · ` : ""}
@@ -136,7 +136,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
           </span>
           {row.resolved ? (
             <span
-              className="rounded px-1 text-[10px] font-semibold uppercase shrink-0"
+              className="rounded px-1 text-xs font-semibold uppercase shrink-0"
               style={{
                 background: "var(--action-primary)",
                 color: "#fff",
@@ -202,7 +202,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
         >
           <div className="flex items-center justify-between">
             <p
-              className="text-[11px] font-medium uppercase tracking-wide"
+              className="text-xs font-medium uppercase tracking-wide"
               style={{ color: VIZ_THEME.muted }}
             >
               Open alerts
@@ -276,7 +276,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
           })()}
         </svg>
         {/* legend */}
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px]" style={{ color: VIZ_THEME.muted }}>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs" style={{ color: VIZ_THEME.muted }}>
           {[
             { label: "Critical", color: "var(--action-danger)" },
             { label: "High", color: "var(--action-warning)" },
@@ -308,7 +308,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
               {feedRows.length} rows
             </span>
             <span
-              className="rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+              className="rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide"
               style={{
                 background:
                   sseState === "live"
@@ -330,7 +330,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
         </div>
         {/* feed-level 30-min heat strip */}
         <div className="mb-3 flex items-center gap-2">
-          <span className="text-[11px]" style={{ color: VIZ_THEME.muted }}>
+          <span className="text-xs" style={{ color: VIZ_THEME.muted }}>
             30-min activity
           </span>
           <MiniHeatStrip
@@ -381,7 +381,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
         {/* per-rule 7-day heat strips (signature visual alternative) */}
         {ruleHeat.length > 0 && (
           <div className="mt-4 space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>
+            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>
               Per-rule heat strips
             </p>
             {ruleHeat.slice(0, 6).map((rule) => (

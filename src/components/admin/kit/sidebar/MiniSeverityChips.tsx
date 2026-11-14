@@ -30,14 +30,14 @@ export function MiniSeverityChips({ counts, label, onClick, className }: MiniSev
         return (
           <span
             key={key}
-            className="px-1 h-[14px] rounded-[3px] text-[8px] font-medium leading-[14px] flex items-center shrink-0"
+            className="px-1 h-[14px] rounded-sm text-xs font-medium leading-[14px] flex items-center shrink-0"
             style={{ backgroundColor: s.bg, color: s.text }}
           >
             {n}
           </span>
         );
       })}
-      {entries.length === 0 && <span className="text-[8px] text-text-muted">0</span>}
+      {entries.length === 0 && <span className="text-xs text-text-muted">0</span>}
     </button>
   );
 }

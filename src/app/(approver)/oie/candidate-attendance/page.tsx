@@ -75,7 +75,7 @@ function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
   }
   return (
     <div className="overflow-x-auto min-w-0">
-      <table className="w-full text-sm min-w-[640px]">
+      <table className="w-full text-sm min-w160">
         <thead>
           <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
             <th className="text-left px-4 py-3">Candidate</th>

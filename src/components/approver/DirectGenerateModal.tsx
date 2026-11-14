@@ -260,7 +260,7 @@ export function DirectGenerateModal({
             <span className="font-semibold text-text-primary">{studentName || "Student"}</span>
             <span className="text-text-muted font-mono">({studentUserId})</span>
             {studentEntryType === "day_scholar" && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-action-warning border border-amber-500/20">
+              <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-action-warning border border-amber-500/20">
                 Day Scholar
               </span>
             )}
@@ -269,7 +269,7 @@ export function DirectGenerateModal({
 
         {roomFieldsRequired && (
           <div className="p-3 rounded-lg bg-bg-surface border border-border space-y-2">
-            <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wide">
+            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               Hostel Room Assignment (required for day scholar home out)
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

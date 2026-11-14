@@ -132,7 +132,7 @@ export default function GateDetailPage() {
                 </p>
                 {data && (
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
                       data.status === "ACTIVE"
                         ? "bg-emerald-500/10 text-action-success border-emerald-500/20"
                         : "bg-rose-500/10 text-action-danger border-rose-500/20"
@@ -245,7 +245,7 @@ export default function GateDetailPage() {
                   </div>
 
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
-                    <table className="w-full text-xs text-left border-collapse min-w-[500px]">
+                    <table className="w-full text-xs text-left border-collapse min-w125">
                       <thead>
                         <tr className="border-b border-border text-text-muted uppercase tracking-wider font-semibold">
                           <th className="pb-2 px-3">Subject Name</th>
@@ -263,7 +263,7 @@ export default function GateDetailPage() {
                               <td className="py-3 px-3 text-text-muted">{scan.personRole}</td>
                               <td className="py-3 px-3">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                                  className={`px-2 py-0.5 rounded text-xs font-extrabold ${
                                     scan.direction === "IN"
                                       ? "bg-emerald-500/20 text-action-success border border-emerald-500/30"
                                       : "bg-amber-500/20 text-action-warning border border-amber-500/30"
@@ -272,7 +272,7 @@ export default function GateDetailPage() {
                                   {scan.direction}
                                 </span>
                                 {scan.reason && (
-                                  <span className="ml-1.5 text-[10px] text-text-muted">({scan.reason})</span>
+                                  <span className="ml-1.5 text-xs text-text-muted">({scan.reason})</span>
                                 )}
                               </td>
                               <td className="py-3 px-3 font-mono text-text-muted">
@@ -311,8 +311,8 @@ export default function GateDetailPage() {
                         </div>
                         <div>
                           <p className="text-xs font-bold text-text-primary">{data.activeOperator.name}</p>
-                          <p className="text-[11px] text-text-muted">{data.activeOperator.email ?? "No email"}</p>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-action-success">
+                          <p className="text-xs text-text-muted">{data.activeOperator.email ?? "No email"}</p>
+                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-action-success">
                             Active On Duty
                           </span>
                         </div>
@@ -322,7 +322,7 @@ export default function GateDetailPage() {
                     )}
 
                     {!isSentinel && (
-                      <p className="text-[11px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         Reassigning the operator is managed from the operator desk
                         (<button onClick={() => router.push(`/gate/${gateId}`)} className="underline font-semibold text-action-success">
                           open operator desk

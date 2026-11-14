@@ -132,12 +132,12 @@ export function PersonalGoals() {
             Personal Goals
           </h2>
           {total > 0 && (
-            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
+            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
               {completed} / {total} completed
             </span>
           )}
         </div>
-        <p className="mt-1 text-[11px] text-text-muted">
+        <p className="mt-1 text-xs text-text-muted">
           Optional, personal goals — never part of academic evaluation.
         </p>
 
@@ -165,7 +165,7 @@ export function PersonalGoals() {
                       {goal.title}
                     </p>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] tabular-nums text-text-muted">
+                      <span className="text-xs tabular-nums text-text-muted">
                         {Math.min(goal.currentValue, goal.targetValue)}/{goal.targetValue}
                       </span>
                       {goal.isCompleted ? (
@@ -203,7 +203,7 @@ export function PersonalGoals() {
                     />
                   </div>
                   {goal.notes ? (
-                    <p className="mt-1.5 text-[11px] text-text-muted">{goal.notes}</p>
+                    <p className="mt-1.5 text-xs text-text-muted">{goal.notes}</p>
                   ) : null}
                 </li>
               );
@@ -218,7 +218,7 @@ export function PersonalGoals() {
         )}
 
         <form onSubmit={handleCreate} className="mt-4 space-y-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3.5">
-          <label className="block text-[11px] font-medium uppercase tracking-wide text-text-muted">
+          <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
             New goal
             <input
               type="text"
@@ -230,7 +230,7 @@ export function PersonalGoals() {
             />
           </label>
           <div className="grid grid-cols-2 gap-2.5">
-            <label className="block text-[11px] font-medium uppercase tracking-wide text-text-muted">
+            <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
               Target value
               <input
                 type="number"
@@ -241,7 +241,7 @@ export function PersonalGoals() {
                 className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
               />
             </label>
-            <label className="block text-[11px] font-medium uppercase tracking-wide text-text-muted">
+            <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
               Notes (optional)
               <input
                 type="text"
@@ -254,7 +254,7 @@ export function PersonalGoals() {
             </label>
           </div>
           {createError ? (
-            <p className="flex items-center gap-1.5 text-[11px] text-action-danger" role="alert">
+            <p className="flex items-center gap-1.5 text-xs text-action-danger" role="alert">
               <XCircle className="h-3.5 w-3.5" aria-hidden />
               {createError}
             </p>

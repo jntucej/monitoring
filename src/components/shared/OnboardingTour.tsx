@@ -67,12 +67,12 @@ export function OnboardingTour() {
             Interactive Onboarding: {nextStep.title}
           </CardTitle>
         </div>
-        <button onClick={() => setDismissed(true)} className="text-[var(--text-secondary)] hover:text-white">
+        <button onClick={() => setDismissed(true)} className="text-secondary hover:text-white">
           <X className="h-4 w-4" />
         </button>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-xs text-[var(--text-secondary)]">{nextStep.description}</p>
+        <p className="text-xs text-secondary">{nextStep.description}</p>
         <div className="flex items-center gap-2">
           <Button variant="primary" size="sm" onClick={handleComplete} className="gap-1 text-xs">
             <CheckCircle className="h-3.5 w-3.5" />

@@ -83,19 +83,19 @@ function AdminPermissionPoliciesInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <GitBranch className="w-3.5 h-3.5 text-action-success" /> Workflow Types
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : workflows.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Defined pass types in circulation</p>
+            <p className="mt-0.5 text-xs text-text-muted">Defined pass types in circulation</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Open Requests">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <FileCheck className="w-3.5 h-3.5 text-action-warning" /> Open Requests
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
@@ -103,19 +103,19 @@ function AdminPermissionPoliciesInner() {
                 ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" />
                 : workflows.reduce((sum, w) => sum + (w.open_count || 0), 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Across all workflow types</p>
+            <p className="mt-0.5 text-xs text-text-muted">Across all workflow types</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Clock className="w-3.5 h-3.5 text-action-primary" /> Standard SLA
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : "48 hrs"}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Approval turnaround target</p>
+            <p className="mt-0.5 text-xs text-text-muted">Approval turnaround target</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -135,7 +135,7 @@ function AdminPermissionPoliciesInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter workflows…"
-                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)]"
+                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:borderaction-success"
               />
               {query && (
                 <button
@@ -171,7 +171,7 @@ function AdminPermissionPoliciesInner() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm min-w-[700px]">
+              <table className="w-full text-left text-sm min-w175">
                 <thead className="bg-bg-surface/60 text-xs uppercase tracking-wide text-text-muted border-b border-border">
                   <tr>
                     <th className="py-2.5 px-4">Workflow</th>
@@ -192,7 +192,7 @@ function AdminPermissionPoliciesInner() {
                             {w.stages.map((s) => (
                               <span
                                 key={s.stage}
-                                className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary"
+                                className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
                               >
                                 {s.stage}
                                 {s.open > 0 && <span className="text-action-success tabular-nums">{s.open}</span>}
@@ -211,7 +211,7 @@ function AdminPermissionPoliciesInner() {
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {w.approver_roles.map((r) => (
-                            <span key={r} className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[11px] text-blue-300">
+                            <span key={r} className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-xs text-blue-300">
                               {r}
                             </span>
                           ))}

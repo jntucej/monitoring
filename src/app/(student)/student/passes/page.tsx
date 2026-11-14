@@ -92,7 +92,7 @@ export default function StudentPassesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/student" className="min-h-[44px] inline-flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors" aria-label="Back to student hub">
+            <Link href="/student" className="min-h11 inline-flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <p className="text-xs text-text-muted">Digital Gate Passes</p>
@@ -104,14 +104,14 @@ export default function StudentPassesPage() {
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="min-h-[44px] px-4 py-2.5 rounded-xl bg-action-primary text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="min-h11 px-4 py-2.5 rounded-xl bg-action-primary text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Apply Gate Pass</span>
         </button>
       </div>
 
-      <div className="p-3.5 rounded-xl bg-action-info/10 border border-[var(--action-info)]/20 text-xs text-action-info flex items-center gap-2">
+      <div className="p-3.5 rounded-xl bg-action-info/10 border borderaction-info/20 text-xs text-action-info flex items-center gap-2">
         <Sparkles className="w-4 h-4 shrink-0 text-action-info" />
         <span>
           <strong>Daily Outing:</strong> Standard local outings do not require a gate pass. Apply for a pass only when requesting <strong>Day Pass</strong> or <strong>Home Out</strong> leave.
@@ -148,11 +148,11 @@ export default function StudentPassesPage() {
                     </span>
                     <div>
                       <h3 className="text-sm font-bold text-text-primary">{passTitle}</h3>
-                      <p className="text-[10px] font-mono text-text-muted">{pass.id}</p>
+                      <p className="text-xs font-mono text-text-muted">{pass.id}</p>
                     </div>
                   </div>
 
-                  <span className={`px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${statusStyle.bg}`}>
+                  <span className={`px-2.5 py-1 rounded-lg border text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${statusStyle.bg}`}>
                     {statusStyle.icon}
                     {statusStyle.text}
                   </span>
@@ -178,7 +178,7 @@ export default function StudentPassesPage() {
 
                 {(pass.status === "ACTIVE" || pass.finalStatus === "APPROVED") && (
                   <div className="pt-2 border-t border-border flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-action-success flex items-center gap-1">
+                    <span className="text-xs font-semibold text-action-success flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5" />
                       Ready to scan at campus gates
                     </span>

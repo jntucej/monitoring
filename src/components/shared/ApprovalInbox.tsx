@@ -251,7 +251,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
           return (
             <div
               key={row.id || row.ticket_number}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-4 min-w-0 transition-colors hover:border-[var(--text-muted)]"
+              className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-4 min-w-0 transition-colors hover:bordertext-muted"
             >
               {/* Header: ticket + SLA badge */}
               <div className="flex items-center justify-between gap-2 min-w-0">
@@ -259,7 +259,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                   {row.ticket_number}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ${
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium shrink-0 ${
                     overdue
                       ? "bg-action-danger/10 text-action-danger"
                       : "bg-action-info/10 text-action-info"
@@ -278,7 +278,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                     <span className="ml-1.5 text-xs font-normal text-text-muted">{roll}</span>
                   ) : null}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-text-secondary">
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-text-secondary">
                   <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5">
                     {row.workflow_type}
                   </span>

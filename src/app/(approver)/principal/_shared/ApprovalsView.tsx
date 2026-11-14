@@ -75,14 +75,14 @@ export function ApprovalsView({
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="w-full min-h-[44px] rounded-xl border border-border bg-bg-surface p-3 text-left"
+                  className="w-full min-h11 rounded-xl border border-border bg-bg-surface p-3 text-left"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
                         {item.student?.name ?? "Unknown"}
                       </p>
-                      <p className="text-[11px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         {item.ticket_number} · {item.workflow_type}
                       </p>
                     </div>

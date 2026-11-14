@@ -313,14 +313,14 @@ const api = useApi();
         <div className="absolute top-0 right-0 w-72 h-72 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative z-10">
           <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-600 via-rose-500 to-amber-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-rose-900/20 overflow-hidden">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-600 to-amber-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-rose-900/20 overflow-hidden">
               {profile?.photoUrl ? (
                 <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover" />
               ) : (
                 initials
               )}
             </div>
-            <div className="absolute -bottom-1 -right-1 p-1 bg-action-success rounded-full border-2 border-[var(--bg-surface)]" title="Active Root Session">
+            <div className="absolute -bottom-1 -right-1 p-1 bg-action-success rounded-full border-2 borderbg-surface" title="Active Root Session">
               <CheckCircle2 className="w-3.5 h-3.5 text-white" />
             </div>
           </div>
@@ -330,10 +330,10 @@ const api = useApi();
               <h2 className="text-xl font-bold text-text-primary truncate">
                 {profile?.name || authUser?.name || "System Administrator"}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-action-danger border border-rose-500/30 uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-action-danger border border-rose-500/30 uppercase tracking-wider">
                 SYSADMIN (ROOT)
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30 flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" /> Zero-Trust Verified
               </span>
             </div>
@@ -358,14 +358,14 @@ const api = useApi();
 
           {/* Quick Metrics */}
           <div className="flex flex-wrap sm:flex-nowrap gap-3 pt-2 md:pt-0 w-full md:w-auto">
-            <div className="px-4 py-2.5 rounded-xl bg-bg-elevated border border-border text-center min-w-[100px] flex-1 sm:flex-initial">
-              <div className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Credential Guard</div>
+            <div className="px-4 py-2.5 rounded-xl bg-bg-elevated border border-border text-center min-w25 flex-1 sm:flex-initial">
+              <div className="text-xs uppercase font-bold text-text-muted tracking-wider">Credential Guard</div>
               <div className="text-xs font-bold text-action-success mt-0.5 flex items-center justify-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" /> Active
               </div>
             </div>
-            <div className="px-4 py-2.5 rounded-xl bg-bg-elevated border border-border text-center min-w-[100px] flex-1 sm:flex-initial">
-              <div className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Active Sessions</div>
+            <div className="px-4 py-2.5 rounded-xl bg-bg-elevated border border-border text-center min-w25 flex-1 sm:flex-initial">
+              <div className="text-xs uppercase font-bold text-text-muted tracking-wider">Active Sessions</div>
               <div className="text-xs font-bold text-action-info mt-0.5">
                 {activeSessionsCount !== null ? activeSessionsCount : "1 Online"}
               </div>
@@ -401,9 +401,9 @@ const api = useApi();
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="Full Legal Name"
-                className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-[var(--action-info)] transition-colors"
+                className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-info transition-colors"
               />
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 This display name appears in system audit logs and broadcast messages.
               </p>
             </div>
@@ -418,7 +418,7 @@ const api = useApi();
                 disabled
                 className="w-full px-3.5 py-2.5 bg-bg-base border border-border rounded-xl text-sm text-text-muted cursor-not-allowed opacity-80"
               />
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 Email changes require root database migration to preserve audit foreign keys.
               </p>
             </div>
@@ -433,7 +433,7 @@ const api = useApi();
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 43210"
-                  className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-[var(--action-info)] transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-info transition-colors"
                 />
               </div>
 
@@ -459,7 +459,7 @@ const api = useApi();
                 value={photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-[var(--action-info)] transition-colors"
+                className="w-full px-3.5 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-info transition-colors"
               />
             </div>
 

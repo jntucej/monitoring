@@ -64,7 +64,7 @@ export function GeoMap({ gates, bounds, height = 360, onGateClick, className }: 
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="mb-2 text-[11px] font-medium" style={{ color: VIZ_THEME.muted }}>
+      <div className="mb-2 text-xs font-medium" style={{ color: VIZ_THEME.muted }}>
         Campus map · {gates.length} gate{gates.length === 1 ? "" : "s"}
       </div>
       <svg

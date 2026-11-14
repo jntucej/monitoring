@@ -51,7 +51,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
       : "var(--action-primary)";
 
   return (
-    <div className="relative w-full h-full min-h-[160px] flex items-center justify-center overflow-hidden rounded-2xl bg-bg-elevated/40 backdrop-blur-md border border-white/10 p-4">
+    <div className="relative w-full h-full min-h40 flex items-center justify-center overflow-hidden rounded-2xl bg-bg-elevated/40 backdrop-blur-md border border-white/10 p-4">
       {/* Laser Scanning Line Wave */}
       <div
         className="absolute left-0 right-0 h-[2px] pointer-events-none shadow-[0_0_15px_var(--action-success)]"
@@ -92,7 +92,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
             style={{ backgroundColor: glowColor, boxShadow: `0 0 12px ${glowColor}` }}
           />
         </div>
-        <span className="text-[10px] font-mono tracking-widest uppercase font-bold text-white/90 mt-2">
+        <span className="text-xs font-mono tracking-widest uppercase font-bold text-white/90 mt-2">
           GATE SECURITY SCANNER
         </span>
       </div>

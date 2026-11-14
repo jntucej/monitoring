@@ -56,8 +56,8 @@ export function PageHeader({
       {/* Mobile: visible title bar (the shell chrome is hidden on small screens). */}
       {showMobileTitle && (
         <div className="md:hidden -mx-4 px-4 pt-2 pb-1">
-          <h2 className="text-base font-bold text-[var(--text-primary)] truncate">{title}</h2>
-          {subtitle && <p className="text-xs text-[var(--text-muted)] truncate">{subtitle}</p>}
+          <h2 className="text-base font-bold text-primary truncate">{title}</h2>
+          {subtitle && <p className="text-xs text-muted truncate">{subtitle}</p>}
         </div>
       )}
     </div>

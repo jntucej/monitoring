@@ -166,7 +166,7 @@ export function CampusAssistant() {
           </div>
           <div>
             <h2 className="text-sm font-bold text-text-primary">Campus Assistant</h2>
-            <p className="text-[10px] text-text-muted">
+            <p className="text-xs text-text-muted">
               Read-only · answers from your own authorized data · no AI guessing
             </p>
           </div>
@@ -190,7 +190,7 @@ export function CampusAssistant() {
                     key={q}
                     type="button"
                     onClick={() => void ask(q)}
-                    className="rounded-full border border-border bg-bg-surface px-2.5 py-1 text-[11px] text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+                    className="rounded-full border border-border bg-bg-surface px-2.5 py-1 text-xs text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
                   >
                     {q}
                   </button>
@@ -213,7 +213,7 @@ export function CampusAssistant() {
                     <User className="mt-0.5 h-3.5 w-3.5 shrink-0 text-indigo-300" aria-hidden />
                   )}
                   <div className="min-w-0">
-                    <p className="text-[13px] leading-snug">{msg.text}</p>
+                    <p className="text-xs leading-snug">{msg.text}</p>
                     {msg.role === "assistant" && renderResult(msg)}
                   </div>
                 </div>

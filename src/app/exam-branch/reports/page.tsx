@@ -243,7 +243,7 @@ function ExamBranchReportsInner() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs min-w-[480px]">
+              <table className="w-full text-xs min-w120">
                 <thead>
                   <tr className="border-b border-border text-text-muted">
                     <th className="text-left px-4 py-2.5 font-semibold">Gate</th>
@@ -314,7 +314,7 @@ function ExamBranchReportsInner() {
         <WidgetBoundary title="Daily Series">
           <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs min-w-[300px]">
+              <table className="w-full text-xs min-w75">
                 <thead>
                   <tr className="border-b border-border text-text-muted">
                     {Object.keys(series[0]).map((k) => (

@@ -103,17 +103,17 @@ function RedisWorkerInner() {
             ) : d?.redisDetails ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
                 <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-[10px] text-text-muted uppercase">Clients</p>
+                  <p className="text-xs text-text-muted uppercase">Clients</p>
                   <p className="text-lg font-bold text-action-info">
                     {d.redisDetails.connectedClients != null ? d.redisDetails.connectedClients : "—"}
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-[10px] text-text-muted uppercase">Memory</p>
+                  <p className="text-xs text-text-muted uppercase">Memory</p>
                   <p className="text-lg font-bold text-action-info">{formatBytes(d.redisDetails.usedMemoryBytes)}</p>
                 </div>
                 <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-[10px] text-text-muted uppercase">Ops/sec</p>
+                  <p className="text-xs text-text-muted uppercase">Ops/sec</p>
                   <p className="text-lg font-bold text-action-info">
                     {d.redisDetails.opsPerSecond != null ? d.redisDetails.opsPerSecond : "—"}
                   </p>

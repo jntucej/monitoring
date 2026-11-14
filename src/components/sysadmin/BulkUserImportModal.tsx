@@ -310,7 +310,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                   Each code is shown once and stored hashed (in <code>enrollment_codes</code>). It is not
                   recoverable later, so copy it into the CSV before closing this dialog.
                 </div>
-                <pre className="text-[11px] leading-5 bg-bg-base rounded p-2 overflow-x-auto">
+                <pre className="text-xs leading-5 bg-bg-base rounded p-2 overflow-x-auto">
 {reportBootstrapCodes.map((c) => `row ${c.row}  ${c.roll ?? ""}  ${c.code}`).join("\n")}
                 </pre>
               </div>

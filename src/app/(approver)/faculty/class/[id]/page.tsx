@@ -101,7 +101,7 @@ function ClassRosterInner() {
     <div className="space-y-4 p-2 min-w-0">
       {details ? (
         <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <GraduationCap className="w-3.5 h-3.5" /> Class
           </p>
           <p className="text-sm font-semibold text-text-primary mt-1">
@@ -115,7 +115,7 @@ function ClassRosterInner() {
       {/* Desktop table / mobile cards */}
       <div className="hidden md:block rounded-xl border border-border bg-bg-surface overflow-hidden min-w-0">
         <table className="w-full text-sm">
-          <thead className="bg-bg-elevated text-[10px] uppercase tracking-wider text-text-muted">
+          <thead className="bg-bg-elevated text-xs uppercase tracking-wider text-text-muted">
             <tr>
               <th className="text-left px-3 py-2 font-bold">Student</th>
               <th className="text-left px-3 py-2 font-bold">Roll</th>
@@ -158,7 +158,7 @@ function ClassRosterInner() {
             <div className="flex items-center justify-between gap-2 min-w-0">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-text-primary truncate">{s.name}</p>
-                <p className="text-[11px] text-text-muted font-mono">
+                <p className="text-xs text-text-muted font-mono">
                   {s.roll} · {s.year != null ? `Y${s.year}` : "—"} / {s.section || "—"}
                 </p>
               </div>

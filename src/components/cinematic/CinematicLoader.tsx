@@ -33,7 +33,7 @@ export function CinematicLoader({
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-bg-base text-white">
         <div className="relative z-10 flex flex-col items-center">
-          <p className="mb-12 text-[10px] uppercase tracking-[0.4em] text-white/40">
+          <p className="mb-12 text-xs uppercase tracking-[0.4em] text-white/40">
             {COPY[mode].label}
           </p>
           <div className="relative mb-10 h-16 w-16 rounded-full bg-cyan-300/20" />
@@ -63,7 +63,7 @@ export function CinematicLoader({
       <FilmGrain opacity={0.04} />
 
       <div className="relative z-10 flex flex-col items-center">
-        <p className="mb-12 text-[10px] uppercase tracking-[0.4em] text-white/40">
+        <p className="mb-12 text-xs uppercase tracking-[0.4em] text-white/40">
           {copy.label}
         </p>
 
@@ -101,7 +101,7 @@ export function CinematicLoader({
           initial={{ opacity: 0 }}
           animate={{ opacity: skippable ? 1 : 0 }}
           transition={{ duration: 0.5 }}
-          className="mt-10 text-[10px] uppercase tracking-[0.32em] text-white/30"
+          className="mt-10 text-xs uppercase tracking-[0.32em] text-white/30"
         >
           Tap anywhere to continue
         </motion.p>

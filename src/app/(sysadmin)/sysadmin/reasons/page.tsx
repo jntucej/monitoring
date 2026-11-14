@@ -236,7 +236,7 @@ const api = useApi();
               placeholder="Search reasons or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-3 rounded-md bg-bg-surface border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
+              className="w-full h-10 pl-9 pr-3 rounded-md bg-bg-surface border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ringfocus-ring"
             />
           </div>
           <span className="text-xs text-text-muted">Showing {filteredReasons.length} reasons</span>

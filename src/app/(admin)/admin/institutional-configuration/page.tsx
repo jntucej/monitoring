@@ -104,7 +104,7 @@ function ReadOnlyCard({
           <Info className="w-4 h-4 text-action-info shrink-0" />
           <div>
             <h3 className="text-sm font-bold text-white">{title}</h3>
-            <p className="text-[11px] text-text-muted">{subtitle}</p>
+            <p className="text-xs text-text-muted">{subtitle}</p>
           </div>
         </div>
         <a
@@ -209,7 +209,7 @@ function InstitutionalConfigurationInner() {
                         key={p.code}
                         type="button"
                         onClick={() => setConfirmDeactivate(p)}
-                        className="rounded-md px-2 py-1 text-[11px] font-medium border border-rose-500/30 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-colors"
+                        className="rounded-md px-2 py-1 text-xs font-medium border border-rose-500/30 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-colors"
                       >
                         {p.name}
                       </button>

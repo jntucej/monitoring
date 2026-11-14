@@ -79,7 +79,7 @@ export function DevMessagesPanel() {
                 <span className="flex items-center gap-1.5 font-semibold text-text-primary">
                   <Send className="w-3 h-3" />
                   {m.user_name || "Unknown user"}
-                  <span className="uppercase tracking-wide text-[10px] px-1.5 py-0.5 rounded bg-bg-base border border-border">
+                  <span className="uppercase tracking-wide text-xs px-1.5 py-0.5 rounded bg-bg-base border border-border">
                     {m.user_role}
                   </span>
                 </span>

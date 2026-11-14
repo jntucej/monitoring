@@ -111,7 +111,7 @@ export function RoleAnalytics() {
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value as "7d" | "30d")}
-                className="bg-transparent text-[11px] text-text-secondary focus:outline-none"
+                className="bg-transparent text-xs text-text-secondary focus:outline-none"
                 aria-label="Date range"
               >
                 <option value="7d">7 days</option>
@@ -123,7 +123,7 @@ export function RoleAnalytics() {
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-[11px] text-text-secondary focus:outline-none"
+                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
                 aria-label="Department"
               >
                 <option value="">All depts</option>
@@ -139,7 +139,7 @@ export function RoleAnalytics() {
               <select
                 value={gate}
                 onChange={(e) => setGate(e.target.value)}
-                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-[11px] text-text-secondary focus:outline-none"
+                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
                 aria-label="Gate"
               >
                 <option value="">All gates</option>
@@ -167,7 +167,7 @@ export function RoleAnalytics() {
                 key={m.key}
                 className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
               >
-                <p className="text-[10px] text-text-muted flex items-center gap-1">
+                <p className="text-xs text-text-muted flex items-center gap-1">
                   {m.key === "active_alerts" && <AlertTriangle className="h-3 w-3" />}
                   {m.key.includes("turnaround") || m.key.includes("resolution") ? (
                     <Clock className="h-3 w-3" />
@@ -188,7 +188,7 @@ export function RoleAnalytics() {
         {/* Chart */}
         {seriesData.length > 0 ? (
           <div className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3">
-            <p className="text-[10px] text-text-muted mb-2">{chartConfig.title}</p>
+            <p className="text-xs text-text-muted mb-2">{chartConfig.title}</p>
             <ChartRenderer
               type={chartConfig.type}
               data={seriesData}

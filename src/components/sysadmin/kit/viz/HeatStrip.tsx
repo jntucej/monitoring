@@ -34,7 +34,7 @@ export function HeatStrip({ cells, maxCells, height = 20, label, onCellClick, cl
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="mb-1 text-[11px] font-medium" style={{ color: VIZ_THEME.muted }}>
+      <div className="mb-1 text-xs font-medium" style={{ color: VIZ_THEME.muted }}>
         {label}
       </div>
       <svg

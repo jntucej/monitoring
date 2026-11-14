@@ -93,7 +93,7 @@ export default function OperatorClaimPage() {
 
         <div className="rounded-xl border border-border bg-bg-surface p-5 space-y-4">
           <label className="block">
-            <span className="block text-[11px] font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+            <span className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
               Claim code
             </span>
             <input
@@ -144,7 +144,7 @@ export default function OperatorClaimPage() {
             type="button"
             onClick={submit}
             disabled={submitting || code.length < 4}
-            className="w-full min-h-[44px] rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
+            className="w-full min-h11 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
           >
             {submitting ? (
               <>
@@ -160,7 +160,7 @@ export default function OperatorClaimPage() {
           </button>
 
           {user?.gateId && (
-            <p className="text-[11px] text-text-muted text-center">
+            <p className="text-xs text-text-muted text-center">
               You already have gate <span className="font-mono text-text-secondary">{user.gateId}</span>{" "}
               assigned. Use the link above to return to your desk.
             </p>

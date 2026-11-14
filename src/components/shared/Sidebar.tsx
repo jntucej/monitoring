@@ -91,7 +91,7 @@ function DesktopSidebar({
       }`}
     >
       {/* Brand Header */}
-      <div className="px-3 py-3 border-b border-border flex items-center justify-between min-h-[64px]">
+      <div className="px-3 py-3 border-b border-border flex items-center justify-between min-h16">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="w-9 h-9 rounded-xl bg-action-primary/20 text-action-primary flex items-center justify-center shrink-0 font-bold border border-action-primary/30">
             <ShieldCheck className="w-5 h-5" />
@@ -101,7 +101,7 @@ function DesktopSidebar({
               <p className="text-sm font-bold tracking-tight text-text-primary truncate">
                 Gate Monitor
               </p>
-              <p className="text-[10px] font-mono uppercase text-text-muted truncate">
+              <p className="text-xs font-mono uppercase text-text-muted truncate">
                 {currentRole}
               </p>
             </div>
@@ -110,7 +110,7 @@ function DesktopSidebar({
         <button
           type="button"
           onClick={toggleSidebarCollapse}
-          className={`p-1.5 text-text-muted hover:text-text-primary hover:bg-bg-elevated rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring)] ${
+          className={`p-1.5 text-text-muted hover:text-text-primary hover:bg-bg-elevated rounded-lg transition-colors focus-visible:outline-2 focus-visible:outlinefocus-ring ${
             isSidebarCollapsed ? "mx-auto" : ""
           }`}
           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -125,11 +125,11 @@ function DesktopSidebar({
         {processedNav.map((group) => (
           <div key={group.groupLabel}>
             {!isSidebarCollapsed ? (
-              <p className="px-3 pb-1 text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              <p className="px-3 pb-1 text-xs font-bold text-text-muted uppercase tracking-wider">
                 {group.groupLabel}
               </p>
             ) : (
-              <div className="h-px bg-[var(--border)] my-2 mx-1" />
+              <div className="h-px bgborder my-2 mx-1" />
             )}
             <div className="space-y-1">
               {group.items.map((item) => {
@@ -140,7 +140,7 @@ function DesktopSidebar({
                   <div key={item.href} className="relative group flex items-center justify-center">
                     <Link
                       href={item.href}
-                      className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-xs font-medium transition-all ${
+                      className={`min-h11 min-w11 flex items-center justify-center rounded-xl text-xs font-medium transition-all ${
                         active
                           ? "bg-action-primary/15 text-action-primary font-semibold border border-action-primary/30"
                           : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated"
@@ -157,7 +157,7 @@ function DesktopSidebar({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                    className={`min-h11 flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       active
                         ? "bg-action-primary/15 text-action-primary font-semibold border border-action-primary/30"
                         : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated"
@@ -167,7 +167,7 @@ function DesktopSidebar({
                     <div className="flex-1 flex items-center justify-between truncate">
                       <span className="truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
+                        <span className="px-1.5 py-0.5 text-xs font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
                           {item.badge}
                         </span>
                       )}
@@ -191,7 +191,7 @@ function DesktopSidebar({
               <p className="text-xs font-semibold text-text-primary truncate">
                 {user?.name || "User"}
               </p>
-              <p className="text-[10px] text-text-muted capitalize truncate">
+              <p className="text-xs text-text-muted capitalize truncate">
                 {currentRole}
               </p>
             </div>
@@ -263,7 +263,7 @@ function MobileDrawer({
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-text-primary">Gate Monitor</h2>
-                  <p className="text-[10px] font-mono uppercase text-text-muted">{currentRole}</p>
+                  <p className="text-xs font-mono uppercase text-text-muted">{currentRole}</p>
                 </div>
               </div>
               <button
@@ -279,7 +279,7 @@ function MobileDrawer({
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
               {processedNav.map((group) => (
                 <div key={group.groupLabel}>
-                  <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2 px-1">
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 px-1">
                     {group.groupLabel}
                   </p>
                   <div className="space-y-1">
@@ -301,7 +301,7 @@ function MobileDrawer({
                           <Icon className="w-5 h-5 shrink-0" />
                           <span className="truncate flex-1">{item.label}</span>
                           {item.badge && (
-                            <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
+                            <span className="px-2 py-0.5 text-xs font-mono font-bold rounded-full bg-action-primary/20 text-action-primary uppercase">
                               {item.badge}
                             </span>
                           )}
@@ -323,7 +323,7 @@ function MobileDrawer({
                   <p className="text-xs font-semibold text-text-primary truncate">
                     {user?.name || "User"}
                   </p>
-                  <p className="text-[10px] text-text-muted capitalize truncate">
+                  <p className="text-xs text-text-muted capitalize truncate">
                     {currentRole}
                   </p>
                 </div>
@@ -366,7 +366,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
         <button
           type="button"
           onClick={toggleMobileSidebar}
-          className="flex flex-col items-center justify-center h-full w-full py-1 text-text-muted hover:text-text-primary active-tap transition-all min-h-[44px]"
+          className="flex flex-col items-center justify-center h-full w-full py-1 text-text-muted hover:text-text-primary active-tap transition-all min-h11"
           aria-label="Open Navigation Drawer"
           title="Navigation Menu"
         >
@@ -384,7 +384,7 @@ function MobileBottomBar({ toggleMobileSidebar, bottomTabs, pathname, searchPara
               key={item.href}
               href={item.href}
               title={item.label}
-              className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h-[44px] ${
+              className={`relative flex flex-col items-center justify-center h-full w-full py-1 active-tap transition-all min-h11 ${
                 active
                   ? "text-action-primary font-bold"
                   : "text-text-muted hover:text-text-primary"

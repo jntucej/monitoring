@@ -66,7 +66,7 @@ const { addToast } = useUIStore();
             <div className="w-20 h-20 rounded-full bg-action-primary/10 text-action-primary border-2 border-action-primary/30 flex items-center justify-center text-3xl font-extrabold shadow-inner">
               {user.name ? user.name.charAt(0).toUpperCase() : (role?.charAt(0).toUpperCase() || "U")}
             </div>
-            <div className="absolute -bottom-1 -right-1 bg-action-success text-black p-1 rounded-full border-2 border-[var(--bg-surface)]" title="Account Active">
+            <div className="absolute -bottom-1 -right-1 bg-action-success text-black p-1 rounded-full border-2 borderbg-surface" title="Account Active">
               <CheckCircle className="w-4 h-4 text-emerald-950 fill-emerald-400" />
             </div>
           </div>
@@ -96,7 +96,7 @@ const { addToast } = useUIStore();
                 <Mail className="w-4 h-4 text-text-muted" />
                 <span>Email Address</span>
               </div>
-              <span className="text-xs font-medium text-text-primary max-w-[200px] truncate">{user.email}</span>
+              <span className="text-xs font-medium text-text-primary max-w50 truncate">{user.email}</span>
             </div>
           )}
 

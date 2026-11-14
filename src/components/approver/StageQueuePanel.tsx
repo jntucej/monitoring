@@ -223,7 +223,7 @@ export function StageQueuePanel({
                         ? ` · ${row.student.student_details.roll}`
                         : ""}
                     </div>
-                    <div className="text-[10px] text-text-muted">
+                    <div className="text-xs text-text-muted">
                       Stage: {row.current_stage}
                       {!actionable ? " · view only" : ""}
                     </div>
@@ -269,7 +269,7 @@ export function StageQueuePanel({
                       )}
                     </div>
                   ) : (
-                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-bg-elevated px-2 py-1 text-[10px] text-text-muted">
+                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-muted">
                       <Eye className="h-3 w-3" aria-hidden /> View only
                     </span>
                   )}

@@ -49,7 +49,7 @@ function Table<T extends Record<string, any>>({
 
   return (
     <div className={cn("overflow-x-auto rounded-lg border border-border bg-bg-surface", className)}>
-      <table className="w-full text-sm min-w-[700px]">
+      <table className="w-full text-sm min-w175">
         <thead>
           <tr className="border-b border-border bg-bg-elevated/30">
             {columns.map((col) => (

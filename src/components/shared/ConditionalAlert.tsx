@@ -47,7 +47,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
           >
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm">{a.title}</p>
-              <p className="mt-0.5 text-[13px] text-text-muted">{a.message}</p>
+              <p className="mt-0.5 text-xs text-text-muted">{a.message}</p>
               {a.href && (
                 <a
                   href={a.href}
@@ -57,7 +57,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
                 </a>
               )}
             </div>
-            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded
+            <span className={`text-xs font-mono px-1.5 py-0.5 rounded
               ${a.severity === "critical" ? "bg-rose-500/20 text-action-danger" : ""}
               ${a.severity === "high" ? "bg-amber-500/20 text-action-warning" : ""}
               ${a.severity === "medium" ? "bg-sky-500/20 text-action-info" : ""}

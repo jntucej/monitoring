@@ -34,7 +34,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
   };
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
-      <div className="rounded-3xl bg-gradient-to-br from-[var(--action-primary)]/20 to-[var(--action-info)]/10 p-6">
+      <div className="rounded-3xl bg-gradient-to-br fromaction-primary/20 toaction-info/10 p-6">
         <p className="text-xs uppercase tracking-wide text-text-muted">
           {r.periodLabel}
         </p>

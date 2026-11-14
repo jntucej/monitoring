@@ -50,7 +50,7 @@ export function SupervisorStatusBar({ counts, lastScan, refreshing = false }: Su
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Supervisor status bar"
     >
       {/* Left: gates · escalations · incidents · shift */}

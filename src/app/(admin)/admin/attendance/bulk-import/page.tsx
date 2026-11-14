@@ -144,15 +144,15 @@ export default function AdminAttendanceBulkImportPage() {
               <p className="text-text-muted uppercase font-semibold mb-2">Result</p>
               <div className="flex gap-6">
                 <div>
-                  <span className="text-[10px] text-text-muted uppercase">Created</span>
+                  <span className="text-xs text-text-muted uppercase">Created</span>
                   <p className="text-lg font-bold text-action-success">{result.created}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-text-muted uppercase">Skipped</span>
+                  <span className="text-xs text-text-muted uppercase">Skipped</span>
                   <p className="text-lg font-bold text-sky-500">{result.skipped}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] text-text-muted uppercase">Failed</span>
+                  <span className="text-xs text-text-muted uppercase">Failed</span>
                   <p className="text-lg font-bold text-red-500">{result.failed}</p>
                 </div>
               </div>

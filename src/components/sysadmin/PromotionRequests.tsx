@@ -141,11 +141,11 @@ export function PromotionRequests() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-action-success border border-emerald-500/30">APPROVED</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-action-success border border-emerald-500/30">APPROVED</span>;
       case "REJECTED":
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">REJECTED</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">REJECTED</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">PENDING</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">PENDING</span>;
     }
   };
 
@@ -219,16 +219,16 @@ export function PromotionRequests() {
                   <tr key={req.id} className="hover:bg-bg-elevated/30 transition-colors">
                     <td className="p-4 font-bold text-white">
                       {req.targetUserName}
-                      <span className="block text-[10px] font-mono text-text-muted">Current: {req.targetCurrentRole}</span>
+                      <span className="block text-xs font-mono text-text-muted">Current: {req.targetCurrentRole}</span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
+                      <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
                         {req.newRole}
                       </span>
                     </td>
                     <td className="p-4 text-white">
                       {req.requesterName}
-                      <span className="block text-[10px] font-mono text-text-muted">{req.requesterRole}</span>
+                      <span className="block text-xs font-mono text-text-muted">{req.requesterRole}</span>
                     </td>
                     <td className="p-4 text-text-muted max-w-xs truncate">{req.reason}</td>
                     <td className="p-4">{getStatusBadge(req.status)}</td>
@@ -237,19 +237,19 @@ export function PromotionRequests() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleAction(req.id, "APPROVED")}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-success hover:bg-action-success text-white font-bold text-[10px]"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-success hover:bg-action-success text-white font-bold text-xs"
                           >
                             <CheckCircle className="w-3 h-3" /> Approve
                           </button>
                           <button
                             onClick={() => handleAction(req.id, "REJECTED")}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-danger hover:bg-action-danger text-white font-bold text-[10px]"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-danger hover:bg-action-danger text-white font-bold text-xs"
                           >
                             <XCircle className="w-3 h-3" /> Reject
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-text-muted font-mono">
+                        <span className="text-xs text-text-muted font-mono">
                           {req.approverName ? `By ${req.approverName}` : "—"}
                         </span>
                       )}
@@ -276,10 +276,10 @@ export function PromotionRequests() {
                   value={userQuery}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Type a name, roll number or email…"
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--action-info)]"
+                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info"
                 />
                 {userQuery.trim().length >= 2 && userResults.length === 0 && (
-                  <p className="text-[10px] text-text-muted">No matching people found.</p>
+                  <p className="text-xs text-text-muted">No matching people found.</p>
                 )}
                 {userResults.length > 0 && (
                   <div className="border border-border rounded-xl overflow-hidden divide-y divide-border max-h-40 overflow-y-auto">
@@ -308,7 +308,7 @@ export function PromotionRequests() {
                 <select id="target-role"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--action-info)]"
+                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info"
                 >
                   <option value="admin">admin</option>
                   <option value="sysadmin">sysadmin</option>
@@ -323,7 +323,7 @@ export function PromotionRequests() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain justification for role change..."
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[var(--action-info)] h-20"
+                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info h-20"
                   required
                 />
               </div>

@@ -142,16 +142,16 @@ const api = useApi();
                   <tr key={job.id} className="hover:bg-bg-elevated/30 transition-colors">
                     <td className="p-4 font-bold text-white">
                       {job.name}
-                      <span className="block text-[10px] text-text-muted font-normal">{job.description}</span>
+                      <span className="block text-xs text-text-muted font-normal">{job.description}</span>
                     </td>
-                    <td className="p-4 font-mono text-[11px] text-action-info">{job.cron_expression}</td>
-                    <td className="p-4 font-mono text-[10px] text-text-muted">
+                    <td className="p-4 font-mono text-xs text-action-info">{job.cron_expression}</td>
+                    <td className="p-4 font-mono text-xs text-text-muted">
                       {job.last_run ? new Date(job.last_run).toLocaleString() : "Never"}
                     </td>
                     <td className="p-4">
                       <button
                         onClick={() => handleToggleJob(job.id, job.enabled)}
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border transition-all ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase border transition-all ${
                           job.enabled
                             ? "bg-emerald-500/20 text-action-success border-emerald-500/30"
                             : "bg-bg-elevated0/20 text-text-muted border-border/30"
@@ -164,7 +164,7 @@ const api = useApi();
                       <button
                         onClick={() => handleRunNow(job.id)}
                         disabled={runningJobId === job.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-action-info text-white font-bold text-[10px] shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-action-info text-white font-bold text-xs shadow-sm disabled:opacity-50"
                       >
                         <Play className={`w-3 h-3 ${runningJobId === job.id ? "animate-spin" : ""}`} /> Run Now
                       </button>
@@ -202,19 +202,19 @@ const api = useApi();
                     <td className="py-2.5 font-mono text-white font-bold">{r.job_id}</td>
                     <td className="py-2.5">
                       {r.status === "SUCCESS" ? (
-                        <span className="inline-flex items-center gap-1 text-action-success font-bold text-[10px]">
+                        <span className="inline-flex items-center gap-1 text-action-success font-bold text-xs">
                           <CheckCircle2 className="w-3 h-3" /> SUCCESS
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-action-danger font-bold text-[10px]">
+                        <span className="inline-flex items-center gap-1 text-action-danger font-bold text-xs">
                           <XCircle className="w-3 h-3" /> FAILED
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 font-mono text-[10px] text-text-muted">
+                    <td className="py-2.5 font-mono text-xs text-text-muted">
                       {new Date(r.start_time).toLocaleString()}
                     </td>
-                    <td className="py-2.5 text-right text-[10px] text-text-muted">
+                    <td className="py-2.5 text-right text-xs text-text-muted">
                       {r.error_message || "Completed in < 5s"}
                     </td>
                   </tr>

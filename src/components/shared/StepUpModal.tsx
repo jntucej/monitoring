@@ -50,7 +50,7 @@ export function StepUpModal({
   return (
     <Modal isOpen={open} onClose={onClose} title="Confirm your password">
       <form onSubmit={submit} className="space-y-3">
-        <p className="text-sm text-[var(--text-secondary)]">
+        <p className="text-sm text-secondary">
           This action requires a fresh password confirmation (valid for 5
           minutes).
         </p>

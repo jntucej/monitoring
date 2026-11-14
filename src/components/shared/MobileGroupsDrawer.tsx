@@ -45,7 +45,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open navigation menu"
-        className="md:hidden fixed top-3 left-3 z-50 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center border border-border bg-bg-elevated/95 backdrop-blur-md text-text-secondary active:scale-95 transition-transform"
+        className="md:hidden fixed top-3 left-3 z-50 min-w11 min-h11 rounded-xl flex items-center justify-center border border-border bg-bg-elevated/95 backdrop-blur-md text-text-secondary active:scale-95 transition-transform"
       >
         <Menu className="w-4 h-4" />
       </button>
@@ -64,7 +64,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         aria-label="Mobile navigation drawer"
         role="dialog"
         aria-modal="true"
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-[280px] max-w-[85vw] bg-bg-elevated border-r border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w70 max-w-[85vw] bg-bg-elevated border-r border-border shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -80,7 +80,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-surface transition-colors"
+            className="min-w11 min-h11 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-surface transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -107,7 +107,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
                   <GroupIcon className="w-4 h-4 shrink-0" />
                   <span className="flex-1 text-left truncate">{group.label}</span>
                   <span
-                    className={`text-[10px] text-text-muted transition-transform ${
+                    className={`text-xs text-text-muted transition-transform ${
                       expanded ? "rotate-90" : ""
                     }`}
                   >

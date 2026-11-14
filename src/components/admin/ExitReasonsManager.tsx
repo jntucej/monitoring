@@ -193,7 +193,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 <p className="text-xs text-text-muted truncate">
                   {r.description || "No description"}
                 </p>
-                <p className="text-[11px] text-text-muted mt-0.5">
+                <p className="text-xs text-text-muted mt-0.5">
                   approval: {r.approvalBy} · notify: {r.parentNotification}
                   {r.maxDurationHours != null && ` · max ${r.maxDurationHours}h`}
                 </p>
@@ -281,7 +281,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 <textarea id="description"
                   value={form.description}
                   onChange={(e) => updateField("description", e.target.value)}
-                  className={`${inputCls} min-h-[60px]`}
+                  className={`${inputCls} min-h15`}
                 />
               </div>
 

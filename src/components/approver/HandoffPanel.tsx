@@ -114,7 +114,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
           <h2 className="text-sm font-bold text-text-primary truncate">
             OIE Handoff
           </h2>
-          <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider shrink-0">
+          <span className="text-xs font-mono text-text-muted uppercase tracking-wider shrink-0">
             {user?.name ? user.name : "Exam Branch"}
           </span>
         </div>
@@ -139,7 +139,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
             />
           </div>
         ) : (
-          <ul className="divide-y divide-border max-h-[480px] overflow-y-auto min-w-0">
+          <ul className="divide-y divide-border max-h120 overflow-y-auto min-w-0">
             {handoffs.map((item) => {
               const ticket = item.ticket_number;
               const isSending = sending.has(ticket);
@@ -177,7 +177,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                         {ticket}
                       </span>
                       <span
-                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-semibold ${
                           item.status === "PENDING"
                             ? "text-action-warning bg-amber-400/10 border border-amber-400/20"
                             : "text-action-info bg-sky-400/10 border border-sky-400/20"
@@ -189,9 +189,9 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                     <div className="mt-1 text-sm font-semibold text-text-primary truncate">
                       {candidateName}
                     </div>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted min-w-0">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted min-w-0">
                       <span className="inline-flex items-center gap-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider">
+                        <span className="text-xs font-mono uppercase tracking-wider">
                           Roll
                         </span>
                         <span className="font-mono text-text-secondary">
@@ -199,13 +199,13 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                         </span>
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider">
+                        <span className="text-xs font-mono uppercase tracking-wider">
                           Date
                         </span>
                         <span>{fmtDate(examDate)}</span>
                       </span>
                       <span className="inline-flex items-center gap-1 min-w-0">
-                        <span className="text-[10px] font-mono uppercase tracking-wider">
+                        <span className="text-xs font-mono uppercase tracking-wider">
                           Subj
                         </span>
                         <span className="truncate">{subject}</span>

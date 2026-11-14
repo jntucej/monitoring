@@ -116,7 +116,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     router.replace("/login");
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="w-10 h-10 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );
@@ -125,7 +125,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="w-10 h-10 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );

@@ -150,7 +150,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Refresh live activity"
         >
           {loading ? (
@@ -163,7 +163,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
       </div>
 
       {/* Counts */}
-      <div className="flex flex-wrap gap-3 mb-3 text-[11px]">
+      <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-danger bg-rose-400/10 border-rose-400/20">
           <ShieldAlert className="w-3 h-3" />
           {data?.data.counts.escalated ?? 0} escalated
@@ -188,13 +188,13 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
         <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-3">
           <div className="flex items-start gap-2">
             <XCircle className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs text-text-muted">
               No open escalations or alerts. The desk is clear.
             </p>
           </div>
         </div>
       ) : (
-        <ul className="space-y-1.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-1.5 max-h70 overflow-y-auto custom-scrollbar pr-1">
           {openItems.map((item) => {
             const priorityTone =
               item.priority === "CRITICAL" || item.priority === "HIGH"
@@ -210,7 +210,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold border ${priorityTone} shrink-0`}
+                      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-mono font-bold border ${priorityTone} shrink-0`}
                     >
                       {item.priority}
                     </span>
@@ -218,11 +218,11 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
                       {item.ticket}
                     </span>
                   </div>
-                  <p className="text-[10px] font-mono text-text-muted truncate mt-0.5">
+                  <p className="text-xs font-mono text-text-muted truncate mt-0.5">
                     team: {item.team} · {item.status}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-text-muted">
+                <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
                   <Clock className="w-3 h-3" />
                   {fmt(item.lastUpdate)}
                 </span>
@@ -233,7 +233,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
       )}
 
       {/* Footer hint */}
-      <p className="mt-3 text-[10px] text-text-muted">
+      <p className="mt-3 text-xs text-text-muted">
         Data refreshed every 15s. Click a ticket in the board for full context.
       </p>
     </section>

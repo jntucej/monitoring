@@ -55,7 +55,7 @@ const api = useApi();
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-bg-elevated border border-border text-xs text-text-primary"
           >
             <span className="font-mono">{r.role}</span>
-            {r.scope && <span className="text-[10px] text-text-muted">· {r.scope}</span>}
+            {r.scope && <span className="text-xs text-text-muted">· {r.scope}</span>}
             <button onClick={() => revoke(r.role, r.scope)} className="text-action-danger hover:text-action-danger">
               <X className="w-3 h-3" />
             </button>

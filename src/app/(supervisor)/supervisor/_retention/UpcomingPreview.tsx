@@ -40,11 +40,11 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
           <li key={item.ticket}>
             <Link
               href={`/supervisor/response/escalations?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex min-h-[44px] items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-bg-elevated"
+              className="flex min-h11 items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-bg-elevated"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-text-primary">{item.subject}</p>
-                <p className="text-[10px] text-text-muted">{item.ticket}</p>
+                <p className="text-xs text-text-muted">{item.ticket}</p>
               </div>
               <SlaBadge slaDeadline={item.slaDeadline} status="PENDING" />
               <ArrowRight className="size-3 shrink-0 text-text-muted" />

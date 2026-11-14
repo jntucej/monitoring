@@ -61,7 +61,7 @@ function Kpi({
   return (
     <div className="rounded-xl border border-border bg-bg-surface p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-wide text-text-muted">
+        <span className="text-xs uppercase tracking-wide text-text-muted">
           {label}
         </span>
         <span className={`h-7 w-7 rounded-lg grid place-items-center ${tint}`} aria-hidden="true">
@@ -72,7 +72,7 @@ function Kpi({
         {value}
       </div>
       {sub && (
-        <div className="mt-1 text-[11px] text-text-muted">{sub}</div>
+        <div className="mt-1 text-xs text-text-muted">{sub}</div>
       )}
     </div>
   );
@@ -221,7 +221,7 @@ export function AcademicsDepartmentPanel({
             {title}
           </h2>
           {!totals.live && (
-            <Badge variant="dayout" className="text-[10px]">
+            <Badge variant="dayout" className="text-xs">
               seed fallback
             </Badge>
           )}
@@ -235,7 +235,7 @@ export function AcademicsDepartmentPanel({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search department or HOD…"
               aria-label="Search department or HOD"
-              className="h-8 w-56 rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--action-info)]/40"
+              className="h-8 w-56 rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ringaction-info/40"
             />
           </div>
           <Button
@@ -305,7 +305,7 @@ export function AcademicsDepartmentPanel({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-wide text-text-muted border-b border-border">
+                    <tr className="text-left text-xs uppercase tracking-wide text-text-muted border-b border-border">
                       <th className="px-4 py-2.5" scope="col">Code</th>
                       <th className="px-4 py-2.5" scope="col">Department</th>
                       <th className="px-4 py-2.5" scope="col">HOD</th>
@@ -408,7 +408,7 @@ export function AcademicsDepartmentPanel({
         </Card>
       </WidgetBoundary>
 
-      <p className="text-[11px] text-text-muted text-right">
+      <p className="text-xs text-text-muted text-right">
         {totals.live ? "Live data" : "Seed fallback"} · updated{" "}
         {payload ? new Date(payload.generatedAt).toLocaleTimeString() : "—"}
       </p>

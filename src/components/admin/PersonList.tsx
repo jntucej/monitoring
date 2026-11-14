@@ -101,7 +101,7 @@ export function PersonList() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-text-secondary">{person.department || person.designation || "N/A"}</p>
-                  <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${
+                  <span className={`text-xs uppercase font-semibold px-2 py-0.5 rounded ${
                     person.status === "active" ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"
                   }`}>
                     {person.status}

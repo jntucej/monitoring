@@ -140,7 +140,7 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
                     onSelect(row);
                   }}
                   onFocus={() => setActiveIndex(idx)}
-                  className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-left transition-colors min-h-[52px] ${
+                  className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl text-left transition-colors min-h13 ${
                     isActive
                       ? "bg-action-primary/10 border border-action-primary/30"
                       : "hover:bg-bg-elevated border border-transparent"
@@ -170,7 +170,7 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
                     <p className="text-sm font-bold text-text-primary truncate">
                       {row.name || row.roll || "—"}
                     </p>
-                    <p className="text-[11px] font-mono text-text-muted truncate">
+                    <p className="text-xs font-mono text-text-muted truncate">
                       {row.roll || "—"}
                       {row.person_type ? ` · ${row.person_type}` : ""}
                     </p>
@@ -178,18 +178,18 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
 
                   {/* gate + reason */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] text-text-secondary max-w-[80px] truncate">
+                    <span className="text-xs text-text-secondary max-w20 truncate">
                       {row.gate_name || row.gate_id || "Gate"}
                     </span>
                     {row.reason ? (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-bg-elevated text-text-secondary max-w-[70px] truncate">
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-bg-elevated text-text-secondary max-w-[70px] truncate">
                         {row.reason}
                       </span>
                     ) : null}
                   </div>
 
                   {/* timestamp */}
-                  <time className="text-[10px] font-mono text-text-muted tabular-nums shrink-0 w-[72px] text-right">
+                  <time className="text-xs font-mono text-text-muted tabular-nums shrink-0 w18 text-right">
                     {fmtTime(row.timestamp ?? row.created_at)}
                   </time>
                 </button>

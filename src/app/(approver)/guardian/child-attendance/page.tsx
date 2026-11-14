@@ -18,7 +18,7 @@ function ChildAttendanceInner() {
           <BarChart3 className="w-6 h-6 text-emerald-400" />
           Child Attendance
         </p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+        <p className="mt-1 text-sm text-muted">
           7-day gate activity summary for your wards
         </p>
       </div>

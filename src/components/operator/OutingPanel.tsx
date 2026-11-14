@@ -21,11 +21,11 @@ export function OutingPanel({ entries }: OutingPanelProps) {
         <h3 className="font-bold text-sm flex items-center gap-2">
           <Clock3 className={`w-4 h-4 ${entries.some((e) => e.overdue) ? "text-red-400" : "text-action-warning"}`} />
           On Outing (No Permission)
-          <span className="px-1.5 py-0.5 rounded-full bg-bg-base text-[10px] font-bold text-text-muted">
+          <span className="px-1.5 py-0.5 rounded-full bg-bg-base text-xs font-bold text-text-muted">
             {entries.length}
           </span>
         </h3>
-        <p className="text-[10px] text-text-muted">
+        <p className="text-xs text-text-muted">
           Short outings · {entries[0]?.limitMinutes ?? 180}m limit
         </p>
       </div>
@@ -51,19 +51,19 @@ export function OutingPanel({ entries }: OutingPanelProps) {
             >
               <div className="min-w-0">
                 <p className="text-xs font-bold truncate">{e.name || "Unknown"}</p>
-                <p className="text-[10px] font-mono text-text-muted">
+                <p className="text-xs font-mono text-text-muted">
                   {e.roll} · out since {new Date(e.outAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </p>
               </div>
               <div className="text-right shrink-0">
                 {e.overdue ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 text-[10px] font-bold">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 text-xs font-bold">
                     OVERDUE · {fmtDuration(e.minutesGone)}
                   </span>
                 ) : (
                   <>
                     <p className="text-xs font-bold tabular-nums text-action-warning">{fmtDuration(e.minutesGone)} gone</p>
-                    <p className="text-[10px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {fmtDuration(Math.max(0, e.limitMinutes - e.minutesGone))} left
                     </p>
                   </>

@@ -89,7 +89,7 @@ export const BotBubble = memo(function BotBubble({
             {isError ? (
               <button
                 onClick={retryThis}
-                className="inline-flex items-center gap-1 text-[11px] text-text-muted hover:text-action-success transition"
+                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-success transition"
               >
                 <RotateCcw className="h-3 w-3" /> {retryLabel}
               </button>
@@ -140,7 +140,7 @@ export const BotBubble = memo(function BotBubble({
                   <motion.span
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[10px] text-text-muted"
+                    className="text-xs text-text-muted"
                   >
                     {thanksLabel}
                   </motion.span>
@@ -148,7 +148,7 @@ export const BotBubble = memo(function BotBubble({
               </>
             )}
             {!thanked && !isError && !canGiveFeedback && (
-              <span className="text-[10px] text-text-muted opacity-60">Offline</span>
+              <span className="text-xs text-text-muted opacity-60">Offline</span>
             )}
           </div>
         )}

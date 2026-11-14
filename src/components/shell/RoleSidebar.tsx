@@ -75,7 +75,7 @@ export function RoleSidebar({
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
       <header className="shrink-0 border-b border-border px-4 py-3">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           {manifest.brand.short}
         </p>
         <p className="text-sm font-semibold text-text-primary">

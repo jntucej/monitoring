@@ -119,10 +119,10 @@ function AdminSessionsInner() {
                   <tr key={r.sessionId} className="hover:bg-bg-elevated/40">
                     <td className="p-3">
                       <p className="text-text-primary font-medium">{r.name}</p>
-                      <p className="text-[11px] text-text-muted font-mono">{r.email}</p>
+                      <p className="text-xs text-text-muted font-mono">{r.email}</p>
                     </td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted capitalize">{r.role}</span>
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted capitalize">{r.role}</span>
                     </td>
                     <td className="p-3 text-xs text-text-muted">
                       {r.lastActive ? new Date(r.lastActive).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}

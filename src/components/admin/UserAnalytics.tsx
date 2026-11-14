@@ -123,7 +123,7 @@ export function UserAnalytics() {
                   <tr key={u.id} className="border-b border-border hover:bg-[var(--bg-surface-elevated)]">
                     <td className="p-2">
                       <div className="font-semibold">{u.name}</div>
-                      <div className="text-text-secondary text-[10px]">{u.email}</div>
+                      <div className="text-text-secondary text-xs">{u.email}</div>
                     </td>
                     <td className="p-2 font-mono text-text-secondary">{u.role}</td>
                     <td className="p-2">

@@ -322,7 +322,7 @@ export function PermissionDetailPanel({
                 <QrCode className="w-5 h-5 shrink-0" />
                 <div>
                   <p className="text-xs font-bold text-action-success">Approved Pass Credential Ready</p>
-                  <p className="text-[11px] text-emerald-400/80">Scan this pass credential at campus gates.</p>
+                  <p className="text-xs text-emerald-400/80">Scan this pass credential at campus gates.</p>
                 </div>
               </div>
               <Button
@@ -393,7 +393,7 @@ export function PermissionDetailPanel({
               <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-surface border border-border">
                 <Fingerprint className="w-4 h-4 text-action-primary" />
                 <div>
-                  <span className="text-text-muted block text-[11px]">
+                  <span className="text-text-muted block text-xs">
                     Hostel Biometric Check
                   </span>
                   <span className="font-medium text-text-primary">
@@ -407,7 +407,7 @@ export function PermissionDetailPanel({
               <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-surface border border-border">
                 <Fingerprint className="w-4 h-4 text-action-primary" />
                 <div>
-                  <span className="text-text-muted block text-[11px]">
+                  <span className="text-text-muted block text-xs">
                     Main Gate Biometric Check
                   </span>
                   <span className="font-medium text-text-primary">
@@ -423,7 +423,7 @@ export function PermissionDetailPanel({
                   <div className="flex items-center gap-2">
                     <PenTool className="w-4 h-4 text-action-warning" />
                     <div>
-                      <span className="text-text-muted block text-[11px]">
+                      <span className="text-text-muted block text-xs">
                         Attached Document / Proof
                       </span>
                       <span className="font-medium text-text-primary">
@@ -479,7 +479,7 @@ export function PermissionDetailPanel({
                   {/* Room-assignment fields: required to approve a day_scholar home_out ticket */}
                   {activeAction === "APPROVE" && isDayScholarHomeOut && (
                     <div className="space-y-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
-                      <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wide">
+                      <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
                         Hostel Room Assignment
                         <span className="ml-1 text-action-danger">* required</span>
                       </p>
@@ -654,19 +654,19 @@ export function PermissionDetailPanel({
               <div className="space-y-2 border-l-2 border-border ml-2 pl-4">
                 {data.stage_history.map((log, index) => (
                   <div key={index} className="space-y-1 relative group">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-action-primary ring-4 ring-[var(--bg-surface)]" />
+                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-action-primary ring-4 ringbg-surface" />
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-xs text-text-primary">
                         {log.actorName || "System Actor"}
                       </span>
-                      <span className="text-[10px] text-text-muted font-mono">
+                      <span className="text-xs text-text-muted font-mono">
                         ({log.actorRole || "System"})
                       </span>
                       {log.action === "FORWARDED" && (
                         <CornerUpRight className="w-3.5 h-3.5 text-action-warning" aria-label="Forwarded" />
                       )}
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded font-semibold uppercase ${
+                        className={`text-xs px-1.5 py-0.5 rounded font-semibold uppercase ${
                           log.action === "FORWARDED"
                             ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
                             : "bg-bg-elevated border border-border text-action-primary"
@@ -680,7 +680,7 @@ export function PermissionDetailPanel({
                         &ldquo;{log.comment}&rdquo;
                       </p>
                     )}
-                    <span className="text-[10px] text-text-muted block">
+                    <span className="text-xs text-text-muted block">
                       {formatDateTime(log.timestamp)}
                     </span>
                   </div>

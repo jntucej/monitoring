@@ -165,7 +165,7 @@ export function TaskContinuity() {
           <RotateCw className="h-4 w-4 text-unit-c" />
           <h3 className="text-sm font-medium text-text-primary">Resume Where You Left Off</h3>
           {hasDrafts && (
-            <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[10px] text-unit-c">
+            <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-unit-c">
               {allDrafts.length} draft(s)
             </span>
           )}
@@ -179,7 +179,7 @@ export function TaskContinuity() {
             </p>
             <ul className="space-y-1">
               {allDrafts.slice(0, 3).map((d, i) => (
-                <li key={i} className="text-[11px] text-violet-300/80 truncate">
+                <li key={i} className="text-xs text-violet-300/80 truncate">
                   • {getDraftLabel(d)}
                   {d.updatedAt && (
                     <span className="text-violet-400/50 ml-1">
@@ -189,7 +189,7 @@ export function TaskContinuity() {
                 </li>
               ))}
               {allDrafts.length > 3 && (
-                <li className="text-[11px] text-violet-400/50">
+                <li className="text-xs text-violet-400/50">
                   +{allDrafts.length - 3} more
                 </li>
               )}
@@ -210,7 +210,7 @@ export function TaskContinuity() {
           <div className="space-y-2 max-h-72 overflow-y-auto">
             {Object.entries(grouped).map(([type, drafts]) => (
               <div key={type}>
-                <p className="text-[10px] font-medium text-text-muted uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5 flex items-center gap-1">
                   <ListPlus className="h-3 w-3" />
                   {DRAFT_TYPE_LABELS[type] ?? type}
                 </p>
@@ -238,7 +238,7 @@ export function TaskContinuity() {
                         {getDraftLabel(draft)}
                       </span>
                       {draft.updatedAt && (
-                        <span className="text-[10px] text-text-muted shrink-0 flex items-center gap-1">
+                        <span className="text-xs text-text-muted shrink-0 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {new Date(draft.updatedAt).toLocaleDateString()}
                         </span>
@@ -254,14 +254,14 @@ export function TaskContinuity() {
 
                     {expanded === `${draft.taskType}:${draft.position}` && (
                       <div className="mt-2 space-y-2">
-                        <div className="rounded bg-bg-surface/50 p-2 text-[10px] text-text-muted font-mono break-all max-h-24 overflow-y-auto">
+                        <div className="rounded bg-bg-surface/50 p-2 text-xs text-text-muted font-mono break-all max-h-24 overflow-y-auto">
                           {JSON.stringify(draft.payload, null, 2)}
                         </div>
                         <div className="flex gap-2">
                           <button
                             type="button"
                             onClick={() => handleResume(draft)}
-                            className="flex items-center gap-1 rounded bg-violet-500/80 px-2.5 py-1 text-[10px] text-white hover:bg-unit-c transition-colors motion-reduce:transition-none"
+                            className="flex items-center gap-1 rounded bg-violet-500/80 px-2.5 py-1 text-xs text-white hover:bg-unit-c transition-colors motion-reduce:transition-none"
                           >
                             <RotateCw className="h-3 w-3" />
                             Resume
@@ -269,7 +269,7 @@ export function TaskContinuity() {
                           <button
                             type="button"
                             onClick={() => handleDismiss(draft)}
-                            className="flex items-center gap-1 rounded border border-border/50 px-2.5 py-1 text-[10px] text-text-muted hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
+                            className="flex items-center gap-1 rounded border border-border/50 px-2.5 py-1 text-xs text-text-muted hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
                           >
                             <X className="h-3 w-3" />
                             Dismiss

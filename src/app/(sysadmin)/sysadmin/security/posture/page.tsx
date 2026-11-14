@@ -116,7 +116,7 @@ export default function SecurityPosturePage() {
                     <span className="text-sm font-medium">{c.label}</span>
                   </div>
                   <p className="mt-1 text-xs opacity-80">{c.detail}</p>
-                  <p className="mt-2 text-[10px] opacity-60">
+                  <p className="mt-2 text-xs opacity-60">
                     runbook → {c.runbook}
                   </p>
                 </div>

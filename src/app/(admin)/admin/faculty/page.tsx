@@ -63,7 +63,7 @@ const api = useApi();
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-muted">
             Real-time entry/exit logs, punctuality tracking, and department-level attendance metrics.
           </p>
         </div>

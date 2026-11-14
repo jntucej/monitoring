@@ -108,13 +108,13 @@ function AdminPassesInner() {
 
       <WidgetBoundary title="Pass records">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-2 min-h-[44px]">
+          <div className="p-4 border-b border-border flex items-center gap-2 min-h11">
             <Search className="w-4 h-4 text-text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter by roll, name, type, or status…"
-              className="flex-1 min-h-[44px] bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+              className="flex-1 min-h11 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
             />
           </div>
           <div className="overflow-x-auto">
@@ -140,7 +140,7 @@ function AdminPassesInner() {
                     <td className="p-3 text-xs capitalize">{r.type.replace("_", " ")}</td>
                     <td className="p-3 text-xs text-text-muted">{r.reason ?? "—"}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${statusBadge(r.status)}`}>{r.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(r.status)}`}>{r.status}</span>
                     </td>
                     <td className="p-3 text-xs text-text-muted">
                       {r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN") : "—"}

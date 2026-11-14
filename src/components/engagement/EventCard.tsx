@@ -149,13 +149,13 @@ export function EventCard({
             <h3 className="truncate text-sm font-bold text-text-primary">
               {event.title}
             </h3>
-            <p className="text-[10px] uppercase tracking-wide text-text-muted">
+            <p className="text-xs uppercase tracking-wide text-text-muted">
               {event.category}
             </p>
           </div>
         </div>
         {event.registrationStatus === "attended" && (
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-action-success">
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-action-success">
             Attended
           </span>
         )}
@@ -167,7 +167,7 @@ export function EventCard({
         </p>
       )}
 
-      <div className="mt-3 space-y-1.5 text-[11px] text-text-muted">
+      <div className="mt-3 space-y-1.5 text-xs text-text-muted">
         <p className="flex items-center gap-1.5">
           <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {formatEventWhen(event.startsAt)}
@@ -191,7 +191,7 @@ export function EventCard({
         {button}
         {message && (
           <p
-            className={`mt-2 text-center text-[11px] ${
+            className={`mt-2 text-center text-xs ${
               state === "error" ? "text-action-danger" : "text-text-muted"
             }`}
             role={state === "error" ? "alert" : "status"}

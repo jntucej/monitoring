@@ -346,11 +346,11 @@ export function UserManagement() {
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Thumbprint (biometric) registration status + actions */}
                 {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/25 flex items-center gap-1">
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/25 flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" /> Biometric ✓
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-bg-elevated0/10 text-text-muted border border-border/25">
+                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-bg-elevated0/10 text-text-muted border border-border/25">
                     No biometric
                   </span>
                 )}

@@ -184,7 +184,7 @@ function ExamBranchVerificationInner() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs min-w-[500px]">
+              <table className="w-full text-xs min-w125">
                 <thead>
                   <tr className="border-b border-border text-text-muted">
                     <th className="text-left px-4 py-2 font-semibold">Gate</th>

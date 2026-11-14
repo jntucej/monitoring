@@ -191,7 +191,7 @@ export function VpCommandBar({ role, open, onClose }: VpCommandBarProps) {
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
             aria-label="Vice Principal command input"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
+          <kbd className="text-xs font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
             esc
           </kbd>
         </div>
@@ -233,7 +233,7 @@ export function VpCommandBar({ role, open, onClose }: VpCommandBarProps) {
                       >
                         {cmd.label}
                       </p>
-                      <p className="text-[11px] text-text-muted truncate font-mono">
+                      <p className="text-xs text-text-muted truncate font-mono">
                         {cmd.hint}
                       </p>
                     </div>
@@ -247,7 +247,7 @@ export function VpCommandBar({ role, open, onClose }: VpCommandBarProps) {
           )}
         </ul>
 
-        <p className="px-4 py-2 border-t border-border text-[10px] text-text-muted">
+        <p className="px-4 py-2 border-t border-border text-xs text-text-muted">
           VP scope = delegated oversight. No hostel/branch filter.
         </p>
       </div>

@@ -224,7 +224,7 @@ export function UnifiedCampusCalendar() {
             {cells.map((cell, i) => (
               <div
                 key={i}
-                className={`min-h-[3.5rem] rounded border p-1 text-xs ${
+                className={`min-h14 rounded border p-1 text-xs ${
                   cell.isCurrentMonth
                     ? "border-border/50 bg-bg-elevated/30"
                     : "border-transparent"
@@ -244,7 +244,7 @@ export function UnifiedCampusCalendar() {
                     .map((ev, j) => (
                       <div
                         key={j}
-                        className="truncate rounded px-1 py-0.5 text-[10px] mb-0.5"
+                        className="truncate rounded px-1 py-0.5 text-xs mb-0.5"
                         style={{
                           backgroundColor: `${CATEGORY_COLORS[ev.category] ?? "var(--text-muted)"}25`,
                           color: CATEGORY_COLORS[ev.category] ?? "var(--text-muted)",
@@ -257,7 +257,7 @@ export function UnifiedCampusCalendar() {
                 {cell.day &&
                   eventsByDay[cell.dateStr] &&
                   eventsByDay[cell.dateStr].length > 3 && (
-                    <div className="text-[10px] text-text-muted">
+                    <div className="text-xs text-text-muted">
                       +{eventsByDay[cell.dateStr]!.length - 3} more
                     </div>
                   )}
@@ -283,7 +283,7 @@ export function UnifiedCampusCalendar() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-text-secondary truncate">{ev.title}</p>
-                    <p className="text-[10px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {new Date(ev.date).toLocaleDateString()}
                       {ev.time ? ` · ${ev.time}` : ""}
                       {ev.location ? ` · ${ev.location}` : ""}

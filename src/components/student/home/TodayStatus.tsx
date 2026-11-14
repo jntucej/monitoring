@@ -49,7 +49,7 @@ export function TodayStatus() {
             state.tone === "in"
               ? "text-action-success"
               : state.tone === "out"
-                ? "text-[var(--alert-warning)]"
+                ? "textalert-warning"
                 : "text-text-muted"
           }`}
           aria-hidden

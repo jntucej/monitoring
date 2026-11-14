@@ -176,7 +176,7 @@ export function CampusKnowledgeCentre() {
                     <p className="text-xs font-medium text-text-secondary truncate">
                       {doc.title}
                     </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-text-muted">
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-muted">
                       <span className="rounded bg-bg-elevated/50 px-1.5 py-0.5 capitalize">
                         {doc.category}
                       </span>
@@ -195,7 +195,7 @@ export function CampusKnowledgeCentre() {
                 </div>
 
                 {selectedDoc?.id === doc.id && (
-                  <div className="mt-2 text-[11px] text-text-muted whitespace-pre-line line-clamp-4">
+                  <div className="mt-2 text-xs text-text-muted whitespace-pre-line line-clamp-4">
                     {doc.body}
                   </div>
                 )}
@@ -208,7 +208,7 @@ export function CampusKnowledgeCentre() {
                         e.stopPropagation();
                         reportOutdated(doc.id);
                       }}
-                      className="flex items-center gap-1.5 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[10px] text-action-danger hover:bg-rose-500/20 transition-colors motion-reduce:transition-none"
+                      className="flex items-center gap-1.5 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-action-danger hover:bg-rose-500/20 transition-colors motion-reduce:transition-none"
                     >
                       <AlertTriangle className="h-3 w-3" />
                       Report as outdated

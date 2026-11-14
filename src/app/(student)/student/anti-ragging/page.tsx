@@ -75,7 +75,7 @@ export default function AntiRaggingPage() {
         <select id="category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="w-full min-h-[44px] border rounded p-2 text-sm"
+          className="w-full min-h11 border rounded p-2 text-sm"
         >
           <option value="ragging">Ragging</option>
           <option value="harassment">Harassment</option>
@@ -103,11 +103,11 @@ export default function AntiRaggingPage() {
           placeholder="e.g. Hostel B Mess, Corridor 2"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          className="w-full min-h-[44px] border rounded p-2 text-sm"
+          className="w-full min-h11 border rounded p-2 text-sm"
         />
       </div>
 
-      <button type="submit" disabled={busy} className="inline-flex min-h-[44px] items-center justify-center px-4 py-2 bg-action-danger text-white rounded text-sm font-medium disabled:opacity-50">
+      <button type="submit" disabled={busy} className="inline-flex min-h11 items-center justify-center px-4 py-2 bg-action-danger text-white rounded text-sm font-medium disabled:opacity-50">
         {busy ? "Filing confidential report..." : "Submit Confidential Report"}
       </button>
     </form>

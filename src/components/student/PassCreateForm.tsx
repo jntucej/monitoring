@@ -154,7 +154,7 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
               ))}
             </select>
             {passType && (
-              <p className="text-[11px] text-text-muted mt-1 italic">
+              <p className="text-xs text-text-muted mt-1 italic">
                 {passTypes.find((pt) => pt.code === passType)?.description}
               </p>
             )}
@@ -167,7 +167,7 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
                 type="datetime-local"
                 value={fromTime}
                 onChange={(e) => handleFromTimeChange(e.target.value)}
-                className="w-full min-h-[44px] p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
+                className="w-full min-h11 p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
                 disabled={submitting}
                 required
               />
@@ -179,14 +179,14 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
                 value={toTime}
                 onChange={(e) => setToTime(e.target.value)}
                 max={passType === "day_pass" && fromTime ? `${fromTime.split("T")[0]}T23:59` : undefined}
-                className="w-full min-h-[44px] p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
+                className="w-full min-h11 p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary"
                 disabled={submitting}
                 required
               />
             </div>
           </div>
           {passType === "day_pass" && (
-            <p className="text-[10px] text-action-warning font-medium">
+            <p className="text-xs text-action-warning font-medium">
               * Day Pass requires returning on the same calendar day (by curfew/23:59).
             </p>
           )}

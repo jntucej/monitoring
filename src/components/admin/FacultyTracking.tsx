@@ -49,14 +49,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           className="p-4 rounded-xl bg-bg-surface border border-border hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
           title="Click to show all faculty records"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <Users className="w-3.5 h-3.5 text-action-primary" />
             Total Faculty
           </div>
           <div className="text-2xl font-black text-text-primary">
             <CountUp value={summary.totalFaculty} />
           </div>
-          <p className="text-[10px] text-text-muted truncate">Across {departmentSummaries.length} departments</p>
+          <p className="text-xs text-text-muted truncate">Across {departmentSummaries.length} departments</p>
         </div>
 
         <div
@@ -64,14 +64,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           className="p-4 rounded-xl bg-bg-surface border border-border hover:border-emerald-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
           title="Click to filter present faculty"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <CheckCircle2 className="w-3.5 h-3.5 text-action-success" />
             Present Today
           </div>
           <div className="text-2xl font-black text-action-success">
             <CountUp value={summary.presentToday} />
           </div>
-          <p className="text-[10px] text-text-muted">{summary.overallAttendanceRate}% attendance rate</p>
+          <p className="text-xs text-text-muted">{summary.overallAttendanceRate}% attendance rate</p>
         </div>
 
         <div
@@ -79,14 +79,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           className="p-4 rounded-xl bg-bg-surface border border-border hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
           title="Click to filter faculty inside campus"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <Building2 className="w-3.5 h-3.5 text-action-primary" />
             Currently Inside
           </div>
           <div className="text-2xl font-black text-action-primary">
             <CountUp value={summary.currentlyInside} />
           </div>
-          <p className="text-[10px] text-text-muted">Active on campus</p>
+          <p className="text-xs text-text-muted">Active on campus</p>
         </div>
 
         <div
@@ -94,14 +94,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           className="p-4 rounded-xl bg-bg-surface border border-border hover:border-amber-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
           title="Click to filter faculty currently outside"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <ArrowRightLeft className="w-3.5 h-3.5 text-action-warning" />
             Currently Outside
           </div>
           <div className="text-2xl font-black text-action-warning">
             <CountUp value={summary.currentlyOutside} />
           </div>
-          <p className="text-[10px] text-text-muted">Punched out / Off site</p>
+          <p className="text-xs text-text-muted">Punched out / Off site</p>
         </div>
 
         <div
@@ -109,25 +109,25 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           className="p-4 rounded-xl bg-bg-surface border border-border hover:border-rose-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
           title="Click to filter late arrivals"
         >
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <Clock className="w-3.5 h-3.5 text-action-danger" />
             Late Check-ins
           </div>
           <div className="text-2xl font-black text-action-danger">
             <CountUp value={summary.lateArrivals} />
           </div>
-          <p className="text-[10px] text-text-muted">After 10:00 AM cut-off</p>
+          <p className="text-xs text-text-muted">After 10:00 AM cut-off</p>
         </div>
 
         <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <UserX className="w-3.5 h-3.5 text-text-muted" />
             Absent / Unchecked
           </div>
           <div className="text-2xl font-black text-text-muted">
             <CountUp value={summary.absentCount} />
           </div>
-          <p className="text-[10px] text-text-muted">No scan logged today</p>
+          <p className="text-xs text-text-muted">No scan logged today</p>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <Building2 className="w-4 h-4 text-action-primary" />
             Departmental Attendance Breakdown
           </h2>
-          <span className="text-[11px] font-mono text-text-muted">
+          <span className="text-xs font-mono text-text-muted">
             Overall Rate: <strong className="text-action-success">{summary.overallAttendanceRate}%</strong>
           </span>
         </div>
@@ -170,7 +170,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 />
               </div>
 
-              <div className="flex justify-between items-center text-[10px] text-text-muted">
+              <div className="flex justify-between items-center text-xs text-text-muted">
                 <span>Total: {dept.totalFaculty}</span>
                 <span>Present: {dept.presentCount}</span>
                 <span className="text-action-primary font-semibold">Inside: {dept.insideCount}</span>
@@ -233,11 +233,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               <Users className="w-4 h-4 text-action-primary" />
               Faculty Attendance Directory ({filteredRecords.length})
             </h2>
-            <p className="text-[11px] text-text-muted mt-0.5">
+            <p className="text-xs text-text-muted mt-0.5">
               Click any faculty row to open their profile overview & 30-day attendance heatmap.
             </p>
           </div>
-          <span className="text-[11px] text-text-muted">
+          <span className="text-xs text-text-muted">
             Updated live from Gate Logs
           </span>
         </div>
@@ -248,9 +248,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           </div>
         ) : (
           <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-left border-collapse min-w-[700px]">
+            <table className="w-full text-left border-collapse min-w175">
               <thead>
-                <tr className="border-b border-border text-[11px] font-bold text-text-muted uppercase tracking-wider">
+                <tr className="border-b border-border text-xs font-bold text-text-muted uppercase tracking-wider">
                   <th className="pb-3 px-3">Faculty Details</th>
                   <th className="pb-3 px-3">Faculty ID</th>
                   <th className="pb-3 px-3">Department</th>
@@ -281,7 +281,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                           <div className="font-bold text-text-primary group-hover:text-action-primary transition">
                             {fac.fullName}
                           </div>
-                          <div className="text-[10px] text-text-muted">{fac.designation}</div>
+                          <div className="text-xs text-text-muted">{fac.designation}</div>
                         </div>
                       </div>
                     </td>
@@ -294,7 +294,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <td className="py-3.5 px-3">
                       <div className="flex flex-col gap-1 items-start">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
                             fac.status === "INSIDE"
                               ? "bg-emerald-500/10 text-action-success border-emerald-500/20"
                               : fac.status === "OUTSIDE"
@@ -305,22 +305,22 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                           {fac.status}
                         </span>
                         {fac.punctualityStatus === "LATE" && (
-                          <span className="text-[9px] text-action-danger font-semibold flex items-center gap-1">
+                          <span className="text-xs text-action-danger font-semibold flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5" /> LATE (&gt;10:00 AM)
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="py-3.5 px-3 font-mono text-[11px] text-text-primary">
+                    <td className="py-3.5 px-3 font-mono text-xs text-text-primary">
                       {fac.firstInTime || "—"}
                     </td>
-                    <td className="py-3.5 px-3 font-mono text-[11px] text-text-muted">
+                    <td className="py-3.5 px-3 font-mono text-xs text-text-muted">
                       {fac.lastOutTime || "—"}
                     </td>
-                    <td className="py-3.5 px-3 font-mono text-[11px] font-semibold text-action-success">
+                    <td className="py-3.5 px-3 font-mono text-xs font-semibold text-action-success">
                       {fac.totalHoursToday || "0 hrs"}
                     </td>
-                    <td className="py-3.5 px-3 text-[11px] text-text-muted">
+                    <td className="py-3.5 px-3 text-xs text-text-muted">
                       {fac.gateLocation ? (
                         <span className="flex items-center gap-1">
                           <MapPin className="w-3 h-3 text-action-primary shrink-0" />
@@ -331,7 +331,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       )}
                     </td>
                     <td className="py-3.5 px-3 text-right">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-action-primary group-hover:translate-x-0.5 transition">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-action-primary group-hover:translate-x-0.5 transition">
                         View Heatmap <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </td>
@@ -362,7 +362,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     {selectedFaculty.fullName.replace("Dr. ", "").replace("Prof. ", "").charAt(0)}
                   </div>
                   <span
-                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[var(--bg-surface)] ${
+                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 borderbg-surface ${
                       selectedFaculty.status === "INSIDE"
                         ? "bg-action-success"
                         : selectedFaculty.status === "OUTSIDE"
@@ -374,15 +374,15 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base font-bold text-text-primary">{selectedFaculty.fullName}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-action-primary border border-indigo-500/20 text-[10px] font-mono font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-action-primary border border-indigo-500/20 text-xs font-mono font-bold">
                       {selectedFaculty.uniqueId}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-bg-elevated/10 text-text-primary border border-border/20 text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-bg-elevated/10 text-text-primary border border-border/20 text-xs font-bold">
                       {selectedFaculty.department}
                     </span>
                   </div>
                   <p className="text-xs text-text-muted mt-0.5">{selectedFaculty.designation}</p>
-                  <div className="flex items-center gap-4 mt-2 text-[11px] text-text-muted flex-wrap">
+                  <div className="flex items-center gap-4 mt-2 text-xs text-text-muted flex-wrap">
                     {selectedFaculty.email && (
                       <span className="flex items-center gap-1">
                         <Mail className="w-3 h-3 text-action-primary" />
@@ -398,7 +398,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <a
                       href={`/admin/faculty/${selectedFaculty.uniqueId}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-action-primary hover:underline"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-action-primary hover:underline"
                     >
                       Full profile <ChevronRight className="w-3 h-3" />
                     </a>
@@ -423,12 +423,12 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     : "✕ ABSENT TODAY"}
                 </span>
                 {selectedFaculty.punctualityStatus === "LATE" && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-action-danger border border-rose-500/20 text-[10px] font-bold flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-action-danger border border-rose-500/20 text-xs font-bold flex items-center gap-1">
                     <Clock className="w-3 h-3" /> LATE CHECK-IN (&gt;10:00 AM)
                   </span>
                 )}
                 {selectedFaculty.punctualityStatus === "ON_TIME" && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/20 text-[10px] font-bold flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/20 text-xs font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> ON TIME (&lt;10:00 AM)
                   </span>
                 )}
@@ -437,45 +437,45 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             {/* 4 Metric Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-                <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-action-success" /> Attendance Rate
                 </span>
                 <div className="text-xl font-black text-action-success">
                   {selectedFaculty.attendanceRate ?? 92}%
                 </div>
-                <p className="text-[10px] text-text-muted">30-day average</p>
+                <p className="text-xs text-text-muted">30-day average</p>
               </div>
 
               <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-                <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-action-primary" /> Today&apos;s Time Logged
                 </span>
                 <div className="text-xl font-black text-action-primary">
                   {selectedFaculty.totalHoursToday || "0 hrs"}
                 </div>
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {selectedFaculty.firstInTime ? `In at ${selectedFaculty.firstInTime}` : "No check-in today"}
                 </p>
               </div>
 
               <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-                <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-action-primary" /> Days Present
                 </span>
                 <div className="text-xl font-black text-text-primary">
                   {selectedFaculty.monthlyStats?.presentDays ?? 20} <span className="text-xs font-normal text-text-muted">/ 22</span>
                 </div>
-                <p className="text-[10px] text-text-muted">Working days present</p>
+                <p className="text-xs text-text-muted">Working days present</p>
               </div>
 
               <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-                <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5 text-action-warning" /> Late Arrivals
                 </span>
                 <div className="text-xl font-black text-action-warning">
                   {selectedFaculty.monthlyStats?.lateDays ?? 2}
                 </div>
-                <p className="text-[10px] text-text-muted">Check-ins after 10:00 AM</p>
+                <p className="text-xs text-text-muted">Check-ins after 10:00 AM</p>
               </div>
             </div>
             {/* 30-Day Attendance Heatmap Calendar */}
@@ -486,11 +486,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <Calendar className="w-4 h-4 text-action-primary" />
                     30-Day Attendance Heatmap Overview
                   </h4>
-                  <p className="text-[11px] text-text-muted mt-0.5">
+                  <p className="text-xs text-text-muted mt-0.5">
                     Click or hover over any day tile below to inspect check-in/out logs & duration.
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap text-[10px]">
+                <div className="flex items-center gap-2 flex-wrap text-xs">
                   <span className="flex items-center gap-1">
                     <span className="w-2.5 h-2.5 rounded bg-action-success inline-block" /> On Time (&lt;10:00 AM)
                   </span>
@@ -532,14 +532,14 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       key={day.date + idx}
                       onClick={() => setActiveHeatmapDay(day)}
                       onMouseEnter={() => setActiveHeatmapDay(day)}
-                      className={`p-2 rounded-lg border text-center transition flex flex-col items-center justify-center min-h-[52px] ${colorClass} ${
+                      className={`p-2 rounded-lg border text-center transition flex flex-col items-center justify-center min-h13 ${colorClass} ${
                         isSelected ? "ring-2 ring-indigo-400 scale-105" : ""
                       }`}
                     >
-                      <span className="text-[10px] font-bold">{dayNum}</span>
-                      <span className="text-[8px] opacity-80 uppercase">{day.dayLabel.split(",")[0]}</span>
+                      <span className="text-xs font-bold">{dayNum}</span>
+                      <span className="text-xs opacity-80 uppercase">{day.dayLabel.split(",")[0]}</span>
                       {day.hours && day.hours > 0 ? (
-                        <span className="text-[8px] font-mono mt-0.5">{day.hours}h</span>
+                        <span className="text-xs font-mono mt-0.5">{day.hours}h</span>
                       ) : null}
                     </button>
                   );
@@ -551,7 +551,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   <div className="flex items-center gap-3">
                     <div className="font-bold text-text-primary">{activeHeatmapDay.dayLabel}</div>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
                         activeHeatmapDay.status === "ON_TIME"
                           ? "bg-emerald-500/20 text-action-success"
                           : activeHeatmapDay.status === "LATE"
@@ -566,7 +566,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       {activeHeatmapDay.status === "LATE" ? "LATE ARRIVAL (>10:00 AM)" : activeHeatmapDay.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-text-muted">
+                  <div className="flex items-center gap-4 text-xs font-mono text-text-muted">
                     {activeHeatmapDay.inTime && (
                       <span>In: <strong className="text-text-primary">{activeHeatmapDay.inTime}</strong></span>
                     )}
@@ -596,7 +596,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     >
                       <div className="flex items-center gap-2.5">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          className={`px-2 py-0.5 rounded text-xs font-bold ${
                             log.direction === "IN"
                               ? "bg-emerald-500/20 text-action-success"
                               : "bg-amber-500/20 text-action-warning"
@@ -606,7 +606,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                         </span>
                         <span className="font-semibold text-text-primary">{log.gate}</span>
                       </div>
-                      <span className="font-mono text-[11px] text-text-muted flex items-center gap-1">
+                      <span className="font-mono text-xs text-text-muted flex items-center gap-1">
                         <Clock className="w-3 h-3 text-action-primary" />
                         {log.timestamp}
                       </span>

@@ -293,11 +293,11 @@ export default function SecurityPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-xs font-bold text-text-primary">{p.label}</h2>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${p.badgeCls}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${p.badgeCls}`}>
                     100% SECURED
                   </span>
                 </div>
-                <p className="text-[11px] text-text-muted">{p.note}</p>
+                <p className="text-xs text-text-muted">{p.note}</p>
               </div>
             </div>
           </div>
@@ -306,11 +306,11 @@ export default function SecurityPage() {
         {/* The 6 Infographic Security Cards */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs text-text-muted px-1">
-            <span className="font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span className="font-bold uppercase tracking-wider text-xs flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-action-success" />
               Click any container to inspect individual parameters ({CARDS.length})
             </span>
-            <span className="font-mono text-[10px]">Role: <strong className="text-text-primary">{displayRoleName}</strong></span>
+            <span className="font-mono text-xs">Role: <strong className="text-text-primary">{displayRoleName}</strong></span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -332,13 +332,13 @@ export default function SecurityPage() {
                         <h3 className="text-xs font-bold text-text-primary group-hover:text-action-success transition-colors">
                           {card.title}
                         </h3>
-                        <span className="text-[10px] text-text-muted font-mono">
+                        <span className="text-xs text-text-muted font-mono">
                           {card.tag}
                         </span>
                       </div>
                     </div>
 
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/10 text-action-success border border-emerald-500/20 shrink-0">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/10 text-action-success border border-emerald-500/20 shrink-0">
                       {card.badge}
                     </span>
                   </div>
@@ -349,7 +349,7 @@ export default function SecurityPage() {
                       <div className="text-lg font-black text-text-primary tracking-tight font-mono">
                         {card.metric}
                       </div>
-                      <div className="text-[10px] text-text-muted font-medium">
+                      <div className="text-xs text-text-muted font-medium">
                         {card.submetric}
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export default function SecurityPage() {
                   </div>
 
                   {/* Footer tap indicator */}
-                  <div className="flex items-center justify-between text-[10px] font-medium text-text-muted group-hover:text-action-success transition-colors pt-1">
+                  <div className="flex items-center justify-between text-xs font-medium text-text-muted group-hover:text-action-success transition-colors pt-1">
                     <span>Inspect Parameters</span>
                     <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -375,7 +375,7 @@ export default function SecurityPage() {
         </div>
 
         {/* Clean Footer */}
-        <div className="text-center pt-2 text-[10px] font-mono text-text-muted">
+        <div className="text-center pt-2 text-xs font-mono text-text-muted">
           Gate Monitor Security Core • Role: {displayRoleName} • Click any container to enter
         </div>
 

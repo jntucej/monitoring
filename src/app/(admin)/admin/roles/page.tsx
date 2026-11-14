@@ -91,7 +91,7 @@ function Node({
     <div>
       <button
         onClick={() => hasChildren && onToggle(node.code)}
-        className="flex items-center gap-2 w-full min-h-[44px] text-left rounded-lg px-2 py-1.5 hover:bg-bg-surface/60 group"
+        className="flex items-center gap-2 w-full min-h11 text-left rounded-lg px-2 py-1.5 hover:bg-bg-surface/60 group"
       >
         {hasChildren ? (
           isOpen ? (
@@ -106,7 +106,7 @@ function Node({
         <span className="text-sm font-medium text-text-primary">
           {node.display_name}
         </span>
-        <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
+        <span className="text-xs uppercase tracking-wide px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
           {node.code}
         </span>
         <span className="ml-auto flex items-center gap-2 text-xs">
@@ -248,30 +248,30 @@ function AdminRolesInner() {
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w50">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roles…"
-            className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+            className="w-full min-h11 pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
           />
         </div>
         <button
           onClick={expandAll}
-          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
+          className="text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Expand all
         </button>
         <button
           onClick={collapseAll}
-          className="text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
+          className="text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Collapse all
         </button>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60 justify-center"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 justify-center"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -291,14 +291,14 @@ function AdminRolesInner() {
                   {filteredNodes.map((n) => (
                     <li
                       key={n.code}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-bg-surface/40 min-h-[44px]"
+                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-bg-surface/40 min-h11"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <ShieldCheck className="w-4 h-4 text-action-primary shrink-0" />
                         <span className="text-sm text-text-primary truncate">
                           {n.display_name}
                         </span>
-                        <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
+                        <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
                           {n.code}
                         </span>
                       </div>
@@ -315,7 +315,7 @@ function AdminRolesInner() {
                 </ul>
               ) : (
                 <div className="overflow-x-auto">
-                  <div className="min-w-[640px] space-y-1">
+                  <div className="min-w160 space-y-1">
                     {tree.map((n) => (
                       <Node key={n.code} node={n} expanded={expanded} onToggle={toggle} />
                     ))}
@@ -332,7 +332,7 @@ function AdminRolesInner() {
             <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
               Membership by role
             </h2>
-            <ul className="space-y-1.5 max-h-[500px] overflow-y-auto">
+            <ul className="space-y-1.5 max-h125 overflow-y-auto">
               {(data?.nodes ?? [])
                 .slice()
                 .sort((a, b) => b.user_count - a.user_count)
@@ -362,7 +362,7 @@ function AdminRolesInner() {
             </ul>
             <Link
               href="/sysadmin/roles"
-              className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h-[44px]"
+              className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h11"
             >
               Full sysadmin role panel <ArrowUpRight className="w-3 h-3" />
             </Link>

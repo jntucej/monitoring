@@ -89,7 +89,7 @@ export function SustainabilityDashboard() {
           <div>
             <div className="text-xs text-text-secondary">Digital Passes Issued</div>
             <div className="text-2xl font-bold">{metrics.digital_passes_count.toLocaleString()}</div>
-            <div className="text-[10px] text-action-success font-medium">100% Paperless</div>
+            <div className="text-xs text-action-success font-medium">100% Paperless</div>
           </div>
         </Card>
 
@@ -98,7 +98,7 @@ export function SustainabilityDashboard() {
           <div>
             <div className="text-xs text-text-secondary">Paper Saved (Sheets)</div>
             <div className="text-2xl font-bold">{metrics.paper_saved_sheets.toLocaleString()}</div>
-            <div className="text-[10px] text-text-secondary">~2 sheets/pass</div>
+            <div className="text-xs text-text-secondary">~2 sheets/pass</div>
           </div>
         </Card>
 
@@ -107,7 +107,7 @@ export function SustainabilityDashboard() {
           <div>
             <div className="text-xs text-text-secondary">Trees Equivalent Saved</div>
             <div className="text-2xl font-bold">{metrics.trees_equivalent} Trees</div>
-            <div className="text-[10px] text-action-success">Carbon offset</div>
+            <div className="text-xs text-action-success">Carbon offset</div>
           </div>
         </Card>
 
@@ -116,7 +116,7 @@ export function SustainabilityDashboard() {
           <div>
             <div className="text-xs text-text-secondary">Carbon Offset (kg CO2)</div>
             <div className="text-2xl font-bold">{metrics.carbon_saved_kg} kg</div>
-            <div className="text-[10px] text-text-secondary">Gate energy: {metrics.energy_kwh} kWh</div>
+            <div className="text-xs text-text-secondary">Gate energy: {metrics.energy_kwh} kWh</div>
           </div>
         </Card>
       </div>

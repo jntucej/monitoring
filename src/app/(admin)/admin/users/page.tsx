@@ -112,14 +112,14 @@ export default function AdminUsersPage() {
               <table className="w-full text-xs text-center border-collapse min-w-[650px]">
                 <thead>
                   <tr className="text-text-muted border-b border-border">
-                    <th className="p-2 text-left w-1/4 uppercase tracking-wider font-semibold text-[10px]">Branch / Department</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">Current HOD</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">Yr 1</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">Yr 2</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">Yr 3</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">Yr 4</th>
-                    <th className="p-2 uppercase tracking-wider font-semibold text-[10px]">LE</th>
-                    <th className="p-2 text-right uppercase tracking-wider font-semibold text-[10px]">Base Total</th>
+                    <th className="p-2 text-left w-1/4 uppercase tracking-wider font-semibold text-xs">Branch / Department</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">Current HOD</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">Yr 1</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">Yr 2</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">Yr 3</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">Yr 4</th>
+                    <th className="p-2 uppercase tracking-wider font-semibold text-xs">LE</th>
+                    <th className="p-2 text-right uppercase tracking-wider font-semibold text-xs">Base Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-text-primary font-mono">
@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
                       <tr key={dept.code} className="hover:bg-white/5 transition">
                         <td className="p-2 text-left font-sans">
                           <span className="font-bold block text-sm">{dept.code}</span>
-                          <span className="text-[10px] text-text-muted">{dept.name}</span>
+                          <span className="text-xs text-text-muted">{dept.name}</span>
                         </td>
                         <td className="p-2 text-text-secondary font-sans">{dept.hod}</td>
                         <td className="p-2">
@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
                           </div>
                         </td>
                         <td className="p-3 text-right font-bold text-white">
-                          {dept.totalStudents} <span className="text-[10px] font-normal text-text-muted block">{dept.facultyCount} faculty</span>
+                          {dept.totalStudents} <span className="text-xs font-normal text-text-muted block">{dept.facultyCount} faculty</span>
                         </td>
                       </tr>
                     ))
@@ -213,7 +213,7 @@ export default function AdminUsersPage() {
             <div>
               <p className="text-sm font-semibold text-action-warning">Role changes require sysadmin</p>
               <p className="mt-1 text-xs text-text-muted">
-                Granting or revoking roles (including <code className="text-[11px]">sysadmin</code>
+                Granting or revoking roles (including <code className="text-xs">sysadmin</code>
                 escalation) runs through the sysadmin console — <Link href="/admin/roles" className="text-action-success hover:underline">view the role hierarchy</Link>{" "}
                 for the assignment map. If an account&#39;s role looks out of date, contact the platform team.
               </p>

@@ -71,7 +71,7 @@ export function StudentDirectoryView() {
                       {s.roll ?? s.uniqueId ?? "—"}
                     </p>
                   </div>
-                  <span className="rounded-full bg-bg-elevated border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+                  <span className="rounded-full bg-bg-elevated border border-border px-2 py-0.5 text-xs text-text-secondary">
                     {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
                   </span>
                 </div>

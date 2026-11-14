@@ -60,7 +60,7 @@ export default function AttendancePage() {
         </p>
       </div>
       {pct < 75 && s && s.total > 0 && (
-        <p className="rounded-xl border border-[var(--alert-warning)] bg-[var(--alert-warning)]/10 p-3 text-sm text-[var(--alert-warning)]">
+        <p className="rounded-xl border borderalert-warning bgalert-warning/10 p-3 text-sm textalert-warning">
           You are below 75%. Attend consistently to avoid detention.
         </p>
       )}

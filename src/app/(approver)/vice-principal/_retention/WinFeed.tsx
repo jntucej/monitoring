@@ -58,7 +58,7 @@ export function WinFeed() {
         <Sparkles className="size-4 text-action-warning" />
         <h2 className="text-sm font-semibold text-text-primary">Your wins</h2>
         {merged.length > 0 && (
-          <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-[10px] font-medium text-action-primary">
+          <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs font-medium text-action-primary">
             {merged.length}
           </span>
         )}
@@ -86,13 +86,13 @@ export function WinFeed() {
                   <span
                     className={`flex size-6 shrink-0 items-center justify-center rounded-full bg-bg-elevated ${style.color}`}
                   >
-                    <Icon className="size-3.5" />
+                    <Icon className="size-4" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-text-primary">
                       {w.subject}
                     </p>
-                    <p className="text-[10px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {w.ticket} · {w.outcome.toLowerCase()} · {relativeTime(w.at)}
                     </p>
                   </div>

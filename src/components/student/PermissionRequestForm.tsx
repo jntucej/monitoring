@@ -192,7 +192,7 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
           disabled={submitting}
           className="h-11"
         />
-        {fieldErrors.reason && <p className="text-[11px] text-action-danger font-medium">{fieldErrors.reason}</p>}
+        {fieldErrors.reason && <p className="text-xs text-action-danger font-medium">{fieldErrors.reason}</p>}
       </div>
 
       {/* Description */}
@@ -213,15 +213,15 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Add any details that help your approver decide..."
           disabled={submitting}
-          className="w-full p-3 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
+          className="w-full p-3 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
         />
         <div className="flex justify-between items-center">
           {fieldErrors.description ? (
-            <p className="text-[11px] text-action-danger font-medium">{fieldErrors.description}</p>
+            <p className="text-xs text-action-danger font-medium">{fieldErrors.description}</p>
           ) : (
             <span />
           )}
-          <span className="text-[10px] text-text-muted font-mono">{description.length}/1000</span>
+          <span className="text-xs text-text-muted font-mono">{description.length}/1000</span>
         </div>
       </div>
 
@@ -234,7 +234,7 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label htmlFor="perm-from" className="text-[11px] text-text-muted font-medium">From (Departure)</label>
+              <label htmlFor="perm-from" className="text-xs text-text-muted font-medium">From (Departure)</label>
               <input
                 id="perm-from"
                 type="datetime-local"
@@ -242,12 +242,12 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
                 onChange={(e) => setFromDate(e.target.value)}
                 disabled={submitting}
                 required
-                className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
+                className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
               />
-              {fieldErrors.fromDate && <p className="text-[11px] text-action-danger font-medium">{fieldErrors.fromDate}</p>}
+              {fieldErrors.fromDate && <p className="text-xs text-action-danger font-medium">{fieldErrors.fromDate}</p>}
             </div>
             <div className="space-y-1">
-              <label htmlFor="perm-to" className="text-[11px] text-text-muted font-medium">To (Return)</label>
+              <label htmlFor="perm-to" className="text-xs text-text-muted font-medium">To (Return)</label>
               <input
                 id="perm-to"
                 type="datetime-local"
@@ -256,9 +256,9 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
                 min={fromDate || undefined}
                 disabled={submitting}
                 required
-                className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
+                className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
               />
-              {fieldErrors.toDate && <p className="text-[11px] text-action-danger font-medium">{fieldErrors.toDate}</p>}
+              {fieldErrors.toDate && <p className="text-xs text-action-danger font-medium">{fieldErrors.toDate}</p>}
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export function PermissionRequestForm({ onSubmitted, defaultWorkflow = "hostel" 
           {documentRequired && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
               <FileText className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
-              <p className="text-[11px] text-action-warning font-medium leading-relaxed">
+              <p className="text-xs text-action-warning font-medium leading-relaxed">
                 You will be able to upload the document after HOD approval.
               </p>
             </div>

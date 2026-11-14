@@ -40,7 +40,7 @@ export function ChainImpact({
             <p className="text-2xl font-semibold tabular-nums text-text-primary">
               {students}
             </p>
-            <p className="text-[10px] text-text-muted">Students</p>
+            <p className="text-xs text-text-muted">Students</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export function ChainImpact({
             <p className="text-2xl font-semibold tabular-nums text-text-primary">
               {faculty}
             </p>
-            <p className="text-[10px] text-text-muted">Faculty & HODs</p>
+            <p className="text-xs text-text-muted">Faculty & HODs</p>
           </div>
         </div>
       </div>

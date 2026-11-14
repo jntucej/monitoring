@@ -190,7 +190,7 @@ export function DelegationCard({ rule }: { rule: DelegationRule }) {
         {rule.workflowType.replace(/_/g, " ")} → {rule.delegateRole.replace(/_/g, " ")}
         {rule.reason ? ` · ${rule.reason}` : ""}
       </p>
-      <p className="text-[10px] text-text-muted mt-1">Priority {rule.priority}</p>
+      <p className="text-xs text-text-muted mt-1">Priority {rule.priority}</p>
     </div>
   );
 }

@@ -106,14 +106,14 @@ export function WorkersView() {
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[200px] flex-1">
+        <div className="relative min-w50 flex-1">
           <Search className="absolute left-3 top-2.5 size-4 text-text-muted" />
           <input
             type="text"
             placeholder="Search workers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-h-[44px] rounded-xl border border-border bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="w-full min-h11 rounded-xl border border-border bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function WorkersView() {
           <select
             value={selectedGate}
             onChange={(e) => setSelectedGate(e.target.value)}
-            className="min-h-[44px] rounded-xl border border-border bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
+            className="min-h11 rounded-xl border border-border bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
             <option value="all">All Gates</option>
             {gates.map((g) => (
@@ -139,7 +139,7 @@ export function WorkersView() {
           <button
             key={c.id}
             onClick={() => setCategory(c.id)}
-            className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-medium transition ${
+            className={`inline-flex min-h11 items-center rounded-full px-3 py-1 text-xs font-medium transition ${
               category === c.id
                 ? "bg-action-primary text-white"
                 : "bg-bg-surface text-text-secondary hover:bg-bg-elevated"
@@ -177,12 +177,12 @@ export function WorkersView() {
                   <Icon className="size-4 shrink-0 text-text-muted" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-text-primary">{w.name}</p>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {w.designation ?? w.staffCategory} {w.firstInTime && `· in at ${new Date(w.firstInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary">
+                    <span className="flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
                       <MapPin className="size-3" />
                       {w.gateName ?? "Unassigned"}
                     </span>
@@ -193,7 +193,7 @@ export function WorkersView() {
                         className="rounded-lg p-1.5 text-action-primary hover:bg-action-primary/10"
                         title={`Call ${w.name}`}
                       >
-                        <Phone className="size-3.5" />
+                        <Phone className="size-4" />
                       </a>
                     )}
                   </div>
@@ -221,29 +221,29 @@ export function WorkersView() {
               <button
                 onClick={() => setActiveWorker(null)}
                 aria-label="Close"
-                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
+                className="flex size-11 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>
             </div>
             <div className="space-y-3 text-xs">
               <div>
-                <p className="text-[10px] uppercase text-text-muted">Staff Category</p>
+                <p className="text-xs uppercase text-text-muted">Staff Category</p>
                 <p className="font-medium text-text-primary">{activeWorker.staffCategory}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-text-muted">Assigned Gate</p>
+                <p className="text-xs uppercase text-text-muted">Assigned Gate</p>
                 <p className="font-medium text-text-primary">{activeWorker.gateName ?? "Unassigned"}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-text-muted">Status</p>
+                <p className="text-xs uppercase text-text-muted">Status</p>
                 <p className="font-medium text-text-primary">{activeWorker.status}</p>
               </div>
               {activeWorker.phoneTail && (
                 <div className="pt-3">
                   <a
                     href={`tel:***${activeWorker.phoneTail}`}
-                    className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
+                    className="flex min-h11 items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
                   >
                     <Phone className="size-4" />
                     Call Worker (***{activeWorker.phoneTail})

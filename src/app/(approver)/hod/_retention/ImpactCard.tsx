@@ -32,7 +32,7 @@ export function ImpactCard({
         </div>
         <Link
           href="/hod/students"
-          className="inline-flex min-h-[44px] items-center text-[11px] text-action-primary hover:underline"
+          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
         >
           All {studentsTotal}
         </Link>
@@ -47,7 +47,7 @@ export function ImpactCard({
 
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-text-muted">
+          <p className="text-xs uppercase tracking-wider text-text-muted">
             On campus
           </p>
           <p className="text-lg font-semibold tabular-nums text-action-primary">
@@ -55,7 +55,7 @@ export function ImpactCard({
           </p>
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-text-muted">
+          <p className="text-xs uppercase tracking-wider text-text-muted">
             Off campus
           </p>
           <p className="text-lg font-semibold tabular-nums text-text-muted">
@@ -65,7 +65,7 @@ export function ImpactCard({
       </div>
 
       {decisionsToday > 0 && (
-        <p className="mt-3 flex items-center gap-1 rounded-lg bg-action-primary/5 px-2.5 py-1.5 text-[11px] text-action-primary">
+        <p className="mt-3 flex items-center gap-1 rounded-lg bg-action-primary/5 px-2.5 py-1.5 text-xs text-action-primary">
           You cleared {decisionsToday} approval{decisionsToday === 1 ? "" : "s"} for them today
           <ArrowRight className="size-3" />
         </p>

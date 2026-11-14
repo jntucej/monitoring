@@ -51,7 +51,7 @@ function FilterSelect({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted" htmlFor="label">{label}</label>
+      <label className="text-xs font-bold uppercase tracking-widest text-text-muted" htmlFor="label">{label}</label>
       <select id="label"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -88,7 +88,7 @@ function StatPill({ label, value, icon, color }: { label: string; value: string 
       <span className={c.text}>{icon}</span>
       <div>
         <div className={`text-lg font-black ${c.text}`}>{value}</div>
-        <div className="text-[9px] text-text-muted uppercase tracking-wide">{label}</div>
+        <div className="text-xs text-text-muted uppercase tracking-wide">{label}</div>
       </div>
     </div>
   );
@@ -135,7 +135,7 @@ const api = useApi();
 
   if (loading && !stats) return (
     <div className="flex justify-center items-center py-12">
-      <div className="w-8 h-8 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 borderaction-success border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!stats) return null;
@@ -149,7 +149,7 @@ const api = useApi();
         <button onClick={() => setShowFilters(!showFilters)}
           className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${showFilters || hasFilters ? "bg-emerald-500/10 border-emerald-500/30 text-action-success" : "border-border bg-bg-surface text-text-muted hover:text-text-primary"}`}>
           <Filter className="w-4 h-4" /><span className="text-sm font-semibold">Filters</span>
-          {hasFilters && <span className="px-1.5 py-0.5 rounded-full bg-action-success text-[10px] font-bold text-white">{activeCount}</span>}
+          {hasFilters && <span className="px-1.5 py-0.5 rounded-full bg-action-success text-xs font-bold text-white">{activeCount}</span>}
         </button>
         {hasFilters && (
           <button onClick={clearAll} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-all text-sm font-semibold">
@@ -242,7 +242,7 @@ const api = useApi();
                 <div key={d.code} className={`p-3 rounded-xl border ${c.border} ${c.bgSoft}`}>
                   <div className={`text-2xl font-black ${c.text}`}>{deptTodayIn + deptTodayOut}</div>
                   <div className="text-xs font-semibold text-text-primary">{d.code} · today</div>
-                  <div className="flex items-center gap-2 text-[10px] mt-1">
+                  <div className="flex items-center gap-2 text-xs mt-1">
                     <span className="text-action-success font-bold">↓ {deptTodayIn}</span>
                     <span className="text-action-warning font-bold">↑ {deptTodayOut}</span>
                   </div>

@@ -123,7 +123,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
           </h3>
         </div>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium shrink-0 ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium shrink-0 ${
             offline
               ? "bg-action-danger/10 text-action-danger"
               : "bg-action-primary/10 text-action-primary"
@@ -186,10 +186,10 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
                   {e.title}
                 </p>
                 {e.detail ? (
-                  <p className="text-[11px] text-text-muted truncate">{e.detail}</p>
+                  <p className="text-xs text-text-muted truncate">{e.detail}</p>
                 ) : null}
               </div>
-              <span className="shrink-0 text-[10px] text-text-muted">
+              <span className="shrink-0 text-xs text-text-muted">
                 {formatTime(new Date(e.timestamp).toISOString())}
               </span>
             </li>

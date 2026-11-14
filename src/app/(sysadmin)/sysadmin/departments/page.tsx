@@ -225,7 +225,7 @@ const api = useApi();
                     value={editingDept.code || ""}
                     onChange={(e) => setEditingDept({ ...editingDept, code: e.target.value.toUpperCase() })}
                     placeholder="e.g. CSE"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-[var(--action-success)]"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:borderaction-success"
                   />
                 </div>
 
@@ -239,7 +239,7 @@ const api = useApi();
                     value={editingDept.name || ""}
                     onChange={(e) => setEditingDept({ ...editingDept, name: e.target.value })}
                     placeholder="e.g. Computer Science & Engineering"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)]"
+                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-success"
                   />
                 </div>
 
@@ -263,7 +263,7 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setEditingDept(null)}
-                    className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>

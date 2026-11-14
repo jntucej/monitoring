@@ -46,7 +46,7 @@ export default function EmoLandingPage() {
 
       <Link
         href="/emo/complaints"
-        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
+        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h11"
       >
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-action-warning" />
@@ -61,7 +61,7 @@ export default function EmoLandingPage() {
       </Link>
       <Link
         href="/emo/complaints?status=resolved"
-        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h-[44px]"
+        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h11"
       >
         <div className="flex items-center gap-3">
           <Wrench className="w-5 h-5 text-action-success" />

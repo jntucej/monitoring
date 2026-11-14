@@ -384,14 +384,14 @@ export function MessInchargeCommandBar({ role, open, onClose }: MessInchargeComm
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
             aria-label="Mess In-charge command input"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
+          <kbd className="text-xs font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
             esc
           </kbd>
         </div>
 
         {/* Parsed-command preview */}
         {parsedPreview && parsedPreview.action !== "UNKNOWN" ? (
-          <div className="px-4 py-2 border-b border-border bg-bg-elevated text-[11px] text-text-secondary">
+          <div className="px-4 py-2 border-b border-border bg-bg-elevated text-xs text-text-secondary">
             <span className="font-mono font-bold text-action-primary">
               {parsedPreview.action}
             </span>
@@ -455,7 +455,7 @@ export function MessInchargeCommandBar({ role, open, onClose }: MessInchargeComm
                       >
                         {cmd.label}
                       </p>
-                      <p className="text-[11px] text-text-muted truncate font-mono">
+                      <p className="text-xs text-text-muted truncate font-mono">
                         {cmd.hint}
                       </p>
                     </div>

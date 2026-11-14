@@ -104,7 +104,7 @@ function AdminFacultyDetail() {
                   </p>
                   <p className="font-mono text-xs text-text-muted">{id}</p>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30">
                   <User className="w-3.5 h-3.5" /> {person?.role ?? "FACULTY"}
                 </span>
               </div>
@@ -141,7 +141,7 @@ function AdminFacultyDetail() {
                         <p className="text-sm font-medium text-text-primary">{a.subjectCode}</p>
                         <p className="text-xs text-text-muted capitalize">{a.role.replace("_", " ")} · class {a.classId.slice(0, 8)}</p>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] ${a.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${a.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                         {a.isActive ? "Active" : "Off"}
                       </span>
                     </div>

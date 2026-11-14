@@ -91,7 +91,7 @@ export function DashboardCustomizer() {
             <Layout className="h-4 w-4 text-action-primary" aria-hidden />
             Dashboard Layout
           </h2>
-          <p className="text-[10px] text-text-muted">
+          <p className="text-xs text-text-muted">
             Reorder &amp; pin widgets — access is unchanged
           </p>
         </div>
@@ -115,7 +115,7 @@ export function DashboardCustomizer() {
                   <p className="truncate text-xs font-semibold text-text-primary">
                     {meta.label}
                   </p>
-                  <p className="text-[10px] text-text-muted">
+                  <p className="text-xs text-text-muted">
                     Position {index + 1} of {order.length}
                     {pinned ? " · pinned" : ""}
                   </p>
@@ -161,21 +161,21 @@ export function DashboardCustomizer() {
         <div className="mt-4 flex items-center gap-2">
           {confirmReset ? (
             <>
-              <span className="text-[11px] text-text-muted">Reset layout to defaults?</span>
+              <span className="text-xs text-text-muted">Reset layout to defaults?</span>
               <button
                 type="button"
                 onClick={() => {
                   resetLayout();
                   setConfirmReset(false);
                 }}
-                className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-[11px] font-medium text-action-danger"
+                className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-xs font-medium text-action-danger"
               >
                 <Check className="h-3 w-3" aria-hidden /> Yes, reset
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
-                className="rounded-md border border-border px-2 py-1 text-[11px] text-text-muted"
+                className="rounded-md border border-border px-2 py-1 text-xs text-text-muted"
               >
                 Cancel
               </button>
@@ -184,13 +184,13 @@ export function DashboardCustomizer() {
             <button
               type="button"
               onClick={() => setConfirmReset(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden />
               Reset layout
             </button>
           )}
-          <p className="ml-auto text-[10px] text-text-muted">
+          <p className="ml-auto text-xs text-text-muted">
             Saved locally — only your layout changes.
           </p>
         </div>
@@ -202,7 +202,7 @@ export function DashboardCustomizer() {
             <BellRing className="h-4 w-4 text-action-warning" aria-hidden />
             Notification preferences
           </h3>
-          <p className="mt-0.5 text-[10px] text-text-muted">
+          <p className="mt-0.5 text-xs text-text-muted">
             Controls how engagement digests are surfaced for you — quiet hours and
             daily summary only.
           </p>
@@ -217,7 +217,7 @@ export function DashboardCustomizer() {
             />
             {notificationPrefs.quietHours && (
               <div className="grid grid-cols-2 gap-2.5 pl-2">
-                <label className="block text-[10px] text-text-muted">
+                <label className="block text-xs text-text-muted">
                   From
                   <input
                     type="time"
@@ -228,7 +228,7 @@ export function DashboardCustomizer() {
                     className="mt-0.5 w-full rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
                   />
                 </label>
-                <label className="block text-[10px] text-text-muted">
+                <label className="block text-xs text-text-muted">
                   To
                   <input
                     type="time"
@@ -249,7 +249,7 @@ export function DashboardCustomizer() {
               onToggle={() => void togglePref({ dailySummary: !notificationPrefs.dailySummary })}
             />
             {notificationPrefs.dailySummary && (
-              <label className="block pl-2 text-[10px] text-text-muted">
+              <label className="block pl-2 text-xs text-text-muted">
                 Summary time
                 <input
                   type="time"
@@ -301,7 +301,7 @@ function ToggleRow({
         <Icon className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
         <div className="min-w-0">
           <p className="text-xs font-medium text-text-primary">{label}</p>
-          <p className="text-[10px] text-text-muted">{hint}</p>
+          <p className="text-xs text-text-muted">{hint}</p>
         </div>
       </div>
       <button
@@ -318,7 +318,7 @@ function ToggleRow({
       >
         <span
           className={`absolute top-0.5 h-3.5 w-3.5 rounded-full transition-[left] motion-reduce:transition-none ${
-            on ? "left-[18px] bg-action-success" : "left-0.5 bg-[var(--text-muted)]"
+            on ? "left-[18px] bg-action-success" : "left-0.5 bgtext-muted"
           }`}
         />
       </button>

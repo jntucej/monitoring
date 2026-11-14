@@ -62,7 +62,7 @@ export function GlossyFloatingContainer({
     >
       {/* Specular Ambient Glow Aura when in Glossy mode */}
       {isGlossy && !isMobileOrLowFps && (
-        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-indigo-500/10 blur-xl opacity-40 -z-10 pointer-events-none" />
+        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 blur-xl opacity-40 -z-10 pointer-events-none" />
       )}
       {children}
     </motion.div>

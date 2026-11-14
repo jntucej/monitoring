@@ -81,9 +81,9 @@ function EnrollmentCodeModal({ userId, userName, onClose }: { userId: string; us
         </p>
         {codeData?.code ? (
           <div className="p-4 rounded-xl bg-bg-surface border border-border text-center space-y-2">
-            <span className="text-[10px] uppercase font-bold text-text-muted block">Secure Code</span>
+            <span className="text-xs uppercase font-bold text-text-muted block">Secure Code</span>
             <span className="text-2xl font-mono font-black text-action-success tracking-wider">{codeData.code}</span>
-            <p className="text-[11px] text-text-muted">Provide this code to the guardian. Expires in 24 hours.</p>
+            <p className="text-xs text-text-muted">Provide this code to the guardian. Expires in 24 hours.</p>
           </div>
         ) : (
           <button type="button" onClick={generateCode} disabled={loading}
@@ -302,7 +302,7 @@ export default function SysAdminParentsPage() {
 
                 {/* Linked children */}
                 <div className="space-y-2 pt-2 border-t border-border">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Linked Students</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Linked Students</span>
                   {p.children && p.children.length > 0 ? (
                     <div className="space-y-1.5">
                       {p.children.map((c) => (

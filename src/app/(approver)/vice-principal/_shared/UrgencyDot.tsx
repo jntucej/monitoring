@@ -14,7 +14,7 @@ export function UrgencyDot({ urgency = "neutral", className }: UrgencyDotProps) 
     medium: "bg-[var(--action-info,var(--action-primary))]",
     info: "bg-[var(--action-info,var(--action-primary))]",
     low: "bg-action-primary",
-    neutral: "bg-[var(--text-muted)]",
+    neutral: "bgtext-muted",
   };
 
   return (

@@ -92,7 +92,7 @@ function VpEscalatedInner() {
                       <span className="text-xs text-text-muted capitalize whitespace-nowrap">
                         {r.workflow_type.replace(/_/g, " ")}
                       </span>
-                      <span className="text-[10px] font-semibold text-action-warning bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
+                      <span className="text-xs font-semibold text-action-warning bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
                         escalated → {r.current_stage}
                       </span>
                       <button

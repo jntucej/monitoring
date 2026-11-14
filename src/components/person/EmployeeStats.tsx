@@ -19,10 +19,10 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
   if (loading) {
     return (
       <div className="bg-bg-surface border border-border rounded-xl p-6 animate-pulse space-y-4">
-        <div className="h-6 w-36 bg-[var(--border)] rounded" />
+        <div className="h-6 w-36 bgborder rounded" />
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-20 bg-[var(--border)] rounded-lg" />
-          <div className="h-20 bg-[var(--border)] rounded-lg" />
+          <div className="h-20 bgborder rounded-lg" />
+          <div className="h-20 bgborder rounded-lg" />
         </div>
       </div>
     );
@@ -54,7 +54,7 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
               : "bg-amber-500/10 text-action-warning border-amber-500/30"
           }`}
         >
-          <span className={`w-2 h-2 rounded-full ${isOnCampus === null ? "bg-[var(--text-muted)]" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
+          <span className={`w-2 h-2 rounded-full ${isOnCampus === null ? "bgtext-muted" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
           {isOnCampus === null ? "UNKNOWN" : isOnCampus ? "ON CAMPUS" : "OFF CAMPUS"}
         </div>
       </div>

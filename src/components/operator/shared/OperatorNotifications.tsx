@@ -231,7 +231,7 @@ export function OperatorNotifications({
     <span className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated transition-colors">
       <Bell className="h-5 w-5" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action-danger px-1 text-[10px] font-bold text-white">
+        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action-danger px-1 text-xs font-bold text-white">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
@@ -262,7 +262,7 @@ export function OperatorNotifications({
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-action-primary hover:bg-bg-elevated transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-action-primary hover:bg-bg-elevated transition-colors"
                 >
                   <CheckCheck className="h-3 w-3" /> Mark all read
                 </button>
@@ -298,10 +298,10 @@ export function OperatorNotifications({
                   <div key={urgency}>
                     <div className="flex items-center gap-2 mb-2">
                       <meta.icon className={`h-3.5 w-3.5 ${meta.accent}`} />
-                      <span className={`text-[11px] font-semibold uppercase tracking-wide ${meta.accent}`}>
+                      <span className={`text-xs font-semibold uppercase tracking-wide ${meta.accent}`}>
                         {meta.label}
                       </span>
-                      <span className="text-[11px] text-text-muted">({group.length})</span>
+                      <span className="text-xs text-text-muted">({group.length})</span>
                     </div>
                     <div className="space-y-2">
                       {group.map((item) => {
@@ -322,12 +322,12 @@ export function OperatorNotifications({
                                 {item.title}
                               </p>
                               {item.message ? (
-                                <p className="mt-0.5 text-[11px] text-text-muted line-clamp-2">
+                                <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
                                   {item.message}
                                 </p>
                               ) : null}
                               {item.createdAt ? (
-                                <p className="mt-1 text-[10px] text-text-muted">
+                                <p className="mt-1 text-xs text-text-muted">
                                   {getTimeAgo(item.createdAt)}
                                 </p>
                               ) : null}

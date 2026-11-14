@@ -164,7 +164,7 @@ export default function AdminStudentsImportPage() {
               />
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-[11px] text-text-muted">
+                <span className="text-xs text-text-muted">
                   Pin the role column to <code className="text-action-primary">student</code> in the CSV.
                 </span>
                 <button

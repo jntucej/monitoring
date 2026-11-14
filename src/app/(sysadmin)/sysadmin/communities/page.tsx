@@ -80,7 +80,7 @@ function SysadminCommunitiesInner() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.name}</p>
                       {r.is_moderated && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-amber-500/15 text-action-warning flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/15 text-action-warning flex items-center gap-1">
                           <ShieldCheck className="w-3 h-3" /> Moderated
                         </span>
                       )}

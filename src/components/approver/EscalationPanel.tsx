@@ -384,7 +384,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
           <span className="text-sm font-bold text-text-primary truncate">
             Escalations
           </span>
-          <span className="text-[10px] font-mono text-text-muted">
+          <span className="text-xs font-mono text-text-muted">
             {rows.length} items
           </span>
         </div>
@@ -392,7 +392,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
           type="button"
           onClick={handleRefresh}
           disabled={escLoading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Refresh escalation panel"
         >
           {escLoading ? (
@@ -413,7 +413,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
             role="tab"
             aria-selected={filter === tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold border transition-colors ${
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold border transition-colors ${
               filter === tab.id
                 ? "border-action-primary/40 bg-action-primary/10 text-action-primary"
                 : "border-border bg-bg-elevated text-text-muted hover:text-text-secondary"
@@ -434,7 +434,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
         <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4">
           <div className="flex items-start gap-2">
             <XCircle className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs text-text-muted">
               {filter === "all"
                 ? "No open escalations or alerts. The desk is clear."
                 : `No ${filter} items match the current filter.`}
@@ -442,7 +442,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
           </div>
         </div>
       ) : (
-        <ul className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-2 max-h100 overflow-y-auto custom-scrollbar pr-1">
           {filtered.map((row) => {
             const isActive = assigningRow === row.key;
             const isBusy = busyKey === row.key;
@@ -459,7 +459,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                   </span>
                   {row.slaBadge ? (
                     <span
-                      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-mono font-bold border shrink-0 ${
+                      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-mono font-bold border shrink-0 ${
                         row.slaBadge === "SLA breached"
                           ? "text-action-danger bg-rose-400/10 border-rose-400/20"
                           : "text-action-warning bg-amber-400/10 border-amber-400/20"
@@ -468,14 +468,14 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       {row.slaBadge}
                     </span>
                   ) : null}
-                  <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-text-muted">
+                  <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
                     <Clock className="w-3 h-3" />
                     {row.age}
                   </span>
                 </div>
 
                 {/* Sub-row: gate + assigned_to */}
-                <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-text-muted">
+                <div className="mt-1 flex items-center gap-2 text-xs font-mono text-text-muted">
                   <span className="truncate">
                     gate: {row.gate}
                   </span>
@@ -500,7 +500,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       type="button"
                       onClick={() => setAssigningRow(isActive ? null : row.key)}
                       disabled={isBusy}
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border transition-colors disabled:opacity-40 ${
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border transition-colors disabled:opacity-40 ${
                         isActive
                           ? "border-action-primary/40 bg-action-primary/10 text-action-primary"
                           : "border-border bg-bg-base text-text-secondary hover:border-action-primary/40"
@@ -520,7 +520,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       type="button"
                       onClick={() => handleResolve(row)}
                       disabled={isBusy}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border border-emerald-400/30 bg-emerald-400/10 text-action-success hover:bg-emerald-400/20 transition-colors disabled:opacity-40"
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border border-emerald-400/30 bg-emerald-400/10 text-action-success hover:bg-emerald-400/20 transition-colors disabled:opacity-40"
                     >
                       <CheckCircle className="w-3 h-3" />
                       Resolve
@@ -533,7 +533,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       type="button"
                       onClick={() => handleEscalate(row)}
                       disabled={isBusy}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border border-rose-400/30 bg-rose-400/10 text-action-danger hover:bg-rose-400/20 transition-colors disabled:opacity-40"
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border border-rose-400/30 bg-rose-400/10 text-action-danger hover:bg-rose-400/20 transition-colors disabled:opacity-40"
                     >
                       <AlertTriangle className="w-3 h-3" />
                       Escalate
@@ -549,16 +549,16 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                 {/* Assignee dropdown (shown when Assign is toggled) */}
                 {isActive && row.alertId && !isBusy ? (
                   <div className="mt-2 rounded-lg border border-border bg-bg-base/50 p-2">
-                    <label className="text-[10px] font-semibold text-text-muted mb-1 block">
+                    <label className="text-xs font-semibold text-text-muted mb-1 block">
                       Assign to
                     </label>
                     {assigneeLoading ? (
-                      <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
+                      <div className="flex items-center gap-1.5 text-xs text-text-muted">
                         <Loader2 className="w-3 h-3 animate-spin" />
                         <span>Loading assignees…</span>
                       </div>
                     ) : assignees.length === 0 ? (
-                      <p className="text-[10px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         No assignees available.
                       </p>
                     ) : (
@@ -568,7 +568,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                             key={a.id}
                             type="button"
                             onClick={() => handleAssign(row, a.id)}
-                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-mono border border-border bg-bg-elevated text-text-secondary hover:border-action-primary/40 hover:text-text-primary transition-colors"
+                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-mono border border-border bg-bg-elevated text-text-secondary hover:border-action-primary/40 hover:text-text-primary transition-colors"
                           >
                             {a.name}
                             <span className="text-text-muted/60">
@@ -587,7 +587,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
       )}
 
       {/* Footer hint */}
-      <p className="mt-3 text-[10px] text-text-muted">
+      <p className="mt-3 text-xs text-text-muted">
         Data refreshed every 15s. Supervised-gates scope applied server-side
         via <code className="font-mono">users.supervised_gates</code>.
       </p>

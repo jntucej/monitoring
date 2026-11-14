@@ -83,7 +83,7 @@ function AdminDepartmentsInner() {
                       <td className="p-3 text-center">{r.facultyCount}</td>
                       <td className="p-3 text-center">{r.totalStudents}</td>
                       <td className="p-3 text-center">
-                        <span className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] font-bold text-action-primary">
+                        <span className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs font-bold text-action-primary">
                           {r.facultyCount + r.totalStudents}
                         </span>
                       </td>

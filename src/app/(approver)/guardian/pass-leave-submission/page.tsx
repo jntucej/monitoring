@@ -231,7 +231,7 @@ function PassLeaveSubmissionInner() {
                   value={wardId}
                   onChange={(e) => setWardId(e.target.value)}
                   disabled={busy}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
                 >
                   {wards.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -250,7 +250,7 @@ function PassLeaveSubmissionInner() {
                   value={passType}
                   onChange={(e) => setPassType(e.target.value)}
                   disabled={busy || passTypesLoading}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
                 >
                   {passTypes.map((t) => (
                     <option key={t.code} value={t.code}>
@@ -277,7 +277,7 @@ function PassLeaveSubmissionInner() {
                     onChange={(e) => setFrom(e.target.value)}
                     min={toLocalInputValue(new Date().toISOString())}
                     disabled={busy}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -290,7 +290,7 @@ function PassLeaveSubmissionInner() {
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
                     disabled={busy}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -306,7 +306,7 @@ function PassLeaveSubmissionInner() {
                   rows={3}
                   placeholder="Reason for the pass or leave (optional)"
                   disabled={busy}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:borderaction-success disabled:opacity-50"
                 />
               </div>
 

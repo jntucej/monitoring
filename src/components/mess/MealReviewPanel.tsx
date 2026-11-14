@@ -232,7 +232,7 @@ export function MealReviewPanel() {
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-sm font-medium text-text-secondary">{MEAL_LABEL[meal]}</span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
                       phase === "open"
                         ? "bg-emerald-500/20 text-action-success"
                         : phase === "upcoming"
@@ -282,7 +282,7 @@ export function MealReviewPanel() {
                       className="mt-2 w-full rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-action-primary"
                     />
                     {savingKey === key && (
-                      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-text-muted">
+                      <div className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
                         <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
                       </div>
                     )}
@@ -316,7 +316,7 @@ export function MealReviewPanel() {
                         {MEAL_LABEL[r.meal_type]}
                         {r.comment ? <span className="ml-2 font-normal text-text-muted">{r.comment}</span> : null}
                       </p>
-                      <p className="text-[10px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         Rated {SATISFACTION_LEVELS.find((s) => s.value === r.satisfaction)?.label ?? r.satisfaction}
                         {r.edit_count ? ` · edited ${r.edit_count}×` : ""}
                       </p>

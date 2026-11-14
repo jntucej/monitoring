@@ -14,7 +14,7 @@ function FacultyPermissionsInner() {
       
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
+          <p className="mt-1 text-sm text-muted">
             Initial-stage exam clearances and memo requests
           </p>
         </div>

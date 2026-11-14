@@ -14,7 +14,7 @@ export default function InfrastructurePage() {
             <Server className="w-6 h-6 text-rose-400" />
             Infrastructure Monitoring
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-muted mt-1">
             Read-only view of host, container, and service telemetry.
           </p>
         </div>

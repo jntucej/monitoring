@@ -143,7 +143,7 @@ export function TodayMealsPanel() {
       {daysLoading || countsLoading ? (
         <div className="flex items-center gap-2 px-3 py-3 text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-[11px]">Loading today&apos;s service…</span>
+          <span className="text-xs">Loading today&apos;s service…</span>
         </div>
       ) : visible.length === 0 ? (
         <EmptyState
@@ -152,7 +152,7 @@ export function TodayMealsPanel() {
           icon={<CalendarDays className="w-5 h-5" />}
         />
       ) : (
-        <ul className="space-y-1.5 max-h-[240px] overflow-y-auto custom-scrollbar pr-1 mb-3">
+        <ul className="space-y-1.5 max-h60 overflow-y-auto custom-scrollbar pr-1 mb-3">
           {visible.map((row) => {
             const status = mealStatus(row, now);
             return (
@@ -163,16 +163,16 @@ export function TodayMealsPanel() {
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-text-primary truncate">
                     {dayName(row.mealDate)}
-                    <span className="ml-1.5 font-mono text-[10px] font-normal text-text-muted">
+                    <span className="ml-1.5 font-mono text-xs font-normal text-text-muted">
                       {row.mealType}
                     </span>
                   </p>
-                  <p className="text-[10px] font-mono text-text-muted truncate">
+                  <p className="text-xs font-mono text-text-muted truncate">
                     {fmtWindow(row.windowOpensAt)} – {fmtWindow(row.windowClosesAt)}
                   </p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border shrink-0 ${STATUS_TONE[status]}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold border shrink-0 ${STATUS_TONE[status]}`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
                   {STATUS_LABEL[status]}
@@ -187,13 +187,13 @@ export function TodayMealsPanel() {
       {countsData?.data ? (
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
-            <p className="text-[10px] text-text-muted">Declared present</p>
+            <p className="text-xs text-text-muted">Declared present</p>
             <p className="text-sm font-bold text-text-primary font-mono tabular-nums">
               {countsData.data.declaredPresent}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
-            <p className="text-[10px] text-text-muted">Confirmed served</p>
+            <p className="text-xs text-text-muted">Confirmed served</p>
             <p className="text-sm font-bold text-action-success font-mono tabular-nums">
               {countsData.data.confirmed}
             </p>

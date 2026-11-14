@@ -75,7 +75,7 @@ export function FloatingOrbs() {
         </motion.div>
       ) : (
         <div
-          className="absolute inset-0 opacity-30 bg-gradient-to-br from-[var(--action-primary)]/10 via-transparent to-[var(--unit-c)]/10"
+          className="absolute inset-0 opacity-30 bg-gradient-to-br fromaction-primary/10 via-transparent tounit-c/10"
           aria-hidden="true"
         />
       )}

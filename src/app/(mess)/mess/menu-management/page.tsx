@@ -69,7 +69,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -122,7 +122,7 @@ function MessMenuInner() {
                   <div className="flex-1" />
                   <Link
                     href="/mess/scan"
-                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
+                    className="inline-flex min-h11 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" /> Token Scanner
                   </Link>
@@ -130,7 +130,7 @@ function MessMenuInner() {
 
                 {/* Items table */}
                 <div className="overflow-x-auto min-w-0">
-                  <table className="w-full text-sm min-w-[360px]">
+                  <table className="w-full text-sm min-w90">
                     <thead>
                       <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                         <th className="text-left px-3 py-2.5">Item</th>

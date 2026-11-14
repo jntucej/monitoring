@@ -18,7 +18,7 @@ export const GlossyHeroComposition: React.FC<GlossyHeroCompositionProps> = () =>
   });
 
   return (
-    <div className="relative w-full h-full min-h-[180px] rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900/80 via-emerald-950/30 to-slate-950/90 border border-white/15 p-6 flex flex-col justify-between">
+    <div className="relative w-full h-full min-h45 rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900/80 to-slate-950/90 border border-white/15 p-6 flex flex-col justify-between">
       {/* Background Floating Glossy Orbs */}
       <div
         className="absolute top-4 left-10 w-36 h-36 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none"

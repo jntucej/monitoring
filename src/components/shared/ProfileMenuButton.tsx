@@ -45,8 +45,8 @@ type AccentId = "emerald" | "rose" | "sky" | "amber" | "violet";
 const ACCENTS: Record<AccentId, { label: string; swatch: string; ring: string }> = {
   emerald: { label: "Emerald", swatch: "bg-action-success", ring: "ring-action-success" },
   rose:    { label: "Rose",    swatch: "bg-action-danger",    ring: "ring-action-danger" },
-  sky:     { label: "Sky",     swatch: "bg-action-info",     ring: "ring-[var(--action-info)]" },
-  amber:   { label: "Amber",   swatch: "bg-action-warning",   ring: "ring-[var(--action-warning)]" },
+  sky:     { label: "Sky",     swatch: "bg-action-info",     ring: "ringaction-info" },
+  amber:   { label: "Amber",   swatch: "bg-action-warning",   ring: "ringaction-warning" },
   violet:  { label: "Violet",  swatch: "bg-unit-c",  ring: "ring-unit-c" },
 };
 
@@ -160,10 +160,10 @@ export function ProfileMenuButton({
         )}
         {!compact && (
           <span className="hidden sm:block text-left min-w-0">
-            <span className="block text-xs font-semibold text-text-primary truncate max-w-[140px]">
+            <span className="block text-xs font-semibold text-text-primary truncate max-w35">
               {user?.name || "Account"}
             </span>
-            <span className="block text-[10px] uppercase tracking-wider text-text-muted capitalize">
+            <span className="block text-xs uppercase tracking-wider text-text-muted capitalize">
               {role || "user"}
             </span>
           </span>
@@ -184,7 +184,7 @@ export function ProfileMenuButton({
 
           {/* Appearance & Backgrounds */}
           <div className="px-4 py-3 border-b border-border space-y-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <Sparkles className="w-3 h-3" /> Appearance &amp; Backgrounds
             </p>
 
@@ -202,7 +202,7 @@ export function ProfileMenuButton({
                       onClick={() => setTheme(t)}
                       aria-label={`Switch to ${t} theme`}
                       className={cn(
-                        "w-8 h-8 min-w-[32px] min-h-[32px] sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all",
+                        "w-8 h-8 min-w8 min-h8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all",
                         active
                           ? "bg-action-primary text-white shadow-sm"
                           : "bg-bg-elevated text-text-muted hover:text-text-primary border border-border"
@@ -219,7 +219,7 @@ export function ProfileMenuButton({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-text-secondary">Accent</span>
-                <span className="text-[10px] text-text-muted capitalize">
+                <span className="text-xs text-text-muted capitalize">
                   {ACCENTS[accent].label}
                 </span>
               </div>
@@ -234,7 +234,7 @@ export function ProfileMenuButton({
                       onClick={() => pickAccent(id)}
                       aria-label={`Use ${a.label} accent`}
                       className={cn(
-                        "w-8 h-8 min-w-[32px] min-h-[32px] sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all active:scale-95",
+                        "w-8 h-8 min-w8 min-h8 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all active:scale-95",
                         a.swatch,
                         active ? cn("ring-2 ring-offset-2 ring-offset-[var(--bg-surface)]", a.ring) : "opacity-70 hover:opacity-100"
                       )}
@@ -261,7 +261,7 @@ export function ProfileMenuButton({
               hint="Sessions & access"
               onClick={() => nav(securityHref)}
             />
-            <div className="h-px bg-[var(--border)] my-1.5" />
+            <div className="h-px bgborder my-1.5" />
             <button
               type="button"
               onClick={signOut}
@@ -301,7 +301,7 @@ function MenuRow({
     >
       <Icon className="w-4 h-4 text-text-muted" />
       <span className="flex-1 truncate">{label}</span>
-      {hint && <span className="text-[10px] text-text-muted">{hint}</span>}
+      {hint && <span className="text-xs text-text-muted">{hint}</span>}
     </button>
   );
 }

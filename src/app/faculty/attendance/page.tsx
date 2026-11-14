@@ -95,7 +95,7 @@ function FacultyAttendanceInner() {
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs text-text-muted">
-          {user?.name && <span className="truncate max-w-[220px]">{user.name}</span>}
+          {user?.name && <span className="truncate max-w55">{user.name}</span>}
         </div>
       </div>
 
@@ -120,7 +120,7 @@ function FacultyAttendanceInner() {
       {/* Loading state */}
       {loading && records.length === 0 && !error ? (
         <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-4 border-[var(--action-success)] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 borderaction-success border-t-transparent rounded-full animate-spin" />
         </div>
       ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
         /* Empty state — no attendance records yet */

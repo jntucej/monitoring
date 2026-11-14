@@ -149,14 +149,14 @@ export function DocumentUploadPanel({
           className={`flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
             dragging
               ? "border-action-primary bg-action-primary/5"
-              : "border-border bg-bg-base hover:border-[var(--text-muted)]"
+              : "border-border bg-bg-base hover:bordertext-muted"
           }`}
         >
           <UploadCloud className="w-8 h-8 text-text-muted" />
           <p className="text-xs font-semibold text-text-secondary">
             Drag &amp; drop a PDF here, or click to browse
           </p>
-          <p className="text-[10px] text-text-muted">PDF only — max 10 MB</p>
+          <p className="text-xs text-text-muted">PDF only — max 10 MB</p>
           <input
             ref={inputRef}
             type="file"
@@ -173,7 +173,7 @@ export function DocumentUploadPanel({
           <div className="flex items-center gap-2 min-w-0">
             <FileText className="w-4 h-4 text-action-warning shrink-0" />
             <span className="text-xs font-semibold text-text-primary truncate">{file.name}</span>
-            <span className="text-[10px] text-text-muted shrink-0">{formatSize(file.size)}</span>
+            <span className="text-xs text-text-muted shrink-0">{formatSize(file.size)}</span>
           </div>
           <button
             type="button"

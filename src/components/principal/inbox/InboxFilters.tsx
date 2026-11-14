@@ -69,7 +69,7 @@ export function InboxFilters() {
           <button
             type="button"
             onClick={() => updateParam("stage", "")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               !stage
                 ? "bg-action-primary text-white"
                 : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
@@ -82,7 +82,7 @@ export function InboxFilters() {
               key={s}
               type="button"
               onClick={() => updateParam("stage", s)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 stage === s
                   ? "bg-action-primary text-white"
                   : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
@@ -102,7 +102,7 @@ export function InboxFilters() {
           <button
             type="button"
             onClick={() => updateParam("workflowType", "")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
               !workflowType
                 ? "bg-action-primary text-white"
                 : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
@@ -115,7 +115,7 @@ export function InboxFilters() {
               key={w}
               type="button"
               onClick={() => updateParam("workflowType", w)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 workflowType === w
                   ? "bg-action-primary text-white"
                   : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"
@@ -138,7 +138,7 @@ export function InboxFilters() {
                 key={s}
                 type="button"
                 onClick={() => updateParam("sla", s === "all" ? "" : s)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                   (s === "all" && !sla) || sla === s
                     ? "bg-action-primary text-white"
                     : "bg-bg-elevated text-text-secondary hover:bg-bg-surface"

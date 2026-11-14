@@ -41,12 +41,12 @@ export function PermissionContextPanel({ row, onClose, onActionComplete }: Permi
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="text-sm font-bold font-mono text-action-primary truncate">{ticket}</h3>
           {workflowType ? (
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${statusBadgeClass(workflowType)}`}>
+            <span className={`px-1.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${statusBadgeClass(workflowType)}`}>
               {workflowType}
             </span>
           ) : null}
         </div>
-        <p className="text-[11px] font-mono text-text-muted truncate mt-0.5 inline-flex items-center gap-1">
+        <p className="text-xs font-mono text-text-muted truncate mt-0.5 inline-flex items-center gap-1">
           <ShieldCheck className="w-3 h-3" />
           {row.name || row.roll || "HOD permission"}
         </p>
@@ -80,7 +80,7 @@ export function PermissionContextPanel({ row, onClose, onActionComplete }: Permi
       {/* Desktop side panel */}
       <aside
         aria-label="Permission detail panel"
-        className="hidden md:flex flex-col w-[340px] lg:w-[380px] shrink-0 bg-bg-surface border-l border-border overflow-y-auto custom-scrollbar"
+        className="hidden md:flex flex-col w85 lg:w95 shrink-0 bg-bg-surface border-l border-border overflow-y-auto custom-scrollbar"
       >
         {body}
       </aside>

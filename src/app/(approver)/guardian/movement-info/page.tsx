@@ -200,7 +200,7 @@ function MovementInfoInner() {
               },
             ].map((kpi) => (
               <div key={kpi.label} className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{kpi.label}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">{kpi.label}</p>
                 <p className={`text-lg font-bold mt-0.5 ${kpi.accent}`}>{kpi.value}</p>
               </div>
             ))}

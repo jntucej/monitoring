@@ -16,7 +16,7 @@ export const LanguageToggle = memo(function LanguageToggle({
           onClick={() => onChange(l)}
           aria-pressed={lang === l}
           aria-label={l === "en" ? "English" : "Telugu"}
-          className={`relative px-2.5 py-1 text-[11px] font-medium rounded-full transition-colors
+          className={`relative px-2.5 py-1 text-xs font-medium rounded-full transition-colors
             disabled:opacity-50
             ${lang === l ? "text-white" : "text-text-muted hover:text-text-primary"}`}
         >

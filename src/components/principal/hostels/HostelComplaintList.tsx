@@ -69,13 +69,13 @@ export function HostelComplaintList() {
               <li key={c.id} className="min-w-0">
                 <Link
                   href={`/principal/operations/incidents`}
-                  className="block p-2.5 rounded-lg bg-bg-elevated border border-border hover:border-[var(--text-muted)] transition-colors"
+                  className="block p-2.5 rounded-lg bg-bg-elevated border border-border hover:bordertext-muted transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-mono text-xs text-text-muted shrink-0">{c.complaintNumber}</span>
                     <span className="text-xs text-text-primary truncate">{c.title}</span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase shrink-0 ${
+                      className={`px-1.5 py-0.5 rounded text-xs font-semibold uppercase shrink-0 ${
                         c.priority === "high"
                           ? "bg-rose-500/10 text-action-danger"
                           : "bg-amber-500/10 text-action-warning"
@@ -84,7 +84,7 @@ export function HostelComplaintList() {
                       {c.priority}
                     </span>
                   </div>
-                  <p className="text-[10px] text-text-muted mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     {c.categoryLabel} · {new Date(c.createdAt).toLocaleDateString()}
                   </p>
                 </Link>

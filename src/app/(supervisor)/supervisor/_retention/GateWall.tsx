@@ -45,7 +45,7 @@ export function GateWall({ gates }: { gates: Gate[] }) {
         </div>
         <Link
           href="/supervisor/gates/live"
-          className="text-[11px] text-action-primary hover:underline"
+          className="text-xs text-action-primary hover:underline"
         >
           Full view →
         </Link>
@@ -72,7 +72,7 @@ export function GateWall({ gates }: { gates: Gate[] }) {
                 <p className="truncate text-sm font-medium text-text-primary">
                   {g.name}
                 </p>
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {fmtLastActivity(g.lastActivity)}
                 </p>
               </div>
@@ -81,7 +81,7 @@ export function GateWall({ gates }: { gates: Gate[] }) {
                 <span className="font-medium tabular-nums">{g.onPost}</span>
               </div>
               {!online && (
-                <AlertTriangle className="size-3.5 text-action-warning" />
+                <AlertTriangle className="size-4 text-action-warning" />
               )}
             </li>
           );

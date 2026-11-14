@@ -39,7 +39,7 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
       label: "ON CAMPUS",
       emoji: "🏕",
       value: onCampus,
-      color: "text-[var(--focus-ring)]",
+      color: "textfocus-ring",
       glow: "shadow-sky-500/10",
       href: `/operator/transactions`,
     },
@@ -69,7 +69,7 @@ export function OperatorStats({ entries, exits, onCampus }: OperatorStatsProps) 
             <p className={`kpi-number text-fluid-2xl font-extrabold ${card.color}`}>
               <CountUp value={card.value} />
             </p>
-            <p className="text-[10px] text-text-muted mt-1 font-mono hidden sm:block">Open Full Page</p>
+            <p className="text-xs text-text-muted mt-1 font-mono hidden sm:block">Open Full Page</p>
           </motion.div>
         </GlossyFloatingContainer>
       ))}

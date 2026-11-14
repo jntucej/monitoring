@@ -114,7 +114,7 @@ function DeputyWardenIncidentsInner() {
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[480px]">
+              <table className="w-full text-sm min-w120">
                 <thead>
                   <tr className="border-b border-border text-left text-xs text-text-muted">
                     <th className="py-2 pr-4">Title</th>

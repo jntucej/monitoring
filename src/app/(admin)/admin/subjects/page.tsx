@@ -131,7 +131,7 @@ function AdminSubjectsInner() {
                         <p className="text-sm font-medium text-text-primary truncate">{s.label}</p>
                         <p className="text-xs font-mono text-text-muted">{s.code}</p>
                       </div>
-                      <span className="text-[10px] text-text-muted">{s.isActive ? "Active" : "Off"}</span>
+                      <span className="text-xs text-text-muted">{s.isActive ? "Active" : "Off"}</span>
                     </div>
                   ))}
                 </div>

@@ -119,9 +119,9 @@ function StaffNotificationsInner() {
                       {n.body && <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{n.body}</p>}
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[11px] text-text-muted capitalize">{n.type ?? "general"}</p>
+                      <p className="text-xs text-text-muted capitalize">{n.type ?? "general"}</p>
                       {n.created_at && (
-                        <p className="text-[11px] text-text-muted">
+                        <p className="text-xs text-text-muted">
                           {new Date(n.created_at).toLocaleDateString("en-IN", {
                             day: "2-digit", month: "short",
                           })}

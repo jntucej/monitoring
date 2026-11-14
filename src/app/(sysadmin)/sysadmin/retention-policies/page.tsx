@@ -75,7 +75,7 @@ function SysadminRetentionInner() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.name}</p>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] ${r.is_active ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${r.is_active ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
                         {r.is_active ? "Active" : "Inactive"}
                       </span>
                     </div>
@@ -84,7 +84,7 @@ function SysadminRetentionInner() {
                       {r.applies_to ? ` · applies to ${r.applies_to}` : ""}
                     </p>
                     {r.last_run_at && (
-                      <p className="text-[11px] text-text-muted mt-1">
+                      <p className="text-xs text-text-muted mt-1">
                         Last run: {new Date(r.last_run_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}

@@ -67,7 +67,7 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
               <thead className="bg-[var(--surface-sunken)] text-text-secondary sticky top-0 font-medium">
                 <tr><th className="p-2.5">Row</th><th className="p-2.5">Name</th><th className="p-2.5">Email</th><th className="p-2.5">Role</th><th className="p-2.5">ID / Dept</th><th className="p-2.5">Status</th></tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)] font-mono">
+              <tbody className="divide-y divideborder-subtle font-mono">
                 {validationResult.rows.map((r) => {
                   const rowErrors = validationResult.errors.filter((e) => e.row === r.row);
                   const rowWarns = validationResult.warnings.filter((w) => w.row === r.row);
@@ -77,12 +77,12 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
                       <td className="p-2.5 text-text-muted">#{r.row}</td>
                       <td className="p-2.5 font-sans font-medium text-text-primary">{r.name || "—"}</td>
                       <td className="p-2.5 text-text-secondary">{r.email}</td>
-                      <td className="p-2.5 uppercase font-bold text-[10px]">{r.role}</td>
+                      <td className="p-2.5 uppercase font-bold text-xs">{r.role}</td>
                       <td className="p-2.5 text-text-secondary">{r.uniqueId || r.employeeId || r.department || "—"}</td>
                       <td className="p-2.5 font-sans">
                         {isOk ? <div className="flex items-center gap-1 text-action-success font-medium"><CheckCircle2 className="w-3.5 h-3.5" /><span>Valid</span></div> :
-                          <div className="space-y-0.5">{rowErrors.map((err, idx) => <div key={idx} className="flex items-center gap-1 text-red-500 text-[11px]"><XCircle className="w-3.5 h-3.5 shrink-0" /><span>{err.message}</span></div>)}</div>}
-                        {rowWarns.map((w, idx) => <div key={idx} className="flex items-center gap-1 text-action-warning text-[11px]"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /><span>{w.message}</span></div>)}
+                          <div className="space-y-0.5">{rowErrors.map((err, idx) => <div key={idx} className="flex items-center gap-1 text-red-500 text-xs"><XCircle className="w-3.5 h-3.5 shrink-0" /><span>{err.message}</span></div>)}</div>}
+                        {rowWarns.map((w, idx) => <div key={idx} className="flex items-center gap-1 text-action-warning text-xs"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /><span>{w.message}</span></div>)}
                       </td>
                     </tr>
                   );
@@ -92,10 +92,10 @@ export function CsvValidationPreview({ validationResult, commitResult, committin
         <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2 text-action-success"><CheckCircle2 className="w-5 h-5" /><h4 className="font-semibold text-sm">Bulk Import Succeeded</h4></div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-[10px] text-text-muted uppercase font-semibold">Total</span><p className="text-lg font-bold text-text-primary">{commitResult.total}</p></div>
-            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-[10px] text-action-success uppercase font-semibold">Created</span><p className="text-lg font-bold text-action-success">{commitResult.created}</p></div>
-            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-[10px] text-sky-500 uppercase font-semibold">Updated</span><p className="text-lg font-bold text-sky-500">{commitResult.updated}</p></div>
-            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-[10px] text-red-500 uppercase font-semibold">Failed</span><p className="text-lg font-bold text-red-500">{commitResult.failed}</p></div>
+            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-xs text-text-muted uppercase font-semibold">Total</span><p className="text-lg font-bold text-text-primary">{commitResult.total}</p></div>
+            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-xs text-action-success uppercase font-semibold">Created</span><p className="text-lg font-bold text-action-success">{commitResult.created}</p></div>
+            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-xs text-sky-500 uppercase font-semibold">Updated</span><p className="text-lg font-bold text-sky-500">{commitResult.updated}</p></div>
+            <div className="p-3 bg-bg-base rounded-lg border border-border"><span className="text-xs text-red-500 uppercase font-semibold">Failed</span><p className="text-lg font-bold text-red-500">{commitResult.failed}</p></div>
           </div>
         </div>
       )}

@@ -84,7 +84,7 @@ function NotificationPrefsSummary() {
           {prefs.announcementAlerts ? "on" : "off"}
         </li>
       </ul>
-      <p className="mt-3 text-[10px] text-text-muted">
+      <p className="mt-3 text-xs text-text-muted">
         Preferences only change how digests are surfaced to you — delivery
         permissions are always enforced by the server.
       </p>

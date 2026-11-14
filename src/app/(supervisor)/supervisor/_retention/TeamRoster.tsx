@@ -74,7 +74,7 @@ export function TeamRoster() {
         </div>
         <Link
           href="/supervisor/team/workers"
-          className="text-[11px] text-action-primary hover:underline"
+          className="text-xs text-action-primary hover:underline"
         >
           Full roster →
         </Link>
@@ -87,7 +87,7 @@ export function TeamRoster() {
           {/* Summary strip */}
           <div className="mb-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">
+              <p className="text-xs uppercase tracking-wider text-text-muted">
                 On post
               </p>
               <p className="text-lg font-semibold tabular-nums text-action-primary">
@@ -95,7 +95,7 @@ export function TeamRoster() {
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">
+              <p className="text-xs uppercase tracking-wider text-text-muted">
                 Security on duty
               </p>
               <p className="text-lg font-semibold tabular-nums text-action-info">
@@ -103,7 +103,7 @@ export function TeamRoster() {
               </p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-text-muted">
+              <p className="text-xs uppercase tracking-wider text-text-muted">
                 Absent
               </p>
               <p className="text-lg font-semibold tabular-nums text-action-danger">
@@ -118,7 +118,7 @@ export function TeamRoster() {
               <p className="font-medium text-action-danger">
                 {absent.length} not accounted for
               </p>
-              <p className="text-[10px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {absent.slice(0, 3).map((w) => w.name).join(", ")}
                 {absent.length > 3 && ` +${absent.length - 3} more`}
               </p>
@@ -131,8 +131,8 @@ export function TeamRoster() {
               <div key={gate} className="rounded-lg border border-border bg-bg-base/30 p-2">
                 <div className="mb-1 flex items-center gap-1.5">
                   <MapPin className="size-3 text-text-muted" />
-                  <span className="text-[11px] font-medium text-text-primary">{gate}</span>
-                  <span className="text-[10px] text-text-muted">
+                  <span className="text-xs font-medium text-text-primary">{gate}</span>
+                  <span className="text-xs text-text-muted">
                     {rows.filter((r) => r.status === "INSIDE").length}/{rows.length}
                   </span>
                 </div>
@@ -146,13 +146,13 @@ export function TeamRoster() {
                         ? "bg-action-warning"
                         : "bg-action-danger";
                     return (
-                      <li key={w.id} className="flex items-center gap-2 text-[11px]">
+                      <li key={w.id} className="flex items-center gap-2 text-xs">
                         <span className={`size-1.5 shrink-0 rounded-full ${statusColor}`} />
                         <Icon className="size-3 text-text-muted" />
                         <span className="truncate font-medium text-text-primary">
                           {w.name}
                         </span>
-                        <span className="ml-auto text-[10px] text-text-muted">
+                        <span className="ml-auto text-xs text-text-muted">
                           {LABELS[w.staffCategory] ?? w.staffCategory}
                         </span>
                         {w.phoneTail && (
@@ -168,7 +168,7 @@ export function TeamRoster() {
                     );
                   })}
                   {rows.length > 4 && (
-                    <li className="text-[10px] text-text-muted">
+                    <li className="text-xs text-text-muted">
                       +{rows.length - 4} more
                     </li>
                   )}

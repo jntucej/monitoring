@@ -49,7 +49,7 @@ export function PrincipalStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Principal status bar"
     >
       {/* Left: principal summary */}

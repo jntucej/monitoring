@@ -4,7 +4,7 @@
  * CaretakerStatusBar — bottom status strip for the caretaker console.
  *
  * Mirrors the PermissionStatusBar visual style (footer, border-t,
- * bg-surface/95 backdrop-blur, text-[11px], select-none). The parent
+ * bg-surface/95 backdrop-blur, text-xs, select-none). The parent
  * (RoleConsole) computes the counts from the fetched caretaker summary
  * response and passes them in; the hostel is derived from the caller's
  * assigned_hostel (via useAuthStore) and passed in as `counts.hostel`.
@@ -47,7 +47,7 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Caretaker status bar"
     >
       {/* Left: hostel · open · urgent · last update */}

@@ -25,7 +25,7 @@ export function DataContent({ data, onRowClick }: Props) {
             <li key={item.id}>
               <button
                 type="button"
-                className="w-full text-left px-3 py-2 rounded hover:bg-[var(--bg-elevated)] dark:hover:bg-[var(--bg-elevated)] transition"
+                className="w-full text-left px-3 py-2 rounded hover:bg-elevated dark:hover:bg-elevated transition"
                 onClick={() => onRowClick(item as unknown as DataEntity)}
               >
                 {item.id}

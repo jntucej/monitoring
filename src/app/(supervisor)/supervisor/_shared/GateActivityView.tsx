@@ -64,7 +64,7 @@ export function GateActivityView() {
                     {g.onPost} guards
                   </span>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
+                <div className="mt-2 flex items-center justify-between text-xs text-text-muted">
                   <span>In: {g.recentEntries} / 1h</span>
                   <span>Out: {g.recentExits} / 1h</span>
                 </div>

@@ -166,7 +166,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
 function Kpi({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
     <div className="rounded-xl border border-border bg-bg-base p-4">
-      <div className="text-[11px] uppercase tracking-wide text-text-muted">{label}</div>
+      <div className="text-xs uppercase tracking-wide text-text-muted">{label}</div>
       <div className="mt-1 text-2xl font-bold" style={{ color: tone }}>
         {value}
       </div>
@@ -262,7 +262,7 @@ function PromotionCard({ row, tone }: { row: PromotionRow; tone: string }) {
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between text-[11px] text-text-muted">
+      <div className="mt-2 flex items-center justify-between text-xs text-text-muted">
         <span>{new Date(row.created_at).toLocaleDateString()}</span>
         {row.approver_name && <span>by {row.approver_name}</span>}
       </div>

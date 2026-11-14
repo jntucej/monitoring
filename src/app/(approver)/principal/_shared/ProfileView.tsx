@@ -63,7 +63,7 @@ export function ProfileView() {
               <h2 className="text-lg font-bold text-text-primary">
                 {profile.name}
               </h2>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-indigo-500/10 text-action-primary border border-indigo-500/20">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-indigo-500/10 text-action-primary border border-indigo-500/20">
                 {profile.role?.replace(/_/g, " ") ?? "Principal"}
               </span>
             </div>
@@ -73,7 +73,7 @@ export function ProfileView() {
             <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
               <Mail className="w-4 h-4 text-text-muted shrink-0" />
               <div>
-                <div className="text-[10px] text-text-muted">Email</div>
+                <div className="text-xs text-text-muted">Email</div>
                 <div className="text-text-primary font-medium">
                   {profile.email}
                 </div>
@@ -83,7 +83,7 @@ export function ProfileView() {
               <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
                 <Phone className="w-4 h-4 text-text-muted shrink-0" />
                 <div>
-                  <div className="text-[10px] text-text-muted">Phone</div>
+                  <div className="text-xs text-text-muted">Phone</div>
                   <div className="text-text-primary font-medium">
                     {profile.phone}
                   </div>

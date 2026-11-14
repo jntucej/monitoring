@@ -124,7 +124,7 @@ function ReleaseRail({ rows }: { rows: DeploymentRow[] }) {
         {visible.map((d, _i) => (
           <div
             key={d.id}
-            className="shrink-0 text-[9px] text-text-muted px-1.5 py-0.5 rounded bg-bg-surface border border-border w-[28px] text-center"
+            className="shrink-0 text-xs text-text-muted px-1.5 py-0.5 rounded bg-bg-surface border border-border w7 text-center"
             title={`${d.status} · ${relative(d.created_at)}`}
           >
             {new Date(d.created_at).toLocaleDateString(undefined, {
@@ -181,7 +181,7 @@ export function DeploymentsContent(
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* last deploy */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Last Deploy
           </p>
           <span className="text-lg font-semibold text-text-primary">
@@ -191,7 +191,7 @@ export function DeploymentsContent(
 
         {/* health gate pass % */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Health Gate
           </p>
           <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export function DeploymentsContent(
 
         {/* rollbacks 30d */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Rollbacks 30d
           </p>
           <span
@@ -229,7 +229,7 @@ export function DeploymentsContent(
 
         {/* lead time */}
         <div className="rounded-xl border border-border bg-bg-surface p-3">
-          <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">
+          <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Lead Time
           </p>
           <span className="text-lg font-semibold text-text-primary">
@@ -251,7 +251,7 @@ export function DeploymentsContent(
         <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-[10px] uppercase tracking-wide text-text-muted">
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                 <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Version</th>
                 <th className="px-3 py-2">Detail</th>
@@ -273,7 +273,7 @@ export function DeploymentsContent(
                   <td className="px-3 py-2 font-mono text-xs text-text-primary">
                     {d.version ?? "—"}
                   </td>
-                  <td className="px-3 py-2 text-xs text-text-muted truncate max-w-[200px]">
+                  <td className="px-3 py-2 text-xs text-text-muted truncate max-w50">
                     {d.message ?? d.commit ?? "—"}
                   </td>
                   <td className="px-3 py-2 text-xs text-text-muted whitespace-nowrap">

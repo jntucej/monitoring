@@ -85,7 +85,7 @@ function SysadminAchievementsInner() {
                     <p className="text-xs text-text-muted">{a.description}</p>
                   </div>
                   {a.earnedAt && (
-                    <span className="text-[11px] text-text-muted shrink-0">
+                    <span className="text-xs text-text-muted shrink-0">
                       {new Date(a.earnedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
                   )}
@@ -112,7 +112,7 @@ function SysadminAchievementsInner() {
                     <p className="text-xs text-text-muted">{a.description}</p>
                   </div>
                   {a.tier && (
-                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated text-text-muted shrink-0">{a.tier}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted shrink-0">{a.tier}</span>
                   )}
                 </div>
               ))}

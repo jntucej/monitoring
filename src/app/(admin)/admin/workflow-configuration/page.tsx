@@ -90,37 +90,37 @@ function AdminWorkflowConfigurationInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Pass Types">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <GitBranch className="w-3.5 h-3.5 text-action-success" /> Pass Types
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : passTypes.length}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Configured workflow definitions</p>
+            <p className="mt-0.5 text-xs text-text-muted">Configured workflow definitions</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Pending">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <FileCheck className="w-3.5 h-3.5 text-action-warning" /> Awaiting Approval
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : totalPending}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Passes queued across all workflows</p>
+            <p className="mt-0.5 text-xs text-text-muted">Passes queued across all workflows</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Clock className="w-3.5 h-3.5 text-action-primary" /> Standard SLA
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : "48 hrs"}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Approval turnaround target</p>
+            <p className="mt-0.5 text-xs text-text-muted">Approval turnaround target</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -140,7 +140,7 @@ function AdminWorkflowConfigurationInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter pass types…"
-                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:border-[var(--action-success)]"
+                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:borderaction-success"
               />
               {query && (
                 <button
@@ -175,7 +175,7 @@ function AdminWorkflowConfigurationInner() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm min-w-[720px]">
+              <table className="w-full text-left text-sm min-w180">
                 <thead className="bg-bg-surface/60 text-xs uppercase tracking-wide text-text-muted border-b border-border">
                   <tr>
                     <th className="py-2.5 px-4">Pass Type</th>
@@ -191,15 +191,15 @@ function AdminWorkflowConfigurationInner() {
                     <tr key={p.code} className="hover:bg-bg-surface/40">
                       <td className="py-3 px-4">
                         <p className="font-semibold text-white">{p.name}</p>
-                        <p className="text-[11px] text-text-muted">{p.code}</p>
+                        <p className="text-xs text-text-muted">{p.code}</p>
                       </td>
                       <td className="py-3 px-4">
                         {p.requires_approval ? (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 text-action-warning px-2 py-0.5 text-[11px] font-medium">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 text-action-warning px-2 py-0.5 text-xs font-medium">
                             <CheckCircle2 className="w-3 h-3" /> {p.approval_flow || "Approval"}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-bg-elevated text-text-muted px-2 py-0.5 text-[11px] font-medium">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-bg-elevated text-text-muted px-2 py-0.5 text-xs font-medium">
                             Direct issue
                           </span>
                         )}
@@ -215,11 +215,11 @@ function AdminWorkflowConfigurationInner() {
                       <td className="py-3 px-4 tabular-nums text-text-secondary">{p.sla_hours} hrs</td>
                       <td className="py-3 px-4">
                         {p.is_active ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-action-success">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-action-success">
                             <CheckCircle2 className="w-3 h-3" /> Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-text-muted">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-text-muted">
                             <XCircle className="w-3 h-3" /> Disabled
                           </span>
                         )}

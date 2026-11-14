@@ -32,7 +32,7 @@ const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
           disabled={disabled}
           onClick={() => !disabled && setOpen(!open)}
           className={cn(
-            "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]",
+            "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring",
             error && "border-action-danger focus:ring-action-danger",
             disabled && "opacity-40 cursor-not-allowed",
             className

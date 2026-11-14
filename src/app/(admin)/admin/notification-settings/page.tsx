@@ -74,37 +74,37 @@ function AdminNotificationSettingsInner() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Gauge className="w-3.5 h-3.5 text-action-success" /> Total Queued
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : totalQueued}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Push + SMS + email delivery queues</p>
+            <p className="mt-0.5 text-xs text-text-muted">Push + SMS + email delivery queues</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Preferences">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Bell className="w-3.5 h-3.5 text-action-primary" /> Preferences Configured
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : (configuredPct ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Users with per-channel settings</p>
+            <p className="mt-0.5 text-xs text-text-muted">Users with per-channel settings</p>
           </div>
         </WidgetBoundary>
 
         <WidgetBoundary title="Channels">
           <div className="rounded-xl border border-border bg-bg-elevated p-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Inbox className="w-3.5 h-3.5 text-action-warning" /> Active Channels
             </div>
             <div className="mt-1.5 text-xl font-black text-white tabular-nums">
               {loading ? <span className="inline-block w-10 h-5 rounded bg-bg-elevated animate-pulse" /> : (d?.channels?.length ?? 0)}
             </div>
-            <p className="mt-0.5 text-[11px] text-text-muted">Delivery channels in use</p>
+            <p className="mt-0.5 text-xs text-text-muted">Delivery channels in use</p>
           </div>
         </WidgetBoundary>
       </div>
@@ -158,7 +158,7 @@ function AdminNotificationSettingsInner() {
                           {q.queue.replace(/_/g, " ")} queue
                         </span>
                         <span
-                          className={`rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums ${
+                          className={`rounded-md px-2 py-0.5 text-xs font-bold tabular-nums ${
                             q.depth > 0 ? "bg-amber-500/15 text-action-warning" : "bg-bg-elevated text-text-muted"
                           }`}
                         >
@@ -182,7 +182,7 @@ function AdminNotificationSettingsInner() {
                 {d!.top_types.map((t) => (
                   <span
                     key={t.type}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1 text-[11px] text-text-secondary"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-secondary"
                   >
                     {t.type.replace(/_/g, " ")}
                     <span className="tabular-nums text-action-success">{t.count}</span>

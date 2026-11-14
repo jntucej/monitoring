@@ -115,7 +115,7 @@ export default function ExitReasonsPage() {
                 maxDurationHours: 12,
               })
             }
-            className="px-4 py-2 min-h-[44px] bg-action-warning hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
+            className="px-4 py-2 min-h11 bg-action-warning hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Add Exit Reason
           </button>
@@ -141,7 +141,7 @@ export default function ExitReasonsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm min-w-[700px]">
+              <table className="w-full text-left text-sm min-w175">
                 <thead className="bg-bg-elevated border-b border-border text-text-muted uppercase text-xs">
                   <tr>
                     <th className="p-4">Reason Code</th>
@@ -187,14 +187,14 @@ export default function ExitReasonsPage() {
                         <button
                           type="button"
                           onClick={() => setEditingReason(r)}
-                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-bg-elevated hover:text-action-warning transition"
+                          className="p-2 min-h11 min-w11 inline-flex items-center justify-center rounded-lg bg-bg-elevated hover:text-action-warning transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(r.code)}
-                          className="p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="p-2 min-h11 min-w11 inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -226,7 +226,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.code || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, code: e.target.value.toUpperCase() })}
                       placeholder="e.g. MEDICAL"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                   <div>
@@ -239,7 +239,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.name || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, name: e.target.value })}
                       placeholder="e.g. Medical Emergency"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                 </div>
@@ -265,7 +265,7 @@ export default function ExitReasonsPage() {
                     <select
                       value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
                     >
                       <option value="principal">Principal</option>
                       <option value="warden">Warden</option>
@@ -282,7 +282,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.maxDurationHours || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, maxDurationHours: e.target.value ? Number(e.target.value) : null })}
                       placeholder="e.g. 24"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
                     />
                   </div>
                 </div>
@@ -291,14 +291,14 @@ export default function ExitReasonsPage() {
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="px-4 py-2 min-h-[44px] bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingReason.code || !editingReason.name}
-                    className="px-4 py-2 min-h-[44px] bg-action-warning text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="px-4 py-2 min-h11 bg-action-warning text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Exit Reason
                   </button>

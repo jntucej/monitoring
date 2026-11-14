@@ -104,7 +104,7 @@ export function StudentContextPanel({
           <p className="text-sm font-semibold text-text-primary truncate">
             {student?.name || "Selected student"}
           </p>
-          <p className="text-[11px] font-mono text-text-muted">
+          <p className="text-xs font-mono text-text-muted">
             Roll {student?.roll || "—"}
           </p>
         </div>
@@ -162,7 +162,7 @@ export function StudentContextPanel({
                   </span>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                     r.status === "PRESENT" || r.status === "IN"
                       ? "bg-emerald-400/15 text-action-success"
                       : "bg-rose-400/15 text-action-danger"
@@ -178,7 +178,7 @@ export function StudentContextPanel({
           <button
             type="button"
             onClick={() => setReloadKey((k) => k + 1)}
-            className="text-[11px] text-text-muted hover:text-text-primary underline decoration-dotted"
+            className="text-xs text-text-muted hover:text-text-primary underline decoration-dotted"
           >
             Refresh
           </button>

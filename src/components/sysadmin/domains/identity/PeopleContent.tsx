@@ -49,7 +49,7 @@ function Facet({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
+      <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
         {label}
       </span>
       {options.map((o) => {
@@ -191,7 +191,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
               label="Cohort retention, % active per cohort cell"
               cellSize={22}
             />
-            <p className="mt-2 text-[11px] text-text-muted">
+            <p className="mt-2 text-xs text-text-muted">
               Cell intensity = % of users in that admission-year cohort still ACTIVE.
             </p>
           </div>
@@ -199,9 +199,9 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
 
         {/* Faceted table */}
         <div className="overflow-x-auto rounded-xl border border-border bg-bg-base">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
+          <table className="w-full min-w180 border-collapse text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-text-muted">
+              <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                 <th className="px-3 py-2 font-medium">Name</th>
                 <th className="px-3 py-2 font-medium">Email</th>
                 <th className="px-3 py-2 font-medium">Role</th>
@@ -273,7 +273,7 @@ function Kpi({
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-bg-base p-4">
       <div>
-        <div className="text-[11px] uppercase tracking-wide text-text-muted">{label}</div>
+        <div className="text-xs uppercase tracking-wide text-text-muted">{label}</div>
         <div className="mt-1 text-2xl font-bold text-text-primary">{value}</div>
       </div>
       <MiniSparkline label={label} values={spark} color={color} />

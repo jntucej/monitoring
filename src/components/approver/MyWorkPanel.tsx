@@ -90,7 +90,7 @@ export function MyWorkPanel() {
               My Work Items
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border text-text-secondary bg-bg-base border-border shrink-0">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border text-text-secondary bg-bg-base border-border shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
             {tasks.length} open
           </span>
@@ -103,7 +103,7 @@ export function MyWorkPanel() {
             Loading work items…
           </div>
         ) : tasks.length > 0 ? (
-          <ul className="space-y-1.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1 min-w-0">
+          <ul className="space-y-1.5 max-h70 overflow-y-auto custom-scrollbar pr-1 min-w-0">
             {tasks.map((t) => (
               <li
                 key={t.id}
@@ -113,16 +113,16 @@ export function MyWorkPanel() {
                   <p className="text-xs font-mono font-semibold text-text-primary truncate">
                     {t.ticket || t.id}
                   </p>
-                  <span className="text-[10px] font-mono text-text-muted shrink-0 uppercase">
+                  <span className="text-xs font-mono text-text-muted shrink-0 uppercase">
                     {t.status ?? "PENDING"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2 min-w-0 mt-1">
-                  <p className="text-[11px] text-text-secondary truncate">
+                  <p className="text-xs text-text-secondary truncate">
                     {t.type ? `${t.type} · ` : ""}
                     stage: {t.stage ?? "—"}
                   </p>
-                  <p className="text-[10px] font-mono text-text-muted shrink-0">
+                  <p className="text-xs font-mono text-text-muted shrink-0">
                     due {fmt(t.createdAt)}
                   </p>
                 </div>
@@ -139,12 +139,12 @@ export function MyWorkPanel() {
 
         {/* Footer: last update */}
         <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2 min-w-0">
-          <span className="text-[11px] text-text-muted truncate">
+          <span className="text-xs text-text-muted truncate">
             {data?.data?.completedLastWeek
               ? `${data.data.completedLastWeek} completed last week`
               : "No recent completions"}
           </span>
-          <span className="text-[11px] font-mono text-text-muted shrink-0">
+          <span className="text-xs font-mono text-text-muted shrink-0">
             last update {fmt(lastUpdate)}
           </span>
         </div>

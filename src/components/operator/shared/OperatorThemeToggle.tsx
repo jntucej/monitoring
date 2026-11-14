@@ -73,7 +73,7 @@ export function OperatorThemeToggle({ className = "" }: OperatorThemeToggleProps
                 role="radio"
                 aria-checked={isActive}
                 onClick={() => handleThemeChange(t.id as any)}
-                className={`relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
+                className={`relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring ${
                   isActive ? "text-text-primary" : "text-text-muted hover:text-text-primary"
                 }`}
                 aria-label={`Switch to ${t.label} theme`}

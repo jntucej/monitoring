@@ -395,7 +395,7 @@ export function BotPanel() {
         "mb-[env(safe-area-inset-bottom)]",
         isMobile
           ? "inset-x-0 bottom-0 rounded-t-2xl"
-          : "right-4 bottom-4 w-[380px] max-w-[calc(100vw-2rem)] h-[min(640px,80vh)] rounded-2xl",
+          : "right-4 bottom-4 w95 max-w-[calc(100vw-2rem)] h-[min(640px,80vh)] rounded-2xl",
         open ? "" : "pointer-events-none",
       ].join(" ")}
       role="dialog"
@@ -407,7 +407,7 @@ export function BotPanel() {
 
       {isMobile && (
         <div className="pt-2 pb-1 flex justify-center relative z-10" aria-hidden>
-          <div className="h-1 w-10 rounded-full bg-[var(--border)]" />
+          <div className="h-1 w-10 rounded-full bgborder" />
         </div>
       )}
 
@@ -441,7 +441,7 @@ export function BotPanel() {
       />
 
       {(error || stt.error === "permission") && (
-        <div className="relative z-10 px-3 py-2 text-[11px] bg-rose-500/10 text-action-danger border-b border-border">
+        <div className="relative z-10 px-3 py-2 text-xs bg-rose-500/10 text-action-danger border-b border-border">
           {stt.error === "permission"
             ? "Microphone permission denied. Enable it in your browser settings to use voice."
             : error?.startsWith("HTTP 401")
@@ -457,7 +457,7 @@ export function BotPanel() {
       )}
 
       {!stt.supported && isMobile && (
-        <div className="relative z-10 px-3 py-1.5 text-[10px] text-text-muted bg-bg-elevated border-b border-border">
+        <div className="relative z-10 px-3 py-1.5 text-xs text-text-muted bg-bg-elevated border-b border-border">
           {t.micUnsupported}
         </div>
       )}
@@ -466,7 +466,7 @@ export function BotPanel() {
         <div
           role="status"
           aria-live="polite"
-          className="relative z-10 mx-3 mb-1 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-[11px] text-text-secondary"
+          className="relative z-10 mx-3 mb-1 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs text-text-secondary"
         >
           <div className="flex items-center justify-between gap-2">
             <span>Voice mode uses your microphone. Enable it?</span>
@@ -531,7 +531,7 @@ export function BotPanel() {
               తెలుగు
             </button>
           </div>
-          <p className="text-[10px] text-text-muted mt-2">
+          <p className="text-xs text-text-muted mt-2">
             You can change this anytime from the language icon above.
           </p>
         </div>
@@ -542,7 +542,7 @@ export function BotPanel() {
           role="alert"
           aria-live="assertive"
           className="relative z-10 mx-3 my-1.5 flex items-center justify-between gap-2 rounded-lg
-                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-action-warning"
+                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-action-warning"
         >
           <span>Start a new chat? Your current history will be cleared.</span>
           <div className="flex items-center gap-2 shrink-0">

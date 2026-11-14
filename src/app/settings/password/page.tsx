@@ -12,7 +12,7 @@ export default function ChangePasswordPage() {
       <div className="mx-auto max-w-2xl p-6 space-y-5">
         <Link
           href="/settings"
-          className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-primary"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to settings

@@ -23,7 +23,7 @@ export function RoleMobileShell({
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
-            className="flex size-9 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+            className="flex size-5 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
           >
             <Menu className="size-5" />
           </button>
@@ -51,7 +51,7 @@ export function RoleMobileShell({
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close navigation"
-                className="flex size-8 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+                className="flex size-5 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>

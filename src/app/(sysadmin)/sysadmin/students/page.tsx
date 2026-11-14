@@ -568,36 +568,36 @@ const api = useApi();
             <p className="text-sm text-text-muted mt-1">Manage student roster. {students.length} records.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setShowBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-action-info">
+            <button onClick={() => setShowBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h11 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-action-info">
               <Upload className="w-4 h-4" /> Bulk Import
             </button>
-            <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-action-success text-white text-sm font-semibold hover:bg-action-success shadow-lg shadow-emerald-900/30">
+            <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h11 rounded-xl bg-action-success text-white text-sm font-semibold hover:bg-action-success shadow-lg shadow-emerald-900/30">
               <UserPlus className="w-4 h-4" /> Add Student
             </button>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative flex-1 min-w55">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input type="text" placeholder="Search by name, roll, email..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full min-h-[44px] pl-10 pr-4 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[var(--action-success)]" />
+              className="w-full min-h11 pl-10 pr-4 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:borderaction-success" />
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <SlidersHorizontal className="w-3.5 h-3.5 text-text-muted" />
-            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h-[44px] text-xs text-text-secondary">
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Courses</option>
               {courses.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h-[44px] text-xs text-text-secondary">
+            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Branches</option>
               {branches.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
-            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h-[44px] text-xs text-text-secondary">
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Years</option>
               {years.map((y) => <option key={y} value={y}>Year {y}</option>)}
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h-[44px] text-xs text-text-secondary">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
           </div>
@@ -645,7 +645,7 @@ const api = useApi();
                   </div>
                 ))}
                 {byBranchCanonical.unassigned > 0 && (
-                  <div className="text-[10px] text-text-muted">{byBranchCanonical.unassigned} unassigned / non-canonical</div>
+                  <div className="text-xs text-text-muted">{byBranchCanonical.unassigned} unassigned / non-canonical</div>
                 )}
               </div>
             </div>
@@ -657,9 +657,9 @@ const api = useApi();
                   const maxCount = byYear.reduce((m, [, n]) => Math.max(m, n), 0);
                   return byYear.map(([y, n]) => (
                     <div key={y} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="text-[10px] text-text-muted">{n}</div>
+                      <div className="text-xs text-text-muted">{n}</div>
                       <div className="w-full rounded-t bg-action-info" style={{ height: `${maxCount ? Math.max(8, (n / maxCount) * 56) : 0}px` }} />
-                      <div className="text-[10px] text-text-muted">Yr {y}</div>
+                      <div className="text-xs text-text-muted">Yr {y}</div>
                     </div>
                   ));
                 })()}
@@ -673,7 +673,7 @@ const api = useApi();
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-text-muted uppercase text-[10px] tracking-wider">
+                    <tr className="text-text-muted uppercase text-xs tracking-wider">
                       <th className="text-left pr-3 py-1">Batch</th>
                       <th className="text-left pr-3 py-1">Course</th>
                       <th className="text-right pr-3 py-1">Regular</th>
@@ -702,7 +702,7 @@ const api = useApi();
                   </tbody>
                 </table>
               </div>
-              <div className="mt-2 text-[10px] text-text-muted">
+              <div className="mt-2 text-xs text-text-muted">
                 B.Tech = 4 yrs · M.Tech = 2 yrs · Lateral (5A) joins 2nd year of the same batch → same graduation as regulars
               </div>
             </div>
@@ -743,7 +743,7 @@ const api = useApi();
         {/* Table */}
         <div className="border border-border rounded-xl overflow-hidden bg-bg-elevated">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
+            <table className="w-full text-sm min-w175">
               <thead>
                 <tr className="bg-bg-surface/60 text-xs text-text-muted uppercase tracking-wider">
                   <th className="px-4 py-3 text-left">Roll No</th>
@@ -785,7 +785,7 @@ const api = useApi();
                         <select
                           value={s.status}
                           onChange={(e) => handleSetStatus(s, e.target.value)}
-                          className="rounded-lg border border-border bg-bg-surface px-2 py-1 min-h-[44px] text-xs"
+                          className="rounded-lg border border-border bg-bg-surface px-2 py-1 min-h11 text-xs"
                         >
                           {STATUS_OPTIONS.map((o) => (
                             <option key={o.value} value={o.value}>{o.label}</option>
@@ -794,11 +794,11 @@ const api = useApi();
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
-                          <button onClick={() => openLinkParentModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated text-unit-c" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
-                          <button onClick={() => handleResetPassword(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-warning" title="Reset Password"><Lock className="w-4 h-4" /></button>
-                          <button onClick={() => openEditModal(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-primary" title="Edit"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteStudent(s)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated text-red-400" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
+                          <button onClick={() => openLinkParentModal(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-unit-c" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
+                          <button onClick={() => handleResetPassword(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-warning" title="Reset Password"><Lock className="w-4 h-4" /></button>
+                          <button onClick={() => openEditModal(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-primary" title="Edit"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteStudent(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-red-400" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -830,37 +830,37 @@ const api = useApi();
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Roll Number <span className="text-text-muted font-normal">(legacy — optional if Custom Unique ID set)</span></label>
-                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" placeholder="22CS101" />
+                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="22CS101" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Custom Unique ID <span className="text-text-muted font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
-                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" placeholder="e.g. ucej-s-0042 (overrides auto)" />
+                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="e.g. ucej-s-0042 (overrides auto)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Full Name *</label>
-                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Branch <span className="text-text-muted font-normal">(optional — auto-detected from roll when blank)</span></label>
-                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" placeholder="Auto from roll (e.g. CSE)" />
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="Auto from roll (e.g. CSE)" />
                   {createForm.roll && getDepartmentFromRoll(createForm.roll) && (
-                    <div className="mt-1 text-[11px] text-action-success">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
+                    <div className="mt-1 text-xs text-action-success">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
                   )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:border-[var(--action-success)]" />
+                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:borderaction-success" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
                   <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
@@ -884,39 +884,39 @@ const api = useApi();
               <UserRolesPanel userId={editingStudent.id} />
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Full Name</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Branch</label>
-                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-[var(--action-success)]" />
+                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-bg-surface/60 border border-border rounded-xl">
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Password (Optional)</label>
-                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Kiosk PIN (Optional)</label>
-                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:border-[var(--action-success)]" />
+                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:borderaction-success" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
-                  <button type="submit" disabled={busy} className="px-4 py-2 min-h-[44px] rounded-xl bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
+                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h11 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button type="submit" disabled={busy} className="px-4 py-2 min-h11 rounded-xl bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
                 </div>
               </form>
             </div>
@@ -944,7 +944,7 @@ const api = useApi();
                   <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
-                    className="w-full min-h-[44px] px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-unit-c"
+                    className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-unit-c"
                   >
                     <option value="">Select guardian…</option>
                     {parents.map((p) => (
@@ -955,11 +955,11 @@ const api = useApi();
                   </select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h-[44px] rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h11 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
                   <button
                     onClick={handleLinkParent}
                     disabled={linkBusy || !selectedParentId}
-                    className="px-4 py-2 min-h-[44px] rounded-xl bg-unit-c text-white text-xs font-semibold hover:bg-unit-c disabled:opacity-50 flex items-center gap-2"
+                    className="px-4 py-2 min-h11 rounded-xl bg-unit-c text-white text-xs font-semibold hover:bg-unit-c disabled:opacity-50 flex items-center gap-2"
                   >
                     {linkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
                     Link

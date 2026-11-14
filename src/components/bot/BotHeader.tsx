@@ -48,7 +48,7 @@ export const BotHeader = memo(function BotHeader({
           {listening && <VoiceWave active />}
           {speaking && <Volume2 className="h-3.5 w-3.5 text-action-success animate-pulse" />}
         </p>
-        <p className="text-[11px] text-text-muted truncate">{subtitle}</p>
+        <p className="text-xs text-text-muted truncate">{subtitle}</p>
       </div>
 
       <LanguageToggle lang={lang} onChange={onLangChange} disabled={streaming} />

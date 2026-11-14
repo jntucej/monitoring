@@ -170,7 +170,7 @@ export function SysadminHealthPanel() {
           Service Health
         </span>
         {lastCheck ? (
-          <span className="ml-auto font-mono text-[10px] text-text-muted shrink-0">
+          <span className="ml-auto font-mono text-xs text-text-muted shrink-0">
             last check {fmtLastCheck(lastCheck)}
           </span>
         ) : null}
@@ -179,7 +179,7 @@ export function SysadminHealthPanel() {
       {loading ? (
         <div className="flex items-center gap-2 px-3 py-3 text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-[11px]">Loading service health…</span>
+          <span className="text-xs">Loading service health…</span>
         </div>
       ) : visible.length === 0 ? (
         <EmptyState
@@ -188,7 +188,7 @@ export function SysadminHealthPanel() {
           icon={<Server className="w-5 h-5" />}
         />
       ) : (
-        <ul className="space-y-1.5 max-h-[240px] overflow-y-auto custom-scrollbar pr-1 mb-3">
+        <ul className="space-y-1.5 max-h60 overflow-y-auto custom-scrollbar pr-1 mb-3">
           {visible.map((row) => (
             <li
               key={row.key}
@@ -198,14 +198,14 @@ export function SysadminHealthPanel() {
                 <p className="text-xs font-semibold text-text-primary truncate">
                   {row.key}
                   {row.detail ? (
-                    <span className="ml-1.5 font-mono text-[10px] font-normal text-text-muted">
+                    <span className="ml-1.5 font-mono text-xs font-normal text-text-muted">
                       {row.detail}
                     </span>
                   ) : null}
                 </p>
               </div>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border shrink-0 ${STATUS_TONE[row.status]}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold border shrink-0 ${STATUS_TONE[row.status]}`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-current" />
                 {STATUS_LABEL[row.status]}
@@ -218,10 +218,10 @@ export function SysadminHealthPanel() {
       {/* Container telemetry (only when Prometheus is reachable). */}
       {containers.length > 0 ? (
         <div>
-          <p className="mb-1.5 px-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <p className="mb-1.5 px-1 text-xs font-bold uppercase tracking-wider text-text-muted">
             Containers
           </p>
-          <ul className="space-y-1.5 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
+          <ul className="space-y-1.5 max-h50 overflow-y-auto custom-scrollbar pr-1">
             {containers.map((c) => (
               <li
                 key={c.name}
@@ -231,13 +231,13 @@ export function SysadminHealthPanel() {
                   <p className="text-xs font-semibold text-text-primary truncate">
                     {c.name}
                   </p>
-                  <p className="font-mono text-[10px] text-text-muted truncate">
+                  <p className="font-mono text-xs text-text-muted truncate">
                     cpu {c.cpuPercent}% · {Math.round(c.memoryBytes / 1024 / 1024)}MB ·{" "}
                     {c.restartsLastHour} restarts/h
                   </p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border shrink-0 ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold border shrink-0 ${
                     c.running
                       ? "text-action-success bg-emerald-400/10 border-emerald-400/20"
                       : "text-action-danger bg-rose-400/10 border-rose-400/20"

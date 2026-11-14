@@ -32,9 +32,9 @@ export const BotWelcome = memo(function BotWelcome({
                         flex items-center justify-center">
           <BotBoat size={24} />
         </div>
-        <p className="text-[15px] font-semibold text-text-primary">{t.title}</p>
+        <p className="text-sm font-semibold text-text-primary">{t.title}</p>
         {welcome && (
-          <p className="text-[11px] text-text-muted">{welcome.subtitle}</p>
+          <p className="text-xs text-text-muted">{welcome.subtitle}</p>
         )}
       </div>
 
@@ -50,7 +50,7 @@ export const BotWelcome = memo(function BotWelcome({
               transition={{ delay: i * 0.04 }}
               disabled={disabled}
               onClick={() => onChip(label)}
-              className="text-[11px] px-2.5 py-1 rounded-full border border-border
+              className="text-xs px-2.5 py-1 rounded-full border border-border
                          hover:bg-bg-elevated active:scale-95 transition
                          disabled:opacity-50 text-text-secondary"
             >

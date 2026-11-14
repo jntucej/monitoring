@@ -11,7 +11,7 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 export default function CampusPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+      <h1 className="text-lg font-semibold text-primary">
         Campus
       </h1>
       <WidgetBoundary name="feed">

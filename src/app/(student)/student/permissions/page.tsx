@@ -70,7 +70,7 @@ export default function StudentPermissionsPage() {
             <p className="text-xs md:text-sm text-text-muted">Track your requests and approvals</p>
           </div>
           <Link href="/student/permissions/new">
-            <Button className="min-h-[44px] gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">
+            <Button className="min-h11 gap-2 bg-action-primary hover:opacity-90 text-white font-semibold">
               <Plus className="w-4 h-4" /> New Permission
             </Button>
           </Link>
@@ -92,7 +92,7 @@ export default function StudentPermissionsPage() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                className={`min-h11 inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
                   filter === f
                     ? "bg-action-primary text-white shadow"
                     : "bg-bg-surface border border-border text-text-muted hover:text-text-primary"

@@ -109,7 +109,7 @@ function MessDefaultInner() {
               <UtensilsCrossed className="w-4 h-4 text-action-success" />
               <p className="text-xs font-semibold text-text-primary">No default set yet</p>
             </div>
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs text-text-muted">
               Pick your default meal below — it will be used to pre-fill the preference window every day.
             </p>
           </div>
@@ -120,7 +120,7 @@ function MessDefaultInner() {
             </p>
             <button
               onClick={() => void load()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-action-danger text-[11px] font-bold hover:bg-rose-500/20 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-action-danger text-xs font-bold hover:bg-rose-500/20 transition"
             >
               <RefreshCw className="w-3 h-3" /> Retry
             </button>
@@ -135,14 +135,14 @@ function MessDefaultInner() {
 
               {/* Primary toggle */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">Primary item</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">Primary item</p>
                 <div className="grid grid-cols-2 gap-2 max-w-xs">
                   <button
                     type="button"
                     onClick={() => setPrimaryItem("VEG")}
                     className={`py-2.5 rounded-xl text-xs font-black tracking-wide transition-all border ${
                       primaryItem === "VEG"
-                        ? "bg-action-success border-[var(--action-success)] text-emerald-950 shadow-lg shadow-emerald-500/20"
+                        ? "bg-action-success borderaction-success text-emerald-950 shadow-lg shadow-emerald-500/20"
                         : "bg-emerald-500/10 border-emerald-500/25 text-action-success hover:bg-emerald-500/20"
                     }`}
                   >
@@ -164,7 +164,7 @@ function MessDefaultInner() {
 
               {/* Sub-items */}
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">Default sub items</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">Default sub items</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
                   {SUB_ITEMS.map((s) => {
                     const on = subItemIds.includes(s.id);
@@ -181,7 +181,7 @@ function MessDefaultInner() {
                       >
                         <span
                           className={`inline-flex items-center justify-center w-4 h-4 rounded-sm border ${
-                            on ? "bg-action-success border-[var(--action-success)] text-emerald-950" : "border-border"
+                            on ? "bg-action-success borderaction-success text-emerald-950" : "border-border"
                           }`}
                         >
                           {on && <Check className="w-2.5 h-2.5" />}
@@ -207,7 +207,7 @@ function MessDefaultInner() {
             {/* Current saved state */}
             {current && (
             <div className="space-y-2 rounded-2xl bg-bg-surface border border-border p-5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Currently saved</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Currently saved</p>
               <p className="text-sm font-bold text-text-primary">
                 {current.primaryItem === "VEG" ? "🥬 Veg" : "🍖 Non-Veg"}
               </p>
@@ -215,12 +215,12 @@ function MessDefaultInner() {
                 <div className="flex flex-wrap gap-1.5">
                   {current.subItemIds?.length ? (
                     current.subItemIds.map((id) => (
-                      <span key={id} className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-action-success text-[10px] font-semibold">
+                      <span key={id} className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-action-success text-xs font-semibold">
                         {SUB_ITEMS.find((s) => s.id === id)?.label ?? id}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[11px] text-text-muted">No sub items</span>
+                    <span className="text-xs text-text-muted">No sub items</span>
                   )}
                 </div>
               </div>

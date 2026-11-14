@@ -18,7 +18,7 @@ export function MiniHeatStrip({ cells, label, onClick, className }: MiniHeatStri
         aria-label={label}
         className={cn("flex items-center gap-[1px] h-4 min-w-0 opacity-30", className)}
       >
-        <span aria-hidden className="block w-[5px] h-[3px] rounded-[1px]" />
+        <span aria-hidden className="block w-[5px] h-[3px] rounded-xs" />
       </button>
     );
   }
@@ -35,7 +35,7 @@ export function MiniHeatStrip({ cells, label, onClick, className }: MiniHeatStri
       {cells.map((v, i) => (
         <span
           key={i}
-          className="w-[5px] h-[3px] rounded-[1px] shrink-0"
+          className="w-[5px] h-[3px] rounded-xs shrink-0"
           style={{ backgroundColor: heatColor(v / max) }}
         />
       ))}

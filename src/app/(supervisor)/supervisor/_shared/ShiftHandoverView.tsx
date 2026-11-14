@@ -72,7 +72,7 @@ export function ShiftHandoverView() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 text-xs font-semibold text-white transition hover:bg-action-primary/90 disabled:opacity-50"
+                className="flex min-h11 w-full items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 text-xs font-semibold text-white transition hover:bg-action-primary/90 disabled:opacity-50"
               >
                 <Send className="size-3.5" />
                 {submitting ? "Submitting..." : "Submit Shift Handover"}

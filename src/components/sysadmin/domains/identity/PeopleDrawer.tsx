@@ -235,7 +235,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
         {title}
       </h3>
       {children}
@@ -246,7 +246,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <dt className="text-[11px] text-text-muted">{k}</dt>
+      <dt className="text-xs text-text-muted">{k}</dt>
       <dd className="text-text-primary">{v}</dd>
     </div>
   );

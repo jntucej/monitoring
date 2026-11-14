@@ -120,7 +120,7 @@ export function ContributionPortfolio() {
             <Award className="h-4 w-4 text-action-warning" />
             <h3 className="text-sm font-medium text-text-primary">Contribution Portfolio</h3>
             {totalVerified > 0 && (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-action-warning">
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-action-warning">
                 {totalVerified} verified
               </span>
             )}
@@ -149,7 +149,7 @@ export function ContributionPortfolio() {
 
         {/* Disclaimer */}
         <div className="mb-4 rounded-lg border border-border/40 bg-bg-surface/30 p-2.5">
-          <p className="text-[10px] text-text-muted flex items-center gap-1.5">
+          <p className="text-xs text-text-muted flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified contributions only. This is a personal record, not an
             official transcript. Exported items contain no PII.
@@ -182,16 +182,16 @@ export function ContributionPortfolio() {
                       {item.title}
                     </p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] opacity-70">
+                      <span className="text-xs opacity-70">
                         {TYPE_LABELS[item.type] ?? item.type}
                       </span>
-                      <span className="text-[10px] opacity-60 flex items-center gap-1">
+                      <span className="text-xs opacity-60 flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(item.date).toLocaleDateString()}
                       </span>
                     </div>
                     {item.details && (
-                      <p className="mt-1 text-[10px] opacity-60 line-clamp-1">
+                      <p className="mt-1 text-xs opacity-60 line-clamp-1">
                         {item.details}
                       </p>
                     )}

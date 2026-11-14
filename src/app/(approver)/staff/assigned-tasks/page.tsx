@@ -94,7 +94,7 @@ function StaffAssignedTasksInner() {
                     <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
                       <span className="text-xs text-text-muted font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
                       <span className="flex-1 text-sm text-text-secondary">{r.workflow_type}</span>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated/40 text-text-secondary shrink-0 capitalize">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated/40 text-text-secondary shrink-0 capitalize">
                         {r.current_stage ?? r.status}
                       </span>
                       <span className="text-xs text-text-muted shrink-0">

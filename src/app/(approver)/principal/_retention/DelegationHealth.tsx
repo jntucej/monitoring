@@ -24,7 +24,7 @@ export function DelegationHealth({
         </div>
         <Link
           href="/principal/governance/delegations"
-          className="inline-flex min-h-[44px] items-center text-[11px] text-action-primary hover:underline"
+          className="inline-flex min-h11 items-center text-xs text-action-primary hover:underline"
         >
           Manage
         </Link>
@@ -32,7 +32,7 @@ export function DelegationHealth({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-text-muted">
+          <p className="text-xs uppercase tracking-wider text-text-muted">
             Active
           </p>
           <p className="text-2xl font-semibold tabular-nums text-action-primary">
@@ -40,7 +40,7 @@ export function DelegationHealth({
           </p>
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-text-muted">
+          <p className="text-xs uppercase tracking-wider text-text-muted">
             Expiring
           </p>
           <p

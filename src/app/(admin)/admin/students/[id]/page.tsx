@@ -105,7 +105,7 @@ function AdminStudentDetail() {
                   <p className="font-mono text-xs text-text-muted">{id}</p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
                     (person?.status ?? "ACTIVE").startsWith("ACTIVE")
                       ? "bg-emerald-500/10 text-action-success border border-emerald-500/30"
                       : "bg-rose-500/10 text-action-danger border border-rose-500/30"

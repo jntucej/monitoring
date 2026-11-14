@@ -29,7 +29,7 @@ export function StrategicScorecard({
         <h2 className="text-sm font-semibold text-text-primary">
           Your impact
         </h2>
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
+        <span className="text-xs uppercase tracking-wider text-text-muted">
           this week
         </span>
       </header>
@@ -89,14 +89,14 @@ function Stat({
     <div>
       <div className="mb-1 flex items-center gap-1.5">
         <Icon className={`size-3.5 ${iconClass}`} aria-hidden />
-        <p className="text-[10px] uppercase tracking-wider text-text-muted">
+        <p className="text-xs uppercase tracking-wider text-text-muted">
           {label}
         </p>
       </div>
       <p className="text-xl font-semibold tabular-nums text-text-primary">
         {value}
       </p>
-      <p className="text-[10px] text-text-muted">{hint}</p>
+      <p className="text-xs text-text-muted">{hint}</p>
     </div>
   );
 }

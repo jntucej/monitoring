@@ -117,7 +117,7 @@ export function ActiveSessions() {
         ) : (
           <div className="overflow-x-auto">
             {refreshing && (
-              <div className="px-4 py-1.5 text-[10px] text-text-muted bg-bg-elevated/40 flex items-center gap-1.5">
+              <div className="px-4 py-1.5 text-xs text-text-muted bg-bg-elevated/40 flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3 animate-spin" /> Refreshing in background…
               </div>
             )}
@@ -136,22 +136,22 @@ export function ActiveSessions() {
                   <tr key={sess.userId} className="hover:bg-bg-elevated/30 transition-colors">
                     <td className="p-4 font-bold text-white">
                       {sess.name}
-                      <span className="block text-[10px] text-text-muted font-normal">{sess.email}</span>
+                      <span className="block text-xs text-text-muted font-normal">{sess.email}</span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-500/20 text-action-info border border-sky-500/30 uppercase">
+                      <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-sky-500/20 text-action-info border border-sky-500/30 uppercase">
                         {sess.role}
                       </span>
                     </td>
-                    <td className="p-4 font-mono text-[10px] text-purple-300">{sess.sessionTokenTruncated}</td>
-                    <td className="p-4 font-mono text-[10px] text-text-muted">
+                    <td className="p-4 font-mono text-xs text-purple-300">{sess.sessionTokenTruncated}</td>
+                    <td className="p-4 font-mono text-xs text-text-muted">
                       {new Date(sess.lastActive).toLocaleString()}
                     </td>
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleRevokeSession(sess.userId, sess.name)}
                         disabled={revokingId === sess.userId}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-action-danger hover:bg-action-danger hover:text-white font-bold text-[10px] transition-all disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-action-danger hover:bg-action-danger hover:text-white font-bold text-xs transition-all disabled:opacity-50"
                       >
                         <LogOut className="w-3 h-3" /> Force Logout
                       </button>

@@ -70,7 +70,7 @@ export function SineWaveLoader({ className = "" }: { className?: string }) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="font-black text-[11px] uppercase tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+        className="font-black text-xs uppercase tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
       >
         FETCHING LIVE TELEMETRY…
       </motion.span>

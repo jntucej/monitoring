@@ -55,7 +55,7 @@ const api = useApi();
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`min-h-[44px] inline-flex items-center justify-center px-3 py-1 text-sm rounded-md transition ${
+              className={`min-h11 inline-flex items-center justify-center px-3 py-1 text-sm rounded-md transition ${
                 filter === f
                   ? "bg-action-primary text-white"
                   : "text-text-muted hover:text-white"

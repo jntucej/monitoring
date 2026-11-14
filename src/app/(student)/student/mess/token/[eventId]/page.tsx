@@ -10,7 +10,7 @@ export default function MyTokenPage() {
   const params = useParams<{ eventId: string }>();
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-      <Link href="/student/mess" className="mb-3 inline-flex min-h-[44px] items-center gap-1 text-sm text-[var(--text-secondary)]">
+      <Link href="/student/mess" className="mb-3 inline-flex min-h11 items-center gap-1 text-sm text-secondary">
         <ArrowLeft className="h-4 w-4" /> Back to mess
       </Link>
       <PageHeader title="My meal token" subtitle="Show this QR — or read out the roll + code at the counter." />

@@ -96,7 +96,7 @@ export function ChildActivityPanel() {
           <span className="text-sm font-bold text-text-primary truncate">
             Child Activity
           </span>
-          <span className="text-[11px] text-text-muted shrink-0">
+          <span className="text-xs text-text-muted shrink-0">
             {children.length} {children.length === 1 ? "child" : "children"}
             {totalOpen > 0 ? ` · ${totalOpen} open request${totalOpen === 1 ? "" : "s"}` : ""}
           </span>
@@ -105,7 +105,7 @@ export function ChildActivityPanel() {
           type="button"
           onClick={handleRefresh}
           disabled={busy || loading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 disabled:opacity-40 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 disabled:opacity-40 transition-colors"
           aria-label="Refresh child activity"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${busy || loading ? "animate-spin" : ""}`} />
@@ -136,11 +136,11 @@ export function ChildActivityPanel() {
           </div>
         </div>
       ) : children.length === 0 ? (
-        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4 text-[11px] text-text-muted">
+        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4 text-xs text-text-muted">
           No linked children yet. Link a child to start tracking their campus activity.
         </div>
       ) : (
-        <ul className="space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-3 max-h80 overflow-y-auto custom-scrollbar pr-1">
           {ordered.map((child) => {
             const move = child.lastMovement;
             const isIn = move?.direction?.toUpperCase() === "IN";
@@ -186,12 +186,12 @@ export function ChildActivityPanel() {
                   <p className="text-sm font-bold text-text-primary truncate">
                     {child.name || "Unnamed child"}
                   </p>
-                  <span className="text-[10px] font-mono text-text-muted shrink-0">
+                  <span className="text-xs font-mono text-text-muted shrink-0">
                     {child.roll || "—"}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-text-muted mb-2">{movementSummary}</p>
+                <p className="text-xs text-text-muted mb-2">{movementSummary}</p>
 
                 {activities.length > 0 ? (
                   <ol className="space-y-1">
@@ -204,10 +204,10 @@ export function ChildActivityPanel() {
                           >
                             <Icon className="w-3.5 h-3.5" />
                           </span>
-                          <span className="flex-1 min-w-0 text-[11px] font-semibold text-text-primary truncate">
+                          <span className="flex-1 min-w-0 text-xs font-semibold text-text-primary truncate">
                             {a.label}
                           </span>
-                          <time className="text-[10px] font-mono text-text-muted tabular-nums shrink-0">
+                          <time className="text-xs font-mono text-text-muted tabular-nums shrink-0">
                             {a.detail}
                           </time>
                         </li>
@@ -215,7 +215,7 @@ export function ChildActivityPanel() {
                     })}
                   </ol>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                  <div className="flex items-center gap-1.5 text-xs text-text-muted">
                     <Clock className="w-3.5 h-3.5" />
                     No recent activity
                   </div>

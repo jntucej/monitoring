@@ -51,7 +51,7 @@ export function ShiftBar({
     <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-action-primary/10">
+          <div className="flex size-5 items-center justify-center rounded-full bg-action-primary/10">
             <Clock className="size-5 text-action-primary" aria-hidden />
           </div>
           <div>

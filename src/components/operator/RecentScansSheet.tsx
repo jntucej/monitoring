@@ -91,7 +91,7 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
             style={{ opacity: 0.4 + dragPx / 160 }}
             aria-hidden
           />
-          <span className="text-[10px] font-medium text-text-muted">
+          <span className="text-xs font-medium text-text-muted">
             {scans.length} recent
           </span>
         </div>
@@ -156,14 +156,14 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
                       <p className="text-sm font-semibold text-text-primary truncate">
                         {scan.name || scan.roll || "Unknown"}
                       </p>
-                      <p className="text-[11px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         {scan.roll}
                         {scan.reason ? ` · ${scan.reason}` : ""}
                         {scan.isCorrection ? " · correction" : ""}
                       </p>
                     </div>
                     <Clock className="h-3.5 w-3.5 text-text-muted shrink-0" aria-hidden />
-                    <span className="text-[11px] text-text-muted shrink-0">
+                    <span className="text-xs text-text-muted shrink-0">
                       {formatTime(scan.timestamp)}
                     </span>
                   </button>
@@ -201,7 +201,7 @@ function ScanDetailPanel({ scan, onClose }: { scan: RecentScan; onClose: () => v
           {scan.isManual ? " · manual" : ""}
           {scan.isCorrection ? " · correction" : ""}
         </p>
-        <p className="text-[11px] text-text-muted">{formatTime(scan.timestamp)}</p>
+        <p className="text-xs text-text-muted">{formatTime(scan.timestamp)}</p>
       </div>
     </div>
   );

@@ -94,7 +94,7 @@ function OperatorStatsInner() {
             <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
             <span className="truncate">Stats unavailable: {error}</span>
           </span>
-          <button type="button" onClick={() => void refresh()} className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
+          <button type="button" onClick={() => void refresh()} className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
             Retry
           </button>
         </div>
@@ -110,7 +110,7 @@ function OperatorStatsInner() {
           <div key={s.label} className="rounded-xl border border-border bg-bg-elevated p-4 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <s.icon className={`w-4 h-4 ${s.tone} shrink-0`} />
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{s.label}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-text-muted">{s.label}</p>
             </div>
             <p className={`text-2xl font-bold tabular-nums ${s.tone}`}>{busy ? "—" : s.value}</p>
           </div>
@@ -126,7 +126,7 @@ function OperatorStatsInner() {
                 <span>Entries</span>
                 <span>{counts.entries} ({Math.round((counts.entries / counts.total) * 100)}%)</span>
               </div>
-              <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
+              <div className="h-2 rounded-full bgborder overflow-hidden">
                 <div
                   className="h-full bg-action-success rounded-full transition-all"
                   style={{ width: `${(counts.entries / counts.total) * 100}%` }}
@@ -136,7 +136,7 @@ function OperatorStatsInner() {
                 <span>Exits</span>
                 <span>{counts.exits} ({Math.round((counts.exits / counts.total) * 100)}%)</span>
               </div>
-              <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
+              <div className="h-2 rounded-full bgborder overflow-hidden">
                 <div
                   className="h-full bg-action-danger rounded-full transition-all"
                   style={{ width: `${(counts.exits / counts.total) * 100}%` }}
@@ -168,7 +168,7 @@ function OperatorStatsInner() {
                   <span className="text-xs font-bold text-text-muted w-5 text-center">{i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-text-primary truncate">{s.name}</p>
-                    <p className="text-[11px] text-text-muted font-mono">{s.roll}</p>
+                    <p className="text-xs text-text-muted font-mono">{s.roll}</p>
                   </div>
                   <span className="rounded-full bg-action-primary/10 text-action-primary text-xs font-bold px-2.5 py-1 shrink-0">
                     {s.count}x

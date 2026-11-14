@@ -220,7 +220,7 @@ function ExaminationReportsInner() {
                       }}
                       title={`${s.label}: ${s.value}`}
                     />
-                    <span className="text-[10px] text-text-muted rotate-0">{s.label}</span>
+                    <span className="text-xs text-text-muted rotate-0">{s.label}</span>
                   </div>
                 ))}
               </div>

@@ -38,7 +38,7 @@ function KpiCard({
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
-          {sub && <p className="mt-0.5 text-[11px] text-text-muted">{sub}</p>}
+          {sub && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
         </div>
         <div className="flex h-9 w-9 items-center justify-center rounded-lg"
              style={{ background: `${tint}22`, color: tint }}>
@@ -339,7 +339,7 @@ export function OccupancyAnalytics() {
                     <tr key={a.id} className="border-b border-border/50 transition-colors hover:bg-bg-elevated">
                       <td className="px-3 py-2.5 font-medium text-text-primary">{a.metric}</td>
                       <td className="px-3 py-2.5">
-                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
                               style={{ background: `${SEVERITY_COLORS[a.severity]}22`, color: SEVERITY_COLORS[a.severity] }}>
                           <span className="h-1.5 w-1.5 rounded-full" style={{ background: SEVERITY_COLORS[a.severity] }} />
                           {a.severity}

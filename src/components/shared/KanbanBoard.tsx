@@ -129,11 +129,11 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
               >
                 <header className="flex items-center justify-between px-3 py-2 border-b border-border">
                   <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>{col}</span>
-                  <span className="text-[11px] font-mono text-text-muted tabular-nums">{rows.length}</span>
+                  <span className="text-xs font-mono text-text-muted tabular-nums">{rows.length}</span>
                 </header>
-                <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar max-h-[420px]">
+                <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar max-h105">
                   {rows.length === 0 ? (
-                    <p className="text-[11px] text-text-muted italic px-2 py-4 text-center">No {col.toLowerCase()} items</p>
+                    <p className="text-xs text-text-muted italic px-2 py-4 text-center">No {col.toLowerCase()} items</p>
                   ) : (
                     rows.map((item) => (
                       <button
@@ -143,10 +143,10 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                         className="w-full text-left rounded-lg border border-border bg-bg-elevated hover:border-action-primary/40 hover:bg-bg-base transition-colors p-3 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded bg-bg-base border border-border text-action-primary truncate">
+                          <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-bg-base border border-border text-action-primary truncate">
                             {item.ticket_number}
                           </span>
-                          <span className="text-[10px] font-mono text-text-muted">
+                          <span className="text-xs font-mono text-text-muted">
                             {item.workflow_type}
                           </span>
                         </div>
@@ -154,13 +154,13 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                           {item.student?.name || "Unknown Student"}
                         </p>
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-[11px] font-mono text-text-muted">
+                          <span className="text-xs font-mono text-text-muted">
                             {item.student?.student_details?.roll || "—"}
                           </span>
                           <div className="flex items-center gap-1.5">
                             <SlaBadge slaDeadline={item.sla_deadline} status={item.status} />
                             <span
-                              className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                              className={`px-1.5 py-0.5 rounded-full text-xs font-semibold uppercase ${
                                 item.status === "PENDING"
                                   ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
                                   : item.status === "APPROVED"

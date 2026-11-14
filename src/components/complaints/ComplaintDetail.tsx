@@ -216,7 +216,7 @@ export function ComplaintDetail({ role }: { role: string }) {
               className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-bg-elevated flex items-center gap-1.5"
             >
               <span>{a.name}</span>
-              {a.internal && <span className="text-[10px] bg-action-warning/20 text-amber-800 px-1 rounded">Internal</span>}
+              {a.internal && <span className="text-xs bg-action-warning/20 text-amber-800 px-1 rounded">Internal</span>}
             </a>
           ))}
         </div>

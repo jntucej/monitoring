@@ -57,13 +57,13 @@ function FacultyClassIndexInner() {
   return (
     <div className="space-y-3 p-2 min-w-0">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+        <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
           <GraduationCap className="w-3.5 h-3.5" /> My Classes
         </p>
         <div className="flex gap-1">
           <button
             onClick={() => setRole("class_teacher")}
-            className={`px-2 py-0.5 text-[10px] rounded-full border transition-colors ${
+            className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
               role === "class_teacher"
                 ? "border-action-primary text-action-primary bg-action-primary/10"
                 : "border-border text-text-muted hover:text-text-primary"
@@ -73,7 +73,7 @@ function FacultyClassIndexInner() {
           </button>
           <button
             onClick={() => setRole("all")}
-            className={`px-2 py-0.5 text-[10px] rounded-full border transition-colors ${
+            className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
               role === "all"
                 ? "border-action-primary text-action-primary bg-action-primary/10"
                 : "border-border text-text-muted hover:text-text-primary"
@@ -96,7 +96,7 @@ function FacultyClassIndexInner() {
                 Year {c.year} &middot; {c.section}
                 {c.name ? ` · ${c.name}` : ""}
               </p>
-              <p className="text-[10px] text-text-muted font-mono">
+              <p className="text-xs text-text-muted font-mono">
                 {c.capacity != null ? `cap ${c.capacity}` : "—"}
                 {c.subjectCodes?.length ? ` · ${c.subjectCodes.join(", ")}` : ""}
               </p>

@@ -27,7 +27,7 @@ export function CursorHalo({ color = "rgba(103,232,249,0.08)" }: { color?: strin
   return (
     <motion.div
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-0 h-[520px] w-[520px] rounded-full"
+      className="pointer-events-none fixed left-0 top-0 z-0 h130 w130 rounded-full"
       style={{
         x: sx,
         y: sy,

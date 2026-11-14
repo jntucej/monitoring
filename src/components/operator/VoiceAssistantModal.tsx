@@ -107,7 +107,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
             placeholder="or type command e.g. 'entry 24JJ1A0501'"
-            className="px-2.5 py-1 text-xs rounded-lg bg-bg-base border border-border font-mono text-text-primary outline-none focus:ring-1 focus:ring-[var(--unit-c)]"
+            className="px-2.5 py-1 text-xs rounded-lg bg-bg-base border border-border font-mono text-text-primary outline-none focus:ring-1 focus:ringunit-c"
           />
           <button type="submit" className="p-1 rounded-md bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30">
             <Sparkles className="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
           <div className="text-xs space-y-1">
             <span className="font-mono text-purple-300">&ldquo;{transcript}&rdquo;</span>
             {parsedCommand && (
-              <Badge variant="success" className="ml-2 text-[10px]">
+              <Badge variant="success" className="ml-2 text-xs">
                 {parsedCommand.action} {parsedCommand.roll_number ? `[${parsedCommand.roll_number}]` : ""}
               </Badge>
             )}

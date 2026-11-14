@@ -54,7 +54,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-lg px-2 py-1 text-[11px] font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+            className="rounded-lg px-2 py-1 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             aria-label="Refresh events"
           >
             Refresh
@@ -105,7 +105,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
           </div>
         )}
         {events.length > limit ? (
-          <p className="mt-3 text-center text-[11px] text-text-muted">
+          <p className="mt-3 text-center text-xs text-text-muted">
             Showing {shown.length} of {events.length} events
           </p>
         ) : null}

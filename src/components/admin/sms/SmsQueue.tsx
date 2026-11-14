@@ -29,7 +29,7 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "text-action-success bg-emerald-400/10",
   failed: "text-action-danger bg-action-danger/10",
   dead_letter: "text-action-danger bg-rose-400/20",
-  expired: "text-text-muted bg-[var(--text-muted)]/10",
+  expired: "text-text-muted bgtext-muted/10",
 };
 
 export function SmsQueue() {
@@ -119,7 +119,7 @@ export function SmsQueue() {
           value={q}
           onChange={(e) => { setQ(e.target.value); setPage(1); }}
           placeholder="Search phone or message…"
-          className="border border-border bg-bg-surface px-3 py-1.5 rounded text-sm flex-1 min-w-[160px]"
+          className="border border-border bg-bg-surface px-3 py-1.5 rounded text-sm flex-1 min-w40"
           aria-label="Search SMS queue"
         />
         <Button
@@ -162,7 +162,7 @@ export function SmsQueue() {
               rows.map((r) => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-bg-elevated">
                   <td className="px-3 py-2 font-mono text-xs">{r.phone_number}</td>
-                  <td className="px-3 py-2 max-w-[220px] truncate" title={r.message}>
+                  <td className="px-3 py-2 max-w55 truncate" title={r.message}>
                     {r.message}
                   </td>
                   <td className="px-3 py-2">

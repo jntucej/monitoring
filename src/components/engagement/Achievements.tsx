@@ -105,12 +105,12 @@ export function Achievements() {
             Achievements
           </h2>
           {loading ? (
-            <span className="flex items-center gap-1.5 text-[11px] text-text-muted" role="status">
+            <span className="flex items-center gap-1.5 text-xs text-text-muted" role="status">
               <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
               Loading…
             </span>
           ) : (
-            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-[11px] font-medium text-text-muted">
+            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
               {earned.length} / {available.length} unlocked
             </span>
           )}
@@ -151,7 +151,7 @@ export function Achievements() {
                       <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">
                         {item.description}
                       </p>
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-text-muted">
+                      <div className="mt-1.5 flex items-center gap-1.5 text-xs uppercase tracking-wide text-text-muted">
                         <span>{item.tier}</span>
                         {item.earned ? (
                           <span className="text-action-success">

@@ -54,7 +54,7 @@ function Stat({ label, value, icon: Icon }: { label: string; value: number; icon
     <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
       <Icon className="mx-auto h-4 w-4 text-text-muted" aria-hidden />
       <p className="mt-1 text-xl font-bold tabular-nums">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-text-muted">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
     </div>
   );
 }
@@ -104,10 +104,10 @@ export function MyCampusProfile() {
             <p className="truncate font-semibold text-text-primary">{displayName}</p>
             <p className="flex flex-wrap items-center gap-1 text-xs text-text-muted">
               {displayRoll && (
-                <span className="rounded bg-[var(--bg-raised)] px-1.5 py-0.5 font-mono text-[10px]">{displayRoll}</span>
+                <span className="rounded bg-[var(--bg-raised)] px-1.5 py-0.5 font-mono text-xs">{displayRoll}</span>
               )}
               {displayRole && (
-                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide">
+                <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide">
                   <BadgeCheck className="h-3 w-3" aria-hidden />
                   {displayRole}
                 </span>
@@ -166,7 +166,7 @@ export function MyCampusProfile() {
                     <p className="text-xs font-semibold text-text-primary">
                       Latest achievement: {data.latestAchievement.title}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                    <p className="text-xs uppercase tracking-wide text-text-muted">
                       {data.latestAchievement.tier} · earned {new Date(data.latestAchievement.earnedAt).toLocaleDateString()}
                     </p>
                   </div>

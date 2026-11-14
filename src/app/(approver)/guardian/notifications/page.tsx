@@ -17,7 +17,7 @@ function NotificationsInner() {
           <Bell className="w-6 h-6 text-emerald-400" />
           Notifications
         </p>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+        <p className="mt-1 text-sm text-muted">
           Alerts, approvals and campus notices for your wards
         </p>
       </div>

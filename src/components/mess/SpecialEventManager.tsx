@@ -188,7 +188,7 @@ export function SpecialEventManager() {
                       className="col-span-3 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs">
                       {SPECIAL_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
-                    <label className="col-span-1 flex items-center gap-1 text-[10px] text-text-muted">
+                    <label className="col-span-1 flex items-center gap-1 text-xs text-text-muted">
                       <input type="checkbox" checked={it.isPrimary} onChange={(e) => updateItem(idx, { isPrimary: e.target.checked })} />
                       Primary
                     </label>

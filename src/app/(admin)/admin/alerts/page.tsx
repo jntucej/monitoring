@@ -166,13 +166,13 @@ function AdminAlertsInner() {
                   const style = SEVERITY_STYLES[a.severity] ?? SEVERITY_STYLES.low;
                   return (
                     <div className="flex flex-wrap gap-2">
-                      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${style.bg} ${style.text}`}>
+                      <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${style.bg} ${style.text}`}>
                         {style.label}
                       </span>
                       {a.studentRoll && (
-                        <span className="text-[10px] font-mono text-text-muted">{a.studentRoll}</span>
+                        <span className="text-xs font-mono text-text-muted">{a.studentRoll}</span>
                       )}
-                      {a.gateId && <span className="text-[10px] text-text-muted">at gate {a.gateId}</span>}
+                      {a.gateId && <span className="text-xs text-text-muted">at gate {a.gateId}</span>}
                     </div>
                   );
                 },

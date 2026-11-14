@@ -32,7 +32,7 @@ function StatusDot({ status, label, detail }: { status: ComponentStatus; label: 
       <span className={`h-2.5 w-2.5 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
       <div>
         <p className="text-xs font-medium text-text-primary">{label}</p>
-        {detail && <p className="text-[11px] text-text-muted">{detail}</p>}
+        {detail && <p className="text-xs text-text-muted">{detail}</p>}
       </div>
     </div>
   );

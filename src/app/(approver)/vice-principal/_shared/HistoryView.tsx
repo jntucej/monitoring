@@ -92,7 +92,7 @@ export function HistoryView({
             {d!.decisions.map((dec) => (
               <li key={dec.ticket} className="flex items-center gap-3 px-4 py-3">
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     dec.outcome === "APPROVED"
                       ? "bg-action-primary/10 text-action-primary"
                       : "bg-action-danger/10 text-action-danger"
@@ -104,9 +104,9 @@ export function HistoryView({
                   <p className="truncate text-sm text-text-primary">
                     {dec.student} · {dec.ticket}
                   </p>
-                  <p className="text-[11px] text-text-muted">{dec.reason}</p>
+                  <p className="text-xs text-text-muted">{dec.reason}</p>
                 </div>
-                <span className="hidden text-[11px] text-text-muted sm:inline">
+                <span className="hidden text-xs text-text-muted sm:inline">
                   {dec.decidedAt}
                 </span>
               </li>

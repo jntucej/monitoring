@@ -95,7 +95,7 @@ export default function OperatorKioskPinPage() {
 
         <div className="rounded-xl border border-border bg-bg-surface p-5 space-y-4">
           <label className="block">
-            <span className="block text-[11px] font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
+            <span className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
               Operator PIN
             </span>
             <input
@@ -134,7 +134,7 @@ export default function OperatorKioskPinPage() {
             type="button"
             onClick={submit}
             disabled={submitting || pin.length === 0}
-            className="w-full min-h-[44px] rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
+            className="w-full min-h11 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-sm font-bold flex items-center justify-center gap-2 transition"
           >
             {submitting ? (
               <>

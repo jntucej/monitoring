@@ -46,7 +46,7 @@ export function HostelCurfewRow({ row, overdue }: { row: CurfewRow; overdue: boo
       <span className="text-text-primary truncate flex-1">{row.name}</span>
       <span className="text-text-muted shrink-0">({row.roll})</span>
       <span
-        className={`text-[10px] font-semibold shrink-0 ${
+        className={`text-xs font-semibold shrink-0 ${
           overdue ? "text-action-danger" : "text-action-success"
         }`}
       >

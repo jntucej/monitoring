@@ -111,29 +111,29 @@ function ApplicationHealthInner() {
               ) : (
                 <>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Uptime</p>
+                    <p className="text-xs text-text-muted uppercase">Uptime</p>
                     <p className="text-lg font-bold text-action-info">{formatUptime(safeHealth.uptimeSeconds)}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Active Users</p>
+                    <p className="text-xs text-text-muted uppercase">Active Users</p>
                     <p className="text-lg font-bold text-action-success">{safeHealth.metrics.activeUsers}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Active Sessions</p>
+                    <p className="text-xs text-text-muted uppercase">Active Sessions</p>
                     <p className="text-lg font-bold text-action-success">{safeHealth.metrics.activeSessions}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Req/min</p>
+                    <p className="text-xs text-text-muted uppercase">Req/min</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.requestsPerMinute}</p>
                   </div>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Error Rate</p>
+                    <p className="text-xs text-text-muted uppercase">Error Rate</p>
                     <p className={`text-lg font-bold ${safeHealth.metrics.errorRate > 5 ? "text-action-danger" : "text-action-success"}`}>
                       {safeHealth.metrics.errorRate}%
                     </p>
                   </div>
                   <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
-                    <p className="text-[10px] text-text-muted uppercase">Avg Response</p>
+                    <p className="text-xs text-text-muted uppercase">Avg Response</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.avgResponseTime}ms</p>
                   </div>
                 </>
@@ -147,7 +147,7 @@ function ApplicationHealthInner() {
                     <div key={a.id} className="rounded-lg border border-border bg-bg-surface/40 p-3 flex items-center justify-between gap-2">
                       <span className="text-sm text-text-secondary truncate">{a.message}</span>
                       <span
-                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
+                        className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                           a.severity === "critical"
                             ? "bg-rose-500/20 text-action-danger"
                             : a.severity === "warning"

@@ -236,7 +236,7 @@ function MessFoodPreferenceInner() {
               await menu.refresh();
             })();
           }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-action-danger text-[11px] font-bold hover:bg-rose-500/20 transition"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-action-danger text-xs font-bold hover:bg-rose-500/20 transition"
         >
           <RefreshCw className="w-3 h-3" /> Retry
         </button>
@@ -250,7 +250,7 @@ function MessFoodPreferenceInner() {
       <div className="space-y-2 p-2 text-center">
         <UtensilsCrossed className="w-6 h-6 mx-auto text-text-muted opacity-60" />
         <p className="text-xs font-semibold text-text-primary">No mess window active</p>
-        <p className="text-[10px] text-text-muted">
+        <p className="text-xs text-text-muted">
           The next meal preference window will appear here automatically.
         </p>
       </div>
@@ -267,17 +267,17 @@ function MessFoodPreferenceInner() {
 
   const statusBadge =
     status === "OPEN" ? (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-action-success text-[10px] font-bold">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-action-success text-xs font-bold">
         <Clock className="w-3 h-3" />
         OPEN · {formatCountdown(msLeft)}
       </span>
     ) : status === "LOCKED" ? (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-action-warning text-[10px] font-bold">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-action-warning text-xs font-bold">
         <Lock className="w-3 h-3" />
         LOCKED
       </span>
     ) : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-bg-elevated/15 border border-border/30 text-text-muted text-[10px] font-bold">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-bg-elevated/15 border border-border/30 text-text-muted text-xs font-bold">
       {msLeft > 0 ? (
         <span className="tabular-nums">Opens in {formatCountdown(msLeft)}</span>
       ) : (
@@ -298,7 +298,7 @@ function MessFoodPreferenceInner() {
           </div>
           <div>
             <p className="text-xs font-bold text-text-primary">{dayLabel}</p>
-            <p className="text-[10px] text-text-muted uppercase tracking-wide">{period.dayType}</p>
+            <p className="text-xs text-text-muted uppercase tracking-wide">{period.dayType}</p>
           </div>
         </div>
         {statusBadge}
@@ -309,8 +309,8 @@ function MessFoodPreferenceInner() {
         <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
           <Lock className="w-4 h-4 text-action-warning mt-0.5 shrink-0" />
           <div className="min-w-0">
-            <p className="text-[11px] font-bold text-action-warning">Selection window locked</p>
-            <p className="text-[10px] text-amber-200/80 mt-0.5">
+            <p className="text-xs font-bold text-action-warning">Selection window locked</p>
+            <p className="text-xs text-amber-200/80 mt-0.5">
               {myPref
                 ? `Your choice: ${myPref.primaryItem === "VEG" ? "Veg" : "Non-Veg"} · ${myPref.willBePresent ? "Present" : "Absent"}${
                     myPref.subItemLabels?.length ? ` · ${myPref.subItemLabels.join(", ")}` : ""
@@ -323,7 +323,7 @@ function MessFoodPreferenceInner() {
 
       {/* Saved-choice prompt when open but nothing selected */}
       {windowOpen && !myPref && (
-        <p className="text-[11px] text-text-muted flex items-center gap-1.5">
+        <p className="text-xs text-text-muted flex items-center gap-1.5">
           <UtensilsCrossed className="w-3.5 h-3.5 text-action-success" />
           Not selected yet — pick your meal below before the window closes.
         </p>
@@ -336,7 +336,7 @@ function MessFoodPreferenceInner() {
             <QRCodeCanvas value={token} size={72} bgColor="#fff" fgColor="var(--bg-elevated)" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-action-success">Meal token</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-action-success">Meal token</p>
             <p className="text-sm font-mono font-bold text-text-primary break-all">{token}</p>
           </div>
         </div>
@@ -347,14 +347,14 @@ function MessFoodPreferenceInner() {
         <div className="space-y-3">
           {/* Primary item toggle */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">Primary item</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">Primary item</p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setPrimaryItem("VEG")}
                 className={`py-2.5 rounded-xl text-xs font-black tracking-wide transition-all border ${
                   primaryItem === "VEG"
-                    ? "bg-action-success border-[var(--action-success)] text-emerald-950 shadow-lg shadow-emerald-500/20"
+                    ? "bg-action-success borderaction-success text-emerald-950 shadow-lg shadow-emerald-500/20"
                     : "bg-emerald-500/10 border-emerald-500/25 text-action-success hover:bg-emerald-500/20"
                 }`}
               >
@@ -377,7 +377,7 @@ function MessFoodPreferenceInner() {
           {/* Sub-items */}
           {subItems.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">Sub items</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5">Sub items</p>
               <div className="overflow-x-auto">
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-1.5 min-w-0">
                   {subItems.map((s) => {
@@ -387,7 +387,7 @@ function MessFoodPreferenceInner() {
                         key={s.id}
                         type="button"
                         onClick={() => toggleSub(s.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition ${
                           on
                             ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
                             : "bg-bg-base border-border text-text-muted hover:border-emerald-500/30"
@@ -395,7 +395,7 @@ function MessFoodPreferenceInner() {
                       >
                         <span
                           className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm border ${
-                            on ? "bg-action-success border-[var(--action-success)] text-emerald-950" : "border-border"
+                            on ? "bg-action-success borderaction-success text-emerald-950" : "border-border"
                           }`}
                         >
                           {on && <Check className="w-2.5 h-2.5" />}
@@ -412,8 +412,8 @@ function MessFoodPreferenceInner() {
           {/* Will be present toggle */}
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Attendance</p>
-              <p className="text-[11px] text-text-primary font-medium">
+              <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Attendance</p>
+              <p className="text-xs text-text-primary font-medium">
                 {willBePresent ? "I will be present for the meal" : "I will not be present"}
               </p>
             </div>
@@ -435,7 +435,7 @@ function MessFoodPreferenceInner() {
           </div>
 
           {/* Hostel block (read-only) */}
-          <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs text-text-muted">
             <MapPin className="w-3 h-3" />
             Hostel block: <span className="text-text-primary font-semibold">{authUser?.hostelBlock ?? "—"}</span>
           </div>
@@ -455,7 +455,7 @@ function MessFoodPreferenceInner() {
 
       {/* Closed banner (not locked) */}
       {status === "CLOSED" && (
-        <p className="text-[11px] text-text-muted text-center">
+        <p className="text-xs text-text-muted text-center">
           {myPref
             ? `Your saved choice: ${myPref.primaryItem === "VEG" ? "Veg" : "Non-Veg"} · ${myPref.willBePresent ? "Present" : "Absent"}`
             : "No selection was saved for this meal day."}
@@ -465,7 +465,7 @@ function MessFoodPreferenceInner() {
       <div className="text-center">
         <Link
           href="/mess/default"
-          className="inline-flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-action-success transition"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-text-muted hover:text-action-success transition"
         >
           <Copy className="w-3 h-3" /> Set your default meal →
         </Link>

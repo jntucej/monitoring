@@ -18,7 +18,7 @@ export function HeatMatrix({ rows, cols, data, label, onCellClick, cellSize = 20
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="mb-2 text-[11px] font-medium" style={{ color: VIZ_THEME.muted }}>
+      <div className="mb-2 text-xs font-medium" style={{ color: VIZ_THEME.muted }}>
         {label}
       </div>
       <div
@@ -35,7 +35,7 @@ export function HeatMatrix({ rows, cols, data, label, onCellClick, cellSize = 20
         {cols.map((c, i) => (
           <div
             key={`col-${i}`}
-            className="truncate pb-1 text-[10px]"
+            className="truncate pb-1 text-xs"
             style={{ color: VIZ_THEME.muted }}
             title={c}
           >
@@ -80,7 +80,7 @@ function MatrixRow({
   return (
     <>
       <div
-        className="flex items-center truncate pr-2 text-[11px]"
+        className="flex items-center truncate pr-2 text-xs"
         style={{ color: VIZ_THEME.text }}
         title={r}
       >

@@ -144,7 +144,7 @@ function VpExaminationInner() {
               </p>
               <Link
                 href="/vice-principal/pending-approvals"
-                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-action-info hover:bg-sky-500/20 transition-colors"
+                className="mt-3 inline-flex min-h11 items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-action-info hover:bg-sky-500/20 transition-colors"
               >
                 Open Pending Approvals <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -165,7 +165,7 @@ function VpExaminationInner() {
                     stage: {r.current_stage}
                   </span>
                   {slaAtRisk.some((x) => x.id === r.id) && (
-                    <span className="text-[10px] font-semibold text-action-danger bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 shrink-0">
+                    <span className="text-xs font-semibold text-action-danger bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 shrink-0">
                       SLA breached
                     </span>
                   )}

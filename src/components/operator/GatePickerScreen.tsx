@@ -146,7 +146,7 @@ export function GatePickerScreen() {
                 className={[
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
                   selected === g.id
-                    ? "border-[var(--action-success)] bg-emerald-500/10 text-text-primary"
+                    ? "borderaction-success bg-emerald-500/10 text-text-primary"
                     : "border-border bg-bg-surface text-text-primary hover:border-border hover:bg-bg-elevated",
                 ].join(" ")}
               >
@@ -154,7 +154,7 @@ export function GatePickerScreen() {
                   className={[
                     "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
                     selected === g.id
-                      ? "border-[var(--action-success)] bg-action-success"
+                      ? "borderaction-success bg-action-success"
                       : "border-border",
                   ].join(" ")}
                 >

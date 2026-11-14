@@ -955,7 +955,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
       {showOpsHeader && (
         <header className="flex items-center justify-between gap-3 px-4 py-2 border-b border-border bg-bg-base/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-text-muted shrink-0">
+            <span className="font-mono text-xs uppercase tracking-widest text-text-muted shrink-0">
               {roleLabel}
             </span>
             <span className="text-sm font-bold text-text-primary truncate">
@@ -970,7 +970,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
           >
             <Command className="w-3.5 h-3.5" />
             <span>Command</span>
-            <kbd className="hidden sm:inline text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-base text-text-muted border border-border">
+            <kbd className="hidden sm:inline text-xs font-mono px-1.5 py-0.5 rounded bg-bg-base text-text-muted border border-border">
               ⌘K
             </kbd>
           </button>

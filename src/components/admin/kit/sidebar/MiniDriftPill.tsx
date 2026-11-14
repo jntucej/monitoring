@@ -19,7 +19,7 @@ export function MiniDriftPill({ driftCount, label, onClick, className }: MiniDri
       className={cn("flex items-center h-4 min-w-0", className)}
     >
       <span
-        className="px-1.5 h-[16px] rounded-full text-[9px] font-medium leading-[16px] flex items-center shrink-0"
+        className="px-1.5 h4 rounded-full text-xs font-medium leading4 flex items-center shrink-0"
         style={
           isDrift
             ? {

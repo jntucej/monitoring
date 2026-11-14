@@ -127,7 +127,7 @@ export function DigitalSignPanel({
       </a>
 
       <div className="space-y-1">
-        <label htmlFor="sign-note" className="text-[11px] text-text-muted font-medium">
+        <label htmlFor="sign-note" className="text-xs text-text-muted font-medium">
           Signature note (optional)
         </label>
         <input
@@ -138,7 +138,7 @@ export function DigitalSignPanel({
           onChange={(e) => setNote(e.target.value)}
           disabled={signing}
           placeholder="Optional note (max 200 characters)"
-          className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50"
+          className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
         />
       </div>
 

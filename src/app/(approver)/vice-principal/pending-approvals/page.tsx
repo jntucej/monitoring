@@ -183,7 +183,7 @@ function VpPendingApprovalsInner() {
                         {r.workflow_type.replace(/_/g, " ")}
                       </span>
                       {slaBreached(r) && (
-                        <span className="text-[10px] font-semibold text-action-danger bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 whitespace-nowrap">
+                        <span className="text-xs font-semibold text-action-danger bg-rose-500/10 border border-rose-500/30 rounded-full px-2 py-0.5 whitespace-nowrap">
                           SLA breached
                         </span>
                       )}
@@ -217,7 +217,7 @@ function VpPendingApprovalsInner() {
                         <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
                       </button>
                       {!inScope && (
-                        <span className="text-[11px] text-text-muted">
+                        <span className="text-xs text-text-muted">
                           view-only · outside delegated scope
                         </span>
                       )}

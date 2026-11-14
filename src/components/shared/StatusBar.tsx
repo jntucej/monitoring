@@ -41,7 +41,7 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Status bar"
     >
       {/* Left: gate + shift */}
@@ -51,7 +51,7 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
           <span className="font-bold text-text-primary truncate">
             {gate?.name || "Gate not set"}
           </span>
-          <span className="font-mono text-[10px] text-text-muted">
+          <span className="font-mono text-xs text-text-muted">
             {gate ? `ID ${gate.id.slice(0, 8)}` : "—"}
           </span>
         </span>

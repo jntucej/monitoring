@@ -83,7 +83,7 @@ export function ClassesView() {
                     <p className="text-sm font-medium">
                       {item.subjectName ?? item.subjectCode ?? "Period " + (item.periodNumber ?? idx + 1)}
                     </p>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {item.className ?? (item.year ? `Y${item.year} - Sec ${item.section ?? "A"}` : "Class")} · Room {item.roomNumber ?? "—"}
                     </p>
                   </div>

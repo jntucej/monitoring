@@ -437,7 +437,7 @@ export function OperatorCamera({
       />
 
       {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-[10px] font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
           <span>No native barcode decoder — switch to QR</span>
         </div>
       )}
@@ -445,7 +445,7 @@ export function OperatorCamera({
       {cameraState === "active" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
           <div className="w-40 h-40 rounded-2xl border border-white/15" />
-          <p className="text-[11px] font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
+          <p className="text-xs font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
             {mode === "qr" ? "Point at a QR code" : "Point at a barcode"}
           </p>
         </div>

@@ -33,7 +33,7 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
           <p className="text-sm text-text-muted py-4 text-center">No pending outpass or leave requests.</p>
         ) : (
           <div className="overflow-x-auto min-w-0">
-            <table className="w-full text-sm min-w-[520px]">
+            <table className="w-full text-sm min-w130">
               <thead>
                 <tr className="text-text-muted text-xs uppercase tracking-wide border-b border-border">
                   <th className="text-left px-3 py-2">Ticket</th>

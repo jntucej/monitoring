@@ -159,8 +159,8 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                 {user?.email || "admin@jntuhcej.ac.in"}
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-action-primary/15 text-action-primary uppercase tracking-wider">{role || "ADMIN"}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-action-primary/15 text-action-primary uppercase tracking-wider">{role || "ADMIN"}</span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30 flex items-center gap-1">
                   <Shield className="w-3 h-3" /> Active
                 </span>
               </div>
@@ -181,7 +181,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-text-secondary">Email (Immutable)</label>
                 <Field value={user?.email ?? ""} disabled />
-                <p className="text-[11px] text-text-muted">Email changes require a root database migration.</p>
+                <p className="text-xs text-text-muted">Email changes require a root database migration.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -263,7 +263,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                         active ? "border-action-primary bg-action-primary/10 text-text-primary shadow-lg" : "border-border bg-bg-elevated text-text-muted hover:text-text-primary")}>
                       <Icon className={cn("w-5 h-5", active && "text-action-primary")} />
                       <span className="text-xs font-semibold">{label}</span>
-                      {active && <span className="text-[10px] text-action-primary">Active</span>}
+                      {active && <span className="text-xs text-action-primary">Active</span>}
                     </button>
                   );
                 })}

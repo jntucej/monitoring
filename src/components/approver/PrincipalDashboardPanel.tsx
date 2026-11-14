@@ -83,7 +83,7 @@ export function PrincipalDashboardPanel() {
             Principal Dashboard
           </span>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border border-border bg-bg-elevated text-text-secondary">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border border-border bg-bg-elevated text-text-secondary">
           <span className="w-1.5 h-1.5 rounded-full bg-action-warning" />
           {pendingApprovals} pending
         </span>
@@ -96,7 +96,7 @@ export function PrincipalDashboardPanel() {
           Loading dashboard…
         </div>
       ) : alerts.length > 0 ? (
-        <ul className="space-y-1.5 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-1.5 max-h55 overflow-y-auto custom-scrollbar pr-1">
           {alerts.map((a) => (
             <li
               key={a.id}
@@ -106,15 +106,15 @@ export function PrincipalDashboardPanel() {
                 <p className="text-xs font-semibold text-text-primary truncate">
                   {a.title || a.message || "Alert"}
                 </p>
-                <p className="text-[10px] font-mono text-text-muted truncate">
+                <p className="text-xs font-mono text-text-muted truncate">
                   {a.gate_name || a.gate_id || "campus"} · {a.severity}
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <span className={`text-[10px] font-mono font-bold uppercase ${severityTone(a.severity)}`}>
+                <span className={`text-xs font-mono font-bold uppercase ${severityTone(a.severity)}`}>
                   {a.severity}
                 </span>
-                <p className="text-[10px] font-mono text-text-muted">
+                <p className="text-xs font-mono text-text-muted">
                   {fmtTime(a.timestamp)}
                 </p>
               </div>

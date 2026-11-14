@@ -91,7 +91,7 @@ export function AttentionQueue() {
             Needs your attention
           </h2>
           {data ? (
-            <span className="text-[10px] text-text-muted" aria-hidden>
+            <span className="text-xs text-text-muted" aria-hidden>
               {items.length} item{items.length === 1 ? "" : "s"}
             </span>
           ) : null}
@@ -139,7 +139,7 @@ export function AttentionQueue() {
                   <a
                     href={item.ctaHref}
                     aria-label={`Open ${item.title}`}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-indigo-500/20 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30 hover:text-indigo-200"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-indigo-500/20 px-2.5 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30 hover:text-indigo-200"
                   >
                     Open
                     <ArrowRight className="h-3 w-3" aria-hidden />

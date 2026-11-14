@@ -31,11 +31,11 @@ export function SlaBadge({ slaDeadline, status, className = "" }: SlaBadgeProps)
   const { label, cls } = config[slsStatus];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${cls} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${cls} ${className}`}
       title={slaDeadline ? `SLA: ${formatDateTime(slaDeadline)}` : undefined}
     >
       {label}
-      {slaDeadline && <span className="font-mono text-[10px] opacity-70">{formatDateTime(slaDeadline)}</span>}
+      {slaDeadline && <span className="font-mono text-xs opacity-70">{formatDateTime(slaDeadline)}</span>}
     </span>
   );
 }

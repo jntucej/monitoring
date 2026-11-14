@@ -47,7 +47,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -102,7 +102,7 @@ function MessMealAttendanceInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <Link
         href="/mess"
-        className="inline-flex min-h-[44px] items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
+        className="inline-flex min-h11 items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
         Back to Mess Overview
       </Link>
@@ -160,7 +160,7 @@ function MessMealAttendanceInner() {
               </div>
 
               <div className="overflow-x-auto min-w-0">
-                <table className="w-full text-sm min-w-[560px]">
+                <table className="w-full text-sm min-w140">
                   <thead>
                     <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-4 py-2.5">Hostel Block</th>

@@ -124,14 +124,14 @@ function SysAdminAnalyticsInner() {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex flex-wrap gap-1 glass-card p-1">
           {([7, 14, 30] as const).map((d) => (
-            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h-[44px] rounded-lg flex items-center justify-center ${range === d ? "bg-action-primary text-white" : "text-text-muted hover:text-text-primary"}`}>
+            <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h11 rounded-lg flex items-center justify-center ${range === d ? "bg-action-primary text-white" : "text-text-muted hover:text-text-primary"}`}>
               {d}d
             </button>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60"><Download className="w-3.5 h-3.5" /> CSV</button>
-          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h-[44px] rounded-lg border border-border hover:bg-bg-surface/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
+          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60"><Download className="w-3.5 h-3.5" /> CSV</button>
+          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
         </div>
       </div>
 

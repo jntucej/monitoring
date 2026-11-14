@@ -71,7 +71,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
                 role="radio"
                 aria-checked={isActive}
                 onClick={() => handleThemeChange(t.id as any)}
-                className={`relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
+                className={`relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-colors z-10 focus:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring ${
                   isActive ? "text-text-primary" : "text-text-muted hover:text-text-primary"
                 }`}
                 aria-label={`Switch to ${t.label} theme`}
@@ -94,7 +94,7 @@ export function GlassThemeToggle({ className = "" }: GlassThemeToggleProps) {
           onClick={() => setShowFeedback(true)}
           title="Report Theme Issue"
           aria-label="Report Theme Issue"
-          className="p-1 sm:p-1.5 min-w-[36px] min-h-[36px] rounded-full text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
+          className="p-1 sm:p-1.5 min-w9 min-h9 rounded-full text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors active:scale-95 shrink-0 hidden xs:flex items-center justify-center"
         >
           <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>

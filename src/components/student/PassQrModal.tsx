@@ -135,7 +135,7 @@ export function PassQrModal({
           <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs flex flex-col items-center text-center space-y-2">
             <AlertCircle className="w-8 h-8 text-action-danger" />
             <span className="font-semibold text-rose-200">Credential Not Available</span>
-            <p className="text-[11px] text-rose-300/80">{error}</p>
+            <p className="text-xs text-rose-300/80">{error}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -151,7 +151,7 @@ export function PassQrModal({
                 includeMargin
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
-              <div className="mt-2 text-[10px] font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1 rounded-full border border-border">
+              <div className="mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1 rounded-full border border-border">
                 <span className="w-2 h-2 rounded-full bg-action-success animate-ping" />
                 Live Gate Token • Refreshes in {expiresIn}s
               </div>
@@ -159,16 +159,16 @@ export function PassQrModal({
 
             {/* Window and Instructions */}
             <div className="bg-bg-elevated p-3 rounded-2xl border border-border text-xs space-y-1.5">
-              <div className="flex items-center gap-1.5 text-action-success font-semibold text-[11px]">
+              <div className="flex items-center gap-1.5 text-action-success font-semibold text-xs">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Approved Pass</span>
               </div>
               {fromDate && toDate && (
-                <p className="text-[11px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   Window: {new Date(fromDate).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} — {new Date(toDate).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </p>
               )}
-              <p className="text-[10px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 Present this QR code to the gate security scanner upon exit and entry.
               </p>
             </div>

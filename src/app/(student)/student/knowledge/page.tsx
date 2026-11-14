@@ -8,7 +8,7 @@ import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 export default function KnowledgePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+      <h1 className="text-lg font-semibold text-primary">
         Knowledge & Feedback
       </h1>
       <WidgetBoundary name="knowledge-centre">

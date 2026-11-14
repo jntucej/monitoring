@@ -186,7 +186,7 @@ function TimelineNode({
             {action}
           </span>
           {stageLabel && (
-            <span className="text-[11px] text-text-muted">
+            <span className="text-xs text-text-muted">
               stage: {stageLabel}
             </span>
           )}
@@ -206,12 +206,12 @@ function TimelineNode({
         </p>
 
         {entry.comment ? (
-          <p className="mt-1 text-[11px] text-text-muted italic line-clamp-2">
+          <p className="mt-1 text-xs text-text-muted italic line-clamp-2">
             “{entry.comment}”
           </p>
         ) : null}
 
-        <p className="mt-1 text-[11px] text-text-muted">
+        <p className="mt-1 text-xs text-text-muted">
           {nextStepHint(entry, isLast, status)}
         </p>
       </div>
@@ -294,14 +294,14 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
           <span className="font-mono text-sm font-bold text-text-primary">
             {detail.ticket_number}
           </span>
-          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-[11px] text-text-secondary">
+          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-xs text-text-secondary">
             {detail.workflow_type}
           </span>
-          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-[11px] text-text-secondary">
+          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-xs text-text-secondary">
             {detail.status}
           </span>
           {detail.sla_deadline ? (
-            <span className="text-[11px] text-text-muted">
+            <span className="text-xs text-text-muted">
               SLA {getTimeAgo(detail.sla_deadline)}
             </span>
           ) : null}

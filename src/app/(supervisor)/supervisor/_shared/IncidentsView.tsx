@@ -54,7 +54,7 @@ export function IncidentsView() {
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-text-primary">{item.title}</span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${
                       item.resolved
                         ? "bg-action-primary/10 text-action-primary"
                         : "bg-action-danger/10 text-action-danger"
@@ -63,7 +63,7 @@ export function IncidentsView() {
                     {item.resolved ? "Resolved" : item.severity}
                   </span>
                 </div>
-                <p className="mt-1 text-[11px] text-text-muted">
+                <p className="mt-1 text-xs text-text-muted">
                   {new Date(item.timestamp).toLocaleString()}
                 </p>
               </li>

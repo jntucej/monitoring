@@ -72,7 +72,7 @@ export function SnapSuccess({
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             transition={{ delay: 0.2 }}
-            className="mt-2 text-sm font-semibold uppercase tracking-wider bg-[var(--bg-elevated)]/10 px-3 py-1 rounded-full"
+            className="mt-2 text-sm font-semibold uppercase tracking-wider bg-elevated/10 px-3 py-1 rounded-full"
           >
             {reason}
           </motion.p>

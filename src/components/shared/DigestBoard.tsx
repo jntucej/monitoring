@@ -99,7 +99,7 @@ export function DigestBoard({ source }: DigestBoardProps) {
               key={key}
               className="rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0"
             >
-              <p className="text-[10px] font-mono uppercase tracking-wide text-text-muted truncate">
+              <p className="text-xs font-mono uppercase tracking-wide text-text-muted truncate">
                 {key}
               </p>
               <div className="mt-1">

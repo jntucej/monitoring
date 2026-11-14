@@ -64,7 +64,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1">
-                <p className="text-[10px] sm:text-xs font-semibold text-text-muted uppercase tracking-wider truncate">
+                <p className="text-xs sm:text-xs font-semibold text-text-muted uppercase tracking-wider truncate">
                   <span className="sm:hidden text-base">{emoji}</span>
                   <span className="hidden sm:inline">{emoji ? `${emoji} ${label}` : label}</span>
                 </p>
@@ -80,7 +80,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
                 )}
               </div>
               {trend ? (
-                <p className="text-[10px] sm:text-xs font-medium text-text-muted mt-0.5 sm:mt-1 truncate">{trend}</p>
+                <p className="text-xs sm:text-xs font-medium text-text-muted mt-0.5 sm:mt-1 truncate">{trend}</p>
               ) : null}
             </div>
           </div>

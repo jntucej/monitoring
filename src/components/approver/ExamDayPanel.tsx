@@ -121,7 +121,7 @@ export function ExamDayPanel() {
           </span>
         </div>
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold border ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border ${
             isOpen
               ? "text-action-success bg-emerald-400/10 border-emerald-400/20"
               : "text-action-danger bg-rose-400/10 border-rose-400/20"
@@ -134,7 +134,7 @@ export function ExamDayPanel() {
 
       {/* Body: today's sessions (or an EmptyState note) */}
       {todaySessions.length > 0 ? (
-        <ul className="space-y-1.5 max-h-[220px] overflow-y-auto custom-scrollbar pr-1 mb-3">
+        <ul className="space-y-1.5 max-h55 overflow-y-auto custom-scrollbar pr-1 mb-3">
           {todaySessions.map((r) => (
             <li
               key={r.id}
@@ -144,11 +144,11 @@ export function ExamDayPanel() {
                 <p className="text-xs font-semibold text-text-primary truncate">
                   {r.candidate_name || r.ticket_number}
                 </p>
-                <p className="text-[10px] font-mono text-text-muted truncate">
+                <p className="text-xs font-mono text-text-muted truncate">
                   {r.ticket_number}
                 </p>
               </div>
-              <span className="text-[10px] font-mono text-text-muted shrink-0">
+              <span className="text-xs font-mono text-text-muted shrink-0">
                 {r.current_stage}
               </span>
             </li>
@@ -158,7 +158,7 @@ export function ExamDayPanel() {
         <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-3 mb-3">
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
-            <p className="text-[11px] text-text-muted">
+            <p className="text-xs text-text-muted">
               No exam-day sessions published yet. The gate access state and
               open/close controls remain available.
             </p>

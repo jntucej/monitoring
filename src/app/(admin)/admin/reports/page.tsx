@@ -214,14 +214,14 @@ export default function AdminReportsPage() {
       {/* KPI summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-bg-surface rounded-xl border border-border p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
             <ClipboardList className="w-3.5 h-3.5 text-action-primary" /> Reports Generated
           </div>
           <div className="mt-1.5 text-xl font-black text-text-primary tabular-nums">{generated.length}</div>
-          <p className="mt-0.5 text-[11px] text-text-muted">Session reports (refresh resets)</p>
+          <p className="mt-0.5 text-xs text-text-muted">Session reports (refresh resets)</p>
         </div>
         <div className="bg-bg-surface rounded-xl border border-border p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
             <Clock className="w-3.5 h-3.5 text-action-info" /> Last Export
           </div>
           <div className="mt-1.5 text-sm font-bold text-text-primary">
@@ -234,14 +234,14 @@ export default function AdminReportsPage() {
                 })
               : "No exports this session"}
           </div>
-          <p className="mt-0.5 text-[11px] text-text-muted">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
+          <p className="mt-0.5 text-xs text-text-muted">{generated.length > 0 ? generated[0].title : "Export a report above"}</p>
         </div>
         <div className="bg-bg-surface rounded-xl border border-border p-4">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
             <FileText className="w-3.5 h-3.5 text-action-warning" /> Export Formats
           </div>
           <div className="mt-1.5 text-sm font-bold text-text-primary">CSV</div>
-          <p className="mt-0.5 text-[11px] text-text-muted">One-click download from report rows</p>
+          <p className="mt-0.5 text-xs text-text-muted">One-click download from report rows</p>
         </div>
       </div>
 

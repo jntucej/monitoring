@@ -61,13 +61,13 @@ export function LiveEventsPanel() {
             <h3 className="text-sm font-semibold text-text-primary truncate">
               Live Events
             </h3>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted shrink-0">
+            <span className="text-xs font-mono uppercase tracking-wider text-text-muted shrink-0">
               live
             </span>
           </div>
           <span
             className={cn(
-              "text-[11px] font-mono px-2 py-0.5 rounded-full border shrink-0",
+              "text-xs font-mono px-2 py-0.5 rounded-full border shrink-0",
               totalSeen > 0
                 ? "border-emerald-500/30 bg-emerald-500/10 text-action-success"
                 : "border-border bg-bg-base text-text-muted"
@@ -82,7 +82,7 @@ export function LiveEventsPanel() {
           <div className="p-6 text-center text-xs text-text-muted flex flex-col items-center gap-2">
             <Radio className="w-6 h-6 opacity-30" />
             <p>No live events yet for your role.</p>
-            <p className="text-[11px]">
+            <p className="text-xs">
               {role && ACTIVE_ROLE_HINT[role]
                 ? ACTIVE_ROLE_HINT[role]
                 : "New alerts and gate events will appear here the moment they fire."}
@@ -119,17 +119,17 @@ export function LiveEventsPanel() {
                         {e.title}
                       </p>
                       {e.fresh && (
-                        <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-action-success border border-emerald-500/30 shrink-0">
+                        <span className="text-xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-action-success border border-emerald-500/30 shrink-0">
                           new
                         </span>
                       )}
                     </div>
                     {e.detail && (
-                      <p className="text-[11px] text-text-muted mt-0.5 line-clamp-2">
+                      <p className="text-xs text-text-muted mt-0.5 line-clamp-2">
                         {e.detail}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 mt-1 text-[10px] font-mono text-text-muted">
+                    <div className="flex items-center gap-2 mt-1 text-xs font-mono text-text-muted">
                       <span className={meta.color}>{meta.label}</span>
                       <span>·</span>
                       <span>{timeAgo(e.at)}</span>
@@ -139,7 +139,7 @@ export function LiveEventsPanel() {
               );
             })}
             {events.length > 8 && (
-              <p className="text-[10px] text-text-muted text-center pt-1">
+              <p className="text-xs text-text-muted text-center pt-1">
                 +{events.length - 8} older events this session
               </p>
             )}
@@ -148,7 +148,7 @@ export function LiveEventsPanel() {
 
         {/* Footer: last-event heartbeat */}
         {lastEventAt && (
-          <p className="text-[10px] font-mono text-text-muted mt-3 pt-3 border-t border-border flex items-center gap-1.5">
+          <p className="text-xs font-mono text-text-muted mt-3 pt-3 border-t border-border flex items-center gap-1.5">
             <Gauge className="w-3 h-3" />
             last event {timeAgo(lastEventAt)}
           </p>

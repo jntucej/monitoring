@@ -145,7 +145,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
             >
               {/* Handle bar */}
               <div className="flex justify-center pt-3 pb-2">
-                <div className="w-12 h-1.5 rounded-full bg-[var(--border)]" />
+                <div className="w-12 h-1.5 rounded-full bgborder" />
               </div>
 
               {/* Header */}
@@ -224,7 +224,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
             <p className="text-xs font-semibold text-text-primary truncate">
               {user?.name || "Operator"}
             </p>
-            <p className="text-[10px] text-text-muted truncate">
+            <p className="text-xs text-text-muted truncate">
               {user?.gateId ? `Gate ${user.gateId}` : "No gate assigned"}
             </p>
           </div>

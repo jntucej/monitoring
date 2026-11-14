@@ -105,7 +105,7 @@ function SecurityReinforcedInner() {
                 Live posture
               </span>
             </div>
-            <span className="text-[11px] text-text-muted">
+            <span className="text-xs text-text-muted">
               signed in as <span className="font-mono text-text-secondary">{role}</span>
             </span>
           </div>
@@ -122,7 +122,7 @@ function SecurityReinforcedInner() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 min-w-0">
               <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
-                <p className="text-[10px] uppercase text-text-muted">Overall</p>
+                <p className="text-xs uppercase text-text-muted">Overall</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.status)}`}>
                     {posture?.status ?? "unknown"}
@@ -130,7 +130,7 @@ function SecurityReinforcedInner() {
                 </p>
               </div>
               <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
-                <p className="text-[10px] uppercase text-text-muted">Redis</p>
+                <p className="text-xs uppercase text-text-muted">Redis</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.redis?.status)}`}>
                     {posture?.redis?.status ?? "unknown"}
@@ -138,27 +138,27 @@ function SecurityReinforcedInner() {
                 </p>
               </div>
               <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
-                <p className="text-[10px] uppercase text-text-muted">Database</p>
+                <p className="text-xs uppercase text-text-muted">Database</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.database?.status)}`}>
                     {posture?.database?.status ?? "unknown"}
                   </span>
                 </p>
                 {typeof posture?.database?.latencyMs === "number" && (
-                  <p className="text-[10px] text-text-muted mt-1 tabular-nums">
+                  <p className="text-xs text-text-muted mt-1 tabular-nums">
                     {posture.database.latencyMs} ms
                   </p>
                 )}
               </div>
               <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
-                <p className="text-[10px] uppercase text-text-muted">Gateways</p>
+                <p className="text-xs uppercase text-text-muted">Gateways</p>
                 <p className="mt-1">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.gateways?.status)}`}>
                     {posture?.gateways?.status ?? "unknown"}
                   </span>
                 </p>
                 {typeof posture?.gateways?.online === "number" && (
-                  <p className="text-[10px] text-text-muted mt-1 tabular-nums">
+                  <p className="text-xs text-text-muted mt-1 tabular-nums">
                     {posture.gateways.online} online · {posture.gateways.offline ?? 0} offline
                   </p>
                 )}

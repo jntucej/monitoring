@@ -88,7 +88,7 @@ function StudentAttendanceCalendarInner() {
           <button
             type="button"
             onClick={prevMonth}
-            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            className="min-h11 inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             ← Prev
           </button>
@@ -98,14 +98,14 @@ function StudentAttendanceCalendarInner() {
           <button
             type="button"
             onClick={nextMonth}
-            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            className="min-h11 inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             Next →
           </button>
         </div>
 
         {/* Weekday header */}
-        <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">
+        <div className="grid grid-cols-7 text-center text-xs font-bold uppercase tracking-wider text-text-muted mb-1">
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
             <div key={d} className="py-1">{d}</div>
           ))}
@@ -154,7 +154,7 @@ function StudentAttendanceCalendarInner() {
         )}
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-text-muted">
+        <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 border border-emerald-500/60" /> Present</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500/40 border border-rose-500/60" /> Absent</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-bg-elevated border border-border" /> Unmarked</span>

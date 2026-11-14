@@ -41,10 +41,10 @@ export default function SessionsPage() {
       <h1 className="text-lg font-semibold">Active sessions</h1>
       <ul className="space-y-2">
         {rows.length === 0 ? (
-          <li className="text-sm text-[var(--text-muted)]">No recorded sessions.</li>
+          <li className="text-sm text-muted">No recorded sessions.</li>
         ) : (
           rows.map((r, i) => (
-            <li key={i} className="rounded-lg border border-[var(--border)] p-3 text-sm">
+            <li key={i} className="rounded-lg border border p-3 text-sm">
               {String(r.ip_address ?? "unknown")} · {String(r.user_agent ?? "—")} ·{" "}
               {String(r.created_at ?? "—")}
             </li>

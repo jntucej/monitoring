@@ -120,7 +120,7 @@ function StaffMydayInner() {
                           })}
                         </span>
                         {m.gate_id && (
-                          <span className="text-[11px] text-text-muted font-mono truncate">gate {m.gate_id}</span>
+                          <span className="text-xs text-text-muted font-mono truncate">gate {m.gate_id}</span>
                         )}
                       </div>
                     ))}

@@ -413,7 +413,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                 type="button"
                 onClick={() => setShowAll(true)}
                 title="Show all categories"
-                className="rounded border border-border px-2 py-1 text-[11px] text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                className="rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 Show all
               </button>
@@ -547,7 +547,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                                       {hasLive && (
                                         <span
                                           className={cn(
-                                            "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[16px] h-[16px] px-1",
+                                            "ml-auto inline-flex items-center justify-center rounded-full text-xs font-medium min-w4 h4 px-1",
                                             isChildActive
                                               ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
                                               : "bg-bg-elevated text-text-muted"
@@ -593,7 +593,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                           {hasLive && (
                             <span
                               className={cn(
-                                "ml-auto inline-flex items-center justify-center rounded-full text-[10px] font-medium min-w-[18px] h-[18px] px-1",
+                                "ml-auto inline-flex items-center justify-center rounded-full text-xs font-medium min-w-[18px] h-[18px] px-1",
                                 isActive
                                   ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
                                   : "bg-bg-elevated text-text-muted"

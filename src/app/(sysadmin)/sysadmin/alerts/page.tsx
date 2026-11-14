@@ -89,7 +89,7 @@ function AlertsInner() {
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
+                "rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide",
                 sseState === "live"
                   ? "text-action-success bg-action-success/10 border border-emerald-200"
                   : sseState === "polling"
@@ -100,7 +100,7 @@ function AlertsInner() {
               {sseState === "live" ? "SSE live" : sseState === "polling" ? "SSE polling" : "SSE idle"}
             </span>
             {liveAt && (
-              <span className="text-[11px] text-text-muted">
+              <span className="text-xs text-text-muted">
                 last event {new Date(liveAt).toLocaleTimeString()}
               </span>
             )}

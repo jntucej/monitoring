@@ -83,8 +83,8 @@ export function AcademicPersonalSection() {
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
           {filled.map((r) => (
             <div key={r.key} className="flex items-baseline justify-between gap-3 py-1 border-b border-border/40 last:border-b-0">
-              <dt className="text-[11px] sm:text-xs font-medium text-text-muted">{r.label}</dt>
-              <dd className="text-[11px] sm:text-xs font-semibold text-text-primary text-right break-words">
+              <dt className="text-xs sm:text-xs font-medium text-text-muted">{r.label}</dt>
+              <dd className="text-xs sm:text-xs font-semibold text-text-primary text-right break-words">
                 {value(r.key)}
               </dd>
             </div>

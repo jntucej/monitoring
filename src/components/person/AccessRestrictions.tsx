@@ -67,7 +67,7 @@ export function AccessRestrictions({ personType = "worker", className = "" }: Ac
       {/* Rules Breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
         <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-muted">
             <Clock className="w-3.5 h-3.5 text-action-primary" />
             Allowed Shift Hours
           </div>
@@ -77,7 +77,7 @@ export function AccessRestrictions({ personType = "worker", className = "" }: Ac
         </div>
 
         <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-muted">
             <Calendar className="w-3.5 h-3.5 text-unit-c" />
             Working Days
           </div>
@@ -87,7 +87,7 @@ export function AccessRestrictions({ personType = "worker", className = "" }: Ac
         </div>
 
         <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-text-muted">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-muted">
             <Clock className="w-3.5 h-3.5 text-action-success" />
             Current System Time
           </div>

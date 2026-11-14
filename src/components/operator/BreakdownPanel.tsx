@@ -23,7 +23,7 @@ export function BreakdownPanel({ breakdown }: BreakdownPanelProps) {
   return (
     <div className="space-y-2">
       <h3 className="font-bold text-sm flex items-center gap-2 px-1">
-        <Users className="w-4 h-4 text-[var(--focus-ring)]" />
+        <Users className="w-4 h-4 textfocus-ring" />
         Inside Campus — by Category
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -37,13 +37,13 @@ export function BreakdownPanel({ breakdown }: BreakdownPanelProps) {
               transition={{ delay: i * 0.05 }}
               className="bg-bg-surface border border-border rounded-xl p-3 text-center"
             >
-              <p className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <p className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
                 {label}
               </p>
               <p className={`text-2xl font-bold tabular-nums mt-1 ${color}`}>{formatNumber(stat.inside)}</p>
-              <p className="text-[9px] text-text-muted uppercase font-semibold">Inside now</p>
-              <div className="flex items-center justify-center gap-3 mt-1.5 text-[10px] font-bold">
+              <p className="text-xs text-text-muted uppercase font-semibold">Inside now</p>
+              <div className="flex items-center justify-center gap-3 mt-1.5 text-xs font-bold">
                 <span className="text-action-success inline-flex items-center gap-0.5">
                   <ArrowDownLeft className="w-3 h-3" /> {stat.inToday}
                 </span>

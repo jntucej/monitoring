@@ -156,7 +156,7 @@ export function CampusFeedbackDesk() {
         {showForm && (
           <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
             <div>
-              <label className="block text-[11px] text-text-muted mb-1.5" htmlFor="category">Category</label>
+              <label className="block text-xs text-text-muted mb-1.5" htmlFor="category">Category</label>
               <select id="category"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
@@ -170,7 +170,7 @@ export function CampusFeedbackDesk() {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-text-muted mb-1.5">
+              <label className="block text-xs text-text-muted mb-1.5">
                 Subject <span className="text-action-danger">*</span>
               </label>
               <input
@@ -182,7 +182,7 @@ export function CampusFeedbackDesk() {
               />
             </div>
             <div>
-              <label className="block text-[11px] text-text-muted mb-1.5" htmlFor="details">Details</label>
+              <label className="block text-xs text-text-muted mb-1.5" htmlFor="details">Details</label>
               <textarea id="details"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
@@ -234,12 +234,12 @@ export function CampusFeedbackDesk() {
                       <p className="text-xs font-medium text-text-secondary truncate">
                         {report.subject}
                       </p>
-                      <p className="text-[10px] text-text-muted capitalize">
+                      <p className="text-xs text-text-muted capitalize">
                         {report.category.replace(/_/g, " ")}
                       </p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[report.status] ?? "text-text-muted"}`}
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[report.status] ?? "text-text-muted"}`}
                     >
                       {report.status.replace(/_/g, " ").toUpperCase()}
                     </span>
@@ -261,7 +261,7 @@ export function CampusFeedbackDesk() {
                               } ${isCurrent ? "ring-2 ring-cyan-400/40" : ""}`}
                             />
                             <span
-                              className={`mt-1 text-[8px] ${
+                              className={`mt-1 text-xs ${
                                 done ? "text-cyan-300" : "text-text-muted"
                               }`}
                             >
@@ -283,24 +283,24 @@ export function CampusFeedbackDesk() {
                   {/* Follow-through details */}
                   <div className="mt-3 space-y-1.5">
                     {report.assignedTo && (
-                      <p className="text-[10px] text-text-muted flex items-center gap-1">
+                      <p className="text-xs text-text-muted flex items-center gap-1">
                         <User className="h-3 w-3" />
                         Assigned to: <span className="text-text-secondary">{report.assignedTo}</span>
                       </p>
                     )}
                     {report.reviewerNote && (
-                      <p className="text-[10px] text-text-muted flex items-center gap-1">
+                      <p className="text-xs text-text-muted flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
                         <span className="line-clamp-2">{report.reviewerNote}</span>
                       </p>
                     )}
                     {report.notes && report.status === "in_progress" && (
-                      <p className="text-[10px] text-text-muted flex items-center gap-1">
+                      <p className="text-xs text-text-muted flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span className="line-clamp-2">{report.notes}</span>
                       </p>
                     )}
-                    <p className="text-[10px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {new Date(report.createdAt).toLocaleDateString()}
                       {report.resolvedAt
                         ? ` · Resolved ${new Date(report.resolvedAt).toLocaleDateString()}`

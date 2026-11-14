@@ -94,7 +94,7 @@ export function DockerFleetPanel() {
             <Server className="w-4 h-4 text-action-success" />
             Docker Fleet
           </p>
-          <p className="text-[11px] text-text-muted mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Loading…"}
           </p>
         </div>

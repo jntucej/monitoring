@@ -11,7 +11,7 @@ import { fmtTime } from "./types";
 /* ── cell class lookup (module-level to avoid per-render string allocation) ── */
 const CELL_BG = ["", "bg-emerald-500/10", "bg-emerald-500/20", "bg-emerald-500/40"] as const;
 function cellClass(n: number): string {
-  return `px-2 py-1 text-[10px] ${CELL_BG[Math.min(n, 3)]}`;
+  return `px-2 py-1 text-xs ${CELL_BG[Math.min(n, 3)]}`;
 }
 
 export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
@@ -45,7 +45,7 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
         )}
         {matrixData && !loading && !error && gates.length > 0 && (
           <div className="overflow-x-auto min-w-0">
-            <table className="w-full text-xs min-w-[560px]">
+            <table className="w-full text-xs min-w140">
               <thead>
                 <tr>
                   <th className="text-left text-text-muted font-semibold pr-3 pb-2">Gate</th>
@@ -71,7 +71,7 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
                         return (
                           <td key={r} className="text-center px-1.5 py-2.5">
                             <span
-                              className={`inline-block min-w-[1.5rem] rounded px-1 py-0.5 text-center font-mono ${
+                              className={`inline-block min-w6 rounded px-1 py-0.5 text-center font-mono ${
                                 v > 0
                                   ? v >= 20
                                     ? "bg-emerald-500/30 text-action-success"
@@ -91,7 +91,7 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
               </tbody>
             </table>
             {matrixData.lastUpdated && (
-              <p className="text-[10px] text-text-muted mt-2">Updated {fmtTime(matrixData.lastUpdated)}</p>
+              <p className="text-xs text-text-muted mt-2">Updated {fmtTime(matrixData.lastUpdated)}</p>
             )}
           </div>
         )}

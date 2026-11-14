@@ -157,7 +157,7 @@ export function DigitalHandover() {
           <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] text-text-muted mb-1.5">
+                <label className="block text-xs text-text-muted mb-1.5">
                   Hand over to role
                 </label>
                 <select
@@ -173,7 +173,7 @@ export function DigitalHandover() {
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] text-text-muted mb-1.5">
+                <label className="block text-xs text-text-muted mb-1.5">
                   Notes (optional)
                 </label>
                 <input
@@ -188,7 +188,7 @@ export function DigitalHandover() {
 
             {/* Items */}
             <div>
-              <p className="text-[11px] text-text-muted mb-2">Items to hand over</p>
+              <p className="text-xs text-text-muted mb-2">Items to hand over</p>
               <div className="space-y-2">
                 {items.map((item, idx) => (
                   <div key={idx} className="flex gap-2 items-start">
@@ -197,7 +197,7 @@ export function DigitalHandover() {
                       onChange={(e) =>
                         updateItem(idx, "type", e.target.value)
                       }
-                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-[10px] text-text-secondary focus:outline-none w-32 shrink-0"
+                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-32 shrink-0"
                       aria-label="Item type"
                     >
                       {ITEM_TYPES.map((t) => (
@@ -220,7 +220,7 @@ export function DigitalHandover() {
                       onChange={(e) =>
                         updateItem(idx, "severity", e.target.value)
                       }
-                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-[10px] text-text-secondary focus:outline-none w-20 shrink-0"
+                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-20 shrink-0"
                       aria-label="Severity"
                     >
                       <option value="low">Low</option>
@@ -241,7 +241,7 @@ export function DigitalHandover() {
               <button
                 type="button"
                 onClick={addItem}
-                className="mt-2 text-[10px] text-action-warning hover:text-action-warning transition-colors motion-reduce:transition-none"
+                className="mt-2 text-xs text-action-warning hover:text-action-warning transition-colors motion-reduce:transition-none"
               >
                 + Add another item
               </button>
@@ -307,7 +307,7 @@ export function DigitalHandover() {
                       <p className="text-xs font-medium text-text-secondary">
                         {ho.byUserName} → {ho.toRole}
                       </p>
-                      <p className="text-[10px] text-text-muted flex items-center gap-2">
+                      <p className="text-xs text-text-muted flex items-center gap-2">
                         <Clock className="h-3 w-3" />
                         {new Date(ho.createdAt).toLocaleString()}
                         <span>·</span>
@@ -324,7 +324,7 @@ export function DigitalHandover() {
                   {expanded && (
                     <div className="mt-3 space-y-1.5">
                       {ho.notes && (
-                        <p className="text-[11px] text-text-muted italic">
+                        <p className="text-xs text-text-muted italic">
                           &ldquo;{ho.notes}&rdquo;
                         </p>
                       )}
@@ -335,14 +335,14 @@ export function DigitalHandover() {
                         >
                           <ListTodo className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] text-text-secondary truncate">
+                            <p className="text-xs text-text-secondary truncate">
                               {item.title}
                             </p>
-                            <p className="text-[10px] opacity-70 capitalize">
+                            <p className="text-xs opacity-70 capitalize">
                               {item.type.replace(/_/g, " ")}
                             </p>
                           </div>
-                          <span className="text-[10px] uppercase shrink-0 opacity-70">
+                          <span className="text-xs uppercase shrink-0 opacity-70">
                             {item.severity}
                           </span>
                         </div>

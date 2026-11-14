@@ -17,7 +17,7 @@ interface CardDivProps {
  */
 export function CardDiv({ children, className = "" }: CardDivProps) {
   return (
-    <div className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 ${className}`}>
+    <div className={`rounded-xl border border bg-surface p-4 ${className}`}>
       {children}
     </div>
   );

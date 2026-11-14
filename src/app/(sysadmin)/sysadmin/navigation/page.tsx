@@ -119,7 +119,7 @@ const api = useApi();
                 order: navItems.length + 1,
               })
             }
-            className="px-4 py-2 min-h-[44px] bg-action-primary hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="px-4 py-2 min-h11 bg-action-primary hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Nav Item
           </button>
@@ -145,7 +145,7 @@ const api = useApi();
               type="button"
               key={role}
               onClick={() => setSelectedRole(role)}
-              className={`px-4 py-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider transition ${
+              className={`px-4 py-2 min-h11 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
                 selectedRole === role
                   ? "bg-action-primary text-white shadow-lg shadow-blue-500/20"
                   : "bg-bg-surface border border-border text-text-muted hover:text-white"
@@ -163,7 +163,7 @@ const api = useApi();
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm min-w-[700px]">
+              <table className="w-full text-left text-sm min-w175">
                 <thead className="bg-bg-elevated border-b border-border text-text-muted uppercase text-xs">
                   <tr>
                     <th className="p-4">Order</th>
@@ -270,7 +270,7 @@ const api = useApi();
                       value={editingItem.icon || ""}
                       onChange={(e) => setEditingItem({ ...editingItem, icon: e.target.value })}
                       placeholder="e.g. DoorOpen"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
                     />
                   </div>
                   <div>
@@ -282,7 +282,7 @@ const api = useApi();
                       required
                       value={editingItem.order ?? 1}
                       onChange={(e) => setEditingItem({ ...editingItem, order: Number(e.target.value) })}
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
                     />
                   </div>
                 </div>
@@ -291,13 +291,13 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setEditingItem(null)}
-                    className="px-4 py-2 min-h-[44px] bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 min-h-[44px] bg-action-primary text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
+                    className="px-4 py-2 min-h11 bg-action-primary text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
                   >
                     Save Item
                   </button>

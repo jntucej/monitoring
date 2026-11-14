@@ -160,7 +160,7 @@ const api = useApi();
   return (
     <div className="bg-bg-surface rounded-xl border border-border p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 border-[var(--action-info)] overflow-hidden">
+      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 borderaction-info overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
@@ -173,7 +173,7 @@ const api = useApi();
           <p className="text-xs sm:text-sm font-medium text-text-primary">
             {decoded.departmentFullName}
           </p>
-          <p className="text-[9px] sm:text-[10px] text-text-muted">
+          <p className="text-xs sm:text-xs text-text-muted">
             {decoded.entryMode} • Batch {decoded.admissionYear}
           </p>
         </div>
@@ -182,28 +182,28 @@ const api = useApi();
       {/* Roll Number Breakdown */}
       <div className="mt-4 sm:mt-6 w-full max-w-sm">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[9px] sm:text-xs font-medium text-text-muted uppercase">Roll Number Breakdown</span>
+          <span className="text-xs sm:text-xs font-medium text-text-muted uppercase">Roll Number Breakdown</span>
         </div>
-        <div className="grid grid-cols-5 gap-px bg-[var(--border)] rounded-lg overflow-hidden">
+        <div className="grid grid-cols-5 gap-px bgborder rounded-lg overflow-hidden">
           <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-text-muted">Year</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.yearCode ?? "—"}</div>
+            <div className="text-xs sm:text-xs text-text-muted">Year</div>
+            <div className="font-mono text-xs sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.yearCode ?? "—"}</div>
           </div>
           <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-text-muted">College</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.collegeCode ?? "—"}</div>
+            <div className="text-xs sm:text-xs text-text-muted">College</div>
+            <div className="font-mono text-xs sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.collegeCode ?? "—"}</div>
           </div>
           <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-text-muted">Entry</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.entryModeCode ?? "—"}</div>
+            <div className="text-xs sm:text-xs text-text-muted">Entry</div>
+            <div className="font-mono text-xs sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.entryModeCode ?? "—"}</div>
           </div>
           <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-text-muted">Dept</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.departmentCode ?? "—"}</div>
+            <div className="text-xs sm:text-xs text-text-muted">Dept</div>
+            <div className="font-mono text-xs sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.departmentCode ?? "—"}</div>
           </div>
           <div className="bg-bg-base p-1 sm:p-1.5 sm:p-2 text-center">
-            <div className="text-[8px] sm:text-[9px] text-text-muted">Serial</div>
-            <div className="font-mono text-[8px] sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.serial ?? "—"}</div>
+            <div className="text-xs sm:text-xs text-text-muted">Serial</div>
+            <div className="font-mono text-xs sm:text-xs sm:text-sm font-medium text-text-primary">{decoded?.serial ?? "—"}</div>
           </div>
         </div>
       </div>
@@ -217,18 +217,18 @@ const api = useApi();
             style={{ width: "100%", maxWidth: 140, height: "auto" }}
           />
         ) : (
-          <div className="h-[140px] w-[140px] flex items-center justify-center">
+          <div className="h35 w35 flex items-center justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
           </div>
         )}
-        <div className="mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-border">
+        <div className="mt-1.5 sm:mt-2 text-xs sm:text-xs font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-border">
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-action-success" />
           Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
           disabled={downloading || !qrToken}
-          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-surface text-white text-[11px] font-bold hover:bg-bg-elevated disabled:opacity-50 transition"
+          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-surface text-white text-xs font-bold hover:bg-bg-elevated disabled:opacity-50 transition"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Saving…" : "Save QR as PNG"}
@@ -251,7 +251,7 @@ const api = useApi();
           <div className="font-mono text-3xl font-black tracking-[0.35em] text-action-success text-center py-2">
             {messToken.manualCode || messToken.token_code || "—"}
           </div>
-          <p className="text-[10px] text-emerald-400/60 text-center mt-1">
+          <p className="text-xs text-emerald-400/60 text-center mt-1">
             Expires {new Date(messToken.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>

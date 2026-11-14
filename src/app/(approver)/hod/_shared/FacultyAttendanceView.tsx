@@ -75,7 +75,7 @@ export function FacultyAttendanceView() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{r.fullName}</p>
-                    <p className="text-[11px] text-text-muted">{r.designation}</p>
+                    <p className="text-xs text-text-muted">{r.designation}</p>
                   </div>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${

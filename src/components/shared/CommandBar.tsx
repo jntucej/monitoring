@@ -195,7 +195,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
             aria-label="Command input"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border">esc</kbd>
+          <kbd className="text-xs font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border">esc</kbd>
         </div>
 
         {/* Command list */}
@@ -229,7 +229,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
                       <p className={`text-sm font-semibold ${isActive ? "text-action-primary" : "text-text-primary"}`}>
                         {cmd.label}
                       </p>
-                      <p className="text-[11px] text-text-muted truncate">{cmd.hint}</p>
+                      <p className="text-xs text-text-muted truncate">{cmd.hint}</p>
                     </div>
                   </button>
                 </li>

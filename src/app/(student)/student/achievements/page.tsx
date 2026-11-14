@@ -9,7 +9,7 @@ import { ContributionPortfolio } from "@/components/retention/ContributionPortfo
 export default function AchievementsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+      <h1 className="text-lg font-semibold text-primary">
         Achievements & Goals
       </h1>
       <WidgetBoundary name="achievements">

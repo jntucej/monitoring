@@ -153,7 +153,7 @@ function BackupReinforcedInner() {
                   >
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-text-secondary truncate">{b.name}</p>
-                      <p className="text-[10px] text-text-muted">
+                      <p className="text-xs text-text-muted">
                         {new Date(b.mtime).toLocaleString()} · {size(b.sizeBytes)}
                       </p>
                     </div>

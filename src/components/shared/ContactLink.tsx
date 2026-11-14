@@ -16,7 +16,7 @@ export function EmailLink({ email, className, showIcon = true, label }: EmailLin
       aria-label={label ?? `Email ${trimmed}`}
       className={
         className ??
-        "inline-flex items-center gap-1 text-action-info underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-info)] rounded"
+        "inline-flex items-center gap-1 text-action-info underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ringaction-info rounded"
       }
     >
       {showIcon && <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
@@ -42,7 +42,7 @@ export function PhoneLink({ phone, className, showIcon = true, label }: PhoneLin
       aria-label={label ?? `Call ${trimmed}`}
       className={
         className ??
-        "inline-flex items-center gap-1 text-action-info underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--action-info)] rounded"
+        "inline-flex items-center gap-1 text-action-info underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ringaction-info rounded"
       }
     >
       {showIcon && <Phone className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}

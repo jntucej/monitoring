@@ -465,14 +465,14 @@ export default function RolesManagementPage() {
             onClick={() => hasChildren && toggleExpand(node.code)}
             disabled={!hasChildren}
             className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-text-muted ${
-              hasChildren ? "hover:bg-[var(--border)] cursor-pointer" : "opacity-0 cursor-default"
+              hasChildren ? "hover:bgborder cursor-pointer" : "opacity-0 cursor-default"
             }`}
             aria-label={hasChildren ? (isExpanded ? "Collapse" : "Expand") : undefined}
           >
             {hasChildren ? (
               isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-muted)]/40" />
+              <span className="w-1.5 h-1.5 rounded-full bgtext-muted/40" />
             )}
           </button>
 
@@ -489,16 +489,16 @@ export default function RolesManagementPage() {
                 {graphNode?.display_name || roleDisplayName(node.code)}
               </span>
               {hasChildren && (
-                <span className="text-[10px] text-text-muted uppercase tracking-wider">
+                <span className="text-xs text-text-muted uppercase tracking-wider">
                   {node.children.length} sub-role{node.children.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
             <div className="mt-0.5 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">
+              <span className="inline-flex items-center gap-1 text-xs text-text-muted">
                 <Users className="w-3 h-3" />
                 {countLoading && count === undefined ? (
-                  <span className="inline-block w-8 h-3 bg-[var(--border)] rounded animate-pulse" />
+                  <span className="inline-block w-8 h-3 bgborder rounded animate-pulse" />
                 ) : (
                   <span className="font-mono font-bold text-text-primary">
                     {count ?? 0}
@@ -512,7 +512,7 @@ export default function RolesManagementPage() {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => openGrantPanel(node.code)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-muted hover:text-action-success hover:border-emerald-500/40 transition"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-action-success hover:border-emerald-500/40 transition"
               title={`Grant / revoke '${node.code}' role`}
             >
               <KeyRound className="w-3 h-3" />
@@ -522,7 +522,7 @@ export default function RolesManagementPage() {
               <Link
                 href={graphNode.default_redirect}
                 target="_blank"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-[10px] font-semibold text-purple-300 hover:bg-purple-500/30 transition"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-xs font-semibold text-purple-300 hover:bg-purple-500/30 transition"
                 title={`Open the ${graphNode.display_name} dashboard`}
               >
                 <ArrowUpRight className="w-3 h-3" />
@@ -550,21 +550,21 @@ export default function RolesManagementPage() {
                     {u.name}
                   </span>
                   {u.branch ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-action-success">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-action-success">
                       {u.branch}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-[var(--border)]/40 text-[10px] font-semibold text-text-muted uppercase">
+                    <span className="px-2 py-0.5 rounded-full bgborder/40 text-xs font-semibold text-text-muted uppercase">
                       No branch
                     </span>
                   )}
-                  <label className="flex items-center gap-1.5 text-[10px] text-text-muted font-semibold">
+                  <label className="flex items-center gap-1.5 text-xs text-text-muted font-semibold">
                     Branch
                     <select
                       value={u.branch}
                       disabled={hodBranchBusy === u.id}
                       onChange={(e) => void assignHodBranch(u.id, e.target.value)}
-                      className="min-w-[92px] px-2 py-1.5 rounded-lg bg-bg-elevated border border-border text-[11px] font-mono text-text-primary focus:outline-none focus:border-[var(--action-success)] disabled:opacity-50"
+                      className="min-w23 px-2 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-mono text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
                       aria-label={`Assign branch to ${u.name}`}
                     >
                       <option value="">— none —</option>
@@ -600,7 +600,7 @@ export default function RolesManagementPage() {
           <div className="mt-2 ml-4 border-l-2 border-border pl-4 space-y-2">
             {node.children.map((child) => (
               <div key={child.code} className="relative">
-                <div className="absolute -left-4 top-1/2 h-0.5 w-4 bg-[var(--border)]" />
+                <div className="absolute -left-4 top-1/2 h-0.5 w-4 bgborder" />
                 {renderTreeNode(child, depth + 1)}
               </div>
             ))}
@@ -635,7 +635,7 @@ export default function RolesManagementPage() {
                 default_redirect: "/profile",
               })
             }
-            className="px-4 py-2 min-h-[44px] bg-unit-c hover:bg-purple-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
+            className="px-4 py-2 min-h11 bg-unit-c hover:bg-purple-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Define System Role
           </button>
@@ -661,19 +661,19 @@ export default function RolesManagementPage() {
               <button
                 onClick={() => void refreshGraph()}
                 disabled={countLoading}
-                className="inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
               >
                 <RefreshCw className="w-3 h-3" /> Refresh
               </button>
               <button
                 onClick={expandAll}
-                className="px-3 py-1.5 min-h-[44px] rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-muted hover:text-unit-c transition"
+                className="px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Expand All
               </button>
               <button
                 onClick={collapseAll}
-                className="px-3 py-1.5 min-h-[44px] rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-muted hover:text-unit-c transition"
+                className="px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Collapse All
               </button>
@@ -681,7 +681,7 @@ export default function RolesManagementPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[640px] p-4 space-y-2">
+            <div className="min-w160 p-4 space-y-2">
               {loading ? (
                 <div className="p-8 text-center text-text-muted text-sm animate-pulse">
                   Loading role hierarchy…
@@ -707,7 +707,7 @@ export default function RolesManagementPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[900px]">
+            <table className="w-full text-left text-xs min-w225">
               <thead className="bg-bg-elevated border-b border-border text-text-muted uppercase">
                 <tr>
                   <th className="p-3 font-semibold">Page</th>
@@ -867,7 +867,7 @@ export default function RolesManagementPage() {
                   value={grantSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Search by name, email, or ID…"
-                  className="w-full min-h-[44px] pl-9 pr-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)]"
+                  className="w-full min-h11 pl-9 pr-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-success"
                 />
                 {grantSearch && (
                   <button
@@ -875,7 +875,7 @@ export default function RolesManagementPage() {
                       setGrantSearch("");
                       setGrantResults([]);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center text-text-muted hover:text-action-danger transition"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 min-h11 min-w11 flex items-center justify-center text-text-muted hover:text-action-danger transition"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -903,7 +903,7 @@ export default function RolesManagementPage() {
                         <button
                           onClick={() => grantRole(u)}
                           disabled={grantBusy || hasRole}
-                          className={`px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-bold transition flex items-center justify-center ${
+                          className={`px-3 py-1.5 min-h11 rounded-lg text-xs font-bold transition flex items-center justify-center ${
                             hasRole
                               ? "bg-bg-elevated text-text-muted cursor-not-allowed"
                               : "bg-action-success hover:bg-action-success text-white"
@@ -920,7 +920,7 @@ export default function RolesManagementPage() {
                               ? "Role graph unavailable — assign a replacement role manually"
                               : `Demote to '${roleParents[grantRoleCode]}'`
                           }
-                          className="px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="px-3 py-1.5 min-h11 rounded-lg text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>
@@ -939,7 +939,7 @@ export default function RolesManagementPage() {
               <div className="flex justify-end pt-3 border-t border-border">
                 <button
                   onClick={closeGrantPanel}
-                  className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                  className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
                 >
                   Close
                 </button>
@@ -1016,7 +1016,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, icon_name: e.target.value })
                       }
                       placeholder="e.g. Shield"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
                     />
                   </div>
                   <div>
@@ -1030,7 +1030,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, default_redirect: e.target.value })
                       }
                       placeholder="e.g. /admin"
-                      className="w-full min-h-[44px] px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
                     />
                   </div>
                 </div>
@@ -1039,13 +1039,13 @@ export default function RolesManagementPage() {
                   <button
                     type="button"
                     onClick={() => setEditingRole(null)}
-                    className="px-4 py-2 min-h-[44px] bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bg-[var(--border)] transition"
+                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 min-h-[44px] bg-unit-c text-white rounded-xl text-xs font-semibold hover:bg-purple-600 transition"
+                    className="px-4 py-2 min-h11 bg-unit-c text-white rounded-xl text-xs font-semibold hover:bg-purple-600 transition"
                   >
                     Save Role
                   </button>

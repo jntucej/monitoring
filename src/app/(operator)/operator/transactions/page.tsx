@@ -116,7 +116,7 @@ function OperatorTransactionsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -134,7 +134,7 @@ function OperatorTransactionsInner() {
               { label: "Manual", value: counts?.manual ?? 0, tone: "text-action-warning" },
             ].map((s) => (
               <div key={s.label} className="px-4 py-3 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
                   {s.label}
                 </p>
                 <p className={`text-xl font-bold tabular-nums mt-0.5 ${s.tone}`}>
@@ -151,7 +151,7 @@ function OperatorTransactionsInner() {
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
+                className={`min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   filter === f
                     ? "bg-action-primary/15 text-action-primary"
                     : "text-text-muted hover:text-text-primary"
@@ -192,7 +192,7 @@ function OperatorTransactionsInner() {
                             <span className="ml-1.5 font-mono text-xs text-text-muted">{r.roll}</span>
                           )}
                         </p>
-                        <p className="text-[11px] text-text-muted mt-0.5">
+                        <p className="text-xs text-text-muted mt-0.5">
                           {fmtTime(r.timestamp)} · {r.gate_name || r.gate_id || "—"}
                         </p>
                       </div>
@@ -207,9 +207,9 @@ function OperatorTransactionsInner() {
                           </span>
                         )}
                         {r.scan_type ? (
-                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[10px] text-action-warning">Manual</span>
+                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-xs text-action-warning">Manual</span>
                         ) : r.is_correction ? (
-                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-[10px] text-action-danger">Correction</span>
+                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-xs text-action-danger">Correction</span>
                         ) : null}
                       </div>
                     </div>
@@ -220,7 +220,7 @@ function OperatorTransactionsInner() {
 
               {/* Desktop: table */}
               <div className="hidden sm:block overflow-x-auto min-w-0">
-                <table className="w-full text-sm min-w-[640px]">
+                <table className="w-full text-sm min-w160">
                   <thead>
                     <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
                       <th className="text-left px-3 py-2 font-semibold">Time</th>
@@ -245,7 +245,7 @@ function OperatorTransactionsInner() {
                             </span>
                           )}
                           {r.person_type && (
-                            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-text-muted uppercase">
+                            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-xs text-text-muted uppercase">
                               {r.person_type}
                             </span>
                           )}

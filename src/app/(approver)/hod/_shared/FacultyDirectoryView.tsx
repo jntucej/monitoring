@@ -71,7 +71,7 @@ export function FacultyDirectoryView() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium">{faculty.name || "—"}</p>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-xs text-text-muted">
                       {faculty.employee_details?.designation ?? "Faculty Member"}
                     </p>
                   </div>

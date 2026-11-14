@@ -34,7 +34,7 @@ export const PrincipalStageTag = memo(function PrincipalStageTag({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide border",
         tc.bg,
         tc.text,
         tc.border
@@ -82,15 +82,15 @@ export const PrincipalCatchUpCard = memo(function PrincipalCatchUpCard() {
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center">
               <p className="text-xl font-bold text-action-success">{Number(d.approvalsCleared ?? 0)}</p>
-              <p className="text-[10px] text-text-muted">Cleared</p>
+              <p className="text-xs text-text-muted">Cleared</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-action-warning">{Number(d.pendingSince ?? 0)}</p>
-              <p className="text-[10px] text-text-muted">New Pending</p>
+              <p className="text-xs text-text-muted">New Pending</p>
             </div>
             <div className="text-center">
               <p className="text-xl font-bold text-action-danger">{Number(d.newEscalations ?? 0)}</p>
-              <p className="text-[10px] text-text-muted">Escalated</p>
+              <p className="text-xs text-text-muted">Escalated</p>
             </div>
           </div>
           {(d.openAlerts as unknown[] | undefined)?.length ? (
@@ -159,7 +159,7 @@ export const PrincipalAgingStrip = memo(function PrincipalAgingStrip() {
                   <p className="text-sm font-medium text-text-primary truncate">
                     {String(r.ticket_number ?? "—")}
                   </p>
-                  <p className="text-[10px] text-text-muted">
+                  <p className="text-xs text-text-muted">
                     {String(r.workflow_type ?? "").replace(/_/g, " ")} ·{" "}
                     {sla ? getTimeAgo(sla.toISOString()) : "SLA pending"}
                   </p>
@@ -210,7 +210,7 @@ export const PrincipalQuickWins = memo(function PrincipalQuickWins() {
               <span className="text-xs font-medium text-text-primary flex-1 truncate">
                 {String(r.name ?? "rule")}
               </span>
-              <span className="text-[10px] text-text-muted shrink-0">
+              <span className="text-xs text-text-muted shrink-0">
                 → {String(r.delegate_role ?? "—")}
               </span>
             </li>
@@ -254,15 +254,15 @@ export const PrincipalWeekDigest = memo(function PrincipalWeekDigest() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="text-center">
               <p className="text-lg font-bold text-action-warning">{totalPending}</p>
-              <p className="text-[10px] text-text-muted">Pending</p>
+              <p className="text-xs text-text-muted">Pending</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-action-success">{totalApproved}</p>
-              <p className="text-[10px] text-text-muted">Cleared</p>
+              <p className="text-xs text-text-muted">Cleared</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-action-danger">{totalEscalated}</p>
-              <p className="text-[10px] text-text-muted">Escalated</p>
+              <p className="text-xs text-text-muted">Escalated</p>
             </div>
           </div>
           {series.length > 0 && (
@@ -279,7 +279,7 @@ export const PrincipalWeekDigest = memo(function PrincipalWeekDigest() {
                         style={{ height: `${h}%` }}
                         title={`${s.count} requests`}
                       />
-                      <span className="text-[9px] text-text-muted">{s.label}</span>
+                      <span className="text-xs text-text-muted">{s.label}</span>
                     </div>
                   );
                 })}
@@ -329,11 +329,11 @@ export const PrincipalDelegationInForce = memo(function PrincipalDelegationInFor
                 <span className="text-xs font-medium text-text-primary flex-1 truncate">
                   {String(r.name ?? "rule")}
                 </span>
-                <span className="text-[10px] text-text-muted">
+                <span className="text-xs text-text-muted">
                   {r.expires_at ? `expires ${String(r.expires_at).slice(0, 10)}` : "indefinite"}
                 </span>
               </div>
-              <p className="mt-1 text-[10px] text-text-muted">
+              <p className="mt-1 text-xs text-text-muted">
                 Scope: {String(r.scope ?? "—")} · Delegate: {String(r.delegate_role ?? "—")}
               </p>
             </div>
@@ -393,10 +393,10 @@ export const PrincipalSlaHeatmap = memo(function PrincipalSlaHeatmap() {
               className={cn("rounded-lg p-3 text-center border border-transparent", cellColor(c.rate))}
             >
               <p className="text-lg font-bold">{c.rate}%</p>
-              <p className="text-[10px] uppercase tracking-wide">
+              <p className="text-xs uppercase tracking-wide">
                 {c.stage.replace(/_/g, " ")}
               </p>
-              <p className="text-[9px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {c.total} tickets · {c.breached} breached
               </p>
             </div>

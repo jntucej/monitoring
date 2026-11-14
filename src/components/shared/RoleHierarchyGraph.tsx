@@ -149,20 +149,20 @@ export function RoleHierarchyGraph({
                 {node.code}
               </span>
               {hasChildren && (
-                <span className="text-[10px] text-text-muted uppercase tracking-wider">
+                <span className="text-xs text-text-muted uppercase tracking-wider">
                   {node.children.length} sub-role{node.children.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
             <div className="mt-0.5 flex items-center gap-3 flex-wrap">
-              <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">
+              <span className="inline-flex items-center gap-1 text-xs text-text-muted">
                 <Users className="w-3 h-3" />
                 <span className="font-mono font-bold text-white tabular-nums">{members}</span>
                 user{members === 1 ? "" : "s"}
               </span>
               {showOnCampus && (
                 <span
-                  className={`inline-flex items-center gap-1 text-[11px] ${
+                  className={`inline-flex items-center gap-1 text-xs ${
                     onCampus > 0 ? "text-action-success" : "text-text-muted"
                   }`}
                 >
@@ -193,16 +193,16 @@ export function RoleHierarchyGraph({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-[11px] text-text-secondary">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary">
             <ShieldCheck className="w-3.5 h-3.5 text-action-success" />
             {totals.roles} roles
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-[11px] text-text-secondary">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary">
             <Users className="w-3.5 h-3.5 text-action-success" />
             {totals.members} total users
           </span>
           {showOnCampus && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-action-success">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-action-success">
               <Lock className="w-3.5 h-3.5" />
               {totals.onCampus} in campus
             </span>
@@ -212,14 +212,14 @@ export function RoleHierarchyGraph({
           <button
             type="button"
             onClick={expandAll}
-            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-secondary hover:text-white hover:border-border transition"
+            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-secondary hover:text-white hover:border-border transition"
           >
             Expand All
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-[10px] font-semibold text-text-secondary hover:text-white hover:border-border transition"
+            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-secondary hover:text-white hover:border-border transition"
           >
             Collapse All
           </button>

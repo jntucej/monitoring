@@ -191,7 +191,7 @@ export default function SysAdminAccessKeysPage() {
           </h2>
           <div className="grid sm:grid-cols-[1fr_auto_auto] gap-3 items-end">
             <div>
-              <label className="block text-[11px] font-semibold text-text-muted mb-1 uppercase tracking-wide">Roll / Employee ID</label>
+              <label className="block text-xs font-semibold text-text-muted mb-1 uppercase tracking-wide">Roll / Employee ID</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
@@ -199,16 +199,16 @@ export default function SysAdminAccessKeysPage() {
                   value={rollInput}
                   onChange={(e) => setRollInput(e.target.value.toUpperCase())}
                   placeholder="e.g. 24JJ1A0501"
-                  className="w-full pl-9 pr-3 py-2 bg-bg-base border border-border rounded-lg font-mono text-sm text-text-primary placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]"
+                  className="w-full pl-9 pr-3 py-2 bg-bg-base border border-border rounded-lg font-mono text-sm text-text-primary placeholder-slate-600 focus:outline-none focus:borderaction-success"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-text-muted mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
+              <label className="block text-xs font-semibold text-text-muted mb-1 uppercase tracking-wide" htmlFor="purpose">Purpose</label>
               <select id="purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-[var(--action-success)]"
+                className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:borderaction-success"
               >
                 {PURPOSES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
@@ -228,7 +228,7 @@ export default function SysAdminAccessKeysPage() {
         {/* Generated code display */}
         {generated && (
           <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/30 space-y-2">
-            <div className="text-[11px] uppercase font-bold text-text-muted tracking-wider flex items-center justify-between">
+            <div className="text-xs uppercase font-bold text-text-muted tracking-wider flex items-center justify-between">
               <span>New code for {generated.userName ? `${generated.userName} (` : ""}{generated.userRoll}{generated.userName ? ")" : ""}</span>
               <span className="flex items-center gap-1 text-action-success normal-case font-mono text-xs">
                 <Clock className="w-3.5 h-3.5" /> {formatTs(generated.expiresAt)}
@@ -241,7 +241,7 @@ export default function SysAdminAccessKeysPage() {
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="text-[11px] text-action-warning">Share at <code className="font-mono">/bootstrap</code> with the student&apos;s roll number and this code.</p>
+            <p className="text-xs text-action-warning">Share at <code className="font-mono">/bootstrap</code> with the student&apos;s roll number and this code.</p>
           </div>
         )}
 
@@ -263,7 +263,7 @@ export default function SysAdminAccessKeysPage() {
           <div className="border border-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-bg-base text-[10px] uppercase tracking-wider text-text-muted">
+                <tr className="bg-bg-base text-xs uppercase tracking-wider text-text-muted">
                   <th className="px-4 py-2.5 text-left">User</th>
                   <th className="px-4 py-2.5 text-left">Purpose</th>
                   <th className="px-4 py-2.5 text-left">Issued</th>
@@ -295,13 +295,13 @@ export default function SysAdminAccessKeysPage() {
                       <tr key={c.id} className="hover:bg-bg-base/50">
                         <td className="px-4 py-2.5">
                           <div className="font-mono text-xs text-action-success">{c.user_roll || c.user_id?.slice(0, 8)}</div>
-                          {c.user_name && <div className="text-[11px] text-text-muted">{c.user_name}</div>}
+                          {c.user_name && <div className="text-xs text-text-muted">{c.user_name}</div>}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-text-secondary">{c.purpose}</td>
                         <td className="px-4 py-2.5 text-xs text-text-muted">{formatTs(c.created_at)}</td>
                         <td className="px-4 py-2.5 text-xs text-text-muted">{formatTs(c.expires_at)}</td>
                         <td className="px-4 py-2.5">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
                             status === "Active" ? "bg-emerald-500/15 text-action-success"
                             : status === "Used" ? "bg-bg-elevated/15 text-text-muted"
                             : "bg-rose-500/15 text-action-danger"
@@ -314,7 +314,7 @@ export default function SysAdminAccessKeysPage() {
                             <button
                               onClick={() => handleInvalidate(c.id)}
                               title="Invalidate this code"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-action-danger hover:bg-rose-500/10 border border-rose-500/30"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-action-danger hover:bg-rose-500/10 border border-rose-500/30"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Invalidate
                             </button>

@@ -116,7 +116,7 @@ function VisitorHistoryInner() {
                       <p className="text-xs text-text-muted truncate">Purpose: {l.purpose}</p>
                     )}
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] bg-bg-elevated/40 text-text-secondary shrink-0">completed</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated/40 text-text-secondary shrink-0">completed</span>
                 </div>
               ))}
             </div>

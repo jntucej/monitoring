@@ -89,11 +89,11 @@ export function HealthDashboard() {
   const getSeverityBadge = (severity: "info" | "warning" | "critical") => {
     switch (severity) {
       case "critical":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">CRITICAL</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">CRITICAL</span>;
       case "warning":
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">WARNING</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">WARNING</span>;
       default:
-        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-action-info border border-sky-500/30">INFO</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-sky-500/20 text-action-info border border-sky-500/30">INFO</span>;
     }
   };
 
@@ -129,7 +129,7 @@ export function HealthDashboard() {
             <Users className="w-4 h-4 text-action-info" />
           </div>
           <p className="text-2xl font-black text-text-primary">{health?.metrics?.activeUsers ?? "-"}</p>
-          <p className="text-[10px] text-text-muted">{health?.metrics?.activeSessions ?? 0} active sessions</p>
+          <p className="text-xs text-text-muted">{health?.metrics?.activeSessions ?? 0} active sessions</p>
         </div>
 
         <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
@@ -138,7 +138,7 @@ export function HealthDashboard() {
             <Zap className="w-4 h-4 text-action-warning" />
           </div>
           <p className="text-2xl font-black text-text-primary">{health?.metrics?.requestsPerMinute ?? "-"}</p>
-          <p className="text-[10px] text-text-muted">Live API throughput</p>
+          <p className="text-xs text-text-muted">Live API throughput</p>
         </div>
 
         <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
@@ -149,7 +149,7 @@ export function HealthDashboard() {
           <p className="text-2xl font-black text-text-primary">
             {health?.metrics?.avgResponseTime !== undefined ? `${Math.round(health.metrics.avgResponseTime)} ms` : "—"}
           </p>
-          <p className="text-[10px] text-text-muted">
+          <p className="text-xs text-text-muted">
             {health?.metrics?.avgResponseTime ? (health.metrics.avgResponseTime < 50 ? "Optimal" : health.metrics.avgResponseTime < 200 ? "Acceptable" : "Elevated") : "Capturing data..."}
           </p>
         </div>
@@ -162,7 +162,7 @@ export function HealthDashboard() {
           <p className="text-2xl font-black text-text-primary">
             {health?.metrics?.errorRate !== undefined ? `${(health.metrics.errorRate * 100).toFixed(2)}%` : "0.00%"}
           </p>
-          <p className="text-[10px] text-text-muted">Threshold: &lt; 5.00%</p>
+          <p className="text-xs text-text-muted">Threshold: &lt; 5.00%</p>
         </div>
       </div>
       {/* Component Cards */}
@@ -183,11 +183,11 @@ export function HealthDashboard() {
               <span className="font-mono text-text-primary font-medium">{health?.components?.database?.latency ?? 0} ms</span>
             </div>
             {health?.components?.database?.error && (
-              <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-action-danger font-mono text-[10px]">
+              <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-action-danger font-mono text-xs">
                 {health.components.database.error}
               </div>
             )}
-            <p className="text-[10px] text-text-muted mt-2 flex items-center gap-1">
+            <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
               Click to view audit telemetry →
             </p>
           </div>
@@ -212,7 +212,7 @@ export function HealthDashboard() {
               <span className="text-text-muted">Total Gates</span>
               <span className="font-mono text-text-primary font-bold">{health?.components?.gateways?.total ?? 0}</span>
             </div>
-            <p className="text-[10px] text-text-muted mt-2 flex items-center gap-1">
+            <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
               Click to manage gate hardware →
             </p>
           </div>
@@ -231,15 +231,15 @@ export function HealthDashboard() {
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-text-muted">Auth & JWT Engine</span>
-              <span className="text-action-success font-bold text-[10px]">
+              <span className="text-action-success font-bold text-xs">
                 {health?.components?.services?.auth?.status === "healthy" ? "Operational" : "Degraded"}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-text-muted">Background Worker</span>
-              <span className="text-action-success font-bold text-[10px]">Operational</span>
+              <span className="text-action-success font-bold text-xs">Operational</span>
             </div>
-            <p className="text-[10px] text-text-muted mt-2 flex items-center gap-1">
+            <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
               Click to manage security policies →
             </p>
           </div>
@@ -270,7 +270,7 @@ export function HealthDashboard() {
                   <tr key={alert.id} className="hover:bg-bg-elevated/50 transition-colors">
                     <td className="py-2.5">{getSeverityBadge(alert.severity)}</td>
                     <td className="py-2.5 font-medium text-text-primary">{alert.message}</td>
-                    <td className="py-2.5 text-right font-mono text-text-muted text-[10px]">
+                    <td className="py-2.5 text-right font-mono text-text-muted text-xs">
                       {new Date(alert.timestamp).toLocaleString()}
                     </td>
                   </tr>

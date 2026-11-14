@@ -157,7 +157,7 @@ function BootstrapPageInner() {
                     placeholder="e.g. 24JJ1A0501 or EMP-001"
                     required
                     autoCapitalize="characters"
-                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)] font-medium uppercase"
+                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success font-medium uppercase"
                   />
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
@@ -180,7 +180,7 @@ function BootstrapPageInner() {
                   />
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
-                <p className="text-[10px] text-emerald-400/70">Locked to your personalized activation link. You cannot change this.</p>
+                <p className="text-xs text-emerald-400/70">Locked to your personalized activation link. You cannot change this.</p>
               </div>
             )}
 
@@ -192,7 +192,7 @@ function BootstrapPageInner() {
                     Activation Code *
                   </label>
                   {urlCode && (
-                    <span className="text-[10px] text-action-success font-medium">Pre-filled from link</span>
+                    <span className="text-xs text-action-success font-medium">Pre-filled from link</span>
                   )}
                 </div>
                 <div className="relative">
@@ -204,7 +204,7 @@ function BootstrapPageInner() {
                     placeholder="e.g. ABCD1234"
                     required
                     maxLength={12}
-                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)] font-bold uppercase"
+                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success font-bold uppercase"
                   />
                   <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
@@ -232,7 +232,7 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="At least 8 characters"
-                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)]"
+                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success"
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
@@ -252,7 +252,7 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="Re-enter your password"
-                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--action-success)]"
+                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success"
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>

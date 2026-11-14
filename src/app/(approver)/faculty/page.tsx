@@ -93,7 +93,7 @@ function FacultyInner() {
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
         <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
             <PencilLine className="w-3.5 h-3.5" /> Your classes
           </p>
           <div className="flex flex-wrap gap-1.5 min-w-0">
@@ -119,7 +119,7 @@ function FacultyInner() {
       ) : activeClass ? (
         /* Single resolved class banner */
         <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+          <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5" /> Your class
           </p>
           <p className="text-sm font-semibold text-text-primary mt-1">

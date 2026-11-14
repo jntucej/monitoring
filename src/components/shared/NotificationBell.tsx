@@ -145,7 +145,7 @@ export function NotificationBell() {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-action-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-action-danger text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -239,7 +239,7 @@ export function NotificationBell() {
                           <h4 className={`text-xs font-semibold truncate ${!n.readAt ? 'text-text-primary' : 'text-text-muted'}`}>
                             {n.title}
                           </h4>
-                          <span className="text-[10px] text-text-muted shrink-0">
+                          <span className="text-xs text-text-muted shrink-0">
                             {getTimeAgo(n.createdAt || (n as any).created_at)}
                           </span>
                         </div>
@@ -249,7 +249,7 @@ export function NotificationBell() {
                         {(n as any).action_url && (
                           <a
                             href={(n as any).action_url}
-                            className="inline-flex items-center gap-1 text-[11px] text-action-info hover:text-action-info mt-2 font-medium"
+                            className="inline-flex items-center gap-1 text-xs text-action-info hover:text-action-info mt-2 font-medium"
                           >
                             View details
                             <ExternalLink className="w-3 h-3" />

@@ -70,7 +70,7 @@ export function SectionCard({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-wider text-white">{title}</h2>
-          {subtitle && <p className="text-[11px] text-text-muted mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -215,7 +215,7 @@ export function MenuItemsTab() {
           <button
           type="button"
             onClick={startNew}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-[11px] font-bold transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold transition"
           >
             <Plus className="w-3.5 h-3.5" /> Add item
           </button>
@@ -229,9 +229,9 @@ export function MenuItemsTab() {
           <p className="py-6 text-center text-xs text-text-muted">No menu items yet. Add the first one.</p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <table className="w-full text-sm min-w-[480px]">
+            <table className="w-full text-sm min-w120">
               <thead>
-                <tr className="text-left border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <tr className="text-left border-b border-border text-xs font-bold uppercase tracking-wider text-text-muted">
                   <th className="py-2.5 pr-2">#</th>
                   <th className="py-2.5 px-2">Code</th>
                   <th className="py-2.5 px-2">Label</th>
@@ -251,11 +251,11 @@ export function MenuItemsTab() {
                     <td className="py-2.5 px-2 font-semibold text-white">{it.label}</td>
                     <td className="py-2.5 px-2">
                       {it.isPrimary ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-action-success text-[10px] font-bold border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-action-success text-xs font-bold border border-emerald-500/20">
                           <Check className="w-3 h-3" /> Primary
                         </span>
                       ) : (
-                        <span className="text-[11px] text-text-muted">Sub-item</span>
+                        <span className="text-xs text-text-muted">Sub-item</span>
                       )}
                     </td>
                     <td className="py-2.5 pl-2">
@@ -298,34 +298,34 @@ export function MenuItemsTab() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Code</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Code</span>
               <input
                 value={editing.code}
                 onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
                 placeholder="RICE"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:borderaction-success"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Label</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Label</span>
               <input
                 value={editing.label}
                 onChange={(e) => setEditing({ ...editing, label: e.target.value })}
                 placeholder="Rice"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Sort order</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Sort order</span>
               <input
                 type="number"
                 value={editing.sortOrder}
                 onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) || 0 })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
               />
             </label>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Type</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Type</span>
               <div className="mt-1 flex gap-2">
                 <button
                 type="button"
@@ -574,20 +574,20 @@ export function MealDaysTab() {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Meal date</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Meal date</span>
             <input
               type="date"
               value={draft.mealDate}
               onChange={(e) => setDraft({ ...draft, mealDate: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
             />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Day type</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Day type</span>
             <select
               value={draft.dayType}
               onChange={(e) => setDraft({ ...draft, dayType: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
             >
               {DAY_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -597,32 +597,32 @@ export function MealDaysTab() {
             </select>
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Window opens</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Window opens</span>
             <input
               type="time"
               value={draft.windowOpens}
               onChange={(e) => setDraft({ ...draft, windowOpens: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
             />
           </label>
           <label className="block">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Window closes</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Window closes</span>
             <input
               type="time"
               value={draft.windowCloses}
               onChange={(e) => setDraft({ ...draft, windowCloses: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
             />
           </label>
         </div>
 
         {/* Items multi-select */}
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+          <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
             Items on this day
           </span>
           {items.length === 0 ? (
-            <p className="text-[11px] text-text-muted mt-1">No menu items available yet.</p>
+            <p className="text-xs text-text-muted mt-1">No menu items available yet.</p>
           ) : (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {items.map((it) => {
@@ -632,7 +632,7 @@ export function MealDaysTab() {
                     type="button"
                     key={it.id}
                     onClick={() => toggleItem(it.id)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition ${
                       on
                         ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
                         : "bg-bg-surface border-border text-text-muted hover:border-emerald-500/30"
@@ -684,9 +684,9 @@ export function MealDaysTab() {
           <p className="py-6 text-center text-xs text-text-muted">No meal days scheduled.</p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <table className="w-full text-sm min-w-[560px]">
+            <table className="w-full text-sm min-w140">
               <thead>
-                <tr className="text-left border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <tr className="text-left border-b border-border text-xs font-bold uppercase tracking-wider text-text-muted">
                   <th className="py-2.5 pr-2">Date</th>
                   <th className="py-2.5 px-2">Type</th>
                   <th className="py-2.5 px-2">Window</th>
@@ -698,10 +698,10 @@ export function MealDaysTab() {
                 {sortedDays.map((d) => (
                   <tr key={d.id} className="hover:bg-bg-elevated/30 transition">
                     <td className="py-2.5 pr-2 font-semibold text-white">{fmtDate(d.mealDate)}</td>
-                    <td className="py-2.5 px-2 text-[11px] text-text-muted">
+                    <td className="py-2.5 px-2 text-xs text-text-muted">
                       {(d.dayType ?? "").replace(/_/g, " ") || "—"}
                     </td>
-                    <td className="py-2.5 px-2 text-[11px] text-text-muted tabular-nums">
+                    <td className="py-2.5 px-2 text-xs text-text-muted tabular-nums">
                       {isoToTime(d.windowOpens) || "—"} – {isoToTime(d.windowCloses) || "—"}
                     </td>
                     <td className="py-2.5 px-2">
@@ -711,13 +711,13 @@ export function MealDaysTab() {
                           return (
                             <span
                               key={iid}
-                              className="px-1.5 py-0.5 rounded bg-bg-elevated/60 border border-border text-[10px] text-text-secondary"
+                              className="px-1.5 py-0.5 rounded bg-bg-elevated/60 border border-border text-xs text-text-secondary"
                             >
                               {it?.label ?? iid.slice(0, 6)}
                             </span>
                           );
                         })}
-                        {(d.itemIds ?? []).length === 0 && <span className="text-[11px] text-text-muted">—</span>}
+                        {(d.itemIds ?? []).length === 0 && <span className="text-xs text-text-muted">—</span>}
                       </div>
                     </td>
                     <td className="py-2.5 pl-2">
@@ -760,20 +760,20 @@ export function MealDaysTab() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Meal date</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Meal date</span>
               <input
                 type="date"
                 value={editingDraft.mealDate}
                 onChange={(e) => setEditingDraft({ ...editingDraft, mealDate: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Day type</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Day type</span>
               <select
                 value={editingDraft.dayType}
                 onChange={(e) => setEditingDraft({ ...editingDraft, dayType: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
               >
                 {DAY_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -783,28 +783,28 @@ export function MealDaysTab() {
               </select>
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Window opens</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Window opens</span>
               <input
                 type="time"
                 value={editingDraft.windowOpens}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowOpens: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
               />
             </label>
             <label className="block">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Window closes</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Window closes</span>
               <input
                 type="time"
                 value={editingDraft.windowCloses}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowCloses: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:border-[var(--action-success)]"
+                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
               />
             </label>
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Items</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Items</span>
             {items.length === 0 ? (
-              <p className="text-[11px] text-text-muted mt-1">No menu items.</p>
+              <p className="text-xs text-text-muted mt-1">No menu items.</p>
             ) : (
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {items.map((it) => {
@@ -814,7 +814,7 @@ export function MealDaysTab() {
                         key={it.id}
                         type="button"
                         onClick={() => toggleEditItem(it.id)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition ${
                         on
                           ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
                           : "bg-bg-surface border-border text-text-muted hover:border-emerald-500/30"
@@ -993,9 +993,9 @@ export function TodayTab() {
                   <div className="flex items-center gap-2 min-w-0">
                     {it.code === "VEG" ? <Leaf className="w-3.5 h-3.5 text-action-success shrink-0" /> : <Beef className="w-3.5 h-3.5 text-action-danger shrink-0" />}
                     <span className="font-semibold text-white text-xs truncate">{it.label}</span>
-                    <span className="font-mono text-[10px] text-text-muted bg-bg-elevated/60 border border-border rounded px-1.5 py-0.5">{it.code}</span>
+                    <span className="font-mono text-xs text-text-muted bg-bg-elevated/60 border border-border rounded px-1.5 py-0.5">{it.code}</span>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase ${it.isAvailable ? "text-action-success" : "text-text-muted line-through"}`}>
+                  <span className={`text-xs font-bold uppercase ${it.isAvailable ? "text-action-success" : "text-text-muted line-through"}`}>
                     {it.isAvailable ? "Available" : "Unavailable"}
                   </span>
                 </li>
@@ -1010,25 +1010,25 @@ export function TodayTab() {
               <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
                 <Users className="w-4 h-4 text-action-info mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{issued}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Issued</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Issued</p>
               </div>
               <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
                 <Check className="w-4 h-4 text-action-success mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{confirmed}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Verified</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Verified</p>
               </div>
               <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
                 <Ticket className="w-4 h-4 text-action-warning mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{remaining}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Remaining</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Remaining</p>
               </div>
             </div>
             <div>
               <label className="block">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Final headcount</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Final headcount</span>
                 <div className="mt-1 flex gap-2">
                   <input type="number" min={0} value={headcount} onChange={(e) => setHeadcount(e.target.value)} placeholder={String(confirmed)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[var(--action-success)]" />
+                    className="flex-1 px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success" />
                   <button type="button" onClick={() => setConfirmFinalize(true)} disabled={!messDayId || finalizing}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition">
                     {finalizing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />} Finalize Day
@@ -1053,11 +1053,11 @@ export function TodayTab() {
           <div className="space-y-2">
             {trend.map((r) => (
               <div key={r.messDayId} className="flex items-center gap-2">
-                <span className="text-[11px] text-text-muted w-24 shrink-0 tabular-nums">{r.mealDate.slice(5)}</span>
+                <span className="text-xs text-text-muted w-24 shrink-0 tabular-nums">{r.mealDate.slice(5)}</span>
                 <div className="flex-1 h-2.5 rounded-full bg-bg-elevated overflow-hidden">
                   <div className="h-full bg-emerald-500/80 rounded-full transition-all" style={{ width: `${Math.round((r.servedTotal / maxServed) * 100)}%` }} />
                 </div>
-                <span className="text-[11px] text-white font-bold tabular-nums w-10 text-right">{r.servedTotal}</span>
+                <span className="text-xs text-white font-bold tabular-nums w-10 text-right">{r.servedTotal}</span>
               </div>
             ))}
           </div>
@@ -1175,7 +1175,7 @@ export function AnalyticsTab() {
           type="button"
             onClick={() => void loadAnalytics()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-[11px] font-bold transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-xs font-bold transition disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             Reload
@@ -1192,9 +1192,9 @@ export function AnalyticsTab() {
           </p>
         ) : (
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <table className="w-full text-sm min-w-[620px]">
+            <table className="w-full text-sm min-w155">
               <thead>
-                <tr className="text-left border-b border-border text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <tr className="text-left border-b border-border text-xs font-bold uppercase tracking-wider text-text-muted">
                   <th className="py-2.5 pr-2">Date</th>
                   <th className="py-2.5 px-2">Total</th>
                   <th className="py-2.5 px-2">Declared</th>
@@ -1229,12 +1229,12 @@ export function AnalyticsTab() {
                               />
                               <div className="h-full bg-action-danger flex-1" />
                             </div>
-                            <span className="text-[10px] text-text-muted tabular-nums">
+                            <span className="text-xs text-text-muted tabular-nums">
                               {veg}/{non}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-[11px] text-text-muted">{r.error ?? "—"}</span>
+                          <span className="text-xs text-text-muted">{r.error ?? "—"}</span>
                         )}
                       </td>
                     </tr>

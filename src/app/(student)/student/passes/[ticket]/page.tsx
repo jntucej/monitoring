@@ -37,7 +37,7 @@ export default function PassLifecyclePage() {
     <div className="mx-auto max-w-2xl space-y-4 p-4">
       <Link
         href="/student/passes"
-        className="inline-flex items-center gap-1 text-sm text-[var(--action-primary)]"
+        className="inline-flex items-center gap-1 text-sm textaction-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back to passes
       </Link>

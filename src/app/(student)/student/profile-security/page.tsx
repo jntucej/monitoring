@@ -50,7 +50,7 @@ function StudentProfileSecurityInner() {
               <p className="text-xs text-text-muted mt-0.5">
                 Set or update your login password. You will be signed out of all devices after a change.
               </p>
-              <p className="text-[10px] font-bold text-action-primary mt-1.5 flex items-center gap-1">
+              <p className="text-xs font-bold text-action-primary mt-1.5 flex items-center gap-1">
                 Change password <ArrowRight className="w-3 h-3" />
               </p>
             </div>
@@ -69,7 +69,7 @@ function StudentProfileSecurityInner() {
               <p className="text-xs text-text-muted mt-0.5">
                 Choose which events you want notified for — passes, leave approvals, curfew, announcements.
               </p>
-              <p className="text-[10px] font-bold text-sky-500 mt-1.5 flex items-center gap-1">
+              <p className="text-xs font-bold text-sky-500 mt-1.5 flex items-center gap-1">
                 Configure channels <ArrowRight className="w-3 h-3" />
               </p>
             </div>
@@ -88,7 +88,7 @@ function StudentProfileSecurityInner() {
               <p className="text-xs text-text-muted mt-0.5">
                 Review where you are signed in. Sign out of any unfamiliar device immediately.
               </p>
-              <p className="text-[10px] font-bold text-action-warning mt-1.5 flex items-center gap-1">
+              <p className="text-xs font-bold text-action-warning mt-1.5 flex items-center gap-1">
                 Review sessions <ArrowRight className="w-3 h-3" />
               </p>
             </div>

@@ -106,7 +106,7 @@ const api = useApi();
             id="passType"
             value={passType || passTypes[0]?.code || ""}
             onChange={(e) => setPassType(e.target.value)}
-            className="mt-1 block w-full rounded-md border-border bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus:border-[var(--action-info)] focus:outline-none focus:ring-[var(--action-info)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border-border bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus:borderaction-info focus:outline-none focus:ringaction-info sm:text-sm"
             disabled={loadingPassTypes}
             required
           >
@@ -152,13 +152,13 @@ const api = useApi();
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="Optional details for the admin…"
-            className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-white shadow-sm focus:border-[var(--action-info)] focus:ring-[var(--action-info)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-white shadow-sm focus:borderaction-info focus:ringaction-info sm:text-sm"
           ></textarea>
         </div>
         <button
           type="submit"
           disabled={busy}
-          className="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-[var(--action-info)] focus:ring-offset-2 disabled:opacity-50"
+          className="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ringaction-info focus:ring-offset-2 disabled:opacity-50"
         >
           {busy ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Ticket className="mr-2 h-5 w-5" />}
           Request Pass

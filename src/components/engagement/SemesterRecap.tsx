@@ -217,7 +217,7 @@ export function SemesterRecap() {
     <WidgetBoundary title="Semester Recap">
       <section
         aria-label="Semester recap"
-        className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 via-[var(--bg-surface)] to-violet-500/10 p-5 min-w-0"
+        className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 viabg-surface to-violet-500/10 p-5 min-w-0"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export function SemesterRecap() {
               <h2 className="text-sm font-bold text-text-primary">
                 {data?.periodLabel ?? "Semester Recap"}
               </h2>
-              <p className="text-[10px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 Your highlight card — no sensitive details included
               </p>
             </div>
@@ -237,7 +237,7 @@ export function SemesterRecap() {
             type="button"
             onClick={() => void handleShare()}
             disabled={!data}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
           >
             {copied ? (
               <CheckCircle2 className="h-3.5 w-3.5 text-action-success" aria-hidden />
@@ -250,7 +250,7 @@ export function SemesterRecap() {
             type="button"
             onClick={() => void handleDownload()}
             disabled={!data}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-[11px] font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" aria-hidden />
             Download card
@@ -268,7 +268,7 @@ export function SemesterRecap() {
           <>
             <p className="mt-4 text-lg font-bold text-text-primary">
               {data.userName}
-              <span className="ml-2 rounded-full bg-[var(--bg-raised)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-text-muted">
+              <span className="ml-2 rounded-full bg-[var(--bg-raised)] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
                 {data.role}
               </span>
             </p>
@@ -277,7 +277,7 @@ export function SemesterRecap() {
               <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
                 <CalendarDays className="mx-auto h-4 w-4 text-action-info" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">{data.eventsRegistered}</p>
-                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                <p className="text-xs uppercase tracking-wide text-text-muted">
                   Events joined
                 </p>
               </div>
@@ -286,7 +286,7 @@ export function SemesterRecap() {
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.earnedAchievements.length}
                 </p>
-                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                <p className="text-xs uppercase tracking-wide text-text-muted">
                   Badges earned
                 </p>
               </div>
@@ -295,7 +295,7 @@ export function SemesterRecap() {
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.completedGoals}/{data.totalGoals}
                 </p>
-                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                <p className="text-xs uppercase tracking-wide text-text-muted">
                   Goals done
                 </p>
               </div>
@@ -305,7 +305,7 @@ export function SemesterRecap() {
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {data.completedEvents.length > 0 && (
                   <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Events
                     </p>
                     <ul className="mt-1.5 space-y-1 text-xs text-text-primary">
@@ -319,7 +319,7 @@ export function SemesterRecap() {
                 )}
                 {data.earnedAchievements.length > 0 && (
                   <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Badges
                     </p>
                     <ul className="mt-1.5 space-y-1 text-xs text-text-primary">

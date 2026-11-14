@@ -111,7 +111,7 @@ function SysadminCronInner() {
                       </td>
                       <td className="p-3 font-mono text-xs text-text-muted">{j.cron_expression ?? "—"}</td>
                       <td className="p-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[11px] ${j.enabled ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${j.enabled ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
                           {j.enabled ? "Enabled" : "Disabled"}
                         </span>
                       </td>
@@ -142,7 +142,7 @@ function SysadminCronInner() {
             <div className="divide-y divide-border">
               {runs.map((r) => (
                 <div key={r.id} className="p-3 flex items-center gap-3">
-                  <span className={`px-2 py-0.5 rounded-full text-[11px] shrink-0 ${statusTone(r.status)}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs shrink-0 ${statusTone(r.status)}`}>
                     {r.status}
                   </span>
                   <p className="flex-1 text-xs text-text-muted">

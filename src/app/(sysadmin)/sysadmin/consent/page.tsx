@@ -78,7 +78,7 @@ function SysadminConsentInner() {
                       {s.granted} active · {s.revoked} revoked · {s.total} total
                     </p>
                   </div>
-                  <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] text-action-primary">
+                  <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary">
                     {s.total > 0 ? `${Math.round((s.granted / s.total) * 100)}% active` : "—"}
                   </span>
                 </div>
@@ -106,7 +106,7 @@ function SysadminConsentInner() {
                   <p className="text-sm font-medium text-text-primary">{row.cat}</p>
                   <p className="text-xs text-text-muted">Scope: {row.scope}</p>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-[11px] text-action-primary shrink-0">
+                <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary shrink-0">
                   {row.retention}
                 </span>
               </div>

@@ -50,7 +50,7 @@ function SectionPanel({ section, data, loading }: { section: keyof HealthData; d
       return (
         <div className="space-y-2">
           <p className="text-xs text-text-muted">24h average API error rate: <span className="font-semibold text-text-primary">{(avg * 100).toFixed(2)}%</span></p>
-          <p className="text-xs text-text-muted">Last 5 samples: <span className="font-mono text-[10px] text-text-primary">{rate.slice(-5).map((v) => `${Math.round(v * 100)}%`).join(" · ")}</span></p>
+          <p className="text-xs text-text-muted">Last 5 samples: <span className="font-mono text-xs text-text-primary">{rate.slice(-5).map((v) => `${Math.round(v * 100)}%`).join(" · ")}</span></p>
         </div>
       );
     }
@@ -60,11 +60,11 @@ function SectionPanel({ section, data, loading }: { section: keyof HealthData; d
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="rounded-lg border border-border bg-bg-surface p-2">
-            <p className="text-[10px] uppercase text-text-muted">Active Conns</p>
+            <p className="text-xs uppercase text-text-muted">Active Conns</p>
             <p className="text-lg font-semibold text-text-primary">{db.conns}</p>
           </div>
           <div className="rounded-lg border border-border bg-bg-surface p-2">
-            <p className="text-[10px] uppercase text-text-muted">Pool Slots</p>
+            <p className="text-xs uppercase text-text-muted">Pool Slots</p>
             <p className="text-lg font-semibold text-text-primary">{db.pool}</p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
         </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-text-primary">{meta.label}</p>
-          <p className="text-[11px] text-text-muted truncate">{meta.detail}</p>
+          <p className="text-xs text-text-muted truncate">{meta.detail}</p>
         </div>
         <button
           type="button"

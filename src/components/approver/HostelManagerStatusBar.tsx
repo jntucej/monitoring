@@ -4,7 +4,7 @@
  * HostelManagerStatusBar — bottom status strip for the hostel manager console.
  *
  * Mirrors the CaretakerStatusBar visual style (footer, border-t,
- * bg-surface/95 backdrop-blur, text-[11px], select-none). The parent
+ * bg-surface/95 backdrop-blur, text-xs, select-none). The parent
  * (RoleConsole) derives the counts from the /api/hostel-manager/summary
  * response (openTickets from pendingCount, hostel from the caller's
  * assignedHostel, occupancy from the presence matrix, maintenance = 0 until
@@ -49,7 +49,7 @@ export function HostelManagerStatusBar({ counts, refreshing = false }: HostelMan
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-[11px] text-text-secondary select-none"
+      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Hostel Manager status bar"
     >
       {/* Left: hostel · open tickets · occupancy · maintenance · last update */}

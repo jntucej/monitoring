@@ -51,7 +51,7 @@ export function AppLoadingScreen() {
   if (hideRef.current) return null;
 
   const isGlass = theme === "glass";
-  const bg = isGlass ? "bg-[var(--bg-base)]" : "bg-bg-base";
+  const bg = isGlass ? "bg-base" : "bg-bg-base";
   const cardBg = isGlass
     ? "bg-white/5 backdrop-blur-xl border-white/10"
     : "bg-bg-surface border-border";
@@ -91,7 +91,7 @@ export function AppLoadingScreen() {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className={`w-1.5 h-1.5 rounded-full ${isGlass ? "bg-white/40" : "bg-[var(--text-muted)]/40"} animate-pulse`}
+            className={`w-1.5 h-1.5 rounded-full ${isGlass ? "bg-white/40" : "bgtext-muted/40"} animate-pulse`}
             style={{ animationDelay: `${i * 150}ms` }}
           />
         ))}

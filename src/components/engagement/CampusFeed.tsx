@@ -76,7 +76,7 @@ function formatWhen(iso: string | null): string | null {
 function VerifiedBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-action-success"
+      className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-action-success"
       title="Published by an administrator"
     >
       <ShieldCheck className="h-3 w-3" aria-hidden />
@@ -170,7 +170,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                 role="tab"
                 aria-selected={filter === f.id}
                 onClick={() => setFilter(f.id)}
-                className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors motion-reduce:transition-none ${
+                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
                   filter === f.id
                     ? "bg-indigo-500/20 text-indigo-300"
                     : "text-text-muted hover:text-text-primary"
@@ -219,7 +219,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                     <p className="truncate text-sm font-semibold text-text-primary">{item.title}</p>
                     {item.isOfficial && <VerifiedBadge />}
                     {item.followed && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium text-indigo-300">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-indigo-300">
                         <Star className="h-3 w-3" aria-hidden />
                         Followed
                       </span>
@@ -227,7 +227,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                   </div>
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-xs text-text-muted">{item.body}</p>
-                <p className="mt-1.5 flex flex-wrap items-center gap-1 text-[10px] text-text-muted">
+                <p className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-text-muted">
                   <User className="h-3 w-3" aria-hidden />
                   {item.meta}
                   <span aria-hidden>·</span>

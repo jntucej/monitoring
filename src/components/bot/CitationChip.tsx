@@ -39,12 +39,12 @@ export const CitationChip = memo(function CitationChip({
           aria-expanded={openId === c.id}
           aria-label={`Source: ${c.title}${c.source ? `, ${c.source}` : ""}`}
           className="inline-flex items-center gap-1 rounded-full border border-border
-                     bg-bg-base px-2.5 py-1 text-[11px] font-medium
+                     bg-bg-base px-2.5 py-1 text-xs font-medium
                      text-text-secondary hover:text-action-success
                      hover:border-emerald-500/40 transition active:scale-[0.98]"
         >
           <FileText className="h-3 w-3 text-action-success" aria-hidden />
-          <span className="font-mono text-[10px] text-action-success">[{c.n}]</span>
+          <span className="font-mono text-xs text-action-success">[{c.n}]</span>
           <span className="max-w-40 truncate">{c.title}</span>
         </button>
       ))}
@@ -52,7 +52,7 @@ export const CitationChip = memo(function CitationChip({
         <button
           onClick={() => setShowAll(true)}
           className="inline-flex items-center rounded-full border border-border
-                     px-2.5 py-1 text-[11px] text-text-muted
+                     px-2.5 py-1 text-xs text-text-muted
                      hover:text-text-primary transition"
         >
           +{hidden} more
@@ -77,7 +77,7 @@ export const CitationChip = memo(function CitationChip({
                   <span className="font-mono text-action-success">[{open.n}]</span> {open.title}
                 </p>
                 {open.source && (
-                  <p className="text-[10px] text-text-muted mt-0.5">{open.source}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{open.source}</p>
                 )}
               </div>
               <button
@@ -89,7 +89,7 @@ export const CitationChip = memo(function CitationChip({
               </button>
             </div>
             {open.excerpt && (
-              <blockquote className="text-[11px] leading-relaxed text-text-secondary
+              <blockquote className="text-xs leading-relaxed text-text-secondary
                                      border-l-2 border-emerald-500/40 pl-2 italic">
                 {open.excerpt}
               </blockquote>

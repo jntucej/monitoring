@@ -60,7 +60,7 @@ export function PwaInstallPrompt() {
             }
             setShow(false);
           }}
-          className="min-h-[44px] flex-1 rounded-lg bg-white font-medium text-[var(--accent,var(--action-primary))]"
+          className="min-h11 flex-1 rounded-lg bg-white font-medium text-[var(--accent,var(--action-primary))]"
         >
           Install
         </button>
@@ -69,7 +69,7 @@ export function PwaInstallPrompt() {
             localStorage.setItem("pwa_dismissed_until", String(Date.now() + 30 * 86400000));
             setShow(false);
           }}
-          className="min-h-[44px] px-4 text-sm opacity-80"
+          className="min-h11 px-4 text-sm opacity-80"
         >
           Not now
         </button>

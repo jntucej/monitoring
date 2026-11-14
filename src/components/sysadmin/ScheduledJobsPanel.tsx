@@ -150,7 +150,7 @@ function KpiCard({
       <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tints[accent]} opacity-40`} />
       <CardContent className="relative flex items-start justify-between gap-3 p-4">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-wider text-text-muted">{label}</p>
+          <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
           {loading ? (
             <div className="mt-2 h-7 w-20 animate-pulse rounded bg-white/10" />
           ) : (
@@ -170,7 +170,7 @@ function StatusPill({ status }: { status: ScheduledJobStatus }) {
   const meta = STATUS_META[status];
   const Icon = meta.icon;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-medium ${meta.color}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-medium ${meta.color}`}>
       <Icon className={`h-3 w-3 ${status === "RUNNING" ? "animate-spin" : ""}`} />
       {meta.label}
     </span>
@@ -181,7 +181,7 @@ function CategoryPill({ category }: { category: ScheduledJobCategory }) {
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-[11px] ${meta.tint}`}>
+    <span className={`inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-xs ${meta.tint}`}>
       <Icon className="h-3 w-3" />
       {meta.label}
     </span>
@@ -283,7 +283,7 @@ function RunsTimeline({ runs, loading }: { runs: Run[]; loading: boolean }) {
                 <span className="inline-flex items-center gap-1"><Activity className="h-3 w-3" />{fmtNumber(r.records_affected)} records</span>
               </div>
               {r.error_message && (
-                <p className="mt-1.5 rounded border border-rose-500/20 bg-rose-500/5 px-2 py-1 text-[11px] text-action-danger">
+                <p className="mt-1.5 rounded border border-rose-500/20 bg-rose-500/5 px-2 py-1 text-xs text-action-danger">
                   {r.error_message}
                 </p>
               )}
@@ -554,7 +554,7 @@ export function ScheduledJobsPanel() {
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-2 p-3">
-          <div className="relative min-w-[220px] flex-1">
+          <div className="relative min-w55 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <Input
               value={search}
@@ -640,19 +640,19 @@ export function ScheduledJobsPanel() {
                         {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       </button>
 
-                      <div className="min-w-[240px] flex-1">
+                      <div className="min-w60 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-medium text-text-primary">{row.name}</h3>
                           <StatusPill status={row.last_status} />
                           <CategoryPill category={row.category} />
-                          <span className={`rounded-md border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${PRIORITY_TINT[row.priority]}`}>
+                          <span className={`rounded-md border px-1.5 py-0.5 text-xs uppercase tracking-wider ${PRIORITY_TINT[row.priority]}`}>
                             {row.priority}
                           </span>
                         </div>
                         <p className="mt-1 line-clamp-2 text-xs text-text-muted">{row.description}</p>
                         <div className="mt-1.5 flex flex-wrap items-center gap-1">
                           {row.tags.map((t) => (
-                            <span key={t} className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-text-muted">
+                            <span key={t} className="rounded bg-white/5 px-1.5 py-0.5 text-xs text-text-muted">
                               #{t}
                             </span>
                           ))}
@@ -660,13 +660,13 @@ export function ScheduledJobsPanel() {
                       </div>
 
                       <div className="w-[210px]">
-                        <p className="flex items-center gap-1 text-[11px] uppercase tracking-wider text-text-muted">
+                        <p className="flex items-center gap-1 text-xs uppercase tracking-wider text-text-muted">
                           <Clock className="h-3 w-3" /> Schedule
                         </p>
                         <p className="mt-0.5 text-sm font-medium text-text-primary">
                           {describeCron(row.cron_expression)}
                         </p>
-                        <code className="text-[10px] text-text-muted">{row.cron_expression}</code>
+                        <code className="text-xs text-text-muted">{row.cron_expression}</code>
                       </div>
 
                       <div className="w-[170px]">
@@ -684,8 +684,8 @@ export function ScheduledJobsPanel() {
                         </div>
                       </div>
 
-                      <div className="w-[140px]">
-                        <div className="flex items-center justify-between text-[11px] text-text-muted">
+                      <div className="w35">
+                        <div className="flex items-center justify-between text-xs text-text-muted">
                           <span>Success</span>
                           <span className="tabular-nums">{row.success_rate.toFixed(1)}%</span>
                         </div>
@@ -699,7 +699,7 @@ export function ScheduledJobsPanel() {
                             style={{ width: `${Math.min(100, row.success_rate)}%` }}
                           />
                         </div>
-                        <p className="mt-1 text-[10px] text-text-muted">
+                        <p className="mt-1 text-xs text-text-muted">
                           {fmtNumber(row.runs_total)} runs · {fmtNumber(row.runs_failed)} failed
                         </p>
                       </div>

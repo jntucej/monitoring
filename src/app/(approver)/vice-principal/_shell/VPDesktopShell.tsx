@@ -16,8 +16,8 @@ export function VPDesktopShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-[var(--bg-base)]">
-      <aside className="w-64 shrink-0 border-[var(--border)]">
+    <div className="flex h-dvh overflow-hidden bg-base">
+      <aside className="w-64 shrink-0 border">
         <VPSidebar mode="expanded" />
       </aside>
 

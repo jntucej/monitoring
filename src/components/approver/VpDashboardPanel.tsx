@@ -106,7 +106,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           aria-label="Refresh VP dashboard"
         >
           {loading ? (
@@ -119,7 +119,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
       </div>
 
       {/* Counts */}
-      <div className="flex flex-wrap gap-3 mb-3 text-[11px]">
+      <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-info bg-sky-400/10 border-sky-400/20">
           <ShieldAlert className="w-3 h-3" />
           {pendingApprovals} pending
@@ -147,7 +147,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
           icon={<CheckCircle className="w-5 h-5 text-action-success" />}
         />
       ) : (
-        <ul className="space-y-1.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-1.5 max-h70 overflow-y-auto custom-scrollbar pr-1">
           {topItems.map((item) => {
             const priorityTone =
               item.severity?.toUpperCase() === "CRITICAL"
@@ -163,7 +163,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span
-                      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-mono font-bold border shrink-0 ${priorityTone}`}
+                      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-mono font-bold border shrink-0 ${priorityTone}`}
                     >
                       {item.severity?.toUpperCase() ?? "—"}
                     </span>
@@ -171,11 +171,11 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
                       {item.title ?? item.message ?? item.id}
                     </span>
                   </div>
-                  <p className="text-[10px] font-mono text-text-muted truncate mt-0.5">
+                  <p className="text-xs font-mono text-text-muted truncate mt-0.5">
                     {item.gate_name ?? "Campus"} · {item.resolved ? "RESOLVED" : "ACTIVE"}
                   </p>
                 </div>
-                <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-mono text-text-muted">
+                <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
                   <Clock className="w-3 h-3" />
                   {fmt(item.timestamp)}
                 </span>
@@ -186,7 +186,7 @@ export function VpDashboardPanel({ onRefresh: _onRefresh }: VpDashboardPanelProp
       )}
 
       {/* Footer hint */}
-      <p className="mt-3 text-[10px] text-text-muted">
+      <p className="mt-3 text-xs text-text-muted">
         VP scope = delegated oversight. No hostel/branch filter. Data refreshed every 15s.
       </p>
     </section>

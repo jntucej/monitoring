@@ -24,12 +24,12 @@ export function GateCard({ gate }: GateCardProps) {
     >
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <span className="font-semibold text-xs sm:text-sm text-text-primary group-hover:text-action-success transition-colors">{gate.name}</span>
-        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase ${(gate.isOnline ?? gate.isActive) ? "bg-emerald-500/10 text-action-success border border-emerald-500/20" : "bg-rose-500/10 text-action-danger border border-rose-500/20"}`}>
+        <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold uppercase ${(gate.isOnline ?? gate.isActive) ? "bg-emerald-500/10 text-action-success border border-emerald-500/20" : "bg-rose-500/10 text-action-danger border border-rose-500/20"}`}>
           <span className={`w-1 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full ${(gate.isOnline ?? gate.isActive) ? "bg-action-success animate-pulse" : "bg-action-danger"}`} />
           {(gate.isOnline ?? gate.isActive) ? "Online" : "Offline"}
         </span>
       </div>
-      <p className="text-[10px] sm:text-[11px] text-text-muted mb-1 sm:mb-2">{gate.location}</p>
+      <p className="text-xs sm:text-xs text-text-muted mb-1 sm:mb-2">{gate.location}</p>
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm">
         <span className="flex items-center gap-1 text-action-success"><ArrowDownLeft className="w-2.5 sm:w-3 h-2.5 sm:h-3" /> {gate.currentScanCount}</span>
         {gate.lastScan && (

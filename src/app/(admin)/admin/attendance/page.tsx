@@ -133,7 +133,7 @@ const api = useApi();
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-1.5 min-h-[44px] rounded-lg bg-bg-surface border border-border text-sm"
+            className="px-3 py-1.5 min-h11 rounded-lg bg-bg-surface border border-border text-sm"
           />
         </div>
       </div>

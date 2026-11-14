@@ -69,12 +69,12 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
           <span className="font-mono text-xs font-bold truncate">{pass.ticket_number}</span>
         </div>
         <span
-          className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${meta.chip}`}
+          className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${meta.chip}`}
         >
           {meta.label}
         </span>
       </div>
-      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-text-muted">
+      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-text-muted">
         <dt className="flex items-center gap-1">
           <Clock className="h-3 w-3" aria-hidden /> Issued
         </dt>
@@ -95,7 +95,7 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
         </dd>
       </dl>
       {pass.reason && (
-        <p className="mt-1.5 text-[11px] text-text-secondary">
+        <p className="mt-1.5 text-xs text-text-secondary">
           Reason: <strong>{pass.reason}</strong>
           {reason && pass.reason !== reason ? (
             <span className="ml-2 text-action-warning">
@@ -105,12 +105,12 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
         </p>
       )}
       {pass.status?.toUpperCase() === "EXPIRED" && (
-        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-action-danger">
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-action-danger">
           <XCircle className="h-3 w-3" aria-hidden /> This pass has lapsed — flag the scan.
         </p>
       )}
       {pass.status?.toUpperCase() === "VALID" && (
-        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-action-success">
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-action-success">
           <CheckCircle2 className="h-3 w-3" aria-hidden /> Pass is live — safe to proceed.
         </p>
       )}

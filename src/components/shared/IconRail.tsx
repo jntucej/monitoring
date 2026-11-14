@@ -129,7 +129,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
         </a>
       </LocalTooltip>
 
-      <div className="h-px w-6 bg-[var(--border)] my-1" />
+      <div className="h-px w-6 bgborder my-1" />
 
       {groups && groups.length > 0 ? (
         groups.map((group) => {
@@ -169,7 +169,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                 aria-label={group.label}
               >
                 <p
-                  className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wide font-semibold"
+                  className="px-3 pt-2 pb-1 text-xs uppercase tracking-wide font-semibold"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {group.label}

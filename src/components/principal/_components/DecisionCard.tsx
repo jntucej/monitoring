@@ -40,12 +40,12 @@ export const DecisionCard = memo(function DecisionCard({
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-text-muted">{ticket}</span>
             {urgency === "overdue" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-medium text-action-danger">
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger">
                 <AlertTriangle className="h-3 w-3" /> Overdue
               </span>
             )}
             {slaDeadline && urgency === "due" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-action-warning">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
                 <Clock className="h-3 w-3" /> Due soon
               </span>
             )}

@@ -24,7 +24,7 @@ function KpiNumber({ label, value, hint }: { label: string; value: ReactNode; hi
       className="rounded-lg border p-3 bg-bg-surface"
       style={{ borderColor: "var(--border)" }}
     >
-      <p className="text-[11px] uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>{label}</p>
+      <p className="text-xs uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums" style={{ color: VIZ_THEME.text }}>
         {value}
       </p>
@@ -99,7 +99,7 @@ function InfraSection({ data }: { data: HealthData["infra"] | null | undefined }
       <div className="flex items-center gap-4">
         <MiniGauge value={gaugeValue} label="Containers running" color={gaugeColor} size={44} />
         <div>
-          <p className="text-[11px] uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>Containers</p>
+          <p className="text-xs uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>Containers</p>
           <p className="text-xl font-semibold tabular-nums" style={{ color: VIZ_THEME.text }}>
             {data.running}
             <span className="ml-1 text-sm font-normal" style={{ color: VIZ_THEME.muted }}>
@@ -127,7 +127,7 @@ function RedisSection({ data }: { data: HealthData["redis"] | null | undefined }
       <div className="flex items-center gap-4">
         <MiniGauge value={value} label={data.worker_healthy ? "Worker healthy" : "Worker degraded"} color={color} size={44} />
         <div>
-          <p className="text-[11px] uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>Worker</p>
+          <p className="text-xs uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>Worker</p>
           <p className="text-xl font-semibold tabular-nums" style={{ color }}>
             {data.worker_healthy ? "Healthy" : "Degraded"}
           </p>

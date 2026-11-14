@@ -10,7 +10,7 @@ import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampu
 export default function ActivityPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">
+      <h1 className="text-lg font-semibold text-primary">
         My Activity
       </h1>
       <WidgetBoundary name="recent-activity">

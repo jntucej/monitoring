@@ -81,7 +81,7 @@ function AdminEventsInner() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.title}</p>
                       {r.category && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] bg-action-primary/10 border border-action-primary/20 text-action-primary">{r.category}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-action-primary/10 border border-action-primary/20 text-action-primary">{r.category}</span>
                       )}
                     </div>
                     <p className="text-xs text-text-muted mt-0.5">

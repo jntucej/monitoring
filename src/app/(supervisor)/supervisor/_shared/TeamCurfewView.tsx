@@ -48,9 +48,9 @@ export function TeamCurfewView() {
               <li key={w.id} className="flex items-center justify-between p-3 text-xs">
                 <div>
                   <p className="font-semibold text-text-primary">{w.name}</p>
-                  <p className="text-[10px] text-text-muted">{w.staffCategory}</p>
+                  <p className="text-xs text-text-muted">{w.staffCategory}</p>
                 </div>
-                <span className="rounded-md bg-bg-elevated px-2 py-0.5 text-[11px] text-text-secondary">
+                <span className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
                   {w.gateName ?? "Unassigned"}
                 </span>
               </li>

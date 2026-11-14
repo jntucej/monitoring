@@ -57,7 +57,7 @@ export function HealthTabContent({ tab }: { tab: Tab }) {
             <p className="mt-1 text-xs opacity-70">{error}</p>
           </div>
         ) : !data ? (
-          <div className="p-8 text-center text-sm text-[var(--text-muted)]">
+          <div className="p-8 text-center text-sm text-muted">
             {loading ? "Loading health signals…" : "No health data available."}
           </div>
         ) : (

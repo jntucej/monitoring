@@ -25,7 +25,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
-            className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+            className="flex size-11 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
           >
             <Menu className="size-5" />
           </button>
@@ -59,7 +59,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close navigation"
-                className="flex size-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+                className="flex size-11 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>

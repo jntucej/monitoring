@@ -118,7 +118,7 @@ function VpHostelSecurityInner() {
             </div>
           ) : (
             <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w-[420px]">
+              <table className="w-full text-sm min-w105">
                 <thead>
                   <tr className="text-text-muted text-xs uppercase tracking-wide border-b border-border">
                     <th className="text-left px-3 py-2">Gate</th>
@@ -183,7 +183,7 @@ function VpHostelSecurityInner() {
                   className="rounded-lg border border-border bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
                       a.severity === "critical"
                         ? "bg-rose-500/15 text-action-danger border border-rose-500/30"
                         : a.severity === "high"

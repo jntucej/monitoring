@@ -44,7 +44,7 @@ export const PrincipalTopBar = memo(function PrincipalTopBar({
         <button className="relative p-2 text-text-muted hover:text-text-primary">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-action-danger text-[10px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-action-danger text-xs font-bold text-white">
               {unreadCount}
             </span>
           )}

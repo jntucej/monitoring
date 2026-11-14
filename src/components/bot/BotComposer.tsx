@@ -83,7 +83,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         )}
         {listening && micRemainingSeconds != null && (
           <span
-            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-action-danger text-white text-[9px] font-semibold flex items-center justify-center leading-none"
+            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-action-danger text-white text-xs font-semibold flex items-center justify-center leading-none"
             aria-label={`${micRemainingSeconds} seconds remaining`}
           >
             {micRemainingSeconds}
@@ -111,7 +111,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
 
       {streaming ? (
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 text-[10px] text-text-muted" role="status" aria-live="polite">
+          <div className="flex items-center gap-1.5 text-xs text-text-muted" role="status" aria-live="polite">
             <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
             <span className="whitespace-nowrap">Generating… {streamingSeconds}s</span>
           </div>
@@ -119,7 +119,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
             type="button"
             onClick={onStop}
             aria-label={t.stop}
-            className="h-8 px-2.5 rounded-lg bg-bg-elevated text-[11px] text-text-secondary
+            className="h-8 px-2.5 rounded-lg bg-bg-elevated text-xs text-text-secondary
                        active:scale-95 transition inline-flex items-center gap-1"
           >
             <Square className="h-3 w-3 fill-current" /> {t.stop}

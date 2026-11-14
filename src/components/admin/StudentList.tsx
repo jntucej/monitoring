@@ -97,7 +97,7 @@ const api = useApi();
               <motion.div
                 variants={isGlossyMotion ? fadeInUp : {}}
                 key={student.id}
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition min-h-[44px]"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition min-h11"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorClass}`}>
@@ -111,13 +111,13 @@ const api = useApi();
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-text-secondary hidden sm:inline">{branch}</span>
                   {isWarning && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-action-danger border border-rose-500/40 animate-pulse flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/40 animate-pulse flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
                       WRN
                     </span>
                   )}
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       isOnCampus
                         ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
                         : "bg-bg-elevated/10 text-text-muted border border-border/20"

@@ -231,22 +231,22 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                           {row.candidate_name || row.ticket_number || "Unknown candidate"}
                         </p>
                         <span
-                          className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${style.accent}`}
+                          className={`text-xs font-mono px-1.5 py-0.5 rounded border ${style.accent}`}
                         >
                           {sev.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-[11px] font-mono text-text-muted truncate">
+                      <p className="text-xs font-mono text-text-muted truncate">
                         {row.ticket_number}
                         {row.roll ? ` · roll ${row.roll}` : ""}
                       </p>
-                      <p className="text-[11px] text-text-secondary mt-1">{desc}</p>
+                      <p className="text-xs text-text-secondary mt-1">{desc}</p>
                       <div className="flex items-center justify-between gap-2 mt-2 flex-wrap">
-                        <span className="text-[10px] font-mono text-text-muted">
+                        <span className="text-xs font-mono text-text-muted">
                           hall: {hall} · {fmtTime(row.updated_at ?? row.created_at)}
                         </span>
                         {resolved ? (
-                          <span className="text-[10px] font-semibold text-action-success">
+                          <span className="text-xs font-semibold text-action-success">
                             resolved
                           </span>
                         ) : (
@@ -254,7 +254,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void markResolved(row)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-base px-2 py-1 text-[10px] font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-base px-2 py-1 text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 transition-colors disabled:opacity-50"
                           >
                             {busyId === row.id ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -274,7 +274,7 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
         )}
 
         {rows.length > 0 ? (
-          <p className="mt-3 text-[10px] font-mono text-text-muted">
+          <p className="mt-3 text-xs font-mono text-text-muted">
             {unresolvedCount} unresolved · {rows.length} total
           </p>
         ) : null}

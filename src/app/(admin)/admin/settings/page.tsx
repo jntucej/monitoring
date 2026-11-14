@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
                 <Settings className="w-5 h-5" />
                 More dynamic config forms coming soon…
               </h3>
-              <p className="text-sm text-[var(--text-muted)]">
+              <p className="text-sm text-muted">
                 As part of settings modernization, exit reasons, roles, and UI
                 configurations will map here.
               </p>

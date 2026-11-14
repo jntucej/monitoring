@@ -96,7 +96,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
         <div className={`text-xl font-bold ${data.shiftStatus === "ON DUTY" ? "text-action-success" : data.shiftStatus === "OFF DUTY" ? "text-action-warning" : "text-text-muted"}`}>
           {data.shiftStatus ?? "UNKNOWN"}
         </div>
-        <p className="text-[10px] text-text-muted font-mono">
+        <p className="text-xs text-text-muted font-mono">
           {data.shiftStatus === "ON DUTY" ? "Currently on campus" : data.shiftStatus === "OFF DUTY" ? "Not on campus" : "No data"}
         </p>
       </div>
@@ -108,7 +108,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
           Today&#39;s Gate Entry
         </div>
         <div className="text-xl font-bold text-text-primary font-mono">{data.todayEntry ?? "—"}</div>
-        <p className="text-[10px] text-text-muted font-mono">
+        <p className="text-xs text-text-muted font-mono">
           {data.todayEntry ? "First recorded IN scan" : "No entry today"}
         </p>
       </div>
@@ -120,7 +120,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
           Last Recorded Exit
         </div>
         <div className="text-xl font-bold text-text-primary font-mono">{data.todayExit ?? "—"}</div>
-        <p className="text-[10px] text-text-muted font-mono">
+        <p className="text-xs text-text-muted font-mono">
           {data.todayExit ? "Last OUT scan" : "No exit logged yet"}
         </p>
       </div>
@@ -134,7 +134,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
         <div className="text-xl font-bold text-text-primary font-mono">
           {data.adherencePct !== null ? `${data.adherencePct}%` : "—"}
         </div>
-        <p className="text-[10px] text-text-muted font-mono">
+        <p className="text-xs text-text-muted font-mono">
           {data.adherencePct !== null ? "Restricted hours compliant" : "Requires history data"}
         </p>
       </div>

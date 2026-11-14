@@ -26,7 +26,7 @@ export function InboxDetailSheet({ ticket, onClose, onActionComplete }: InboxDet
         <div className="max-h-[85vh] overflow-y-auto bg-bg-surface border-t border-border rounded-t-2xl shadow-2xl p-4 space-y-3">
           {/* Drag handle */}
           <div className="flex justify-center">
-            <div className="w-10 h-1.5 rounded-full bg-[var(--border)]" />
+            <div className="w-10 h-1.5 rounded-full bgborder" />
           </div>
           <PermissionDetailPanel
             ticket={ticket}

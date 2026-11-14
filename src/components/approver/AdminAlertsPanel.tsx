@@ -69,7 +69,7 @@ export function AdminAlertsPanel() {
           Open Alerts
         </span>
         {openAlerts.length > 0 ? (
-          <span className="ml-auto font-mono text-[10px] text-text-muted shrink-0">
+          <span className="ml-auto font-mono text-xs text-text-muted shrink-0">
             {openAlerts.length} active
           </span>
         ) : null}
@@ -78,7 +78,7 @@ export function AdminAlertsPanel() {
       {loading ? (
         <div className="flex items-center gap-2 px-3 py-3 text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-[11px]">Loading alerts…</span>
+          <span className="text-xs">Loading alerts…</span>
         </div>
       ) : openAlerts.length === 0 ? (
         <EmptyState
@@ -87,7 +87,7 @@ export function AdminAlertsPanel() {
           icon={<Bell className="w-5 h-5" />}
         />
       ) : (
-        <ul className="space-y-1.5 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+        <ul className="space-y-1.5 max-h60 overflow-y-auto custom-scrollbar pr-1">
           {openAlerts.map((alert) => {
             const tone = SEVERITY_TONE[alert.severity] ?? SEVERITY_TONE.low;
             return (
@@ -100,18 +100,18 @@ export function AdminAlertsPanel() {
                     {alert.title}
                   </p>
                   {alert.message ? (
-                    <p className="text-[10px] text-text-muted truncate">
+                    <p className="text-xs text-text-muted truncate">
                       {alert.message}
                     </p>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${tone}`}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border ${tone}`}
                   >
                     {alert.severity}
                   </span>
-                  <span className="font-mono text-[10px] text-text-muted tabular-nums">
+                  <span className="font-mono text-xs text-text-muted tabular-nums">
                     {fmtTime(alert.timestamp)}
                   </span>
                 </div>

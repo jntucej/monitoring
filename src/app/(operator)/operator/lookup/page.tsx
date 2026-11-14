@@ -64,9 +64,9 @@ type LookupState = "idle" | "loading" | "found" | "notfound" | "error";
 
 function StatusBadge({ status }: { status: string }) {
   const s = (status ?? "").toUpperCase();
-  if (s === "ACTIVE") return <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-success">Active</span>;
-  if (s === "SUSPENDED" || s === "LOCKED") return <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-danger">{s}</span>;
-  return <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-action-warning">{s}</span>;
+  if (s === "ACTIVE") return <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold uppercase text-action-success">Active</span>;
+  if (s === "SUSPENDED" || s === "LOCKED") return <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-xs font-semibold uppercase text-action-danger">{s}</span>;
+  return <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase text-action-warning">{s}</span>;
 }
 
 function OperatorLookupInner() {
@@ -174,7 +174,7 @@ function OperatorLookupInner() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Aditi Sharma"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h11 px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
             <div className="space-y-1.5 min-w-0">
@@ -188,7 +188,7 @@ function OperatorLookupInner() {
                 onChange={(e) => setIdNumber(e.target.value.toUpperCase())}
                 onKeyDown={(e) => { if (e.key === "Enter") void runLookup(); }}
                 placeholder="e.g. 24JJ1A0501"
-                className="w-full min-h-[44px] px-3 py-2.5 rounded-lg border border-border bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                className="w-full min-h11 px-3 py-2.5 rounded-lg border border-border bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ function OperatorLookupInner() {
             type="button"
             onClick={() => void runLookup()}
             disabled={lookupState === "loading" || !idNumber.trim()}
-            className="w-full sm:w-auto inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="w-full sm:w-auto inline-flex min-h11 items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {lookupState === "loading" ? (
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none" />

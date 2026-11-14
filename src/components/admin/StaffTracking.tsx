@@ -79,58 +79,58 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
       {/* 5 KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted uppercase">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Briefcase className="w-3.5 h-3.5 text-unit-c" />
             Total Staff
           </div>
           <div className="text-2xl font-black text-text-primary">
             <CountUp value={summary.totalStaff} />
           </div>
-          <p className="text-[10px] text-text-muted font-mono">Administrative Roster</p>
+          <p className="text-xs text-text-muted font-mono">Administrative Roster</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted uppercase">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <CheckCircle2 className="w-3.5 h-3.5 text-action-success" />
             Present Today
           </div>
           <div className="text-2xl font-black text-action-success">
             <CountUp value={summary.presentToday} />
           </div>
-          <p className="text-[10px] text-text-muted">{summary.overallAttendanceRate}% daily rate</p>
+          <p className="text-xs text-text-muted">{summary.overallAttendanceRate}% daily rate</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted uppercase">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Building2 className="w-3.5 h-3.5 text-action-primary" />
             Currently Inside
           </div>
           <div className="text-2xl font-black text-action-primary">
             <CountUp value={summary.currentlyInside} />
           </div>
-          <p className="text-[10px] text-text-muted">Inside Campus</p>
+          <p className="text-xs text-text-muted">Inside Campus</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-text-muted uppercase">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Clock className="w-3.5 h-3.5 text-action-warning" />
             Currently Outside
           </div>
           <div className="text-2xl font-black text-action-warning">
             <CountUp value={summary.currentlyOutside} />
           </div>
-          <p className="text-[10px] text-text-muted font-mono">Off Campus</p>
+          <p className="text-xs text-text-muted font-mono">Off Campus</p>
         </div>
 
         <div className="p-4 rounded-2xl bg-bg-surface border border-rose-500/30 bg-rose-500/5 space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-action-danger uppercase">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-action-danger uppercase">
             <ShieldAlert className="w-3.5 h-3.5 text-action-danger" />
             Warnings (WRN)
           </div>
           <div className="text-2xl font-black text-action-danger">
             <CountUp value={summary.warningCount} />
           </div>
-          <p className="text-[10px] text-rose-400/80">Flagged exceptions</p>
+          <p className="text-xs text-rose-400/80">Flagged exceptions</p>
         </div>
       </div>
       {/* Filter & Search Bar */}
@@ -142,7 +142,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, ID, designation..."
-            className="w-full pl-9 pr-4 py-2 bg-bg-base border border-border rounded-xl text-xs focus:outline-none focus:border-[var(--unit-c)]"
+            className="w-full pl-9 pr-4 py-2 bg-bg-base border border-border rounded-xl text-xs focus:outline-none focus:borderunit-c"
           />
         </div>
 
@@ -182,9 +182,9 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
         </div>
 
         <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <table className="w-full text-left border-collapse min-w-[700px]">
+          <table className="w-full text-left border-collapse min-w175">
             <thead>
-              <tr className="border-b border-border text-[11px] font-bold text-text-muted uppercase tracking-wider bg-white/5">
+              <tr className="border-b border-border text-xs font-bold text-text-muted uppercase tracking-wider bg-white/5">
                 <th className="py-3 px-4">Staff Member</th>
                 <th className="py-3 px-4">Department / Role</th>
                 <th className="py-3 px-4">Current Status</th>
@@ -210,17 +210,17 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                         </div>
                         <div>
                           <div className="font-bold text-text-primary">{staff.fullName}</div>
-                          <div className="font-mono text-[10px] text-text-muted">{staff.uniqueId}</div>
+                          <div className="font-mono text-xs text-text-muted">{staff.uniqueId}</div>
                         </div>
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-text-primary">{staff.department}</div>
-                      <div className="text-[11px] text-text-muted">{staff.designation}</div>
+                      <div className="text-xs text-text-muted">{staff.designation}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                        className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase ${
                           staff.status === "INSIDE"
                             ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
                             : staff.status === "OUTSIDE"
@@ -237,17 +237,17 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {staff.flagStatus ? (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-action-danger border border-rose-500/40 animate-pulse flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/40 animate-pulse flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3" />
                             WRN
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-action-success">
+                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-action-success">
                             OK
                           </span>
                         )}
                         {staff.punctualityStatus === "LATE" && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-action-warning">
+                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-action-warning">
                             LATE
                           </span>
                         )}
@@ -310,7 +310,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                     >
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          className={`px-2 py-0.5 rounded text-xs font-bold ${
                             log.direction === "IN"
                               ? "bg-emerald-500/20 text-action-success"
                               : "bg-amber-500/20 text-action-warning"
@@ -320,7 +320,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                         </span>
                         <span className="font-semibold text-text-primary">{log.gate}</span>
                       </div>
-                      <span className="font-mono text-[11px] text-text-muted">
+                      <span className="font-mono text-xs text-text-muted">
                         {log.timestamp}
                       </span>
                     </div>

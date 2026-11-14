@@ -423,7 +423,7 @@ const shift = useOperatorShiftClock();
       <div className="fixed top-14 inset-x-0 z-60 flex flex-col items-center gap-2 px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-md space-y-2">
           {/* O16: shift clock — first-scan-derived 8h window label. */}
-          <div className="pointer-events-none flex items-center gap-1.5 text-[11px] text-text-muted">
+          <div className="pointer-events-none flex items-center gap-1.5 text-xs text-text-muted">
             {shift.start ? (
               <>
                 <span className="font-mono font-semibold text-text-secondary">
@@ -571,13 +571,13 @@ const shift = useOperatorShiftClock();
               value={manualRollInput}
               onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
               placeholder="e.g. >24JJ1A0501"
-              className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+              className="w-full min-h11 px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="flex-1 min-h-[44px] px-4 rounded-xl bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="flex-1 min-h11 px-4 rounded-xl bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
               >
                 <KeyRound className="w-4 h-4" />
                 <span>Verify Roll Number</span>
@@ -585,7 +585,7 @@ const shift = useOperatorShiftClock();
               <button
                 type="button"
                 onClick={() => { setManualOpen(false); setManualRollInput(""); }}
-                className="min-h-[44px] px-4 rounded-xl bg-bg-base border border-border text-text-muted text-sm font-semibold"
+                className="min-h11 px-4 rounded-xl bg-bg-base border border-border text-text-muted text-sm font-semibold"
               >
                 Close
               </button>
@@ -657,7 +657,7 @@ const shift = useOperatorShiftClock();
                   </h3>
                   <p className="text-xs text-text-secondary">{error.message}</p>
                   {isAuthError && (
-                    <p className="text-[10px] font-semibold text-action-warning">
+                    <p className="text-xs font-semibold text-action-warning">
                       Your session could not be verified. Dismiss to sign in again.
                     </p>
                   )}
@@ -672,7 +672,7 @@ const shift = useOperatorShiftClock();
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="min-h-[44px] px-4 py-2 rounded-xl bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="min-h11 px-4 py-2 rounded-xl bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -690,7 +690,7 @@ const shift = useOperatorShiftClock();
                         reset();
                       }
                     }}
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
+                    className="min-h11 px-4 py-2 rounded-xl bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -731,14 +731,14 @@ const shift = useOperatorShiftClock();
               <button
                 type="button"
                 onClick={() => { setScannerOpen(true); setManualOpen(false); }}
-                className="min-h-[44px] rounded-xl bg-action-primary text-black font-bold text-sm"
+                className="min-h11 rounded-xl bg-action-primary text-black font-bold text-sm"
               >
                 Open scanner
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/operator")}
-                className="min-h-[44px] rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
+                className="min-h11 rounded-xl bg-bg-surface border border-border text-text-secondary font-bold text-sm"
               >
                 Dashboard
               </button>
@@ -772,7 +772,7 @@ const shift = useOperatorShiftClock();
               type="button"
               disabled={!canConfirm}
               onClick={() => { void doConfirmWithGeo("IN"); }}
-              className="min-h-[56px] rounded-xl bg-action-primary text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h14 rounded-xl bg-action-primary text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               IN
             </button>
@@ -780,7 +780,7 @@ const shift = useOperatorShiftClock();
               type="button"
               disabled={!canConfirm}
               onClick={() => { void doConfirmWithGeo("OUT"); }}
-              className="min-h-[56px] rounded-xl bg-action-danger text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h14 rounded-xl bg-action-danger text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
             >
               OUT
             </button>

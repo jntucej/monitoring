@@ -81,7 +81,7 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
           >
             {/* Handle bar */}
             <div className="flex justify-center pt-1 pb-3">
-              <div className="w-12 h-1.5 rounded-full bg-[var(--border)]" />
+              <div className="w-12 h-1.5 rounded-full bgborder" />
             </div>
 
             {/* Header */}
@@ -119,14 +119,14 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="e.g. 24JJ1A0501 or >24JJ1A0501"
-                  className="w-full px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
                   autoFocus
                 />
               </div>
 
               {error && (
                 <p className="text-xs text-action-danger flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-rose-400/20 flex items-center justify-center text-[8px]">!</span>
+                  <span className="w-3 h-3 rounded-full bg-rose-400/20 flex items-center justify-center text-xs">!</span>
                   {error}
                 </p>
               )}

@@ -42,7 +42,7 @@ export function FeedbackModal({ theme, onClose, onSubmit }: FeedbackModalProps) 
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text-primary">Theme Feedback</h3>
-            <button onClick={onClose} aria-label="Close modal" className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-bg-elevated">
+            <button onClick={onClose} aria-label="Close modal" className="p-2 min-w11 min-h11 flex items-center justify-center rounded-lg hover:bg-bg-elevated">
               <X className="w-5 h-5 text-text-muted" />
             </button>
           </div>
@@ -55,7 +55,7 @@ export function FeedbackModal({ theme, onClose, onSubmit }: FeedbackModalProps) 
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Describe any visual or functional problems..."
-              className="w-full p-3 rounded-xl bg-bg-base border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--focus-ring)] outline-none resize-none"
+              className="w-full p-3 rounded-xl bg-bg-base border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none resize-none"
             />
             <div className="flex justify-end gap-2 mt-4">
               <button

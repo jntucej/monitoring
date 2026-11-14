@@ -137,7 +137,7 @@ function VpDecisionHistoryInner() {
                   className="rounded-lg border border-border bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${
+                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
                       r.status === "APPROVED"
                         ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
                         : "bg-rose-500/15 text-action-danger border border-rose-500/30"

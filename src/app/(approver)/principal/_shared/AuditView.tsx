@@ -58,7 +58,7 @@ export function AuditView() {
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{log.action}</p>
-                  <span className="text-[10px] text-text-muted">
+                  <span className="text-xs text-text-muted">
                     {new Date(log.timestamp).toLocaleDateString()}
                   </span>
                 </div>

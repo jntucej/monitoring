@@ -61,20 +61,20 @@ export function BetweenClasses({
           <Clock className="size-4 text-action-info" />
           <h2 className="text-sm font-semibold text-text-primary">Teaching day</h2>
         </div>
-        <span className="text-[10px] uppercase tracking-wider text-text-muted">
+        <span className="text-xs uppercase tracking-wider text-text-muted">
           {schedule.filter((s) => s.marked).length}/{schedule.length} marked
         </span>
       </header>
 
       {current && (
         <div className="mb-3 rounded-lg bg-action-primary/10 p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-action-primary">
+          <p className="text-xs uppercase tracking-wider text-action-primary">
             In class now
           </p>
           <p className="mt-0.5 text-sm font-medium text-text-primary">
             {current.subject} · {current.section}
           </p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-xs text-text-muted">
             {current.room ?? "No room"} · ends {current.endsAt}
           </p>
         </div>
@@ -82,14 +82,14 @@ export function BetweenClasses({
 
       {next && canClearApprovals && (
         <div className="mb-3 rounded-lg bg-action-warning/10 p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-action-warning">
+          <p className="text-xs uppercase tracking-wider text-action-warning">
             You have time
           </p>
           <p className="mt-0.5 text-sm font-medium text-text-primary">
             {Math.round(timeUntilNext! / 60_000)} minutes until {next.subject}
           </p>
           {pendingCount > 0 && (
-            <p className="mt-0.5 text-[11px] text-text-secondary">
+            <p className="mt-0.5 text-xs text-text-secondary">
               {pendingCount} approval{pendingCount === 1 ? "" : "s"} waiting.
             </p>
           )}
@@ -98,13 +98,13 @@ export function BetweenClasses({
 
       {next && !canClearApprovals && (
         <div className="mb-3 rounded-lg bg-bg-elevated p-2.5">
-          <p className="text-[10px] uppercase tracking-wider text-text-muted">
+          <p className="text-xs uppercase tracking-wider text-text-muted">
             Next class
           </p>
           <p className="mt-0.5 text-sm font-medium text-text-primary">
             {next.subject} · {next.section}
           </p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-xs text-text-muted">
             Starts {next.startsAt} · {next.room ?? "No room"}
           </p>
         </div>
@@ -113,12 +113,12 @@ export function BetweenClasses({
       {/* Schedule strip */}
       <ul className="space-y-1">
         {upcoming.slice(0, 4).map((s) => (
-          <li key={s.id} className="flex items-center gap-2 text-[11px]">
+          <li key={s.id} className="flex items-center gap-2 text-xs">
             <span
               className={`size-1.5 shrink-0 rounded-full ${
                 s.marked
                   ? "bg-action-primary"
-                  : "bg-[var(--text-muted)]"
+                  : "bgtext-muted"
               }`}
             />
             <span className="tabular-nums text-text-muted">{s.startsAt}</span>
@@ -126,7 +126,7 @@ export function BetweenClasses({
               {s.subject}
             </span>
             {s.marked && (
-              <span className="text-[10px] text-action-primary">marked</span>
+              <span className="text-xs text-action-primary">marked</span>
             )}
           </li>
         ))}
@@ -135,7 +135,7 @@ export function BetweenClasses({
       {pendingCount > 0 && (
         <a
           href="/hod/approvals/pending"
-          className="mt-3 flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-action-primary/30 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
+          className="mt-3 flex min-h11 items-center justify-center gap-1 rounded-lg border border-action-primary/30 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
         >
           Clear {pendingCount} approval{pendingCount === 1 ? "" : "s"} now
           <ArrowRight className="size-3" />

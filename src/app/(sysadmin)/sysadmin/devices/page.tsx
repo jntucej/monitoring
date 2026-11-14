@@ -212,7 +212,7 @@ const api = useApi();
 
                     <Badge
                       variant={isEnabled ? "success" : "offline"}
-                      className="px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase flex items-center gap-1.5"
+                      className="px-2.5 py-1 text-xs font-bold tracking-wide uppercase flex items-center gap-1.5"
                     >
                       {isEnabled ? (
                         <>
@@ -230,18 +230,18 @@ const api = useApi();
                 </CardHeader>
 
                 <CardContent className="space-y-4 pt-0">
-                  <p className="text-xs text-text-secondary leading-relaxed min-h-[36px]">
+                  <p className="text-xs text-text-secondary leading-relaxed min-h9">
                     {config.description}
                   </p>
 
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-bg-elevated text-text-secondary border border-border">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-bg-elevated text-text-secondary border border-border">
                         <Globe className="w-3 h-3" />
                         Scope: {current.scope || "Global"}
                       </span>
                       {current.updated_at && (
-                        <span className="text-[10px] text-text-muted">
+                        <span className="text-xs text-text-muted">
                           Synced {formatDate(current.updated_at)}
                         </span>
                       )}
@@ -254,7 +254,7 @@ const api = useApi();
                       disabled={isBusy || loading}
                       onClick={() => handleToggle(config)}
                       className={cn(
-                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:cursor-not-allowed disabled:opacity-50",
+                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:cursor-not-allowed disabled:opacity-50",
                         isEnabled ? "bg-action-success" : "bg-bg-elevated border-border"
                       )}
                     >

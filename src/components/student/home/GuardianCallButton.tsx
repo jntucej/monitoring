@@ -24,7 +24,7 @@ export function GuardianCallButton() {
   return (
     <a
       href={`tel:${g.phone}`}
-      className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-3 py-2 text-sm text-[var(--text-secondary)]"
+      className="inline-flex items-center gap-1 rounded-md border border px-3 py-2 text-sm text-secondary"
     >
       <Phone className="h-4 w-4" aria-hidden /> Call {g.guardianName ?? "guardian"}
     </a>

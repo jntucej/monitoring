@@ -119,7 +119,7 @@ const api = useApi();
         <textarea rows={4} value={csvText} onChange={(e) => { setCsvText(e.target.value); setValidationResult(null); setCommitResult(null); }} placeholder="Paste CSV: email,name,role,unique_id,..." className="w-full font-mono text-xs p-3 rounded-lg border border-border bg-[var(--surface-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-text-muted">Roles: student, faculty, staff, principal, operator, sysadmin, parent, worker</span>
+          <span className="text-xs text-text-muted">Roles: student, faculty, staff, principal, operator, sysadmin, parent, worker</span>
           <button onClick={handleValidate} disabled={validating || !csvText.trim()} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50">
             {validating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
             Validate & Preview

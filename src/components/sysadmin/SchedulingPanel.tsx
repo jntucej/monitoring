@@ -343,7 +343,7 @@ export function SchedulingPanel() {
                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action-success" aria-hidden />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium text-text-primary">{a.title}</p>
-                        <p className="text-[10px] text-text-muted">
+                        <p className="text-xs text-text-muted">
                           {CATEGORY_META[a.category].label} · {fmtRelative(a.appliedAt)} · {a.actor}
                         </p>
                       </div>
@@ -397,7 +397,7 @@ function KpiCard({
         {fmtInt(value)}
         {suffix ? <span className="ml-1 text-sm font-normal text-text-muted">{suffix}</span> : null}
       </p>
-      <p className="mt-1 text-[11px] leading-snug text-text-muted">{hint}</p>
+      <p className="mt-1 text-xs leading-snug text-text-muted">{hint}</p>
     </div>
   );
 }
@@ -440,7 +440,7 @@ function ItemCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-text-primary">{item.title}</h3>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${meta.surface} ${meta.accent}`}>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium uppercase tracking-wide ${meta.surface} ${meta.accent}`}>
               {meta.label}
             </span>
           </div>
@@ -458,7 +458,7 @@ function ItemCard({
               <div className={`h-full rounded-full ${tier.bar}`} style={{ width: `${item.impact_score}%` }} />
             </div>
             <span className={`text-xs font-medium tabular-nums ${tier.accent}`}>{item.impact_score}</span>
-            <span className={`text-[10px] uppercase tracking-wide ${tier.accent}`}>{tier.label}</span>
+            <span className={`text-xs uppercase tracking-wide ${tier.accent}`}>{tier.label}</span>
           </div>
         </div>
 
@@ -488,13 +488,13 @@ function ItemCard({
         <div className="border-t border-border p-3 text-xs">
           <div className="space-y-3">
             <div>
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">AI reasoning</p>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">AI reasoning</p>
               <p className="rounded-md border border-border bg-bg-surface p-2 leading-relaxed text-text-secondary">
                 {item.reasoning}
               </p>
             </div>
             <div>
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">Suggested change</p>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">Suggested change</p>
               <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-surface p-2">
                 <ChangeChip label="Target" value={item.suggested_action?.target ?? "—"} />
                 {item.suggested_action?.before ? <ChangeChip label="Before" value={item.suggested_action.before} /> : null}
@@ -518,7 +518,7 @@ function ItemCard({
 function ChangeChip({ label, value }: { label: string; value: string }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-border bg-bg-elevated px-2 py-0.5">
-      <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
+      <span className="text-xs uppercase tracking-wide text-text-muted">{label}</span>
       <span className="text-xs font-medium tabular-nums text-text-primary">{value}</span>
     </span>
   );

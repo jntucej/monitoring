@@ -12,13 +12,13 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
     return (
       <div className="flex gap-1">
         {cleanStreak > 0 && (
-          <span className="flex items-center gap-0.5 rounded-full bg-action-primary/10 px-1.5 py-0.5 text-[10px] text-action-primary">
+          <span className="flex items-center gap-0.5 rounded-full bg-action-primary/10 px-1.5 py-0.5 text-xs text-action-primary">
             <DoorOpen className="size-2.5" />
             {cleanStreak}
           </span>
         )}
         {handoverStreak > 0 && (
-          <span className="flex items-center gap-0.5 rounded-full bg-action-info/10 px-1.5 py-0.5 text-[10px] text-action-info">
+          <span className="flex items-center gap-0.5 rounded-full bg-action-info/10 px-1.5 py-0.5 text-xs text-action-info">
             <Flame className="size-2.5" />
             {handoverStreak}
           </span>
@@ -41,7 +41,7 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
       )}
       {handoverStreak > 0 && (
         <div
-          className="flex items-center gap-1.5 rounded-full border border-[var(--action-info)]/30 bg-action-info/10 px-2.5 py-1 text-xs text-action-info"
+          className="flex items-center gap-1.5 rounded-full border borderaction-info/30 bg-action-info/10 px-2.5 py-1 text-xs text-action-info"
           title="Consecutive handovers submitted on time"
         >
           <Flame className="size-3" />
