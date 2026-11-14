@@ -18,7 +18,6 @@ import { NumbersBand } from "./components/sections/NumbersBand";
 import { CTASection } from "./components/sections/CTASection";
 import { HomeFooter } from "./components/sections/HomeFooter";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import "./home.css";
 
 export const metadata: Metadata = buildPageMetadata({
   title: `Official Campus Portal | ${COLLEGE.officialName}`,

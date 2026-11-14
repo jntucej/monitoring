@@ -24,7 +24,7 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
 
   // Auth shell + global loading overlay (first paint + route transition)
 
-  const {setTheme, isSidebarCollapsed} = useUIStore();
+  const { isSidebarCollapsed } = useUIStore();
   const { performanceTier } = useGlass();
   const pathname = usePathname();
 
@@ -81,19 +81,6 @@ export function SafeAreaAppShell({ children }: SafeAreaAppShellProps) {
     STANDALONE_CONSOLE_ROOTS.some(
       (root) => pathname === root || pathname.startsWith(`${root}/`),
     );
-
-  // Initialize theme from localStorage on client-side mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("gate-monitor-theme") as "dark" | "light" | "glass" | null;
-      if (savedTheme && (savedTheme === "dark" || savedTheme === "light" || savedTheme === "glass")) {
-        setTheme(savedTheme);
-      } else {
-        // Default to dark per project requirement
-        setTheme("dark");
-      }
-    }
-  }, [setTheme]);
 
   const showNav = _hasHydrated && authenticated && !isStandaloneConsole;
 

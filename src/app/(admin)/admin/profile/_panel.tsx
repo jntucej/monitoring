@@ -7,11 +7,10 @@ import { useUIStore } from "@/stores/uiStore";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
-import {User as UserIcon, Mail, Shield, KeyRound, Lock, Save, Loader2, Bell, Eye, EyeOff, Palette, Sparkles, Moon, Sun, Droplet, Check, Activity, ScrollText, type LucideIcon}  from "lucide-react";
+import {User as UserIcon, Mail, Shield, KeyRound, Lock, Save, Loader2, Bell, Eye, EyeOff, Sparkles, Check, Activity, ScrollText, type LucideIcon}  from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tab = "personal" | "security" | "appearance";
-type Theme = "dark" | "light" | "glass";
 type AccentId = "emerald" | "rose" | "sky" | "amber" | "violet";
 
 const ACCENTS: Record<AccentId, { label: string; swatch: string; hex: string }> = {
@@ -49,7 +48,6 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
         ? "appearance"
         : "personal");
   const { user, role } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
   const addToast = useUIStore((s) => s.addToast);
 
   // Personal
@@ -248,28 +246,6 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
       {/* ── Appearance ── */}
       {tab === "appearance" && (
         <div className="space-y-6">
-          <WidgetBoundary title="Console Theme">
-            <SectionCard title="Console Theme" description="Choose how the admin console looks" icon={Palette}>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {([
-                  { id: "dark", label: "Dark", Icon: Moon },
-                  { id: "light", label: "Light", Icon: Sun },
-                  { id: "glass", label: "Glossy", Icon: Droplet },
-                ] as const).map(({ id, label, Icon }) => {
-                  const active = theme === id;
-                  return (
-                    <button key={id} type="button" onClick={() => setTheme(id as Theme)} aria-pressed={active}
-                      className={cn("flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all",
-                        active ? "border-action-primary bg-action-primary/10 text-text-primary shadow-lg" : "border-border bg-bg-elevated text-text-muted hover:text-text-primary")}>
-                      <Icon className={cn("w-5 h-5", active && "text-action-primary")} />
-                      <span className="text-xs font-semibold">{label}</span>
-                      {active && <span className="text-xs text-action-primary">Active</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </SectionCard>
-          </WidgetBoundary>
 
           <WidgetBoundary title="Accent & Backgrounds">
             <SectionCard title="Accent & Backgrounds" description="Signature color that tints your active background" icon={Sparkles}>

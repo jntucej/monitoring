@@ -11,7 +11,6 @@ import { ToastProvider } from "@/components/ui/toast";
 import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { LoadingStates } from "@/components/shared/LoadingStates";
-import { FloatableThemeCycler } from "@/components/shared/FloatableThemeCycler";
 import { LiveEventToaster } from "@/components/shared/LiveEventToaster";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
@@ -76,8 +75,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           {/* LiveEventToaster: ambient SSE/poll-to-toast layer, gated
               per-role inside the component — inert for non-alert roles. */}
           {!isMarketing && <LiveEventToaster />}
-          {!isMarketing && <FloatingBot />}
-          {!isMarketing && !isGateKiosk && <FloatableThemeCycler />}
+          {!isMarketing && !isGateKiosk && <FloatingBot />}
         </ToastProvider>
       </NavigationProvider>
     </GlassProvider>

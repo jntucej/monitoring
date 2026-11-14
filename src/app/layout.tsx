@@ -5,7 +5,6 @@ import { COLLEGE } from "@/lib/college-config";
 import { organizationJsonLd } from "@/lib/seo";
 import { ClientProviders } from "./ClientProviders";
 import { PwaInstallPrompt } from "@/components/shared/PwaInstallPrompt";
-import { getServerTheme } from "@/lib/theme-cookie";
 
 export const metadata: Metadata = {
   metadataBase: new URL(COLLEGE.baseUrl),
@@ -91,37 +90,17 @@ export default async function RootLayout({
   // Without this, static/prerendered pages ship a fixed nonce and
   // 'strict-dynamic' blocks every dynamically-imported chunk.
   await headers();
-  const theme = await getServerTheme();
-  // L2: The edge middleware stamps a per-request CSP nonce on the x-nonce
-  // request header. Next.js SSR reads it back here so the theme-flash
-  // inline script in <head> carries the matching nonce attribute;
-  // 'strict-dynamic' in the CSP header then permits it (and every
-  // dynamically-imported chunk it enables) without 'unsafe-inline'.
+  // The edge middleware stamps a per-request CSP nonce on the x-nonce
+  // request header. Next.js SSR reads it back here so the inline script
+  // in <head> carries the matching nonce attribute; 'strict-dynamic'
+  // in the CSP header then permits it without 'unsafe-inline'.
   const h = await headers();
   const nonce = h.get("x-nonce") ?? "";
   return (
     <html
       lang="en-IN"
-      data-theme={theme ?? "dark"}
-      suppressHydrationWarning
     >
       <head>
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `
-try {
-  var s = localStorage.getItem('gate-monitor-theme');
-  var t = s || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  var d = document.documentElement;
-  d.setAttribute('data-theme', t);
-  d.classList.toggle('dark', t === 'dark');
-  d.classList.toggle('light', t === 'light');
-  d.classList.toggle('glass', t === 'glass');
-} catch (e) {}
-`,
-          }}
-        />
         {/* Un-hide the Next.js streaming SSR wrapper (S:0) immediately.
             Next.js wraps client component trees in <div hidden id="S:0">
             during SSR. The wrapper stays hidden until React hydration

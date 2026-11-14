@@ -277,7 +277,7 @@ function AdminStudentsInner() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 section-offscreen">
         {/* Facet rail */}
         <WidgetBoundary title="Filters">
           <aside className="glass-card p-4 space-y-4 lg:sticky lg:top-4 self-start">

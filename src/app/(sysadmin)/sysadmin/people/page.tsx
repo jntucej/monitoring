@@ -41,7 +41,9 @@ export default function PeoplePage() {
         <Skeleton className="h-64 w-full" />
       ) : (
         <>
-          <PeopleContent data={data} loading={loading} error={error} onRowClick={openRow} />
+          <div className="section-offscreen">
+            <PeopleContent data={data} loading={loading} error={error} onRowClick={openRow} />
+          </div>
           <PeopleDrawer row={selectedRow} onClose={() => setSelectedRow(null)} />
         </>
       )}

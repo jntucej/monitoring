@@ -8,9 +8,6 @@ import { useUIStore } from "@/stores/uiStore";
 import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-
-import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
-
 export function UserProfileTab() {
   const { user, role, logout } = useAuthStore();
 const { addToast } = useUIStore();
@@ -109,9 +106,6 @@ const { addToast } = useUIStore();
           </div>
         </div>
       </div>
-
-      {/* Appearance & Glass Theme Control Card */}
-      <GlassThemeToggle showCard={true} />
 
       {/* Sign Out Action Card */}
       <div className="bg-bg-surface border border-border rounded-2xl p-4 space-y-3 shadow-md">

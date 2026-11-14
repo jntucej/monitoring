@@ -1,6 +1,6 @@
 /**
- * Zustand UI store — global toast notifications, modal state, theme.
- * Uses persist middleware to maintain sidebar collapse state across refreshes.
+ * Zustand UI store — global toast notifications + sidebar state.
+ * Single theme (graphite): no theme field, no setTheme.
  */
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -11,7 +11,6 @@ const MAX_TOASTS = 3;
 
 interface UIState {
   toasts: ToastData[];
-  theme: "dark" | "light" | "glass";
   isMobileSidebarOpen: boolean;
   isSidebarCollapsed: boolean;
 }
@@ -20,7 +19,6 @@ interface UIActions {
   addToast: (toast: Omit<ToastData, "id">) => void;
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
-  setTheme: (theme: "dark" | "light" | "glass") => void;
   toggleMobileSidebar: () => void;
   setMobileSidebarOpen: (open: boolean) => void;
   toggleSidebarCollapse: () => void;
@@ -35,7 +33,6 @@ export const useUIStore = create<UIState & UIActions>()(
   persist(
     (set) => ({
       toasts: [],
-      theme: "dark",
       isMobileSidebarOpen: false,
       isSidebarCollapsed: false,
 
@@ -50,7 +47,7 @@ export const useUIStore = create<UIState & UIActions>()(
           // Fix 7: enforce max 3 toasts
           const overflow = state.toasts.length + 1 - MAX_TOASTS;
           const trimmed = overflow > 0 ? state.toasts.slice(overflow) : state.toasts;
-          return { toasts: [...trimmed, newToast] };
+          return { toasts: [...trimmed, newToast] }
         });
         if (duration > 0) {
           setTimeout(() => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })), duration);
@@ -59,25 +56,6 @@ export const useUIStore = create<UIState & UIActions>()(
 
       removeToast: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
       clearAllToasts: () => set({ toasts: [] }),
-
-      setTheme: (theme) => {
-        if (!["dark", "light", "glass"].includes(theme)) return;
-        if (typeof window !== "undefined") {
-          document.documentElement.setAttribute("data-theme", theme);
-          document.documentElement.classList.remove("dark", "light", "glass");
-          if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-          } else if (theme === "glass") {
-            document.documentElement.classList.add("glass");
-          } else if (theme === "light") {
-            document.documentElement.classList.add("light");
-          }
-          localStorage.setItem("gate-monitor-theme", theme);
-          // Persist to cookie so the server can render the right theme next request
-          document.cookie = `gate-monitor-theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
-        }
-        set({ theme });
-      },
 
       toggleMobileSidebar: () => set((state) => ({ isMobileSidebarOpen: !state.isMobileSidebarOpen })),
       setMobileSidebarOpen: (open) => set({ isMobileSidebarOpen: open }),
@@ -125,9 +103,7 @@ export const useUIStore = create<UIState & UIActions>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         isSidebarCollapsed: state.isSidebarCollapsed,
-        theme: state.theme,
       }),
     }
   )
 );
-

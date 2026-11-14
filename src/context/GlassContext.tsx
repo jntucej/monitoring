@@ -26,8 +26,6 @@ export interface GateCardState {
 export type { AlertPayload };
 
 interface GlassState {
-  isDark: boolean;
-  toggleTheme: () => void;
   displayMode: DisplayMode;
   setDisplayMode: (mode: DisplayMode) => void;
   toggleDisplayMode: () => void;
@@ -72,7 +70,6 @@ const INITIAL_CARDS: GateCardState[] = [
 
 export function GlassProvider({
   children,
-  initialDark = true,
 }: {
   children: ReactNode;
   initialDark?: boolean;
@@ -415,18 +412,11 @@ export function GlassProvider({
     };
   }, [prefersReducedMotion, setPerformanceTier]);
 
-  const isDark = store.theme ? store.theme === "dark" : initialDark;
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
     }
   }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = store.theme === "dark" ? "glass" : store.theme === "glass" ? "light" : "dark";
-    store.setTheme(nextTheme);
-  };
 
   const isLowEndDevice = performanceTier === "legacy" || performanceTier === "emergency" || performanceTier === "low";
 
@@ -439,8 +429,6 @@ export function GlassProvider({
   // change" symptom. Memoise on the exact set of values the object exposes.
   const contextValue: GlassState = useMemo(
     () => ({
-      isDark,
-      toggleTheme,
       displayMode,
       setDisplayMode,
       toggleDisplayMode,
@@ -473,8 +461,6 @@ export function GlassProvider({
       dismissAlert,
     }),
     [
-      isDark,
-      toggleTheme,
       displayMode,
       setDisplayMode,
       toggleDisplayMode,

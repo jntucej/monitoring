@@ -189,6 +189,7 @@ export default function OperatorActionsPage() {
         </div>
       )}
 
+      <div className="section-offscreen">
       {forecasts.length > 0 && (
         <div className="mb-3 flex flex-col gap-2">
           {forecasts.slice(0, 5).map((f) => (
@@ -358,6 +359,7 @@ export default function OperatorActionsPage() {
           })}
         </div>
       )}
+      </div>
     </WidgetBoundary>
   );
 }

@@ -1,10 +1,9 @@
 import { Variants, useReducedMotion } from "framer-motion";
-import { useUIStore } from "@/stores/uiStore";
 
+// Single theme (graphite): glossy motion is off everywhere.
+// Kept so existing imports keep compiling; always false.
 export function useGlossyMotion() {
-  const theme = useUIStore((s) => s.theme);
-  const prefersReduced = useReducedMotion();
-  return theme === "glass" && !prefersReduced;
+  return false;
 }
 
 export const fadeInUp: Variants = {
@@ -20,7 +19,6 @@ export const fadeIn: Variants = {
 export const scaleIn: Variants = {
   hidden: { scale: 0.92, opacity: 0 },
   visible: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 20 } },
-  // ponytail: exit variant so AnimatePresence can play FeedbackModal's close.
   exit: { scale: 0.92, opacity: 0, transition: { duration: 0.15 } },
 };
 
@@ -46,11 +44,10 @@ export const wordStaggerContainer: Variants = {
 };
 
 export const wordItemVariant: Variants = {
-  hidden: { opacity: 0, y: 8, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { type: "spring", stiffness: 350, damping: 24 },
   },
 };
@@ -66,10 +63,9 @@ export const glossyFloatAnimation = {
 
 export const buttonTap: any = { scale: 0.96 };
 export const buttonHover: any = { scale: 1.02, y: -2, transition: { type: "spring", stiffness: 400, damping: 10 } };
-export const cardHover: any = { scale: 1.015, y: -4, boxShadow: "0 12px 40px rgba(16,185,129,0.15)", transition: { type: "spring", stiffness: 300, damping: 20 } };
+export const cardHover: any = { scale: 1.015, y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } };
 export const statusPulse: any = {
   scale: [1, 1.08, 1],
   opacity: [1, 0.7, 1],
   transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
 };
-

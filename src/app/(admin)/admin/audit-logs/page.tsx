@@ -35,6 +35,7 @@ function AdminAuditLogsInner() {
         </p>
       </div>
 
+      <div className="section-offscreen">
       <WidgetBoundary title="Audit Trail">
         <div className="rounded-2xl border border-border bg-bg-elevated p-4 sm:p-5">
           <div className="flex items-center gap-3 mb-4">
@@ -52,6 +53,7 @@ function AdminAuditLogsInner() {
           <AdminAuditLogViewer canViewAll={canViewAll} />
         </div>
       </WidgetBoundary>
+      </div>
 
     </div>
   );

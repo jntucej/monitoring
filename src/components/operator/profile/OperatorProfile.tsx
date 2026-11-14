@@ -11,7 +11,6 @@ import { useUIStore } from "@/stores/uiStore";
 import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-import { OperatorThemeToggle } from "@/components/operator/shared/OperatorThemeToggle";
 
 export function OperatorProfile() {
   const user = useAuthStore((s) => s.user);
@@ -113,9 +112,6 @@ const { addToast } = useUIStore();
           </div>
         </div>
       </div>
-
-      {/* Appearance & Glass Theme Control Card */}
-      <OperatorThemeToggle showCard={true} />
 
       {/* Sign Out Action Card */}
       <div className="bg-bg-surface border border-border rounded-2xl p-4 space-y-3 shadow-md">

@@ -129,6 +129,7 @@ export default function VPTodayPage() {
         </WidgetBoundary>
 
         {/* 2. Focus Zone — the one thing right now */}
+        <div className="section-offscreen">
         <WidgetBoundary name="FocusZone" title="Focus Zone">
           <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
         </WidgetBoundary>
@@ -188,6 +189,7 @@ export default function VPTodayPage() {
         </WidgetBoundary>
 <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+        </div>
 
       </div>
     </>

@@ -7,7 +7,6 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
-import { GlassThemeToggle } from "@/components/shared/GlassThemeToggle";
 import { Sidebar, type OverviewPayload } from "@/components/sysadmin/Sidebar";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -96,9 +95,6 @@ export default function SysadminConsoleLayout({
                 <span className="text-xs font-semibold tracking-wide text-text-muted">
                   JNTU CEEJ · SysAdmin
                 </span>
-                <div className="flex items-center gap-2">
-                  <GlassThemeToggle />
-                </div>
               </div>
               {main}
             </main>

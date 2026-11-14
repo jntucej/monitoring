@@ -4,18 +4,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useMouseParallax } from "@/hooks/useMouseParallax";
 import { useGlass } from "@/context/GlassContext";
-import { useUIStore } from "@/stores/uiStore";
 
 export function FloatingOrbs() {
   const { x, y, isDesktop } = useMouseParallax(0.025, 20, 120);
   const { performanceTier } = useGlass();
-  const theme = useUIStore((s) => s.theme);
-
   if (performanceTier === "emergency" || performanceTier === "legacy") {
     return null;
   }
 
-  const isGlossy = theme === "glass";
 
   return (
     <div
@@ -32,9 +28,9 @@ export function FloatingOrbs() {
             <svg className="w-full h-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
               <defs>
                 <linearGradient id="fluidRibbonGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="var(--action-info)" stopOpacity={isGlossy ? "0.85" : "0.35"} />
-                  <stop offset="50%" stopColor="var(--action-primary)" stopOpacity={isGlossy ? "0.75" : "0.25"} />
-                  <stop offset="100%" stopColor="var(--unit-c)" stopOpacity={isGlossy ? "0.65" : "0.15"} />
+                  <stop offset="0%" stopColor="var(--action-info)" stopOpacity={"0.35"} />
+                  <stop offset="50%" stopColor="var(--action-primary)" stopOpacity={"0.25"} />
+                  <stop offset="100%" stopColor="var(--unit-c)" stopOpacity={"0.15"} />
                 </linearGradient>
                 <linearGradient id="discGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
@@ -45,7 +41,7 @@ export function FloatingOrbs() {
               <path
                 d="M -100,250 C 300,100 450,600 800,400 C 1150,200 1300,700 1600,500"
                 stroke="url(#fluidRibbonGrad1)"
-                strokeWidth={isGlossy ? "52" : "30"}
+                strokeWidth={"30"}
                 strokeLinecap="round"
                 style={{ filter: "drop-shadow(0px 16px 32px rgba(0, 114, 255, 0.25))" }}
               >
@@ -57,25 +53,12 @@ export function FloatingOrbs() {
                 />
               </path>
 
-              {isGlossy && (
-                <motion.ellipse
-                  cx="520"
-                  cy="120"
-                  rx="65"
-                  ry="35"
-                  fill="url(#discGrad)"
-                  transform="rotate(-25 520 120)"
-                  animate={{ y: [0, -18, 0] }}
-                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ filter: "drop-shadow(0px 12px 24px rgba(99, 102, 241, 0.3))" }}
-                />
-              )}
             </svg>
           </div>
         </motion.div>
       ) : (
         <div
-          className="absolute inset-0 opacity-30 bg-gradient-to-br fromaction-primary/10 via-transparent tounit-c/10"
+          className="absolute inset-0 opacity-30 bg-gradient-to-br from-action-primary/10 via-transparent to-unit-c/10"
           aria-hidden="true"
         />
       )}

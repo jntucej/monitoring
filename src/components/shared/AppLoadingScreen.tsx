@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { useUIStore } from "@/stores/uiStore";
 
 import { Shield, Loader2 } from "lucide-react";
 
@@ -19,7 +18,6 @@ const MIN_VISIBLE_MS = 400;
 
 export function AppLoadingScreen() {
   const { loading, _hasHydrated } = useAuthStore();
-  const { theme } = useUIStore();
   const [progress, setProgress] = useState(0);
   const hideRef = useRef(false);
   const startRef = useRef(Date.now());
@@ -50,11 +48,8 @@ export function AppLoadingScreen() {
 
   if (hideRef.current) return null;
 
-  const isGlass = theme === "glass";
-  const bg = isGlass ? "bg-base" : "bg-bg-base";
-  const cardBg = isGlass
-    ? "bg-white/5 backdrop-blur-xl border-white/10"
-    : "bg-bg-surface border-border";
+  const bg = "bg-bg-base";
+  const cardBg = "bg-bg-surface border-border";
   const textMuted = "text-text-muted";
 
   return (
@@ -91,7 +86,7 @@ export function AppLoadingScreen() {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className={`w-1.5 h-1.5 rounded-full ${isGlass ? "bg-white/40" : "bgtext-muted/40"} animate-pulse`}
+            className={`w-1.5 h-1.5 rounded-full "bg-bg-base" animate-pulse`}
             style={{ animationDelay: `${i * 150}ms` }}
           />
         ))}

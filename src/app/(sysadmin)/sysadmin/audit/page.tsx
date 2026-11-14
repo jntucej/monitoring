@@ -28,9 +28,11 @@ function SysadminAuditInner() {
         </p>
       </div>
 
+      <div className="section-offscreen">
       <WidgetBoundary title="Audit Log Viewer">
         <AuditLogViewer />
       </WidgetBoundary>
+      </div>
 
     </div>
   );

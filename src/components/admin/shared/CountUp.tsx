@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useSpring, useTransform } from "framer-motion";
 import { useGlass } from "@/context/GlassContext";
-import { useUIStore } from "@/stores/uiStore";
 
 export interface CountUpProps {
   value: number;
@@ -89,10 +88,8 @@ export function CountUp({
   startValue = 0,
   isLoading: propIsLoading,
 }: CountUpProps) {
-  const theme = useUIStore((s) => s.theme);
   const { prefersReducedMotion, performanceTier, isTouchDevice, isLiveLoading } = useGlass();
   const [mounted, setMounted] = useState(false);
-  const prevThemeRef = useRef(theme);
 
   const isLoading = propIsLoading !== undefined ? propIsLoading : isLiveLoading;
 
@@ -112,19 +109,13 @@ export function CountUp({
   useEffect(() => {
     setMounted(true);
 
-    if (prevThemeRef.current !== theme) {
-      // Re-trigger fresh count-up animation from 0 on theme switch
-      spring.set(0);
-      prevThemeRef.current = theme;
-    }
-
     if (!isLoading && typeof value === "number") {
       const timer = setTimeout(() => {
         spring.set(value);
       }, delay * 1000);
       return () => clearTimeout(timer);
     }
-  }, [value, delay, spring, theme, isLoading]);
+  }, [value, delay, spring, isLoading]);
 
   const display = useTransform(spring, (v) => {
     const formatted = decimals > 0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();

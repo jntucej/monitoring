@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { useUIStore } from "@/stores/uiStore";
 import { useGlass } from "@/context/GlassContext";
 import { GlossyGateScanComposition } from "./GlossyGateScanComposition";
 import { GlossyHeroComposition } from "./GlossyHeroComposition";
@@ -18,7 +17,6 @@ export function GlossyMotionPlayer({
   status = "entry",
   className = "",
 }: GlossyMotionPlayerProps) {
-  const theme = useUIStore((s) => s.theme);
   const { prefersReducedMotion, performanceTier, isTouchDevice, displayMode } = useGlass();
   const [mounted, setMounted] = useState(false);
 
@@ -26,7 +24,6 @@ export function GlossyMotionPlayer({
     setMounted(true);
   }, []);
 
-  const isGlossy = theme === "glass";
   const isMobileOrLowFps =
     isTouchDevice ||
     performanceTier === "legacy" ||
@@ -36,7 +33,7 @@ export function GlossyMotionPlayer({
     prefersReducedMotion;
 
   // Static Lightweight SVG / CSS Fallback for Mobile / Non-Glossy / Low-FPS
-  if (!mounted || !isGlossy || isMobileOrLowFps) {
+  if (!mounted || isMobileOrLowFps) {
     const statusColor =
       status === "entry"
         ? "text-action-success bg-emerald-500/10 border-emerald-500/30"

@@ -11,9 +11,6 @@ import {
   LogOut,
   Loader2,
   Check,
-  Moon,
-  Sun,
-  Droplet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,7 +67,6 @@ export function ProfileMenuButton({
 }: ProfileMenuButtonProps) {
   const router = useRouter();
   const { user, role, logout } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [accent, setAccent] = useState<AccentId>(loadAccent);
@@ -188,32 +184,6 @@ export function ProfileMenuButton({
               <Sparkles className="w-3 h-3" /> Appearance &amp; Backgrounds
             </p>
 
-            {/* Theme switcher (live app theme, reactive + persisted) */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-text-secondary">Theme</span>
-              <div className="flex items-center gap-1">
-                {(["dark", "light", "glass"] as const).map((t) => {
-                  const Icon = t === "dark" ? Moon : t === "light" ? Sun : Sparkles;
-                  const active = theme === t;
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setTheme(t)}
-                      aria-label={`Switch to ${t} theme`}
-                      className={cn(
-                        "w-8 h-8 min-w8 min-h8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all",
-                        active
-                          ? "bg-action-primary text-white shadow-sm"
-                          : "bg-bg-elevated text-text-muted hover:text-text-primary border border-border"
-                      )}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* Account accent / background tint */}
             <div>
@@ -325,4 +295,4 @@ function applyAccent(id: AccentId) {
 }
 
 // re-export a small icon helper so the sidebars can render the avatar button
-export { Moon, Sun, Droplet };
+export { Moon, Sun, Droplet } from "lucide-react";
