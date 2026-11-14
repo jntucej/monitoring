@@ -4,6 +4,7 @@ import "./globals.css";
 import { COLLEGE } from "@/lib/college-config";
 import { organizationJsonLd } from "@/lib/seo";
 import { ClientProviders } from "./ClientProviders";
+import { buildCspHeader } from "@/lib/csp";
 import { PwaInstallPrompt } from "@/components/shared/PwaInstallPrompt";
 
 export const metadata: Metadata = {
@@ -111,6 +112,7 @@ export default async function RootLayout({
   return (
     <html lang="en-IN">
       <head>
+        <meta httpEquiv="Content-Security-Policy" content={buildCspHeader({ nonce, isDev: process.env.NODE_ENV === "development" })} />
         {/* JSON-LD blocks are data islands, not executable scripts: they are
           not affected by script-src, so no nonce is required. */}
         <script
