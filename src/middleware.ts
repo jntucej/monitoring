@@ -100,8 +100,14 @@ export async function proxy(req: NextRequest) {
   // other routes (including every authenticated console) keep the
   // strict nonce + strict-dynamic posture — that is the layer that
   // contains stored XSS in user content.
-  const PUBLIC_PATHS = ['/', '/login', '/about', '/help'];
-  const isPublic = PUBLIC_PATHS.some(p => pathname === p || (p === '/login' && pathname.startsWith('/login')));
+  // Only the home page is force-static — it ships cached HTML without a
+  // nonce, so strict-dynamic would block every chunk. /login, /about and
+  // /help are dynamic (no force-static export): Next.js SSR reads x-nonce
+  // and stamps it on script tags, so strict-dynamic works and they keep
+  // the strict posture. Shrinking PUBLIC_PATHS to '/' closes the
+  // regression that made all four routes unsafe.
+  const PUBLIC_PATHS = ['/'];
+  const isPublic = pathname === '/';
   const csp = buildCspHeader({ nonce, isDev, public: isPublic });
 
   // Home landing page: redirect authenticated visitors to their role

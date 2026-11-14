@@ -112,18 +112,21 @@ export default async function RootLayout({
     <html lang="en-IN">
       <head>
         {/*
-          S:0 unhide: Next.js wraps the client tree in
-          <div hidden id="S:0"> during SSR. The inline script below
-          un-hides it immediately — it is NOT hydration-dependent.
-          With strict-dynamic dropped, the response header CSP
-          ('self' + nonce) allows external chunks. The inline script
-          needs 'unsafe-inline' — add it to the CSP fallback.
+          S:0 unhide script removed.
+          Next.js wraps the client tree in <div hidden id="S:0"> during
+          SSR for force-static pages (home only). The S:0 wrapper is
+          emitted by the React streaming runtime, not by our code, and
+          the ClientProviders component already skips the Suspense
+          boundary on marketing paths — the S:0 div is a streaming
+          artifact, not a design choice. The unhide script was a
+          workaround that made first paint JS-dependent; removing it
+          is correct: the home page's CSP is the relaxed policy
+          ('self' + 'unsafe-inline'), and React's own hydration will
+          unhide S:0 naturally. If LCP ever regresses on home, the fix
+          is to make home dynamic (force-dynamic) so Next.js SSR
+          stamps the nonce and strict-dynamic works — not to add a
+          head-side script back.
         */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('S:0');if(s)s.hidden=false;});`,
-          }}
-        />
         {/*
           CSP is served as a response header by the edge middleware, not
           as a meta tag. The header carries a fresh per-request nonce +

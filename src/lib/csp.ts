@@ -16,16 +16,19 @@ export function buildCspHeader({ nonce, isDev, public: isPublic = false }: CspOp
     // console surface where user content (complaints, announcements,
     // KB docs) is the stored-XSS vector.
     //
-    // PUBLIC (force-static marketing routes: /, /login, /about, /help):
-    // The home page is force-static — Next.js caches the HTML at build
-    // time and ships it without a nonce baked into the script tags.
-    // Under strict-dynamic, 'self' is inert, so every static chunk is
-    // blocked and the S:0 streaming wrapper never un-hides → NO_FCP.
-    // For these routes we drop strict-dynamic and add 'unsafe-inline'
-    // so the page's own inline scripts (S:0 unhide, RSC payload) run
-    // and 'self' covers external chunks. Public pages carry no user
-    // content, so the stored-XSS surface that strict-dynamic protects
-    // against does not apply here.
+    // PUBLIC (force-static home page only):
+    // The home page is the sole force-static route — Next.js caches the
+    // HTML at build time and ships it without a nonce baked into the
+    // script tags. Under strict-dynamic, 'self' is inert, so every
+    // static chunk is blocked and the S:0 streaming wrapper never
+    // un-hides → NO_FCP. For this route we drop strict-dynamic and add
+    // 'unsafe-inline' so the page's own inline scripts (S:0 unhide, RSC
+    // payload) run and 'self' covers external chunks.
+    //
+    // /login, /about, /help are DYNAMIC: they have no force-static
+    // export, so Next.js SSR reads x-nonce and stamps it on script
+    // tags — strict-dynamic works. They keep the strict posture and
+    // must NOT be moved into PUBLIC_PATHS.
     //
     // The middleware picks the policy per route (PUBLIC_PATHS in
     // middleware.ts). Do NOT apply the public policy to authenticated
