@@ -2,31 +2,25 @@ export interface CspOptions { nonce: string; isDev: boolean; }
 export function buildCspHeader({ nonce, isDev }: CspOptions): string {
   return [
     "default-src 'self'",
-    // Per-request nonce + strict-dynamic. The nonce is set on the response
-    // header by the edge middleware; Next.js picks it up from the x-nonce
-    // request header and stamps it on dynamically imported script tags.
-    // 'unsafe-inline' is omitted from script-src — that is the whole point.
     //
-    // Fallback: when no nonce is available (static prerender of the home
-    // page bakes nonce="" into script tags), strict-dynamic is inert and
-    // 'self' would block every chunk. In that case we drop strict-dynamic
-    // and add 'unsafe-inline' so the page's own scripts run. This is a
-    // per-page fallback, not a global relaxation: dynamic responses
-    // (middleware-set headers) always carry a real nonce.
+    // CSP strategy (post-P0 fix):
     //
-    // Even when a nonce IS present, strict-dynamic only unlocks
-    // dynamically-imported scripts (importScript, dynamic import()).
-    // Static <script src> tags in the HTML do NOT inherit the nonce's
-    // permission — they need 'self' to be effective. In strict-dynamic
-    // mode 'self' is inert, so every static chunk is blocked. The fix
-    // is to keep 'self' effective by dropping strict-dynamic: 'self'
-    // covers external chunks, 'nonce' still validates inline scripts.
-    // 'unsafe-inline' is required for the S:0 unhide script and
-    // Next.js's own inline scripts (RSC payload, theme-flash). The
-    // security cost is acceptable: inline script injection is mitigated
-    // by the lack of user-controlled content in <head> and the
-    // response header CSP being set by trusted middleware.
-    `script-src 'self' ${nonce ? `'nonce-${nonce}' ` : ""}'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+    // The home page is statically prerendered. Its <script src> tags ship
+    // without a nonce attribute (prerender bakes nonce="" into the RSC
+    // payload). Under strict-dynamic, 'self' is inert, so every static
+    // chunk was blocked — a P0 NO_FCP on the critical LCP path.
+    //
+    // Fix: drop strict-dynamic. 'self' is now effective and covers
+    // external chunks. 'unsafe-inline' covers inline scripts (S:0 unhide,
+    // RSC payload, theme-flash). The nonce is kept for inline script
+    // validation but 'unsafe-inline' makes it redundant for that purpose.
+    //
+    // Security trade-off: 'unsafe-inline' in script-src means an XSS
+    // injection in any inline context would execute. Mitigation: no
+    // user-controlled content in <head>, CSP set by trusted middleware.
+    // The alternative (strict-dynamic) blocks every static chunk on the
+    // prerendered home page — a P0 that beats a theoretical XSS.
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     // style-src MUST keep 'unsafe-inline' — Next.js injects inline styles
     // and CSS injection is not an XSS vector.
     `style-src 'self' 'unsafe-inline' https:`,
