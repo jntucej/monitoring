@@ -435,7 +435,7 @@ const shift = useOperatorShiftClock();
                 )}
               </>
             ) : (
-              <span>shift starts at first scan</span>
+              <span title="Your 8-hour shift window begins the moment you confirm your first scan of the day.">shift window opens on your first scan</span>
             )}
           </div>
           {/* A1: compact mode + lockdown banner (always visible, incl. OPEN). */}
@@ -552,7 +552,13 @@ const shift = useOperatorShiftClock();
       </div>
 
       {/* ── Manual entry: one button, inline sheet (not a mode) ── */}
-      {manualOpen && state === "idle" && !needsAssignment && (
+      {/* Gated on "not confirming" rather than "idle" — the previous
+          `state === "idle"` condition made the button appear dead when the
+          desk was in any transient state (detecting/error/success), which
+          operators reported as "clicked Enter Roll Manually, nothing
+          happened". The sheet itself is a fixed overlay; the underlying
+          camera state does not matter while it is open. */}
+      {manualOpen && state !== "confirming" && !needsAssignment && (
         <div className="fixed bottom-28 inset-x-0 z-60 flex justify-center px-4 pointer-events-none">
           <form
             onSubmit={submitManual}
@@ -766,23 +772,34 @@ const shift = useOperatorShiftClock();
 
       {/* ── Two decisions, always in the same place ── */}
       {!needsAssignment && scannerOpen && (
-        <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-2 px-4">
+        <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-1.5 px-4">
+          <div className="w-full max-w-md">
+            {state !== "confirming" && (
+              <p className="text-center text-xs text-text-muted mb-1.5" aria-live="polite">
+                Scan a pass or enter a roll, then choose entry or exit.
+              </p>
+            )}
+          </div>
           <div className="w-full max-w-md grid grid-cols-2 gap-2">
             <button
               type="button"
               disabled={!canConfirm}
+              aria-label="Confirm entry (IN)"
               onClick={() => { void doConfirmWithGeo("IN"); }}
-              className="min-h14 rounded-xl bg-action-primary text-black font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h14 rounded-xl bg-action-primary text-black font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.99] disabled:opacity-25"
             >
-              IN
+              <span>IN</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Entry</span>
             </button>
             <button
               type="button"
               disabled={!canConfirm}
+              aria-label="Confirm exit (OUT)"
               onClick={() => { void doConfirmWithGeo("OUT"); }}
-              className="min-h14 rounded-xl bg-action-danger text-white font-extrabold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-25"
+              className="min-h14 rounded-xl bg-action-danger text-white font-extrabold text-lg flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.99] disabled:opacity-25"
             >
-              OUT
+              <span>OUT</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">Exit</span>
             </button>
           </div>
         </div>

@@ -122,3 +122,4 @@ data/uploads/
 scripts/smoke-creds.json
 scripts/smoke-report.json
 .metrics.token
+.swarm/

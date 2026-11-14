@@ -151,12 +151,6 @@ export default async function RootLayout({
         >
           Skip to main content
         </a>
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-action-primary focus:px-4 focus:py-2 focus:text-white"
-        >
-          Skip to main content
-        </a>
         <ClientProviders>{children}</ClientProviders>
         <PwaInstallPrompt />
       </body>

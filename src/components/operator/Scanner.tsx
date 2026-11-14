@@ -760,12 +760,21 @@ export function Scanner({
                 </div>
                 <h3 className="text-sm font-bold text-action-warning">Camera Unavailable</h3>
                 <p className="text-xs text-text-secondary max-w-xs">{errorMessage}</p>
+                {/* The critical next step: live scanning is unavailable, so
+                    fall back to manual entry or a photo of the code. Without
+                    this, operators saw a dead box and didn't know they could
+                    still verify a pass. */}
+                <p className="text-xs font-semibold text-text-primary max-w-xs">
+                  {onManualEntryClick
+                    ? "You can still verify a pass below — enter the roll number or upload a photo of the code."
+                    : "Upload a photo of the code below to continue."}
+                </p>
                 <button
                   type="button"
                   onClick={() => startCamera()}
-                  className="surface-card mt-2 px-4 py-2 bg-bg-elevated hover:bg-bg-elevated text-white text-xs font-semibold flex items-center gap-1.5"
+                  className="surface-card mt-1 px-4 py-2 bg-bg-elevated hover:bg-bg-elevated text-white text-xs font-semibold flex items-center gap-1.5"
                 >
-                  <RefreshCw className="w-3.5 h-3.5" /> Retry
+                  <RefreshCw className="w-3.5 h-3.5" /> Retry camera
                 </button>
               </div>
             )}

@@ -95,13 +95,17 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
     ];
   }
 
-  // Operator
+  // Operator: one primary action only. The desk's own landing page already
+  // shows a single "Open gate desk" CTA to the assigned gate; a second
+  // near-identical "Start Scan"/"SCAN"/"Operator Desk" button here just
+  // confused operators about which one opens the scan surface (synthetic
+  // UX test, 20-persona run). "View Escalated" and "Operator Desk" both
+  // pointed at /operator — the page the operator is already on — so they
+  // are dead duplicates of the CTA. Keep only the gate-desk link.
   if (role === "operator") {
-    const gateHref = userGateId ? `/gate/${userGateId}` : "/operator";
+    const gateHref = userGateId ? `/gate/${userGateId}` : "/operator/claim";
     return [
-      { label: "Start Scan", icon: ScanLine, href: gateHref },
-      { label: "View Escalated", icon: ArrowUpRight, href: "/operator" },
-      { label: "Operator Desk", icon: LayoutDashboard, href: "/operator" },
+      { label: userGateId ? "Open gate desk" : "Claim your gate", icon: ScanLine, href: gateHref },
     ];
   }
 
