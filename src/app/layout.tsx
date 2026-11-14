@@ -112,6 +112,21 @@ export default async function RootLayout({
     <html lang="en-IN">
       <head>
         {/*
+          S:0 unhide: Next.js wraps the client tree in
+          <div hidden id="S:0"> during SSR. The inline script below
+          un-hides it immediately — it is NOT hydration-dependent.
+          With the CSP meta tag removed and strict-dynamic dropped,
+          the response header CSP ('self' + nonce) allows this inline
+          script to run. Without it, the hero stays hidden until React
+          mounts — an LCP regression on every cold load.
+        */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('S:0');if(s)s.hidden=false;});`,
+          }}
+        />
+        {/*
           CSP is served as a response header by the edge middleware, not
           as a meta tag. The header carries a fresh per-request nonce +
           strict-dynamic. A meta tag would be a decoy: when both are
