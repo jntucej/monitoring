@@ -119,7 +119,9 @@ export async function proxy(req: NextRequest) {
     requestHeaders.set('x-request-id', requestId);
     requestHeaders.set('x-nonce', nonce);
     requestHeaders.set('x-url', pathname);
-    requestHeaders.set('Content-Security-Policy', csp);
+    // NB: Content-Security-Policy is set on the RESPONSE below, not on
+    // the forwarded request headers — request headers are internal-only
+    // and Next.js does not echo them to the response.
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
     res.headers.set('Content-Security-Policy', csp);
