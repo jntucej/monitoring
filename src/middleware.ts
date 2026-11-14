@@ -92,7 +92,17 @@ export async function proxy(req: NextRequest) {
   // nonce-scoped script tags. 'strict-dynamic' makes nonce-scoped scripts
   // implicitly trust dynamically-imported chunks — no 'unsafe-inline' needed.
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-  const csp = buildCspHeader({ nonce, isDev: process.env.NODE_ENV === 'development' });
+  const isDev = process.env.NODE_ENV === 'development';
+
+  // CSP is split by route class: the force-static marketing pages ship
+  // cached HTML without a nonce, so strict-dynamic would block every
+  // chunk. They get the relaxed 'self' + 'unsafe-inline' policy. All
+  // other routes (including every authenticated console) keep the
+  // strict nonce + strict-dynamic posture — that is the layer that
+  // contains stored XSS in user content.
+  const PUBLIC_PATHS = ['/', '/login', '/about', '/help'];
+  const isPublic = PUBLIC_PATHS.some(p => pathname === p || (p === '/login' && pathname.startsWith('/login')));
+  const csp = buildCspHeader({ nonce, isDev, public: isPublic });
 
   // Home landing page: redirect authenticated visitors to their role
   // console. Runs for everyone hitting `/` (no rate-limit / CSRF needed).
