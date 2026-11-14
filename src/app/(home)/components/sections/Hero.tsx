@@ -120,7 +120,8 @@ export function Hero() {
         <button
           type="button"
           onClick={() => scrollTo("home-access-flow")}
-          className="surface-card inline-flex items-center gap-2 (--home- ,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,var(--bg-surface))] hover:bg-white/5"
+          className="surface-card inline-flex items-center gap-2 border border-[var(--home-border-hard,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,var(--bg-surface))] hover:bg-white/5"
+          style={{ background: "rgba(255,255,255,0.05)" }}
         >
           How it works
           <ArrowRight className="h-4 w-4" />

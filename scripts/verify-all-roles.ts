@@ -175,7 +175,9 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
       }
       if (!seedable) {
         // Navigate back to the app origin so storage is reachable, then seed.
-        await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+        // Heavy role roots (oie, exam_superintendent) can take >30s to
+        // reach domcontentloaded under prod load; use 60s.
+        await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded", timeout: 60_000 });
       }
       await page.evaluate(([tok, ref, u, r]) => {
         sessionStorage.setItem("auth.token", tok as string);
@@ -198,8 +200,10 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     await seedStore();
     // First boot so the app's zustand rehydrate + persist cycle completes
     // against a live page (the store settles to its post-rehydrate shape).
-    await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+    // Heavy role roots (oie, exam_superintendent) can take >30s to reach
+    // domcontentloaded under prod load; use 60s.
+    await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
     await page.waitForTimeout(2000);
     // Re-seed over whatever the first boot wrote (logged-out shape).
     await seedStore();
@@ -207,12 +211,12 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt === 0) {
         // Reload boots the app with the freshly seeded store.
-        await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
+        await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
       } else {
-        await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+        await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
         await seedStore();
       }
-      await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+      await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
       await page.waitForTimeout(5000);
       landed = page.url();
       if (!landed.includes("/login")) break;

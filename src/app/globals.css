@@ -311,6 +311,22 @@ p, li, .text-body { color: var(--color-text-secondary); }
 [data-home] .home-access-flow,
 [data-home] .home-role-card { color: var(--home-text-secondary); }
 
+/* Home surface-cards must stay dark: .surface-card sets a white background
+   (var(--color-surface)) which wins the cascade over the home bg utilities
+   (both live in @layer utilities, .surface-card is declared later). Without
+   this override the RoleMap / Modules / SystemHealth / HomeFooter cards
+   render white and the dark-theme text (#CBD5E1 / #94A3B8 / zinc-400)
+   fails WCAG AA contrast on white. Scoped to [data-home] so the console
+   surface-cards keep their white bg. */
+[data-home] .surface-card {
+  background: var(--home-bg-elev-1, #0F172A);
+  border-color: var(--home-border-soft, rgba(255, 255, 255, 0.08));
+}
+/* The footer is the only home surface-card that should stay on the base bg. */
+[data-home] footer.surface-card {
+  background: var(--home-bg-base, #0A1128);
+}
+
 /* ── A11Y ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

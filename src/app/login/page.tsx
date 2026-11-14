@@ -23,7 +23,7 @@ export default function CinematicLoginPage() {
             <span className="font-semibold tracking-wide text-text-muted">JNTUH UCEJ Gate Monitor</span>
           </div>
           <div className="max-w-md space-y-4 my-auto">
-            <div className="surface-card inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-300 text-xs font-medium">
+            <div className="surface-card inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-600 text-xs font-medium">
               Secure Institutional Access
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
