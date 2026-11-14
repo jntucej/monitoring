@@ -115,13 +115,11 @@ export default async function RootLayout({
           S:0 unhide: Next.js wraps the client tree in
           <div hidden id="S:0"> during SSR. The inline script below
           un-hides it immediately — it is NOT hydration-dependent.
-          With the CSP meta tag removed and strict-dynamic dropped,
-          the response header CSP ('self' + nonce) allows this inline
-          script to run. Without it, the hero stays hidden until React
-          mounts — an LCP regression on every cold load.
+          With strict-dynamic dropped, the response header CSP
+          ('self' + nonce) allows external chunks. The inline script
+          needs 'unsafe-inline' — add it to the CSP fallback.
         */}
         <script
-          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('S:0');if(s)s.hidden=false;});`,
           }}

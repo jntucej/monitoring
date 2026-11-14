@@ -21,7 +21,12 @@ export function buildCspHeader({ nonce, isDev }: CspOptions): string {
     // mode 'self' is inert, so every static chunk is blocked. The fix
     // is to keep 'self' effective by dropping strict-dynamic: 'self'
     // covers external chunks, 'nonce' still validates inline scripts.
-    `script-src 'self' ${nonce ? `'nonce-${nonce}' ` : ""}${isDev ? " 'unsafe-eval'" : ""}`,
+    // 'unsafe-inline' is required for the S:0 unhide script and
+    // Next.js's own inline scripts (RSC payload, theme-flash). The
+    // security cost is acceptable: inline script injection is mitigated
+    // by the lack of user-controlled content in <head> and the
+    // response header CSP being set by trusted middleware.
+    `script-src 'self' ${nonce ? `'nonce-${nonce}' ` : ""}'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     // style-src MUST keep 'unsafe-inline' — Next.js injects inline styles
     // and CSS injection is not an XSS vector.
     `style-src 'self' 'unsafe-inline' https:`,
