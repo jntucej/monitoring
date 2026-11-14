@@ -19,11 +19,18 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
+  // Prod-like harness: build + next start (NODE_ENV=production).
+  // The dev server does NOT enforce the CSP middleware header, which is
+  // the gap that let the P0 (force-static + strict-dynamic nonce mismatch)
+  // ship under 19/19 green. `next start` runs the real middleware, so
+  // the CSP header is present and the csp-paint tests actually verify
+  // first-paint under the prod-like policy.
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL ? undefined : {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'npm run build && npm run start',
+    url: 'http://localhost:3000/api/health',
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 300_000,
+    env: { NODE_ENV: 'production' },
   },
   projects: [
     {

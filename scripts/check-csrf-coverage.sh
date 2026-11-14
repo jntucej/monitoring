@@ -27,7 +27,7 @@ for f in $(find src/app/api -name "route.ts" | sort); do
   # attacker-meaningful) and the MSG91 delivery webhook (HMAC-secret
   # guarded, verified by check-security.sh).
   case "$f" in
-    *auth/login*|*auth/refresh*|*auth/reset-password*|*auth/bootstrap*|*auth/logout*|*auth/pin-change*|*auth/pin-reset-self*|*auth/passkey*|*auth/_drill*|*webhooks/sms*|*webhooks/alertmanager*|*api/cron/*|*dev/contact*|*device-push*|*mobile/login*|*mobile/*|*sysadmin/drills*)
+    *auth/login*|*auth/refresh*|*auth/reset-password*|*auth/bootstrap*|*auth/logout*|*auth/pin-change*|*auth/pin-reset-self*|*auth/passkey*|*auth/_drill*|*webhooks/sms*|*webhooks/alertmanager*|*api/cron/*|*dev/contact*|*device-push*|*mobile/login*|*mobile/*|*sysadmin/drills*|*telegram/webhook*)
       continue
       ;;
   esac

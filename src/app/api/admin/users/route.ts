@@ -15,6 +15,7 @@ import { NextRequest } from "next/server";
 import type { AuthContext } from "@/lib/authContext";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { withAdminMutation } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { randomUUID } from "crypto";
@@ -31,6 +32,9 @@ const SENSITIVE_COLS = new Set([
 ]);
 
 // ── GET: List users ──────────────────────────────────────────────────
+// Read-only: withAuthorization enforces requiredRole; no CSRF guard
+// (CSRF applies to state-changing verbs only — the check-csrf-coverage
+// guard skips GET).
 export const GET = withRateLimit(
   withAuthorization(
     async (_req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
@@ -109,9 +113,13 @@ export const GET = withRateLimit(
 );
 
 // ── POST: Create user ────────────────────────────────────────────────
-export const POST = withRateLimit(
-  withAuthorization(
-    async (req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
+// withAdminMutation bakes in requiredRole ['admin','sysadmin'] plus the
+// full mutation triad (user rate-limit + trusted-headers + CSRF + step-up
+// gate). A bare withRateLimit(withAuthorization(...)) here is the class
+// of gap check-csrf-coverage.sh exists to catch — admin user creation
+// is a state-changing verb and must pass assertCsrf.
+export const POST = withAdminMutation(
+  async (req: NextRequest, _ctx: { auth: AuthContext }): Promise<Response> => {
       let body: Record<string, unknown>;
       try {
         body = await req.json();
@@ -172,7 +180,5 @@ export const POST = withRateLimit(
 
       return ok(user, 201);
     },
-    { requiredRole: ["sysadmin", "admin"] }
-  ),
-  { windowMs: 60_000, maxRequests: 20 }
+  { rateLimit: { windowMs: 60_000, maxRequests: 20 } }
 );
