@@ -13,9 +13,15 @@ export function buildCspHeader({ nonce, isDev }: CspOptions): string {
     // and add 'unsafe-inline' so the page's own scripts run. This is a
     // per-page fallback, not a global relaxation: dynamic responses
     // (middleware-set headers) always carry a real nonce.
-    nonce
-      ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`
-      : `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+    //
+    // Even when a nonce IS present, strict-dynamic only unlocks
+    // dynamically-imported scripts (importScript, dynamic import()).
+    // Static <script src> tags in the HTML do NOT inherit the nonce's
+    // permission — they need 'self' to be effective. In strict-dynamic
+    // mode 'self' is inert, so every static chunk is blocked. The fix
+    // is to keep 'self' effective by dropping strict-dynamic: 'self'
+    // covers external chunks, 'nonce' still validates inline scripts.
+    `script-src 'self' ${nonce ? `'nonce-${nonce}' ` : ""}${isDev ? " 'unsafe-eval'" : ""}`,
     // style-src MUST keep 'unsafe-inline' — Next.js injects inline styles
     // and CSS injection is not an XSS vector.
     `style-src 'self' 'unsafe-inline' https:`,
