@@ -70,7 +70,7 @@ export function FacultyAttendanceView() {
             {records.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>

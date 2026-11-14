@@ -38,12 +38,9 @@ export const CitationChip = memo(function CitationChip({
           onClick={() => setOpenId(openId === c.id ? null : c.id)}
           aria-expanded={openId === c.id}
           aria-label={`Source: ${c.title}${c.source ? `, ${c.source}` : ""}`}
-          className="inline-flex items-center gap-1 rounded-full border border-border
-                     bg-bg-base px-2.5 py-1 text-xs font-medium
-                     text-text-secondary hover:text-action-success
-                     hover:border-emerald-500/40 transition active:scale-[0.98]"
+          className="surface-card inline-flex items-center gap-1 bg-bg-base px-2.5 py-1 text-xs font-medium text-text-secondary hover:text-action-success hover: transition active:scale-[0.98]"
         >
-          <FileText className="h-3 w-3 text-action-success" aria-hidden />
+          <FileText className="size-3.5 text-action-success" aria-hidden />
           <span className="font-mono text-xs text-action-success">[{c.n}]</span>
           <span className="max-w-40 truncate">{c.title}</span>
         </button>
@@ -51,9 +48,7 @@ export const CitationChip = memo(function CitationChip({
       {hidden > 0 && (
         <button
           onClick={() => setShowAll(true)}
-          className="inline-flex items-center rounded-full border border-border
-                     px-2.5 py-1 text-xs text-text-muted
-                     hover:text-text-primary transition"
+          className="surface-card inline-flex items-center px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition"
         >
           +{hidden} more
         </button>
@@ -68,8 +63,7 @@ export const CitationChip = memo(function CitationChip({
             transition={{ duration: 0.15 }}
             role="dialog"
             aria-label={`Source: ${open.title}`}
-            className="relative w-full max-w-md rounded-lg border border-border
-                       bg-bg-elevated p-3 text-left shadow-lg"
+            className="surface-card relative w-full max-w-md bg-bg-elevated p-3 text-left"
           >
             <div className="flex items-start justify-between gap-2 mb-1.5">
               <div className="min-w-0">
@@ -83,14 +77,13 @@ export const CitationChip = memo(function CitationChip({
               <button
                 onClick={() => setOpenId(null)}
                 aria-label="Close source"
-                className="shrink-0 p-0.5 rounded text-text-muted hover:text-text-primary transition"
+                className="surface-card shrink-0 p-0.5 text-text-muted hover:text-text-primary transition"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
             {open.excerpt && (
-              <blockquote className="text-xs leading-relaxed text-text-secondary
-                                     border-l-2 border-emerald-500/40 pl-2 italic">
+              <blockquote className="surface-card text-xs leading-relaxed text-text-secondary pl-2 italic">
                 {open.excerpt}
               </blockquote>
             )}

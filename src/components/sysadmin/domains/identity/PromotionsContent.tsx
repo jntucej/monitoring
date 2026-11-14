@@ -61,7 +61,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
   if (error && !data) {
     return (
       <WidgetBoundary>
-        <div className="rounded-md border border-action-danger bg-action-danger/10 p-4 text-sm text-action-danger">
+        <div className="surface-card bg-action-danger/10 p-4 text-sm text-action-danger">
           Failed to load promotions: {error}
         </div>
       </WidgetBoundary>
@@ -107,12 +107,12 @@ export function PromotionsContent({ data, loading, error }: Props) {
             return (
               <div
                 key={status}
-                className="flex flex-col rounded-xl border border-border bg-bg-base p-3"
+                className="surface-card flex flex-col bg-bg-base p-3"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      className="inline-block size-2 rounded-full"
                       style={{ backgroundColor: COLUMN_TONE[status] }}
                     />
                     <span className="text-sm font-semibold text-text-primary">
@@ -124,7 +124,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
                 <div className="flex-1 space-y-2">
                   {rows.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-text-muted">
+                    <div className="surface-card p-4 text-center text-xs text-text-muted">
                       No {status.toLowerCase()} requests.
                     </div>
                   ) : (
@@ -140,7 +140,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
         {/* Signature visual: role-transition Sankey */}
         {hasSankey && sankey ? (
-          <div className="rounded-xl border border-border bg-bg-base p-4">
+          <div className="surface-card bg-bg-base p-4">
             <h2 className="mb-3 text-sm font-semibold text-text-primary">
               Role transitions (from-role → to-role)
             </h2>
@@ -152,7 +152,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
             />
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-bg-base p-4 text-sm text-text-muted">
+          <div className="surface-card bg-bg-base p-4 text-sm text-text-muted">
             No role transitions recorded yet.
           </div>
         )}
@@ -165,7 +165,7 @@ export function PromotionsContent({ data, loading, error }: Props) {
 
 function Kpi({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4">
+    <div className="surface-card bg-bg-base p-4">
       <div className="text-xs uppercase tracking-wide text-text-muted">{label}</div>
       <div className="mt-1 text-2xl font-bold" style={{ color: tone }}>
         {value}

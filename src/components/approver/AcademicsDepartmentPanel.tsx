@@ -59,12 +59,12 @@ function Kpi({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-wide text-text-muted">
           {label}
         </span>
-        <span className={`h-7 w-7 rounded-lg grid place-items-center ${tint}`} aria-hidden="true">
+        <span className={`size-6 rounded-lg grid place-items-center ${tint}`} aria-hidden="true">
           <Icon className="h-3.5 w-3.5" />
         </span>
       </div>
@@ -213,7 +213,7 @@ export function AcademicsDepartmentPanel({
     <section className="space-y-4" aria-labelledby="academics-dept-heading">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-action-info" aria-hidden="true" />
+          <Building2 className="h-6 w-6 text-action-info" aria-hidden="true" />
           <h2
             id="academics-dept-heading"
             className="text-lg font-semibold text-text-primary"
@@ -235,7 +235,7 @@ export function AcademicsDepartmentPanel({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search department or HOD…"
               aria-label="Search department or HOD"
-              className="h-8 w-56 rounded-lg border border-border bg-bg-elevated pl-8 pr-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ringaction-info/40"
+              className="surface-card h-6 w-6 bg-bg-elevated pl-8 pr-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ringaction-info/40"
             />
           </div>
           <Button
@@ -258,7 +258,7 @@ export function AcademicsDepartmentPanel({
       {error && (
         <div
           role="alert"
-          className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 px-3 py-2 text-xs text-action-danger"
+          className="surface-card flex items-center gap-2 bg-rose-500/5 px-3 py-2 text-xs text-action-danger"
         >
           <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
           <span>{error}</span>
@@ -339,14 +339,14 @@ export function AcademicsDepartmentPanel({
                                   value={hodDraft}
                                   onChange={(e) => setHodDraft(e.target.value)}
                                   aria-label={`New HOD name for ${d.name}`}
-                                  className="h-7 w-40 rounded-md border border-border bg-bg-elevated px-2 text-xs text-text-primary"
+                                  className="surface-card h-6 w-6 bg-bg-elevated px-2 text-xs text-text-primary"
                                   placeholder="HOD name"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => void saveHod(d.code)}
                                   disabled={isSaving}
-                                  className="h-7 w-7 grid place-items-center rounded-md bg-emerald-500/15 text-action-success disabled:opacity-50"
+                                  className="size-6 grid place-items-center rounded-md bg-emerald-500/15 text-action-success disabled:opacity-50"
                                   aria-label={`Save HOD for ${d.name}`}
                                 >
                                   {isSaving ? (
@@ -358,7 +358,7 @@ export function AcademicsDepartmentPanel({
                                 <button
                                   type="button"
                                   onClick={cancelEdit}
-                                  className="h-7 w-7 grid place-items-center rounded-md bg-rose-500/15 text-action-danger"
+                                  className="size-6 grid place-items-center rounded-md bg-rose-500/15 text-action-danger"
                                   aria-label={`Cancel editing HOD for ${d.name}`}
                                 >
                                   <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -376,7 +376,7 @@ export function AcademicsDepartmentPanel({
                                     className="opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100 transition-opacity"
                                     aria-label={`Edit HOD for ${d.name}`}
                                   >
-                                    <Pencil className="h-3 w-3 text-text-muted" aria-hidden="true" />
+                                    <Pencil className="size-3.5 text-text-muted" aria-hidden="true" />
                                   </button>
                                 )}
                               </div>

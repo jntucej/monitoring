@@ -53,7 +53,7 @@ export function GeoFenceWarning({
       aria-label={`Off-fence at ${gateName}`}
       className="fixed inset-x-0 bottom-0 z-80 mx-auto w-full max-w-md p-4"
     >
-      <div className="rounded-2xl border border-amber-500/40 bg-bg-surface p-4 shadow-2xl">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-start gap-3">
           <MapPinOff className="mt-0.5 h-5 w-5 shrink-0 text-action-warning" aria-hidden />
           <div className="min-w-0 flex-1">

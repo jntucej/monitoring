@@ -95,7 +95,7 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <h3 className="font-semibold mb-4">Request a Pass</h3>
       <form className="space-y-4" onSubmit={submit}>
         <div>
@@ -106,7 +106,7 @@ const api = useApi();
             id="passType"
             value={passType || passTypes[0]?.code || ""}
             onChange={(e) => setPassType(e.target.value)}
-            className="mt-1 block w-full rounded-md border-border bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus:borderaction-info focus:outline-none focus:ringaction-info sm:text-sm"
+            className="surface-card mt-1 block w-full bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus: focus:outline-none focus:ringaction-info sm:text-sm"
             disabled={loadingPassTypes}
             required
           >
@@ -128,7 +128,7 @@ const api = useApi();
               type="datetime-local"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-text-primary sm:text-sm p-2"
+              className="surface-card mt-1 block w-full bg-bg-elevated text-text-primary sm:text-sm p-2"
             />
           </div>
           <div>
@@ -138,7 +138,7 @@ const api = useApi();
               type="datetime-local"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="mt-1 block w-full rounded-md border-border text-text-primary sm:text-sm p-2 bg-bg-elevated"
+              className="surface-card mt-1 block w-full text-text-primary sm:text-sm p-2 bg-bg-elevated"
             />
           </div>
         </div>
@@ -158,7 +158,7 @@ const api = useApi();
         <button
           type="submit"
           disabled={busy}
-          className="w-full inline-flex justify-center items-center rounded-lg border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ringaction-info focus:ring-offset-2 disabled:opacity-50"
+          className="surface-card w-full inline-flex justify-center items-center bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ringaction-info focus:ring-offset-2 disabled:opacity-50"
         >
           {busy ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Ticket className="mr-2 h-5 w-5" />}
           Request Pass

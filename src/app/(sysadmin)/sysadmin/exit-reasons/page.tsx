@@ -94,7 +94,7 @@ export default function ExitReasonsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <DoorOpen className="w-6 h-6 text-action-warning" />
+              <DoorOpen className="w-5 h-5 text-action-warning" />
               Exit Reasons & Outpass Governance
             </p>
             <p className="text-sm text-text-muted">
@@ -115,7 +115,7 @@ export default function ExitReasonsPage() {
                 maxDurationHours: 12,
               })
             }
-            className="px-4 py-2 min-h11 bg-action-warning hover:bg-amber-600 text-black font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
+            className="surface-card px-4 py-2 min-h11 bg-action-warning hover:bg-amber-600 text-black font-semibold text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Add Exit Reason
           </button>
@@ -163,7 +163,7 @@ export default function ExitReasonsPage() {
                       <td className="p-4">
                         <div className="flex flex-wrap gap-1">
                           {(r.applicableTo || []).map((a) => (
-                            <span key={a} className="px-2 py-0.5 rounded-md bg-bg-elevated text-text-secondary text-xs font-mono">
+                            <span key={a} className="surface-card px-2 py-0.5 bg-bg-elevated text-text-secondary text-xs font-mono">
                               {a}
                             </span>
                           ))}
@@ -171,11 +171,11 @@ export default function ExitReasonsPage() {
                       </td>
                       <td className="p-4">
                         {r.requiresApproval ? (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-action-primary border border-blue-500/30 uppercase">
+                          <span className="surface-card px-2.5 py-1 text-xs font-semibold bg-blue-500/10 text-action-primary uppercase">
                             {r.approvalBy}
                           </span>
                         ) : (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30">
+                          <span className="surface-card px-2.5 py-1 text-xs font-semibold bg-emerald-500/10 text-action-success">
                             Auto-approve
                           </span>
                         )}
@@ -187,14 +187,14 @@ export default function ExitReasonsPage() {
                         <button
                           type="button"
                           onClick={() => setEditingReason(r)}
-                          className="p-2 min-h11 min-w11 inline-flex items-center justify-center rounded-lg bg-bg-elevated hover:text-action-warning transition"
+                          className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-bg-elevated hover:text-action-warning transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(r.code)}
-                          className="p-2 min-h11 min-w11 inline-flex items-center justify-center rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="surface-card p-2 min-h11 min-w11 inline-flex items-center justify-center bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -209,7 +209,7 @@ export default function ExitReasonsPage() {
 
         {editingReason && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-bg-surface border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div className="surface-card bg-bg-surface max-w-lg w-full p-6 space-y-4">
               <h3 className="text-lg font-bold text-text-primary">
                 {editingReason.code ? "Edit Exit Reason" : "New Exit Reason"}
               </h3>
@@ -226,7 +226,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.code || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, code: e.target.value.toUpperCase() })}
                       placeholder="e.g. MEDICAL"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -239,7 +239,7 @@ export default function ExitReasonsPage() {
                       value={editingReason.name || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, name: e.target.value })}
                       placeholder="e.g. Medical Emergency"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export default function ExitReasonsPage() {
                     value={editingReason.description || ""}
                     onChange={(e) => setEditingReason({ ...editingReason, description: e.target.value })}
                     placeholder="Provide context for students..."
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -265,7 +265,7 @@ export default function ExitReasonsPage() {
                     <select
                       value={editingReason.approvalBy || "principal"}
                       onChange={(e) => setEditingReason({ ...editingReason, approvalBy: e.target.value })}
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-warning"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     >
                       <option value="principal">Principal</option>
                       <option value="warden">Warden</option>
@@ -282,23 +282,23 @@ export default function ExitReasonsPage() {
                       value={editingReason.maxDurationHours || ""}
                       onChange={(e) => setEditingReason({ ...editingReason, maxDurationHours: e.target.value ? Number(e.target.value) : null })}
                       placeholder="e.g. 24"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-warning"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <div className="surface-card flex justify-end gap-2 pt-4">
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingReason.code || !editingReason.name}
-                    className="px-4 py-2 min-h11 bg-action-warning text-black rounded-xl text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="surface-card px-4 py-2 min-h11 bg-action-warning text-black text-xs font-semibold hover:bg-amber-600 transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Exit Reason
                   </button>

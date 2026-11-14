@@ -177,8 +177,8 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-bg-surface border border-border rounded-2xl p-4 sm:p-6 w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
-        <div className="flex justify-between items-center border-b border-border pb-3">
+      <div className="surface-card bg-bg-surface p-4 sm:p-6 w-full space-y-4 max-h-[90vh] overflow-y-auto" style={{ maxWidth: report ? "38rem" : "56rem" }}>
+        <div className="surface-card flex justify-between items-center pb-3">
           <h3 className="font-bold text-lg text-white flex items-center gap-2">
             <Upload className="w-5 h-5 text-action-info" /> Bulk Student Import
           </h3>
@@ -201,7 +201,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <label className="cursor-pointer px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base flex items-center gap-2">
+              <label className="surface-card cursor-pointer px-3 py-1.5 bg-bg-elevated text-xs font-semibold hover:bg-bg-base flex items-center gap-2">
                 <FileText className="w-4 h-4 text-action-info" /> Choose CSV File
                 <input type="file" accept=".csv" onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -215,7 +215,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button
                 type="button"
                 onClick={() => downloadCsv(MINIMAL_CSV, "student_import_template.csv")}
-                className="px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-action-info flex items-center gap-1.5"
+                className="surface-card px-3 py-1.5 bg-bg-elevated text-xs font-semibold hover:bg-bg-base text-action-info flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5" /> Download Template
               </button>
@@ -223,7 +223,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button
                 type="button"
                 onClick={() => { setCsvText(MINIMAL_CSV); setPreview(null); }}
-                className="px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-unit-c flex items-center gap-1.5"
+                className="surface-card px-3 py-1.5 bg-bg-elevated text-xs font-semibold hover:bg-bg-base text-unit-c flex items-center gap-1.5"
               >
                 <ScrollText className="w-3.5 h-3.5" /> Load Sample
               </button>
@@ -234,11 +234,11 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               placeholder={"HTNO,STUDENT_NAME,FATHER/GUARDIAN_NAME,GENDER,MOBILE,DOB,EMAIL,PARENT_MOBILE\n25JJ1A0501,AADITH KUMAR,Prakash Rao,male,9876543210,12-05-2005,aadith.k@jntuhcej.ac.in,9440123456"}
               value={csvText}
               onChange={(e) => { setCsvText(e.target.value); setPreview(null); }}
-              className="w-full font-mono text-xs p-3 bg-bg-base border border-border rounded-xl text-white focus:outline-none"
+              className="surface-card w-full font-mono text-xs p-3 bg-bg-base text-white focus:outline-none"
             />
 
             {preview && preview.summary.total > 0 && (
-              <div className="p-3 rounded-lg text-xs space-y-2 bg-bg-base border border-border">
+              <div className="surface-card p-3 text-xs space-y-2 bg-bg-base">
                 <div className="flex gap-4 font-semibold">
                   <span>{preview.summary.total} rows</span>
                   <span className="text-action-success">{preview.summary.valid} importable</span>
@@ -246,7 +246,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                   <span className={preview.summary.invalid ? "text-action-danger" : ""}>{preview.summary.invalid} invalid</span>
                 </div>
                 {preview.skippedRows.length > 0 && (
-                  <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 text-action-warning">
+                  <div className="surface-card bg-amber-500/10 p-2 text-action-warning">
                     <b>{preview.skippedRows.length}</b> row(s) match existing students — they will be skipped (no update).
                     {preview.skippedRows.slice(0, 5).map((s) => (
                       <div key={s.roll} className="pl-2 text-amber-300/80">row {s.row} · {s.roll}{s.name ? ` (${s.name})` : ""}</div>
@@ -266,13 +266,13 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+            <div className="surface-card flex justify-end gap-2 pt-2">
               <button onClick={onClose} className="px-3 py-1.5 text-xs text-text-muted hover:text-white font-medium">Cancel</button>
               <button
                 type="button"
                 onClick={handleImport}
                 disabled={busy !== "idle" || !csvText.trim()}
-                className="px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
+                className="surface-card px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold disabled:opacity-50 flex items-center gap-2"
               >
                 {busy === "commit" ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Importing…</> : "Run Import"}
               </button>
@@ -287,21 +287,21 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
-              <div className="rounded-lg p-2 bg-emerald-500/10 border border-emerald-500/20 text-action-success">{report.imported} imported</div>
-              <div className="rounded-lg p-2 bg-amber-500/10 border border-amber-500/20 text-action-warning">{report.skipped} skipped (already in DB)</div>
-              <div className="rounded-lg p-2 bg-rose-500/10 border border-rose-500/20 text-action-danger">{report.invalid} invalid</div>
+              <div className="surface-card p-2 bg-emerald-500/10 text-action-success">{report.imported} imported</div>
+              <div className="surface-card p-2 bg-amber-500/10 text-action-warning">{report.skipped} skipped (already in DB)</div>
+              <div className="surface-card p-2 bg-rose-500/10 text-action-danger">{report.invalid} invalid</div>
             </div>
 
             <button
               type="button"
               onClick={downloadReport}
-              className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-lg text-xs font-semibold hover:bg-bg-base text-action-info flex items-center justify-center gap-2"
+              className="surface-card w-full px-3 py-2 bg-bg-elevated text-xs font-semibold hover:bg-bg-base text-action-info flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" /> Download Report CSV (imported + not-imported)
             </button>
 
             {reportBootstrapCodes && reportBootstrapCodes.length > 0 && (
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs space-y-1">
+              <div className="surface-card bg-emerald-500/5 p-3 text-xs space-y-1">
                 <div className="font-semibold text-action-success">
                   {reportBootstrapCodes.length} one-time setup code(s) issued — hand each to the student so they
                   can activate at <code className="font-mono">/bootstrap?code=…</code>
@@ -310,7 +310,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                   Each code is shown once and stored hashed (in <code>enrollment_codes</code>). It is not
                   recoverable later, so copy it into the CSV before closing this dialog.
                 </div>
-                <pre className="text-xs leading-5 bg-bg-base rounded p-2 overflow-x-auto">
+                <pre className="surface-card text-xs leading-5 bg-bg-base p-2 overflow-x-auto">
 {reportBootstrapCodes.map((c) => `row ${c.row}  ${c.roll ?? ""}  ${c.code}`).join("\n")}
                 </pre>
               </div>
@@ -355,7 +355,7 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
               <button
                 type="button"
                 onClick={() => { setReport(null); setPreview(null); setCsvText(""); setReportBootstrapCodes(null); }}
-                className="px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold rounded-lg"
+                className="surface-card px-4 py-1.5 bg-sky-600 hover:bg-action-info text-white text-xs font-bold"
               >
                 Import Another File
               </button>

@@ -41,7 +41,7 @@ interface AccessExceptionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
+    <div className="surface-card bg-bg-base p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
         <Inbox className="w-5 h-5 text-text-muted" />
         <p className="max-w-md text-sm text-text-muted">{message}</p>
@@ -52,7 +52,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -60,7 +60,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -179,7 +179,7 @@ function AccessExceptionsInner() {
         href="/oie"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -201,21 +201,21 @@ function AccessExceptionsInner() {
       {/* KPI strip */}
       <WidgetBoundary title="Access Exception KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <FileWarning className="w-4 h-4 shrink-0" />
               <span>Exceptions</span>
             </div>
             <p className="text-2xl font-bold text-action-warning mt-2">{rows.length}</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>SLA Breached</span>
             </div>
             <p className="text-2xl font-bold text-action-danger mt-2">{breachedCount}</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <ShieldOff className="w-4 h-4 shrink-0" />
               <span>Rejected</span>
@@ -224,7 +224,7 @@ function AccessExceptionsInner() {
               {rows.filter((r) => r.status === "REJECTED").length}
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <Inbox className="w-4 h-4 shrink-0" />
               <span>Escala</span>
@@ -238,7 +238,7 @@ function AccessExceptionsInner() {
 
       <WidgetBoundary title="Exam Access Exceptions">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <ShieldOff className="w-4 h-4 text-action-warning shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Rejected &amp; Escalated Exam Access Requests
@@ -251,7 +251,7 @@ function AccessExceptionsInner() {
           ) : (
             <ExceptionTable rows={rows} />
           )}
-          <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
+          <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Exceptions are surfaced for OIE review only. Resolution is handled by the
             relevant exam-branch or hod office.
           </div>

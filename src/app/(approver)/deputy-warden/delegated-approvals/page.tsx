@@ -73,13 +73,13 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+    <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
+        <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
@@ -91,18 +91,18 @@ function StatCard({
 function DelegationBadge({ active, loading }: { active: boolean; loading: boolean }) {
   if (loading) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-text-muted">
-        <Loader2 className="w-3 h-3 animate-spin motion-reduce:animate-none" /> Checking delegation…
+      <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-text-muted">
+        <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" /> Checking delegation…
       </span>
     );
   }
   return active ? (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-action-success">
-      <Gavel className="w-3 h-3" /> Within delegated scope — approval actions enabled
+    <span className="surface-card inline-flex items-center gap-1.5 bg-emerald-400/10 px-2.5 py-1 text-xs font-semibold text-action-success">
+      <Gavel className="size-3.5" /> Within delegated scope — approval actions enabled
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-bg-elevated/30 px-2.5 py-1 text-xs font-semibold text-text-secondary">
-      <Gavel className="w-3 h-3" /> Read-only — no delegation data recorded yet
+    <span className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated/30 px-2.5 py-1 text-xs font-semibold text-text-secondary">
+      <Gavel className="size-3.5" /> Read-only — no delegation data recorded yet
     </span>
   );
 }
@@ -160,7 +160,7 @@ function DeputyWardenDelegatedApprovalsInner() {
         href="/deputy-warden/daily-overview"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Daily Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Daily Overview
       </Link>
 
       {/* Page toolbar */}
@@ -178,7 +178,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Approvals data unavailable: {error}</span>
@@ -186,7 +186,7 @@ function DeputyWardenDelegatedApprovalsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -228,7 +228,7 @@ function DeputyWardenDelegatedApprovalsInner() {
       </WidgetBoundary>
 
       {/* Delegation status banner */}
-      <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-wrap items-center gap-3 min-w-0">
+      <div className="surface-card bg-bg-base p-4 flex flex-wrap items-center gap-3 min-w-0">
         <DelegationBadge active={delegationActive} loading={delegationLoading && !delegation} />
         <p className="text-xs text-text-muted min-w-0">
           {delegation?.data?.note ??
@@ -251,7 +251,7 @@ function DeputyWardenDelegatedApprovalsInner() {
         <WidgetBoundary title="Approval Queue">
           <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <Inbox className="w-4 h-4 text-text-muted mx-auto mb-2" />
               <p className="text-sm text-text-muted">
                 No pending items at the deputy-warden stage. The queue is clear.
               </p>

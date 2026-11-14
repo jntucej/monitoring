@@ -50,7 +50,7 @@ function statusBadge(status?: string) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-bg-base/60 p-8 text-center text-sm text-text-muted">
+    <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
       <Inbox className="w-6 h-6 mx-auto mb-2 text-text-muted" />
       <p>{message}</p>
     </div>
@@ -105,7 +105,7 @@ function ChildRequestsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             {error}
@@ -113,7 +113,7 @@ function ChildRequestsInner() {
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
           >
             Retry
           </button>
@@ -121,14 +121,14 @@ function ChildRequestsInner() {
       )}
 
       {loading ? (
-        <div className="rounded-xl border border-border bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
+        <div className="surface-card bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
         </div>
       ) : rows.length === 0 ? (
         <EmptyState message="No pending requests from your wards. The queue is clear." />
       ) : (
         <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <div className="surface-card px-4 py-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Pending Requests
             </h2>

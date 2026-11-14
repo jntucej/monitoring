@@ -93,11 +93,11 @@ function KpiCard({ tile }: { tile: KpiTile }) {
         : "var(--action-primary)";
 
   const body = (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 flex flex-col gap-2">
+    <div className="surface-card bg-bg-surface p-4 flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-4">
           <span
-            className="inline-flex items-center justify-center size-8 rounded-lg shrink-0"
+            className="inline-flex items-center justify-center size-5 rounded-lg shrink-0"
             style={{
               backgroundColor: `color-mix(in srgb, ${toneColor} 16%, transparent)`,
             }}
@@ -280,11 +280,11 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
       {/* ── Status hero */}
       <section
         aria-label="System status"
-        className="rounded-2xl border border-border bg-bg-surface p-5 flex flex-wrap items-center gap-4"
+        className="surface-card bg-bg-surface p-5 flex flex-wrap items-center gap-4"
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-4">
           <span
-            className="inline-flex items-center justify-center size-11 rounded-xl shrink-0"
+            className="inline-flex items-center justify-center size-5 rounded-xl shrink-0"
             style={{
               backgroundColor: `color-mix(in srgb, ${toneColor} 18%, transparent)`,
             }}
@@ -297,7 +297,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
               <CheckCircle2 className="h-5 w-5" style={{ color: toneColor }} />
             )}
           </span>
-          <div className="min-w-0">
+          <div className="min-w-4">
             <p
               className="text-lg font-semibold tracking-tight truncate"
               style={{ color: toneColor }}
@@ -312,7 +312,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
         <div className="flex flex-wrap items-center gap-4 text-xs text-text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span
-              className="inline-block size-2 rounded-full"
+              className="inline-block size-4 rounded-full"
               style={{ backgroundColor: backup < 0.5 ? "var(--action-danger)" : "var(--action-primary)" }}
             />
             Backup freshness {Math.round(backup * 100)}%
@@ -334,7 +334,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section
           aria-label="Service topology"
-          className="lg:col-span-2 rounded-2xl border border-border bg-bg-surface p-4"
+          className="surface-card lg:col-span-2 bg-bg-surface p-4"
         >
           <div className="flex items-center gap-2 mb-3">
             <Server className="h-4 w-4 text-text-muted" />
@@ -363,7 +363,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
 
         <section
           aria-label="Attention queue"
-          className="lg:col-span-1 rounded-2xl border border-border bg-bg-surface p-4 flex flex-col"
+          className="surface-card lg:col-span-1 bg-bg-surface p-4 flex flex-col"
         >
           <div className="flex items-center gap-2 mb-3">
             <Clock className="h-4 w-4 text-text-muted" />
@@ -374,7 +374,7 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
 
           {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-              <CheckCircle2 className="h-8 w-8 text-action-primary mb-3" />
+              <CheckCircle2 className="size-5 text-action-primary mb-3" />
               <p className="text-sm font-medium text-text-primary">
                 All systems nominal
               </p>
@@ -401,14 +401,14 @@ export function CommandCenterContent({ data }: CommandCenterContentProps) {
                       )}
                     >
                       <span
-                        className="inline-flex items-center justify-center size-8 rounded-lg shrink-0"
+                        className="inline-flex items-center justify-center size-5 rounded-lg shrink-0"
                         style={{
                           backgroundColor: `color-mix(in srgb, ${c} 16%, transparent)`,
                         }}
                       >
                         <it.icon className="h-4 w-4" style={{ color: c }} />
                       </span>
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-4 flex-1">
                         <span className="block text-sm font-medium text-text-primary truncate">
                           {it.title}
                         </span>

@@ -90,14 +90,14 @@ function SecurityReinforcedInner() {
       />
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700 flex items-center gap-2">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-amber-700 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           Posture data unavailable: {error}
         </div>
       )}
 
       <WidgetBoundary title="Security Posture">
-        <div className="rounded-xl border border-border bg-bg-surface p-4 min-w-0">
+        <div className="surface-card bg-bg-surface p-4 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-action-success" />
@@ -115,32 +115,32 @@ function SecurityReinforcedInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-16 rounded-lg bg-bg-elevated animate-pulse"
+                  className="h-16 bg-bg-elevated animate-pulse"
                 />
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 min-w-0">
-              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+              <div className="surface-card bg-bg-elevated p-3 min-w-0">
                 <p className="text-xs uppercase text-text-muted">Overall</p>
                 <p className="mt-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.status)}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5`}>
                     {posture?.status ?? "unknown"}
                   </span>
                 </p>
               </div>
-              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+              <div className="surface-card bg-bg-elevated p-3 min-w-0">
                 <p className="text-xs uppercase text-text-muted">Redis</p>
                 <p className="mt-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.redis?.status)}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5`}>
                     {posture?.redis?.status ?? "unknown"}
                   </span>
                 </p>
               </div>
-              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+              <div className="surface-card bg-bg-elevated p-3 min-w-0">
                 <p className="text-xs uppercase text-text-muted">Database</p>
                 <p className="mt-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.database?.status)}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5`}>
                     {posture?.database?.status ?? "unknown"}
                   </span>
                 </p>
@@ -150,10 +150,10 @@ function SecurityReinforcedInner() {
                   </p>
                 )}
               </div>
-              <div className="rounded-lg bg-bg-elevated p-3 min-w-0">
+              <div className="surface-card bg-bg-elevated p-3 min-w-0">
                 <p className="text-xs uppercase text-text-muted">Gateways</p>
                 <p className="mt-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusClass(posture?.gateways?.status)}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5`}>
                     {posture?.gateways?.status ?? "unknown"}
                   </span>
                 </p>
@@ -174,7 +174,7 @@ function SecurityReinforcedInner() {
             <Link
               key={href}
               href={href}
-              className="rounded-xl border border-border bg-bg-surface p-4 min-w-0 hover:bg-bg-elevated transition-colors group"
+              className="surface-card bg-bg-surface p-4 min-w-0 hover:bg-bg-elevated transition-colors group"
             >
               <div className="flex items-center gap-2 text-text-secondary min-w-0">
                 <Icon className="w-4 h-4 shrink-0" />

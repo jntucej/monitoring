@@ -239,13 +239,13 @@ export function PermissionDetailPanel({
 
   const content = (
     <div className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-border">
+      <div className="surface-card flex items-center justify-between pb-4">
         <div className="flex items-center gap-3">
           {isStandalonePage && (
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg border border-border hover:bg-bg-elevated text-text-secondary"
+              className="surface-card p-1.5 hover:bg-bg-elevated text-text-secondary"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -292,7 +292,7 @@ export function PermissionDetailPanel({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted hover:text-text-primary"
+              className="surface-card p-1.5 hover:bg-bg-elevated text-text-muted hover:text-text-primary"
             >
               <X className="w-5 h-5" />
             </button>
@@ -308,7 +308,7 @@ export function PermissionDetailPanel({
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center gap-2">
+        <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -317,7 +317,7 @@ export function PermissionDetailPanel({
       {data && (
         <div className="space-y-6">
           {data.status === "APPROVED" && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl flex items-center justify-between gap-3">
+            <div className="surface-card bg-emerald-500/10 p-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-action-success">
                 <QrCode className="w-5 h-5 shrink-0" />
                 <div>
@@ -335,7 +335,7 @@ export function PermissionDetailPanel({
               </Button>
             </div>
           )}
-          <div className="bg-bg-elevated p-4 rounded-xl border border-border space-y-3">
+          <div className="surface-card bg-bg-elevated p-4 space-y-3">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" />
               Student Profile
@@ -384,13 +384,13 @@ export function PermissionDetailPanel({
             </div>
           </div>
 
-          <div className="bg-bg-elevated p-4 rounded-xl border border-border space-y-3">
+          <div className="surface-card bg-bg-elevated p-4 space-y-3">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5" />
               Verification Status
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-surface border border-border">
+              <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-surface">
                 <Fingerprint className="w-4 h-4 text-action-primary" />
                 <div>
                   <span className="text-text-muted block text-xs">
@@ -404,7 +404,7 @@ export function PermissionDetailPanel({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-surface border border-border">
+              <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-surface">
                 <Fingerprint className="w-4 h-4 text-action-primary" />
                 <div>
                   <span className="text-text-muted block text-xs">
@@ -419,7 +419,7 @@ export function PermissionDetailPanel({
               </div>
 
               {data.document_required && (
-                <div className="col-span-full p-2.5 rounded-lg bg-bg-surface border border-border flex items-center justify-between">
+                <div className="surface-card col-span-full p-2.5 bg-bg-surface flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <PenTool className="w-4 h-4 text-action-warning" />
                     <div>
@@ -439,7 +439,7 @@ export function PermissionDetailPanel({
                       className="inline-flex items-center gap-1 text-xs text-action-primary hover:underline font-medium"
                     >
                       View Document
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="size-3.5" />
                     </a>
                   )}
                 </div>
@@ -448,13 +448,13 @@ export function PermissionDetailPanel({
           </div>
 
           {data.status === "PENDING" && (
-            <div className="bg-bg-elevated p-4 rounded-xl border border-border space-y-4">
+            <div className="surface-card bg-bg-elevated p-4 space-y-4">
               <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">
                 Workflow Decisions
               </h3>
 
               {activeAction ? (
-                <div className="space-y-3 p-3 rounded-lg bg-bg-surface border border-border">
+                <div className="surface-card space-y-3 p-3 bg-bg-surface">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-text-primary">
                       Execute {activeAction}
@@ -473,12 +473,12 @@ export function PermissionDetailPanel({
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Enter remarks/reason for this decision..."
                     rows={2}
-                    className="w-full text-xs p-2 rounded-lg border border-border bg-bg-elevated text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
+                    className="surface-card w-full text-xs p-2 bg-bg-elevated text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
                   />
 
                   {/* Room-assignment fields: required to approve a day_scholar home_out ticket */}
                   {activeAction === "APPROVE" && isDayScholarHomeOut && (
-                    <div className="space-y-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                    <div className="surface-card space-y-2 p-2.5 bg-bg-elevated">
                       <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
                         Hostel Room Assignment
                         <span className="ml-1 text-action-danger">* required</span>
@@ -608,7 +608,7 @@ export function PermissionDetailPanel({
           )}
 
           {isExamMemo && (
-            <div className="bg-bg-surface border border-border rounded-xl p-4 space-y-2">
+            <div className="surface-card bg-bg-surface p-4 space-y-2">
               <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5" />
                 Document
@@ -625,7 +625,7 @@ export function PermissionDetailPanel({
           )}
 
           {isExamMemo && (
-            <div className="bg-bg-surface border border-border rounded-xl p-4 space-y-2">
+            <div className="surface-card bg-bg-surface p-4 space-y-2">
               <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
                 <PenTool className="w-3.5 h-3.5" />
                 Digital Signature
@@ -651,10 +651,10 @@ export function PermissionDetailPanel({
             {(!data.stage_history || data.stage_history.length === 0) ? (
               <p className="text-xs text-text-muted italic">No stage history recorded.</p>
             ) : (
-              <div className="space-y-2 border-l-2 border-border ml-2 pl-4">
+              <div className="surface-card space-y-2 ml-2 pl-4">
                 {data.stage_history.map((log, index) => (
                   <div key={index} className="space-y-1 relative group">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-action-primary ring-4 ringbg-surface" />
+                    <div className="absolute -left-[21px] top-1 size-4 rounded-full bg-action-primary ring-4 ringbg-surface" />
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-xs text-text-primary">
                         {log.actorName || "System Actor"}
@@ -733,7 +733,7 @@ export function PermissionDetailPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-bg-surface border border-border rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto">
+      <div className="surface-card bg-bg-surface max-w-2xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto">
         {content}
       </div>
     </div>

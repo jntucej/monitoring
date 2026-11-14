@@ -42,7 +42,7 @@ function VicePrincipalProfileInner() {
       <h1 className="text-xl font-bold text-text-primary">Vice Principal Profile</h1>
 
       <WidgetBoundary title="Vice Principal Profile">
-        <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+        <div className="surface-card bg-bg-surface p-4 sm:p-5">
           {error && <p className="text-xs text-action-danger mb-2">{error}</p>}
 
           {!profile && !error ? (
@@ -59,10 +59,10 @@ function VicePrincipalProfileInner() {
                   <img
                     src={profile.photoUrl}
                     alt={profile.name}
-                    className="w-14 h-14 rounded-full object-cover"
+                    className="size-6 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-bg-elevated flex items-center justify-center">
+                  <div className="size-6 rounded-full bg-bg-elevated flex items-center justify-center">
                     <User className="w-6 h-6 text-text-muted" />
                   </div>
                 )}
@@ -70,7 +70,7 @@ function VicePrincipalProfileInner() {
                   <h2 className="text-lg font-bold text-text-primary">
                     {profile.name}
                   </h2>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-indigo-500/10 text-action-primary border border-indigo-500/20">
+                  <span className="surface-card inline-flex items-center px-2 py-0.5 text-xs font-semibold uppercase bg-indigo-500/10 text-action-primary">
                     {profile.role.replace(/_/g, " ")}
                   </span>
                 </div>
@@ -78,7 +78,7 @@ function VicePrincipalProfileInner() {
 
               {/* Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-elevated">
                   <Mail className="w-4 h-4 text-text-muted shrink-0" />
                   <div>
                     <div className="text-xs text-text-muted">Email</div>
@@ -88,7 +88,7 @@ function VicePrincipalProfileInner() {
                   </div>
                 </div>
                 {profile.phone && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                  <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-elevated">
                     <Phone className="w-4 h-4 text-text-muted shrink-0" />
                     <div>
                       <div className="text-xs text-text-muted">Phone</div>
@@ -99,7 +99,7 @@ function VicePrincipalProfileInner() {
                   </div>
                 )}
                 {profile.uniqueId && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+                  <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-elevated">
                     <Shield className="w-4 h-4 text-text-muted shrink-0" />
                     <div>
                       <div className="text-xs text-text-muted">

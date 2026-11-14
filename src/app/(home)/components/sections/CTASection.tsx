@@ -37,7 +37,7 @@ export function CTASection() {
         whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="home-cta-glass relative overflow-hidden rounded-3xl px-8 py-16 text-center md:px-16"
+        className="surface-card home-cta-glass relative overflow-hidden px-8 py-16 text-center md:px-16"
       >
         <div
           ref={titleRef}
@@ -63,7 +63,7 @@ export function CTASection() {
             onClick={() => router.push("/login")}
             strength={0.05}
             radius={80}
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+            className="surface-card inline-flex items-center gap-2 bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white hover:opacity-95"
           >
             <LogIn className="h-4 w-4" />
             Sign in

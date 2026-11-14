@@ -7,7 +7,7 @@ export const LanguageToggle = memo(function LanguageToggle({
   lang, onChange, disabled,
 }: { lang: BotLang; onChange: (l: BotLang) => void; disabled?: boolean }) {
   return (
-    <div className="inline-flex rounded-full bg-bg-elevated p-0.5 border border-border">
+    <div className="surface-card inline-flex bg-bg-elevated p-0.5">
       {(["en", "te"] as const).map((l) => (
         <button
           key={l}

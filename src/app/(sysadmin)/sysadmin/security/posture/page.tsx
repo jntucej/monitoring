@@ -72,7 +72,7 @@ export default function SecurityPosturePage() {
         actions={
           <button
             onClick={refresh}
-            className="rounded-md border border-border px-3 py-1.5 text-sm inline-flex items-center gap-2"
+            className="surface-card px-3 py-1.5 text-sm inline-flex items-center gap-2"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
@@ -86,7 +86,7 @@ export default function SecurityPosturePage() {
             tone[posture.overall]
           )}
         >
-          <Activity className="h-8 w-8" />
+          <Activity className="size-5" />
           <div>
             <div className="text-2xl font-semibold">{posture.score}% green</div>
             <div className="text-xs opacity-80">

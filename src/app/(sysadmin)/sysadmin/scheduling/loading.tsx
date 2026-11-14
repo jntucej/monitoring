@@ -3,7 +3,7 @@ export default function Loading() {
   return (
     <div className="space-y-6 p-4 sm:p-6" aria-busy="true" aria-live="polite">
       <div className="space-y-2">
-        <div className="h-7 w-72 animate-pulse rounded bg-bg-elevated" />
+        <div className="size-62 animate-pulse rounded bg-bg-elevated" />
         <div className="h-4 w-96 animate-pulse rounded bg-bg-elevated" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

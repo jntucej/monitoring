@@ -67,7 +67,7 @@ function LocalTooltip({ label, children }: { label: string; children: React.Reac
       {children}
       <span
         role="tooltip"
-        className="absolute left-full ml-3 px-2.5 py-1 bg-bg-elevated border border-border rounded-lg text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-50 text-text-primary"
+        className="surface-card absolute left-full ml-3 px-2.5 py-1 bg-bg-elevated text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 text-text-primary"
       >
         {label}
       </span>
@@ -111,7 +111,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
   return (
     <nav
       aria-label="Primary navigation"
-      className="relative hidden md:flex flex-col items-center gap-1 py-3 px-1.5 w-14 shrink-0 border-r border-border bg-bg-surface/95 backdrop-blur-md"
+      className="surface-card relative hidden md:flex flex-col items-center gap-1 py-3 px-1.5 w-14 shrink-0 bg-bg-surface/95 backdrop-blur-md"
     >
       {/* Dashboard (board) */}
       <LocalTooltip label="Dashboard">
@@ -119,7 +119,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
           href={roleRoot}
           aria-label="Dashboard"
           aria-current={pathname === roleRoot ? "page" : undefined}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+          className={`size-6 rounded-xl flex items-center justify-center transition-colors ${
             pathname === roleRoot
               ? "bg-action-primary/15 text-action-primary"
               : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
@@ -148,7 +148,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                 aria-label={group.label}
                 aria-expanded={open}
                 onClick={() => setOpenGroupId(open ? null : group.id)}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                className={`size-6 rounded-xl flex items-center justify-center transition-colors ${
                   active
                     ? "bg-action-primary/15 text-action-primary"
                     : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"
@@ -208,7 +208,7 @@ export function IconRail({ role, roleRoot, items, groups }: IconRailProps) {
                 href={item.href}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                className={`size-6 rounded-xl flex items-center justify-center transition-colors ${
                   isActive
                     ? "bg-action-primary/15 text-action-primary"
                     : "text-text-secondary hover:bg-bg-elevated hover:text-text-primary"

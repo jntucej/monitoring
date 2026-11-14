@@ -74,7 +74,7 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 z-50 bg-bg-surface border-t border-border rounded-t-2xl shadow-2xl p-4"
+            className="surface-card fixed inset-x-0 bottom-0 z-50 bg-bg-surface p-4"
             role="dialog"
             aria-modal="true"
             aria-label="Manual entry"
@@ -93,7 +93,7 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
+                className="size-6 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -119,14 +119,14 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="e.g. 24JJ1A0501 or >24JJ1A0501"
-                  className="w-full px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+                  className="surface-card w-full px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
                   autoFocus
                 />
               </div>
 
               {error && (
                 <p className="text-xs text-action-danger flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-rose-400/20 flex items-center justify-center text-xs">!</span>
+                  <span className="size-3.5 rounded-full bg-rose-400/20 flex items-center justify-center text-xs">!</span>
                   {error}
                 </p>
               )}
@@ -154,7 +154,7 @@ export function ManualEntrySheet({ isOpen, onClose, onScan, gateId: _gateId, wor
                 type="button"
                 onClick={handleSubmit}
                 disabled={!rollInput.trim()}
-                className="w-full py-3 rounded-xl bg-action-primary text-black font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99]"
+                className="surface-card w-full py-3 bg-action-primary text-black font-bold text-sm hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.99]"
               >
                 Verify Roll Number
               </button>

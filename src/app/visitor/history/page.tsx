@@ -55,7 +55,7 @@ function VisitorHistoryInner() {
         href="/visitor"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Visitor Portal
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -69,7 +69,7 @@ function VisitorHistoryInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">History unavailable: {error}</span>
@@ -77,7 +77,7 @@ function VisitorHistoryInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -86,7 +86,7 @@ function VisitorHistoryInner() {
 
       <WidgetBoundary title="History">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <History className="w-4 h-4 text-action-info shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Completed visits</span>
@@ -116,7 +116,7 @@ function VisitorHistoryInner() {
                       <p className="text-xs text-text-muted truncate">Purpose: {l.purpose}</p>
                     )}
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated/40 text-text-secondary shrink-0">completed</span>
+                  <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated/40 text-text-secondary shrink-0">completed</span>
                 </div>
               ))}
             </div>

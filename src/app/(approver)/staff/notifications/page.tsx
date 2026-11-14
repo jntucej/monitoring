@@ -63,7 +63,7 @@ function StaffNotificationsInner() {
         href="/staff"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Staff Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -77,7 +77,7 @@ function StaffNotificationsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Notifications data unavailable: {error}</span>
@@ -85,7 +85,7 @@ function StaffNotificationsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -94,7 +94,7 @@ function StaffNotificationsInner() {
 
       <WidgetBoundary title="Notifications">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Bell className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your notifications</span>

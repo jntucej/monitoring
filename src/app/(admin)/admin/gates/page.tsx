@@ -162,7 +162,7 @@ export default function AdminGatesPage() {
         <button
           type="button"
           onClick={() => setShowCreate((v) => !v)}
-          className="flex items-center gap-2 px-3.5 py-2 min-h11 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold shrink-0"
+          className="surface-card flex items-center gap-2 px-3.5 py-2 min-h11 bg-action-success hover:bg-action-success text-white text-xs font-bold shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           {showCreate ? "Hide Create Form" : "Create Gate"}
@@ -170,7 +170,7 @@ export default function AdminGatesPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center gap-2">
+        <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -178,7 +178,7 @@ export default function AdminGatesPage() {
 
       {/* Campus Gate Operations Mode */}
       <WidgetBoundary title="Campus Gate Operations Mode">
-        <div className="p-5 rounded-2xl bg-bg-surface border border-border space-y-4">
+        <div className="surface-card p-5 bg-bg-surface space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">
@@ -186,13 +186,7 @@ export default function AdminGatesPage() {
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5 ${
-                    gateMode === "OPEN"
-                      ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
-                      : gateMode === "CURFEW"
-                      ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
-                      : "bg-rose-500/10 text-action-danger border border-rose-500/20"
-                  }`}
+                  className={`px-3 py-1 text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5 "OPEN" "text-action-success" "CURFEW" "text-action-warning" "text-action-danger" "OPEN" "text-action-success" "CURFEW" "text-action-warning" "text-action-danger"`}
                 >
                   {gateMode === "OPEN" && <Check className="w-3.5 h-3.5" />}
                   {gateMode === "CURFEW" && <Moon className="w-3.5 h-3.5" />}
@@ -212,11 +206,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("OPEN")}
-                className={`px-3 py-2 min-h11 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  gateMode === "OPEN"
-                    ? "bg-action-success text-white shadow-sm"
-                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
-                }`}
+                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "OPEN" "text-white "text-text-muted hover:text-text-primary" "OPEN" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Check className="w-3.5 h-3.5" />
                 Normal (OPEN)
@@ -225,11 +215,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("CURFEW")}
-                className={`px-3 py-2 min-h11 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  gateMode === "CURFEW"
-                    ? "bg-amber-600 text-white shadow-sm"
-                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
-                }`}
+                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "CURFEW" "text-white "text-text-muted hover:text-text-primary" "CURFEW" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Moon className="w-3.5 h-3.5" />
                 Curfew
@@ -238,11 +224,7 @@ export default function AdminGatesPage() {
                 type="button"
                 disabled={updatingMode}
                 onClick={() => handleSetGateMode("MAINTENANCE")}
-                className={`px-3 py-2 min-h11 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                  gateMode === "MAINTENANCE"
-                    ? "bg-action-danger text-white shadow-sm"
-                    : "bg-bg-elevated border border-border text-text-muted hover:text-text-primary"
-                }`}
+                className={`px-3 py-2 min-h11 text-xs font-bold transition flex items-center gap-1.5 "MAINTENANCE" "text-white "text-text-muted hover:text-text-primary" "MAINTENANCE" "text-white" "text-text-muted hover:text-text-primary"`}
               >
                 <Wrench className="w-3.5 h-3.5" />
                 Maintenance
@@ -255,7 +237,7 @@ export default function AdminGatesPage() {
       {/* Create form */}
       {showCreate && (
         <WidgetBoundary title="Create Gate">
-          <form onSubmit={createGate} className="p-5 rounded-2xl bg-bg-surface border border-border space-y-4">
+          <form onSubmit={createGate} className="surface-card p-5 bg-bg-surface space-y-4">
             <h2 className="font-bold text-sm text-text-primary">New Gate</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <label className="block">
@@ -265,7 +247,7 @@ export default function AdminGatesPage() {
                   onChange={(e) => setCreateForm({ ...createForm, gateCode: e.target.value })}
                   required
                   placeholder="e.g. G-MAIN"
-                  className="mt-1 w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -274,7 +256,7 @@ export default function AdminGatesPage() {
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   placeholder="Main Gate"
-                  className="mt-1 w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -283,7 +265,7 @@ export default function AdminGatesPage() {
                   value={createForm.location}
                   onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
                   placeholder="Campus"
-                  className="mt-1 w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 />
               </label>
               <label className="block">
@@ -291,7 +273,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.type}
                   onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
-                  className="mt-1 w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 >
                   <option value="standard">standard</option>
                   <option value="staff">staff</option>
@@ -304,7 +286,7 @@ export default function AdminGatesPage() {
                 <select
                   value={createForm.audience}
                   onChange={(e) => setCreateForm({ ...createForm, audience: e.target.value })}
-                  className="mt-1 w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-text-primary outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 px-3 py-2 bg-bg-elevated text-sm text-text-primary outline-none focus:"
                 >
                   <option value="all">all</option>
                   <option value="staff">staff</option>
@@ -315,7 +297,7 @@ export default function AdminGatesPage() {
             <button
               type="submit"
               disabled={creating || !createForm.gateCode.trim()}
-              className="px-4 py-2 min-h11 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
+              className="surface-card px-4 py-2 min-h11 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-xs font-bold flex items-center gap-2"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               {creating ? "Creating..." : "Create Gate"}
@@ -329,7 +311,7 @@ export default function AdminGatesPage() {
         {loadingGates && gates.length === 0 ? (
           <PageLoading />
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-bg-surface border border-border">
+          <div className="overflow-x-auto bg-bg-surface border border-border">
             <table className="w-full text-xs text-left border-collapse min-w160">
               <thead>
                 <tr className="border-b border-border text-text-muted uppercase tracking-wider font-semibold">
@@ -356,7 +338,7 @@ export default function AdminGatesPage() {
                       <tr key={g.id} className="hover:bg-bg-elevated/50 transition-colors">
                         <td className="py-3 px-4 font-mono font-bold text-text-primary">
                           <span className="flex items-center gap-1.5">
-                            {isSentinel && <Lock className="w-3 h-3 text-action-warning" />}
+                            {isSentinel && <Lock className="size-3.5 text-action-warning" />}
                             {g.gateCode}
                           </span>
                         </td>
@@ -365,14 +347,14 @@ export default function AdminGatesPage() {
                         <td className="py-3 px-4 text-text-muted">{g.type}</td>
                         <td className="py-3 px-4 text-text-muted">{g.audience ?? "all"}</td>
                         <td className="py-3 px-4">
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${g.isActive ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
+                          <span className={`inline-block px-2 py-0.5 text-xs font-bold "text-action-success" "text-action-danger" "text-action-success" "text-action-danger"`}>
                             {g.isActive ? "ACTIVE" : "INACTIVE"}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-text-muted">
                           <Link
                             href={`/admin/gates/${g.id}`}
-                            className="px-2.5 py-1 min-h11 inline-flex items-center rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-primary hover:bg-bg-base transition"
+                            className="surface-card px-2.5 py-1 min-h11 inline-flex items-center bg-bg-elevated text-xs font-semibold text-text-primary hover:bg-bg-base transition"
                           >
                             Details & Status
                           </Link>

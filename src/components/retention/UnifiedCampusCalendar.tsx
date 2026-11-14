@@ -145,7 +145,7 @@ export function UnifiedCampusCalendar() {
 
   return (
     <WidgetBoundary title="Unified Campus Calendar">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -157,7 +157,7 @@ export function UnifiedCampusCalendar() {
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1 rounded hover:bg-bg-elevated/50 text-text-muted transition-colors motion-reduce:transition-none"
+              className="surface-card p-1 hover:bg-bg-elevated/50 text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -165,7 +165,7 @@ export function UnifiedCampusCalendar() {
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1 rounded hover:bg-bg-elevated/50 text-text-muted transition-colors motion-reduce:transition-none"
+              className="surface-card p-1 hover:bg-bg-elevated/50 text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
@@ -173,7 +173,7 @@ export function UnifiedCampusCalendar() {
             <button
               type="button"
               onClick={() => setView(view === "month" ? "list" : "month")}
-              className="px-2 py-1 rounded text-xs text-text-muted hover:bg-bg-elevated/50 transition-colors motion-reduce:transition-none"
+              className="surface-card px-2 py-1 text-xs text-text-muted hover:bg-bg-elevated/50 transition-colors motion-reduce:transition-none"
             >
               {view === "month" ? "List" : "Month"}
             </button>
@@ -204,7 +204,7 @@ export function UnifiedCampusCalendar() {
                     : undefined
                 }
               >
-                {followed ? <Check className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+                {followed ? <Check className="size-3.5" /> : <Bell className="size-3.5" />}
                 {cat.label}
               </button>
             );
@@ -244,7 +244,7 @@ export function UnifiedCampusCalendar() {
                     .map((ev, j) => (
                       <div
                         key={j}
-                        className="truncate rounded px-1 py-0.5 text-xs mb-0.5"
+                        className="surface-card truncate px-1 py-0.5 text-xs mb-0.5"
                         style={{
                           backgroundColor: `${CATEGORY_COLORS[ev.category] ?? "var(--text-muted)"}25`,
                           color: CATEGORY_COLORS[ev.category] ?? "var(--text-muted)",
@@ -273,7 +273,7 @@ export function UnifiedCampusCalendar() {
               events.map((ev) => (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
+                  className="surface-card flex items-start gap-3 bg-bg-elevated/30 p-3"
                 >
                   <div
                     className="mt-0.5 h-2 w-2 rounded-full shrink-0"

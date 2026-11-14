@@ -79,7 +79,7 @@ function VisitorRegistrationInner() {
         href="/visitor"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Visitor Portal
       </Link>
 
       {/* Page toolbar */}
@@ -94,7 +94,7 @@ function VisitorRegistrationInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Registration data unavailable: {error}</span>
@@ -102,7 +102,7 @@ function VisitorRegistrationInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -111,7 +111,7 @@ function VisitorRegistrationInner() {
 
       <WidgetBoundary title="Registration">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <UserCheck className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Your registration</span>
@@ -127,23 +127,23 @@ function VisitorRegistrationInner() {
           ) : (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Name</p>
                   <p className="mt-1 text-base font-semibold text-text-primary">
                     {reg?.name ?? (user?.name ?? "—")}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Visitor ID</p>
                   <p className="mt-1 text-base font-mono text-action-info">
                     {reg?.uniqueId ?? (user?.id?.slice(0, 8) ?? "—")}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Account</p>
                   <p className="mt-1 text-base font-bold text-action-success">{reg?.status ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Role</p>
                   <p className="mt-1 text-base font-bold text-action-warning">{reg?.role ?? "visitor"}</p>
                 </div>

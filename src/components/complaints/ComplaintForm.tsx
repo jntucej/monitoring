@@ -44,14 +44,14 @@ export function ComplaintForm() {
   };
 
   return (
-    <form onSubmit={submit} className="max-w-2xl space-y-4 p-6 bg-white border rounded shadow-sm">
+    <form onSubmit={submit} className="surface-card max-w-2xl space-y-4 p-6 bg-white">
       <div>
         <label className="block text-sm font-medium text-text-muted mb-1" htmlFor="complaint-category">Complaint Category</label>
         <select id="complaint-category"
           required
           value={selectedCode}
           onChange={(e) => setSelectedCode(e.target.value)}
-          className="w-full border rounded p-2 text-sm"
+          className="surface-card w-full p-2 text-sm"
         >
           <option value="">Select category…</option>
           {categories.map((c) => (
@@ -75,7 +75,7 @@ export function ComplaintForm() {
           placeholder="Brief summary of the issue"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="surface-card w-full p-2 text-sm"
         />
       </div>
 
@@ -87,7 +87,7 @@ export function ComplaintForm() {
           placeholder="Provide detailed information…"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="surface-card w-full p-2 text-sm"
         />
       </div>
 
@@ -97,11 +97,11 @@ export function ComplaintForm() {
           placeholder="e.g. Hostel A, Room 204"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="surface-card w-full p-2 text-sm"
         />
       </div>
 
-      <div className="space-y-2 pt-2 border-t">
+      <div className="surface-card space-y-2 pt-2">
         {selected?.anonymousAllowed && (
           <label className="flex gap-2 items-center text-sm">
             <input
@@ -127,7 +127,7 @@ export function ComplaintForm() {
       <button
         type="submit"
         disabled={busy || !selectedCode}
-        className="px-4 py-2 rounded bg-bg-surface text-white text-sm font-medium disabled:opacity-50"
+        className="surface-card px-4 py-2 bg-bg-surface text-white text-sm font-medium disabled:opacity-50"
       >
         {busy ? "Submitting…" : "Submit complaint"}
       </button>

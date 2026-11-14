@@ -68,7 +68,7 @@ function BackupReinforcedInner() {
     <div className="space-y-6 max-w-7xl mx-auto min-w-0">
       <div>
         <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
-          <Database className="w-6 h-6 text-action-success" />
+          <Database className="w-4 h-4 text-action-success" />
           Backup Status
         </p>
         <p className="text-xs text-text-muted mt-1">
@@ -80,7 +80,7 @@ function BackupReinforcedInner() {
       {/* Cron backup freshness strip */}
       <WidgetBoundary title="Cron Backup Freshness">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <div className="surface-card px-4 py-3 flex items-center justify-between">
             <span className="text-sm font-semibold text-white flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-action-success" /> Host Backup Directory
             </span>
@@ -89,12 +89,12 @@ function BackupReinforcedInner() {
           {busy ? (
             <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-bg-elevated/40" />
+                <div key={i} className="h-4 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))}
             </div>
           ) : d?.source === "unavailable" || !d?.lastBackup ? (
             <div className="p-6 text-center min-w-0">
-              <AlertTriangle className="w-5 h-5 text-amber-400/70 mx-auto mb-2" />
+              <AlertTriangle className="w-4 h-4 text-amber-400/70 mx-auto mb-2" />
               <p className="text-sm text-text-muted">
                 Host backup directory not visible in this environment.
               </p>
@@ -105,14 +105,14 @@ function BackupReinforcedInner() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Last Backup</p>
                 <p className="mt-1 text-sm font-bold text-action-success truncate">
                   {d.lastBackup.name}
                 </p>
                 <p className="text-xs text-text-muted">{size(d.lastBackup.sizeBytes)}</p>
               </div>
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Age</p>
                 <p
                   className={`mt-1 text-sm font-bold ${d.stale ? "text-action-danger" : "text-action-info"}`}
@@ -123,7 +123,7 @@ function BackupReinforcedInner() {
                   {d.stale ? "older than 24h — verify cron" : "within 24h window"}
                 </p>
               </div>
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Cron Cadence</p>
                 <p className="mt-1 text-sm font-bold text-text-secondary">
                   {d.daily.length} daily · {d.weekly.length} weekly
@@ -142,14 +142,14 @@ function BackupReinforcedInner() {
                   disabled={busy}
                   className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors disabled:opacity-50"
                 >
-                  <RefreshCw className="w-3 h-3" /> Refresh
+                  <RefreshCw className="size-3.5" /> Refresh
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-w-0">
                 {d.daily.slice(0, 6).map((b) => (
                   <div
                     key={b.name}
-                    className="rounded-lg border border-border bg-bg-surface/40 p-2 flex items-center justify-between gap-2 min-w-0"
+                    className="surface-card bg-bg-surface/40 p-2 flex items-center justify-between gap-2 min-w-0"
                   >
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-text-secondary truncate">{b.name}</p>
@@ -167,7 +167,7 @@ function BackupReinforcedInner() {
       </WidgetBoundary>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Backup status unavailable: {error}</span>
@@ -175,7 +175,7 @@ function BackupReinforcedInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>

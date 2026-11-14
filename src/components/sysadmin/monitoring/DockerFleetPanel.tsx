@@ -88,7 +88,7 @@ export function DockerFleetPanel() {
 
   return (
     <div className="rounded-xl border border-border bg-bg-surface">
-      <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="surface-card flex items-center justify-between p-4">
         <div>
           <p className="text-sm font-bold flex items-center gap-2">
             <Server className="w-4 h-4 text-action-success" />
@@ -101,7 +101,7 @@ export function DockerFleetPanel() {
         <button
           onClick={load}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-bg-elevated border border-border hover:bg-bg-base disabled:opacity-50"
+          className="surface-card inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-bg-elevated hover:bg-bg-base disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -109,7 +109,7 @@ export function DockerFleetPanel() {
       </div>
 
       {error ? (
-        <div className="p-4 m-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
+        <div className="surface-card p-4 m-4 bg-rose-500/10 text-action-danger text-xs">
           Monitoring stack unreachable: {error}
         </div>
       ) : rows.length === 0 ? (
@@ -164,7 +164,7 @@ export function DockerFleetPanel() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-text-muted hover:text-action-success"
                       >
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="size-3.5" />
                       </a>
                     ) : (
                       <span className="text-text-muted">—</span>

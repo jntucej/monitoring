@@ -51,7 +51,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
       : "var(--action-primary)";
 
   return (
-    <div className="relative w-full h-full min-h40 flex items-center justify-center overflow-hidden rounded-2xl bg-bg-elevated/40 backdrop-blur-md border border-white/10 p-4">
+    <div className="surface-card relative w-full h-full min-h40 flex items-center justify-center overflow-hidden bg-bg-elevated/40 backdrop-blur-md p-4">
       {/* Laser Scanning Line Wave */}
       <div
         className="absolute left-0 right-0 h-[2px] pointer-events-none shadow-[0_0_15px_var(--action-success)]"
@@ -63,7 +63,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
 
       {/* Holographic Specular Arc Ring */}
       <div
-        className="absolute w-32 h-32 rounded-full border border-white/20 pointer-events-none"
+        className="absolute w-6 h-6 rounded-full border border-white/20 pointer-events-none"
         style={{
           transform: `rotate(${rotation}deg)`,
           borderTopColor: glowColor,
@@ -73,7 +73,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
 
       {/* Pulsing Status Core Halo */}
       <div
-        className="w-20 h-20 rounded-full flex items-center justify-center transition-transform"
+        className="w-6 h-6 rounded-full flex items-center justify-center transition-transform"
         style={{
           transform: `scale(${pulseScale})`,
           opacity: pulseOpacity,
@@ -84,7 +84,7 @@ export const GlossyGateScanComposition: React.FC<GlossyGateScanCompositionProps>
       {/* Central Holographic Gate Scanner Icon / Telemetry Graphic */}
       <div className="absolute flex flex-col items-center justify-center text-center z-10">
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/30 bg-white/10 shadow-lg backdrop-blur-md"
+          className="size-6 rounded-xl flex items-center justify-center border border-white/30 bg-white/10 shadow-lg backdrop-blur-md"
           style={{ borderColor: glowColor }}
         >
           <div

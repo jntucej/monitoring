@@ -81,17 +81,17 @@ export default function NotificationSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h100">
-        <div className="w-8 h-8 border-4 border-action-primary border-t-transparent rounded-full animate-spin" />
+        <div className="size-5 border-4 border-action-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="flex items-center justify-between border-b border-border pb-6">
+      <div className="surface-card flex items-center justify-between pb-6">
         <div>
           <p className="text-sm font-medium text-text-secondary mb-3">
-            <Bell className="w-6 h-6 text-action-primary" />
+            <Bell className="w-5 h-5 text-action-primary" />
             Notification Preferences
           </p>
           <p className="text-sm text-text-muted mt-1">
@@ -101,7 +101,7 @@ export default function NotificationSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-action-primary text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="surface-card flex items-center gap-2 px-5 py-2.5 bg-action-primary text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {saving ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -115,12 +115,12 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Channels */}
-      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
+      <div className="surface-card bg-bg-surface p-6 space-y-4">
         <h2 className="text-lg font-semibold text-text-primary">Notification Channels</h2>
         <p className="text-xs text-text-muted">Select channels you want to receive alerts through.</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
+          <label className="surface-card flex items-center justify-between p-4 hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
               <Smartphone className="w-5 h-5 text-action-primary" />
               <div>
@@ -136,7 +136,7 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
+          <label className="surface-card flex items-center justify-between p-4 hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
               <Smartphone className="w-5 h-5 text-action-success" />
               <div>
@@ -152,7 +152,7 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
+          <label className="surface-card flex items-center justify-between p-4 hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-unit-c" />
               <div>
@@ -168,7 +168,7 @@ export default function NotificationSettingsPage() {
             />
           </label>
 
-          <label className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer">
+          <label className="surface-card flex items-center justify-between p-4 hover:bg-bg-elevated cursor-pointer">
             <div className="flex items-center gap-3">
               <AppWindow className="w-5 h-5 text-action-warning" />
               <div>
@@ -187,7 +187,7 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Notification Categories */}
-      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
+      <div className="surface-card bg-bg-surface p-6 space-y-4">
         <h2 className="text-lg font-semibold text-text-primary">Alert Categories</h2>
         <p className="text-xs text-text-muted">Enable or disable specific types of alerts.</p>
 
@@ -201,7 +201,7 @@ export default function NotificationSettingsPage() {
             return (
               <label
                 key={key}
-                className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-bg-elevated cursor-pointer"
+                className="surface-card flex items-center justify-between p-3 hover:bg-bg-elevated cursor-pointer"
               >
                 <span className="text-sm font-medium text-text-primary">{formattedLabel}</span>
                 <input
@@ -217,7 +217,7 @@ export default function NotificationSettingsPage() {
       </div>
 
       {/* Quiet Hours */}
-      <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-4">
+      <div className="surface-card bg-bg-surface p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-action-primary" />
           <h2 className="text-lg font-semibold text-text-primary">Quiet Hours</h2>
@@ -234,7 +234,7 @@ export default function NotificationSettingsPage() {
                 ...prev,
                 quietHours: { start: e.target.value, end: prev.quietHours?.end || "06:00" }
               }))}
-              className="bg-bg-elevated border border-border text-text-primary text-sm rounded-lg px-3 py-2"
+              className="surface-card bg-bg-elevated text-text-primary text-sm px-3 py-2"
             />
           </div>
 
@@ -247,7 +247,7 @@ export default function NotificationSettingsPage() {
                 ...prev,
                 quietHours: { start: prev.quietHours?.start || "22:00", end: e.target.value }
               }))}
-              className="bg-bg-elevated border border-border text-text-primary text-sm rounded-lg px-3 py-2"
+              className="surface-card bg-bg-elevated text-text-primary text-sm px-3 py-2"
             />
           </div>
         </div>

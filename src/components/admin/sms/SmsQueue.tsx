@@ -107,7 +107,7 @@ export function SmsQueue() {
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="border border-border bg-bg-surface px-2 py-1.5 rounded text-sm"
+          className="surface-card bg-bg-surface px-2 py-1.5 text-sm"
           aria-label="Filter by status"
         >
           <option value="">All statuses</option>
@@ -119,7 +119,7 @@ export function SmsQueue() {
           value={q}
           onChange={(e) => { setQ(e.target.value); setPage(1); }}
           placeholder="Search phone or message…"
-          className="border border-border bg-bg-surface px-3 py-1.5 rounded text-sm flex-1 min-w40"
+          className="surface-card bg-bg-surface px-3 py-1.5 text-sm flex-1 min-w40"
           aria-label="Search SMS queue"
         />
         <Button
@@ -190,7 +190,7 @@ export function SmsQueue() {
                           onClick={() => retry(r.id)}
                           aria-label={`Retry SMS ${r.id}`}
                         >
-                          <RotateCcw className="w-3 h-3" aria-hidden="true" /> Retry
+                          <RotateCcw className="size-3.5" aria-hidden="true" /> Retry
                         </Button>
                       )}
                       {r.status !== "delivered" && (
@@ -200,7 +200,7 @@ export function SmsQueue() {
                           onClick={() => cancel(r.id)}
                           aria-label={`Cancel SMS ${r.id}`}
                         >
-                          <Trash2 className="w-3 h-3" aria-hidden="true" />
+                          <Trash2 className="size-3.5" aria-hidden="true" />
                         </Button>
                       )}
                     </div>

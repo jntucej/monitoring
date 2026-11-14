@@ -102,14 +102,14 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200">
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* request list */}
-        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-4 space-y-3 min-w-0">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Ward requests
           </h2>
@@ -118,7 +118,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
+            <div className="surface-card p-6 text-center text-sm text-text-muted">
               No requests found for your wards.
             </div>
           ) : (
@@ -163,7 +163,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
           {effectiveTicket ? (
             <RequestTimeline ticket={effectiveTicket} />
           ) : (
-            <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted h-full flex items-center justify-center">
+            <div className="surface-card p-8 text-center text-sm text-text-muted h-full flex items-center justify-center">
               Select a request to view its approval timeline.
             </div>
           )}

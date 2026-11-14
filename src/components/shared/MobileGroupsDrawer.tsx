@@ -69,7 +69,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
         }`}
       >
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="surface-card flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-4 h-4 text-action-primary" />
             <span className="text-xs font-bold text-text-primary uppercase tracking-wide">
@@ -115,7 +115,7 @@ export function MobileGroupsDrawer({ groups, roleRoot: _roleRoot }: MobileGroups
                   </span>
                 </button>
                 {expanded && (
-                  <div className="ml-4 border-l border-border pl-2 mt-0.5 mb-1">
+                  <div className="surface-card ml-4 pl-2 mt-0.5 mb-1">
                     {group.children.map((child) => (
                       <a
                         key={child.href}

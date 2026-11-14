@@ -212,7 +212,7 @@ function AdminAnalyticsInner() {
         subtitle={`Traffic and occupancy from ${data?.range.from ?? "—"} to ${data?.range.to ?? "—"}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex rounded-xl bg-bg-surface border border-border p-1 text-xs">
+            <div className="surface-card inline-flex bg-bg-surface p-1 text-xs">
               {(([7, 14, 30] as const)).map((days) => (
                 <button
                   key={days}
@@ -232,14 +232,14 @@ function AdminAnalyticsInner() {
               type="button"
               onClick={exportCsv}
               disabled={!data || data.daily.length === 0}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h11 rounded-xl bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
+              className="surface-card inline-flex items-center gap-1.5 px-3.5 py-2 min-h11 bg-bg-surface text-xs font-semibold text-text-primary hover:bg-bg-elevated disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button
               type="button"
               onClick={load}
-              className="p-2 min-h11 min-w11 flex items-center justify-center rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary"
+              className="surface-card p-2 min-h11 min-w11 flex items-center justify-center bg-bg-surface text-text-muted hover:text-text-primary"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
@@ -249,7 +249,7 @@ function AdminAnalyticsInner() {
       />
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-sm flex items-center gap-2">
+        <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -258,7 +258,7 @@ function AdminAnalyticsInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <WidgetBoundary title="Total Entries">
-          <div className="glass-card p-4 space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-action-success" /> Total Entries ({range}d)
             </p>
@@ -273,7 +273,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Total Exits">
-          <div className="glass-card p-4 space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-action-danger" /> Total Exits ({range}d)
             </p>
@@ -288,7 +288,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Peak On-Campus">
-          <div className="glass-card p-4 space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5 text-action-primary" /> Peak On-Campus
             </p>
@@ -303,7 +303,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Average Daily Volume">
-          <div className="glass-card p-4 space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-unit-c" /> Daily Avg Volume
             </p>
@@ -321,7 +321,7 @@ function AdminAnalyticsInner() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <WidgetBoundary title="Traffic Volume">
-          <div className="glass-card p-4 sm:p-5 space-y-4">
+          <div className="surface-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">Gate Traffic Flow</h3>
@@ -344,7 +344,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Campus Occupancy">
-          <div className="glass-card p-4 sm:p-5 space-y-4">
+          <div className="surface-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">On-Campus Occupancy</h3>
@@ -367,7 +367,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Department Distribution">
-          <div className="glass-card p-4 sm:p-5 space-y-4">
+          <div className="surface-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">Students by Department</h3>
@@ -390,7 +390,7 @@ function AdminAnalyticsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Role Distribution">
-          <div className="glass-card p-4 sm:p-5 space-y-4">
+          <div className="surface-card p-4 sm:p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-semibold text-text-primary">Active Users by Role</h3>

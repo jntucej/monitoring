@@ -46,7 +46,7 @@ export function DevMessagesPanel() {
   usePolling(load, { intervalMs: 60_000 });
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <div className="flex items-center gap-2 mb-3">
         <MessageSquare className="w-4 h-4 text-action-success" />
         <h3 className="text-sm font-semibold text-text-primary">
@@ -77,9 +77,9 @@ export function DevMessagesPanel() {
             >
               <div className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-1.5 font-semibold text-text-primary">
-                  <Send className="w-3 h-3" />
+                  <Send className="size-3.5" />
                   {m.user_name || "Unknown user"}
-                  <span className="uppercase tracking-wide text-xs px-1.5 py-0.5 rounded bg-bg-base border border-border">
+                  <span className="surface-card uppercase tracking-wide text-xs px-1.5 py-0.5 bg-bg-base">
                     {m.user_role}
                   </span>
                 </span>

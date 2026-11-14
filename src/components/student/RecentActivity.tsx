@@ -42,7 +42,7 @@ export function RecentActivity() {
   usePolling(load, { intervalMs: 30_000 });
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <h3 className="font-semibold mb-4">Recent Activity</h3>
       <div className="space-y-4">
         {loading ? (

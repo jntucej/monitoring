@@ -127,7 +127,7 @@ export interface JobsContentProps {
 export function JobsContent({ data }: JobsContentProps) {
   if (!data) {
     return (
-      <div className="rounded-lg border p-4 text-sm text-text-muted">
+      <div className="surface-card p-4 text-sm text-text-muted">
         No job data available.
       </div>
     );
@@ -163,7 +163,7 @@ export function JobsContent({ data }: JobsContentProps) {
 
       {/* Signature visual: runs matrix (jobs × days) */}
       <div
-        className="rounded-lg border p-4 bg-bg-surface"
+        className="surface-card p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -172,13 +172,13 @@ export function JobsContent({ data }: JobsContentProps) {
           </p>
           <div className="flex items-center gap-3 text-xs" style={{ color: VIZ_THEME.muted }}>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: statusColor("ok") }} /> 2+ runs
+              <span className="inline-block size-2 rounded-sm" style={{ background: statusColor("ok") }} /> 2+ runs
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: statusColor("warn") }} /> 1 run
+              <span className="inline-block size-2 rounded-sm" style={{ background: statusColor("warn") }} /> 1 run
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "transparent", border: "1px solid var(--border)" }} /> none
+              <span className="inline-block size-2 rounded-sm" style={{ background: "transparent", border: "1px solid var(--border)" }} /> none
             </span>
           </div>
         </div>

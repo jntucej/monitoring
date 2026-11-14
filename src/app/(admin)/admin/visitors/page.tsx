@@ -88,19 +88,19 @@ function AdminVisitorsInner() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><Users className="w-3.5 h-3.5" /> Total</p>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{rows.length}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><UserCheck className="w-3.5 h-3.5 text-action-success" /> On campus</p>
           <p className="text-2xl font-bold text-action-success tabular-nums">{onCampus}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-action-warning" /> Pending</p>
           <p className="text-2xl font-bold text-action-warning tabular-nums">{pending}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><UserX className="w-3.5 h-3.5 text-action-info" /> Checked out</p>
           <p className="text-2xl font-bold text-action-info tabular-nums">{rows.length - onCampus - pending}</p>
         </div>
@@ -108,7 +108,7 @@ function AdminVisitorsInner() {
 
       <WidgetBoundary title="Visitor log">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-2 min-h11">
+          <div className="surface-card p-4 flex items-center gap-2 min-h11">
             <Search className="w-4 h-4 text-text-muted" />
             <input
               value={query}
@@ -138,7 +138,7 @@ function AdminVisitorsInner() {
                     <td className="p-3 text-text-primary">{r.name ?? "—"}</td>
                     <td className="p-3 text-text-muted">{r.purpose ?? "—"}</td>
                     <td className="p-3 text-text-muted">{r.host ?? "—"}</td>
-                    <td className="p-3 text-text-muted flex items-center gap-1"><MapPin className="w-3 h-3" />{r.gate ?? "—"}</td>
+                    <td className="p-3 text-text-muted flex items-center gap-1"><MapPin className="size-3.5" />{r.gate ?? "—"}</td>
                     <td className="p-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(r.status)}`}>{r.status}</span>
                     </td>

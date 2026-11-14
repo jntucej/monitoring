@@ -33,7 +33,7 @@ export default function JobsPage() {
         ) : error && !data ? (
           <div
             role="alert"
-            className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger"
+            className="surface-card bg-action-danger/10 p-4 text-sm text-action-danger"
           >
             Failed to load job data: {error}
           </div>

@@ -18,7 +18,7 @@ export function FacultyCare({
   const allPresent = needsAttention === 0 && total > 0;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="size-4 text-action-info" />
@@ -35,7 +35,7 @@ export function FacultyCare({
       </header>
 
       {allPresent ? (
-        <div className="flex items-center gap-2 rounded-lg bg-action-primary/10 px-3 py-2.5">
+        <div className="surface-card flex items-center gap-2 bg-action-primary/10 px-3 py-2.5">
           <CheckCircle2 className="size-4 text-action-primary" />
           <div>
             <p className="text-sm font-medium text-action-primary">
@@ -48,7 +48,7 @@ export function FacultyCare({
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-lg bg-action-warning/10 px-3 py-2">
+          <div className="surface-card flex items-center gap-2 bg-action-warning/10 px-3 py-2">
             <AlertCircle className="size-4 text-action-warning" />
             <div className="flex-1">
               <p className="text-sm font-medium text-text-primary">

@@ -618,7 +618,7 @@ export async function findGatePasses(filters: {
   return (data || []).map(mPass);
 }
 
-// Issue #392: correctionCandidates previously queried all scans from the
+// Issue issue-392: correctionCandidates previously queried all scans from the
 // last hour with a fixed limit of 20. On a busy campus that's still a
 // potential full-scan query. Now accepts explicit filters and enforces a
 // hard max so callers can scope to a gate, user, or date window.
@@ -2476,7 +2476,7 @@ export const getStudentHistory = getPersonHistory;
 
 export async function getLinkedPersons(
   userId: string,
-  // Issue #388: support reverse lookup — find guardians of a student, not
+  // Issue issue-388: support reverse lookup — find guardians of a student, not
   // just children of a guardian. Callers must pass a direction explicitly.
   direction: 'children_of' | 'guardians_of' = 'children_of',
 ): Promise<Person[]> {

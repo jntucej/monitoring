@@ -111,7 +111,7 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
           <Loader2 className="w-4 h-4 animate-spin" /> Loading permissions&hellip;
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="surface-card py-6 text-xs text-action-warning bg-amber-400/10 p-3">
           {error}
         </div>
       ) : items.length === 0 ? (
@@ -127,7 +127,7 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                 className="rounded-xl border border-border bg-bg-surface/60 flex flex-col min-h-0"
                 aria-label={`${col} column`}
               >
-                <header className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <header className="surface-card flex items-center justify-between px-3 py-2">
                   <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>{col}</span>
                   <span className="text-xs font-mono text-text-muted tabular-nums">{rows.length}</span>
                 </header>
@@ -140,10 +140,10 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                         key={item.id || item.ticket_number}
                         type="button"
                         onClick={() => onSelect(toBoardRow(item))}
-                        className="w-full text-left rounded-lg border border-border bg-bg-elevated hover:border-action-primary/40 hover:bg-bg-base transition-colors p-3 space-y-2"
+                        className="surface-card w-full text-left bg-bg-elevated hover: hover:bg-bg-base transition-colors p-3 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-bg-base border border-border text-action-primary truncate">
+                          <span className="surface-card font-mono text-xs font-bold px-1.5 py-0.5 bg-bg-base text-action-primary truncate">
                             {item.ticket_number}
                           </span>
                           <span className="text-xs font-mono text-text-muted">

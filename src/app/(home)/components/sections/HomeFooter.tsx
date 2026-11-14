@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function HomeFooter() {
   return (
-    <footer className="border-t border py-8 text-center text-sm text-zinc-400">
+    <footer className="surface-card py-8 text-center text-sm text-zinc-400">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <p>
           © {new Date().getFullYear()} {COLLEGE.officialName ?? "Gate Monitor"}. All rights reserved.

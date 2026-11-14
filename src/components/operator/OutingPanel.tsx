@@ -16,12 +16,12 @@ function fmtDuration(minutes: number): string {
 
 export function OutingPanel({ entries }: OutingPanelProps) {
   return (
-    <div className="bg-bg-surface border border-border rounded-xl p-4 space-y-3">
+    <div className="surface-card bg-bg-surface p-4 space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="font-bold text-sm flex items-center gap-2">
           <Clock3 className={`w-4 h-4 ${entries.some((e) => e.overdue) ? "text-red-400" : "text-action-warning"}`} />
           On Outing (No Permission)
-          <span className="px-1.5 py-0.5 rounded-full bg-bg-base text-xs font-bold text-text-muted">
+          <span className="surface-card px-1.5 py-0.5 bg-bg-base text-xs font-bold text-text-muted">
             {entries.length}
           </span>
         </h3>
@@ -57,7 +57,7 @@ export function OutingPanel({ entries }: OutingPanelProps) {
               </div>
               <div className="text-right shrink-0">
                 {e.overdue ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 text-xs font-bold">
+                  <span className="surface-card inline-flex items-center px-2 py-0.5 bg-red-500/15 text-red-400 text-xs font-bold">
                     OVERDUE · {fmtDuration(e.minutesGone)}
                   </span>
                 ) : (

@@ -24,7 +24,7 @@ export default function AdminSettingsPage() {
           </WidgetBoundary>
 
           <WidgetBoundary title="More Config">
-            <div className="glass-card p-6 col-span-1 lg:col-span-2">
+            <div className="surface-card p-6 col-span-1 lg:col-span-2">
               <h3 className="font-semibold flex items-center gap-2 mb-4 text-emerald-400">
                 <Settings className="w-5 h-5" />
                 More dynamic config forms coming soon…

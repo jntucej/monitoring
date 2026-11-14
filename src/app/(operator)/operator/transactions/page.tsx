@@ -51,7 +51,7 @@ function OperatorTransactionsInner() {
   // a fresh object reference on every poll (the auth store's user field
   // is not referentially stable here), which re-triggers useApiResource's
   // effect → new refresh callback → effect re-runs → setState in the
-  // effect → re-render → loop (Minified React #310).
+  // effect → re-render → loop (Minified React issue-310).
   const enabled = useAuthStore((s) => !!s.user);
 
   const {
@@ -108,7 +108,7 @@ function OperatorTransactionsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Transactions unavailable: {error}</span>
@@ -116,7 +116,7 @@ function OperatorTransactionsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -145,7 +145,7 @@ function OperatorTransactionsInner() {
           </div>
 
           {/* Direction filter */}
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-border min-w-0">
+          <div className="surface-card flex flex-wrap items-center gap-2 px-3 py-2 min-w-0">
             {(["ALL", "IN", "OUT"] as DirectionFilter[]).map((f) => (
               <button
                 key={f}
@@ -207,9 +207,9 @@ function OperatorTransactionsInner() {
                           </span>
                         )}
                         {r.scan_type ? (
-                          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-xs text-action-warning">Manual</span>
+                          <span className="surface-card bg-amber-400/10 px-1.5 py-0.5 text-xs text-action-warning">Manual</span>
                         ) : r.is_correction ? (
-                          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-xs text-action-danger">Correction</span>
+                          <span className="surface-card bg-rose-400/10 px-1.5 py-0.5 text-xs text-action-danger">Correction</span>
                         ) : null}
                       </div>
                     </div>
@@ -245,7 +245,7 @@ function OperatorTransactionsInner() {
                             </span>
                           )}
                           {r.person_type && (
-                            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-xs text-text-muted uppercase">
+                            <span className="surface-card ml-1.5 px-1.5 py-0.5 text-xs text-text-muted uppercase">
                               {r.person_type}
                             </span>
                           )}
@@ -269,11 +269,11 @@ function OperatorTransactionsInner() {
                         </td>
                         <td className="px-3 py-2.5 text-xs">
                           {r.scan_type ? (
-                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-action-warning font-medium">
+                            <span className="surface-card bg-amber-400/10 px-2 py-0.5 text-action-warning font-medium">
                               Manual
                             </span>
                           ) : r.is_correction ? (
-                            <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 text-action-danger font-medium">
+                            <span className="surface-card bg-rose-400/10 px-2 py-0.5 text-action-danger font-medium">
                               Correction
                             </span>
                           ) : (
@@ -286,7 +286,7 @@ function OperatorTransactionsInner() {
                 </table>
               </div>
 
-              <div className="px-3 py-2.5 border-t border-border text-xs text-text-muted flex items-center gap-1.5 min-w-0">
+              <div className="surface-card px-3 py-2.5 text-xs text-text-muted flex items-center gap-1.5 min-w-0">
                 <Clock className="w-3.5 h-3.5 shrink-0" />
                 Auto-refreshes every 30 seconds.
               </div>

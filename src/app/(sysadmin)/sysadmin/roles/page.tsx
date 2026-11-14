@@ -472,7 +472,7 @@ export default function RolesManagementPage() {
             {hasChildren ? (
               isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bgtext-muted/40" />
+              <span className="size-4 rounded-full bgtext-muted/40" />
             )}
           </button>
 
@@ -482,7 +482,7 @@ export default function RolesManagementPage() {
             }`}
           />
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-4">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-mono text-xs font-bold text-unit-c">{node.code}</span>
               <span className="text-xs font-semibold text-text-primary">
@@ -496,9 +496,9 @@ export default function RolesManagementPage() {
             </div>
             <div className="mt-0.5 flex items-center gap-2">
               <span className="inline-flex items-center gap-1 text-xs text-text-muted">
-                <Users className="w-3 h-3" />
+                <Users className="size-3.5" />
                 {countLoading && count === undefined ? (
-                  <span className="inline-block w-8 h-3 bgborder rounded animate-pulse" />
+                  <span className="inline-block w-6 h-4 bgborder rounded animate-pulse" />
                 ) : (
                   <span className="font-mono font-bold text-text-primary">
                     {count ?? 0}
@@ -512,20 +512,20 @@ export default function RolesManagementPage() {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => openGrantPanel(node.code)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-action-success hover:border-emerald-500/40 transition"
+              className="surface-card inline-flex items-center gap-1 px-2.5 py-1.5 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-action-success hover: transition"
               title={`Grant / revoke '${node.code}' role`}
             >
-              <KeyRound className="w-3 h-3" />
+              <KeyRound className="size-3.5" />
               Grant
             </button>
             {graphNode?.default_redirect && (
               <Link
                 href={graphNode.default_redirect}
                 target="_blank"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-xs font-semibold text-purple-300 hover:bg-purple-500/30 transition"
+                className="surface-card inline-flex items-center gap-1 px-2.5 py-1.5 bg-purple-500/15 text-xs font-semibold text-purple-300 hover:bg-purple-500/30 transition"
                 title={`Open the ${graphNode.display_name} dashboard`}
               >
-                <ArrowUpRight className="w-3 h-3" />
+                <ArrowUpRight className="size-3.5" />
                 View Dashboard
               </Link>
             )}
@@ -534,7 +534,7 @@ export default function RolesManagementPage() {
 
         {/* HOD node: per-user branch assignment + current branch shown next to each name */}
         {node.code === "hod" && isExpanded && (
-          <div className="mt-2 ml-4 border-l-2 border-border pl-4 space-y-2">
+          <div className="surface-card mt-2 ml-4 pl-4 space-y-2">
             {hodTreeRows.length === 0 ? (
               <div className="text-xs text-text-muted py-2">
                 No HOD users yet. Grant the &lsquo;hod&rsquo; role above, then assign a branch.
@@ -543,18 +543,18 @@ export default function RolesManagementPage() {
               hodTreeRows.map((u) => (
                 <div
                   key={u.id}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-bg-elevated/40 px-3 py-2"
+                  className="surface-card flex items-center gap-2 bg-bg-elevated/40 px-3 py-2"
                 >
                   <Users className="w-3.5 h-3.5 shrink-0 text-text-muted" />
-                  <span className="text-xs font-semibold text-text-primary flex-1 min-w-0 truncate">
+                  <span className="text-xs font-semibold text-text-primary flex-1 min-w-4 truncate">
                     {u.name}
                   </span>
                   {u.branch ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-action-success">
+                    <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/15 text-xs font-bold text-action-success">
                       {u.branch}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full bgborder/40 text-xs font-semibold text-text-muted uppercase">
+                    <span className="surface-card px-2 py-0.5 bgborder/40 text-xs font-semibold text-text-muted uppercase">
                       No branch
                     </span>
                   )}
@@ -564,7 +564,7 @@ export default function RolesManagementPage() {
                       value={u.branch}
                       disabled={hodBranchBusy === u.id}
                       onChange={(e) => void assignHodBranch(u.id, e.target.value)}
-                      className="min-w23 px-2 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-mono text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+                      className="surface-card min-w23 px-2 py-1.5 bg-bg-elevated text-xs font-mono text-text-primary focus:outline-none focus: disabled:opacity-50"
                       aria-label={`Assign branch to ${u.name}`}
                     >
                       <option value="">— none —</option>
@@ -597,7 +597,7 @@ export default function RolesManagementPage() {
 
         {/* children with CSS connector lines (no graph library) */}
         {hasChildren && isExpanded && (
-          <div className="mt-2 ml-4 border-l-2 border-border pl-4 space-y-2">
+          <div className="surface-card mt-2 ml-4 pl-4 space-y-2">
             {node.children.map((child) => (
               <div key={child.code} className="relative">
                 <div className="absolute -left-4 top-1/2 h-0.5 w-4 bgborder" />
@@ -635,15 +635,15 @@ export default function RolesManagementPage() {
                 default_redirect: "/profile",
               })
             }
-            className="px-4 py-2 min-h11 bg-unit-c hover:bg-purple-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition shrink-0"
+            className="surface-card px-4 py-2 min-h11 bg-unit-c hover:bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 transition shrink-0"
           >
             <Plus className="w-4 h-4" /> Define System Role
           </button>
         </div>
 
         {/* ------------------------------------------------ role hierarchy graph (from /api/roles-graph) */}
-        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-border bg-bg-elevated/50">
+        <div className="rounded-xl bg-bg-surface overflow-hidden">
+          <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-bg-elevated/50">
             <div className="flex items-center gap-2">
               <Network className="w-4 h-4 text-unit-c" />
               <div>
@@ -661,19 +661,19 @@ export default function RolesManagementPage() {
               <button
                 onClick={() => void refreshGraph()}
                 disabled={countLoading}
-                className="inline-flex items-center gap-1 px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
+                className="surface-card inline-flex items-center gap-1 px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition disabled:opacity-50"
               >
-                <RefreshCw className="w-3 h-3" /> Refresh
+                <RefreshCw className="size-3.5" /> Refresh
               </button>
               <button
                 onClick={expandAll}
-                className="px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition"
+                className="surface-card px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Expand All
               </button>
               <button
                 onClick={collapseAll}
-                className="px-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-muted hover:text-unit-c transition"
+                className="surface-card px-3 py-1.5 min-h11 bg-bg-elevated text-xs font-semibold text-text-muted hover:text-unit-c transition"
               >
                 Collapse All
               </button>
@@ -698,8 +698,8 @@ export default function RolesManagementPage() {
         </div>
 
         {/* ------------------------------------------------ role access matrix */}
-        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-bg-elevated/50">
+        <div className="rounded-xl bg-bg-surface overflow-hidden">
+          <div className="surface-card px-4 py-3 bg-bg-elevated/50">
             <h2 className="text-sm font-bold text-text-primary">Role Access Matrix</h2>
             <p className="text-xs text-text-muted">
               Which roles can reach which pages. Filled dot = direct access; hatched dot = inherited
@@ -735,17 +735,17 @@ export default function RolesManagementPage() {
                           <td key={r} className="p-3 text-center">
                             {direct ? (
                               <span
-                                className="inline-block w-2.5 h-2.5 rounded-full bg-action-success"
+                                className="inline-block size-4 rounded-full bg-action-success"
                                 title={`Direct access for ${r}`}
                               />
                             ) : inherited ? (
                               <span
-                                className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400/30 border border-emerald-400/50"
+                                className="inline-block size-4 bg-emerald-400/30 border border-emerald-400/50"
                                 title={`Inherited access for ${r}`}
                               />
                             ) : (
                               <span
-                                className="inline-block w-2.5 h-2.5 rounded-full border border-border"
+                                className="inline-block size-4 border border-border"
                               />
                             )}
                           </td>
@@ -760,8 +760,8 @@ export default function RolesManagementPage() {
         </div>
 
         {/* ------------------------------------------------ role definitions table */}
-        <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-          <div className="px-4 py-3 border-b border-border bg-bg-elevated/50">
+        <div className="rounded-xl bg-bg-surface overflow-hidden">
+          <div className="surface-card px-4 py-3 bg-bg-elevated/50">
             <h2 className="text-sm font-bold text-text-primary">Role Definitions</h2>
           </div>
           {loading ? (
@@ -798,14 +798,14 @@ export default function RolesManagementPage() {
                       <td className="p-4 text-right space-x-2">
                         <button
                           onClick={() => setEditingRole(r)}
-                          className="p-1.5 rounded-lg bg-bg-elevated hover:text-unit-c transition"
+                          className="surface-card p-1.5 bg-bg-elevated hover:text-unit-c transition"
                           title="Edit"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(r.code)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="surface-card p-1.5 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                           title="Deactivate"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -822,7 +822,7 @@ export default function RolesManagementPage() {
         {/* ------------------------------------------------ grant / revoke panel */}
         {grantOpen && grantRoleCode && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="surface-card bg-bg-surface max-w-md w-full p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
@@ -836,7 +836,7 @@ export default function RolesManagementPage() {
                 </div>
                 <button
                   onClick={closeGrantPanel}
-                  className="p-2 rounded-lg hover:bg-bg-elevated transition"
+                  className="surface-card p-2 hover:bg-bg-elevated transition"
                 >
                   <X className="w-4 h-4 text-text-muted" />
                 </button>
@@ -867,7 +867,7 @@ export default function RolesManagementPage() {
                   value={grantSearch}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Search by name, email, or ID…"
-                  className="w-full min-h11 pl-9 pr-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-success"
+                  className="surface-card w-full min-h11 pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                 />
                 {grantSearch && (
                   <button
@@ -883,7 +883,7 @@ export default function RolesManagementPage() {
               </div>
 
               {grantResults.length > 0 && (
-                <div className="max-h-64 overflow-y-auto border border-border rounded-xl divide-y divide-border">
+                <div className="max-h-6 overflow-y-auto rounded-xl divide-y divide-border">
                   {grantResults.map((u) => {
                     const hasRole = u.role === grantRoleCode;
                     return (
@@ -891,7 +891,7 @@ export default function RolesManagementPage() {
                         key={u.id}
                         className="p-3 flex items-center gap-3 hover:bg-bg-elevated/50 transition"
                       >
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-4">
                           <div className="text-sm font-semibold text-text-primary truncate">
                             {u.name}
                           </div>
@@ -920,7 +920,7 @@ export default function RolesManagementPage() {
                               ? "Role graph unavailable — assign a replacement role manually"
                               : `Demote to '${roleParents[grantRoleCode]}'`
                           }
-                          className="px-3 py-1.5 min-h11 rounded-lg text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="surface-card px-3 py-1.5 min-h11 text-xs font-bold transition flex items-center justify-center bg-rose-500/15 text-action-danger hover:bg-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           Revoke
                         </button>
@@ -936,10 +936,10 @@ export default function RolesManagementPage() {
                 </div>
               )}
 
-              <div className="flex justify-end pt-3 border-t border-border">
+              <div className="surface-card flex justify-end pt-3">
                 <button
                   onClick={closeGrantPanel}
-                  className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
+                  className="surface-card px-4 py-2 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                 >
                   Close
                 </button>
@@ -951,7 +951,7 @@ export default function RolesManagementPage() {
         {/* ------------------------------------------------ create / edit role form (existing) */}
         {editingRole && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="surface-card bg-bg-surface max-w-md w-full p-6 space-y-4">
               <h3 className="text-lg font-bold text-text-primary">
                 {editingRole.code ? "Edit Role Configuration" : "Define New System Role"}
               </h3>
@@ -969,7 +969,7 @@ export default function RolesManagementPage() {
                       setEditingRole({ ...editingRole, code: e.target.value.toLowerCase() })
                     }
                     placeholder="e.g. supervisor"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -985,7 +985,7 @@ export default function RolesManagementPage() {
                       setEditingRole({ ...editingRole, display_name: e.target.value })
                     }
                     placeholder="e.g. Gate Supervisor"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -1000,7 +1000,7 @@ export default function RolesManagementPage() {
                       setEditingRole({ ...editingRole, description: e.target.value })
                     }
                     placeholder="Scope of authority..."
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -1016,7 +1016,7 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, icon_name: e.target.value })
                       }
                       placeholder="e.g. Shield"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -1030,22 +1030,22 @@ export default function RolesManagementPage() {
                         setEditingRole({ ...editingRole, default_redirect: e.target.value })
                       }
                       placeholder="e.g. /admin"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-purple-400"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <div className="surface-card flex justify-end gap-2 pt-4">
                   <button
                     type="button"
                     onClick={() => setEditingRole(null)}
-                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 min-h11 bg-unit-c text-white rounded-xl text-xs font-semibold hover:bg-purple-600 transition"
+                    className="surface-card px-4 py-2 min-h11 bg-unit-c text-white text-xs font-semibold hover:bg-purple-600 transition"
                   >
                     Save Role
                   </button>

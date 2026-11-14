@@ -251,11 +251,11 @@ export default function SecurityPage() {
       <div className="min-h-dvh bg-bg-base text-text-primary p-4 md:p-6 space-y-4 max-w-5xl mx-auto select-none">
         
         {/* Minimal Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="surface-card flex items-center justify-between gap-3 pb-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary transition-all cursor-pointer"
+              className="surface-card p-2 bg-bg-surface text-text-muted hover:text-text-primary transition-all cursor-pointer"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -274,7 +274,7 @@ export default function SecurityPage() {
             {isSysadmin && (
               <button
                 onClick={() => router.push("/sysadmin/security")}
-                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-action-success text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                className="surface-card px-2.5 py-1.5 bg-emerald-500/15 text-action-success text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
               >
                 <ServerCog className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Admin</span>
@@ -287,8 +287,8 @@ export default function SecurityPage() {
         <div className={`rounded-2xl border p-3.5 transition-all ${p.cls}`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-action-success flex items-center justify-center shrink-0">
-                <MainIcon className="w-4.5 h-4.5" />
+              <div className="size-6 bg-emerald-500/15 border border-emerald-500/30 text-action-success flex items-center justify-center shrink-0">
+                <MainIcon className="size-4" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -320,12 +320,12 @@ export default function SecurityPage() {
                 <div
                   key={card.id}
                   onClick={() => router.push(`/security/${card.id}`)}
-                  className="group relative rounded-2xl border border-border bg-bg-surface p-4 hover:border-emerald-500/50 hover:bg-bg-elevated transition-all cursor-pointer select-none space-y-3 shadow-sm active:scale-[0.99]"
+                  className="surface-card group relative bg-bg-surface p-4 hover: hover:bg-bg-elevated transition-all cursor-pointer select-none space-y-3 active:scale-[0.99]"
                 >
                   {/* Card Header */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-action-success flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                      <div className="size-6 bg-emerald-500/10 text-action-success flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-110 transition-transform">
                         <CardIcon className="w-4 h-4" />
                       </div>
                       <div>
@@ -338,13 +338,13 @@ export default function SecurityPage() {
                       </div>
                     </div>
 
-                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/10 text-action-success border border-emerald-500/20 shrink-0">
+                    <span className="surface-card px-2 py-0.5 text-xs font-mono font-bold bg-emerald-500/10 text-action-success shrink-0">
                       {card.badge}
                     </span>
                   </div>
 
                   {/* Main Metric Infographic Display */}
-                  <div className="bg-bg-base/80 rounded-xl p-3 border border-border/60 flex items-center justify-between gap-2">
+                  <div className="surface-card bg-bg-base/80 p-3 flex items-center justify-between gap-2">
                     <div>
                       <div className="text-lg font-black text-text-primary tracking-tight font-mono">
                         {card.metric}
@@ -358,7 +358,7 @@ export default function SecurityPage() {
 
                   {/* Visual Progress / Infographic Bar */}
                   <div className="space-y-1">
-                    <div className="h-1.5 w-full bg-bg-base rounded-full overflow-hidden border border-border/40">
+                    <div className="h-1.5 w-full bg-bg-base overflow-hidden border border-border/40">
                       <div className={`h-full ${card.barColor} ${card.barWidth} rounded-full transition-all duration-500`} />
                     </div>
                   </div>

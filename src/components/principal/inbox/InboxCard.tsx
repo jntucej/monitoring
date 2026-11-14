@@ -87,7 +87,7 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
         <div className="flex-1 min-w-0 space-y-1.5">
           {/* Row 1: ticket + SLA + stage */}
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-bg-elevated border border-border text-action-primary shrink-0">
+            <span className="surface-card font-mono text-xs font-bold px-1.5 py-0.5 bg-bg-elevated text-action-primary shrink-0">
               {ticket.ticket_number}
             </span>
             <SlaBadge slaDeadline={ticket.sla_deadline} status={ticket.status} />
@@ -114,7 +114,7 @@ export function InboxCard({ ticket, onOpenDetail, selected, onToggleSelect }: In
             )}
             {ticket.forwarded_from_role && (
               <span className="flex items-center gap-0.5 text-amber-500/80">
-                <Forward className="w-3 h-3" />
+                <Forward className="size-3.5" />
                 from {ticket.forwarded_from_role.replace(/_/g, " ")}
               </span>
             )}

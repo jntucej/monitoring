@@ -59,7 +59,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+    <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -132,7 +132,7 @@ function HostelManagerResourceManagementInner() {
         href="/hostel-manager"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Operations Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Operations Overview
       </Link>
 
       {/* Page toolbar */}
@@ -146,7 +146,7 @@ function HostelManagerResourceManagementInner() {
       </div>
 
       {/* Authority note */}
-      <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+      <div className="surface-card bg-bg-base p-4 min-w-0">
         <p className="text-sm text-text-secondary min-w-0">
           The hostel manager owns <span className="font-semibold text-action-info">resources and facilities</span> —
           rooms, beds, utilities, and stock. They do <span className="font-semibold text-action-danger">not</span> hold
@@ -195,7 +195,7 @@ function HostelManagerResourceManagementInner() {
       {/* Manager analytics metrics */}
       <WidgetBoundary title="Manager Metrics">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <Package className="w-4 h-4 text-action-warning shrink-0" />
             <span className="text-sm font-semibold text-white">7-Day Resource Metrics</span>
           </div>
@@ -214,7 +214,7 @@ function HostelManagerResourceManagementInner() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 min-w-0">
               {metrics.map((m) => (
-                <div key={m.key} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div key={m.key} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide truncate">{m.label}</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {m.value}

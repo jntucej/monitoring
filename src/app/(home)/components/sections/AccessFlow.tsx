@@ -104,7 +104,7 @@ export function AccessFlow() {
               transition={{ duration: 0.4, delay: i * 0.08 }}
               className="text-center"
             >
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-[var(--home-border-hard,rgba(255,255,255,0.18))] bg-[var(--home-bg-elev-1,var(--bg-base))] text-sm font-bold text-[var(--home-accent-indigo,var(--action-primary))]">
+              <div className="mx-auto flex size-6 items-center justify-center rounded-full border border-[var(--home-border-hard,rgba(255,255,255,0.18))] bg-[var(--home-bg-elev-1,var(--bg-base))] text-sm font-bold text-[var(--home-accent-indigo,var(--action-primary))]">
                 {i + 1}
               </div>
               <h3 className="mt-3 text-base font-semibold text-[var(--home-text-primary,var(--bg-surface))]">

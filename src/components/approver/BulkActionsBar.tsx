@@ -42,9 +42,9 @@ export function BulkActionsBar({
   };
 
   return (
-    <div className="bg-bg-elevated border border-border rounded-xl p-3 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="surface-card bg-bg-elevated p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center bg-action-primary text-white text-xs font-bold rounded-full h-6 min-w-6 px-1.5">
+        <span className="surface-card inline-flex items-center justify-center bg-action-primary text-white text-xs font-bold h-6 min-w-6 px-1.5">
           {selectedCount}
         </span>
         <span className="text-sm font-medium text-text-primary">
@@ -59,7 +59,7 @@ export function BulkActionsBar({
             placeholder={`Reason for bulk ${promptAction}...`}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-border bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary w-full sm:w-64"
+            className="surface-card px-3 py-1.5 text-xs bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary w-full sm:w-64"
           />
           <div className="flex items-center gap-2">
             <Button

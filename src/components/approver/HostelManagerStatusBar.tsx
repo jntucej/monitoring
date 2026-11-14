@@ -49,7 +49,7 @@ export function HostelManagerStatusBar({ counts, refreshing = false }: HostelMan
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Hostel Manager status bar"
     >
       {/* Left: hostel · open tickets · occupancy · maintenance · last update */}
@@ -63,7 +63,7 @@ export function HostelManagerStatusBar({ counts, refreshing = false }: HostelMan
         </span>
 
         <span className="inline-flex items-center gap-1.5 text-text-muted shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-warning shrink-0" />
+          <span className="size-2 rounded-full bg-action-warning shrink-0" />
           open
           <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.openTickets ?? 0}

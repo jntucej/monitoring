@@ -93,7 +93,7 @@ function SysadminExamDayInner() {
       {/* Clearance desk */}
       <WidgetBoundary title="Clearance desk">
         <div className="glass-card">
-          <div className="p-4 border-b border-border">
+          <div className="surface-card p-4">
             <p className="text-sm font-semibold text-text-primary">Pending approvals by stage</p>
           </div>
           {stageSummary.length === 0 ? (
@@ -103,7 +103,7 @@ function SysadminExamDayInner() {
               {stageSummary.map((s, i) => (
                 <div key={i} className="p-3 flex items-center gap-3">
                   <span className="flex-1 text-sm text-text-primary">{s.current_stage}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${statusTone(s.status)}`}>{s.status}</span>
+                  <span className={`px-2 py-0.5 text-xs`}>{s.status}</span>
                   <span className="text-sm font-bold text-action-primary w-8 text-right">{s.count}</span>
                 </div>
               ))}
@@ -137,7 +137,7 @@ function SysadminExamDayInner() {
                       </td>
                       <td className="p-3 text-xs text-text-muted">{r.current_stage ?? "—"}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${statusTone(r.status)}`}>{r.status}</span>
+                        <span className={`px-2 py-0.5 text-xs`}>{r.status}</span>
                       </td>
                       <td className="p-3 text-xs text-text-muted">
                         {r.sla_deadline ? new Date(r.sla_deadline).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
@@ -173,7 +173,7 @@ function SysadminExamDayInner() {
                       <td className="p-3 text-sm font-medium text-text-primary">{r.candidate_name ?? "—"}</td>
                       <td className="p-3 font-mono text-xs text-text-muted">{r.roll ?? "—"}</td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${r.status === "PRESENT" ? "bg-emerald-500/15 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
+                        <span className={`px-2 py-0.5 text-xs "PRESENT" "text-action-success" "text-text-muted" "PRESENT" "text-action-success" "text-text-muted"`}>
                           {r.status}
                         </span>
                       </td>

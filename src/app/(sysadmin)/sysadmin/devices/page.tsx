@@ -46,28 +46,28 @@ const DEVICE_CONFIGS: DeviceConfig[] = [
     name: "Thumbprint Biometrics",
     icon: Fingerprint,
     description: "Biometric fingerprint scanner at entry/exit turnstiles for student and staff identity validation.",
-    accentColor: "from-emerald-500/20 to-emerald-500/5 text-action-success border-emerald-500/30",
+    accentColor: "bg-action-success/20 text-action-success border-action-success/30",
   },
   {
     type: "face",
     name: "Facial Recognition Gate",
     icon: ScanFace,
     description: "AI optical facial scan camera for contactless gate passage and instant turnstile unlock.",
-    accentColor: "from-blue-500/20 to-blue-500/5 text-action-primary border-blue-500/30",
+    accentColor: "bg-action-primary/20 text-action-primary border-action-primary/30",
   },
   {
     type: "barcode",
     name: "Barcode Scanner",
     icon: ScanBarcode,
     description: "Laser barcode reader for student physical ID card barcode verification and express pass checkout.",
-    accentColor: "from-purple-500/20 to-purple-500/5 text-unit-c border-purple-500/30",
+    accentColor: "bg-unit-c/20 text-unit-c border-unit-c/30",
   },
   {
     type: "qr",
     name: "QR Code Scanner",
     icon: QrCode,
     description: "Dynamic high-density optical QR scanner for mobile digital passes and guest permits.",
-    accentColor: "from-amber-500/20 to-amber-500/5 text-action-warning border-amber-500/30",
+    accentColor: "bg-action-warning/20 text-action-warning border-action-warning/30",
   },
 ];
 export default function SysadminDevicesPage() {
@@ -163,7 +163,7 @@ const api = useApi();
            </div>
          </div>
 
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3.5">
+        <div className="surface-card bg-amber-500/10 p-4 flex items-start gap-3.5">
           <AlertTriangle className="w-5 h-5 text-action-warning shrink-0 mt-0.5" />
           <div>
             <h3 className="text-sm font-semibold text-action-warning">Hardware Readiness Notice</h3>
@@ -190,14 +190,14 @@ const api = useApi();
                 className={cn(
                   "relative transition-all duration-200 border bg-bg-surface hover:border-[var(--primary)]/40",
                   isEnabled
-                    ? "border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.06)]"
+                    ? "shadow-[0_0_20px_rgba(16,185,129,0.06)]"
                     : "border-border"
                 )}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className={cn("p-2.5 rounded-xl border bg-gradient-to-br", config.accentColor)}>
+                      <div className={cn("p-2.5 rounded-card", config.accentColor)}>
                         <Icon className="w-6 h-6" />
                       </div>
                       <div>
@@ -234,10 +234,10 @@ const api = useApi();
                     {config.description}
                   </p>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="surface-card flex items-center justify-between pt-3">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-bg-elevated text-text-secondary border border-border">
-                        <Globe className="w-3 h-3" />
+                      <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-bg-elevated text-text-secondary">
+                        <Globe className="size-3.5" />
                         Scope: {current.scope || "Global"}
                       </span>
                       {current.updated_at && (
@@ -254,7 +254,7 @@ const api = useApi();
                       disabled={isBusy || loading}
                       onClick={() => handleToggle(config)}
                       className={cn(
-                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:cursor-not-allowed disabled:opacity-50",
+                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:cursor-not-allowed disabled:opacity-50",
                         isEnabled ? "bg-action-success" : "bg-bg-elevated border-border"
                       )}
                     >
@@ -262,7 +262,7 @@ const api = useApi();
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                          "pointer-events-none inline-block h-5 w-5 transform rounded-full shadow ring-0 transition duration-200 ease-in-out",
                           isEnabled ? "translate-x-5" : "translate-x-0"
                         )}
                       />
@@ -274,7 +274,7 @@ const api = useApi();
           })}
         </div>
 
-        <div className="p-4 rounded-xl border border-border bg-bg-elevated/50 flex items-center gap-3">
+        <div className="surface-card p-4 bg-bg-elevated/50 flex items-center gap-3">
           <ShieldCheck className="w-5 h-5 text-action-primary shrink-0" />
           <p className="text-xs text-text-muted">
             Device toggle mutations are protected with system administrator zero-trust RBAC and immutable telemetry audit logging.

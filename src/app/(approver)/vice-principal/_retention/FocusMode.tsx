@@ -145,11 +145,11 @@ export function FocusMode({
         className="fixed inset-0 z-50 flex flex-col bg-bg-base"
       >
         {/* Top bar */}
-        <header className="flex shrink-0 items-center justify-between border-b border-border bg-bg-surface px-4 py-3">
+        <header className="surface-card flex shrink-0 items-center justify-between bg-bg-surface px-4 py-3">
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="flex size-11 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
+              className="flex size-4 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
               aria-label="Exit focus mode"
             >
               <X className="size-4" />
@@ -165,14 +165,14 @@ export function FocusMode({
             </div>
           </div>
           <div className="hidden items-center gap-2 text-xs text-text-muted sm:flex">
-            <Keyboard className="size-3" />
-            <kbd className="rounded border border-border px-1.5 py-0.5">Space</kbd>
+            <Keyboard className="size-4" />
+            <kbd className="surface-card px-1.5 py-0.5">Space</kbd>
             approve
-            <kbd className="rounded border border-border px-1.5 py-0.5">X</kbd>
+            <kbd className="surface-card px-1.5 py-0.5">X</kbd>
             reject
-            <kbd className="rounded border border-border px-1.5 py-0.5">E</kbd>
+            <kbd className="surface-card px-1.5 py-0.5">E</kbd>
             escalate
-            <kbd className="rounded border border-border px-1.5 py-0.5">Esc</kbd>
+            <kbd className="surface-card px-1.5 py-0.5">Esc</kbd>
             exit
           </div>
         </header>
@@ -193,7 +193,7 @@ export function FocusMode({
                 <Loader2 className="size-4 animate-spin text-text-muted" />
               </div>
             ) : !current ? (
-              <div className="rounded-2xl border-2 border-action-primary/30 bg-action-primary/5 p-8 text-center">
+              <div className="surface-card bg-action-primary/5 p-8 text-center">
                 <Check className="mx-auto size-4 text-action-primary" />
                 <p className="mt-3 text-lg font-semibold text-text-primary">
                   Queue is clear
@@ -210,7 +210,7 @@ export function FocusMode({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="rounded-2xl border border-border bg-bg-surface p-5 sm:p-6"
+                className="surface-card bg-bg-surface p-5 sm:p-6"
               >
                 <header className="mb-4 flex items-start justify-between">
                   <div>
@@ -239,7 +239,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("APPROVE")}
-                    className="flex min-h11 items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
+                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-primary px-4 py-3 text-sm font-medium text-white transition disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                     Approve
@@ -247,7 +247,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("REJECT")}
-                    className="flex min-h11 items-center justify-center gap-2 rounded-xl border border-action-danger/40 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
+                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-danger/5 px-4 py-3 text-sm font-medium text-action-danger transition disabled:opacity-50"
                   >
                     <X className="size-4" />
                     Reject
@@ -255,7 +255,7 @@ export function FocusMode({
                   <button
                     disabled={busy}
                     onClick={() => decide("ESCALATE")}
-                    className="flex min-h11 items-center justify-center gap-2 rounded-xl border border-border bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
+                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-bg-surface px-4 py-3 text-sm font-medium text-text-primary transition disabled:opacity-50"
                   >
                     <ArrowUpRight className="size-4" />
                     Escalate

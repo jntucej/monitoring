@@ -18,11 +18,11 @@ interface EmployeeStatsProps {
 export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
   if (loading) {
     return (
-      <div className="bg-bg-surface border border-border rounded-xl p-6 animate-pulse space-y-4">
-        <div className="h-6 w-36 bgborder rounded" />
+      <div className="surface-card bg-bg-surface p-6 animate-pulse space-y-4">
+        <div className="h-6 w-6 bgborder rounded" />
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-20 bgborder rounded-lg" />
-          <div className="h-20 bgborder rounded-lg" />
+          <div className="h-6 bgborder rounded-lg" />
+          <div className="h-6 bgborder rounded-lg" />
         </div>
       </div>
     );
@@ -37,10 +37,10 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
     : null;
 
   return (
-    <div className="bg-bg-surface border border-border rounded-xl p-6 space-y-6 shadow-sm">
+    <div className="surface-card bg-bg-surface p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-base text-text-primary flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-action-success" />
+          <ShieldCheck className="w-4 h-4 text-action-success" />
           Attendance & Status
         </h3>
 
@@ -54,13 +54,13 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
               : "bg-amber-500/10 text-action-warning border-amber-500/30"
           }`}
         >
-          <span className={`w-2 h-2 rounded-full ${isOnCampus === null ? "bgtext-muted" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
+          <span className={`w-4 h-4 rounded-full ${isOnCampus === null ? "bgtext-muted" : isOnCampus ? "bg-action-success animate-ping" : "bg-action-warning"}`} />
           {isOnCampus === null ? "UNKNOWN" : isOnCampus ? "ON CAMPUS" : "OFF CAMPUS"}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl bg-bg-base border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-base space-y-1">
           <div className="flex items-center gap-2 text-xs text-text-muted font-medium">
             <Calendar className="w-4 h-4 text-action-success" />
             This Week
@@ -68,7 +68,7 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
           <p className="text-2xl font-bold text-text-primary">{daysPresent !== null ? daysPresent : "—"} <span className="text-xs font-normal text-text-muted">Days</span></p>
         </div>
 
-        <div className="p-4 rounded-xl bg-bg-base border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-base space-y-1">
           <div className="flex items-center gap-2 text-xs text-text-muted font-medium">
             <Clock className="w-4 h-4 text-unit-c" />
             This Month
@@ -77,7 +77,7 @@ export function EmployeeStats({ stats, loading = false }: EmployeeStatsProps) {
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-border pt-4 text-xs text-text-muted">
+      <div className="surface-card space-y-2 pt-4 text-xs text-text-muted">
         <div className="flex items-center justify-between">
           <span>Last Recorded Scan:</span>
           <span className="font-mono text-text-primary font-semibold">{lastScan ? `${lastScan} (${stats?.lastScanType || "—"})` : "No data"}</span>

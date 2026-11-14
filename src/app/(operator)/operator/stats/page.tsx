@@ -89,12 +89,12 @@ function OperatorStatsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
             <span className="truncate">Stats unavailable: {error}</span>
           </span>
-          <button type="button" onClick={() => void refresh()} className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-400/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
+          <button type="button" onClick={() => void refresh()} className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0">
             Retry
           </button>
         </div>
@@ -107,7 +107,7 @@ function OperatorStatsInner() {
           { label: "Entries", value: counts?.entries ?? 0, tone: "text-action-success", icon: ArrowDownLeft },
           { label: "Exits", value: counts?.exits ?? 0, tone: "text-action-danger", icon: ArrowUpRight },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-border bg-bg-elevated p-4 min-w-0">
+          <div key={s.label} className="surface-card bg-bg-elevated p-4 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <s.icon className={`w-4 h-4 ${s.tone} shrink-0`} />
               <p className="text-xs font-bold uppercase tracking-wider text-text-muted">{s.label}</p>
@@ -119,7 +119,7 @@ function OperatorStatsInner() {
 
       {/* IN/OUT split visual */}
       <OperatorWidgetBoundary title="Today&apos;s Split">
-        <div className="rounded-xl border border-border bg-bg-elevated p-4 min-w-0">
+        <div className="surface-card bg-bg-elevated p-4 min-w-0">
           {counts && counts.total > 0 ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-text-muted">
@@ -170,7 +170,7 @@ function OperatorStatsInner() {
                     <p className="text-sm font-semibold text-text-primary truncate">{s.name}</p>
                     <p className="text-xs text-text-muted font-mono">{s.roll}</p>
                   </div>
-                  <span className="rounded-full bg-action-primary/10 text-action-primary text-xs font-bold px-2.5 py-1 shrink-0">
+                  <span className="surface-card bg-action-primary/10 text-action-primary text-xs font-bold px-2.5 py-1 shrink-0">
                     {s.count}x
                   </span>
                 </li>

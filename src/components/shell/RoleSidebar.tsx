@@ -74,7 +74,7 @@ export function RoleSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="shrink-0 border-b border-border px-4 py-3">
+      <header className="surface-card shrink-0 px-4 py-3">
         <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           {manifest.brand.short}
         </p>
@@ -110,13 +110,13 @@ export function RoleSidebar({
         )}
       </nav>
 
-      <footer className="shrink-0 border-t border-border p-2 space-y-1">
+      <footer className="surface-card shrink-0 p-2 space-y-1">
         {Footer && <Footer />}
         {manifest.hasProfile !== false && (
           <Link
             href={`${manifest.rootHref}/profile`}
             onClick={close}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
+            className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
           >
             Account settings
           </Link>

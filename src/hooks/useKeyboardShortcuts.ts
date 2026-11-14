@@ -3,7 +3,7 @@
 /**
  * useKeyboardShortcuts — register global keyboard shortcuts.
  *
- * Issue #395: adds `holdMs` option for destructive actions that require the
+ * Issue issue-395: adds `holdMs` option for destructive actions that require the
  * user to hold a key for a fixed duration before triggering, preventing
  * accidental single-keypress deletions.
  */

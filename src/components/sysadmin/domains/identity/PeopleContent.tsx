@@ -111,7 +111,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
   if (error && !data) {
     return (
       <WidgetBoundary>
-        <div className="rounded-md border border-action-danger bg-action-danger/10 p-4 text-sm text-action-danger">
+        <div className="surface-card bg-action-danger/10 p-4 text-sm text-action-danger">
           Failed to load people: {error}
         </div>
       </WidgetBoundary>
@@ -158,7 +158,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
         </div>
 
         {/* Facet FilterBar */}
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-bg-base p-4">
+        <div className="surface-card flex flex-col gap-3 bg-bg-base p-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
             <span>Filters</span>
             {(roleFilter.length > 0 || stateFilter.length > 0) && (
@@ -180,7 +180,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
 
         {/* Signature visual: cohort retention HeatMatrix */}
         {hasCohort && cohortGrid ? (
-          <div className="rounded-xl border border-border bg-bg-base p-4">
+          <div className="surface-card bg-bg-base p-4">
             <h2 className="mb-3 text-sm font-semibold text-text-primary">
               Cohort retention — admission year × semester
             </h2>
@@ -227,7 +227,7 @@ export function PeopleContent({ data, loading, error, onRowClick }: Props) {
                     <td className="px-3 py-2 font-medium text-text-primary">{r.name}</td>
                     <td className="px-3 py-2 text-text-secondary">{r.email}</td>
                     <td className="px-3 py-2">
-                      <span className="rounded-full border border-border px-2 py-0.5 text-xs">
+                      <span className="surface-card px-2 py-0.5 text-xs">
                         {r.role}
                       </span>
                     </td>
@@ -271,7 +271,7 @@ function Kpi({
           ? "var(--action-danger)"
           : "var(--action-primary)";
   return (
-    <div className="flex items-center justify-between rounded-xl border border-border bg-bg-base p-4">
+    <div className="surface-card flex items-center justify-between bg-bg-base p-4">
       <div>
         <div className="text-xs uppercase tracking-wide text-text-muted">{label}</div>
         <div className="mt-1 text-2xl font-bold text-text-primary">{value}</div>
@@ -292,7 +292,7 @@ function StatusPill({ status }: { status: string }) {
   const c = map[status] ?? "var(--text-muted)";
   return (
     <span
-      className="rounded-full px-2 py-0.5 text-xs font-medium"
+      className="surface-card px-2 py-0.5 text-xs font-medium"
       style={{ color: c, backgroundColor: `color-mix(in srgb, ${c} 12%, transparent)` }}
     >
       {status}

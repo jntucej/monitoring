@@ -168,7 +168,7 @@ export default function OperatorActionsPage() {
 
       {health && (
         <div
-          className="mb-3 rounded-lg border p-3 text-xs"
+          className="surface-card mb-3 p-3 text-xs"
           style={{ borderColor: "var(--border)", background: "var(--bg-surface)" }}
         >
           <div className="mb-1 font-semibold text-sm">Live Health</div>
@@ -195,7 +195,7 @@ export default function OperatorActionsPage() {
           {forecasts.slice(0, 5).map((f) => (
             <div
               key={f.id}
-              className="rounded-md border p-2 text-xs"
+              className="surface-card p-2 text-xs"
               style={{ borderColor: "var(--action-accent)" }}
             >
               <span className="font-medium">{f.signal}</span>{" "}
@@ -208,7 +208,7 @@ export default function OperatorActionsPage() {
       )}
 
       {controls.length > 0 && (
-        <div className="mb-4 rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+        <div className="surface-card mb-4 p-3" style={{ borderColor: "var(--border)" }}>
           <div className="mb-2 text-sm font-semibold">Automation Kill Switches</div>
           <div className="flex flex-col gap-2">
             {controls.map((c) => (
@@ -221,10 +221,10 @@ export default function OperatorActionsPage() {
                   type="button"
                   disabled={toggling === c.name}
                   onClick={() => toggleControl(c.name, !c.enabled, c.enabled ? "Re-enabled via dashboard" : "Disabled via dashboard")}
-                  className="rounded px-2 py-1 text-xs font-medium"
+                  className="surface-card px-2 py-1 text-xs font-medium"
                   style={{
                     background: c.enabled ? "var(--action-danger)" : "var(--action-success, var(--action-success))",
-                    color: "#fff",
+                    color: "var(--color-surface)",
                     opacity: toggling === c.name ? 0.5 : 1,
                   }}
                 >
@@ -253,10 +253,10 @@ export default function OperatorActionsPage() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className="rounded px-3 py-1 text-sm"
+            className="surface-card px-3 py-1 text-sm"
             style={{
               background: filter === f ? "var(--action-accent)" : "transparent",
-              color: filter === f ? "#fff" : "var(--text-secondary)",
+              color: filter === f ? "var(--color-surface)" : "var(--text-secondary)",
               border: "1px solid var(--border)",
             }}
           >
@@ -268,11 +268,11 @@ export default function OperatorActionsPage() {
       {loading && rows.length === 0 ? (
         <Skeleton className="h-48 w-full" />
       ) : error && rows.length === 0 ? (
-        <div className="rounded-md border p-4 text-sm" style={{ borderColor: "var(--action-danger)", color: "var(--action-danger)" }}>
+        <div className="surface-card p-4 text-sm" style={{ borderColor: "var(--action-danger)", color: "var(--action-danger)" }}>
           Failed to load actions: {String(error)}
         </div>
       ) : actions.length === 0 ? (
-        <div className="rounded-md border p-6 text-center text-sm text-text-secondary">
+        <div className="surface-card p-6 text-center text-sm text-text-secondary">
           No {filter === "all" ? "" : filter + " "}operator actions.
         </div>
       ) : (
@@ -282,7 +282,7 @@ export default function OperatorActionsPage() {
             return (
               <div
                 key={a.id}
-                className="rounded-lg border p-4"
+                className="surface-card p-4"
                 style={{
                   borderColor:
                     a.risk === "high" ? "var(--action-danger)" : "var(--border)",
@@ -296,11 +296,11 @@ export default function OperatorActionsPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className="rounded px-2 py-0.5 text-xs font-semibold uppercase"
+                        className="surface-card px-2 py-0.5 text-xs font-semibold uppercase"
                         style={{
                           background:
                             a.risk === "high" ? "var(--action-danger)" : "var(--action-accent)",
-                          color: "#fff",
+                          color: "var(--color-surface)",
                         }}
                       >
                         {a.risk === "high" ? "HIGH RISK" : "LOW RISK"}
@@ -316,7 +316,7 @@ export default function OperatorActionsPage() {
                       const ev = a.evidence as Record<string, unknown> | null | undefined;
                       return ev && Object.keys(ev).length > 0 ? (
                         <pre
-                          className="mt-2 overflow-x-auto rounded p-2 text-xs"
+                          className="surface-card mt-2 overflow-x-auto p-2 text-xs"
                           style={{ background: "var(--bg-surface)" }}
                         >
                           {JSON.stringify(ev, null, 2)}
@@ -330,23 +330,23 @@ export default function OperatorActionsPage() {
                         value={note[a.id] ?? ""}
                         onChange={(e) => setNote((n) => ({ ...n, [a.id]: e.target.value }))}
                         placeholder="decision note (optional)"
-                        className="w-48 rounded border px-2 py-1 text-xs"
+                        className="surface-card w-48 px-2 py-1 text-xs"
                         style={{ borderColor: "var(--border)" }}
                       />
                       <div className="flex gap-2">
                         <button
                           disabled={busy[a.id]}
                           onClick={() => decide(a.id, "approve")}
-                          className="rounded px-3 py-1 text-xs font-medium"
-                          style={{ background: "var(--action-accent)", color: "#fff", opacity: busy[a.id] ? 0.5 : 1 }}
+                          className="surface-card px-3 py-1 text-xs font-medium"
+                          style={{ background: "var(--action-accent)", color: "var(--color-surface)", opacity: busy[a.id] ? 0.5 : 1 }}
                         >
                           Approve
                         </button>
                         <button
                           disabled={busy[a.id]}
                           onClick={() => decide(a.id, "reject")}
-                          className="rounded px-3 py-1 text-xs font-medium"
-                          style={{ background: "var(--action-danger)", color: "#fff", opacity: busy[a.id] ? 0.5 : 1 }}
+                          className="surface-card px-3 py-1 text-xs font-medium"
+                          style={{ background: "var(--action-danger)", color: "var(--color-surface)", opacity: busy[a.id] ? 0.5 : 1 }}
                         >
                           Reject
                         </button>

@@ -146,7 +146,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
       className="hidden md:flex flex-col w85 lg:w95 shrink-0 bg-bg-surface border-l border-border overflow-y-auto custom-scrollbar"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border sticky top-0 bg-bg-surface/95 backdrop-blur-md">
+      <div className="surface-card flex items-start justify-between gap-3 px-4 py-3 sticky top-0 bg-bg-surface/95 backdrop-blur-md">
         <div className="min-w-0">
           <h3 className="text-sm font-bold text-text-primary truncate">
             {person?.fullName || fallbackScan.name}
@@ -163,7 +163,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors shrink-0"
+          className="surface-card p-1.5 hover:bg-bg-elevated text-text-muted transition-colors shrink-0"
           aria-label="Close context panel"
         >
           <X className="w-4 h-4" />
@@ -177,7 +177,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
           </div>
         ) : null}
         {error ? (
-          <div className="text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">{error}</div>
+          <div className="surface-card text-xs text-action-warning bg-amber-400/10 p-3">{error}</div>
         ) : null}
 
         {/* This scan */}
@@ -191,7 +191,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
                 {fallbackScan.reason ? <span className="ml-2 text-xs font-semibold text-text-secondary">({fallbackScan.reason})</span> : null}
               </p>
               <p className="text-xs text-text-muted inline-flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> {fallbackScan.gateName || "Gate"} · {fmtTime(fallbackScan.timestamp)}
+                <MapPin className="size-3.5" /> {fallbackScan.gateName || "Gate"} · {fmtTime(fallbackScan.timestamp)}
               </p>
             </div>
           </div>
@@ -217,7 +217,7 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
               ]
                 .filter((pair) => !!pair[1])
                 .map(([k, v]) => (
-                  <div key={k} className="bg-bg-base rounded-lg px-3 py-2">
+                  <div key={k} className="surface-card bg-bg-base px-3 py-2">
                     <p className="text-xs uppercase font-bold text-text-muted">{k}</p>
                     <p className="font-semibold truncate">{v}</p>
                   </div>
@@ -234,13 +234,13 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
             </p>
             <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
               {payload.history.slice(0, 12).map((h) => (
-                <div key={h.id} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg bg-bg-base">
+                <div key={h.id} className="surface-card flex items-center justify-between text-xs px-2 py-1.5 bg-bg-base">
                   <span className={`inline-flex items-center gap-1 font-bold ${h.direction === "IN" ? "text-action-success" : "text-action-danger"}`}>
-                    {h.direction === "IN" ? <ArrowDownLeft className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                    {h.direction === "IN" ? <ArrowDownLeft className="size-3.5" /> : <ArrowUpRight className="size-3.5" />}
                     {h.direction === "IN" ? "Entry" : "Exit"}
                   </span>
                   <span className="inline-flex items-center gap-1 text-text-muted">
-                    <Clock className="w-3 h-3" /> {fmtTime(h.timestamp)}
+                    <Clock className="size-3.5" /> {fmtTime(h.timestamp)}
                   </span>
                 </div>
               ))}
@@ -252,13 +252,13 @@ export function ContextPanel({ row, onClose, historyHref = "/operator/transactio
         <div className="space-y-1.5 pt-1">
           <button
             onClick={handleCorrect}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-primary bg-bg-elevated hover:bg-bg-base border border-border transition-colors"
+            className="surface-card w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-text-primary bg-bg-elevated hover:bg-bg-base transition-colors"
           >
             <Pencil className="w-3.5 h-3.5" /> Correct this scan
           </button>
           <a
             href={historyHref}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text-secondary bg-bg-elevated hover:bg-bg-base border border-border transition-colors"
+            className="surface-card w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-text-secondary bg-bg-elevated hover:bg-bg-base transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" /> Open full history
           </a>

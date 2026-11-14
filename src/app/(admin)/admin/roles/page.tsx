@@ -91,7 +91,7 @@ function Node({
     <div>
       <button
         onClick={() => hasChildren && onToggle(node.code)}
-        className="flex items-center gap-2 w-full min-h11 text-left rounded-lg px-2 py-1.5 hover:bg-bg-surface/60 group"
+        className="surface-card flex items-center gap-2 w-full min-h11 text-left px-2 py-1.5 hover:bg-bg-surface/60 group"
       >
         {hasChildren ? (
           isOpen ? (
@@ -106,7 +106,7 @@ function Node({
         <span className="text-sm font-medium text-text-primary">
           {node.display_name}
         </span>
-        <span className="text-xs uppercase tracking-wide px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
+        <span className="surface-card text-xs uppercase tracking-wide px-1.5 py-0.5 bg-bg-surface/80 text-text-muted">
           {node.code}
         </span>
         <span className="ml-auto flex items-center gap-2 text-xs">
@@ -114,7 +114,7 @@ function Node({
             {node.user_count} users
           </span>
           <span className="flex items-center gap-1 tabular-nums text-action-primary">
-            <Users className="w-3 h-3" /> {node.on_campus}
+            <Users className="size-3.5" /> {node.on_campus}
           </span>
           <span
             className="w-12 h-1.5 rounded-full bg-bg-surface/60 overflow-hidden hidden sm:block"
@@ -129,7 +129,7 @@ function Node({
       </button>
 
       {hasChildren && isOpen && (
-        <div className="ml-4 border-l border-border pl-2">
+        <div className="surface-card ml-4 pl-2">
           {node.children.map((c) => (
             <Node key={c.code} node={c} expanded={expanded} onToggle={onToggle} />
           ))}
@@ -213,14 +213,14 @@ function AdminRolesInner() {
       />
 
       {error && (
-        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
+        <div className="surface-card p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Roles defined
           </div>
@@ -228,7 +228,7 @@ function AdminRolesInner() {
             {data?.totals.roles ?? 0}
           </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <Users className="w-3.5 h-3.5" /> Total users
           </div>
@@ -236,7 +236,7 @@ function AdminRolesInner() {
             {data?.totals.users ?? 0}
           </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
             <Network className="w-3.5 h-3.5" /> On campus
           </div>
@@ -254,24 +254,24 @@ function AdminRolesInner() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search roles…"
-            className="w-full min-h11 pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+            className="surface-card w-full min-h11 pl-9 pr-3 py-2 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
           />
         </div>
         <button
           onClick={expandAll}
-          className="text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
+          className="surface-card text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Expand all
         </button>
         <button
           onClick={collapseAll}
-          className="text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 flex items-center justify-center"
+          className="surface-card text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 flex items-center justify-center"
         >
           Collapse all
         </button>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60 justify-center"
+          className="surface-card flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60 justify-center"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -281,7 +281,7 @@ function AdminRolesInner() {
         {/* Hierarchy */}
         <div className="lg:col-span-2">
           <WidgetBoundary title="Hierarchy">
-            <div className="glass-card p-4">
+            <div className="surface-card p-4">
               <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
                 Role hierarchy
               </h2>
@@ -291,14 +291,14 @@ function AdminRolesInner() {
                   {filteredNodes.map((n) => (
                     <li
                       key={n.code}
-                      className="flex items-center justify-between rounded-lg px-2 py-1.5 bg-bg-surface/40 min-h11"
+                      className="surface-card flex items-center justify-between px-2 py-1.5 bg-bg-surface/40 min-h11"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <ShieldCheck className="w-4 h-4 text-action-primary shrink-0" />
                         <span className="text-sm text-text-primary truncate">
                           {n.display_name}
                         </span>
-                        <span className="text-xs uppercase px-1.5 py-0.5 rounded bg-bg-surface/80 text-text-muted">
+                        <span className="surface-card text-xs uppercase px-1.5 py-0.5 bg-bg-surface/80 text-text-muted">
                           {n.code}
                         </span>
                       </div>
@@ -328,7 +328,7 @@ function AdminRolesInner() {
 
         {/* Membership */}
         <WidgetBoundary title="Membership">
-          <div className="glass-card p-4">
+          <div className="surface-card p-4">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
               Membership by role
             </h2>
@@ -364,7 +364,7 @@ function AdminRolesInner() {
               href="/sysadmin/roles"
               className="mt-3 flex items-center justify-center gap-1 text-xs text-action-primary hover:underline min-h11"
             >
-              Full sysadmin role panel <ArrowUpRight className="w-3 h-3" />
+              Full sysadmin role panel <ArrowUpRight className="size-3.5" />
             </Link>
           </div>
         </WidgetBoundary>

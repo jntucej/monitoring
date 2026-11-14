@@ -94,7 +94,7 @@ function AdminGateDeviceConfigurationInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Gate Roster">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <DoorOpen className="w-3.5 h-3.5 text-action-success" /> Gate Roster
             </div>
@@ -106,7 +106,7 @@ function AdminGateDeviceConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Schedules">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Clock className="w-3.5 h-3.5 text-action-primary" /> Schedule Entries
             </div>
@@ -118,7 +118,7 @@ function AdminGateDeviceConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Devices">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Cpu className="w-3.5 h-3.5 text-action-warning" /> Device Modes
             </div>
@@ -137,14 +137,14 @@ function AdminGateDeviceConfigurationInner() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-border bg-bg-elevated p-4 space-y-2 animate-pulse">
+              <div key={i} className="surface-card bg-bg-elevated p-4 space-y-2 animate-pulse">
                 <div className="h-4 w-32 rounded bg-bg-elevated" />
                 <div className="h-3 w-40 rounded bg-bg-elevated" />
                 <div className="h-3 w-24 rounded bg-bg-elevated" />
               </div>
             ))
           ) : gates.length === 0 ? (
-            <div className="col-span-full rounded-xl border border-border bg-bg-elevated p-8 text-center">
+            <div className="surface-card col-span-full bg-bg-elevated p-8 text-center">
               <DoorOpen className="w-6 h-6 text-text-muted mx-auto mb-2" />
               <p className="text-sm text-text-muted">No gates configured yet.</p>
               <Link
@@ -182,7 +182,7 @@ function AdminGateDeviceConfigurationInner() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg bg-bg-surface/60 p-2.5">
+                  <div className="surface-card bg-bg-surface/60 p-2.5">
                     <p className="text-text-muted mb-0.5">Geofence</p>
                     <p className="text-text-secondary tabular-nums">
                       {gate.latitude != null && gate.longitude != null
@@ -190,7 +190,7 @@ function AdminGateDeviceConfigurationInner() {
                         : "Not set"}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-bg-surface/60 p-2.5">
+                  <div className="surface-card bg-bg-surface/60 p-2.5">
                     <p className="text-text-muted mb-0.5">Radius</p>
                     <p className="text-text-secondary tabular-nums">
                       {gate.allowed_radius_meters != null ? `${gate.allowed_radius_meters} m` : "Default"}
@@ -200,7 +200,7 @@ function AdminGateDeviceConfigurationInner() {
 
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1.5 flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Schedules
+                    <Clock className="size-3.5" /> Schedules
                   </p>
                   {gate.schedules.length === 0 ? (
                     <p className="text-xs text-text-muted">No schedule entries</p>
@@ -277,7 +277,7 @@ function AdminGateDeviceConfigurationInner() {
       </WidgetBoundary>
 
       {/* Read-only notice */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+      <div className="surface-card bg-amber-500/[0.06] p-4 flex items-start gap-3">
         <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-action-warning flex items-center gap-1.5">

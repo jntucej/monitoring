@@ -203,7 +203,7 @@ export function SchedulingPanel() {
       />
 
       {suggestions.error ? (
-        <div role="alert" className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
+        <div role="alert" className="surface-card flex items-start gap-2 bg-rose-500/10 p-3 text-sm text-action-danger">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <div>
             <p className="font-medium">Could not load ai smart scheduling assistant</p>
@@ -253,11 +253,11 @@ export function SchedulingPanel() {
         <div className="lg:col-span-2">
           <WidgetBoundary title="items-list">
             <section aria-label="Recommendations" className="rounded-xl border border-border bg-bg-surface">
-              <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+              <header className="surface-card flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-action-primary" aria-hidden />
                   <h2 className="text-sm font-semibold text-text-primary">Recommendations</h2>
-                  <span className="rounded-full bg-bg-elevated px-2 py-0.5 text-xs tabular-nums text-text-muted">
+                  <span className="surface-card bg-bg-elevated px-2 py-0.5 text-xs tabular-nums text-text-muted">
                     {rows.length} of {stats.total}
                   </span>
                 </div>
@@ -298,7 +298,7 @@ export function SchedulingPanel() {
 
         <aside className="space-y-4 lg:col-span-1">
           <WidgetBoundary title="model-info">
-            <section aria-label="Model information" className="rounded-xl border border-border bg-bg-surface p-4">
+            <section aria-label="Model information" className="surface-card bg-bg-surface p-4">
               <header className="mb-3 flex items-center gap-2">
                 <Brain className="h-4 w-4 text-text-muted" aria-hidden />
                 <h2 className="text-sm font-semibold text-text-primary">Model</h2>
@@ -319,15 +319,15 @@ export function SchedulingPanel() {
                   <dd className="text-text-primary">{lastUpdated}</dd>
                 </div>
               </dl>
-              <p className="mt-3 flex items-start gap-1.5 rounded-md border border-border bg-bg-elevated p-2 text-xs text-text-muted">
-                <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-action-success" aria-hidden />
+              <p className="surface-card mt-3 flex items-start gap-1.5 bg-bg-elevated p-2 text-xs text-text-muted">
+                <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-action-success" aria-hidden />
                 Suggestions are advisory. Every applied change is audit-logged with the acting admin and a before/after snapshot.
               </p>
             </section>
           </WidgetBoundary>
 
           <WidgetBoundary title="recent-applications">
-            <section aria-label="Recently applied changes" className="rounded-xl border border-border bg-bg-surface p-4">
+            <section aria-label="Recently applied changes" className="surface-card bg-bg-surface p-4">
               <header className="mb-3 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-text-muted" aria-hidden />
                 <h2 className="text-sm font-semibold text-text-primary">Applied this session</h2>
@@ -339,7 +339,7 @@ export function SchedulingPanel() {
               ) : (
                 <ul className="space-y-2" role="list">
                   {applied.map((a) => (
-                    <li key={`${a.id}-${a.appliedAt}`} className="flex items-start gap-2 rounded-md border border-border bg-bg-elevated p-2">
+                    <li key={`${a.id}-${a.appliedAt}`} className="surface-card flex items-start gap-2 bg-bg-elevated p-2">
                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-action-success" aria-hidden />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium text-text-primary">{a.title}</p>
@@ -388,7 +388,7 @@ function KpiCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
         <Icon className={`h-4 w-4 ${accent}`} aria-hidden />
@@ -428,12 +428,12 @@ function ItemCard({
           onClick={onToggle}
           aria-label={expanded ? "Collapse item" : "Expand item"}
           aria-expanded={expanded}
-          className="mt-0.5 rounded-md p-1 text-text-muted hover:bg-bg-surface hover:text-text-primary"
+          className="surface-card mt-0.5 p-1 text-text-muted hover:bg-bg-surface hover:text-text-primary"
         >
           <Chevron className="h-4 w-4" aria-hidden />
         </button>
 
-        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${meta.surface}`}>
+        <div className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border ${meta.surface}`}>
           <Icon className={`h-4 w-4 ${meta.accent}`} aria-hidden />
         </div>
 
@@ -467,7 +467,7 @@ function ItemCard({
             type="button"
             onClick={onToggle}
             aria-label="Preview reasoning"
-            className="rounded-md p-1.5 text-text-muted hover:bg-bg-surface hover:text-text-primary"
+            className="surface-card p-1.5 text-text-muted hover:bg-bg-surface hover:text-text-primary"
           >
             <Eye className="h-4 w-4" aria-hidden />
           </button>
@@ -476,35 +476,35 @@ function ItemCard({
             onClick={onApply}
             disabled={applying}
             aria-label={`Apply ${item.title}`}
-            className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-action-success hover:bg-emerald-500/20 disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-action-success hover:bg-emerald-500/20 disabled:opacity-50"
           >
-            {applying ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden /> : <Check className="h-3 w-3" aria-hidden />}
+            {applying ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <Check className="size-3.5" aria-hidden />}
             {applying ? "Applying" : "Apply"}
           </button>
         </div>
       </header>
 
       {expanded ? (
-        <div className="border-t border-border p-3 text-xs">
+        <div className="surface-card p-3 text-xs">
           <div className="space-y-3">
             <div>
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">AI reasoning</p>
-              <p className="rounded-md border border-border bg-bg-surface p-2 leading-relaxed text-text-secondary">
+              <p className="surface-card bg-bg-surface p-2 leading-relaxed text-text-secondary">
                 {item.reasoning}
               </p>
             </div>
             <div>
               <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">Suggested change</p>
-              <div className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-bg-surface p-2">
+              <div className="surface-card flex flex-wrap items-center gap-2 bg-bg-surface p-2">
                 <ChangeChip label="Target" value={item.suggested_action?.target ?? "—"} />
                 {item.suggested_action?.before ? <ChangeChip label="Before" value={item.suggested_action.before} /> : null}
-                {item.suggested_action?.before ? <ArrowRight className="h-3 w-3 text-text-muted" aria-hidden /> : null}
+                {item.suggested_action?.before ? <ArrowRight className="size-3.5 text-text-muted" aria-hidden /> : null}
                 {item.suggested_action?.after ? <ChangeChip label="After" value={item.suggested_action.after} /> : null}
               </div>
             </div>
-            <div className="rounded-md border border-border bg-bg-surface p-2 text-text-muted">
+            <div className="surface-card bg-bg-surface p-2 text-text-muted">
               <p className="flex items-start gap-1.5">
-                <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+                <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                 Category: {meta.label} — {meta.description}
               </p>
             </div>
@@ -517,7 +517,7 @@ function ItemCard({
 
 function ChangeChip({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-bg-elevated px-2 py-0.5">
+    <span className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2 py-0.5">
       <span className="text-xs uppercase tracking-wide text-text-muted">{label}</span>
       <span className="text-xs font-medium tabular-nums text-text-primary">{value}</span>
     </span>

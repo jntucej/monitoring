@@ -69,14 +69,14 @@ export function ChildStatus() {
 
   if (error) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-rose-500/30 bg-rose-500/10 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
+      <div className="surface-card bg-bg-surface bg-rose-500/10 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
         <div className="flex items-center gap-2 text-action-danger font-medium">
           <AlertCircle className="w-4 h-4 text-action-danger shrink-0" />
           <span>Could not load child status.</span>
         </div>
         <button
           onClick={load}
-          className="px-3 py-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+          className="surface-card px-3 py-1.5 bg-rose-500/20 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
         >
           Retry
         </button>
@@ -86,7 +86,7 @@ export function ChildStatus() {
 
   if (loading) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-border p-6 flex items-center gap-3 text-text-muted text-sm">
+      <div className="surface-card bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading children…
       </div>
     );
@@ -94,7 +94,7 @@ export function ChildStatus() {
 
   if (children.length === 0) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-border p-6 text-sm text-text-muted">
+      <div className="surface-card bg-bg-surface p-6 text-sm text-text-muted">
         No linked students found.
       </div>
     );
@@ -116,9 +116,9 @@ export function ChildStatus() {
             })}${st.last.reason ? ` • ${st.last.reason.replace(/_/g, " ")}` : ""}`
           : "No recent activity";
         return (
-          <div key={child.id} className="bg-bg-surface rounded-xl border border-border p-6 flex items-center justify-between gap-3 flex-wrap">
+          <div key={child.id} className="surface-card bg-bg-surface p-6 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 rounded-full border-2 border-border overflow-hidden">
+              <div className="relative size-5 rounded-full border-2 border-border overflow-hidden">
                 {child.photoUrl || child.photo ? (
                   <img src={child.photoUrl || child.photo} alt={name} className="rounded-full w-full h-full object-cover" />
                 ) : (

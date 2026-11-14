@@ -126,13 +126,13 @@ function AdminClassesInner() {
       <PageHeader title="Classes" subtitle="Teaching groups by department, year, and section" onRefresh={load} />
 
       <WidgetBoundary title="Create class">
-        <form onSubmit={create} className="glass-card p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+        <form onSubmit={create} className="surface-card p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
           <label className="block sm:col-span-2 md:col-span-1">
             <span className="text-xs font-semibold text-text-secondary block mb-1">Department</span>
             <select
               value={draft.departmentId}
               onChange={(e) => setDraft((d) => ({ ...d, departmentId: e.target.value }))}
-              className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm"
+              className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm"
               required
             >
               <option value="">Select</option>
@@ -142,25 +142,25 @@ function AdminClassesInner() {
           <label>
             <span className="text-xs font-semibold text-text-secondary block mb-1">Year</span>
             <input type="number" min="1" max="10" value={draft.year} onChange={(e) => setDraft((d) => ({ ...d, year: e.target.value }))}
-              placeholder="1" required className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm" />
+              placeholder="1" required className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm" />
           </label>
           <label>
             <span className="text-xs font-semibold text-text-secondary block mb-1">Section</span>
             <input value={draft.section} onChange={(e) => setDraft((d) => ({ ...d, section: e.target.value }))}
-              placeholder="A" required className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm" />
+              placeholder="A" required className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm" />
           </label>
           <label>
             <span className="text-xs font-semibold text-text-secondary block mb-1">Room</span>
             <input value={draft.roomNumber} onChange={(e) => setDraft((d) => ({ ...d, roomNumber: e.target.value }))}
-              placeholder="B101" className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm" />
+              placeholder="B101" className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm" />
           </label>
           <label>
             <span className="text-xs font-semibold text-text-secondary block mb-1">Capacity</span>
             <input type="number" min="0" value={draft.capacity} onChange={(e) => setDraft((d) => ({ ...d, capacity: e.target.value }))}
-              placeholder="60" className="w-full min-h11 px-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm" />
+              placeholder="60" className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm" />
           </label>
           <button type="submit" disabled={saving}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h11 rounded-lg bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
+            className="surface-card inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h11 bg-action-primary text-white text-xs font-semibold disabled:opacity-50">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />} Add
           </button>
         </form>
@@ -168,13 +168,13 @@ function AdminClassesInner() {
 
       <WidgetBoundary title="Class list">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex flex-wrap items-center gap-2">
+          <div className="surface-card p-4 flex flex-wrap items-center gap-2">
             <Layers className="w-4 h-4 text-action-primary" />
             <span className="text-sm font-semibold">{filtered.length} classes</span>
             <div className="ml-auto relative min-w40">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Filter…"
-                className="pl-8 pr-3 py-1.5 min-h11 rounded-lg bg-bg-elevated border border-border text-xs w-full sm:w-40" />
+                className="surface-card pl-8 pr-3 py-1.5 min-h11 bg-bg-elevated text-xs w-full sm:w-40" />
             </div>
           </div>
           <div className="overflow-x-auto">

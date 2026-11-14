@@ -23,9 +23,9 @@ const sizeClasses = {
 };
 
 const dotSizes = {
-  sm: "w-1.5 h-1.5",
+  sm: "size-2",
   md: "w-2 h-2",
-  lg: "w-2.5 h-2.5",
+  lg: "size-2",
 };
 
 export function OperatorStatusBadge({ direction, reason, className, size = "md" }: OperatorStatusBadgeProps) {

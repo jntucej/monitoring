@@ -113,14 +113,14 @@ export function ContributionPortfolio() {
 
   return (
     <WidgetBoundary title="Contribution Portfolio">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Award className="h-4 w-4 text-action-warning" />
             <h3 className="text-sm font-medium text-text-primary">Contribution Portfolio</h3>
             {totalVerified > 0 && (
-              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-action-warning">
+              <span className="surface-card bg-amber-500/20 px-2 py-0.5 text-xs text-action-warning">
                 {totalVerified} verified
               </span>
             )}
@@ -130,7 +130,7 @@ export function ContributionPortfolio() {
               type="button"
               onClick={handleExport}
               disabled={items.length === 0 || exported}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 disabled:opacity-40 transition-colors motion-reduce:transition-none"
+              className="surface-card flex items-center gap-1.5 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 disabled:opacity-40 transition-colors motion-reduce:transition-none"
             >
               {exported ? (
                 <>
@@ -148,7 +148,7 @@ export function ContributionPortfolio() {
         </div>
 
         {/* Disclaimer */}
-        <div className="mb-4 rounded-lg border border-border/40 bg-bg-surface/30 p-2.5">
+        <div className="surface-card mb-4 bg-bg-surface/30 p-2.5">
           <p className="text-xs text-text-muted flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified contributions only. This is a personal record, not an
@@ -161,7 +161,7 @@ export function ContributionPortfolio() {
           <div className="h-32 animate-pulse rounded bg-bg-elevated/20" />
         ) : items.length === 0 ? (
           <div className="py-8 text-center">
-            <FileText className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <FileText className="size-6 text-text-muted mx-auto mb-2" />
             <p className="text-xs text-text-muted">
               No contributions yet. Participate in campus events, complete goals,
               and earn achievements to build your portfolio.
@@ -186,7 +186,7 @@ export function ContributionPortfolio() {
                         {TYPE_LABELS[item.type] ?? item.type}
                       </span>
                       <span className="text-xs opacity-60 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="size-3.5" />
                         {new Date(item.date).toLocaleDateString()}
                       </span>
                     </div>

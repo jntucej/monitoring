@@ -92,7 +92,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="border-b pb-4">
+      <div className="surface-card pb-4">
         <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
         <h1 className="text-2xl font-semibold text-text-primary mt-1">{c.title}</h1>
         <p className="text-sm text-text-muted mt-1">
@@ -101,47 +101,47 @@ export function ComplaintDetail({ role }: { role: string }) {
         </p>
       </div>
 
-      <div className="bg-bg-elevated border rounded p-4 space-y-2">
+      <div className="surface-card bg-bg-elevated p-4 space-y-2">
         <h2 className="font-medium text-text-primary">Description</h2>
         <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
         {c.resolutionSummary && (
-          <div className="mt-3 pt-3 border-t">
-            <h3 className="font-medium text-emerald-800">Resolution Summary</h3>
-            <p className="text-sm text-emerald-700">{c.resolutionSummary}</p>
+          <div className="surface-card mt-3 pt-3">
+            <h3 className="font-medium text-action-success">Resolution Summary</h3>
+            <p className="text-sm text-action-success">{c.resolutionSummary}</p>
           </div>
         )}
       </div>
 
       {/* Authority Action Buttons */}
       {isAuthority && (
-        <div className="flex gap-2 flex-wrap border p-4 rounded bg-white">
+        <div className="surface-card flex gap-2 flex-wrap p-4 bg-white">
           {c.status === "submitted" && (
-            <button onClick={() => patchAction("acknowledge")} className="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">
+            <button onClick={() => patchAction("acknowledge")} className="surface-card px-3 py-1.5 bg-action-info text-white text-sm">
               Acknowledge
             </button>
           )}
           {["submitted", "acknowledged"].includes(c.status) && (
-            <button onClick={() => patchAction("start")} className="px-3 py-1.5 rounded bg-amber-600 text-white text-sm">
+            <button onClick={() => patchAction("start")} className="surface-card px-3 py-1.5 bg-action-warning text-white text-sm">
               Start work
             </button>
           )}
           {["submitted", "acknowledged", "in_progress"].includes(c.status) && (
-            <div className="w-full mt-2 pt-2 border-t flex gap-2 items-center">
+            <div className="surface-card w-full mt-2 pt-2 flex gap-2 items-center">
               <input
                 placeholder="Resolution summary…"
                 value={resolutionSummary}
                 onChange={(e) => setResolutionSummary(e.target.value)}
-                className="border rounded p-1.5 text-sm flex-1"
+                className="surface-card p-1.5 text-sm flex-1"
               />
-              <button onClick={resolveComplaint} className="px-3 py-1.5 rounded bg-action-success text-white text-sm">
+              <button onClick={resolveComplaint} className="surface-card px-3 py-1.5 bg-action-success text-white text-sm">
                 Resolve
               </button>
             </div>
           )}
-          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 rounded bg-bg-elevated text-white text-sm">
+          <button onClick={() => patchAction("escalate")} className="surface-card px-3 py-1.5 bg-bg-elevated text-white text-sm">
             Forward / Escalate
           </button>
-          <button onClick={() => patchAction("reject")} className="px-3 py-1.5 rounded bg-action-danger text-white text-sm">
+          <button onClick={() => patchAction("reject")} className="surface-card px-3 py-1.5 bg-action-danger text-white text-sm">
             Reject
           </button>
         </div>
@@ -149,11 +149,11 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Feedback section for student when resolved */}
       {role === "student" && ["resolved", "awaiting_verification"].includes(c.status) && !data.feedback && (
-        <form onSubmit={submitFeedback} className="border p-4 rounded bg-action-success/10 space-y-3">
-          <h2 className="font-medium text-emerald-950">Leave resolution feedback</h2>
+        <form onSubmit={submitFeedback} className="surface-card p-4 bg-action-success/10 space-y-3">
+          <h2 className="font-medium text-text-primary">Leave resolution feedback</h2>
           <div className="flex gap-2 items-center">
             <label className="text-sm">Rating (1-5):</label>
-            <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="border rounded p-1 text-sm">
+            <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="surface-card p-1 text-sm">
               <option value="5">5 - Excellent</option>
               <option value="4">4 - Good</option>
               <option value="3">3 - Average</option>
@@ -165,9 +165,9 @@ export function ComplaintDetail({ role }: { role: string }) {
             placeholder="Comments (optional)"
             value={feedbackComment}
             onChange={(e) => setFeedbackComment(e.target.value)}
-            className="w-full border rounded p-2 text-sm bg-white"
+            className="surface-card w-full p-2 text-sm bg-white"
           />
-          <button type="submit" className="px-3 py-1.5 rounded bg-emerald-700 text-white text-sm">
+          <button type="submit" className="surface-card px-3 py-1.5 bg-action-success text-white text-sm">
             Submit & Close
           </button>
         </form>
@@ -184,7 +184,7 @@ export function ComplaintDetail({ role }: { role: string }) {
                 <span className="uppercase text-xs text-text-muted font-mono">{t.status}</span>
               </div>
               <p className="text-xs text-text-muted">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
-              {t.notes && <p className="text-text-muted mt-1 bg-bg-elevated p-2 rounded">{t.notes}</p>}
+              {t.notes && <p className="surface-card text-text-muted mt-1 bg-bg-elevated p-2">{t.notes}</p>}
             </div>
           ))}
         </div>
@@ -195,16 +195,16 @@ export function ComplaintDetail({ role }: { role: string }) {
             placeholder="Add internal note / comment…"
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
-            className="border rounded p-2 text-sm flex-1"
+            className="surface-card p-2 text-sm flex-1"
           />
-          <button type="submit" className="px-3 py-2 rounded bg-bg-elevated text-white text-sm">
+          <button type="submit" className="surface-card px-3 py-2 bg-bg-elevated text-white text-sm">
             Post note
           </button>
         </form>
       </div>
 
       {/* Attachments */}
-      <div className="space-y-3 pt-4 border-t">
+      <div className="surface-card space-y-3 pt-4">
         <h2 className="font-medium text-text-primary">Attachments</h2>
         <div className="flex flex-wrap gap-2">
           {data.attachments.map((a: any) => (
@@ -213,16 +213,16 @@ export function ComplaintDetail({ role }: { role: string }) {
               href={`/api/complaints/${id}/attachments/${a.id}`}
               target="_blank"
               rel="noreferrer"
-              className="px-3 py-1.5 border rounded bg-white text-xs hover:bg-bg-elevated flex items-center gap-1.5"
+              className="surface-card px-3 py-1.5 bg-white text-xs hover:bg-bg-elevated flex items-center gap-1.5"
             >
               <span>{a.name}</span>
-              {a.internal && <span className="text-xs bg-action-warning/20 text-amber-800 px-1 rounded">Internal</span>}
+              {a.internal && <span className="surface-card text-xs bg-action-warning/20 text-action-warning px-1">Internal</span>}
             </a>
           ))}
         </div>
         <form onSubmit={uploadAttachment} className="flex gap-2 items-center pt-2">
           <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-          <button type="submit" disabled={!file} className="px-3 py-1.5 rounded bg-bg-elevated text-white text-sm">
+          <button type="submit" disabled={!file} className="surface-card px-3 py-1.5 bg-bg-elevated text-white text-sm">
             Upload file
           </button>
         </form>

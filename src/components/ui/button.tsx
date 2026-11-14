@@ -15,7 +15,7 @@ const buttonVariants = cva(
         secondary: "bg-bg-surface text-text-primary border border-border hover:bg-bg-elevated",
         danger: "bg-action-danger text-white shadow-sm hover:brightness-110",
         ghost: "hover:bg-bg-surface text-text-secondary",
-        icon: "h-10 w-10 p-0 text-text-secondary hover:bg-bg-surface",
+        icon: "size-6 p-0 text-text-secondary hover:bg-bg-surface",
       },
       size: {
         sm: "h-8 px-3 text-xs",

@@ -69,7 +69,7 @@ export default function AdminUsersPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab(activeTab === "heatmap" ? "roles" : "heatmap")}
-            className="px-3.5 py-1.5 rounded-lg bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition flex items-center gap-1.5"
+            className="surface-card px-3.5 py-1.5 bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition flex items-center gap-1.5"
           >
             <Grid className="w-3.5 h-3.5" />
             {activeTab === "heatmap" ? "View Role Directory" : "View Branch Heatmaps"}
@@ -80,7 +80,7 @@ export default function AdminUsersPage() {
       {activeTab === "heatmap" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-bg-surface p-4 rounded-xl border border-border">
+            <div className="surface-card bg-bg-surface p-4">
               <div className="text-xs text-text-muted font-semibold uppercase mb-1 flex items-center gap-1.5">
                 <GraduationCap className="w-3.5 h-3.5 text-action-primary" /> Students Enrolled
               </div>
@@ -88,7 +88,7 @@ export default function AdminUsersPage() {
                 {loadingDepts ? "..." : totalStudentCount}
               </div>
             </div>
-            <div className="bg-bg-surface p-4 rounded-xl border border-border">
+            <div className="surface-card bg-bg-surface p-4">
               <div className="text-xs text-text-muted font-semibold uppercase mb-1 flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-action-warning" /> Total Faculty
               </div>
@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
                 {loadingDepts ? "..." : departments.reduce((acc, curr) => acc + (curr.facultyCount || 0), 0)}
               </div>
             </div>
-            <div className="bg-bg-surface p-4 rounded-xl border border-border">
+            <div className="surface-card bg-bg-surface p-4">
               <div className="text-xs text-text-muted font-semibold uppercase mb-1 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5 text-action-success" /> Active Branches
               </div>
@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
             </div>
           </div>
 
-          <div className="bg-bg-surface rounded-xl border border-border p-4">
+          <div className="surface-card bg-bg-surface p-4">
             <h3 className="font-semibold text-sm mb-4 text-text-primary">Year-wise Branch Density (Headcount Matrix)</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-center border-collapse min-w-[650px]">
@@ -136,27 +136,27 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="p-2 text-text-secondary font-sans">{dept.hod}</td>
                         <td className="p-2">
-                          <div className={`py-2 px-3 rounded-lg ${getHeatmapColor(dept.heatmap!.y1)}`}>
+                          <div className={`py-2 px-3`}>
                             {dept.heatmap!.y1}
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className={`py-2 px-3 rounded-lg ${getHeatmapColor(dept.heatmap!.y2)}`}>
+                          <div className={`py-2 px-3`}>
                             {dept.heatmap!.y2}
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className={`py-2 px-3 rounded-lg ${getHeatmapColor(dept.heatmap!.y3)}`}>
+                          <div className={`py-2 px-3`}>
                             {dept.heatmap!.y3}
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className={`py-2 px-3 rounded-lg ${getHeatmapColor(dept.heatmap!.y4)}`}>
+                          <div className={`py-2 px-3`}>
                             {dept.heatmap!.y4}
                           </div>
                         </td>
                         <td className="p-2">
-                          <div className={`py-2 px-3 rounded-lg ${getHeatmapColor(dept.heatmap!.le * 10)}`}>
+                          <div className={`py-2 px-3`}>
                             {dept.heatmap!.le}
                           </div>
                         </td>
@@ -172,18 +172,18 @@ export default function AdminUsersPage() {
 
             <div className="flex items-center justify-end gap-3 text-xs text-text-muted pt-2">
               <span>Density Legend:</span>
-              <span className="px-2 py-0.5 rounded bg-blue-500/10 text-action-primary">Low (&lt;30)</span>
-              <span className="px-2 py-0.5 rounded bg-blue-500/40 text-blue-200">Medium (30-70)</span>
-              <span className="px-2 py-0.5 rounded bg-blue-600 text-white font-bold">High (&gt;100)</span>
+              <span className="surface-card px-2 py-0.5 bg-blue-500/10 text-action-primary">Low (&lt;30)</span>
+              <span className="surface-card px-2 py-0.5 bg-blue-500/40 text-blue-200">Medium (30-70)</span>
+              <span className="surface-card px-2 py-0.5 bg-blue-600 text-white font-bold">High (&gt;100)</span>
             </div>
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="bg-bg-surface p-4 rounded-xl border border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="surface-card bg-bg-surface p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-action-primary flex items-center justify-center">
-                <GraduationCap className="w-4.5 h-4.5" />
+              <div className="size-6 bg-blue-500/15 text-action-primary flex items-center justify-center">
+                <GraduationCap className="size-4" />
               </div>
               <div>
                 <div className="text-sm font-semibold text-text-primary">
@@ -196,7 +196,7 @@ export default function AdminUsersPage() {
             </div>
             <Link
               href="/admin/students"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-xs font-semibold text-text-primary hover:bg-white/5 transition"
+              className="surface-card inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-text-primary hover:bg-white/5 transition"
             >
               Open student roster
               <ArrowRight className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ export default function AdminUsersPage() {
           {/* Role-change guidance — grant/revoke lives on the sysadmin
               console (/api/admin/users/[id]/roles). Admins can view
               assignments but privilege changes are sysadmin-gated. */}
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+          <div className="surface-card bg-amber-500/[0.06] p-4 flex items-start gap-3">
             <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-action-warning">Role changes require sysadmin</p>

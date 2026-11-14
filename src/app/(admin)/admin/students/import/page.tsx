@@ -110,7 +110,7 @@ export default function AdminStudentsImportPage() {
         />
         <WidgetBoundary title="Student Bulk Import">
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4">
+            <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4">
               <div>
                 <h3 className="text-base font-semibold">CSV Student Provisioning</h3>
                 <p className="text-xs text-text-muted mt-0.5">
@@ -120,7 +120,7 @@ export default function AdminStudentsImportPage() {
               </div>
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg glass-card hover:bg-bg-elevated"
+                className="surface-card flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium hover:bg-bg-elevated"
               >
                 <Download className="w-3.5 h-3.5 text-text-muted" />
                 Student template
@@ -128,18 +128,18 @@ export default function AdminStudentsImportPage() {
             </div>
 
             {errorMsg && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-action-danger/20 text-xs text-action-danger">
+              <div className="surface-card flex items-start gap-2.5 p-3 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-xs text-action-danger">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            <div className="glass-card p-4 sm:p-5 space-y-4">
+            <div className="surface-card p-4 sm:p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                   CSV input
                 </label>
-                <label className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[color-mix(in_srgb,var(--action-primary)_12%,transparent)] text-action-primary font-medium cursor-pointer">
+                <label className="surface-card flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[color-mix(in_srgb,var(--action-primary)_12%,transparent)] text-action-primary font-medium cursor-pointer">
                   <Upload className="w-3.5 h-3.5" />
                   Upload .csv
                   <input
@@ -160,7 +160,7 @@ export default function AdminStudentsImportPage() {
                   setCommitResult(null);
                 }}
                 placeholder="Paste student CSV, or upload a .csv file"
-                className="w-full font-mono text-xs p-3 rounded-lg border border-border bg-[var(--bg-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
+                className="surface-card w-full font-mono text-xs p-3 bg-[var(--bg-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
               />
 
               <div className="flex items-center justify-between pt-1">
@@ -170,7 +170,7 @@ export default function AdminStudentsImportPage() {
                 <button
                   onClick={handleValidate}
                   disabled={validating || !csvText.trim()}
-                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-action-primary text-white hover:opacity-90 disabled:opacity-50"
+                  className="surface-card flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-action-primary text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {validating ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

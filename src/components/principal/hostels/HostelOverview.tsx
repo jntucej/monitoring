@@ -24,7 +24,7 @@ export interface HostelOverviewData {
 export function HostelBlockCard({ block }: { block: HostelBlock }) {
   const pct = block.total > 0 ? Math.round((block.occupied / block.total) * 100) : 0;
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-3">
+    <div className="surface-card bg-bg-surface p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="font-semibold text-sm">{block.block}</span>
         <span className="text-xs text-text-muted">
@@ -122,7 +122,7 @@ export function HostelOverview() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Overview">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <Building2 className="w-4 h-4 text-action-primary" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Occupancy</span>

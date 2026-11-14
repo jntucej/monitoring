@@ -53,13 +53,13 @@ export function OieStatusBar({ counts, lastScan, refreshing = false }: OieStatus
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="OIE exam status bar"
     >
       {/* Left: exam queue · pending · exceptions · exam day */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0" />
+          <span className="size-2 rounded-full bg-action-primary shrink-0" />
           <span className="text-text-muted">Exam queue</span>
         </span>
 
@@ -81,7 +81,7 @@ export function OieStatusBar({ counts, lastScan, refreshing = false }: OieStatus
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold ${examDayTone}`}
         >
-          <CalendarClock className="w-3 h-3" />
+          <CalendarClock className="size-3.5" />
           exam day: {examDay ?? "—"}
         </span>
       </div>

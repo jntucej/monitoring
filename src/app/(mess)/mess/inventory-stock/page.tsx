@@ -38,7 +38,7 @@ interface InventoryResponse {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -46,7 +46,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -101,7 +101,7 @@ function MessInventoryStockInner() {
 
       <WidgetBoundary title="Inventory and Stock">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <Package className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Inventory &amp; Stock</span>
             <span className="ml-auto text-xs text-text-muted shrink-0">{d ? `${d.total} item(s)` : "—"}</span>
@@ -114,15 +114,15 @@ function MessInventoryStockInner() {
           ) : items.length > 0 ? (
             <div className="min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Active Items</p>
                   <p className="mt-1 text-lg font-bold text-action-success">{d?.total}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Primary Items</p>
                   <p className="mt-1 text-lg font-bold text-action-warning">{d?.primaryCount}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Stock Levels</p>
                   <p className="mt-1 text-lg font-bold text-action-info">
                     {items.reduce((sum, i) => sum + i.scheduledDays, 0)}
@@ -148,11 +148,11 @@ function MessInventoryStockInner() {
                         <td className="px-4 py-3 text-text-muted font-mono text-xs whitespace-nowrap">{item.code}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           {item.isPrimary ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-action-warning">
-                              <CheckCircle2 className="w-3 h-3" /> Primary
+                            <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-400/10 text-action-warning">
+                              <CheckCircle2 className="size-3.5" /> Primary
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-border/40 bg-bg-elevated/20 text-text-muted">
+                            <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-bg-elevated/20 text-text-muted">
                               Add-on
                             </span>
                           )}
@@ -170,7 +170,7 @@ function MessInventoryStockInner() {
                 </table>
               </div>
 
-              <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
+              <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
                 Stock state mirrors the active menu-item catalog. Use{" "}
                 <Link href="/mess/operational-requests" className="text-action-success hover:underline">
                   Operational Requests

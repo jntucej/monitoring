@@ -130,9 +130,9 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
           }`}
         >
           {offline ? (
-            <WifiOff className="h-3 w-3" />
+            <WifiOff className="size-3.5" />
           ) : (
-            <Wifi className="h-3 w-3" />
+            <Wifi className="size-3.5" />
           )}
           {offline ? "Offline" : wsReconnecting ? "Reconnecting…" : "Live"}
         </span>
@@ -140,15 +140,15 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
 
       {offline ? (
         /* Static empty list when the socket is disconnected */
-        <div className="rounded-xl border border-dashed border-border bg-bg-elevated p-6 text-center">
-          <DoorOpen className="mx-auto h-8 w-8 text-text-muted" />
+        <div className="surface-card bg-bg-elevated p-6 text-center">
+          <DoorOpen className="mx-auto size-6 text-text-muted" />
           <p className="mt-2 text-xs text-text-muted">
             Live feed disconnected — showing last known events.
           </p>
         </div>
       ) : events.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-bg-elevated p-6 text-center">
-          <Bell className="mx-auto h-8 w-8 text-text-muted" />
+        <div className="surface-card bg-bg-elevated p-6 text-center">
+          <Bell className="mx-auto size-6 text-text-muted" />
           <p className="mt-2 text-xs text-text-muted">
             No live events yet. Gate status changes and alerts will appear here.
           </p>
@@ -165,7 +165,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
               }`}
             >
               <span
-                className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+                className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md ${
                   e.kind === "gate"
                     ? "bg-action-info/10 text-action-info"
                     : e.severity
@@ -205,7 +205,7 @@ export function LiveActivityFeed({ compact = false, limit = MAX_FEED }: LiveActi
 
   return (
     <WidgetBoundary title="Live Activity">
-      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
         {feed}
       </div>
     </WidgetBoundary>

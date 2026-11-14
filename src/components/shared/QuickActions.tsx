@@ -149,9 +149,9 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
             key={a.label}
             type="button"
             onClick={() => navigate(a.href)}
-            className="group flex items-center gap-3 rounded-xl border border-border bg-bg-surface p-3.5 text-left transition-all hover:bordertext-muted hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring active:scale-[0.98]"
+            className="surface-card group flex items-center gap-3 bg-bg-surface p-3.5 text-left transition-all hover: hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring active:scale-[0.98]"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bg-elevated border border-border text-action-primary">
+            <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-bg-elevated border border-border text-action-primary">
               <a.icon className="h-4 w-4" />
             </span>
             <span className="text-sm font-semibold text-text-primary group-hover:text-text-primary">
@@ -166,7 +166,7 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
   if (actions.length === 0) {
     return (
       <WidgetBoundary title="Quick Actions">
-        <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
+        <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
           <p className="text-xs text-text-muted">
             No quick actions available for your role.
           </p>
@@ -176,7 +176,7 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
   }
 
   const card = (
-    <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface/40 p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-4">
         <Inbox className="h-4 w-4 text-action-primary" />
         <h3 className="text-sm font-semibold text-text-primary">Quick Actions</h3>

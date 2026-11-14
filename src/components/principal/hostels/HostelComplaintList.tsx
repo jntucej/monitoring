@@ -46,7 +46,7 @@ export function HostelComplaintList() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Complaints">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <MessageSquare className="w-4 h-4 text-action-warning" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Complaints</span>
@@ -69,7 +69,7 @@ export function HostelComplaintList() {
               <li key={c.id} className="min-w-0">
                 <Link
                   href={`/principal/operations/incidents`}
-                  className="block p-2.5 rounded-lg bg-bg-elevated border border-border hover:bordertext-muted transition-colors"
+                  className="surface-card block p-2.5 bg-bg-elevated hover: transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="font-mono text-xs text-text-muted shrink-0">{c.complaintNumber}</span>

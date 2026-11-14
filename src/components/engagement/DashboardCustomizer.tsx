@@ -84,7 +84,7 @@ export function DashboardCustomizer() {
     <WidgetBoundary title="Dashboard Customizer">
       <section
         aria-label="Dashboard customizer"
-        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
+        className="surface-card bg-bg-surface p-5 min-w-0"
       >
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
@@ -105,10 +105,10 @@ export function DashboardCustomizer() {
             return (
               <li
                 key={id}
-                className="flex items-center gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/30 p-2.5"
+                className="surface-card flex items-center gap-2.5 bg-[var(--bg-raised)]/30 p-2.5"
               >
                 <GripVertical className="h-4 w-4 shrink-0 text-text-muted opacity-50" aria-hidden />
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-300">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-300">
                   <Icon className="h-4 w-4" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -126,7 +126,7 @@ export function DashboardCustomizer() {
                     onClick={() => move(id, -1)}
                     disabled={index === 0}
                     aria-label={`Move ${meta.label} up`}
-                    className="rounded-md border border-border bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
+                    className="surface-card bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
                   >
                     ↑
                   </button>
@@ -135,7 +135,7 @@ export function DashboardCustomizer() {
                     onClick={() => move(id, 1)}
                     disabled={index === order.length - 1}
                     aria-label={`Move ${meta.label} down`}
-                    className="rounded-md border border-border bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
+                    className="surface-card bg-bg-surface px-1.5 py-1 text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-30"
                   >
                     ↓
                   </button>
@@ -168,14 +168,14 @@ export function DashboardCustomizer() {
                   resetLayout();
                   setConfirmReset(false);
                 }}
-                className="inline-flex items-center gap-1 rounded-md border border-rose-500/40 bg-rose-500/15 px-2 py-1 text-xs font-medium text-action-danger"
+                className="surface-card inline-flex items-center gap-1 bg-rose-500/15 px-2 py-1 text-xs font-medium text-action-danger"
               >
-                <Check className="h-3 w-3" aria-hidden /> Yes, reset
+                <Check className="size-3.5" aria-hidden /> Yes, reset
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmReset(false)}
-                className="rounded-md border border-border px-2 py-1 text-xs text-text-muted"
+                className="surface-card px-2 py-1 text-xs text-text-muted"
               >
                 Cancel
               </button>
@@ -184,7 +184,7 @@ export function DashboardCustomizer() {
             <button
               type="button"
               onClick={() => setConfirmReset(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+              className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden />
               Reset layout
@@ -197,7 +197,7 @@ export function DashboardCustomizer() {
 
         {/* Notification preferences (surfacing only; the server still
             enforces all real delivery permissions). */}
-        <div className="mt-5 rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3.5">
+        <div className="surface-card mt-5 bg-[var(--bg-raised)]/20 p-3.5">
           <h3 className="flex items-center gap-2 text-xs font-bold text-text-primary">
             <BellRing className="h-4 w-4 text-action-warning" aria-hidden />
             Notification preferences
@@ -225,7 +225,7 @@ export function DashboardCustomizer() {
                     onChange={(e) =>
                       void togglePref({ quietHoursFrom: e.target.value })
                     }
-                    className="mt-0.5 w-full rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
+                    className="surface-card mt-0.5 w-full bg-bg-surface px-2 py-1 text-xs text-text-primary"
                   />
                 </label>
                 <label className="block text-xs text-text-muted">
@@ -236,7 +236,7 @@ export function DashboardCustomizer() {
                     onChange={(e) =>
                       void togglePref({ quietHoursTo: e.target.value })
                     }
-                    className="mt-0.5 w-full rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
+                    className="surface-card mt-0.5 w-full bg-bg-surface px-2 py-1 text-xs text-text-primary"
                   />
                 </label>
               </div>
@@ -257,7 +257,7 @@ export function DashboardCustomizer() {
                   onChange={(e) =>
                     void togglePref({ dailySummaryTime: e.target.value })
                   }
-                  className="mt-0.5 w-36 rounded-md border border-border bg-bg-surface px-2 py-1 text-xs text-text-primary"
+                  className="surface-card mt-0.5 w-36 bg-bg-surface px-2 py-1 text-xs text-text-primary"
                 />
               </label>
             )}

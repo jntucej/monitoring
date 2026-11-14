@@ -70,7 +70,7 @@ const api = useApi();
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-center gap-2">
+        <div className="surface-card p-4 bg-rose-500/10 text-rose-400 text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -78,7 +78,7 @@ const api = useApi();
 
       {loading && records.length === 0 ? (
         <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="size-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <FacultyTracking

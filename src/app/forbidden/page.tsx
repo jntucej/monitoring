@@ -18,9 +18,9 @@ export default function ForbiddenPage() {
 
   return (
     <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary p-4">
-      <div className="max-w-md w-full text-center space-y-6 bg-bg-surface border border-border p-8 rounded-2xl shadow-xl">
-        <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-action-danger rounded-full flex items-center justify-center mx-auto">
-          <ShieldAlert className="w-8 h-8" />
+      <div className="surface-card max-w-md w-full text-center space-y-6 bg-bg-surface p-8">
+        <div className="size-6 bg-rose-500/10 border border-rose-500/20 text-action-danger rounded-full flex items-center justify-center mx-auto">
+          <ShieldAlert className="size-6" />
         </div>
         <div className="space-y-2">
           <p className="text-sm font-medium text-text-secondary mb-3">403 - Access Forbidden</p>

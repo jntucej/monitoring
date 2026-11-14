@@ -23,7 +23,7 @@ export default function HomeError({
       <div className="flex items-center gap-4">
         <button
           onClick={() => reset()}
-          className="rounded-full border-white/20 bg-white/10 px-5 py-2.5 text-sm transition hover:bg-white/20"
+          className="surface-card bg-white/10 px-5 py-2.5 text-sm transition hover:bg-white/20"
         >
           Try again
         </button>

@@ -10,7 +10,7 @@ export function PrincipalBridge({
   principalPending: number;
 }) {
   return (
-    <section className="rounded-2xl border border-border bg-gradient-to-br from-bg-surface tobg-elevated p-4 sm:p-5">
+    <section className="surface-card bg-surface-muted p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Network className="size-4 text-action-info" />
         <h2 className="text-sm font-semibold text-text-primary">Your chain</h2>

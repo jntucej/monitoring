@@ -91,7 +91,7 @@ function ModuleCard({
     <div className={`rounded-2xl border border-border bg-bg-surface p-5 shadow-lg flex flex-col justify-between transition-all ${borderColor}`}>
       <div>
         <div className="flex items-center gap-3 mb-4">
-          <div className={`w-9 h-9 rounded-xl ${bgColor} ${color} flex items-center justify-center`}>
+          <div className={`size-6 rounded-xl ${bgColor} ${color} flex items-center justify-center`}>
             <Icon className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-bold text-text-primary">{title}</h3>

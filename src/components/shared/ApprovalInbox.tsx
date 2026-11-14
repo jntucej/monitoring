@@ -217,12 +217,12 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
   } else if (error) {
     body = (
       <div className="flex flex-col items-center gap-3 p-6 text-center">
-        <AlertTriangle className="h-8 w-8 text-action-danger" />
+        <AlertTriangle className="size-6 text-action-danger" />
         <p className="text-sm text-text-secondary">{error}</p>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-surface"
+          className="surface-card inline-flex items-center gap-2 bg-bg-elevated px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-surface"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Retry
         </button>
@@ -237,7 +237,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
             ? "You're all caught up — nothing is awaiting your decision."
             : "There are no pending requests visible to you right now."
         }
-        icon={<Inbox className="h-8 w-8" />}
+        icon={<Inbox className="size-6" />}
       />
     );
   } else {
@@ -251,11 +251,11 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
           return (
             <div
               key={row.id || row.ticket_number}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-bg-surface p-4 min-w-0 transition-colors hover:bordertext-muted"
+              className="surface-card flex flex-col gap-3 bg-bg-surface p-4 min-w-0 transition-colors hover:"
             >
               {/* Header: ticket + SLA badge */}
               <div className="flex items-center justify-between gap-2 min-w-0">
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-bg-elevated border border-border text-action-primary truncate">
+                <span className="surface-card font-mono text-xs font-bold px-2 py-0.5 bg-bg-elevated text-action-primary truncate">
                   {row.ticket_number}
                 </span>
                 <span
@@ -265,7 +265,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                       : "bg-action-info/10 text-action-info"
                   }`}
                 >
-                  {overdue ? <AlertTriangle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                  {overdue ? <AlertTriangle className="size-3.5" /> : <Clock className="size-3.5" />}
                   {slaDetail(row, now)}
                 </span>
               </div>
@@ -279,10 +279,10 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                   ) : null}
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-text-secondary">
-                  <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5">
+                  <span className="surface-card bg-bg-elevated px-1.5 py-0.5">
                     {row.workflow_type}
                   </span>
-                  <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5">
+                  <span className="surface-card bg-bg-elevated px-1.5 py-0.5">
                     {STAGE_LABELS[row.current_stage] ?? row.current_stage}
                   </span>
                 </div>
@@ -296,35 +296,35 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "APPROVE")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-action-primary px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 disabled:pointer-events-none"
+                      className="surface-card inline-flex items-center gap-1 bg-action-primary px-2.5 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-40 disabled:pointer-events-none"
                     >
-                      {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                       Approve
                     </button>
                     <button
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "REJECT")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-action-danger hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
+                      className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-action-danger hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
                     >
-                      <X className="h-3 w-3" /> Reject
+                      <X className="size-3.5" /> Reject
                     </button>
                     <button
                       type="button"
                       onClick={() => void runAction(row.ticket_number, "ESCALATE")}
                       disabled={busy}
-                      className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-action-warning hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
+                      className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-action-warning hover:bg-bg-surface disabled:opacity-40 disabled:pointer-events-none"
                     >
-                      <ArrowUpRight className="h-3 w-3" /> Escalate
+                      <ArrowUpRight className="size-3.5" /> Escalate
                     </button>
                   </>
                 ) : (
                   <button
                     type="button"
                     onClick={() => viewTicket(row.ticket_number)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-bg-elevated border border-border px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:bg-bg-surface"
+                    className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:bg-bg-surface"
                   >
-                    <Eye className="h-3 w-3" /> View details
+                    <Eye className="size-3.5" /> View details
                   </button>
                 )}
               </div>
@@ -349,7 +349,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
           type="button"
           onClick={() => void refresh()}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 self-start rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-elevated disabled:opacity-50"
+          className="surface-card inline-flex items-center gap-1.5 self-start bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-elevated disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           Refresh
@@ -365,7 +365,7 @@ export function ApprovalInbox({ compact = false, pollMs = 30_000, limit = 20 }: 
 
   return (
     <WidgetBoundary title="Approval Inbox">
-      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
         {inner}
       </div>
     </WidgetBoundary>

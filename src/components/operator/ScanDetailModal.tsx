@@ -60,7 +60,7 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" role="presentation" onClick={onClose}>
       <div
-        className="bg-bg-surface border border-border rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[85dvh] overflow-y-auto p-5 space-y-4"
+        className="surface-card bg-bg-surface sm: w-full max-w-md max-h-[85dvh] overflow-y-auto p-5 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -77,7 +77,7 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
               ) : null}
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-base">
+          <button onClick={onClose} className="surface-card p-1.5 hover:bg-bg-base">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -87,7 +87,7 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
             <Loader2 className="w-4 h-4 animate-spin" /> Loading overview…
           </div>
         ) : error ? (
-          <div className="text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">{error}</div>
+          <div className="surface-card text-xs text-action-warning bg-amber-400/10 p-3">{error}</div>
         ) : null}
 
         {/* This scan */}
@@ -112,8 +112,8 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
           <p className="text-xs text-text-secondary inline-flex items-center gap-1.5 pt-1 flex-wrap">
             <ShieldCheck className="w-3.5 h-3.5 textfocus-ring" />
             Processed by operator: <span className="font-bold text-text-primary">{scan.operatorName || "—"}</span>
-            {scan.isManual ? <span className="px-1.5 py-0.5 rounded bg-amber-400/15 text-action-warning text-xs font-bold">MANUAL</span> : null}
-            {scan.isCorrection ? <span className="px-1.5 py-0.5 rounded bg-sky-400/15 text-action-info text-xs font-bold">CORRECTION</span> : null}
+            {scan.isManual ? <span className="surface-card px-1.5 py-0.5 bg-amber-400/15 text-action-warning text-xs font-bold">MANUAL</span> : null}
+            {scan.isCorrection ? <span className="surface-card px-1.5 py-0.5 bg-sky-400/15 text-action-info text-xs font-bold">CORRECTION</span> : null}
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
             ]
               .filter((pair) => !!pair[1])
               .map(([k, v]) => (
-                <div key={k} className="bg-bg-base rounded-lg px-3 py-2">
+                <div key={k} className="surface-card bg-bg-base px-3 py-2">
                   <p className="text-xs uppercase font-bold text-text-muted">{k}</p>
                   <p className="font-semibold truncate">{v}</p>
                 </div>
@@ -146,9 +146,9 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
             </p>
             <div className="space-y-1 max-h-44 overflow-y-auto pr-1">
               {payload.history.slice(0, 12).map((h) => (
-                <div key={h.id} className="flex items-center justify-between text-xs px-2 py-1.5 rounded-lg bg-bg-base">
+                <div key={h.id} className="surface-card flex items-center justify-between text-xs px-2 py-1.5 bg-bg-base">
                   <span className={`inline-flex items-center gap-1 font-bold ${h.direction === "IN" ? "text-action-success" : "text-action-danger"}`}>
-                    {h.direction === "IN" ? <ArrowDownLeft className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                    {h.direction === "IN" ? <ArrowDownLeft className="size-3.5" /> : <ArrowUpRight className="size-3.5" />}
                     {h.direction === "IN" ? "Entry" : "Exit"}
                   </span>
                   <span className="text-text-muted">{new Date(h.timestamp).toLocaleString()}</span>

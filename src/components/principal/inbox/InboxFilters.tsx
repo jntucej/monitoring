@@ -60,7 +60,7 @@ export function InboxFilters() {
   const hasActiveFilters = !!(stage || workflowType || sla !== "all" || search);
 
   return (
-    <div className="space-y-2 bg-bg-surface p-3 rounded-xl border border-border min-w-0">
+    <div className="surface-card space-y-2 bg-bg-surface p-3 min-w-0">
       {/* Row 1: Stage */}
       <div className="flex items-center gap-2">
         <Filter className="w-3.5 h-3.5 text-text-muted shrink-0" />
@@ -163,7 +163,7 @@ export function InboxFilters() {
             <button
               type="button"
               onClick={() => router.push(window.location.pathname, { scroll: false })}
-              className="p-1.5 rounded-lg border border-border text-text-muted hover:text-text-primary"
+              className="surface-card p-1.5 text-text-muted hover:text-text-primary"
               title="Clear all filters"
             >
               <X className="w-3.5 h-3.5" />

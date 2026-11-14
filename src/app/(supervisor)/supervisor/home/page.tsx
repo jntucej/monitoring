@@ -29,7 +29,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" | "neutral" }) {
   const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : tone === "neutral" ? "text-text-muted" : "text-text-primary";
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+    <div className="surface-card bg-bg-surface p-3 min-w-0">
       <div className="text-xs font-bold uppercase tracking-wider text-text-muted">{label}</div>
       <div className={`mt-1 text-lg font-extrabold truncate ${toneClass}`}>{value}</div>
     </div>

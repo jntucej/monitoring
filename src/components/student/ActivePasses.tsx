@@ -20,9 +20,9 @@ function expiryLabel(to: string, status: string): string {
 }
 
 function statusStyle(s: string) {
-  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-action-success", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="w-8 h-8 text-action-success" /> };
-  if (s === "REJECTED") return { text: "text-action-danger", bg: "bg-rose-500/10", icon: <XCircle className="w-8 h-8 text-action-danger" /> };
-  return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="w-8 h-8 text-action-warning" /> };
+  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-action-success", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="size-6 text-action-success" /> };
+  if (s === "REJECTED") return { text: "text-action-danger", bg: "bg-rose-500/10", icon: <XCircle className="size-6 text-action-danger" /> };
+  return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="size-6 text-action-warning" /> };
 }
 
 export function ActivePasses() {
@@ -62,18 +62,18 @@ export function ActivePasses() {
   usePolling(load, { intervalMs: 30_000 });
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <h3 className="font-semibold mb-4">Active Passes</h3>
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading…
         </div>
       ) : error ? (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30">
+        <div className="surface-card flex flex-col sm:flex-row items-center justify-between gap-2 p-3 bg-rose-500/10">
           <p className="text-sm text-action-danger">Could not load passes: {error}</p>
           <button
             onClick={load}
-            className="px-3 py-1 rounded-lg bg-rose-500/20 border border-rose-500/30 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
+            className="surface-card px-3 py-1 bg-rose-500/20 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
           >
             Retry
           </button>
@@ -94,7 +94,7 @@ export function ActivePasses() {
                   </p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs font-semibold uppercase tracking-wider bg-black/20 px-2 py-1 rounded">
+                  <span className="surface-card text-xs font-semibold uppercase tracking-wider bg-black/20 px-2 py-1">
                     {pass.finalStatus}
                   </span>
                   {pass.parentStatus !== 'APPROVED' && (

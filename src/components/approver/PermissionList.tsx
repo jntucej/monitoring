@@ -248,7 +248,7 @@ export function PermissionList({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-bg-surface p-3 rounded-xl border border-border min-w-0">
+      <div className="surface-card flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-bg-surface p-3 min-w-0">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <Input
@@ -299,8 +299,8 @@ export function PermissionList({
       )}
 
       {filteredPermissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 bg-bg-surface border border-border rounded-2xl text-center space-y-3 min-w-0">
-          <AlertCircle className="w-10 h-10 text-text-muted" />
+        <div className="surface-card flex flex-col items-center justify-center p-12 bg-bg-surface text-center space-y-3 min-w-0">
+          <AlertCircle className="size-6 text-text-muted" />
           <div className="space-y-1 max-w-md">
             <h3 className="text-base font-semibold text-text-primary">
               No permission requests found

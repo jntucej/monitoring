@@ -41,7 +41,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
       >
         {dot && (
           <span
-            className="h-1.5 w-1.5 rounded-full"
+            className="size-2 rounded-full"
             style={{
               backgroundColor:
                 variant === "entry"

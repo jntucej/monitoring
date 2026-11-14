@@ -68,7 +68,7 @@ export function DepartmentsView() {
             {(d?.departments ?? []).map((dept) => (
               <li
                 key={dept.code}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -77,7 +77,7 @@ export function DepartmentsView() {
                       HOD: {dept.hodName ?? "—"}
                     </p>
                   </div>
-                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs font-semibold text-action-primary">
+                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs font-semibold text-action-primary">
                     {dept.attendancePct}%
                   </span>
                 </div>

@@ -59,7 +59,7 @@ function NotificationPrefsSummary() {
   return (
     <section
       aria-label="Notification preferences summary"
-      className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
+      className="surface-card bg-bg-surface p-5 min-w-0"
     >
       <h2 className="text-sm font-bold text-text-primary">
         Notification preferences

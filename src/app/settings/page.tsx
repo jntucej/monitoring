@@ -42,9 +42,9 @@ function SettingTile({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-2xl border border-border bg-bg-surface p-4 hover:bg-bg-elevated transition"
+      className="surface-card flex items-center gap-4 bg-bg-surface p-4 hover:bg-bg-elevated transition"
     >
-      <div className="p-2.5 rounded-xl bg-action-primary/10 text-action-primary">
+      <div className="surface-card p-2.5 bg-action-primary/10 text-action-primary">
         {icon}
       </div>
       <div className="flex-1">

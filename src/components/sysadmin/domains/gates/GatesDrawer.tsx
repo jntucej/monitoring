@@ -15,26 +15,26 @@ export function GatesDrawer({ entity, onClose, onMutate }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed right-0 top-0 z-50 h-full w-96 max-w-full border-l border-border bg-background p-4 shadow-lg"
+      className="surface-card fixed right-0 top-0 z-50 h-full w-96 max-w-full bg-background p-4"
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold">Gates detail</h2>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md border px-2 py-1 text-xs hover:bg-accent"
+          className="surface-card px-2 py-1 text-xs hover:bg-accent"
         >
           Close
         </button>
       </div>
-      <pre className="overflow-auto rounded-md border p-2 text-xs">
+      <pre className="surface-card overflow-auto p-2 text-xs">
         {JSON.stringify(entity, null, 2)}
       </pre>
       {onMutate ? (
         <button
           type="button"
           onClick={onMutate}
-          className="mt-3 rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground hover:bg-primary/90"
+          className="surface-card mt-3 bg-primary px-3 py-1.5 text-xs text-primary-foreground hover:bg-primary/90"
         >
           Save changes
         </button>

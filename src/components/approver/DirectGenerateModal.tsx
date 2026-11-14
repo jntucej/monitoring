@@ -260,7 +260,7 @@ export function DirectGenerateModal({
             <span className="font-semibold text-text-primary">{studentName || "Student"}</span>
             <span className="text-text-muted font-mono">({studentUserId})</span>
             {studentEntryType === "day_scholar" && (
-              <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-action-warning border border-amber-500/20">
+              <span className="surface-card px-1.5 py-0.5 text-xs font-semibold bg-amber-500/10 text-action-warning">
                 Day Scholar
               </span>
             )}
@@ -268,7 +268,7 @@ export function DirectGenerateModal({
         )}
 
         {roomFieldsRequired && (
-          <div className="p-3 rounded-lg bg-bg-surface border border-border space-y-2">
+          <div className="surface-card p-3 bg-bg-surface space-y-2">
             <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
               Hostel Room Assignment (required for day scholar home out)
             </p>
@@ -355,7 +355,7 @@ export function DirectGenerateModal({
         </div>
 
         {stepupRequired && (
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
+          <div className="surface-card p-3 bg-amber-500/10 space-y-2">
             <div className="flex items-center gap-1.5 text-action-warning text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
               Step-up password required
@@ -370,7 +370,7 @@ export function DirectGenerateModal({
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
+          <div className="surface-card p-3 bg-rose-500/10 text-action-danger text-xs">
             {error}
           </div>
         )}

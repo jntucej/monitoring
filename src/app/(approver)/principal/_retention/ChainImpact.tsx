@@ -13,7 +13,7 @@ export function ChainImpact({
 }) {
   if (total === 0) {
     return (
-      <section className="rounded-2xl border border-action-primary/30 bg-action-primary/5 p-4 sm:p-5">
+      <section className="surface-card bg-action-primary/5 p-4 sm:p-5">
         <p className="text-sm font-medium text-action-primary">
           No one is waiting on you
         </p>
@@ -25,7 +25,7 @@ export function ChainImpact({
   }
 
   return (
-    <section className="rounded-2xl border border-action-warning/30 bg-action-warning/5 p-4 sm:p-5">
+    <section className="surface-card bg-action-warning/5 p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Users className="size-4 text-action-warning" />
         <h2 className="text-sm font-semibold text-action-warning">

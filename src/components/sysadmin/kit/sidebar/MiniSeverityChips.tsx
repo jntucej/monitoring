@@ -8,9 +8,9 @@ export interface MiniSeverityChipsProps extends MiniProps {
 }
 
 const SEVERITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  critical: { bg: "var(--action-danger)", text: "#fff", label: "crit" },
-  high: { bg: "var(--action-warning)", text: "#000", label: "high" },
-  medium: { bg: "var(--action-info)", text: "#fff", label: "med" },
+  critical: { bg: "var(--action-danger)", text: "var(--color-surface)", label: "crit" },
+  high: { bg: "var(--action-warning)", text: "var(--color-ink)", label: "high" },
+  medium: { bg: "var(--action-info)", text: "var(--color-surface)", label: "med" },
   low: { bg: "var(--text-muted)", text: "var(--bg-surface)", label: "low" },
 };
 

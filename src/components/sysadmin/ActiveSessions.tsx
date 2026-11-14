@@ -89,7 +89,7 @@ export function ActiveSessions() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border shadow-sm">
+      <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-6 h-6 text-action-info" /> Active User Sessions
@@ -101,7 +101,7 @@ export function ActiveSessions() {
         <button
           onClick={() => fetchSessions(false)}
           disabled={loading || refreshing}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
+          className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading || refreshing ? "animate-spin" : ""}`} />
           {refreshing && !loading ? "Refreshing…" : "Refresh List"}
@@ -118,7 +118,7 @@ export function ActiveSessions() {
           <div className="overflow-x-auto">
             {refreshing && (
               <div className="px-4 py-1.5 text-xs text-text-muted bg-bg-elevated/40 flex items-center gap-1.5">
-                <RefreshCw className="w-3 h-3 animate-spin" /> Refreshing in background…
+                <RefreshCw className="size-3.5 animate-spin" /> Refreshing in background…
               </div>
             )}
             <table className="w-full text-left text-xs min-w-[650px]">
@@ -139,7 +139,7 @@ export function ActiveSessions() {
                       <span className="block text-xs text-text-muted font-normal">{sess.email}</span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-sky-500/20 text-action-info border border-sky-500/30 uppercase">
+                      <span className="surface-card px-2 py-0.5 text-xs font-mono font-bold bg-sky-500/20 text-action-info uppercase">
                         {sess.role}
                       </span>
                     </td>
@@ -151,9 +151,9 @@ export function ActiveSessions() {
                       <button
                         onClick={() => handleRevokeSession(sess.userId, sess.name)}
                         disabled={revokingId === sess.userId}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600/20 border border-rose-500/30 text-action-danger hover:bg-action-danger hover:text-white font-bold text-xs transition-all disabled:opacity-50"
+                        className="surface-card inline-flex items-center gap-1 px-3 py-1.5 bg-rose-600/20 text-action-danger hover:bg-action-danger hover:text-white font-bold text-xs transition-all disabled:opacity-50"
                       >
-                        <LogOut className="w-3 h-3" /> Force Logout
+                        <LogOut className="size-3.5" /> Force Logout
                       </button>
                     </td>
                   </tr>

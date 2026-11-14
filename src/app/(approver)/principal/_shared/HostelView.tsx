@@ -64,7 +64,7 @@ export function HostelView() {
               return (
                 <li
                   key={b.id ?? idx}
-                  className="rounded-xl border border-border bg-bg-surface p-3"
+                  className="surface-card bg-bg-surface p-3"
                 >
                   <p className="text-sm font-medium">{name}</p>
                   <div className="mt-2 flex gap-3 text-xs text-text-secondary">
@@ -94,7 +94,7 @@ export function HostelView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "ACTIVE"}
                     </span>
                   ),

@@ -14,7 +14,7 @@ export function HotSpots({ spots }: { spots: HotSpot[] }) {
   if (spots.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AlertTriangle className="size-4 text-action-warning" />

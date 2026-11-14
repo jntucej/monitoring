@@ -158,7 +158,7 @@ function buildContext(feature, flags) {
    SHARED 1 — src/components/shared/TicketKpiStrip.tsx
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const TICKET_KPI_STRIP_TSX = `"use client";
+const TICKET_KPI_STRIP_TSX = `// DESIGN RULES (enforced by unslop-ui + pre-commit, zero-baseline):\n// - one surface per section (.surface-card); group rows with divide-y, never nested borders\n// - colors only from @theme tokens: canvas, surface, ink, ink-muted, action-*\n// - zero shadows, zero gradients, one radius token (--radius-card)\n// - icon size: ICON.sm | ICON.md | ICON.lg from src/lib/icon-scale.ts\n// - no arbitrary values: if you need a new value, add a token first\n//\n"use client";
 // src/components/shared/TicketKpiStrip.tsx
 // SCAFFOLD:TICKETS — KPI row for the My Tickets dashboard. Idempotent.
 

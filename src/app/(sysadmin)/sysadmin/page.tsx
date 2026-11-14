@@ -45,7 +45,7 @@ export default function SysadminCommandCenterPage() {
       ) : error ? (
         <div
           role="alert"
-          className="rounded-2xl border border-action-danger/30 bg-action-danger/5 p-5 text-sm text-text-primary"
+          className="surface-card bg-action-danger/5 p-5 text-sm text-text-primary"
         >
           <p className="flex items-center gap-2 font-medium text-action-danger">
             <AlertTriangle className="h-4 w-4" />
@@ -55,7 +55,7 @@ export default function SysadminCommandCenterPage() {
           <button
             type="button"
             onClick={refresh}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 min-h11 text-xs hover:bg-bg-elevated"
+            className="surface-card mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 min-h11 text-xs hover:bg-bg-elevated"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Retry

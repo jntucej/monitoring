@@ -75,13 +75,13 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4 flex flex-col gap-2 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4 text-action-success" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
       </div>
       {loading ? (
-        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
+        <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
       ) : (
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       )}
@@ -104,10 +104,10 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="group rounded-xl border border-border bg-bg-surface p-4 flex items-center gap-3 hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
+      className="surface-card group bg-bg-surface p-4 flex items-center gap-3 hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
     >
-      <div className="rounded-lg bg-emerald-500/10 p-2 text-action-success shrink-0">
-        <Icon className="w-5 h-5" />
+      <div className="surface-card bg-emerald-500/10 p-2 text-action-success shrink-0">
+        <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-text-primary">{title}</p>
@@ -181,7 +181,7 @@ function GuardianOverviewInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-action-success" />
+            <ShieldCheck className="w-4 h-4 text-action-success" />
             Linked Student Overview
           </p>
           <p className="mt-1 text-sm text-text-muted">

@@ -149,7 +149,7 @@ export function FloatingBot() {
           type="button"
           id="bot-launcher-btn"
           aria-label="Hold to speak, tap to open assistant"
-          className="relative w-16 h-16 rounded-full bg-bg-surface border border-border shadow-[0_8px_24px_rgba(0,0,0,0.35)] flex items-center justify-center active:scale-95 transition-transform"
+          className="relative size-6 rounded-full bg-bg-surface border border-border shadow-[0_8px_24px_rgba(0,0,0,0.35)] flex items-center justify-center active:scale-95 transition-transform"
         >
           {/* Hold-progress ring */}
           <svg

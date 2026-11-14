@@ -42,7 +42,7 @@ function StaffAssignedTasksInner() {
         href="/staff"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Staff Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -56,7 +56,7 @@ function StaffAssignedTasksInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Assigned Tasks data unavailable: {error}</span>
@@ -64,7 +64,7 @@ function StaffAssignedTasksInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -73,7 +73,7 @@ function StaffAssignedTasksInner() {
 
       <WidgetBoundary title="Assigned Tasks">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Open staff-leave requests</span>
@@ -91,10 +91,10 @@ function StaffAssignedTasksInner() {
               {slice && slice.openRequests.length > 0 ? (
                 <div className="space-y-2 min-w-0">
                   {slice.openRequests.map((r) => (
-                    <div key={r.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                    <div key={r.id} className="surface-card flex flex-wrap items-center gap-3 bg-bg-surface/40 p-3 min-w-0">
                       <span className="text-xs text-text-muted font-mono shrink-0">{r.ticket_number ?? r.id.slice(0, 8)}</span>
                       <span className="flex-1 text-sm text-text-secondary">{r.workflow_type}</span>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated/40 text-text-secondary shrink-0 capitalize">
+                      <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated/40 text-text-secondary shrink-0 capitalize">
                         {r.current_stage ?? r.status}
                       </span>
                       <span className="text-xs text-text-muted shrink-0">

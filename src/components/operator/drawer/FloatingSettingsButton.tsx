@@ -14,7 +14,7 @@ export function FloatingSettingsButton({ onClick, className }: FloatingSettingsB
       type="button"
       onClick={onClick}
       className={cn(
-        "fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full",
+        "fixed bottom-6 right-6 z-40 size-6 rounded-full",
         "bg-bg-surface border border-border shadow-lg",
         "text-text-secondary hover:text-text-primary hover:border-action-primary",
         "flex items-center justify-center transition-all active:scale-95",

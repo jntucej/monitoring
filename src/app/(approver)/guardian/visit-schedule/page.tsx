@@ -125,7 +125,7 @@ function VisitScheduleInner() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-action-success" />
+            <Calendar className="w-4 h-4 text-action-success" />
             Visit Schedule
           </p>
           <p className="mt-1 text-sm text-text-muted">
@@ -135,7 +135,7 @@ function VisitScheduleInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             Could not load the campus calendar.
@@ -143,14 +143,14 @@ function VisitScheduleInner() {
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
           >
             Retry
           </button>
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         {/* header row */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -166,7 +166,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
+              className="surface-card p-1.5 hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Previous month"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -174,7 +174,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
+              className="surface-card p-1.5 hover:bg-bg-elevated text-text-muted transition-colors motion-reduce:transition-none"
               aria-label="Next month"
             >
               <ChevronRight className="h-4 w-4" />
@@ -182,7 +182,7 @@ function VisitScheduleInner() {
             <button
               type="button"
               onClick={() => setView(view === "list" ? "month" : "list")}
-              className="px-2.5 py-1 rounded-lg text-xs text-text-muted hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
+              className="surface-card px-2.5 py-1 text-xs text-text-muted hover:bg-bg-elevated transition-colors motion-reduce:transition-none"
             >
               {view === "list" ? "Month view" : "List view"}
             </button>
@@ -212,7 +212,7 @@ function VisitScheduleInner() {
                       : undefined
                   }
                 >
-                  {isFollowed ? <Check className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+                  {isFollowed ? <Check className="size-3.5" /> : <Bell className="size-3.5" />}
                   {cat.label}
                 </button>
               );
@@ -222,7 +222,7 @@ function VisitScheduleInner() {
 
         {loading ? (
           <div className="py-10 flex items-center justify-center text-sm text-text-muted">
-            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
             Loading campus calendar…
           </div>
         ) : upcoming.length === 0 ? (
@@ -230,17 +230,17 @@ function VisitScheduleInner() {
             No upcoming campus events this month.
           </p>
         ) : view === "list" ? (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <div className="space-y-2 max-h-4 overflow-y-auto">
             {upcoming.map((ev) => {
               const color = CATEGORY_COLORS[ev.category] ?? "var(--text-muted)";
               const isFollowed = followed.includes(ev.category);
               return (
                 <div
                   key={ev.id}
-                  className="flex items-start gap-3 rounded-xl border border-border/60 bg-bg-base/40 p-3"
+                  className="surface-card flex items-start gap-3 bg-bg-base/40 p-3"
                 >
                   <div
-                    className="mt-0.5 h-2.5 w-2.5 rounded-full shrink-0"
+                    className="mt-0.5 size-4 rounded-full shrink-0"
                     style={{ backgroundColor: color }}
                   />
                   <div className="flex-1 min-w-0">
@@ -276,7 +276,7 @@ function VisitScheduleInner() {
           </div>
         ) : (
           /* compact month-style grid of events by day */
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-4 overflow-y-auto">
             {groupedMonth(events).map(([day, dayEvents]) => (
               <div key={day}>
                 <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-1.5">
@@ -292,7 +292,7 @@ function VisitScheduleInner() {
                     return (
                       <div
                         key={ev.id}
-                        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs"
+                        className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs"
                         style={{
                           backgroundColor: `${color}15`,
                           color,

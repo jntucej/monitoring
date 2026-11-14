@@ -34,7 +34,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
   };
   return (
     <div className="mx-auto max-w-md space-y-4 p-4">
-      <div className="rounded-3xl bg-gradient-to-br fromaction-primary/20 toaction-info/10 p-6">
+      <div className="surface-card bg-surface-muted p-6">
         <p className="text-xs uppercase tracking-wide text-text-muted">
           {r.periodLabel}
         </p>
@@ -61,7 +61,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
       </div>
       <button
         onClick={share}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm"
+        className="surface-card inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm"
       >
         <Share2 className="h-4 w-4" aria-hidden /> Share
       </button>

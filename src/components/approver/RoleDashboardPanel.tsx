@@ -99,10 +99,10 @@ export function RoleDashboardPanel({
   }, [endpoint, mapKpis, raw]);
 
   return (
-    <section className="rounded-xl border border-border bg-[var(--bg-elevated,var(--bg-surface))] p-5">
+    <section className="surface-card bg-[var(--bg-elevated,var(--bg-surface))] p-5">
       <header className="flex items-center gap-2 mb-4">
         {Icon && (
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+          <div className="size-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
             <Icon className="w-4 h-4 text-action-success" />
           </div>
         )}
@@ -110,7 +110,7 @@ export function RoleDashboardPanel({
       </header>
 
       {!endpoint && (
-        <div className="rounded-lg border border-dashed border-border p-6 text-center space-y-1">
+        <div className="surface-card p-6 text-center space-y-1">
           <Inbox className="w-6 h-6 mx-auto text-text-muted" />
           <p className="text-sm text-text-secondary">
             KPI panel coming soon
@@ -124,7 +124,7 @@ export function RoleDashboardPanel({
       {endpoint && resource.loading && kpis.length === 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+            <div key={i} className="surface-card p-3 space-y-2">
               <div className="h-2.5 w-1/2 bgtext-muted/10 rounded animate-pulse" />
               <div className="h-6 w-2/3 bgtext-muted/10 rounded animate-pulse" />
             </div>
@@ -133,7 +133,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && resource.error && kpis.length === 0 && (
-        <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-sm text-action-danger">
+        <div className="surface-card flex items-start gap-2 bg-rose-500/5 p-3 text-sm text-action-danger">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Could not load KPIs: {resource.error}{" "}
@@ -148,7 +148,7 @@ export function RoleDashboardPanel({
       )}
 
       {endpoint && !resource.loading && !resource.error && kpis.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
+        <div className="surface-card p-6 text-center text-sm text-text-muted">
           No metrics available yet
         </div>
       )}
@@ -176,7 +176,7 @@ export function RoleDashboardPanel({
 
       {endpoint && resource.loading && kpis.length > 0 && (
         <div className="flex items-center justify-end gap-1.5 mt-2 text-xs text-text-muted">
-          <Loader2 className="w-3 h-3 animate-spin" />
+          <Loader2 className="size-3.5 animate-spin" />
           refreshing
         </div>
       )}

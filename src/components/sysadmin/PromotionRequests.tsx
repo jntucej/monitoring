@@ -141,18 +141,18 @@ export function PromotionRequests() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-action-success border border-emerald-500/30">APPROVED</span>;
+        return <span className="surface-card px-2.5 py-0.5 text-xs font-bold bg-emerald-500/20 text-action-success">APPROVED</span>;
       case "REJECTED":
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">REJECTED</span>;
+        return <span className="surface-card px-2.5 py-0.5 text-xs font-bold bg-rose-500/20 text-action-danger">REJECTED</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">PENDING</span>;
+        return <span className="surface-card px-2.5 py-0.5 text-xs font-bold bg-amber-500/20 text-action-warning">PENDING</span>;
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border">
+      <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <UserCheck className="w-6 h-6 text-action-info" /> Role Promotion Workflow
@@ -164,14 +164,14 @@ export function PromotionRequests() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all shadow-md"
+            className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all"
           >
             <Plus className="w-4 h-4" /> Request Promotion
           </button>
           <button
             onClick={fetchRequests}
             disabled={loading}
-            className="p-2 rounded-xl bg-bg-elevated border border-border text-white hover:bg-bg-elevated transition-all"
+            className="surface-card p-2 bg-bg-elevated text-white hover:bg-bg-elevated transition-all"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           </button>
@@ -179,7 +179,7 @@ export function PromotionRequests() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-2 text-xs font-bold">
+      <div className="surface-card flex items-center gap-2 pb-2 text-xs font-bold">
         {["ALL", "PENDING", "APPROVED", "REJECTED"].map((st) => (
           <button
             key={st}
@@ -222,7 +222,7 @@ export function PromotionRequests() {
                       <span className="block text-xs font-mono text-text-muted">Current: {req.targetCurrentRole}</span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
+                      <span className="surface-card px-2 py-0.5 text-xs font-mono font-bold bg-purple-500/20 text-purple-300 uppercase">
                         {req.newRole}
                       </span>
                     </td>
@@ -237,15 +237,15 @@ export function PromotionRequests() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleAction(req.id, "APPROVED")}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-success hover:bg-action-success text-white font-bold text-xs"
+                            className="surface-card inline-flex items-center gap-1 px-3 py-1 bg-action-success hover:bg-action-success text-white font-bold text-xs"
                           >
-                            <CheckCircle className="w-3 h-3" /> Approve
+                            <CheckCircle className="size-3.5" /> Approve
                           </button>
                           <button
                             onClick={() => handleAction(req.id, "REJECTED")}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-action-danger hover:bg-action-danger text-white font-bold text-xs"
+                            className="surface-card inline-flex items-center gap-1 px-3 py-1 bg-action-danger hover:bg-action-danger text-white font-bold text-xs"
                           >
-                            <XCircle className="w-3 h-3" /> Reject
+                            <XCircle className="size-3.5" /> Reject
                           </button>
                         </div>
                       ) : (
@@ -264,7 +264,7 @@ export function PromotionRequests() {
       {/* New Promotion Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleCreateRequest} className="bg-bg-surface border border-border p-6 rounded-2xl space-y-4 max-w-md w-full">
+          <form onSubmit={handleCreateRequest} className="surface-card bg-bg-surface p-6 space-y-4 max-w-md w-full">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-action-info" /> Request Role Promotion
             </h3>
@@ -276,7 +276,7 @@ export function PromotionRequests() {
                   value={userQuery}
                   onChange={(e) => searchUsers(e.target.value)}
                   placeholder="Type a name, roll number or email…"
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-white focus:outline-none focus:"
                 />
                 {userQuery.trim().length >= 2 && userResults.length === 0 && (
                   <p className="text-xs text-text-muted">No matching people found.</p>
@@ -297,7 +297,7 @@ export function PromotionRequests() {
                   </div>
                 )}
                 {targetUser && (
-                  <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-xs">
+                  <div className="surface-card flex items-center justify-between px-3 py-2 bg-sky-500/10 text-xs">
                     <span className="text-action-info font-semibold">{targetUser.name} → {newRole}</span>
                     <button type="button" onClick={() => { setTargetUser(null); setTargetUserId(""); }} className="text-text-muted hover:text-white">✕</button>
                   </div>
@@ -308,7 +308,7 @@ export function PromotionRequests() {
                 <select id="target-role"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-white focus:outline-none focus:"
                 >
                   <option value="admin">admin</option>
                   <option value="sysadmin">sysadmin</option>
@@ -323,7 +323,7 @@ export function PromotionRequests() {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Explain justification for role change..."
-                  className="w-full bg-bg-elevated border border-border rounded-xl px-3 py-2 text-white focus:outline-none focus:borderaction-info h-20"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-white focus:outline-none focus: h-20"
                   required
                 />
               </div>
@@ -332,14 +332,14 @@ export function PromotionRequests() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl bg-bg-elevated text-white text-xs font-bold"
+                className="surface-card px-4 py-2 bg-bg-elevated text-white text-xs font-bold"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold"
+                className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-action-info text-white text-xs font-bold"
               >
                 <Send className="w-3.5 h-3.5" /> Submit Request
               </button>

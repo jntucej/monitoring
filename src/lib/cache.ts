@@ -2,7 +2,7 @@
  * High-performance Cache Manager for Gate Monitor Platform.
  * Supports dual-mode operation: Redis client (if REDIS_URL is set) or high-efficiency in-memory TTL cache fallback.
  *
- * Issue #383: enforces a hard entry cap (LRU eviction) so the Map never
+ * Issue issue-383: enforces a hard entry cap (LRU eviction) so the Map never
  * grows unboundedly when keys include user IDs or session identifiers.
  */
 

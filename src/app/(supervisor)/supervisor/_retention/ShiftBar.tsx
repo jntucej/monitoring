@@ -23,7 +23,7 @@ export function ShiftBar({
 }) {
   if (!startedAt) {
     return (
-      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <section className="surface-card bg-bg-surface p-4 sm:p-5">
         <p className="text-sm font-medium text-text-primary">No active shift</p>
         <p className="mt-1 text-xs text-text-muted">
           Your shift hasn&#39;t started yet.
@@ -48,7 +48,7 @@ export function ShiftBar({
       : `${needsAction} items to clear before handover.`;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex size-5 items-center justify-center rounded-full bg-action-primary/10">

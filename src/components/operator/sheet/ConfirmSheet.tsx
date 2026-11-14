@@ -66,7 +66,7 @@ export function ConfirmSheet({
 
   // Flag banner.
   const flagBanner = student.flagStatus ? (
-    <div className="flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm bg-rose-500/10 border-rose-500/40 text-action-danger">
+    <div className="surface-card flex items-start gap-3 px-4 py-3 bg-rose-500/10 text-action-danger">
       <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-action-danger" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -117,12 +117,12 @@ export function ConfirmSheet({
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="surface-card flex items-center justify-between px-4 py-3">
               <h2 className="text-sm font-bold text-text-primary">Confirm Scan</h2>
               <button
                 type="button"
                 onClick={onCancel}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
+                className="size-6 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                 aria-label="Cancel"
               >
                 <X className="w-5 h-5" />
@@ -136,7 +136,7 @@ export function ConfirmSheet({
 
               {/* Student info */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-lg font-bold">
+                <div className="size-6 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-lg font-bold">
                   {student.name?.charAt(0) || "?"}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -213,7 +213,7 @@ export function ConfirmSheet({
                       <select
                         value={selectedReason || ""}
                         onChange={(e) => setSelectedReason(e.target.value as ExitReason)}
-                        className="w-full px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary focus:ring-2 focus:ringfocus-ring outline-none"
+                        className="surface-card w-full px-3 py-2.5 bg-bg-base text-sm text-text-primary focus:ring-2 focus:ringfocus-ring outline-none"
                       >
                         <option value="">Select reason...</option>
                         <option value="daily_outing">Daily Outing</option>
@@ -230,7 +230,7 @@ export function ConfirmSheet({
             </div>
 
             {/* Footer */}
-            <div className="border-t border-border p-4 space-y-2">
+            <div className="surface-card p-4 space-y-2">
               {autoConfirmMs && autoConfirmMs > 0 && countdown !== null && (
                 <div className="flex items-center justify-center gap-2 text-xs text-text-muted">
                   <Clock className="w-3.5 h-3.5 animate-pulse" />
@@ -241,14 +241,14 @@ export function ConfirmSheet({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="py-3 rounded-xl border border-border text-sm font-semibold text-text-secondary hover:bg-bg-elevated transition-colors"
+                  className="surface-card py-3 text-sm font-semibold text-text-secondary hover:bg-bg-elevated transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className="py-3 rounded-xl bg-action-primary text-black font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
+                  className="surface-card py-3 bg-action-primary text-black font-bold text-sm hover:brightness-110 transition-all active:scale-[0.99]"
                 >
                   Confirm
                 </button>

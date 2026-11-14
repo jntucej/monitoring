@@ -407,7 +407,7 @@ export function BotPanel() {
 
       {isMobile && (
         <div className="pt-2 pb-1 flex justify-center relative z-10" aria-hidden>
-          <div className="h-1 w-10 rounded-full bgborder" />
+          <div className="size-20 rounded-full bgborder" />
         </div>
       )}
 
@@ -441,7 +441,7 @@ export function BotPanel() {
       />
 
       {(error || stt.error === "permission") && (
-        <div className="relative z-10 px-3 py-2 text-xs bg-rose-500/10 text-action-danger border-b border-border">
+        <div className="surface-card relative z-10 px-3 py-2 text-xs bg-rose-500/10 text-action-danger">
           {stt.error === "permission"
             ? "Microphone permission denied. Enable it in your browser settings to use voice."
             : error?.startsWith("HTTP 401")
@@ -457,7 +457,7 @@ export function BotPanel() {
       )}
 
       {!stt.supported && isMobile && (
-        <div className="relative z-10 px-3 py-1.5 text-xs text-text-muted bg-bg-elevated border-b border-border">
+        <div className="surface-card relative z-10 px-3 py-1.5 text-xs text-text-muted bg-bg-elevated">
           {t.micUnsupported}
         </div>
       )}
@@ -466,7 +466,7 @@ export function BotPanel() {
         <div
           role="status"
           aria-live="polite"
-          className="relative z-10 mx-3 mb-1 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs text-text-secondary"
+          className="surface-card relative z-10 mx-3 mb-1 bg-bg-elevated px-3 py-2 text-xs text-text-secondary"
         >
           <div className="flex items-center justify-between gap-2">
             <span>Voice mode uses your microphone. Enable it?</span>
@@ -500,7 +500,7 @@ export function BotPanel() {
         <div
           role="group"
           aria-label="Choose your language"
-          className="relative z-10 mx-3 my-2 rounded-xl border border-border bg-bg-elevated p-3"
+          className="surface-card relative z-10 mx-3 my-2 bg-bg-elevated p-3"
         >
           <p className="text-xs font-medium text-text-primary mb-2">
             Choose your language
@@ -514,8 +514,7 @@ export function BotPanel() {
                 // profile PUT — one call covers both.
                 void persistLangChoice("en");
               }}
-              className="rounded-lg border border-border px-3 py-2 text-xs
-                         hover:bg-bg-base transition active:scale-[0.98]"
+              className="surface-card px-3 py-2 text-xs hover:bg-bg-base transition active:scale-[0.98]"
             >
               English
             </button>
@@ -525,8 +524,7 @@ export function BotPanel() {
                 setLangPromptPending(false);
                 void persistLangChoice("te");
               }}
-              className="rounded-lg border border-border px-3 py-2 text-xs
-                         hover:bg-bg-base transition active:scale-[0.98]"
+              className="surface-card px-3 py-2 text-xs hover:bg-bg-base transition active:scale-[0.98]"
             >
               తెలుగు
             </button>
@@ -541,8 +539,7 @@ export function BotPanel() {
         <div
           role="alert"
           aria-live="assertive"
-          className="relative z-10 mx-3 my-1.5 flex items-center justify-between gap-2 rounded-lg
-                     border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-action-warning"
+          className="surface-card relative z-10 mx-3 my-1.5 flex items-center justify-between gap-2 bg-amber-500/10 px-3 py-2 text-xs text-action-warning"
         >
           <span>Start a new chat? Your current history will be cleared.</span>
           <div className="flex items-center gap-2 shrink-0">

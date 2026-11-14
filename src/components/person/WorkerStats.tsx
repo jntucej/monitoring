@@ -88,7 +88,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Shift Status */}
-      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+      <div className="surface-card p-4 bg-bg-surface space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
           <UserCheck className="w-3.5 h-3.5 text-action-primary" />
           Shift Status
@@ -102,7 +102,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Today Entry */}
-      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+      <div className="surface-card p-4 bg-bg-surface space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
           <Clock className="w-3.5 h-3.5 text-unit-c" />
           Today&#39;s Gate Entry
@@ -114,7 +114,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Last Exit */}
-      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+      <div className="surface-card p-4 bg-bg-surface space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
           <Clock className="w-3.5 h-3.5 text-action-warning" />
           Last Recorded Exit
@@ -126,7 +126,7 @@ export function WorkerStats({ loading = false, uniqueId }: WorkerStatsProps) {
       </div>
 
       {/* Shift Compliance */}
-      <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+      <div className="surface-card p-4 bg-bg-surface space-y-1">
         <div className="flex items-center gap-1.5 text-xs text-text-muted font-medium">
           <ShieldCheck className="w-3.5 h-3.5 text-action-success" />
           Shift Adherence

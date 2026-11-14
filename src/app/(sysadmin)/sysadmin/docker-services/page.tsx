@@ -74,7 +74,7 @@ function DockerServicesInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Service status unavailable: {error}
         </div>
@@ -82,17 +82,11 @@ function DockerServicesInner() {
 
       {/* App-level service + container summary */}
       <WidgetBoundary title="Services & Containers">
-        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div className="bg-bg-base overflow-hidden min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Service &amp; Container Status</span>
             <span
-              className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                d?.status === "healthy"
-                  ? "bg-emerald-500/20 text-action-success"
-                  : d?.status === "degraded"
-                    ? "bg-amber-500/20 text-action-warning"
-                    : "bg-bg-elevated/40 text-text-muted"
-              }`}
+              className={`text-xs font-bold px-2 py-0.5 "healthy" "text-action-success" "degraded" "text-action-warning" "text-text-muted" "healthy" "text-action-success" "degraded" "text-action-warning" "text-text-muted"`}
             >
               {d?.status ?? "loading"}
             </span>
@@ -101,7 +95,7 @@ function DockerServicesInner() {
           {busy ? (
             <div className="p-4 space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-bg-elevated/40" />
+                <div key={i} className="h-10 animate-pulse bg-bg-elevated/40" />
               ))}
             </div>
           ) : (
@@ -114,11 +108,7 @@ function DockerServicesInner() {
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    d?.database?.status === "healthy"
-                      ? "bg-emerald-500/20 text-action-success"
-                      : "bg-rose-500/20 text-action-danger"
-                  }`}
+                  className={`text-xs font-bold px-2 py-0.5 "healthy" "text-action-success" "text-action-danger" "healthy" "text-action-success" "text-action-danger"`}
                 >
                   {d?.database?.status ?? "unknown"}
                 </span>
@@ -129,11 +119,7 @@ function DockerServicesInner() {
                   <p className="text-xs text-text-muted">shared cache layer</p>
                 </div>
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    d?.redis?.status === "healthy"
-                      ? "bg-emerald-500/20 text-action-success"
-                      : "bg-amber-500/20 text-action-warning"
-                  }`}
+                  className={`text-xs font-bold px-2 py-0.5 "healthy" "text-action-success" "text-action-warning" "healthy" "text-action-success" "text-action-warning"`}
                 >
                   {d?.redis?.status ?? "unknown"}
                 </span>
@@ -148,11 +134,7 @@ function DockerServicesInner() {
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    d?.gateways?.status === "healthy"
-                      ? "bg-emerald-500/20 text-action-success"
-                      : "bg-amber-500/20 text-action-warning"
-                  }`}
+                  className={`text-xs font-bold px-2 py-0.5 "healthy" "text-action-success" "text-action-warning" "healthy" "text-action-success" "text-action-warning"`}
                 >
                   {d?.gateways?.status ?? "unknown"}
                 </span>
@@ -162,8 +144,8 @@ function DockerServicesInner() {
         </div>
 
         {/* Containers table */}
-        <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+        <div className="bg-bg-base overflow-hidden min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center justify-between">
             <span className="text-sm font-semibold text-white">Containers</span>
             <span className="text-xs text-text-muted">
               {d?.containers ? `${d.containers.length} tracked` : "not available"}
@@ -172,7 +154,7 @@ function DockerServicesInner() {
           {busy ? (
             <div className="p-4 space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-10 animate-pulse rounded-lg bg-bg-elevated/40" />
+                <div key={i} className="h-10 animate-pulse bg-bg-elevated/40" />
               ))}
             </div>
           ) : !d?.containers ? (
@@ -204,11 +186,7 @@ function DockerServicesInner() {
                       <td className="px-4 py-2 font-mono text-xs text-text-secondary">{c.name}</td>
                       <td className="px-3 py-2">
                         <span
-                          className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                            c.running
-                              ? "bg-emerald-500/20 text-action-success"
-                              : "bg-rose-500/20 text-action-danger"
-                          }`}
+                          className={`text-xs font-bold px-2 py-0.5 "text-action-success" "text-action-danger" "text-action-success" "text-action-danger"`}
                         >
                           {c.running ? "running" : "stopped"}
                         </span>

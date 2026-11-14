@@ -91,7 +91,7 @@ export default function OperatorClaimPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-bg-surface p-5 space-y-4">
+        <div className="surface-card bg-bg-surface p-5 space-y-4">
           <label className="block">
             <span className="block text-xs font-semibold text-text-muted mb-1.5 uppercase tracking-wide">
               Claim code
@@ -110,13 +110,13 @@ export default function OperatorClaimPage() {
                 if (e.key === "Enter") submit();
               }}
               placeholder="e.g. 482913"
-              className="w-full px-4 py-3 rounded-lg bg-bg-base border border-border text-2xl font-mono tracking-[0.3em] text-text-primary placeholder:text-text-muted placeholder:text-base placeholder:tracking-normal placeholder:font-sans focus:ring-2 focus:ring-emerald-500/40 outline-none"
+              className="surface-card w-full px-4 py-3 bg-bg-base text-2xl font-mono tracking-[0.3em] text-text-primary placeholder:text-text-muted placeholder:text-base placeholder:tracking-normal placeholder:font-sans focus:ring-2 focus:ring-emerald-500/40 outline-none"
               disabled={submitting}
             />
           </label>
 
           {error && (
-            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-action-danger text-xs font-medium flex items-start gap-2">
+            <div className="surface-card p-2.5 bg-rose-500/10 text-action-danger text-xs font-medium flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
                 {error}{" "}
@@ -134,7 +134,7 @@ export default function OperatorClaimPage() {
           )}
 
           {claimedGateName && !error && (
-            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-action-success text-xs font-medium flex items-center gap-2">
+            <div className="surface-card p-2.5 bg-emerald-500/10 text-action-success text-xs font-medium flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               Gate claimed ({claimedGateName}). Routing to your desk…
             </div>

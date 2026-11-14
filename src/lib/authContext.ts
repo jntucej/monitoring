@@ -15,7 +15,7 @@ import { verifyAccessToken } from './auth-token';
 import { query } from './postgres';
 import { isPrivileged, isSuperAdmin } from './roles';
 
-// ── Issue #382: user-level cache (not context-level) ──────────────────────
+// ── Issue issue-382: user-level cache (not context-level) ──────────────────────
 // Never cache the full AuthContext keyed by token — that would honour stale
 // sessions after a password change for the full TTL. Instead, cache only the
 // DB user row for a short window (30 s) so repeated requests within the same
@@ -171,7 +171,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
     throw new Error('UNAUTHORIZED: Invalid or expired token');
   }
 
-  // Issue #382: use the short-TTL user row cache. The session_version check
+  // Issue issue-382: use the short-TTL user row cache. The session_version check
   // below is ALWAYS performed — we compare the token's embedded version
   // against the (possibly freshly-fetched) DB value so a password change
   // is caught within at most USER_ROW_TTL_MS (30 s).
@@ -200,7 +200,7 @@ export async function createAuthContext(token: string): Promise<AuthContext> {
   // enrollment endpoints themselves become unreachable (lockout trap).
   // Enforcement now lives in `withAuthorization` (middleware) and at login.
 
-  // Issue #541: Log role drift if token payload role differs from DB role
+  // Issue issue-541: Log role drift if token payload role differs from DB role
   if (payload && payload.role && payload.role !== profile.role) {
     console.warn("[auth] JWT role drift detected — utilizing authoritative DB role", {
       userId: profile.id,

@@ -121,16 +121,16 @@ const api = useApi();
 
   if (loading) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-border p-8 flex items-center gap-2 text-text-muted text-sm">
-        <Loader2 className="w-4 h-4 animate-spin" /> Loading ID…
+      <div className="surface-card bg-bg-surface p-8 flex items-center gap-2 text-text-muted text-sm">
+        <Loader2 className="w-6 h-6 animate-spin" /> Loading ID…
       </div>
     );
   }
 
   if (error || !student) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-border p-8 text-center space-y-2">
-        <AlertCircle className="w-8 h-8 text-action-danger mx-auto opacity-60" />
+      <div className="surface-card bg-bg-surface p-8 text-center space-y-2">
+        <AlertCircle className="size-6 text-action-danger mx-auto opacity-60" />
         <p className="text-sm font-semibold text-text-primary">Unable to Load ID Card</p>
         <p className="text-xs text-text-muted">{error || "Student record not found."}</p>
       </div>
@@ -158,9 +158,9 @@ const api = useApi();
   const photoSrc = student.photo || "/avatar-placeholder.png";
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
+    <div className="surface-card bg-bg-surface p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-24 sm:w-28 md:w-28 lg:w-32 h-24 sm:h-28 md:h-28 lg:h-32 rounded-full mb-3 sm:mb-4 border-4 borderaction-info overflow-hidden">
+      <div className="relative w-6 sm:w-28 md:w-28 lg:w-6 h-6 sm:h-28 md:h-28 lg:h-6 rounded-full mb-3 sm:mb-4 border-4 borderaction-info overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
@@ -169,7 +169,7 @@ const api = useApi();
       <p className="text-sm sm:text-base md:text-lg font-mono">{student.roll}</p>
 
       {decoded && (
-        <div className="mt-2 sm:mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-bg-base/50 rounded-lg text-center">
+        <div className="surface-card mt-2 sm:mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-bg-base/50 text-center">
           <p className="text-xs sm:text-sm font-medium text-text-primary">
             {decoded.departmentFullName}
           </p>
@@ -209,7 +209,7 @@ const api = useApi();
       </div>
 
       {/* Signed QR Code — short-lived token, not the raw roll */}
-      <div ref={qrRef} className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white rounded-2xl flex flex-col items-center shadow-lg relative">
+      <div ref={qrRef} className="surface-card mt-4 sm:mt-6 p-3 sm:p-4 bg-white flex flex-col items-center relative">
         {qrToken ? (
           <QRCode
             value={qrToken}
@@ -221,27 +221,27 @@ const api = useApi();
             <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
           </div>
         )}
-        <div className="mt-1.5 sm:mt-2 text-xs sm:text-xs font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-border">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-action-success" />
+        <div className="surface-card mt-1.5 sm:mt-2 text-xs sm:text-xs font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1">
+          <span className="size-6 sm:w-6 sm:h-6 rounded-full bg-action-success" />
           Gate Verification QR
         </div>
         <button
           onClick={downloadQR}
           disabled={downloading || !qrToken}
-          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-surface text-white text-xs font-bold hover:bg-bg-elevated disabled:opacity-50 transition"
+          className="surface-card mt-2.5 flex items-center gap-1.5 px-3 py-1.5 bg-bg-surface text-white text-xs font-bold hover:bg-bg-elevated disabled:opacity-50 transition"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Saving…" : "Save QR as PNG"}
         </button>
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-text-muted flex items-center gap-1">
-        <QrCode className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-action-primary" />
+        <QrCode className="w-6 sm:w-3.5 h-6 sm:h-3.5 text-action-primary" />
         Signed token — refreshes automatically
       </p>
 
       {/* Today's Mess Code */}
       {messToken && (
-        <div className="mt-4 sm:mt-6 w-full max-w-sm rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+        <div className="surface-card mt-4 sm:mt-6 w-full max-w-sm bg-emerald-500/10 p-4">
           <p className="text-xs font-semibold text-action-success uppercase tracking-wide mb-1">
             Today&apos;s Mess Code
           </p>

@@ -54,7 +54,7 @@ function SysadminConsentInner() {
         onRefresh={load}
       />
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -78,7 +78,7 @@ function SysadminConsentInner() {
                       {s.granted} active · {s.revoked} revoked · {s.total} total
                     </p>
                   </div>
-                  <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary">
+                  <span className="surface-card px-2 py-1 bg-action-primary/10 text-xs text-action-primary">
                     {s.total > 0 ? `${Math.round((s.granted / s.total) * 100)}% active` : "—"}
                   </span>
                 </div>
@@ -106,7 +106,7 @@ function SysadminConsentInner() {
                   <p className="text-sm font-medium text-text-primary">{row.cat}</p>
                   <p className="text-xs text-text-muted">Scope: {row.scope}</p>
                 </div>
-                <span className="px-2 py-1 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary shrink-0">
+                <span className="surface-card px-2 py-1 bg-action-primary/10 text-xs text-action-primary shrink-0">
                   {row.retention}
                 </span>
               </div>

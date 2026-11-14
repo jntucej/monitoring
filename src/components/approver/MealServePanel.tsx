@@ -270,7 +270,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
 
   return (
     <section
-      className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0"
+      className="surface-card bg-bg-surface/60 p-4 min-w-0"
       aria-label="Meal serve panel"
     >
       {/* Header */}
@@ -290,13 +290,13 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           aria-label="Refresh meal serve data"
         >
           {loading ? (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <Radio className="w-3 h-3" />
+            <Radio className="size-3.5" />
           )}
           <span>Refresh</span>
         </button>
@@ -320,14 +320,14 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
             {blocks.map((b) => (
               <li
                 key={b.hostelBlock}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-semibold text-text-primary truncate">
                       {b.hostelBlock}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-mono font-bold border text-action-success bg-emerald-400/10 border-emerald-400/20 shrink-0">
+                    <span className="surface-card inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-mono font-bold text-action-success bg-emerald-400/10 shrink-0">
                       {b.confirmed} served
                     </span>
                   </div>
@@ -337,7 +337,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
                   </p>
                 </div>
                 <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
-                  <PackageCheck className="w-3 h-3" />
+                  <PackageCheck className="size-3.5" />
                   {b.attendanceRate}%
                 </span>
               </li>
@@ -356,7 +356,7 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
                 }
               }}
               placeholder="Token code (e.g. 7F3A-9C2D)"
-              className="flex-1 min-w-0 rounded-lg border border-border bg-bg-base px-2.5 py-1.5 text-xs font-mono text-text-primary placeholder:text-text-muted outline-none focus:border-action-primary/60"
+              className="surface-card flex-1 min-w-0 bg-bg-base px-2.5 py-1.5 text-xs font-mono text-text-primary placeholder:text-text-muted outline-none focus:"
               aria-label="Manual serve token code"
               disabled={busy}
             />
@@ -364,12 +364,12 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
               type="button"
               onClick={() => void handleManualServe()}
               disabled={busy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-action-primary text-white text-xs font-semibold px-3 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shrink-0"
+              className="surface-card inline-flex items-center gap-1.5 bg-action-primary text-white text-xs font-semibold px-3 py-1.5 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shrink-0"
             >
               {busy ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <UtensilsCrossed className="w-3 h-3" />
+                <UtensilsCrossed className="size-3.5" />
               )}
               Serve
             </button>
@@ -381,18 +381,18 @@ export function MealServePanel({ onRefresh }: MealServePanelProps) {
               type="button"
               onClick={() => void handleRevoke()}
               disabled={busy}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-400/40 text-action-danger hover:bg-rose-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-semibold transition-colors"
+              className="surface-card inline-flex items-center justify-center gap-1.5 text-action-danger hover:bg-rose-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-semibold transition-colors"
             >
-              <Ban className="w-3 h-3" />
+              <Ban className="size-3.5" />
               Revoke day
             </button>
             <button
               type="button"
               onClick={() => void handleMarkAllServed()}
               disabled={busy}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-400/40 text-action-success hover:bg-emerald-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-semibold transition-colors"
+              className="surface-card inline-flex items-center justify-center gap-1.5 text-action-success hover:bg-emerald-400/10 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-semibold transition-colors"
             >
-              <CheckCheck className="w-3 h-3" />
+              <CheckCheck className="size-3.5" />
               Finalize day
             </button>
           </div>

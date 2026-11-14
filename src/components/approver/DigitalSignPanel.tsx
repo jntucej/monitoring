@@ -80,7 +80,7 @@ export function DigitalSignPanel({
   // Completed: show signature hash + signed download.
   if (isCompleted) {
     return (
-      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+      <div className="surface-card p-3 bg-emerald-500/10 space-y-2">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-action-success" />
           <span className="text-xs font-bold text-action-success uppercase tracking-wider">
@@ -138,12 +138,12 @@ export function DigitalSignPanel({
           onChange={(e) => setNote(e.target.value)}
           disabled={signing}
           placeholder="Optional note (max 200 characters)"
-          className="w-full p-2.5 rounded-xl bg-bg-base border border-border text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
+          className="surface-card w-full p-2.5 bg-bg-base text-xs font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ringfocus-ring disabled:opacity-50"
         />
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30">
+        <div className="surface-card flex items-start gap-2 p-2.5 bg-rose-500/10">
           <AlertCircle className="w-4 h-4 text-action-danger shrink-0 mt-0.5" />
           <p className="text-xs text-action-danger font-medium">{error}</p>
         </div>

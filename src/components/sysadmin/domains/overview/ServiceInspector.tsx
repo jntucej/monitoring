@@ -59,11 +59,11 @@ function SectionPanel({ section, data, loading }: { section: keyof HealthData; d
       if (!db) return <p className="text-xs text-text-muted">No database metrics.</p>;
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="rounded-lg border border-border bg-bg-surface p-2">
+          <div className="surface-card bg-bg-surface p-2">
             <p className="text-xs uppercase text-text-muted">Active Conns</p>
             <p className="text-lg font-semibold text-text-primary">{db.conns}</p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-surface p-2">
+          <div className="surface-card bg-bg-surface p-2">
             <p className="text-xs uppercase text-text-muted">Pool Slots</p>
             <p className="text-lg font-semibold text-text-primary">{db.pool}</p>
           </div>
@@ -115,7 +115,7 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
 
   return (
     <div
-      className="rounded-xl border border-border bg-bg-elevated p-4 mt-3 animate-in fade-in slide-in-from-top-2 duration-200"
+      className="surface-card bg-bg-elevated p-4 mt-3 animate-in fade-in slide-in-from-top-2 duration-200"
       role="region"
       aria-label={`${meta.label} inspection`}
     >
@@ -133,7 +133,7 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded-md hover:bg-bg-surface text-text-muted transition-colors"
+          className="surface-card p-1 hover:bg-bg-surface text-text-muted transition-colors"
           aria-label="Close inspector"
         >
           <X className="h-4 w-4" />

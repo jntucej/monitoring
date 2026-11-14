@@ -144,7 +144,7 @@ function ExceptionsInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {(txError || permError) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate min-w-0">
             {[txError, permError].filter(Boolean).join(" · ")}
@@ -153,19 +153,15 @@ function ExceptionsInner() {
       )}
 
       <OperatorWidgetBoundary title="Today&rsquo;s Exceptions">
-        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
+        <div className="rounded-xl bg-bg-elevated overflow-hidden min-w-0">
           {/* Filter tabs */}
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-border min-w-0">
+          <div className="surface-card flex flex-wrap items-center gap-2 px-3 py-2 min-w-0">
             {(["ALL", "FLAGGED", "DENIED", "MANUAL"] as Filter[]).map((f) => (
               <button
                 key={f}
                 type="button"
                 onClick={() => setFilter(f)}
-                className={`min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 ${
-                  filter === f
-                    ? "bg-action-primary/15 text-action-primary"
-                    : "text-text-muted hover:text-text-primary"
-                }`}
+                className={` min-h11 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors shrink-0 "text-action-primary" "text-text-muted hover:text-text-primary" `}
               >
                 {f === "ALL"
                   ? "All exceptions"
@@ -222,13 +218,7 @@ function ExceptionsInner() {
                           {tags.map((t) => (
                             <span
                               key={t}
-                              className={`rounded-full border px-1.5 py-0.5 text-xs font-medium ${
-                                t === "Denied"
-                                  ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
-                                  : t === "Flagged"
-                                    ? "border-amber-500/30 bg-amber-500/10 text-action-warning"
-                                    : "border-sky-500/30 bg-sky-500/10 text-action-info"
-                              }`}
+                              className={` rounded-full px-1.5 py-0.5 text-xs font-medium "Denied" "text-action-danger" "Flagged" "text-action-warning" "text-action-info" `}
                             >
                               {t}
                             </span>
@@ -280,13 +270,7 @@ function ExceptionsInner() {
                                 tags.map((t) => (
                                   <span
                                     key={t}
-                                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
-                                      t === "Denied"
-                                        ? "border-rose-500/30 bg-rose-500/10 text-action-danger"
-                                        : t === "Flagged"
-                                          ? "border-amber-500/30 bg-amber-500/10 text-action-warning"
-                                          : "border-sky-500/30 bg-sky-500/10 text-action-info"
-                                    }`}
+                                    className={` rounded-full px-2 py-0.5 text-xs font-medium "Denied" "text-action-danger" "Flagged" "text-action-warning" "text-action-info" `}
                                   >
                                     {t}
                                   </span>
@@ -315,8 +299,8 @@ function ExceptionsInner() {
 
       {/* Denied hostel passes (workflow) */}
       <OperatorWidgetBoundary title="Rejected Passes Today">
-        <div className="rounded-xl border border-border bg-bg-elevated overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+        <div className="rounded-xl bg-bg-elevated overflow-hidden min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <ShieldAlert className="w-4 h-4 text-action-danger shrink-0" />
             <span className="text-sm font-semibold text-text-primary truncate">
               Hostel passes rejected at the main-gate stage today
@@ -351,7 +335,7 @@ function ExceptionsInner() {
                       {p.ticket_number || p.id}
                     </p>
                   </div>
-                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger shrink-0">
+                  <span className="surface-card bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger shrink-0">
                     REJECTED
                   </span>
                 </li>

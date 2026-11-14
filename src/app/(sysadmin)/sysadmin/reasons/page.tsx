@@ -201,7 +201,7 @@ const api = useApi();
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+        <div className="surface-card flex flex-wrap items-center gap-2 pb-3">
           <button
             type="button"
             onClick={() => setActiveTab("all")}
@@ -236,14 +236,14 @@ const api = useApi();
               placeholder="Search reasons or code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-3 rounded-md bg-bg-surface border border-border text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ringfocus-ring"
+              className="surface-card w-full h-10 pl-9 pr-3 bg-bg-surface text-sm text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ringfocus-ring"
             />
           </div>
           <span className="text-xs text-text-muted">Showing {filteredReasons.length} reasons</span>
         </div>
 
         <Card>
-          <CardHeader className="pb-3 border-b border-border">
+          <CardHeader className="surface-card pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Tag className="w-4 h-4 text-action-primary" />
               Configured Reasons
@@ -254,7 +254,7 @@ const api = useApi();
               <div className="p-8 text-center text-sm text-text-muted">Loading reasons...</div>
             ) : filteredReasons.length === 0 ? (
               <div className="p-12 text-center text-text-muted">
-                <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-60" />
+                <AlertCircle className="size-6 mx-auto mb-2 opacity-60" />
                 <p className="text-sm font-semibold text-text-primary">No reasons found</p>
               </div>
             ) : (
@@ -292,10 +292,10 @@ const api = useApi();
                         </td>
                         <td className="px-5 py-3.5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
-                            <Button variant="ghost" size="sm" onClick={() => openEditModal(item)} className="h-8 w-8 p-0" aria-label="Edit">
+                            <Button variant="ghost" size="sm" onClick={() => openEditModal(item)} className="size-6 p-0" aria-label="Edit">
                               <Edit2 className="w-3.5 h-3.5" />
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmItem(item)} className="h-8 w-8 p-0 text-action-danger hover:bg-rose-500/10" aria-label="Delete">
+                            <Button variant="ghost" size="sm" onClick={() => setDeleteConfirmItem(item)} className="size-6 p-0 text-action-danger hover:bg-rose-500/10" aria-label="Delete">
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </div>
@@ -342,7 +342,7 @@ const api = useApi();
               required
               helper="Lowercase alphanumeric and underscores only (/^[a-z0-9_]+$/)."
             />
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+            <div className="surface-card flex items-center justify-end gap-2 pt-3">
               <Button type="button" variant="secondary" size="sm" onClick={() => setIsModalOpen(false)} disabled={submitting}>
                 Cancel
               </Button>
@@ -358,7 +358,7 @@ const api = useApi();
             <p className="text-sm text-text-secondary">
               Are you sure you want to delete reason <strong>{deleteConfirmItem?.label}</strong> ({deleteConfirmItem?.code})?
             </p>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+            <div className="surface-card flex items-center justify-end gap-2 pt-2">
               <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteConfirmItem(null)} disabled={submitting}>
                 Cancel
               </Button>

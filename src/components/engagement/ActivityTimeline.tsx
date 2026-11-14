@@ -94,7 +94,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
     <WidgetBoundary title="Activity Timeline">
       <section
         aria-label="Activity timeline"
-        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
+        className="surface-card bg-bg-surface p-5 min-w-0"
       >
         <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
           <ScrollText className="h-4 w-4 text-action-success" aria-hidden />
@@ -110,7 +110,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
             Loading activity…
           </div>
         ) : error && !data ? (
-          <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
             {error}
           </div>
         ) : items.length === 0 ? (
@@ -127,11 +127,11 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
               return (
                 <li
                   key={item.id}
-                  className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
+                  className="surface-card bg-[var(--bg-raised)]/40 p-3.5"
                 >
                   <div className="flex items-start gap-2.5">
                     <div
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-raised)] ${Meta.color}`}
+                      className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-raised)] ${Meta.color}`}
                     >
                       <Icon className="h-3.5 w-3.5" aria-hidden />
                     </div>
@@ -141,12 +141,12 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
                       </p>
                       <p className="mt-0.5 text-xs text-text-muted">{item.detail}</p>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-text-muted">
-                        <Clock className="h-3 w-3" aria-hidden />
+                        <Clock className="size-3.5" aria-hidden />
                         {when ?? "—"}
                         {item.ctaHref && (
                           <a
                             href={item.ctaHref}
-                            className="ml-2 inline-flex items-center rounded-lg bg-indigo-500/15 px-2 py-0.5 font-medium text-indigo-300 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none"
+                            className="surface-card ml-2 inline-flex items-center bg-indigo-500/15 px-2 py-0.5 font-medium text-indigo-300 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none"
                           >
                             Open
                           </a>

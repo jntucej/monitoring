@@ -365,22 +365,22 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "shrink-0 border-r border-border bg-bg-surface flex flex-col",
+        "shrink-0 border-r border-border flex flex-col",
         widthClass,
         "transition-[width] duration-200"
       )}
       aria-label="Sysadmin navigation"
     >
       {/* Top bar: brand + collapse toggle + expand/collapse all */}
-      <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
+      <div className="surface-card flex items-center gap-2 px-3 py-3">
         <button
           type="button"
           onClick={() => (forceExpanded ? undefined : setCollapsed((v) => !v))}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!isCollapsed}
           className={cn(
-            "inline-flex items-center justify-center rounded-md p-1.5",
-            "text-text-muted hover:text-text-primary hover:bg-bg-elevated",
+            "inline-flex items-center justify-center p-1.5",
+            "text-text-muted",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary",
             "transition-colors"
           )}
@@ -396,7 +396,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
               type="button"
               onClick={collapseAll}
               title="Collapse all"
-              className="inline-flex items-center justify-center rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+              className="surface-card inline-flex items-center justify-center p-1 text-text-muted hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary hover:bg-bg-elevated"
             >
               <ChevronsDownUp className="h-4 w-4" />
             </button>
@@ -404,7 +404,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
               type="button"
               onClick={expandAll}
               title="Expand all"
-              className="inline-flex items-center justify-center rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+              className="surface-card inline-flex items-center justify-center p-1 text-text-muted hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary hover:bg-bg-elevated"
             >
               <ChevronsUpDown className="h-4 w-4" />
             </button>
@@ -413,7 +413,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                 type="button"
                 onClick={() => setShowAll(true)}
                 title="Show all categories"
-                className="rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text-primary hover:bg-bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                className="surface-card px-2 py-1 text-xs text-text-muted hover:text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary hover:bg-bg-elevated"
               >
                 Show all
               </button>
@@ -441,7 +441,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                     if (!forceExpanded) setCollapsed(false);
                     onNavigate?.();
                   }}
-                  className="flex items-center justify-center rounded-md h-9 w-full text-text-muted hover:text-text-primary hover:bg-bg-elevated"
+                  className="flex items-center justify-center h-9 w-full text-text-muted hover:text-text-primary hover:bg-bg-elevated"
                 >
                   <Icon className="h-4 w-4" />
                 </Link>
@@ -457,7 +457,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                   type="button"
                   onClick={() => toggleCat(cat.id)}
                   aria-expanded={isOpen}
-                  className="flex items-center gap-1.5 flex-1 min-w-0 py-0.5 hover:text-text-primary text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary rounded"
+                  className="surface-card flex items-center gap-1.5 flex-1 min-w-0 py-0.5 hover:text-text-primary text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary hover:bg-bg-elevated"
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="text-xs font-medium uppercase tracking-wider truncate flex-1 text-left">
@@ -504,10 +504,10 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                             onClick={() => toggleGroup(page.id)}
                             aria-expanded={isGroupOpen}
                             className={cn(
-                              "flex items-center gap-1.5 w-full rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
+                              "flex items-center gap-1.5 w-full px-2.5 py-1.5 text-sm font-medium transition-colors text-left",
                               isGroupActive
                                 ? "text-text-primary font-medium"
-                                : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
+                                : "text-text-muted"
                             )}
                           >
                             <span className="flex-1 truncate">{page.title}</span>
@@ -520,7 +520,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                             />
                           </button>
                           {isGroupOpen && (
-                            <ul className="pl-2.5 space-y-0.5 border-l border-border ml-3 my-0.5">
+                            <ul className="surface-card pl-2.5 space-y-0.5 ml-3 my-0.5">
                               {page.children.map((child) => {
                                 const childHref = child.route
                                   ? `/sysadmin/${child.route}`
@@ -537,20 +537,20 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                                       aria-current={isChildActive ? "page" : undefined}
                                       onClick={onNavigate}
                                       className={cn(
-                                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+                                        "flex items-center gap-1.5 px-2.5 py-1 text-xs transition-colors",
                                         isChildActive
-                                          ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
-                                          : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
+                                          ? "text-text-primary font-medium"
+                                          : "text-text-muted"
                                       )}
                                     >
                                       <span className="flex-1 truncate">{child.title}</span>
                                       {hasLive && (
                                         <span
                                           className={cn(
-                                            "ml-auto inline-flex items-center justify-center rounded-full text-xs font-medium min-w4 h4 px-1",
+                                            "ml-auto inline-flex items-center justify-center text-xs font-medium min-w4 h4 px-1",
                                             isChildActive
-                                              ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
-                                              : "bg-bg-elevated text-text-muted"
+                                              ? "text-text-primary"
+                                              : "text-text-muted"
                                           )}
                                           title={`${child.title}: ${liveCount} live`}
                                         >
@@ -582,21 +582,21 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                           aria-current={isActive ? "page" : undefined}
                           onClick={onNavigate}
                           className={cn(
-                            "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm",
+                            "flex items-center gap-1.5 px-2.5 py-1.5 text-sm",
                             "transition-colors",
                             isActive
-                              ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
-                              : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
+                              ? "text-text-primary font-medium"
+                              : "text-text-muted"
                           )}
                         >
                           <span className="flex-1 truncate">{page.title}</span>
                           {hasLive && (
                             <span
                               className={cn(
-                                "ml-auto inline-flex items-center justify-center rounded-full text-xs font-medium min-w-[18px] h-[18px] px-1",
+                                "ml-auto inline-flex items-center justify-center text-xs font-medium min-w-[18px] h-[18px] px-1",
                                 isActive
-                                  ? "bg-[color-mix(in_srgb,var(--action-primary)_22%,transparent)] text-text-primary"
-                                  : "bg-bg-elevated text-text-muted"
+                                  ? "text-text-primary"
+                                  : "text-text-muted"
                               )}
                               title={`${page.title}: ${liveCount} live`}
                             >
@@ -615,7 +615,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
 
         {/* Personal footer routes (manifest `personal`) */}
         {!collapsed && personalRoutes.length > 0 && (
-          <div className="border-t border-border mt-2 pt-2 px-1">
+          <div className="surface-card mt-2 pt-2 px-1">
             {personalRoutes.map((p) => {
               const href = p.route ? `/sysadmin/${p.route}` : "/sysadmin";
               const isActive =
@@ -627,10 +627,10 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
                   aria-current={isActive ? "page" : undefined}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 text-sm transition-colors",
                     isActive
-                      ? "bg-[color-mix(in_srgb,var(--action-primary)_14%,transparent)] text-text-primary font-medium"
-                      : "text-text-muted hover:bg-bg-elevated hover:text-text-primary"
+                      ? "text-text-primary font-medium"
+                      : "text-text-muted"
                   )}
                 >
                   <span className="flex-1 truncate">{p.title}</span>
@@ -646,7 +646,7 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
       </nav>
 
       {/* Account footer: profile button + appearance + sign out */}
-      <div className="shrink-0 border-t border-border p-2">
+      <div className="surface-card shrink-0 p-2">
         <ProfileMenuButton consoleRoot="/sysadmin" compact={collapsed} />
       </div>
     </aside>

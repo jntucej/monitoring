@@ -370,7 +370,7 @@ export function DeputyWardenCommandBar({ role, open, onClose }: DeputyWardenComm
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <div className="surface-card flex items-center gap-2 px-4 py-3">
           <Search className="w-4 h-4 text-text-muted shrink-0" />
           <input
             ref={inputRef}
@@ -384,14 +384,14 @@ export function DeputyWardenCommandBar({ role, open, onClose }: DeputyWardenComm
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
             aria-label="Deputy Warden command input"
           />
-          <kbd className="text-xs font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border shrink-0">
+          <kbd className="surface-card text-xs font-mono px-1.5 py-0.5 bg-bg-elevated text-text-muted shrink-0">
             esc
           </kbd>
         </div>
 
         {/* Parsed-command preview */}
         {parsedPreview && parsedPreview.action !== "UNKNOWN" ? (
-          <div className="px-4 py-2 border-b border-border bg-bg-elevated text-xs text-text-secondary">
+          <div className="surface-card px-4 py-2 bg-bg-elevated text-xs text-text-secondary">
             <span className="font-mono font-bold text-action-primary">
               {parsedPreview.action}
             </span>
@@ -459,7 +459,7 @@ export function DeputyWardenCommandBar({ role, open, onClose }: DeputyWardenComm
                     }`}
                   >
                     <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                      className={`size-6 rounded-lg flex items-center justify-center shrink-0 ${
                         isActive
                           ? "bg-action-primary/20 text-action-primary"
                           : "bg-bg-elevated text-text-secondary"

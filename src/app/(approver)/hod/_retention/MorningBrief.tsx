@@ -36,7 +36,7 @@ export function MorningBrief({
       : `${pending} left — you're ${pct}% through today's target.`;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-full bg-action-primary/10">

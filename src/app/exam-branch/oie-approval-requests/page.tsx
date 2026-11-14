@@ -78,7 +78,7 @@ function OieApprovalRequestsInner() {
         href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Page toolbar */}
@@ -93,7 +93,7 @@ function OieApprovalRequestsInner() {
 
       {/* OIE handoff notice — never bypass */}
       <div
-        className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 min-w-0"
+        className="surface-card bg-emerald-500/10 p-4 min-w-0"
         role="note"
       >
         <p className="flex items-center gap-2 text-sm font-semibold text-action-success">
@@ -110,7 +110,7 @@ function OieApprovalRequestsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">
@@ -120,7 +120,7 @@ function OieApprovalRequestsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -129,7 +129,7 @@ function OieApprovalRequestsInner() {
 
       <WidgetBoundary title="OIE Approval Requests">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Inbox className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -152,7 +152,7 @@ function OieApprovalRequestsInner() {
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <Inbox className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <Inbox className="size-6 mx-auto text-text-muted mb-2" />
               <p className="text-sm text-text-muted">
                 No exam requests are currently pending OIE approval.
               </p>
@@ -169,8 +169,8 @@ function OieApprovalRequestsInner() {
                       <span className="font-mono text-xs text-text-secondary">
                         {req.ticket_number}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-action-success px-2 py-0.5 text-xs">
-                        <FileWarning className="w-3 h-3" />
+                      <span className="surface-card inline-flex items-center gap-1 bg-emerald-500/15 text-action-success px-2 py-0.5 text-xs">
+                        <FileWarning className="size-3.5" />
                         {stageLabel(req.current_stage)}
                       </span>
                       {req.sla_deadline && (

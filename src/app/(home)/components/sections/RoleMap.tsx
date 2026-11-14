@@ -130,9 +130,9 @@ function TiltCard({ role, reduced, index }: { role: Role; reduced: boolean; inde
     >
       <Link
         href={role.href}
-        className="group block h-full rounded-2xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-5"
+        className="surface-card group block h-full (--home- ,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-5"
       >
-        <role.Icon className="h-7 w-7 text-[var(--home-accent-indigo,var(--action-primary))]" />
+        <role.Icon className="size-6 text-[var(--home-accent-indigo,var(--action-primary))]" />
         <h3 className="mt-3 text-lg font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
           {role.name}
         </h3>

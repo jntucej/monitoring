@@ -28,8 +28,8 @@ const DOT: Record<ComponentStatus, string> = {
 
 function StatusDot({ status, label, detail }: { status: ComponentStatus; label: string; detail?: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-bg-surface px-3 py-2">
-      <span className={`h-2.5 w-2.5 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
+    <div className="surface-card flex items-center gap-2 bg-bg-surface px-3 py-2">
+      <span className={`size-2 rounded-full ${DOT[status]} ${status === "healthy" ? "animate-pulse" : ""}`} />
       <div>
         <p className="text-xs font-medium text-text-primary">{label}</p>
         {detail && <p className="text-xs text-text-muted">{detail}</p>}
@@ -101,7 +101,7 @@ export default function SystemHealthPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <div className="surface-card p-2 bg-emerald-500/10">
           <Activity className="w-5 h-5 text-action-success" />
         </div>
         <div>

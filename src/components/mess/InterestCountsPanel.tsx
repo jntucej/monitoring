@@ -95,7 +95,7 @@ export function InterestCountsPanel({ eventId }: { eventId: string }) {
                     {s.itemIds.map((id) => {
                       const it = itemById.get(id);
                       return (
-                        <span key={id} className="rounded-full border border-border px-2 py-0.5 text-xs text-text-secondary">
+                        <span key={id} className="surface-card px-2 py-0.5 text-xs text-text-secondary">
                           {it?.label ?? id}
                         </span>
                       );

@@ -217,11 +217,11 @@ export function SemesterRecap() {
     <WidgetBoundary title="Semester Recap">
       <section
         aria-label="Semester recap"
-        className="rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 viabg-surface to-violet-500/10 p-5 min-w-0"
+        className="surface-card bg-surface-muted p-5 min-w-0"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
+            <div className="flex size-6 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
               <Sparkles className="h-4 w-4" aria-hidden />
             </div>
             <div>
@@ -237,7 +237,7 @@ export function SemesterRecap() {
             type="button"
             onClick={() => void handleShare()}
             disabled={!data}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-1.5 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
           >
             {copied ? (
               <CheckCircle2 className="h-3.5 w-3.5 text-action-success" aria-hidden />
@@ -250,7 +250,7 @@ export function SemesterRecap() {
             type="button"
             onClick={() => void handleDownload()}
             disabled={!data}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-1.5 bg-indigo-500/15 px-2.5 py-1.5 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" aria-hidden />
             Download card
@@ -263,25 +263,25 @@ export function SemesterRecap() {
             Building your recap…
           </div>
         ) : error && !data ? (
-          <div className="mt-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-5 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : data ? (
           <>
             <p className="mt-4 text-lg font-bold text-text-primary">
               {data.userName}
-              <span className="ml-2 rounded-full bg-[var(--bg-raised)] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
+              <span className="surface-card ml-2 bg-[var(--bg-raised)] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-text-muted">
                 {data.role}
               </span>
             </p>
 
             <div className="mt-4 grid grid-cols-3 gap-2.5">
-              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <CalendarDays className="mx-auto h-4 w-4 text-action-info" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">{data.eventsRegistered}</p>
                 <p className="text-xs uppercase tracking-wide text-text-muted">
                   Events joined
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <Award className="mx-auto h-4 w-4 text-action-warning" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.earnedAchievements.length}
@@ -290,7 +290,7 @@ export function SemesterRecap() {
                   Badges earned
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <Target className="mx-auto h-4 w-4 text-unit-c" aria-hidden />
                 <p className="mt-1 text-lg font-bold tabular-nums">
                   {data.completedGoals}/{data.totalGoals}
@@ -304,7 +304,7 @@ export function SemesterRecap() {
             {(data.completedEvents.length > 0 || data.earnedAchievements.length > 0) && (
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {data.completedEvents.length > 0 && (
-                  <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
+                  <div className="surface-card bg-bg-surface/50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Events
                     </p>
@@ -318,7 +318,7 @@ export function SemesterRecap() {
                   </div>
                 )}
                 {data.earnedAchievements.length > 0 && (
-                  <div className="rounded-xl border border-border bg-bg-surface/50 p-3">
+                  <div className="surface-card bg-bg-surface/50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Badges
                     </p>

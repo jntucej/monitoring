@@ -124,7 +124,7 @@ function ReleaseRail({ rows }: { rows: DeploymentRow[] }) {
         {visible.map((d, _i) => (
           <div
             key={d.id}
-            className="shrink-0 text-xs text-text-muted px-1.5 py-0.5 rounded bg-bg-surface border border-border w7 text-center"
+            className="surface-card shrink-0 text-xs text-text-muted px-1.5 py-0.5 bg-bg-surface w7 text-center"
             title={`${d.status} · ${relative(d.created_at)}`}
           >
             {new Date(d.created_at).toLocaleDateString(undefined, {
@@ -165,7 +165,7 @@ export function DeploymentsContent(
 
   if (error) {
     return (
-      <div className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger">
+      <div className="surface-card bg-action-danger/10 p-4 text-sm text-action-danger">
         Failed to load deployment data: {error}
       </div>
     );
@@ -180,7 +180,7 @@ export function DeploymentsContent(
       {/* KPI strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* last deploy */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Last Deploy
           </p>
@@ -190,7 +190,7 @@ export function DeploymentsContent(
         </div>
 
         {/* health gate pass % */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Health Gate
           </p>
@@ -211,7 +211,7 @@ export function DeploymentsContent(
         </div>
 
         {/* rollbacks 30d */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Rollbacks 30d
           </p>
@@ -228,7 +228,7 @@ export function DeploymentsContent(
         </div>
 
         {/* lead time */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Lead Time
           </p>
@@ -239,7 +239,7 @@ export function DeploymentsContent(
       </div>
 
       {/* Signature visual: release rail */}
-      <div className="rounded-xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         <p className="text-sm font-semibold text-text-primary mb-3">
           Release Rail
         </p>

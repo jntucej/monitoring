@@ -114,7 +114,7 @@ export function Modules() {
                 animate={reduced ? undefined : { opacity: 1, y: 0 }}
                 exit={reduced ? undefined : { opacity: 0, y: -8 }}
                 transition={{ duration: 0.28 }}
-                className="rounded-3xl border border-[var(--home-border-soft,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-10"
+                className="surface-card (--home- ,rgba(255,255,255,0.08))] bg-[var(--home-bg-elev-1,var(--bg-base))] p-10"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-[var(--home-text-muted,var(--text-muted))]">
                   Module {String(activeIndex + 1).padStart(2, "0")}

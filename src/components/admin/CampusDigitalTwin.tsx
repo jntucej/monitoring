@@ -100,7 +100,7 @@ function CampusDigitalTwinView() {
         </div>
       </div>
 
-      <div className="relative w-full h100 bg-bg-elevated border border-border rounded-lg overflow-hidden flex items-center justify-center p-4">
+      <div className="surface-card relative w-full h100 bg-bg-elevated overflow-hidden flex items-center justify-center p-4">
         <svg viewBox="0 0 800 400" className="w-full h-full">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -118,7 +118,7 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[0].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="60" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[0].name}</text>
+                <text x="60" y="75" fill="var(--color-surface)" fontSize="12" fontWeight="bold">{twinData.zones[0].name}</text>
                 <text x="60" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[0].current_occupancy} / {twinData.zones[0].capacity} ({twinData.zones[0].occupancy_percentage}%)
                 </text>
@@ -133,7 +133,7 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[1].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="310" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[1].name}</text>
+                <text x="310" y="75" fill="var(--color-surface)" fontSize="12" fontWeight="bold">{twinData.zones[1].name}</text>
                 <text x="310" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[1].current_occupancy} / {twinData.zones[1].capacity} ({twinData.zones[1].occupancy_percentage}%)
                 </text>
@@ -148,7 +148,7 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor(twinData.zones[2].occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="560" y="75" fill="#fff" fontSize="12" fontWeight="bold">{twinData.zones[2].name}</text>
+                <text x="560" y="75" fill="var(--color-surface)" fontSize="12" fontWeight="bold">{twinData.zones[2].name}</text>
                 <text x="560" y="95" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {twinData.zones[2].current_occupancy} / {twinData.zones[2].capacity} ({twinData.zones[2].occupancy_percentage}%)
                 </text>
@@ -163,7 +163,7 @@ function CampusDigitalTwinView() {
                   stroke={getStrokeColor((twinData.zones[3] || twinData.zones[4]).occupancy_percentage)} strokeWidth="2"
                   className="hover:opacity-80 transition-all"
                 />
-                <text x="60" y="245" fill="#fff" fontSize="12" fontWeight="bold">{(twinData.zones[3] || twinData.zones[4]).name}</text>
+                <text x="60" y="245" fill="var(--color-surface)" fontSize="12" fontWeight="bold">{(twinData.zones[3] || twinData.zones[4]).name}</text>
                 <text x="60" y="265" fill="var(--text-muted)" fontSize="10">
                   Occupancy: {(twinData.zones[3] || twinData.zones[4]).current_occupancy} ({(twinData.zones[3] || twinData.zones[4]).occupancy_percentage}%)
                 </text>
@@ -175,7 +175,7 @@ function CampusDigitalTwinView() {
             {twinData.gates.map((g, i) => (
               <g key={g.id} transform={`translate(${180 + i * 140}, 360)`} className="cursor-pointer">
                 <circle r="12" fill={g.status === "online" ? "var(--action-success)" : "var(--action-warning)"} />
-                <text x="0" y="4" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">G{i + 1}</text>
+                <text x="0" y="4" textAnchor="middle" fill="var(--color-surface)" fontSize="10" fontWeight="bold">G{i + 1}</text>
               </g>
             ))}
           </g>
@@ -183,37 +183,37 @@ function CampusDigitalTwinView() {
       </div>
 
       {selectedZone && (
-        <div className="p-4 rounded border border-border bg-[var(--bg-surface-elevated)] space-y-3 text-xs">
+        <div className="surface-card p-4 bg-[var(--bg-surface-elevated)] space-y-3 text-xs">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-unit-c" />
               <h4 className="font-bold text-sm text-text-primary">{selectedZone.name} Detailed Breakdown</h4>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedZone(null)} className="h-7 w-7 p-0">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedZone(null)} className="size-5 p-0">
               <X className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+            <div className="surface-card p-2 bg-bg-surface text-center">
               <span className="text-text-secondary">Students</span>
               <div className="font-bold text-sm text-action-primary">
                 {selectedZone.breakdown?.students ?? Math.round(selectedZone.current_occupancy * 0.7)}
               </div>
             </div>
-            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+            <div className="surface-card p-2 bg-bg-surface text-center">
               <span className="text-text-secondary">Faculty</span>
               <div className="font-bold text-sm text-action-success">
                 {selectedZone.breakdown?.faculty ?? Math.round(selectedZone.current_occupancy * 0.15)}
               </div>
             </div>
-            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+            <div className="surface-card p-2 bg-bg-surface text-center">
               <span className="text-text-secondary">Staff</span>
               <div className="font-bold text-sm text-action-warning">
                 {selectedZone.breakdown?.staff ?? Math.round(selectedZone.current_occupancy * 0.1)}
               </div>
             </div>
-            <div className="p-2 bg-bg-surface border border-border rounded text-center">
+            <div className="surface-card p-2 bg-bg-surface text-center">
               <span className="text-text-secondary">Visitors</span>
               <div className="font-bold text-sm text-unit-c">
                 {selectedZone.breakdown?.visitors ?? Math.round(selectedZone.current_occupancy * 0.05)}
@@ -221,7 +221,7 @@ function CampusDigitalTwinView() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2 rounded bg-purple-500/10 border border-purple-500/20 text-purple-300">
+          <div className="surface-card flex items-center justify-between p-2 bg-purple-500/10 text-purple-300">
             <div className="flex items-center gap-1.5">
               <TrendingUp className="h-4 w-4" />
               <span>1-Hour Predictive Occupancy Forecast:</span>

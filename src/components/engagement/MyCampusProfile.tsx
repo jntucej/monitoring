@@ -51,7 +51,7 @@ interface ProfileData {
 
 function Stat({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Inbox }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface/60 p-3 text-center">
+    <div className="surface-card bg-bg-surface/60 p-3 text-center">
       <Icon className="mx-auto h-4 w-4 text-text-muted" aria-hidden />
       <p className="mt-1 text-xl font-bold tabular-nums">{value}</p>
       <p className="text-xs uppercase tracking-wide text-text-muted">{label}</p>
@@ -95,20 +95,20 @@ export function MyCampusProfile() {
 
   return (
     <WidgetBoundary title="My Campus Profile">
-      <section aria-label="My campus profile" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="My campus profile" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-500/15 text-action-primary">
-            <User className="h-5 w-5" aria-hidden />
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500/15 text-action-primary">
+            <User className="h-4 w-4" aria-hidden />
           </div>
           <div className="min-w-0">
             <p className="truncate font-semibold text-text-primary">{displayName}</p>
             <p className="flex flex-wrap items-center gap-1 text-xs text-text-muted">
               {displayRoll && (
-                <span className="rounded bg-[var(--bg-raised)] px-1.5 py-0.5 font-mono text-xs">{displayRoll}</span>
+                <span className="surface-card bg-[var(--bg-raised)] px-1.5 py-0.5 font-mono text-xs">{displayRoll}</span>
               )}
               {displayRole && (
                 <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide">
-                  <BadgeCheck className="h-3 w-3" aria-hidden />
+                  <BadgeCheck className="size-3.5" aria-hidden />
                   {displayRole}
                 </span>
               )}
@@ -122,13 +122,13 @@ export function MyCampusProfile() {
             Loading your campus profile…
           </div>
         ) : error && !data ? (
-          <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
             {error}
             <div className="mt-2">
               <button
                 type="button"
                 onClick={() => void load()}
-                className="rounded-lg border border-rose-400/40 px-2.5 py-1 text-xs font-medium hover:bg-rose-500/20 motion-reduce:transition-none transition-colors"
+                className="surface-card px-2.5 py-1 text-xs font-medium hover:bg-rose-500/20 motion-reduce:transition-none transition-colors"
               >
                 Retry
               </button>
@@ -144,7 +144,7 @@ export function MyCampusProfile() {
 
             <div className="mt-4 space-y-2.5">
               {data.latestAnnouncement ? (
-                <div className="flex items-start gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3">
+                <div className="surface-card flex items-start gap-2.5 bg-[var(--bg-raised)]/40 p-3">
                   <Megaphone className="mt-0.5 h-4 w-4 shrink-0 text-action-warning" aria-hidden />
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-text-primary">
@@ -160,7 +160,7 @@ export function MyCampusProfile() {
               )}
 
               {data.latestAchievement ? (
-                <div className="flex items-center gap-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3">
+                <div className="surface-card flex items-center gap-2.5 bg-[var(--bg-raised)]/40 p-3">
                   <Award className="h-4 w-4 shrink-0 text-action-success" aria-hidden />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-text-primary">

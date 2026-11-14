@@ -21,7 +21,7 @@ export function ApprovalDetailSheet({
     <>
       {/* Mobile: bottom sheet */}
       <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-        <div className="max-h-[85vh] overflow-y-auto rounded-t-2xl border-t border-border bg-bg-surface p-4 shadow-2xl space-y-3">
+        <div className="surface-card max-h-[85vh] overflow-y-auto bg-bg-surface p-4 space-y-3">
           <div className="flex justify-center">
             <div className="h-1.5 w-10 rounded-full bgborder" />
           </div>
@@ -36,7 +36,7 @@ export function ApprovalDetailSheet({
 
       {/* Desktop: side panel */}
       <div className="fixed inset-y-0 right-0 z-50 hidden w-full max-w-md md:block">
-        <div className="h-full overflow-y-auto border-l border-border bg-bg-surface p-4 shadow-2xl">
+        <div className="surface-card h-full overflow-y-auto bg-bg-surface p-4">
           <PermissionDetailPanel
             ticket={item.ticket_number}
             onClose={onClose}

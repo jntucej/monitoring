@@ -159,14 +159,14 @@ export function StageQueuePanel({
   }, [refresh]);
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface p-4">
+    <section className="surface-card bg-bg-surface p-4">
       <header className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
         <button
           type="button"
           onClick={retry}
           disabled={loading}
-          className="rounded-md p-1.5 text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:opacity-50"
+          className="surface-card p-1.5 text-text-secondary transition-colors hover:bg-bg-elevated hover:text-text-primary disabled:opacity-50"
           aria-label="Refresh queue"
           title="Refresh queue"
         >
@@ -181,7 +181,7 @@ export function StageQueuePanel({
       {error && (
         <div
           role="alert"
-          className="mb-3 rounded-md border border-action-danger/40 bg-action-danger/10 p-2 text-xs text-action-danger"
+          className="surface-card mb-3 bg-action-danger/10 p-2 text-xs text-action-danger"
         >
           {error}
         </div>
@@ -189,7 +189,7 @@ export function StageQueuePanel({
       {actionError && (
         <div
           role="alert"
-          className="mb-3 rounded-md border border-action-warning/40 bg-action-warning/10 p-2 text-xs text-action-warning"
+          className="surface-card mb-3 bg-action-warning/10 p-2 text-xs text-action-warning"
         >
           {actionError}
         </div>
@@ -235,32 +235,32 @@ export function StageQueuePanel({
                         type="button"
                         disabled={busy}
                         onClick={() => void handle(row, "APPROVE")}
-                        className="rounded-md bg-action-primary px-2 py-1 text-xs text-white disabled:opacity-50"
+                        className="surface-card bg-action-primary px-2 py-1 text-xs text-white disabled:opacity-50"
                         aria-label={`Approve ${row.ticket_number}`}
                         title="Approve"
                       >
                         {busy ? (
-                          <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+                          <Loader2 className="size-3.5 animate-spin" aria-hidden />
                         ) : (
-                          <Check className="h-3 w-3" aria-hidden />
+                          <Check className="size-3.5" aria-hidden />
                         )}
                       </button>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => void handle(row, "REJECT")}
-                        className="rounded-md bg-action-danger px-2 py-1 text-xs text-white disabled:opacity-50"
+                        className="surface-card bg-action-danger px-2 py-1 text-xs text-white disabled:opacity-50"
                         aria-label={`Reject ${row.ticket_number}`}
                         title="Reject"
                       >
-                        <X className="h-3 w-3" aria-hidden />
+                        <X className="size-3.5" aria-hidden />
                       </button>
                       {allowForward && (
                         <button
                           type="button"
                           disabled={busy}
                           onClick={() => void handle(row, "FORWARD")}
-                          className="rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-secondary disabled:opacity-50"
+                          className="surface-card bg-bg-elevated px-2 py-1 text-xs text-text-secondary disabled:opacity-50"
                           aria-label={`Forward ${row.ticket_number}`}
                           title="Forward to next stage"
                         >
@@ -269,8 +269,8 @@ export function StageQueuePanel({
                       )}
                     </div>
                   ) : (
-                    <span className="flex shrink-0 items-center gap-1 rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-muted">
-                      <Eye className="h-3 w-3" aria-hidden /> View only
+                    <span className="surface-card flex shrink-0 items-center gap-1 bg-bg-elevated px-2 py-1 text-xs text-text-muted">
+                      <Eye className="size-3.5" aria-hidden /> View only
                     </span>
                   )}
                 </li>

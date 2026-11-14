@@ -133,7 +133,7 @@ export function RoleHierarchyGraph({
                 <ChevronRight className="w-4 h-4" />
               )
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-bg-elevated" />
+              <span className="size-4 rounded-full bg-bg-elevated" />
             )}
           </button>
 
@@ -143,7 +143,7 @@ export function RoleHierarchyGraph({
             <Building2 className="w-4 h-4 shrink-0 text-text-muted" />
           )}
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-4">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`font-mono text-xs font-bold ${isRoot ? "text-action-success" : "text-text-muted"}`}>
                 {node.code}
@@ -156,7 +156,7 @@ export function RoleHierarchyGraph({
             </div>
             <div className="mt-0.5 flex items-center gap-3 flex-wrap">
               <span className="inline-flex items-center gap-1 text-xs text-text-muted">
-                <Users className="w-3 h-3" />
+                <Users className="size-3.5" />
                 <span className="font-mono font-bold text-white tabular-nums">{members}</span>
                 user{members === 1 ? "" : "s"}
               </span>
@@ -166,7 +166,7 @@ export function RoleHierarchyGraph({
                     onCampus > 0 ? "text-action-success" : "text-text-muted"
                   }`}
                 >
-                  <Lock className="w-3 h-3" />
+                  <Lock className="size-3.5" />
                   <span className="font-mono font-bold tabular-nums">{onCampus}</span>
                   in campus
                 </span>
@@ -193,16 +193,16 @@ export function RoleHierarchyGraph({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary">
+          <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 bg-bg-elevated text-xs text-text-secondary">
             <ShieldCheck className="w-3.5 h-3.5 text-action-success" />
             {totals.roles} roles
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary">
+          <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 bg-bg-elevated text-xs text-text-secondary">
             <Users className="w-3.5 h-3.5 text-action-success" />
             {totals.members} total users
           </span>
           {showOnCampus && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-xs text-action-success">
+            <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-xs text-action-success">
               <Lock className="w-3.5 h-3.5" />
               {totals.onCampus} in campus
             </span>
@@ -212,14 +212,14 @@ export function RoleHierarchyGraph({
           <button
             type="button"
             onClick={expandAll}
-            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-secondary hover:text-white hover:border-border transition"
+            className="surface-card px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:text-white hover: transition"
           >
             Expand All
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs font-semibold text-text-secondary hover:text-white hover:border-border transition"
+            className="surface-card px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:text-white hover: transition"
           >
             Collapse All
           </button>

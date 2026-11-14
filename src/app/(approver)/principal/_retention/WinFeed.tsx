@@ -55,12 +55,12 @@ export function WinFeed() {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Sparkles className="size-4 text-action-warning" />
         <h2 className="text-sm font-semibold text-text-primary">Your wins</h2>
         {merged.length > 0 && (
-          <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs font-medium text-action-primary">
+          <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs font-medium text-action-primary">
             {merged.length}
           </span>
         )}

@@ -82,7 +82,7 @@ export function HostelCurfew() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Curfew & Returns">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <Moon className="w-4 h-4 text-violet-400" />
           <span className="text-xs font-semibold uppercase tracking-wide">

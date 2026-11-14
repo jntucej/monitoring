@@ -36,8 +36,8 @@ export const BotHeader = memo(function BotHeader({
     t.subtitle;
 
   return (
-    <header className="relative z-10 flex items-center gap-2 p-3 border-b border-border bg-bg-elevated/95 backdrop-blur-sm">
-      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-600
+    <header className="surface-card relative z-10 flex items-center gap-2 p-3 bg-bg-elevated/95 backdrop-blur-sm">
+      <div className="size-6 rounded-full bg-action-info
                       flex items-center justify-center shrink-0">
         <BotBoat phase={phase} size={26} />
       </div>
@@ -70,7 +70,7 @@ export const BotHeader = memo(function BotHeader({
           onClick={onNewChat}
           aria-label={t.newChat}
           title={t.newChat}
-          className="p-1.5 rounded-lg hover:bg-bg-elevated active:scale-95 transition"
+          className="surface-card p-1.5 hover:bg-bg-elevated active:scale-95 transition"
         >
           <Trash2 className="h-4 w-4 text-text-muted" />
         </button>
@@ -80,7 +80,7 @@ export const BotHeader = memo(function BotHeader({
         type="button"
         onClick={onClose}
         aria-label={t.close}
-        className="p-2 rounded-lg hover:bg-[var(--bg-surface-hover)] text-text-secondary hover:text-text-primary transition-colors active:scale-95"
+        className="surface-card p-2 hover:bg-[var(--bg-surface-hover)] text-text-secondary hover:text-text-primary transition-colors active:scale-95"
       >
         <X size={16} />
       </button>

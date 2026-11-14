@@ -88,13 +88,13 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h3 className="font-semibold">Gate Management</h3>
         {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-action-success" : "text-action-danger"}`}>{msg}</div>}
         <button
           onClick={() => setShowForm((s) => !s)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700"
+          className="surface-card inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600 text-white hover:bg-sky-700"
         >
           <PlusCircle className="w-5 h-5" />
           Add Gate
@@ -102,7 +102,7 @@ const api = useApi();
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="mb-4 p-4 bg-bg-base rounded-lg space-y-3">
+        <form onSubmit={submit} className="surface-card mb-4 p-4 bg-bg-base space-y-3">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="name">Name</label>
             <input id="name"
@@ -110,7 +110,7 @@ const api = useApi();
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Main Gate"
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
@@ -120,7 +120,7 @@ const api = useApi();
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. North Campus"
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
@@ -128,7 +128,7 @@ const api = useApi();
             <select id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "main" | "hostel" | "back")}
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             >
               <option value="main">Main</option>
               <option value="hostel">Hostel</option>
@@ -139,14 +139,14 @@ const api = useApi();
             <button
               type="submit"
               disabled={busy}
-              className="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 disabled:opacity-50"
+              className="surface-card px-4 py-2 bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 disabled:opacity-50"
             >
               {busy ? "Adding…" : "Add Gate"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg border border-border text-sm font-medium"
+              className="surface-card px-4 py-2 text-sm font-medium"
             >
               Cancel
             </button>
@@ -160,7 +160,7 @@ const api = useApi();
         </div>
       ) : error ? (
         <div className="p-8 flex flex-col items-center gap-4 text-center">
-          <XCircle className="w-10 h-10 text-red-500" />
+          <XCircle className="size-5 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load gates</h4>
           <p className="text-sm text-text-muted">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
         </div>
@@ -171,7 +171,7 @@ const api = useApi();
       ) : (
         <div className="space-y-3">
           {gates.map((gate) => (
-            <div key={gate.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
+            <div key={gate.id} className="surface-card flex items-center justify-between p-3 bg-white/5 flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <DoorOpen className="w-5 h-5 text-text-muted" />
                 <div>

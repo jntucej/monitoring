@@ -105,21 +105,21 @@ export function PredictiveAnalytics() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-action-success" />
+          <TrendingUp className="size-6 text-action-success" />
           <div>
             <div className="text-xs text-text-secondary">Model Accuracy (MAPE)</div>
             <div className="text-xl font-bold text-text-primary">{metrics.mape}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <Activity className="h-8 w-8 text-action-primary" />
+          <Activity className="size-6 text-action-primary" />
           <div>
             <div className="text-xs text-text-secondary">Root Mean Square Error (RMSE)</div>
             <div className="text-xl font-bold text-text-primary">{metrics.rmse}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <CheckCircle className="h-8 w-8 text-unit-c" />
+          <CheckCircle className="size-6 text-unit-c" />
           <div>
             <div className="text-xs text-text-secondary">Active Model Version</div>
             <div className="text-base font-bold text-text-primary">{metrics.model_version}</div>
@@ -130,7 +130,7 @@ export function PredictiveAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-action-warning" />
+            <AlertTriangle className="h-6 w-6 text-action-warning" />
             Real-Time Anomaly Detections (&gt;2.0σ Deviation)
           </CardTitle>
         </CardHeader>
@@ -139,7 +139,7 @@ export function PredictiveAnalytics() {
             <p className="text-xs text-text-secondary">No active statistical anomalies detected.</p>
           ) : (
             anomalies.map((anom) => (
-              <div key={anom.id} className="p-3 rounded border border-border bg-[var(--bg-surface-elevated)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div key={anom.id} className="surface-card p-3 bg-[var(--bg-surface-elevated)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Badge variant={anom.severity === "critical" ? "error" : "offline"} className="text-xs">

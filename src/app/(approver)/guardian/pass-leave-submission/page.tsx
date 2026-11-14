@@ -188,7 +188,7 @@ function PassLeaveSubmissionInner() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-3 text-sm text-action-warning flex items-start gap-2.5">
+      <div className="surface-card bg-amber-400/10 p-3 text-sm text-action-warning flex items-start gap-2.5">
         <Info className="w-4 h-4 shrink-0 mt-0.5 text-action-warning" />
         <p>
           <strong className="font-semibold text-amber-100">Submission only — no approval authority.</strong>{" "}
@@ -198,7 +198,7 @@ function PassLeaveSubmissionInner() {
       </div>
 
       {personsError && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200">
           Could not load wards.{" "}
           <button type="button" onClick={() => void refreshPersons()} className="underline font-semibold">
             Retry
@@ -210,7 +210,7 @@ function PassLeaveSubmissionInner() {
         {/* ── submission form ── */}
         <form
           onSubmit={submit}
-          className="rounded-xl border border-border bg-bg-surface p-4 space-y-4"
+          className="surface-card bg-bg-surface p-4 space-y-4"
         >
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             New request
@@ -231,7 +231,7 @@ function PassLeaveSubmissionInner() {
                   value={wardId}
                   onChange={(e) => setWardId(e.target.value)}
                   disabled={busy}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
                 >
                   {wards.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -250,7 +250,7 @@ function PassLeaveSubmissionInner() {
                   value={passType}
                   onChange={(e) => setPassType(e.target.value)}
                   disabled={busy || passTypesLoading}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
                 >
                   {passTypes.map((t) => (
                     <option key={t.code} value={t.code}>
@@ -277,7 +277,7 @@ function PassLeaveSubmissionInner() {
                     onChange={(e) => setFrom(e.target.value)}
                     min={toLocalInputValue(new Date().toISOString())}
                     disabled={busy}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+                    className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -290,7 +290,7 @@ function PassLeaveSubmissionInner() {
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
                     disabled={busy}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+                    className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -306,14 +306,14 @@ function PassLeaveSubmissionInner() {
                   rows={3}
                   placeholder="Reason for the pass or leave (optional)"
                   disabled={busy}
-                  className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:borderaction-success disabled:opacity-50"
+                  className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus: disabled:opacity-50"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={busy || wards.length === 0}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold w-full sm:w-auto"
+                className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold w-full sm:w-auto"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {busy ? "Submitting…" : "Submit request"}
@@ -336,7 +336,7 @@ function PassLeaveSubmissionInner() {
         </form>
 
         {/* ── ward request status list ── */}
-        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-4 space-y-3 min-w-0">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Ward request status
@@ -351,7 +351,7 @@ function PassLeaveSubmissionInner() {
               <Loader2 className="w-4 h-4 animate-spin" /> Loading requests…
             </div>
           ) : rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-text-muted">
+            <div className="surface-card p-6 text-center text-sm text-text-muted">
               No requests found for your wards.
             </div>
           ) : (
@@ -359,7 +359,7 @@ function PassLeaveSubmissionInner() {
               {rows.slice(0, 12).map((r) => (
                 <div
                   key={r.id}
-                  className="rounded-lg border border-border bg-bg-base/50 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0"
+                  className="surface-card bg-bg-base/50 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text-primary font-mono">

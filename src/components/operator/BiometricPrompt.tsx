@@ -89,7 +89,7 @@ export function BiometricPrompt({
       aria-label="Biometric verification"
       className="fixed inset-x-0 bottom-0 z-80 mx-auto w-full max-w-md p-4"
     >
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 shadow-2xl">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-center gap-2">
           {busy ? (
             <Loader2 className="h-5 w-5 animate-spin text-action-primary" aria-hidden />

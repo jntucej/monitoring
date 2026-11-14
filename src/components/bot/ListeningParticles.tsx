@@ -22,7 +22,7 @@ export function ListeningParticles({ active }: { active: boolean }) {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="block w-[2.5px] rounded-full bg-[var(--chrome-mid, #CDCBCA)]
+          className="block w-[2.5px] rounded-full bg-[var(--chrome-mid, var(--color-border-strong))]
                      listening-bar"
           style={{ animationDelay: `${i * 0.22}s`, height: 8 }}
         />

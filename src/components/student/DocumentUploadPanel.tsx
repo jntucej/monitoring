@@ -152,7 +152,7 @@ export function DocumentUploadPanel({
               : "border-border bg-bg-base hover:bordertext-muted"
           }`}
         >
-          <UploadCloud className="w-8 h-8 text-text-muted" />
+          <UploadCloud className="size-6 text-text-muted" />
           <p className="text-xs font-semibold text-text-secondary">
             Drag &amp; drop a PDF here, or click to browse
           </p>
@@ -169,7 +169,7 @@ export function DocumentUploadPanel({
 
       {/* Selected file preview */}
       {showDropzone && file && (
-        <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+        <div className="surface-card flex items-center justify-between gap-2 p-2.5 bg-bg-elevated">
           <div className="flex items-center gap-2 min-w-0">
             <FileText className="w-4 h-4 text-action-warning shrink-0" />
             <span className="text-xs font-semibold text-text-primary truncate">{file.name}</span>
@@ -178,7 +178,7 @@ export function DocumentUploadPanel({
           <button
             type="button"
             onClick={reset}
-            className="p-1 rounded hover:bg-bg-surface text-text-muted hover:text-text-primary"
+            className="surface-card p-1 hover:bg-bg-surface text-text-muted hover:text-text-primary"
             aria-label="Remove selected file"
           >
             <X className="w-3.5 h-3.5" />
@@ -188,7 +188,7 @@ export function DocumentUploadPanel({
 
       {/* Error banner */}
       {error && (
-        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30">
+        <div className="surface-card flex items-start gap-2 p-2.5 bg-rose-500/10">
           <AlertCircle className="w-4 h-4 text-action-danger shrink-0 mt-0.5" />
           <p className="text-xs text-action-danger font-medium">{error}</p>
         </div>

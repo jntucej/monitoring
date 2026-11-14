@@ -7,7 +7,7 @@ export default function DeputyWardenCurfewOversightPage() {
   return (
     <div className="p-6">
       <EmptyState
-        icon={<Clock className="w-8 h-8" />}
+        icon={<Clock className="size-6" />}
         title="Curfew Oversight"
         description="Hostel curfew check and student presence monitoring."
       />

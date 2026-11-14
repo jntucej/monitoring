@@ -39,7 +39,7 @@ export function PersonList() {
 
   return (
     <div className="bg-bg-surface rounded-xl border border-border">
-      <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-3">
+      <div className="surface-card p-4 flex flex-wrap justify-between items-center gap-3">
         <div>
           <h3 className="font-semibold text-white">Campus Directory</h3>
           <p className="text-xs text-text-muted">
@@ -50,7 +50,7 @@ export function PersonList() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary"
+            className="surface-card px-3 py-2 bg-bg-base text-sm text-text-primary"
           >
             <option value="all">All Types</option>
             <option value="student">Student</option>
@@ -67,13 +67,13 @@ export function PersonList() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by ID, name, dept..."
-              className="pl-9 pr-4 py-2 w-56 bg-bg-base border border-border rounded-lg text-sm"
+              className="surface-card pl-9 pr-4 py-2 w-6 bg-bg-base text-sm"
             />
           </div>
         </div>
       </div>
 
-      <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
+      <div className="p-4 space-y-2 max-h-6 overflow-y-auto">
         {loading ? (
           <div className="text-center py-8 text-text-muted text-sm">Loading...</div>
         ) : persons.length === 0 ? (
@@ -85,11 +85,11 @@ export function PersonList() {
             return (
               <div
                 key={person.id}
-                className="flex items-center justify-between p-2.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-border transition-all"
+                className="surface-card flex items-center justify-between p-2.5 hover:bg-white/5 hover: transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-bg-elevated flex items-center justify-center border border-border">
-                    <User className="w-5 h-5 text-text-secondary" />
+                  <div className="size-6 rounded-full bg-bg-elevated flex items-center justify-center border border-border">
+                    <User className="w-6 h-6 text-text-secondary" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">

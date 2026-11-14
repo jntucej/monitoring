@@ -140,7 +140,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
         </div>
 
         {/* Desktop sidebar header */}
-        <div className="hidden md:flex h-14 items-center gap-2 border-b border-border px-4">
+        <div className="surface-card hidden md:flex h-14 items-center gap-2 px-4">
           <Crown className="h-5 w-5 text-action-warning" />
           <span className="text-sm font-semibold text-text-primary">Principal</span>
         </div>
@@ -161,7 +161,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
           ))}
 
           {/* Profile section */}
-          <div className="mt-6 border-t border-border pt-4">
+          <div className="surface-card mt-6 pt-4">
             <PrincipalSidebarCategory title="PROFILE" icon={<UserCircle className="h-4 w-4" />} defaultOpen={false}>
               <NavItem href="/principal/governance/delegations" label="Settings" icon={Settings} />
               <NavItem href="/principal/profile" label="Profile" icon={UserCircle} />
@@ -170,7 +170,7 @@ export const PrincipalSidebar = memo(function PrincipalSidebar({
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">
             Campus Management System v1.0
           </p>

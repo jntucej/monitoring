@@ -61,7 +61,7 @@ export function AdminAlertsPanel() {
   }, [data]);
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Bell className="w-4 h-4 text-action-primary shrink-0" />
@@ -93,7 +93,7 @@ export function AdminAlertsPanel() {
             return (
               <li
                 key={alert.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-text-primary truncate">

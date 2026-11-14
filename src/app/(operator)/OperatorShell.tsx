@@ -28,7 +28,7 @@ function OperatorShellInner({ children }: { children: React.ReactNode }) {
   // Declared BEFORE the early returns below — calling useCallback after a
   // conditional return is a rules-of-hooks violation. The hook count changes
   // between renders whenever role/loading/assigned flips, which throws
-  // Minified React error #310 ("too many re-renders" / hook-order crash)
+  // Minified React error issue-310 ("too many re-renders" / hook-order crash)
   // on the operator console.
   const handleSettingsClick = useCallback(() => {
     profileRef.current?.scrollIntoView({ behavior: "smooth" });

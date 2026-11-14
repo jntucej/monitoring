@@ -36,7 +36,7 @@ export function PermissionContextPanel({ row, onClose, onActionComplete }: Permi
   const workflowType = (row.person_type as WorkflowType | null) ?? null;
 
   const header = (
-    <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border sticky top-0 bg-bg-surface/95 backdrop-blur-md z-10">
+    <div className="surface-card flex items-start justify-between gap-3 px-4 py-3 sticky top-0 bg-bg-surface/95 backdrop-blur-md z-10">
       <div className="min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="text-sm font-bold font-mono text-action-primary truncate">{ticket}</h3>
@@ -47,13 +47,13 @@ export function PermissionContextPanel({ row, onClose, onActionComplete }: Permi
           ) : null}
         </div>
         <p className="text-xs font-mono text-text-muted truncate mt-0.5 inline-flex items-center gap-1">
-          <ShieldCheck className="w-3 h-3" />
+          <ShieldCheck className="size-3.5" />
           {row.name || row.roll || "HOD permission"}
         </p>
       </div>
       <button
         onClick={onClose}
-        className="p-1.5 rounded-lg hover:bg-bg-elevated text-text-muted transition-colors shrink-0"
+        className="surface-card p-1.5 hover:bg-bg-elevated text-text-muted transition-colors shrink-0"
         aria-label="Close permission panel"
       >
         <X className="w-4 h-4" />

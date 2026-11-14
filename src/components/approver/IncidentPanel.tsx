@@ -254,12 +254,12 @@ export function IncidentPanel({ onResolved }: IncidentPanelProps) {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void markResolved(row)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-base px-2 py-1 text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 transition-colors disabled:opacity-50"
+                            className="surface-card inline-flex items-center gap-1.5 bg-bg-base px-2 py-1 text-xs font-semibold text-text-secondary hover:text-text-primary hover: transition-colors disabled:opacity-50"
                           >
                             {busyId === row.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <Loader2 className="size-3.5 animate-spin" />
                             ) : (
-                              <CheckCircle className="w-3 h-3" />
+                              <CheckCircle className="size-3.5" />
                             )}
                             Mark resolved
                           </button>

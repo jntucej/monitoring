@@ -74,14 +74,14 @@ function AdminEventsInner() {
             <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
+                  <div className="size-6 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <CalendarDays className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.title}</p>
                       {r.category && (
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-action-primary/10 border border-action-primary/20 text-action-primary">{r.category}</span>
+                        <span className="surface-card px-2 py-0.5 text-xs bg-action-primary/10 text-action-primary">{r.category}</span>
                       )}
                     </div>
                     <p className="text-xs text-text-muted mt-0.5">

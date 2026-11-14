@@ -98,7 +98,7 @@ const api = useApi();
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border shadow-sm">
+      <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-6">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Clock className="w-6 h-6 text-action-info" /> Scheduled Background Jobs
@@ -110,7 +110,7 @@ const api = useApi();
         <button
           onClick={fetchJobs}
           disabled={loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 shadow-md self-start sm:self-auto"
+          className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-action-info text-white text-xs font-bold transition-all disabled:opacity-50 self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh Jobs
         </button>
@@ -118,7 +118,7 @@ const api = useApi();
 
       {/* Jobs Table */}
       <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-border bg-bg-elevated/40 font-bold text-xs text-white">
+        <div className="surface-card p-4 bg-bg-elevated/40 font-bold text-xs text-white">
           Active Background Tasks
         </div>
         {loading ? (
@@ -164,9 +164,9 @@ const api = useApi();
                       <button
                         onClick={() => handleRunNow(job.id)}
                         disabled={runningJobId === job.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-action-info text-white font-bold text-xs shadow-sm disabled:opacity-50"
+                        className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-action-info text-white font-bold text-xs disabled:opacity-50"
                       >
-                        <Play className={`w-3 h-3 ${runningJobId === job.id ? "animate-spin" : ""}`} /> Run Now
+                        <Play className={`size-3.5 ${runningJobId === job.id ? "animate-spin" : ""}`} /> Run Now
                       </button>
                     </td>
                   </tr>
@@ -177,12 +177,12 @@ const api = useApi();
         )}
       </div>
       {/* Runs Table */}
-      <div className="bg-bg-surface border border-border p-6 rounded-2xl space-y-4">
+      <div className="surface-card bg-bg-surface p-6 space-y-4">
         <h3 className="font-bold text-sm text-white flex items-center gap-2">
           <Clock className="w-4 h-4 text-unit-c" /> Execution History (Last 10 Runs)
         </h3>
         {runs.length === 0 ? (
-          <div className="py-6 text-center text-xs text-text-muted border border-dashed border-border rounded-xl">
+          <div className="surface-card py-6 text-center text-xs text-text-muted">
             No recent job executions recorded.
           </div>
         ) : (
@@ -203,11 +203,11 @@ const api = useApi();
                     <td className="py-2.5">
                       {r.status === "SUCCESS" ? (
                         <span className="inline-flex items-center gap-1 text-action-success font-bold text-xs">
-                          <CheckCircle2 className="w-3 h-3" /> SUCCESS
+                          <CheckCircle2 className="size-3.5" /> SUCCESS
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-action-danger font-bold text-xs">
-                          <XCircle className="w-3 h-3" /> FAILED
+                          <XCircle className="size-3.5" /> FAILED
                         </span>
                       )}
                     </td>

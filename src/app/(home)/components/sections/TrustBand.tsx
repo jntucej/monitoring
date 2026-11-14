@@ -54,7 +54,7 @@ export function TrustBand() {
             whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.5, delay: i * 0.05 }}
-            className="border-l-2 border-[var(--home-accent-steel,var(--action-info))] pl-5"
+            className="surface-card (--home-accent-steel,var(--action-info))] pl-5"
           >
             <h3 className="font-semibold text-[var(--home-text-primary,var(--bg-surface))]">
               {p.title}

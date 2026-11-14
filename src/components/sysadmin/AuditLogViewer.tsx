@@ -123,13 +123,13 @@ const api = useApi();
           </div>
         )}
 
-        <div className="p-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
+        <div className="surface-card p-3 flex items-center justify-between text-xs text-text-muted">
           <span>Total: {total} items</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page <= 1}
-              className="p-1 rounded border border-border disabled:opacity-40"
+              className="surface-card p-1 disabled:opacity-40"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -137,7 +137,7 @@ const api = useApi();
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages}
-              className="p-1 rounded border border-border disabled:opacity-40"
+              className="surface-card p-1 disabled:opacity-40"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

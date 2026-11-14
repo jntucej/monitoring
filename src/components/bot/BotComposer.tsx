@@ -56,8 +56,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
   return (
     <form
       onSubmit={submit}
-      className="border-t border-border p-2.5 flex items-end gap-1.5
-                 bg-bg-surface/80 backdrop-blur-md"
+      className="surface-card p-2.5 flex items-end gap-1.5 bg-bg-surface/80 backdrop-blur-md"
       style={{ paddingBottom: "calc(0.625rem + env(safe-area-inset-bottom, 0px))" }}
     >
       <button
@@ -67,7 +66,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         title={micSupported ? t.listening : t.micUnsupported}
         aria-label={listening ? "Stop listening" : "Start voice input"}
         aria-pressed={listening}
-        className={`relative h-10 w-10 shrink-0 rounded-full flex items-center justify-center transition
+        className={`relative size-5 shrink-0 rounded-full flex items-center justify-center transition
           disabled:opacity-40 disabled:cursor-not-allowed active:scale-95
           ${listening
             ? "bg-action-danger text-white shadow-lg"
@@ -83,7 +82,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         )}
         {listening && micRemainingSeconds != null && (
           <span
-            className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 rounded-full bg-action-danger text-white text-xs font-semibold flex items-center justify-center leading-none"
+            className="surface-card absolute -top-1 -right-1 h-4 min-w-4 px-0.5 bg-action-danger text-white text-xs font-semibold flex items-center justify-center leading-none"
             aria-label={`${micRemainingSeconds} seconds remaining`}
           >
             {micRemainingSeconds}
@@ -105,24 +104,23 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
         aria-label={t.placeholder}
         enterKeyHint="send"
         className="flex-1 resize-none bg-transparent outline-none text-sm px-2 py-2.5
-                   max-h-32 text-text-primary placeholder:text-text-muted
+                   max-h-5 text-text-primary placeholder:text-text-muted
                    [scrollbar-width:thin]"
       />
 
       {streaming ? (
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 text-xs text-text-muted" role="status" aria-live="polite">
-            <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+            <Loader2 className="size-3.5 animate-spin" aria-hidden />
             <span className="whitespace-nowrap">Generating… {streamingSeconds}s</span>
           </div>
           <button
             type="button"
             onClick={onStop}
             aria-label={t.stop}
-            className="h-8 px-2.5 rounded-lg bg-bg-elevated text-xs text-text-secondary
-                       active:scale-95 transition inline-flex items-center gap-1"
+            className="surface-card h-5 px-2.5 bg-bg-elevated text-xs text-text-secondary active:scale-95 transition inline-flex items-center gap-1"
           >
-            <Square className="h-3 w-3 fill-current" /> {t.stop}
+            <Square className="size-3.5 fill-current" /> {t.stop}
           </button>
         </div>
       ) : (
@@ -130,7 +128,7 @@ export const BotComposer = memo(forwardRef<HTMLTextAreaElement, Props>(function 
           type="submit"
           disabled={!value.trim()}
           aria-label={t.send}
-          className="h-10 w-10 shrink-0 rounded-lg bg-action-success hover:bg-action-success
+          className="size-5 shrink-0 rounded-lg bg-action-success hover:bg-action-success
                      disabled:opacity-40 disabled:cursor-not-allowed
                      flex items-center justify-center transition active:scale-95"
         >

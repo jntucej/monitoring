@@ -47,7 +47,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+        <div className="surface-card bg-bg-surface p-4">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>On-Duty Workers</span>
             <HardHat className="w-4 h-4 text-action-warning" />
@@ -56,7 +56,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
           <p className="text-xs text-text-muted mt-0.5">out of {summary.totalActive} total</p>
         </div>
 
-        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+        <div className="surface-card bg-bg-surface p-4">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Shift Adherence</span>
             <CheckCircle className="w-4 h-4 text-action-success" />
@@ -65,7 +65,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
           <p className="text-xs text-text-muted mt-0.5">on-time arrival rate</p>
         </div>
 
-        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+        <div className="surface-card bg-bg-surface p-4">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Late Check-Ins</span>
             <AlertTriangle className="w-4 h-4 text-action-danger" />
@@ -74,7 +74,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
           <p className="text-xs text-text-muted mt-0.5">delayed arrival</p>
         </div>
 
-        <div className="bg-bg-surface border border-border rounded-2xl p-4 shadow-sm">
+        <div className="surface-card bg-bg-surface p-4">
           <div className="flex items-center justify-between text-xs text-text-muted">
             <span>Off Shift</span>
             <Clock className="w-4 h-4 text-action-primary" />
@@ -87,13 +87,13 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="Search worker..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-bg-surface border border-border text-xs"
+              className="surface-card w-full pl-9 pr-4 py-2 bg-bg-surface text-xs"
             />
           </div>
 
@@ -101,7 +101,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
             <select
               value={filterContractor}
               onChange={(e) => setFilterContractor(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-bg-surface border border-border text-xs"
+              className="surface-card px-3 py-2 bg-bg-surface text-xs"
             >
               <option value="ALL">All Contractors</option>
               {contractors.map((c) => (
@@ -111,7 +111,7 @@ export function WorkerShiftTracker({ shifts, summary }: WorkerShiftTrackerProps)
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-bg-surface border border-border text-xs"
+              className="surface-card px-3 py-2 bg-bg-surface text-xs"
             >
               <option value="ALL">All Statuses</option>
               <option value="on_shift">On Shift</option>

@@ -77,7 +77,7 @@ export default function StudentPermissionsPage() {
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] border border-action-danger/30 text-action-danger text-xs md:text-sm flex items-center gap-2">
+          <div className="surface-card p-4 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-action-danger text-xs md:text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -111,8 +111,8 @@ export default function StudentPermissionsPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="glass-card p-12 text-center space-y-3">
-            <Inbox className="w-8 h-8 text-text-muted mx-auto" />
+          <div className="surface-card p-12 text-center space-y-3">
+            <Inbox className="size-6 text-text-muted mx-auto" />
             <p className="text-sm font-semibold text-text-primary">No permission requests found</p>
             <p className="text-xs text-text-muted">
               {filter === "ALL" ? "You haven't submitted any permission requests yet." : `No ${filter.toLowerCase()} requests.`}
@@ -123,16 +123,16 @@ export default function StudentPermissionsPage() {
             {filtered.map((t) => {
               const ticketNum = t.ticket_number ?? t.id;
               return (
-                <div key={t.id} className="glass-card p-4 space-y-3">
+                <div key={t.id} className="surface-card p-4 space-y-3">
                   <PermissionTicketCard
                     ticket={t}
                     onSelect={(num) => setActiveTicket(num)}
                   />
                   {t.status === "REJECTED" && (
-                    <div className="pt-2 border-t border-border flex justify-end">
+                    <div className="surface-card pt-2 flex justify-end">
                       <Link
                         href={`/student/permissions/new?reapply=${encodeURIComponent(ticketNum)}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 text-action-warning text-xs font-semibold hover:bg-amber-500/20 transition w-full sm:w-auto"
+                        className="surface-card inline-flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 text-action-warning text-xs font-semibold hover:bg-amber-500/20 transition w-full sm:w-auto"
                       >
                         <Plus className="w-4 h-4" />
                         Reapply (creates a new ticket)

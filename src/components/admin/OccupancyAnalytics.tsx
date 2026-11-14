@@ -33,16 +33,16 @@ function KpiCard({
   tint: string; sub?: string;
 }) {
   return (
-    <div className="glass-card rounded-xl border border-border bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
           {sub && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
         </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg"
+        <div className="flex size-6 items-center justify-center rounded-lg"
              style={{ background: `${tint}22`, color: tint }}>
-          <Icon className="h-4.5 w-4.5" />
+          <Icon className="size-4" />
         </div>
       </div>
     </div>
@@ -205,7 +205,7 @@ export function OccupancyAnalytics() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {demoOnly && (
-        <div role="status" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-action-warning">
+        <div role="status" className="surface-card bg-amber-500/10 px-4 py-3 text-xs font-medium text-action-warning">
           DEMO DATA — occupancy analytics is not enabled in this environment.
           The figures below are a synthetic sample, not measured data.
           Enable <code className="font-mono">ALLOW_DEMO_ANALYTICS=true</code> or
@@ -215,7 +215,7 @@ export function OccupancyAnalytics() {
       {/* Header */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-action-success">
+          <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-emerald-500/15 text-action-success">
             <Brain className="h-6 w-6" />
           </div>
           <div>
@@ -227,7 +227,7 @@ export function OccupancyAnalytics() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="offline" className="gap-1">
-            <Sparkles className="h-3 w-3" />
+            <Sparkles className="size-3.5" />
             {dataset.predictions[0]?.model_version ?? "v1.0-arima"}
           </Badge>
           <Button variant="secondary" size="sm" onClick={exportCsv} disabled={!dataset.predictions.length}>
@@ -317,8 +317,8 @@ export function OccupancyAnalytics() {
         </CardHeader>
         <CardContent>
           {dataset.anomalies.length === 0 ? (
-            <div className="flex items-center gap-3 rounded-lg border border-dashed border-border p-6 text-sm text-text-muted">
-              <CheckCircle className="h-5 w-5 text-action-success" />
+            <div className="surface-card flex items-center gap-3 p-6 text-sm text-text-muted">
+              <CheckCircle className="h-4 w-4 text-action-success" />
               No anomalies detected. All metrics are within expected bounds.
             </div>
           ) : (
@@ -339,9 +339,9 @@ export function OccupancyAnalytics() {
                     <tr key={a.id} className="border-b border-border/50 transition-colors hover:bg-bg-elevated">
                       <td className="px-3 py-2.5 font-medium text-text-primary">{a.metric}</td>
                       <td className="px-3 py-2.5">
-                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+                        <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold"
                               style={{ background: `${SEVERITY_COLORS[a.severity]}22`, color: SEVERITY_COLORS[a.severity] }}>
-                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: SEVERITY_COLORS[a.severity] }} />
+                          <span className="size-4 rounded-full" style={{ background: SEVERITY_COLORS[a.severity] }} />
                           {a.severity}
                         </span>
                       </td>

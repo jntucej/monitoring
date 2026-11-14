@@ -55,7 +55,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated transition flex items-center gap-1.5"
+            className="surface-card px-3 py-1.5 bg-bg-surface text-xs font-semibold text-text-primary hover:bg-bg-elevated transition flex items-center gap-1.5"
           >
             <Activity className="w-3.5 h-3.5 text-action-success" />
             Refresh
@@ -71,7 +71,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
           return (
             <div
               key={device.id}
-              className="bg-bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4 hover:border-[var(--border-hover)] transition"
+              className="surface-card bg-bg-surface p-5 space-y-4 hover: (-- )] transition"
             >
               {/* Header */}
               <div className="flex items-start justify-between gap-2">
@@ -89,7 +89,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
                   }`}
                 >
                   <span
-                    className={`w-1.5 h-1.5 rounded-full ${
+                    className={`size-2 rounded-full ${
                       isOnline ? "bg-action-success animate-pulse" : isMaintenance ? "bg-action-warning" : "bg-action-danger"
                     }`}
                   />
@@ -98,7 +98,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
               </div>
 
               {/* Assigned operators (from users.gate_id) */}
-              <div className="rounded-xl bg-bg-elevated border border-border p-3 space-y-1.5">
+              <div className="surface-card bg-bg-elevated p-3 space-y-1.5">
                 <div className="flex items-center gap-1 text-xs text-text-muted font-medium">
                   <User className="w-3.5 h-3.5 text-action-primary" />
                   Assigned Operator{device.assignedOperators.length !== 1 ? "s" : ""}
@@ -114,7 +114,7 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
                   device.assignedOperators.map((op) => (
                     <div key={op.id} className="text-xs font-bold text-text-primary">
                       {op.name || op.email}
-                      <span className="ml-1.5 text-xs font-mono text-xs font-bold text-action-primary bg-blue-500/10 px-1.5 py-0.5 rounded">
+                      <span className="surface-card ml-1.5 text-xs font-mono text-xs font-bold text-action-primary bg-blue-500/10 px-1.5 py-0.5">
                         {op.role}
                       </span>
                     </div>
@@ -123,9 +123,9 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
 
                 {/* Who actually used the gate in the last 5 minutes */}
                 {device.lastOperator && (
-                  <div className="flex items-center justify-between text-xs mt-1 pt-2 border-t border-border">
+                  <div className="surface-card flex items-center justify-between text-xs mt-1 pt-2">
                     <span className="text-text-muted flex items-center gap-1">
-                      <Activity className="w-3 h-3 text-action-success" />
+                      <Activity className="size-3.5 text-action-success" />
                       {device.lastOperator.attributed ? "Last scan by" : "Likely user"}
                     </span>
                     <span className="font-semibold text-text-primary">
@@ -137,16 +137,16 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
 
               {/* Counters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                <div className="surface-card p-2.5 bg-emerald-500/5">
                   <div className="text-xs text-text-muted flex items-center gap-1">
-                    <ArrowDownLeft className="w-3 h-3 text-action-success" />
+                    <ArrowDownLeft className="size-3.5 text-action-success" />
                     Entries Today
                   </div>
                   <div className="text-base font-bold text-action-success mt-1">{device.entriesToday}</div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <div className="surface-card p-2.5 bg-amber-500/5">
                   <div className="text-xs text-text-muted flex items-center gap-1">
-                    <ArrowUpRight className="w-3 h-3 text-action-warning" />
+                    <ArrowUpRight className="size-3.5 text-action-warning" />
                     Exits Today
                   </div>
                   <div className="text-base font-bold text-action-warning mt-1">{device.exitsToday}</div>
@@ -154,10 +154,10 @@ export function GateDeviceTracker({ devices, onRefresh }: GateDeviceTrackerProps
               </div>
 
               {/* Footer */}
-              <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-text-muted">
+              <div className="surface-card pt-2 flex items-center justify-between text-xs text-text-muted">
                 <div>Last Active: <span className="font-semibold text-text-primary">{device.lastActive}</span></div>
                 <div className="flex items-center gap-1 font-mono font-bold text-action-success">
-                  <Wifi className="w-3 h-3" />
+                  <Wifi className="size-3.5" />
                   {device.uptime}% Uptime
                 </div>
               </div>

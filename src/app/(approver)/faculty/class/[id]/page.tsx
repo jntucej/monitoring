@@ -100,7 +100,7 @@ function ClassRosterInner() {
   return (
     <div className="space-y-4 p-2 min-w-0">
       {details ? (
-        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <GraduationCap className="w-3.5 h-3.5" /> Class
           </p>

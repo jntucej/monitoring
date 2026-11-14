@@ -105,7 +105,7 @@ function ContactInfoInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center gap-2">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -113,7 +113,7 @@ function ContactInfoInner() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* read-only summary card */}
-        <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-4">
+        <div className="surface-card bg-bg-surface p-4 space-y-4">
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Registered details
           </h2>
@@ -131,7 +131,7 @@ function ContactInfoInner() {
                 { icon: ShieldCheck, label: "Role", value: p.role || "—" },
               ].map((row) => (
                 <div key={row.label} className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-bg-elevated border border-border flex items-center justify-center shrink-0">
+                  <div className="size-6 rounded-lg bg-bg-elevated border border-border flex items-center justify-center shrink-0">
                     <row.icon className="w-4 h-4 text-action-success" />
                   </div>
                   <div className="min-w-0">
@@ -154,7 +154,7 @@ function ContactInfoInner() {
         {/* update form */}
         <form
           onSubmit={submit}
-          className="rounded-xl border border-border bg-bg-surface p-4 space-y-4"
+          className="surface-card bg-bg-surface p-4 space-y-4"
         >
           <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
             Update name &amp; phone
@@ -173,7 +173,7 @@ function ContactInfoInner() {
               required
               minLength={2}
               maxLength={100}
-              className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:borderaction-success disabled:opacity-50"
+              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
             />
           </div>
 
@@ -188,14 +188,14 @@ function ContactInfoInner() {
               onChange={(e) => setPhone(e.target.value)}
               disabled={busy || loading}
               placeholder="+91 90000 00000"
-              className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:borderaction-success disabled:opacity-50"
+              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus: disabled:opacity-50"
             />
           </div>
 
           <button
             type="submit"
             disabled={busy || loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold"
+            className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-semibold"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {busy ? "Saving…" : "Save changes"}

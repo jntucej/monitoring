@@ -437,15 +437,15 @@ export function OperatorCamera({
       />
 
       {cameraState === "active" && mode === "barcode" && !barcodeApiAvailable && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
+        <div className="surface-card absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 px-3 py-1.5 pointer-events-none">
           <span>No native barcode decoder — switch to QR</span>
         </div>
       )}
 
       {cameraState === "active" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
-          <div className="w-40 h-40 rounded-2xl border border-white/15" />
-          <p className="text-xs font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
+          <div className="w-6 h-6 rounded-2xl border border-white/15" />
+          <p className="surface-card text-xs font-semibold text-white/90 bg-bg-elevated/70 px-3 py-1">
             {mode === "qr" ? "Point at a QR code" : "Point at a barcode"}
           </p>
         </div>
@@ -454,7 +454,7 @@ export function OperatorCamera({
       {cameraState === "requesting" && (
         <div className="absolute inset-0 flex items-center justify-center bg-bg-elevated">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-border border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="size-6 border-2 border-border border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs text-text-muted mt-2">Initializing camera...</p>
           </div>
         </div>
@@ -462,7 +462,7 @@ export function OperatorCamera({
 
       {cameraState === "error" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-elevated/95 text-center p-6">
-          <div className="w-12 h-12 rounded-full bg-rose-500/20 text-action-danger flex items-center justify-center mb-3">
+          <div className="size-6 rounded-full bg-rose-500/20 text-action-danger flex items-center justify-center mb-3">
             <Camera className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-bold text-action-danger">Camera Unavailable</h3>
@@ -474,7 +474,7 @@ export function OperatorCamera({
       <button
         type="button"
         onClick={() => setSoundEnabled(!soundEnabled)}
-        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"
+        className="absolute top-3 right-3 size-6 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70"
         title={soundEnabled ? "Mute" : "Unmute"}
       >
         {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}

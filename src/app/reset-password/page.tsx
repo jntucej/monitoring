@@ -69,7 +69,7 @@ function ResetPasswordInner() {
   if (state === "success") {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8">
-        <div className="w-full max-w-md space-y-4 rounded-2xl bg-bg-surface/80 border border-border p-6">
+        <div className="surface-card w-full max-w-md space-y-4 bg-bg-surface/80 p-6">
           <div className="flex items-center gap-2 text-action-success">
             <CheckCircle2 className="h-6 w-6" />
             <h1 className="text-lg font-bold text-text-primary">Password updated</h1>
@@ -79,7 +79,7 @@ function ResetPasswordInner() {
           </p>
           <Link
             href="/login"
-            className="block w-full rounded-lg bg-action-primary px-4 py-2.5 text-center text-sm font-semibold text-white"
+            className="surface-card block w-full bg-action-primary px-4 py-2.5 text-center text-sm font-semibold text-white"
           >
             Go to sign in
           </Link>
@@ -90,10 +90,10 @@ function ResetPasswordInner() {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8">
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="w-full max-w-md space-y-4 rounded-2xl bg-bg-surface/80 border border-border p-6">
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-6 h-6 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="surface-card w-full max-w-md space-y-4 bg-bg-surface/80 p-6">
         <div className="flex items-center gap-2">
-          <KeyRound className="h-5 w-5 text-action-success" />
+          <KeyRound className="h-4 w-4 text-action-success" />
           <h1 className="text-lg font-bold text-text-primary">Set a new password</h1>
         </div>
         <p className="text-sm text-text-muted">
@@ -103,7 +103,7 @@ function ResetPasswordInner() {
         </p>
 
         {!token ? (
-          <div role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
+          <div role="alert" className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
             This page requires a valid <code>?token=</code> parameter from a reset link.
             <div className="mt-2">
               <Link href="/login" className="text-action-primary underline">
@@ -127,7 +127,7 @@ function ResetPasswordInner() {
                   autoComplete="new-password"
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="surface-card w-full bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
                 />
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                 <button
@@ -155,7 +155,7 @@ function ResetPasswordInner() {
                   autoComplete="new-password"
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-border bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="surface-card w-full bg-bg-base px-3 py-2 pl-9 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
                 />
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
@@ -164,7 +164,7 @@ function ResetPasswordInner() {
             {error && (
               <div
                 role="alert"
-                className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger"
+                className="surface-card flex items-start gap-2 bg-rose-500/10 p-3 text-sm text-action-danger"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
@@ -174,7 +174,7 @@ function ResetPasswordInner() {
             <button
               type="submit"
               disabled={state === "submitting" || !token}
-              className="w-full rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="surface-card w-full bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {state === "submitting" ? "Saving…" : "Update password"}
             </button>

@@ -132,7 +132,7 @@ export function DigitalHandover() {
 
   return (
     <WidgetBoundary title="Digital Handover">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export function DigitalHandover() {
             <button
               type="button"
               onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 transition-colors motion-reduce:transition-none"
+              className="surface-card flex items-center gap-1.5 bg-amber-500/10 px-3 py-1.5 text-xs text-action-warning hover:bg-amber-500/20 transition-colors motion-reduce:transition-none"
             >
               <Plus className="h-3.5 w-3.5" />
               {showForm ? "Cancel" : "New Handover"}
@@ -154,7 +154,7 @@ export function DigitalHandover() {
 
         {/* Create Handover Form */}
         {showForm && (
-          <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
+          <div className="surface-card mb-4 space-y-3 bg-bg-surface/40 p-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-text-muted mb-1.5">
@@ -163,7 +163,7 @@ export function DigitalHandover() {
                 <select
                   value={toRole}
                   onChange={(e) => setToRole(e.target.value)}
-                  className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                  className="surface-card w-full bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                 >
                   {HANDOVER_ROLES.map((r) => (
                     <option key={r} value={r}>
@@ -181,7 +181,7 @@ export function DigitalHandover() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Brief shift summary"
-                  className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                  className="surface-card w-full bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ export function DigitalHandover() {
                       onChange={(e) =>
                         updateItem(idx, "type", e.target.value)
                       }
-                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-32 shrink-0"
+                      className="surface-card bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-6 shrink-0"
                       aria-label="Item type"
                     >
                       {ITEM_TYPES.map((t) => (
@@ -213,14 +213,14 @@ export function DigitalHandover() {
                         updateItem(idx, "title", e.target.value)
                       }
                       placeholder="Describe the item"
-                      className="flex-1 rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-1.5 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                      className="surface-card flex-1 bg-bg-elevated/50 px-3 py-1.5 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-amber-500/50"
                     />
                     <select
                       value={item.severity}
                       onChange={(e) =>
                         updateItem(idx, "severity", e.target.value)
                       }
-                      className="rounded-lg border border-border/50 bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-20 shrink-0"
+                      className="surface-card bg-bg-elevated/50 px-2 py-1.5 text-xs text-text-secondary focus:outline-none w-6 shrink-0"
                       aria-label="Severity"
                     >
                       <option value="low">Low</option>
@@ -251,7 +251,7 @@ export function DigitalHandover() {
               type="button"
               onClick={handleSubmit}
               disabled={submitting || items.filter((i) => i.title.trim()).length === 0}
-              className="flex items-center gap-1.5 rounded-lg bg-amber-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-action-warning disabled:opacity-40 transition-colors motion-reduce:transition-none"
+              className="surface-card flex items-center gap-1.5 bg-amber-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-action-warning disabled:opacity-40 transition-colors motion-reduce:transition-none"
             >
               {submitting ? (
                 "Creating…"
@@ -267,13 +267,13 @@ export function DigitalHandover() {
 
         {/* Handover History */}
         {loading ? (
-          <div className="h-20 animate-pulse rounded bg-bg-elevated/20" />
+          <div className="h-6 animate-pulse rounded bg-bg-elevated/20" />
         ) : handovers.length === 0 ? (
           <p className="text-xs text-text-muted py-6 text-center">
             No handovers yet. Generate one at the end of your shift.
           </p>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-6 overflow-y-auto">
             {handovers.map((ho) => {
               const expanded = expandedId === ho.id;
               return (
@@ -308,7 +308,7 @@ export function DigitalHandover() {
                         {ho.byUserName} → {ho.toRole}
                       </p>
                       <p className="text-xs text-text-muted flex items-center gap-2">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="size-3.5" />
                         {new Date(ho.createdAt).toLocaleString()}
                         <span>·</span>
                         {ho.items.length} item(s)

@@ -77,20 +77,20 @@ export function AdvancedAnalytics() {
       </div>
 
       {showSave && (
-        <Card className="border p-4">
+        <Card className="surface-card p-4">
           <form onSubmit={handleSaveReport} className="flex gap-3">
-            <input value={reportName} onChange={(e) => setReportName(e.target.value)} required placeholder="Report Name" className="flex-1 p-2 border rounded text-sm" />
+            <input value={reportName} onChange={(e) => setReportName(e.target.value)} required placeholder="Report Name" className="surface-card flex-1 p-2 text-sm" />
             <Button type="submit" size="sm">Save</Button>
           </form>
         </Card>
       )}
 
-      <Card className="border p-4 flex gap-4 items-center">
-        <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="p-2 border rounded text-sm">
+      <Card className="surface-card p-4 flex gap-4 items-center">
+        <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="surface-card p-2 text-sm">
           <option value="hourly">Hourly</option>
           <option value="daily">Daily</option>
         </select>
-        <select value={personType} onChange={(e) => setPersonType(e.target.value)} className="p-2 border rounded text-sm">
+        <select value={personType} onChange={(e) => setPersonType(e.target.value)} className="surface-card p-2 text-sm">
           <option value="all">All Types</option>
           <option value="student">Students</option>
           <option value="faculty">Faculty</option>
@@ -101,7 +101,7 @@ export function AdvancedAnalytics() {
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {data.model === "unavailable" && (
-            <div className="lg:col-span-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+            <div className="surface-card lg:col-span-3 bg-amber-500/10 p-3 text-sm text-action-warning">
               No prediction model available. Showing raw historical movement data only
               ({data.dataPoints} samples). {data.reason}
             </div>
@@ -123,10 +123,10 @@ export function AdvancedAnalytics() {
             </div>
           </Card>
           {data.model === "historical-ma" && (
-            <Card className="border p-4 space-y-3">
+            <Card className="surface-card p-4 space-y-3">
               {Array.isArray(data.breakdown) && data.breakdown.length > 0
                 ? data.breakdown.map((b: any) => (
-                    <div key={b.category} className="flex justify-between text-sm border-b pb-2">
+                    <div key={b.category} className="surface-card flex justify-between text-sm pb-2">
                       <span>{b.category}</span>
                       <Badge variant="entry">{b.count}</Badge>
                     </div>
@@ -137,10 +137,10 @@ export function AdvancedAnalytics() {
         </div>
       )}
 
-      <Card className="border p-4">
+      <Card className="surface-card p-4">
         <h3 className="font-semibold text-base mb-2">Saved Reports</h3>
         {savedReports.map((r) => (
-          <div key={r.id} className="flex justify-between items-center py-2 border-b text-sm">
+          <div key={r.id} className="surface-card flex justify-between items-center py-2 text-sm">
             <span>{r.name}</span>
             <Button onClick={() => handleRunReport(r.id)} size="sm" variant="secondary" className="text-xs">Run Report</Button>
           </div>

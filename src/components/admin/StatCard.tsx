@@ -46,23 +46,23 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           tabIndex={0}
           onClick={handleClick}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
-          className="group relative overflow-hidden bg-bg-surface rounded-xl sm:rounded-2xl border border-border hover:border-indigo-500/50 p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10"
+          className="surface-card group relative overflow-hidden bg-bg-surface sm: hover: p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover: hover:"
           title={`Click to view context & breakdown for ${label}`}
         >
           {/* Reactive Ambient Back Glow */}
           <div
-            className="absolute -top-12 -right-12 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+            className="absolute -top-12 -right-12 w-6 h-6 rounded-full blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
             style={{ backgroundColor: color }}
           />
 
           <div className="relative z-10 flex items-center gap-3 sm:gap-4">
             <div
-              className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300 shadow-sm"
+              className="size-6 sm:w-6 sm:h-6 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300 shadow-sm"
               style={{ backgroundColor: `${color}18`, color }}
             >
               <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-3 flex-1">
               <div className="flex items-center justify-between gap-1">
                 <p className="text-xs sm:text-xs font-semibold text-text-muted uppercase tracking-wider truncate">
                   <span className="sm:hidden text-base">{emoji}</span>
@@ -96,9 +96,9 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           size="md"
         >
           <div className="space-y-4 p-1">
-            <div className="p-4 rounded-xl border border-border bg-bg-surface flex items-center gap-4">
+            <div className="surface-card p-4 bg-bg-surface flex items-center gap-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                className="size-6 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                 style={{ backgroundColor: `${color}20`, color }}
               >
                 <Icon className="w-6 h-6" />
@@ -111,7 +111,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-bg-base border border-border space-y-2 text-xs">
+            <div className="surface-card p-3 bg-bg-base space-y-2 text-xs">
               <div className="flex items-center gap-2 font-semibold text-text-primary">
                 <Activity className="w-4 h-4 text-action-success" /> Live Metric Analysis
               </div>

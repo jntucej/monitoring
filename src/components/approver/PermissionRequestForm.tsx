@@ -77,13 +77,13 @@ export function PermissionRequestForm({
 
   if (ticketNumber) {
     return (
-      <div className="bg-bg-surface border border-border rounded-2xl p-6 text-center space-y-4">
-        <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+      <div className="surface-card bg-bg-surface p-6 text-center space-y-4">
+        <div className="size-6 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
           <CheckCircle2 className="w-6 h-6 text-action-success" />
         </div>
         <h2 className="text-lg font-bold text-text-primary">Request Submitted</h2>
         <p className="text-xs text-text-muted">Your ticket #{ticketNumber} is now pending approval.</p>
-        <div className="p-3 rounded-xl bg-bg-elevated font-mono text-sm font-bold text-action-primary">
+        <div className="surface-card p-3 bg-bg-elevated font-mono text-sm font-bold text-action-primary">
           Ticket #{ticketNumber}
         </div>
       </div>
@@ -91,7 +91,7 @@ export function PermissionRequestForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-bg-surface border border-border rounded-2xl p-5 space-y-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="surface-card bg-bg-surface p-5 space-y-5">
       {!lockedWorkflow && (
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-text-secondary uppercase">Category</label>
@@ -139,7 +139,7 @@ export function PermissionRequestForm({
               type="datetime-local"
               value={fromDatetime}
               onChange={(e) => setFromDatetime(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
+              className="surface-card w-full text-xs p-2.5 bg-bg-elevated text-text-primary"
             />
             {fieldErrors.fromDatetime && <p className="text-xs text-action-danger">{fieldErrors.fromDatetime}</p>}
           </div>
@@ -151,7 +151,7 @@ export function PermissionRequestForm({
               type="datetime-local"
               value={toDatetime}
               onChange={(e) => setToDatetime(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
+              className="surface-card w-full text-xs p-2.5 bg-bg-elevated text-text-primary"
             />
             {fieldErrors.toDatetime && <p className="text-xs text-action-danger">{fieldErrors.toDatetime}</p>}
           </div>
@@ -165,7 +165,7 @@ export function PermissionRequestForm({
           value={description}
           onChange={(e) => { setDescription(e.target.value); setFieldErrors((p) => ({ ...p, description: "" })); }}
           placeholder="Details..."
-          className="w-full text-xs p-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary"
+          className="surface-card w-full text-xs p-2.5 bg-bg-elevated text-text-primary"
         />
         {fieldErrors.description && <p className="text-xs text-action-danger">{fieldErrors.description}</p>}
       </div>
@@ -185,7 +185,7 @@ export function PermissionRequestForm({
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-action-danger text-xs">
+        <div className="surface-card p-3 bg-rose-500/10 flex items-center gap-2 text-action-danger text-xs">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -194,7 +194,7 @@ export function PermissionRequestForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full py-2.5 px-4 rounded-xl bg-action-primary text-white text-xs font-bold hover:brightness-110 disabled:opacity-50 transition flex items-center justify-center gap-2"
+        className="surface-card w-full py-2.5 px-4 bg-action-primary text-white text-xs font-bold hover:brightness-110 disabled:opacity-50 transition flex items-center justify-center gap-2"
       >
         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Submit Permission Request</span>}
       </button>

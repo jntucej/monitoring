@@ -68,7 +68,7 @@ export default function CategoriesPage() {
                     defaultValue={c.slaHours}
                     disabled={saving === c.code}
                     onBlur={(e) => patch(c.code, "slaHours", Number(e.target.value))}
-                    className="w-20 border rounded p-1 text-sm min-h11"
+                    className="surface-card w-20 p-1 text-sm min-h11"
                   />
                 </td>
                 <td className="p-3">

@@ -162,7 +162,7 @@ export function SysadminHealthPanel() {
   const visible = serviceRows.length > 0 ? serviceRows : [];
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <Server className="w-4 h-4 text-action-primary shrink-0" />
@@ -185,14 +185,14 @@ export function SysadminHealthPanel() {
         <EmptyState
           title="No service health reported"
           description="The health engine has not reported any services yet."
-          icon={<Server className="w-5 h-5" />}
+          icon={<Server className="w-4 h-4" />}
         />
       ) : (
         <ul className="space-y-1.5 max-h60 overflow-y-auto custom-scrollbar pr-1 mb-3">
           {visible.map((row) => (
             <li
               key={row.key}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+              className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
             >
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-text-primary truncate">
@@ -207,7 +207,7 @@ export function SysadminHealthPanel() {
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold border shrink-0 ${STATUS_TONE[row.status]}`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                <span className="size-0 rounded-full bg-current" />
                 {STATUS_LABEL[row.status]}
               </span>
             </li>
@@ -225,7 +225,7 @@ export function SysadminHealthPanel() {
             {containers.map((c) => (
               <li
                 key={c.name}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-base/50 px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-text-primary truncate">
@@ -243,7 +243,7 @@ export function SysadminHealthPanel() {
                       : "text-action-danger bg-rose-400/10 border-rose-400/20"
                   }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  <span className="size-0 rounded-full bg-current" />
                   {c.running ? "Running" : "Down"}
                 </span>
               </li>

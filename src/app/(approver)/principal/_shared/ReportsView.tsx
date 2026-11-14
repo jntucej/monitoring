@@ -52,7 +52,7 @@ export function ReportsView() {
             {breakdown.map((item) => (
               <li
                 key={item.workflow_type}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{item.workflow_type}</p>

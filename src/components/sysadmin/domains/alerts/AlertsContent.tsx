@@ -89,7 +89,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
 
   return (
     <li
-      className="flex items-center gap-3 rounded-lg border p-3 bg-bg-surface"
+      className="surface-card flex items-center gap-3 p-3 bg-bg-surface"
       style={{ borderColor: "var(--border)" }}
     >
       {/* severity ribbon */}
@@ -102,7 +102,7 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="rounded px-1.5 py-0.5 text-xs font-bold uppercase shrink-0"
+            className="surface-card px-1.5 py-0.5 text-xs font-bold uppercase shrink-0"
             style={{ color, border: `1px solid ${color}` }}
           >
             {sev || "unknown"}
@@ -136,10 +136,10 @@ function FeedRow({ row }: { row: AlertsFeedRow }) {
           </span>
           {row.resolved ? (
             <span
-              className="rounded px-1 text-xs font-semibold uppercase shrink-0"
+              className="surface-card px-1 text-xs font-semibold uppercase shrink-0"
               style={{
                 background: "var(--action-primary)",
-                color: "#fff",
+                color: "var(--color-surface)",
               }}
             >
               resolved
@@ -197,7 +197,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
       {/* KPI chips row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <div
-          className="rounded-lg border p-3 bg-bg-surface"
+          className="surface-card p-3 bg-bg-surface"
           style={{ borderColor: "var(--border)" }}
         >
           <div className="flex items-center justify-between">
@@ -222,7 +222,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* Signature visual: 24h severity stacked-area strip */}
       <div
-        className="rounded-lg border p-4 bg-bg-surface"
+        className="surface-card p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -296,7 +296,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* Live feed with 30-min heat strip on each row */}
       <div
-        className="rounded-lg border p-4 bg-bg-surface"
+        className="surface-card p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">
@@ -308,7 +308,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
               {feedRows.length} rows
             </span>
             <span
-              className="rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide"
+              className="surface-card px-2 py-0.5 text-xs font-semibold uppercase tracking-wide"
               style={{
                 background:
                   sseState === "live"
@@ -354,7 +354,7 @@ export function AlertsContent({ data, sseState = "idle" }: AlertsContentProps) {
 
       {/* 7-day rule heat matrix */}
       <div
-        className="rounded-lg border p-4 bg-bg-surface"
+        className="surface-card p-4 bg-bg-surface"
         style={{ borderColor: "var(--border)" }}
       >
         <div className="mb-3 flex items-center justify-between">

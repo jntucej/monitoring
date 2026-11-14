@@ -12,7 +12,7 @@ export default function LastScanCard({ payload }: StudentWidgetProps) {
   const scan = payload.lastScan as LastScanPayload | null;
   if (!scan) {
     return (
-      <article className="rounded-2xl border border-border bg-bg-surface p-5">
+      <article className="surface-card bg-bg-surface p-5">
         <h3 className="mb-3 text-sm font-semibold">Last Gate Scan</h3>
         <EmptyState title="No scans yet" description="Your next gate entry or exit will appear here." />
       </article>
@@ -22,7 +22,7 @@ export default function LastScanCard({ payload }: StudentWidgetProps) {
   const Icon = isIn ? ArrowDownLeft : ArrowUpRight;
   const color = isIn ? "text-action-success" : "text-action-danger";
   return (
-    <article className="rounded-2xl border border-border bg-bg-surface p-5">
+    <article className="surface-card bg-bg-surface p-5">
       <header className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Last Gate Scan</h3>
         <span className={`flex items-center gap-1 text-xs ${color}`}>

@@ -86,7 +86,7 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm">
+        <div className="surface-card flex items-center gap-2 p-3 bg-rose-500/10 text-action-danger text-sm">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
@@ -103,8 +103,8 @@ export function InboxList({ title, description, fixedFilters }: InboxListProps) 
 
       {/* Empty */}
       {!loading && !error && tickets.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-12 rounded-2xl bg-bg-surface border border-border space-y-2">
-          <Inbox className="w-8 h-8 text-text-muted" />
+        <div className="surface-card flex flex-col items-center justify-center p-12 bg-bg-surface space-y-2">
+          <Inbox className="size-6 text-text-muted" />
           <p className="text-sm text-text-secondary">No tickets match your filters.</p>
         </div>
       )}

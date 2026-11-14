@@ -687,9 +687,9 @@ export function Scanner({
           className="relative w-full h-full flex flex-col overflow-hidden"
         >
           {/* Header — one compact status line. No decoration. */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 bg-bg-elevated/85 z-10">
+          <div className="surface-card flex items-center justify-between px-4 py-2.5 bg-bg-elevated/85 z-10">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-bg-elevated text-text-secondary flex items-center justify-center border border-border">
+              <div className="size-6 bg-bg-elevated text-text-secondary flex items-center justify-center border border-border">
                 <Camera className="w-4 h-4" />
               </div>
               <div className="min-w-0">
@@ -703,14 +703,14 @@ export function Scanner({
               <button
                 type="button"
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className="w-8 h-8 rounded-full bg-bg-elevated text-text-muted hover:text-white flex items-center justify-center transition-colors"
+                className="size-6 rounded-full bg-bg-elevated text-text-muted hover:text-white flex items-center justify-center transition-colors"
                 title={soundEnabled ? "Mute" : "Unmute"}
               >
                 {soundEnabled ? <Volume2 className="w-4 h-4 text-text-secondary" /> : <VolumeX className="w-4 h-4 text-text-muted" />}
               </button>
               <button
                 onClick={() => { stopCamera(); onClose(); }}
-                className="w-8 h-8 rounded-full bg-bg-elevated text-text-muted hover:text-white flex items-center justify-center transition-colors"
+                className="size-6 rounded-full bg-bg-elevated text-text-muted hover:text-white flex items-center justify-center transition-colors"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -730,16 +730,16 @@ export function Scanner({
             {/* Warn when the phone's browser can't decode 1D/2D barcodes
                 natively so the operator knows live auto-detect is QR-only. */}
             {cameraState === "active" && mode === "all" && !barcodeApiAvailable && (
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 border border-amber-500/40 rounded-full px-3 py-1.5 pointer-events-none">
-                <AlertTriangle className="w-3 h-3" />
+              <div className="surface-card absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs font-semibold text-action-warning bg-amber-950/80 px-3 py-1.5 pointer-events-none">
+                <AlertTriangle className="size-3.5" />
                 <span>No native barcode decoder in this browser — QR only · Use Upload below</span>
               </div>
             )}
 
             {cameraState === "active" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
-                <div className="w-40 h-40 rounded-2xl border border-white/15" />
-                <p className="text-xs font-semibold text-white/90 bg-bg-elevated/70 rounded-full px-3 py-1">
+                <div className="w-6 h-6 border border-white/15" />
+                <p className="surface-card text-xs font-semibold text-white/90 bg-bg-elevated/70 px-3 py-1">
                   {mode === "qr"
                     ? "Point at a QR code — auto-detecting"
                     : "Point at a barcode (1D/2D) — auto-detecting"}
@@ -748,14 +748,14 @@ export function Scanner({
             )}
             {cameraState === "requesting" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-elevated text-white space-y-3 p-4 text-center">
-                <RefreshCw className="w-8 h-8 text-text-muted animate-spin" />
+                <RefreshCw className="size-6 text-text-muted animate-spin" />
                 <p className="text-xs text-text-secondary font-medium">Initializing camera...</p>
               </div>
             )}
 
             {cameraState === "error" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-elevated/95 text-center p-6 space-y-3">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 text-action-warning flex items-center justify-center border border-amber-500/30">
+                <div className="size-6 bg-amber-500/20 text-action-warning flex items-center justify-center border border-amber-500/30">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-action-warning">Camera Unavailable</h3>
@@ -763,7 +763,7 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => startCamera()}
-                  className="mt-2 px-4 py-2 rounded-lg bg-bg-elevated hover:bg-bg-elevated text-white text-xs font-semibold flex items-center gap-1.5"
+                  className="surface-card mt-2 px-4 py-2 bg-bg-elevated hover:bg-bg-elevated text-white text-xs font-semibold flex items-center gap-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> Retry
                 </button>
@@ -773,7 +773,7 @@ export function Scanner({
 
           {/* Actions — a clearly-separated "if the camera can't read it" row,
               distinct from the page's IN/OUT decision bar. */}
-          <div className="p-4 pt-3 bg-bg-surface border-t-2 border-border">
+          <div className="surface-card p-4 pt-3 bg-bg-surface">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               Can&#39;t see the code?
             </p>
@@ -789,7 +789,7 @@ export function Scanner({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full sm:flex-1 py-2.5 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                  className="surface-card w-full sm:flex-1 py-2.5 bg-bg-elevated hover:bg-bg-elevated text-text-secondary font-semibold text-xs transition-all flex items-center justify-center gap-2"
                 >
                   <Upload className="w-4 h-4 text-text-muted shrink-0" />
                   <span className="truncate">Upload QR Image</span>
@@ -798,7 +798,7 @@ export function Scanner({
                   <button
                     type="button"
                     onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
-                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary font-semibold text-xs transition-all flex items-center justify-center gap-2"
+                    className="surface-card w-full sm:flex-1 py-2.5 bg-bg-elevated hover:bg-bg-elevated text-text-secondary font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
                     <KeyRound className="w-4 h-4 text-text-muted shrink-0" />
                     <span className="truncate">Enter Roll Manually</span>

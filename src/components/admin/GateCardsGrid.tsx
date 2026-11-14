@@ -20,12 +20,12 @@ export function GateCard({ gate }: GateCardProps) {
   return (
     <Link
       href={`/admin/gates/${gate.id}`}
-      className="p-4 border-b sm:border-b-0 sm:border-r border-border last:border-r-0 hover:bg-bg-elevated/30 cursor-pointer transition group"
+      className="surface-card p-4 sm: sm: last: hover:bg-bg-elevated/30 cursor-pointer transition group"
     >
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <span className="font-semibold text-xs sm:text-sm text-text-primary group-hover:text-action-success transition-colors">{gate.name}</span>
         <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold uppercase ${(gate.isOnline ?? gate.isActive) ? "bg-emerald-500/10 text-action-success border border-emerald-500/20" : "bg-rose-500/10 text-action-danger border border-rose-500/20"}`}>
-          <span className={`w-1 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full ${(gate.isOnline ?? gate.isActive) ? "bg-action-success animate-pulse" : "bg-action-danger"}`} />
+          <span className={`size-2.5 sm:w-1.5 sm:h-1.5 rounded-full ${(gate.isOnline ?? gate.isActive) ? "bg-action-success animate-pulse" : "bg-action-danger"}`} />
           {(gate.isOnline ?? gate.isActive) ? "Online" : "Offline"}
         </span>
       </div>
@@ -48,14 +48,14 @@ export function GateCardsGrid({ locations }: GateCardsGridProps) {
   if (locations.length === 0) return null;
   return (
     <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      <div className="surface-card p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Cpu className="w-4 h-4 text-action-success" />
           <span className="font-semibold text-sm hidden sm:inline">🔑 Gates at a Glance</span>
           <span className="text-lg sm:hidden">🔑</span>
         </div>
         <Link href="/admin/gates" className="text-xs text-text-muted hover:text-text-primary flex items-center gap-1 transition-colors hidden sm:flex">
-          Manage Gates <ChevronRight className="w-3 h-3" />
+          Manage Gates <ChevronRight className="size-3.5" />
         </Link>
       </div>
       <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">

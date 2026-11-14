@@ -50,7 +50,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+    <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
       <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -67,7 +67,7 @@ function StatCard({
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -75,7 +75,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -143,7 +143,7 @@ function MessDailyMealCountsInner() {
 
       <WidgetBoundary title="Daily Meal Counts">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <Calculator className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Daily Meal Counts</span>
             <span className="ml-auto text-xs text-text-muted">{fmtDate(d?.mealDate)}</span>

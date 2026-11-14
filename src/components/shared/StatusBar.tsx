@@ -41,7 +41,7 @@ export function StatusBar({ counts, lastScan }: StatusBarProps) {
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Status bar"
     >
       {/* Left: gate + shift */}

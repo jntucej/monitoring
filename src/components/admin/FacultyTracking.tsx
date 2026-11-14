@@ -46,7 +46,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div
           onClick={() => { setSelectedStatus("ALL"); setSelectedDept("ALL"); }}
-          className="p-4 rounded-xl bg-bg-surface border border-border hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          className="surface-card p-4 bg-bg-surface hover: cursor-pointer transition-all space-y-1 group"
           title="Click to show all faculty records"
         >
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -61,7 +61,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
 
         <div
           onClick={() => setSelectedStatus("INSIDE")}
-          className="p-4 rounded-xl bg-bg-surface border border-border hover:border-emerald-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          className="surface-card p-4 bg-bg-surface hover: cursor-pointer transition-all space-y-1 group"
           title="Click to filter present faculty"
         >
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -76,7 +76,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
 
         <div
           onClick={() => setSelectedStatus("INSIDE")}
-          className="p-4 rounded-xl bg-bg-surface border border-border hover:border-indigo-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          className="surface-card p-4 bg-bg-surface hover: cursor-pointer transition-all space-y-1 group"
           title="Click to filter faculty inside campus"
         >
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -91,7 +91,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
 
         <div
           onClick={() => setSelectedStatus("OUTSIDE")}
-          className="p-4 rounded-xl bg-bg-surface border border-border hover:border-amber-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          className="surface-card p-4 bg-bg-surface hover: cursor-pointer transition-all space-y-1 group"
           title="Click to filter faculty currently outside"
         >
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -106,7 +106,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
 
         <div
           onClick={() => setSelectedStatus("LATE")}
-          className="p-4 rounded-xl bg-bg-surface border border-border hover:border-rose-500/40 cursor-pointer transition-all space-y-1 group shadow-sm"
+          className="surface-card p-4 bg-bg-surface hover: cursor-pointer transition-all space-y-1 group"
           title="Click to filter late arrivals"
         >
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
@@ -119,7 +119,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <p className="text-xs text-text-muted">After 10:00 AM cut-off</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-surface space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
             <UserX className="w-3.5 h-3.5 text-text-muted" />
             Absent / Unchecked
@@ -132,7 +132,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Department Breakdown Section */}
-      <div className="p-5 rounded-2xl bg-bg-surface border border-border space-y-4">
+      <div className="surface-card p-5 bg-bg-surface space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
             <Building2 className="w-4 h-4 text-action-primary" />
@@ -148,11 +148,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             <div
               key={dept.department}
               onClick={() => setSelectedDept(selectedDept === dept.department ? "ALL" : dept.department)}
-              className={`p-3.5 rounded-xl border transition cursor-pointer ${
-                selectedDept === dept.department
-                  ? "bg-indigo-500/10 border-indigo-500/40"
-                  : "bg-[var(--background)]/50 border-border hover:bg-[var(--background)]"
-              }`}
+              className={`p-3.5 transition cursor-pointer "" "hover:bg-[var(--background)]" "" "hover:bg-[var(--background)]"`}
             >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-text-primary truncate max-w-[170px]">
@@ -163,9 +159,9 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 </span>
               </div>
 
-              <div className="w-full h-1.5 bg-bg-surface rounded-full overflow-hidden mb-2">
+              <div className="w-full h-1.5 bg-bg-surface overflow-hidden mb-2">
                 <div
-                  className="h-full bg-action-success rounded-full transition-all"
+                  className="h-full bg-action-success transition-all"
                   style={{ width: `${dept.attendanceRate}%` }}
                 />
               </div>
@@ -181,15 +177,15 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-bg-surface border border-border flex flex-col md:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full md:w-80">
+      <div className="surface-card p-4 bg-bg-surface flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full md:w-4">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search faculty by name, ID, title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[var(--background)] border border-border text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:border-action-primary"
+            className="surface-card w-full pl-9 pr-4 py-2 bg-[var(--background)] text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:"
           />
         </div>
 
@@ -201,7 +197,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[var(--background)] border border-border text-xs text-text-primary focus:outline-none focus:border-action-primary"
+            className="surface-card px-3 py-2 bg-[var(--background)] text-xs text-text-primary focus:outline-none focus:"
           >
             <option value="ALL">All Departments</option>
             {departmentSummaries.map((d) => (
@@ -214,7 +210,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[var(--background)] border border-border text-xs text-text-primary focus:outline-none focus:border-action-primary"
+            className="surface-card px-3 py-2 bg-[var(--background)] text-xs text-text-primary focus:outline-none focus:"
           >
             <option value="ALL">All Statuses</option>
             <option value="INSIDE">Currently Inside</option>
@@ -226,7 +222,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
 
       {/* Roster Table */}
-      <div className="p-6 rounded-2xl bg-bg-surface border border-border space-y-4">
+      <div className="surface-card p-6 bg-bg-surface space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
@@ -274,7 +270,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   >
                     <td className="py-3.5 px-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-bold text-action-primary text-xs">
+                        <div className="size-4 bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center font-bold text-action-primary text-xs">
                           {fac.fullName.replace("Dr. ", "").replace("Prof. ", "").charAt(0)}
                         </div>
                         <div>
@@ -294,19 +290,13 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <td className="py-3.5 px-3">
                       <div className="flex flex-col gap-1 items-start">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
-                            fac.status === "INSIDE"
-                              ? "bg-emerald-500/10 text-action-success border-emerald-500/20"
-                              : fac.status === "OUTSIDE"
-                              ? "bg-amber-500/10 text-action-warning border-amber-500/20"
-                              : "bg-bg-elevated/10 text-text-muted border-border/20"
-                          }`}
+                          className={`px-2 py-0.5 text-xs font-bold "INSIDE" "text-action-success" "OUTSIDE" "text-action-warning" "text-text-muted" "INSIDE" "text-action-success" "OUTSIDE" "text-action-warning" "text-text-muted"`}
                         >
                           {fac.status}
                         </span>
                         {fac.punctualityStatus === "LATE" && (
                           <span className="text-xs text-action-danger font-semibold flex items-center gap-1">
-                            <Clock className="w-2.5 h-2.5" /> LATE (&gt;10:00 AM)
+                            <Clock className="size-2" /> LATE (&gt;10:00 AM)
                           </span>
                         )}
                       </div>
@@ -323,7 +313,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     <td className="py-3.5 px-3 text-xs text-text-muted">
                       {fac.gateLocation ? (
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-action-primary shrink-0" />
+                          <MapPin className="size-3.5 text-action-primary shrink-0" />
                           {fac.gateLocation}
                         </span>
                       ) : (
@@ -355,29 +345,23 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
         >
           <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
             {/* Top Profile Summary Header */}
-            <div className="p-4 rounded-xl bg-bg-surface border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="surface-card p-4 bg-bg-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center font-bold text-action-primary text-lg">
+                  <div className="size-4 bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center font-bold text-action-primary text-lg">
                     {selectedFaculty.fullName.replace("Dr. ", "").replace("Prof. ", "").charAt(0)}
                   </div>
                   <span
-                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 borderbg-surface ${
-                      selectedFaculty.status === "INSIDE"
-                        ? "bg-action-success"
-                        : selectedFaculty.status === "OUTSIDE"
-                        ? "bg-action-warning"
-                        : "bg-bg-elevated"
-                    }`}
+                    className={`absolute bottom-0 right-0 w-3.5 h-3.5 borderbg-surface "INSIDE" "bg-action-success" "OUTSIDE" "bg-action-warning" "bg-bg-elevated"`}
                   />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base font-bold text-text-primary">{selectedFaculty.fullName}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-action-primary border border-indigo-500/20 text-xs font-mono font-bold">
+                    <span className="surface-card px-2 py-0.5 bg-indigo-500/10 text-action-primary text-xs font-mono font-bold">
                       {selectedFaculty.uniqueId}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-bg-elevated/10 text-text-primary border border-border/20 text-xs font-bold">
+                    <span className="surface-card px-2 py-0.5 bg-bg-elevated/10 text-text-primary text-xs font-bold">
                       {selectedFaculty.department}
                     </span>
                   </div>
@@ -385,13 +369,13 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   <div className="flex items-center gap-4 mt-2 text-xs text-text-muted flex-wrap">
                     {selectedFaculty.email && (
                       <span className="flex items-center gap-1">
-                        <Mail className="w-3 h-3 text-action-primary" />
+                        <Mail className="size-3.5 text-action-primary" />
                         {selectedFaculty.email}
                       </span>
                     )}
                     {selectedFaculty.phone && (
                       <span className="flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-action-success" />
+                        <Phone className="size-3.5 text-action-success" />
                         {selectedFaculty.phone}
                       </span>
                     )}
@@ -400,21 +384,15 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center gap-1 text-xs font-semibold text-action-primary hover:underline"
                     >
-                      Full profile <ChevronRight className="w-3 h-3" />
+                      Full profile <ChevronRight className="size-3.5" />
                     </a>
                   </div>
                 </div>
               </div>
 
-              <div className="flex sm:flex-col items-end gap-2 w-full sm:w-auto justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-border">
+              <div className="surface-card flex sm:flex-col items-end gap-2 w-full sm:w-auto justify-between sm: pt-2 sm:pt-0">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                    selectedFaculty.status === "INSIDE"
-                      ? "bg-emerald-500/10 text-action-success border-emerald-500/30"
-                      : selectedFaculty.status === "OUTSIDE"
-                      ? "bg-amber-500/10 text-action-warning border-amber-500/30"
-                      : "bg-bg-elevated/10 text-text-muted border-border/30"
-                  }`}
+                  className={`px-3 py-1 text-xs font-bold "INSIDE" "text-action-success" "OUTSIDE" "text-action-warning" "text-text-muted" "INSIDE" "text-action-success" "OUTSIDE" "text-action-warning" "text-text-muted"`}
                 >
                   {selectedFaculty.status === "INSIDE"
                     ? "● CURRENTLY ON CAMPUS"
@@ -423,20 +401,20 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                     : "✕ ABSENT TODAY"}
                 </span>
                 {selectedFaculty.punctualityStatus === "LATE" && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 text-action-danger border border-rose-500/20 text-xs font-bold flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> LATE CHECK-IN (&gt;10:00 AM)
+                  <span className="surface-card px-2.5 py-0.5 bg-rose-500/10 text-action-danger text-xs font-bold flex items-center gap-1">
+                    <Clock className="size-3.5" /> LATE CHECK-IN (&gt;10:00 AM)
                   </span>
                 )}
                 {selectedFaculty.punctualityStatus === "ON_TIME" && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/20 text-xs font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> ON TIME (&lt;10:00 AM)
+                  <span className="surface-card px-2.5 py-0.5 bg-emerald-500/10 text-action-success text-xs font-bold flex items-center gap-1">
+                    <CheckCircle2 className="size-3.5" /> ON TIME (&lt;10:00 AM)
                   </span>
                 )}
               </div>
             </div>
             {/* 4 Metric Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-surface space-y-1">
                 <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-action-success" /> Attendance Rate
                 </span>
@@ -446,7 +424,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 <p className="text-xs text-text-muted">30-day average</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-surface space-y-1">
                 <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-action-primary" /> Today&apos;s Time Logged
                 </span>
@@ -458,7 +436,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-surface space-y-1">
                 <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-action-primary" /> Days Present
                 </span>
@@ -468,7 +446,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 <p className="text-xs text-text-muted">Working days present</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-bg-surface border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-surface space-y-1">
                 <span className="text-xs font-medium text-text-muted flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5 text-action-warning" /> Late Arrivals
                 </span>
@@ -479,7 +457,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               </div>
             </div>
             {/* 30-Day Attendance Heatmap Calendar */}
-            <div className="p-5 rounded-xl bg-bg-surface border border-border space-y-4">
+            <div className="surface-card p-5 bg-bg-surface space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
@@ -492,19 +470,19 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                 </div>
                 <div className="flex items-center gap-2 flex-wrap text-xs">
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-action-success inline-block" /> On Time (&lt;10:00 AM)
+                    <span className="size-2 bg-action-success inline-block" /> On Time (&lt;10:00 AM)
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-action-warning inline-block" /> Late (&gt;10:00 AM)
+                    <span className="size-2 bg-action-warning inline-block" /> Late (&gt;10:00 AM)
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-action-primary inline-block" /> Inside Today
+                    <span className="size-2 bg-action-primary inline-block" /> Inside Today
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-rose-500/40 inline-block" /> Absent
+                    <span className="size-2 bg-rose-500/40 inline-block" /> Absent
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded bg-bg-elevated/50 inline-block" /> Weekend
+                    <span className="size-2 bg-bg-elevated/50 inline-block" /> Weekend
                   </span>
                 </div>
               </div>
@@ -532,9 +510,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                       key={day.date + idx}
                       onClick={() => setActiveHeatmapDay(day)}
                       onMouseEnter={() => setActiveHeatmapDay(day)}
-                      className={`p-2 rounded-lg border text-center transition flex flex-col items-center justify-center min-h13 ${colorClass} ${
-                        isSelected ? "ring-2 ring-indigo-400 scale-105" : ""
-                      }`}
+                      className={`p-2 text-center transition flex flex-col items-center justify-center min-h13 "ring-2 ring-indigo-400 scale-105" "" "ring-2 ring-indigo-400 scale-105" ""`}
                     >
                       <span className="text-xs font-bold">{dayNum}</span>
                       <span className="text-xs opacity-80 uppercase">{day.dayLabel.split(",")[0]}</span>
@@ -547,21 +523,11 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               </div>
               {/* Active Day Detail Card */}
               {activeHeatmapDay && (
-                <div className="p-3 rounded-lg bg-[var(--background)] border border-indigo-500/30 flex items-center justify-between text-xs transition mt-3">
+                <div className="surface-card p-3 bg-[var(--background)] flex items-center justify-between text-xs transition mt-3">
                   <div className="flex items-center gap-3">
                     <div className="font-bold text-text-primary">{activeHeatmapDay.dayLabel}</div>
                     <span
-                      className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
-                        activeHeatmapDay.status === "ON_TIME"
-                          ? "bg-emerald-500/20 text-action-success"
-                          : activeHeatmapDay.status === "LATE"
-                          ? "bg-amber-500/20 text-action-warning"
-                          : activeHeatmapDay.status === "INSIDE"
-                          ? "bg-indigo-500/20 text-action-primary"
-                          : activeHeatmapDay.status === "ABSENT"
-                          ? "bg-rose-500/20 text-action-danger"
-                          : "bg-bg-elevated/20 text-text-muted"
-                      }`}
+                      className={`px-2 py-0.5 text-xs font-bold uppercase "ON_TIME" "text-action-success" "LATE" "text-action-warning" "INSIDE" "text-action-primary" "ABSENT" "text-action-danger" "text-text-muted" "ON_TIME" "text-action-success" "LATE" "text-action-warning" "INSIDE" "text-action-primary" "ABSENT" "text-action-danger" "text-text-muted"`}
                     >
                       {activeHeatmapDay.status === "LATE" ? "LATE ARRIVAL (>10:00 AM)" : activeHeatmapDay.status}
                     </span>
@@ -581,7 +547,7 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
               )}
 
             {/* Movement Gate Logs */}
-            <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-3">
+            <div className="surface-card p-4 bg-bg-surface space-y-3">
               <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
                 <Activity className="w-4 h-4 text-action-success" />
                 Recent Gate Scans & Terminal Activity
@@ -592,22 +558,18 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
                   {selectedFaculty.recentLogs.map((log) => (
                     <div
                       key={log.id}
-                      className="p-2.5 rounded-lg bg-[var(--background)] border border-border flex items-center justify-between text-xs"
+                      className="surface-card p-2.5 bg-[var(--background)] flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2.5">
                         <span
-                          className={`px-2 py-0.5 rounded text-xs font-bold ${
-                            log.direction === "IN"
-                              ? "bg-emerald-500/20 text-action-success"
-                              : "bg-amber-500/20 text-action-warning"
-                          }`}
+                          className={`px-2 py-0.5 text-xs font-bold "IN" "text-action-success" "text-action-warning" "IN" "text-action-success" "text-action-warning"`}
                         >
                           {log.direction === "IN" ? "GATE ENTRY (IN)" : "GATE EXIT (OUT)"}
                         </span>
                         <span className="font-semibold text-text-primary">{log.gate}</span>
                       </div>
                       <span className="font-mono text-xs text-text-muted flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-action-primary" />
+                        <Clock className="size-3.5 text-action-primary" />
                         {log.timestamp}
                       </span>
                     </div>

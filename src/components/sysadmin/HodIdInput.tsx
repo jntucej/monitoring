@@ -77,7 +77,7 @@ export function HodIdInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Enter roll number, employee ID, unique ID, or email"
-          className="w-full rounded-lg border bg-background py-2 pl-9 pr-10 text-sm outline-none focus:border-primary"
+          className="surface-card w-full bg-background py-2 pl-9 pr-10 text-sm outline-none focus:"
         />
         {state.kind === "checking" && (
           <Loader2
@@ -97,7 +97,7 @@ export function HodIdInput({
 function LookupBanner({ result }: { result: LookupResult }) {
   if (!result.found) {
     return (
-      <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+      <div className="surface-card flex items-start gap-2 bg-destructive/5 px-3 py-2 text-sm text-destructive">
         <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
           <div className="font-medium">Not found</div>
@@ -109,7 +109,7 @@ function LookupBanner({ result }: { result: LookupResult }) {
 
   if (result.eligible === false) {
     return (
-      <div className="flex items-start gap-2 rounded-lg border border-orange-500/30 bg-orange-500/5 px-3 py-2 text-sm text-orange-400">
+      <div className="surface-card flex items-start gap-2 bg-orange-500/5 px-3 py-2 text-sm text-orange-400">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
           <div className="font-medium">
@@ -123,7 +123,7 @@ function LookupBanner({ result }: { result: LookupResult }) {
 
   if (result.willTransferFrom) {
     return (
-      <div className="flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 px-3 py-2 text-sm text-blue-300">
+      <div className="surface-card flex items-start gap-2 bg-blue-500/5 px-3 py-2 text-sm text-blue-300">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
           <div className="font-medium">{result.name}</div>
@@ -138,7 +138,7 @@ function LookupBanner({ result }: { result: LookupResult }) {
   }
 
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-sm text-emerald-400">
+    <div className="surface-card flex items-start gap-2 bg-emerald-500/5 px-3 py-2 text-sm text-emerald-400">
       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
       <div>
         <div className="font-medium">

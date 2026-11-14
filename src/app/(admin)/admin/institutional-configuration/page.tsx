@@ -98,7 +98,7 @@ function ReadOnlyCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-elevated p-5">
+    <div className="surface-card bg-bg-elevated p-5">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-action-info shrink-0" />
@@ -197,7 +197,7 @@ function InstitutionalConfigurationInner() {
           <div className="space-y-3">
             <PassTypesForm />
             {snapshot?.passTypes?.some((p) => p.is_active) && (
-              <div className="rounded-lg border border-rose-500/20 bg-rose-500/[0.04] p-3">
+              <div className="surface-card bg-rose-500/[0.04] p-3">
                 <p className="text-xs font-semibold text-action-danger mb-2">
                   Deactivate pass type
                 </p>
@@ -209,7 +209,7 @@ function InstitutionalConfigurationInner() {
                         key={p.code}
                         type="button"
                         onClick={() => setConfirmDeactivate(p)}
-                        className="rounded-md px-2 py-1 text-xs font-medium border border-rose-500/30 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-colors"
+                        className="surface-card px-2 py-1 text-xs font-medium bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition-colors"
                       >
                         {p.name}
                       </button>

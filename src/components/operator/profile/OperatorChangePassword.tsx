@@ -94,9 +94,9 @@ export function OperatorChangePasswordCard() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-6 shadow-sm">
+    <div className="surface-card bg-bg-surface p-6">
       {mustChangePassword && !success && (
-        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-action-warning">
+        <div className="surface-card mb-4 flex items-start gap-2 bg-amber-500/10 p-3 text-xs text-action-warning">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-semibold">A temporary password was set for your account.</p>
@@ -108,7 +108,7 @@ export function OperatorChangePasswordCard() {
         </div>
       )}
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-xl bg-action-primary/10">
+        <div className="surface-card p-2 bg-action-primary/10">
           <KeyRound className="w-5 h-5 text-action-primary" />
         </div>
         <div>
@@ -120,7 +120,7 @@ export function OperatorChangePasswordCard() {
       </div>
 
       {success ? (
-        <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4">
+        <div className="surface-card flex items-start gap-3 bg-emerald-500/10 p-4">
           <CheckCircle2 className="w-5 h-5 text-action-success mt-0.5" />
           <div>
             <p className="text-sm font-medium text-action-success dark:text-action-success">
@@ -160,7 +160,7 @@ export function OperatorChangePasswordCard() {
           />
 
           {error && (
-            <div className="flex items-start gap-2 rounded-xl bg-rose-500/10 border border-rose-500/30 p-3">
+            <div className="surface-card flex items-start gap-2 bg-rose-500/10 p-3">
               <AlertCircle className="w-4 h-4 text-action-danger mt-0.5 flex-shrink-0" />
               <p className="text-sm text-action-danger dark:text-action-danger">{error}</p>
             </div>
@@ -169,7 +169,7 @@ export function OperatorChangePasswordCard() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 transition"
+            className="surface-card w-full inline-flex items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 transition"
           >
             {submitting ? (
               <>
@@ -213,7 +213,7 @@ function OperatorPasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
-          className="w-full rounded-xl border border-border bg-bg-base px-3 py-2.5 pr-10 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+          className="surface-card w-full bg-bg-base px-3 py-2.5 pr-10 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/40"
         />
         <button
           type="button"

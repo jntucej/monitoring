@@ -125,7 +125,7 @@ export function SpecialEventManager() {
             <label className="text-sm text-text-secondary">
               Title
               <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
             <label className="text-sm text-text-secondary">
               Event date
@@ -135,31 +135,31 @@ export function SpecialEventManager() {
                   setAnnouncementAt(defaultAnnouncement(e.target.value));
                   setInterestDeadline(defaultDeadline(e.target.value));
                 }}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
             <label className="text-sm text-text-secondary">
               Meal
               <select value={mealType} onChange={(e) => setMealType(e.target.value as MealType)}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm">
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm">
                 {MEAL_TYPES.map((m) => <option key={m} value={m}>{MEAL_LABEL[m]}</option>)}
               </select>
             </label>
             <label className="text-sm text-text-secondary">
               Notes (optional)
               <input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
             <label className="text-sm text-text-secondary">
               Announce at
               <input type="datetime-local" value={announcementAt}
                 onChange={(e) => setAnnouncementAt(e.target.value)}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
             <label className="text-sm text-text-secondary">
               Interest deadline
               <input type="datetime-local" value={interestDeadline}
                 onChange={(e) => setInterestDeadline(e.target.value)}
-                className="mt-1 w-full rounded-md border border-border bg-[var(--bg)] px-3 py-2 text-sm" />
+                className="surface-card mt-1 w-full bg-[var(--bg)] px-3 py-2 text-sm" />
             </label>
 
             <label className="flex items-center gap-2 text-sm text-text-secondary md:col-span-2">
@@ -180,12 +180,12 @@ export function SpecialEventManager() {
                   <div key={idx} className="grid grid-cols-12 gap-2">
                     <input value={it.code} onChange={(e) => updateItem(idx, { code: e.target.value.toUpperCase() })}
                       placeholder="CODE" maxLength={20}
-                      className="col-span-2 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs font-mono" />
+                      className="surface-card col-span-2 bg-[var(--bg)] px-2 py-1.5 text-xs font-mono" />
                     <input value={it.label} onChange={(e) => updateItem(idx, { label: e.target.value })}
                       placeholder="Label (e.g. Chicken Biryani)" maxLength={80}
-                      className="col-span-5 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs" />
+                      className="surface-card col-span-5 bg-[var(--bg)] px-2 py-1.5 text-xs" />
                     <select value={it.category} onChange={(e) => updateItem(idx, { category: e.target.value as SpecialItemCategory })}
-                      className="col-span-3 rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs">
+                      className="surface-card col-span-3 bg-[var(--bg)] px-2 py-1.5 text-xs">
                       {SPECIAL_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
                     <label className="col-span-1 flex items-center gap-1 text-xs text-text-muted">
@@ -203,7 +203,7 @@ export function SpecialEventManager() {
 
             <div className="md:col-span-2">
               <button type="submit" disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
+                className="surface-card inline-flex items-center gap-2 bg-action-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60">
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarDays className="h-4 w-4" />}
                 Create event
               </button>
@@ -217,18 +217,18 @@ export function SpecialEventManager() {
         >
           <div className="flex items-center justify-end mb-3">
             <button type="button" onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary">
+              className="surface-card inline-flex items-center gap-2 px-3 py-2 text-sm text-text-secondary">
               <RefreshCw className="h-4 w-4" /> Refresh
             </button>
           </div>
           {loading && <div className="space-y-2">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>}
-          {error && <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">{error}</div>}
+          {error && <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">{error}</div>}
           {!loading && !error && events.length === 0 && <p className="text-sm text-text-muted">No special events yet.</p>}
           <div className="space-y-2">
             {events.map((ev) => {
               const status = effectiveEventStatus(ev);
               return (
-                <div key={ev.id} className="rounded-lg border border-border p-3">
+                <div key={ev.id} className="surface-card p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-text-primary">{ev.title}</div>
@@ -238,16 +238,16 @@ export function SpecialEventManager() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <button type="button" onClick={() => setActiveEventId(activeEventId === ev.id ? null : ev.id)}
-                        className="rounded-md border border-border px-2 py-1 text-xs">
+                        className="surface-card px-2 py-1 text-xs">
                         {activeEventId === ev.id ? "Hide counts" : "View counts"}
                       </button>
                       {status !== "CANCELLED" && (
                         <button type="button" onClick={() => void setStatus(ev.id, "CLOSED")}
-                          className="rounded-md border border-border px-2 py-1 text-xs">Close</button>
+                          className="surface-card px-2 py-1 text-xs">Close</button>
                       )}
                       {status !== "CANCELLED" && (
                         <button type="button" onClick={() => void setStatus(ev.id, "CANCELLED")}
-                          className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-action-danger">Cancel</button>
+                          className="surface-card px-2 py-1 text-xs text-action-danger">Cancel</button>
                       )}
                     </div>
                   </div>

@@ -14,7 +14,7 @@ export function DelegationHealth({
   const warning = active > 0 && expiringSoon > 0;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <UserCog className="size-4 text-action-info" />

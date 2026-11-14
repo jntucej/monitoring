@@ -99,7 +99,7 @@ export function CampusKnowledgeCentre() {
 
   return (
     <WidgetBoundary title="Campus Knowledge Centre">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="h-4 w-4 text-action-warning" />
@@ -118,14 +118,14 @@ export function CampusKnowledgeCentre() {
               placeholder="Search documents…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-border/50 bg-bg-surface/50 py-2 pl-9 pr-3 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+              className="surface-card w-full bg-bg-surface/50 py-2 pl-9 pr-3 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
               aria-label="Search knowledge documents"
             />
           </div>
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
-            className="rounded-lg border border-border/50 bg-bg-surface/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+            className="surface-card bg-bg-surface/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
             aria-label="Filter by category"
           >
             <option value="all">All Categories</option>
@@ -177,15 +177,15 @@ export function CampusKnowledgeCentre() {
                       {doc.title}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-muted">
-                      <span className="rounded bg-bg-elevated/50 px-1.5 py-0.5 capitalize">
+                      <span className="surface-card bg-bg-elevated/50 px-1.5 py-0.5 capitalize">
                         {doc.category}
                       </span>
                       <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
+                        <User className="size-3.5" />
                         {doc.ownerRole}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="size-3.5" />
                         {new Date(doc.updatedAt).toLocaleDateString()}
                       </span>
                       <span>v{doc.version}</span>
@@ -208,9 +208,9 @@ export function CampusKnowledgeCentre() {
                         e.stopPropagation();
                         reportOutdated(doc.id);
                       }}
-                      className="flex items-center gap-1.5 rounded border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-xs text-action-danger hover:bg-rose-500/20 transition-colors motion-reduce:transition-none"
+                      className="surface-card flex items-center gap-1.5 bg-rose-500/10 px-2 py-1 text-xs text-action-danger hover:bg-rose-500/20 transition-colors motion-reduce:transition-none"
                     >
-                      <AlertTriangle className="h-3 w-3" />
+                      <AlertTriangle className="size-3.5" />
                       Report as outdated
                     </button>
                   </div>

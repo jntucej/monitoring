@@ -259,7 +259,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
-            <GraduationCap className="w-7 h-7 text-action-success" />
+            <GraduationCap className="size-6 text-action-success" />
             Alumni &amp; Deprovision
           </p>
           <p className="text-sm text-text-muted mt-1 max-w-2xl">
@@ -269,7 +269,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
         </div>
         <button
           onClick={() => { setLoading(true); fetchStudents(); fetchDeprovisioned(); }}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-elevated hover:bg-bg-elevated text-sm text-text-secondary transition"
+          className="surface-card flex items-center gap-2 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-sm text-text-secondary transition"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -277,7 +277,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
       </div>
 
       {/* Backup notice */}
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-950/40 border border-amber-800/50">
+      <div className="surface-card flex items-start gap-3 p-4 bg-amber-950/40">
         <ShieldAlert className="text-action-warning shrink-0 mt-0.5" size={20} />
         <div>
           <p className="text-action-warning text-sm font-medium">Before deprovisioning, a pg_dump backup is recommended.</p>
@@ -304,7 +304,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, roll, or course…"
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-bg-elevated border border-border text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+            className="surface-card w-full pl-9 pr-3 py-2 bg-bg-elevated text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           />
         </div>
       </div>
@@ -337,7 +337,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
         </div>
       )}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/50 text-action-danger text-sm">
+        <div className="surface-card p-4 bg-rose-950/40 text-action-danger text-sm">
           <AlertTriangle className="inline mr-2" size={16} /> {error}
         </div>
       )}
@@ -358,7 +358,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                     <button
                       onClick={() => setConfirmBulk(true)}
                       disabled={bulkLoading || filteredAuto.length === 0}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition"
+                      className="surface-card flex items-center gap-2 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition"
                     >
                       {bulkLoading ? <Loader2 size={14} className="animate-spin" /> : <GraduationCap size={14} />}
                       Mark All Detected as Graduated
@@ -367,9 +367,9 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
 
                   {confirmBulk && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                      <div className="bg-bg-surface border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                      <div className="surface-card bg-bg-surface p-6 max-w-md w-full">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="p-2 rounded-full bg-emerald-500/15">
+                          <div className="surface-card p-2 bg-emerald-500/15">
                             <GraduationCap className="text-action-success" size={20} />
                           </div>
                           <div>
@@ -382,8 +382,8 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                           Their historical data is preserved. This action can be reversed via the &quot;Re-activate&quot; button.
                         </p>
                         <div className="flex gap-3">
-                          <button onClick={() => setConfirmBulk(false)} className="flex-1 px-4 py-2 rounded-lg bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-sm transition">Cancel</button>
-                          <button onClick={handleBulkGraduate} disabled={bulkLoading} className="flex-1 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-medium transition flex items-center justify-center gap-2">
+                          <button onClick={() => setConfirmBulk(false)} className="surface-card flex-1 px-4 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-sm transition">Cancel</button>
+                          <button onClick={handleBulkGraduate} disabled={bulkLoading} className="surface-card flex-1 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-50 text-white text-sm font-medium transition flex items-center justify-center gap-2">
                             {bulkLoading && <Loader2 size={14} className="animate-spin" />}
                             Confirm
                           </button>
@@ -416,13 +416,13 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                               <td className="px-4 py-3 text-text-muted">{decoded?.admissionYear ?? "—"}</td>
                               <td className="px-4 py-3 text-action-warning font-medium">{s.gradYear ?? "—"}</td>
                               <td className="px-4 py-3">
-                                <span className="px-2 py-0.5 rounded-full bg-green-500/15 text-green-400 text-xs font-medium">ACTIVE</span>
+                                <span className="surface-card px-2 py-0.5 bg-green-500/15 text-green-400 text-xs font-medium">ACTIVE</span>
                               </td>
                               <td className="px-4 py-3 text-right">
                                 <button
                                   onClick={() => handleSingleGraduate(s)}
                                   disabled={singleBusy === s.id}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-500/30 text-action-success text-xs font-medium transition disabled:opacity-50"
+                                  className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-500/30 text-action-success text-xs font-medium transition disabled:opacity-50"
                                 >
                                   {singleBusy === s.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
                                   Mark Graduated
@@ -446,7 +446,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={rosterCourse}
                   onChange={(e) => setRosterCourse(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary"
+                  className="surface-card px-3 py-1.5 bg-bg-elevated text-xs text-text-secondary"
                 >
                   <option value="ALL">All Courses</option>
                   {rosterCourses.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -454,7 +454,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={rosterYear}
                   onChange={(e) => setRosterYear(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary"
+                  className="surface-card px-3 py-1.5 bg-bg-elevated text-xs text-text-secondary"
                 >
                   <option value="ALL">All Grad. Years</option>
                   {rosterYears.map((y) => <option key={y} value={String(y)}>{y}</option>)}
@@ -506,7 +506,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                 <select
                   value={depRole}
                   onChange={(e) => setDepRole(e.target.value)}
-                  className="px-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs text-text-secondary"
+                  className="surface-card px-3 py-1.5 bg-bg-elevated text-xs text-text-secondary"
                 >
                   <option value="ALL">All Roles</option>
                   {depRoles.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -539,7 +539,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
                             <button
                               onClick={() => handleReactivateUser(u)}
                               disabled={reprovisionBusy === u.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-500/30 text-blue-300 text-xs font-medium transition disabled:opacity-50"
+                              className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-500/30 text-blue-300 text-xs font-medium transition disabled:opacity-50"
                             >
                               {reprovisionBusy === u.id ? <Loader2 size={12} className="animate-spin" /> : <UserCheck size={12} />}
                               Re-activate
@@ -562,7 +562,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
 
 function KpiCard({ label, value, icon, color, sub }: { label: string; value: number; icon: ReactNode; color: string; sub?: string }) {
   return (
-    <div className="bg-bg-elevated/40 border border-border/60 rounded-xl p-4">
+    <div className="surface-card bg-bg-elevated/40 p-4">
       <div className={`flex items-center gap-2 text-xs text-text-muted mb-1`}>
         {icon}
         {label}

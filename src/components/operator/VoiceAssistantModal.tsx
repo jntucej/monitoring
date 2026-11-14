@@ -89,7 +89,7 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
   };
 
   return (
-    <div className="p-3.5 rounded-2xl border border-purple-500/20 bg-purple-950/10 backdrop-blur-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+    <div className="surface-card p-3.5 bg-purple-950/10 backdrop-blur-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
       <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
         <Button
           variant={isListening ? "danger" : "secondary"}
@@ -107,9 +107,9 @@ export function VoiceAssistantModal({ onExecuteCommand }: VoiceAssistantModalPro
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
             placeholder="or type command e.g. 'entry 24JJ1A0501'"
-            className="px-2.5 py-1 text-xs rounded-lg bg-bg-base border border-border font-mono text-text-primary outline-none focus:ring-1 focus:ringunit-c"
+            className="surface-card px-2.5 py-1 text-xs bg-bg-base font-mono text-text-primary outline-none focus:ring-1 focus:ringunit-c"
           />
-          <button type="submit" className="p-1 rounded-md bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30">
+          <button type="submit" className="surface-card p-1 bg-purple-500/20 text-purple-300 text-xs hover:bg-purple-500/30">
             <Sparkles className="w-3.5 h-3.5" />
           </button>
         </form>

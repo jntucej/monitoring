@@ -65,7 +65,7 @@ function OperatorAnnouncementsInner() {
       <div className="flex items-center justify-between min-w-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <Megaphone className="w-5 h-5 text-action-primary shrink-0" />
+            <Megaphone className="w-4 h-4 text-action-primary shrink-0" />
             <h2 className="text-lg font-bold text-text-primary truncate">Announcements</h2>
           </div>
           <p className="text-xs text-text-muted mt-1 min-w-0">
@@ -76,16 +76,16 @@ function OperatorAnnouncementsInner() {
           type="button"
           onClick={() => void loadAnnouncements()}
           disabled={loading}
-          className="min-h11 inline-flex items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition shrink-0 disabled:opacity-50"
+          className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition shrink-0 disabled:opacity-50"
         >
           {loading ? (
-            <span className="flex items-center gap-1.5"><Loader2 className="w-3 h-3 animate-spin" />Loading</span>
+            <span className="flex items-center gap-1.5"><Loader2 className="size-3.5 animate-spin" />Loading</span>
           ) : "Refresh"}
         </button>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
         </div>
@@ -100,7 +100,7 @@ function OperatorAnnouncementsInner() {
             </div>
           ) : announcements.length === 0 ? (
             <div className="p-8 text-center min-w-0">
-              <Inbox className="w-6 h-6 text-text-muted mx-auto mb-2" />
+              <Inbox className="w-4 h-4 text-text-muted mx-auto mb-2" />
               <p className="text-sm text-text-muted">No active announcements at this time.</p>
             </div>
           ) : (
@@ -114,17 +114,17 @@ function OperatorAnnouncementsInner() {
                       {a.body && <p className="text-xs text-text-muted mt-1 line-clamp-3">{a.body}</p>}
                       <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
                         {a.audience && (
-                          <span className="rounded-full border border-border px-1.5 py-0.5 uppercase">
+                          <span className="surface-card px-1.5 py-0.5 uppercase">
                             {a.audience}
                           </span>
                         )}
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
+                          <Calendar className="size-3.5" />
                           {fmtDate(a.created_at)}
                         </span>
                         {a.expires_at && (
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="size-3.5" />
                             Expires {fmtDate(a.expires_at)}
                           </span>
                         )}

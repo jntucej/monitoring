@@ -88,7 +88,7 @@ export function ChildActivityPanel() {
   const totalOpen = data?.data?.totalOpenRequests ?? 0;
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -105,7 +105,7 @@ export function ChildActivityPanel() {
           type="button"
           onClick={handleRefresh}
           disabled={busy || loading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 disabled:opacity-40 transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover: disabled:opacity-40 transition-colors"
           aria-label="Refresh child activity"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${busy || loading ? "animate-spin" : ""}`} />
@@ -120,7 +120,7 @@ export function ChildActivityPanel() {
           Loading child activity&hellip;
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs text-action-warning">
+        <div className="surface-card bg-amber-500/10 px-3 py-3 text-xs text-action-warning">
           <div className="flex items-center justify-between gap-3">
             <span>
               Could not load child activity: {error}
@@ -128,7 +128,7 @@ export function ChildActivityPanel() {
             <button
               type="button"
               onClick={handleRefresh}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 shrink-0"
+              className="surface-card inline-flex items-center gap-1.5 bg-amber-500/20 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/30 shrink-0"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Retry
@@ -136,7 +136,7 @@ export function ChildActivityPanel() {
           </div>
         </div>
       ) : children.length === 0 ? (
-        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4 text-xs text-text-muted">
+        <div className="surface-card bg-bg-base/50 px-3 py-4 text-xs text-text-muted">
           No linked children yet. Link a child to start tracking their campus activity.
         </div>
       ) : (
@@ -180,7 +180,7 @@ export function ChildActivityPanel() {
             return (
               <li
                 key={child.childId}
-                className="rounded-lg border border-border bg-bg-elevated p-3 min-w-0"
+                className="surface-card bg-bg-elevated p-3 min-w-0"
               >
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <p className="text-sm font-bold text-text-primary truncate">

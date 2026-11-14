@@ -150,12 +150,12 @@ export function HostelForwardModal({
             onChange={(e) => setComment(e.target.value)}
             rows={3}
             placeholder="Explain why this request needs a higher level"
-            className="w-full text-sm p-2 rounded-lg border border-border bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="surface-card w-full text-sm p-2 bg-bg-surface text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
         {stepupRequired && (
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-2">
+          <div className="surface-card p-3 bg-amber-500/10 space-y-2">
             <div className="flex items-center gap-1.5 text-action-warning text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
               Step-up password required
@@ -170,7 +170,7 @@ export function HostelForwardModal({
         )}
 
         {error && (
-          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs">
+          <div className="surface-card p-3 bg-rose-500/10 text-action-danger text-xs">
             {error}
           </div>
         )}

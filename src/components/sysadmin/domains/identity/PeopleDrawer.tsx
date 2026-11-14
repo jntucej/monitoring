@@ -86,7 +86,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
         className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-border bg-bg-base shadow-xl"
       >
         {/* header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-bg-base px-4 py-3">
+        <div className="surface-card sticky top-0 z-10 flex items-center justify-between bg-bg-base px-4 py-3">
           <div className="min-w-0">
             <div className="truncate text-base font-semibold text-text-primary">
               {d?.name ?? activeRow.name}
@@ -98,7 +98,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-border p-1.5 text-text-secondary hover:bg-[var(--surface-raised)]"
+            className="surface-card p-1.5 text-text-secondary hover:bg-[var(--surface-raised)]"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -108,12 +108,12 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
         <div className="space-y-4 p-4">
           {state === "loading" && (
             <div className="space-y-2">
-              <div className="h-3 w-32 animate-pulse rounded bg-[var(--surface-raised)]" />
+              <div className="size-3.52 animate-pulse rounded bg-[var(--surface-raised)]" />
               <div className="h-24 animate-pulse rounded bg-[var(--surface-raised)]" />
             </div>
           )}
           {state === "error" && (
-            <div className="rounded-md border border-action-danger bg-action-danger/10 p-3 text-sm text-action-danger">
+            <div className="surface-card bg-action-danger/10 p-3 text-sm text-action-danger">
               {error}
             </div>
           )}
@@ -144,7 +144,7 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
                   {d.roles.map((r) => (
                     <li
                       key={r.role}
-                      className="flex items-center justify-between rounded border border-border px-2 py-1 text-sm"
+                      className="surface-card flex items-center justify-between px-2 py-1 text-sm"
                     >
                       <span className="text-text-primary">{r.role}</span>
                       <span className="text-xs text-text-muted">
@@ -256,7 +256,7 @@ function DrawerLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <a
       href={href}
-      className="rounded-full border border-border px-2.5 py-0.5 text-xs text-text-secondary hover:border-action-primary hover:text-action-primary"
+      className="surface-card px-2.5 py-0.5 text-xs text-text-secondary hover: hover:text-action-primary"
     >
       {children}
     </a>

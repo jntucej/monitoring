@@ -58,7 +58,7 @@ function WorkerWorkOrdersInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">
           Work orders unavailable: {error}
         </div>
       )}
@@ -84,7 +84,7 @@ function WorkerWorkOrdersInner() {
                       {o.stage ? ` · ${o.stage}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
+                  <span className="surface-card shrink-0 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
                     {o.status ?? "PENDING"}
                   </span>
                 </div>
@@ -108,7 +108,7 @@ function WorkerWorkOrdersInner() {
                       </p>
                     )}
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-action-success">
+                  <span className="surface-card shrink-0 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-action-success">
                     {c.status}
                   </span>
                 </div>

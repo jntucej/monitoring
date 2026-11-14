@@ -125,14 +125,14 @@ export function PersonalGoals() {
 
   return (
     <WidgetBoundary title="Personal Goals">
-      <section aria-label="Personal goals" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="Personal goals" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
             <Target className="h-4 w-4 text-unit-c" aria-hidden />
             Personal Goals
           </h2>
           {total > 0 && (
-            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
+            <span className="surface-card bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
               {completed} / {total} completed
             </span>
           )}
@@ -147,13 +147,13 @@ export function PersonalGoals() {
             Loading goals…
           </div>
         ) : error ? (
-          <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : (
           <ul className="mt-4 space-y-3" aria-label="Goal list">
             {goals.map((goal) => {
               const pct = progressPct(goal);
               return (
-                <li key={goal.id} className="rounded-xl border border-border bg-[var(--bg-raised)]/30 p-3.5">
+                <li key={goal.id} className="surface-card bg-[var(--bg-raised)]/30 p-3.5">
                   <div className="flex items-center justify-between gap-2">
                     <p
                       className={`text-sm font-semibold ${
@@ -176,7 +176,7 @@ export function PersonalGoals() {
                           onClick={() => handleComplete(goal)}
                           disabled={busyGoalId === goal.id}
                           aria-label={`Mark "${goal.title}" complete`}
-                          className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-1 text-action-success hover:bg-emerald-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
+                          className="surface-card bg-emerald-500/10 p-1 text-action-success hover:bg-emerald-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:opacity-50"
                         >
                           {busyGoalId === goal.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
@@ -209,7 +209,7 @@ export function PersonalGoals() {
               );
             })}
             {goals.length === 0 && (
-              <li className="flex items-center gap-2 rounded-xl border border-dashed border-border p-4 text-sm text-text-muted">
+              <li className="surface-card flex items-center gap-2 p-4 text-sm text-text-muted">
                 <Circle className="h-4 w-4" aria-hidden />
                 No goals yet — add one below.
               </li>
@@ -217,7 +217,7 @@ export function PersonalGoals() {
           </ul>
         )}
 
-        <form onSubmit={handleCreate} className="mt-4 space-y-2.5 rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3.5">
+        <form onSubmit={handleCreate} className="surface-card mt-4 space-y-2.5 bg-[var(--bg-raised)]/20 p-3.5">
           <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
             New goal
             <input
@@ -226,7 +226,7 @@ export function PersonalGoals() {
               onChange={(e) => setTitle(e.target.value)}
               maxLength={200}
               placeholder="e.g. Attend 5 campus events this term"
-              className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
+              className="surface-card mt-1 w-full bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition- motion-reduce:transition-none"
             />
           </label>
           <div className="grid grid-cols-2 gap-2.5">
@@ -238,7 +238,7 @@ export function PersonalGoals() {
                 max={100000}
                 value={targetValue}
                 onChange={(e) => setTargetValue(parseInt(e.target.value, 10) || 1)}
-                className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
+                className="surface-card mt-1 w-full bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition- motion-reduce:transition-none"
               />
             </label>
             <label className="block text-xs font-medium uppercase tracking-wide text-text-muted">
@@ -249,7 +249,7 @@ export function PersonalGoals() {
                 onChange={(e) => setNotes(e.target.value)}
                 maxLength={1000}
                 placeholder="Optional context"
-                className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
+                className="surface-card mt-1 w-full bg-bg-surface px-2.5 py-1.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-indigo-500/40 motion-safe:transition- motion-reduce:transition-none"
               />
             </label>
           </div>
@@ -262,7 +262,7 @@ export function PersonalGoals() {
           <button
             type="submit"
             disabled={creating || !title.trim()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/40 bg-violet-500/15 px-3 py-2 text-xs font-semibold text-unit-c hover:bg-violet-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-1.5 bg-violet-500/15 px-3 py-2 text-xs font-semibold text-unit-c hover:bg-violet-500/25 motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {creating ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />

@@ -77,7 +77,7 @@ export function SmartSchedulingAssistant() {
           <Card className="p-4 text-xs text-text-secondary">All smart schedule optimizations applied.</Card>
         ) : (
           suggestions.map((sug) => (
-            <Card key={sug.id} className="p-4 space-y-3 border border-border">
+            <Card key={sug.id} className="surface-card p-4 space-y-3">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function SmartSchedulingAssistant() {
                 </Button>
               </div>
 
-              <p className="text-xs text-text-secondary bg-[var(--bg-surface-elevated)] p-2.5 rounded">
+              <p className="surface-card text-xs text-text-secondary bg-[var(--bg-surface-elevated)] p-2.5">
                 💡 <span className="font-semibold">Data Insight:</span> {sug.reasoning}
               </p>
             </Card>

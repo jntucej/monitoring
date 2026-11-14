@@ -86,41 +86,41 @@ const api = useApi();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--surface-sunken)] p-4 rounded-xl border border-border">
+      <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--surface-sunken)] p-4">
         <div>
           <h3 className="text-base font-semibold text-text-primary">CSV Bulk User Provisioning</h3>
           <p className="text-xs text-text-secondary mt-0.5">Two-phase validation checking relational integrity, IDs, and gates.</p>
         </div>
-        <button onClick={handleDownloadTemplate} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-base hover:bg-[var(--surface-raised)] border border-border text-text-primary shadow-sm">
+        <button onClick={handleDownloadTemplate} className="surface-card flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-bg-base hover:bg-[var(--surface-raised)] text-text-primary">
           <Download className="w-3.5 h-3.5 text-text-muted" />
           Template
         </button>
       </div>
 
       {errorMsg && (
-        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-500">
+        <div className="surface-card flex items-start gap-2.5 p-3 bg-red-500/10 text-xs text-red-500">
           <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      <div className="bg-bg-base border border-border rounded-xl p-5 space-y-4">
+      <div className="surface-card bg-bg-base p-5 space-y-4">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-text-secondary uppercase">CSV Input</label>
           <div className="flex items-center gap-2">
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv,text/csv" className="hidden" />
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] font-medium">
+            <button type="button" onClick={() => fileInputRef.current?.click()} className="surface-card flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[var(--primary)]/10 text-[var(--primary)] font-medium">
               <Upload className="w-3.5 h-3.5" />
               Upload .csv
             </button>
           </div>
         </div>
 
-        <textarea rows={4} value={csvText} onChange={(e) => { setCsvText(e.target.value); setValidationResult(null); setCommitResult(null); }} placeholder="Paste CSV: email,name,role,unique_id,..." className="w-full font-mono text-xs p-3 rounded-lg border border-border bg-[var(--surface-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
+        <textarea rows={4} value={csvText} onChange={(e) => { setCsvText(e.target.value); setValidationResult(null); setCommitResult(null); }} placeholder="Paste CSV: email,name,role,unique_id,..." className="surface-card w-full font-mono text-xs p-3 bg-[var(--surface-sunken)] text-text-primary focus:outline-none focus:ring-1 focus:ring-[var(--primary)]" />
 
         <div className="flex items-center justify-between pt-1">
           <span className="text-xs text-text-muted">Roles: student, faculty, staff, principal, operator, sysadmin, parent, worker</span>
-          <button onClick={handleValidate} disabled={validating || !csvText.trim()} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50">
+          <button onClick={handleValidate} disabled={validating || !csvText.trim()} className="surface-card flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-[var(--primary)] text-white hover:opacity-90 disabled:opacity-50">
             {validating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
             Validate & Preview
           </button>

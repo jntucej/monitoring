@@ -63,11 +63,11 @@ export function DelegationsView() {
             {delegations.map((d) => (
               <li
                 key={d.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
-                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {d.status ?? "ACTIVE"}
                   </span>
                 </div>
@@ -94,7 +94,7 @@ export function DelegationsView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "ACTIVE"}
                     </span>
                   ),

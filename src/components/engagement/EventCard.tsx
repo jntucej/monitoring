@@ -88,7 +88,7 @@ export function EventCard({
           <button
             type="button"
             disabled
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-action-success motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-default"
+            className="surface-card inline-flex w-full items-center justify-center gap-1.5 bg-emerald-500/15 px-3 py-2 text-xs font-semibold text-action-success motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-default"
           >
             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
             Registered
@@ -99,7 +99,7 @@ export function EventCard({
           <button
             type="button"
             disabled
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-text-muted motion-reduce:transition-none"
+            className="surface-card inline-flex w-full items-center justify-center gap-1.5 bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-text-muted motion-reduce:transition-none"
           >
             <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
             Registering…
@@ -110,7 +110,7 @@ export function EventCard({
           <button
             type="button"
             onClick={() => void handleRegister()}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-action-danger motion-safe:transition-colors motion-reduce:transition-none"
+            className="surface-card inline-flex w-full items-center justify-center gap-1.5 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-action-danger motion-safe:transition-colors motion-reduce:transition-none"
           >
             <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             Retry registration
@@ -138,11 +138,11 @@ export function EventCard({
   return (
     <article
       aria-label={`Campus event: ${event.title}`}
-      className="flex flex-col rounded-2xl border border-border bg-bg-surface p-4 min-w-0"
+      className="surface-card flex flex-col bg-bg-surface p-4 min-w-0"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-action-info">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-action-info">
             <CalendarDays className="h-4 w-4" aria-hidden />
           </div>
           <div className="min-w-0">
@@ -155,7 +155,7 @@ export function EventCard({
           </div>
         </div>
         {event.registrationStatus === "attended" && (
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-action-success">
+          <span className="surface-card bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-action-success">
             Attended
           </span>
         )}

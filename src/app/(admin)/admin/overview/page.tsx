@@ -113,10 +113,10 @@ function AdminOverviewInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
       <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} />
       {/* Hero */}
-      <div className="rounded-2xl border border-border bg-bg-surface p-6 sm:p-8">
+      <div className="surface-card bg-bg-surface p-6 sm:p-8">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 shrink-0">
-            <Shield className="w-7 h-7 text-action-success" />
+          <div className="surface-card p-3 bg-emerald-500/10 shrink-0">
+            <Shield className="size-5 text-action-success" />
           </div>
           <div className="flex-1">
             <p className="text-sm sm:text-base text-text-muted leading-relaxed max-w-2xl">
@@ -135,11 +135,11 @@ function AdminOverviewInner() {
             Operational Metrics
           </h2>
           {error ? (
-            <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-action-danger">
+            <div className="surface-card bg-rose-500/5 p-4 text-sm text-action-danger">
               {error}
             </div>
           ) : !data ? (
-            <div className="rounded-xl border border-border bg-bg-surface p-6 text-sm text-text-muted">
+            <div className="surface-card bg-bg-surface p-6 text-sm text-text-muted">
               Loading overview…
             </div>
           ) : (
@@ -151,10 +151,10 @@ function AdminOverviewInner() {
                     key={card.label}
                     href={card.href}
                     aria-label={`${card.label}: ${fmt(card.value)}`}
-                    className="group rounded-xl border border-border bg-bg-surface p-4 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all"
+                    className="surface-card group bg-bg-surface p-4 hover: hover:bg-emerald-500/5 transition-all"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="p-2 rounded-lg bg-emerald-500/10 text-action-success">
+                      <div className="surface-card p-2 bg-emerald-500/10 text-action-success">
                         <Icon className="w-4 h-4" />
                       </div>
                       <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success group-hover:translate-x-1 transition-all" />
@@ -175,8 +175,8 @@ function AdminOverviewInner() {
               <div className="rounded-xl border border-border bg-bg-surface divide-y divide-border">
                 {data.recentAuditEvents.map((e) => (
                   <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <code className="text-xs bg-bg-elevated border border-border rounded px-1.5 py-1.5 text-action-success">
+                    <div className="min-w-4">
+                      <code className="surface-card text-xs bg-bg-elevated px-1.5 py-1.5 text-action-success">
                         {e.action}
                       </code>
                       <p className="text-xs text-text-muted mt-1 truncate">
@@ -225,11 +225,11 @@ function AdminOverviewInner() {
                 key={i}
                 href={mod.href}
                 aria-label={mod.label}
-                className="group p-4 rounded-xl border border-border bg-bg-surface hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all cursor-pointer"
+                className="surface-card group p-4 bg-bg-surface hover: hover:bg-emerald-500/5 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10 text-action-success group-hover:scale-110 transition-transform">
+                    <div className="surface-card p-2 bg-emerald-500/10 text-action-success group-hover:scale-110 transition-transform">
                       {IconComp && <IconComp className="w-4 h-4" />}
                     </div>
                     <div>
@@ -258,7 +258,7 @@ function AdminOverviewInner() {
       </WidgetBoundary>
 
       {/* Info Strip */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-center gap-3">
+      <div className="surface-card bg-amber-500/5 p-4 flex items-center gap-3">
         <Info className="w-5 h-5 text-action-warning shrink-0" />
         <div>
           <p className="text-xs font-semibold text-action-warning">Command Overview</p>

@@ -34,7 +34,7 @@ export default function VisitorLandingPage() {
         {loading ? (
           <PageLoading />
         ) : (
-          <div className="rounded-xl border border-border bg-bg-surface p-4 space-y-3">
+          <div className="surface-card bg-bg-surface p-4 space-y-3">
             <div className="text-sm text-text-secondary">
               Status: <strong>{state ?? "No visit"}</strong>
               {host && <> · Host: <strong>{host}</strong></>}
@@ -42,7 +42,7 @@ export default function VisitorLandingPage() {
             </div>
             <Link
               href="/visitor/visit"
-              className="flex items-center justify-between rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white"
+              className="surface-card flex items-center justify-between bg-action-primary px-4 py-2.5 text-sm font-semibold text-white"
             >
               {state === "ACTIVE" ? "Check out" : "Check in"}
               <MapPin className="w-4 h-4" />
@@ -57,7 +57,7 @@ export default function VisitorLandingPage() {
             <Link
               key={href}
               href={href}
-              className="group min-h11 flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
+              className="surface-card group min-h11 flex items-center justify-between p-4 hover:bg-[var(--bg-elev-1)] transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon className="w-5 h-5 shrink-0" />

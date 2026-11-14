@@ -28,7 +28,7 @@ export default function WebhooksPage() {
       ) : error && !data ? (
         <div
           role="alert"
-          className="rounded-md border p-4 text-sm"
+          className="surface-card p-4 text-sm"
           style={{
             borderColor: "var(--action-danger)",
             background: "color-mix(in srgb, var(--action-danger) 10%, transparent)",

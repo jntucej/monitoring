@@ -47,7 +47,7 @@ export function PwaInstallPrompt() {
     <div
       role="dialog"
       aria-label="Install Gate Monitor"
-      className="fixed inset-x-4 bottom-20 z-40 rounded-xl bg-[var(--accent,var(--action-primary))] p-4 text-white shadow-lg md:hidden"
+      className="surface-card fixed inset-x-4 bottom-20 z-40 bg-[var(--accent,var(--action-primary))] p-4 text-white md:hidden"
     >
       <p className="font-semibold">Install Gate Monitor</p>
       <p className="text-sm opacity-90">Open faster. Get gate-out alerts.</p>

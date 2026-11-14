@@ -52,12 +52,12 @@ const api = useApi();
         {roles.map((r) => (
           <span
             key={`${r.role}:${r.scope ?? ""}`}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-bg-elevated border border-border text-xs text-text-primary"
+            className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 bg-bg-elevated text-xs text-text-primary"
           >
             <span className="font-mono">{r.role}</span>
             {r.scope && <span className="text-xs text-text-muted">· {r.scope}</span>}
             <button onClick={() => revoke(r.role, r.scope)} className="text-action-danger hover:text-action-danger">
-              <X className="w-3 h-3" />
+              <X className="size-3.5" />
             </button>
           </span>
         ))}
@@ -66,7 +66,7 @@ const api = useApi();
       <div className="flex gap-2">
         <select
           value={newRole} onChange={(e) => setNewRole(e.target.value)}
-          className="flex-1 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs"
+          className="surface-card flex-1 px-2.5 py-1.5 bg-bg-elevated text-xs"
         >
           <option value="">Add role…</option>
           {ALL_ROLES.filter((r: string) => !roles.some((x: { role: string; scope: string | null }) => x.role === r && !x.scope)).map((r: string) => (
@@ -76,11 +76,11 @@ const api = useApi();
         <input
           value={newScope} onChange={(e) => setNewScope(e.target.value)}
           placeholder="scope (optional)"
-          className="w-32 px-2.5 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs"
+          className="surface-card w-32 px-2.5 py-1.5 bg-bg-elevated text-xs"
         />
         <button
           onClick={grant} disabled={!newRole}
-          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-action-success text-white text-xs font-bold disabled:opacity-50"
+          className="surface-card px-3 py-1.5 bg-emerald-600 hover:bg-action-success text-white text-xs font-bold disabled:opacity-50"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>

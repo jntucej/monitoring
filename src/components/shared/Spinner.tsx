@@ -12,7 +12,7 @@ export type SpinnerSize = "sm" | "md" | "lg";
 const SIZES: Record<SpinnerSize, string> = {
   sm: "h-4 w-4 border-2",
   md: "h-6 w-6 border-2",
-  lg: "h-10 w-10 border-4",
+  lg: "size-6 border-4",
 };
 
 export function Spinner({
@@ -54,7 +54,7 @@ export function WidgetSkeleton({ className = "" }: { className?: string }) {
   return (
     <div className={`space-y-2 rounded-xl border border-border bg-bg-surface p-4 ${className}`} role="status" aria-label="Loading widget">
       <div className="h-4 w-1/2 animate-pulse rounded bg-bg-elevated" />
-      <div className="h-3 w-3/4 animate-pulse rounded bg-bg-elevated" />
+      <div className="size-3.5/4 animate-pulse rounded bg-bg-elevated" />
     </div>
   );
 }

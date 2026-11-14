@@ -18,7 +18,7 @@ export const StatCard = memo(function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 flex flex-col gap-2.5">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 flex flex-col gap-2.5">
       <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>

@@ -100,7 +100,7 @@ const api = useApi();
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <Layout className="w-6 h-6 text-action-primary" />
+              <Layout className="w-5 h-5 text-action-primary" />
               Dynamic Sidebar Navigation Editor
             </p>
             <p className="text-sm text-text-muted">
@@ -119,7 +119,7 @@ const api = useApi();
                 order: navItems.length + 1,
               })
             }
-            className="px-4 py-2 min-h11 bg-action-primary hover:bg-blue-600 text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="surface-card px-4 py-2 min-h11 bg-action-primary hover:bg-blue-600 text-white font-semibold text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Nav Item
           </button>
@@ -189,14 +189,14 @@ const api = useApi();
                         <button
                           type="button"
                           onClick={() => setEditingItem(item)}
-                          className="p-1.5 rounded-lg bg-bg-elevated hover:text-action-primary transition"
+                          className="surface-card p-1.5 bg-bg-elevated hover:text-action-primary transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => item.id && handleDelete(item.id)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="surface-card p-1.5 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -211,7 +211,7 @@ const api = useApi();
 
         {editingItem && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="surface-card bg-bg-surface max-w-md w-full p-6 space-y-4">
               <h3 className="text-lg font-bold text-text-primary">
                 {editingItem.id ? "Edit Nav Item" : "New Nav Item"} ({selectedRole})
               </h3>
@@ -227,7 +227,7 @@ const api = useApi();
                     value={editingItem.groupLabel || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, groupLabel: e.target.value })}
                     placeholder="e.g. Monitoring"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -241,7 +241,7 @@ const api = useApi();
                     value={editingItem.label || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, label: e.target.value })}
                     placeholder="e.g. Live Gates"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ const api = useApi();
                     value={editingItem.href || ""}
                     onChange={(e) => setEditingItem({ ...editingItem, href: e.target.value })}
                     placeholder="e.g. /sysadmin/gates"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -270,7 +270,7 @@ const api = useApi();
                       value={editingItem.icon || ""}
                       onChange={(e) => setEditingItem({ ...editingItem, icon: e.target.value })}
                       placeholder="e.g. DoorOpen"
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                   <div>
@@ -282,22 +282,22 @@ const api = useApi();
                       required
                       value={editingItem.order ?? 1}
                       onChange={(e) => setEditingItem({ ...editingItem, order: Number(e.target.value) })}
-                      className="w-full min-h11 px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:border-action-primary"
+                      className="surface-card w-full min-h11 px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <div className="surface-card flex justify-end gap-2 pt-4">
                   <button
                     type="button"
                     onClick={() => setEditingItem(null)}
-                    className="px-4 py-2 min-h11 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 min-h11 bg-action-primary text-white rounded-xl text-xs font-semibold hover:bg-blue-600 transition"
+                    className="surface-card px-4 py-2 min-h11 bg-action-primary text-white text-xs font-semibold hover:bg-blue-600 transition"
                   >
                     Save Item
                   </button>

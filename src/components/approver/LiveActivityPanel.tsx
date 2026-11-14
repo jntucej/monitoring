@@ -135,7 +135,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
 
   return (
     <section
-      className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0"
+      className="surface-card bg-bg-surface/60 p-4 min-w-0"
       aria-label="Live activity panel"
     >
       {/* Header */}
@@ -150,13 +150,13 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
           type="button"
           onClick={handleRefresh}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Refresh live activity"
         >
           {loading ? (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <Radio className="w-3 h-3" />
+            <Radio className="size-3.5" />
           )}
           <span>Refresh</span>
         </button>
@@ -164,16 +164,16 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
 
       {/* Counts */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-danger bg-rose-400/10 border-rose-400/20">
-          <ShieldAlert className="w-3 h-3" />
+        <span className="surface-card inline-flex items-center gap-1.5 px-2 py-0.5 font-semibold text-action-danger bg-rose-400/10">
+          <ShieldAlert className="size-3.5" />
           {data?.data.counts.escalated ?? 0} escalated
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-warning bg-amber-400/10 border-amber-400/20">
-          <ShieldAlert className="w-3 h-3" />
+        <span className="surface-card inline-flex items-center gap-1.5 px-2 py-0.5 font-semibold text-action-warning bg-amber-400/10">
+          <ShieldAlert className="size-3.5" />
           {data?.data.counts.alerts ?? 0} alerts
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 border font-semibold text-action-success bg-emerald-400/10 border-emerald-400/20">
-          <CheckCircle className="w-3 h-3" />
+        <span className="surface-card inline-flex items-center gap-1.5 px-2 py-0.5 font-semibold text-action-success bg-emerald-400/10">
+          <CheckCircle className="size-3.5" />
           {data?.data.counts.decisions ?? 0} decisions
         </span>
       </div>
@@ -185,7 +185,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
           <span>Loading live activity…</span>
         </div>
       ) : openItems.length === 0 ? (
-        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-3">
+        <div className="surface-card bg-bg-base/50 px-3 py-3">
           <div className="flex items-start gap-2">
             <XCircle className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
             <p className="text-xs text-text-muted">
@@ -205,7 +205,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
             return (
               <li
                 key={item.key}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
@@ -223,7 +223,7 @@ export function LiveActivityPanel({ onRefresh: _onRefresh }: LiveActivityPanelPr
                   </p>
                 </div>
                 <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
-                  <Clock className="w-3 h-3" />
+                  <Clock className="size-3.5" />
                   {fmt(item.lastUpdate)}
                 </span>
               </li>

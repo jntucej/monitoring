@@ -34,9 +34,9 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-md max-h-[90dvh] overflow-y-auto bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl">
+      <div className="surface-card relative w-full max-w-md max-h-[90dvh] overflow-y-auto bg-bg-surface p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+          <div className={`flex-shrink-0 size-6 rounded-xl flex items-center justify-center ${
             variant === "destructive" ? "bg-rose-500/20 text-action-danger" :
             variant === "warning" ? "bg-amber-500/20 text-action-warning" :
             "bg-blue-500/20 text-action-primary"
@@ -53,7 +53,7 @@ export function ConfirmDialog({
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
+            className="surface-card px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
           >
             {cancelText}
           </button>

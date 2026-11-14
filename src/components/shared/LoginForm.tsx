@@ -188,7 +188,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
           </p>
         </div>
         {resetSent ? (
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-action-success">
+          <div className="surface-card bg-emerald-500/10 p-3 text-sm text-action-success">
             If that email exists, a reset link has been sent. Check your inbox.
           </div>
         ) : (
@@ -199,10 +199,10 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               onChange={(e) => setResetEmail(e.target.value)}
               placeholder="you@college.edu"
               autoComplete="email"
-              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary"
+              className="surface-card w-full bg-bg-surface px-3 py-2 text-sm text-text-primary"
             />
             {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
+              <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
                 {error}
               </div>
             )}
@@ -210,7 +210,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               type="button"
               onClick={handlePasswordReset}
               disabled={submitting || !resetEmail.trim()}
-              className="w-full rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              className="surface-card w-full bg-action-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
             >
               {submitting ? "Sending…" : "Send reset link"}
             </button>
@@ -231,7 +231,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       {error && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger"
+          className="surface-card flex items-start gap-2 bg-rose-500/10 p-3 text-sm text-action-danger"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
@@ -260,7 +260,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               autoComplete="username"
               autoCapitalize="characters"
               required
-              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 pl-10 text-sm text-text-primary"
+              className="surface-card w-full bg-bg-surface px-3 py-2 pl-10 text-sm text-text-primary"
             />
             <UserCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           </div>
@@ -279,7 +279,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
-              className="w-full rounded-lg border border-border bg-bg-surface px-3 py-2 pl-10 pr-10 text-sm text-text-primary"
+              className="surface-card w-full bg-bg-surface px-3 py-2 pl-10 pr-10 text-sm text-text-primary"
             />
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <button
@@ -315,7 +315,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <button
           type="submit"
           disabled={disabled}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="surface-card flex w-full items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Signing in…" : "Sign In"}
           {!submitting && <ArrowRight className="h-4 w-4" />}

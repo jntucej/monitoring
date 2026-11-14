@@ -68,7 +68,7 @@ function ExamSuperintendentScheduleInner() {
         href="/exam/superintendent"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Page toolbar */}
@@ -82,7 +82,7 @@ function ExamSuperintendentScheduleInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Schedule data unavailable: {error}</span>
@@ -90,7 +90,7 @@ function ExamSuperintendentScheduleInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -99,7 +99,7 @@ function ExamSuperintendentScheduleInner() {
 
       <WidgetBoundary title="Exam Schedule">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <CalendarClock className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white">Exam Schedule</span>
@@ -111,19 +111,19 @@ function ExamSuperintendentScheduleInner() {
 
           {/* Summary strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-            <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
               <p className="text-xs text-text-muted uppercase tracking-wide">Status</p>
               <p className="mt-1 text-lg font-bold text-action-success">Live</p>
               <p className="text-xs text-text-muted">Exam schedule streams from the permission workflow engine.</p>
             </div>
-            <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
               <p className="text-xs text-text-muted uppercase tracking-wide">Deadlines at Risk</p>
               <p className={`mt-1 text-lg font-bold ${breached.length > 0 ? "text-action-warning" : "text-text-secondary"}`}>
                 {breached.length}
               </p>
               <p className="text-xs text-text-muted">Pending items past their SLA deadline.</p>
             </div>
-            <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
               <p className="text-xs text-text-muted uppercase tracking-wide">Last Updated</p>
               <p className="mt-1 text-lg font-bold text-action-info">
                 {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
@@ -142,14 +142,14 @@ function ExamSuperintendentScheduleInner() {
                 ))}
               </div>
             ) : upcoming.length === 0 ? (
-              <div className="rounded-lg border border-border bg-bg-surface/30 p-6 text-center min-w-0">
+              <div className="surface-card bg-bg-surface/30 p-6 text-center min-w-0">
                 <ShieldCheck className="w-5 h-5 text-text-muted mx-auto mb-2" />
                 <p className="text-sm text-text-muted">No scheduled exam clearance deadlines in view.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                 {upcoming.map((row) => (
-                  <div key={row.id} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div key={row.id} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{row.candidate_name ?? row.ticket_number ?? "Exam candidate"}</p>
                     <p className="text-xs text-text-muted mt-0.5 truncate">
                       {row.roll_number ? `Roll ${row.roll_number} · ` : ""}

@@ -37,7 +37,7 @@ export function SectionCard({
       )}
     >
       {showHeader && (
-        <div className="flex items-center gap-3 border-b border-border pb-4 mb-5">
+        <div className="surface-card flex items-center gap-3 pb-4 mb-5">
           {Icon && (
             <div
               className={cn(

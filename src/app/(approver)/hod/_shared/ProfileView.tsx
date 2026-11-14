@@ -47,16 +47,16 @@ export function ProfileView() {
           ))}
         </div>
       ) : profile ? (
-        <div className="rounded-2xl border border-border bg-bg-surface p-5 space-y-4">
+        <div className="surface-card bg-bg-surface p-5 space-y-4">
           <div className="flex items-center gap-3">
             {profile.photoUrl ? (
               <img
                 src={profile.photoUrl}
                 alt={profile.name}
-                className="w-14 h-14 rounded-full object-cover"
+                className="size-6 rounded-full object-cover"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-bg-elevated flex items-center justify-center">
+              <div className="size-6 rounded-full bg-bg-elevated flex items-center justify-center">
                 <User className="w-6 h-6 text-text-muted" />
               </div>
             )}
@@ -64,14 +64,14 @@ export function ProfileView() {
               <h2 className="text-lg font-bold text-text-primary">
                 {profile.name}
               </h2>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-indigo-500/10 text-action-primary border border-indigo-500/20">
+              <span className="surface-card inline-flex items-center px-2 py-0.5 text-xs font-semibold uppercase bg-indigo-500/10 text-action-primary">
                 {profile.role?.replace(/_/g, " ") ?? "HOD"}
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+            <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-elevated">
               <Mail className="w-4 h-4 text-text-muted shrink-0" />
               <div>
                 <div className="text-xs text-text-muted">Email</div>
@@ -81,7 +81,7 @@ export function ProfileView() {
               </div>
             </div>
             {profile.phone && (
-              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-bg-elevated border border-border">
+              <div className="surface-card flex items-center gap-2 p-2.5 bg-bg-elevated">
                 <Phone className="w-4 h-4 text-text-muted shrink-0" />
                 <div>
                   <div className="text-xs text-text-muted">Phone</div>

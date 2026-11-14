@@ -42,7 +42,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2">
+    <div className="surface-card bg-bg-base p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
@@ -59,7 +59,7 @@ function StatCard({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
+    <div className="surface-card bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
       {message}
     </div>
   );

@@ -118,7 +118,7 @@ function OperatorPageInner() {
 
   // Subscribe via individual selectors, NOT the whole store object (a full
   // useOperatorStore() call re-renders this page on every store field
-  // change and drives the "too many re-renders" React #310 loop).
+  // change and drives the "too many re-renders" React issue-310 loop).
   const state = useScanStore((s) => s.state);
   const currentStudent = useScanStore((s) => s.currentStudent);
   const currentCampusStatus = useScanStore((s) => s.currentCampusStatus);
@@ -453,7 +453,7 @@ const shift = useOperatorShiftClock();
               truthful offline hint on every page. */}
 
           {gateMode === "MAINTENANCE" && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 space-y-1 shadow-sm">
+            <div className="surface-card bg-amber-500/10 p-4 space-y-1">
               <div className="flex items-center gap-2">
                 <Wrench className="w-5 h-5 text-action-warning" />
                 <h3 className="font-extrabold text-sm text-action-warning uppercase tracking-wide">Maintenance Mode Active</h3>
@@ -465,7 +465,7 @@ const shift = useOperatorShiftClock();
           )}
 
           {gateMode === "CURFEW" && (
-            <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-4 space-y-1 shadow-sm">
+            <div className="surface-card bg-indigo-500/10 p-4 space-y-1">
               <div className="flex items-center gap-2">
                 <Moon className="w-5 h-5 text-action-primary" />
                 <h3 className="font-extrabold text-sm text-indigo-300 uppercase tracking-wide">Night Curfew Hours Active</h3>
@@ -477,8 +477,8 @@ const shift = useOperatorShiftClock();
           )}
 
           {activeLockdown && (
-            <div className="bg-action-danger text-white p-4 rounded-xl border border-rose-700 shadow-lg flex items-center gap-3 animate-pulse">
-              <ShieldAlert className="w-7 h-7 shrink-0 text-action-warning" />
+            <div className="surface-card bg-action-danger text-white p-4 flex items-center gap-3 animate-pulse">
+              <ShieldAlert className="size-5 shrink-0 text-action-warning" />
               <div className="min-w-0">
                 <h4 className="font-extrabold text-sm uppercase tracking-wider">Campus Lockdown In Effect</h4>
                 <p className="text-xs opacity-90">
@@ -556,7 +556,7 @@ const shift = useOperatorShiftClock();
         <div className="fixed bottom-28 inset-x-0 z-60 flex justify-center px-4 pointer-events-none">
           <form
             onSubmit={submitManual}
-            className="pointer-events-auto w-full max-w-md bg-bg-surface border border-border rounded-2xl p-4 space-y-3 shadow-2xl"
+            className="surface-card pointer-events-auto w-full max-w-md bg-bg-surface p-4 space-y-3"
           >
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-text-primary">Manual Student Lookup</h3>
@@ -571,21 +571,21 @@ const shift = useOperatorShiftClock();
               value={manualRollInput}
               onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
               placeholder="e.g. >24JJ1A0501"
-              className="w-full min-h11 px-4 py-3 rounded-xl bg-bg-base border border-border text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+              className="surface-card w-full min-h11 px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={!manualRollInput.trim() || !!activeLockdown}
-                className="flex-1 min-h11 px-4 rounded-xl bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                className="surface-card flex-1 min-h11 px-4 bg-action-primary disabled:opacity-50 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
               >
-                <KeyRound className="w-4 h-4" />
+                <KeyRound className="w-5 h-5" />
                 <span>Verify Roll Number</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setManualOpen(false); setManualRollInput(""); }}
-                className="min-h11 px-4 rounded-xl bg-bg-base border border-border text-text-muted text-sm font-semibold"
+                className="surface-card min-h11 px-4 bg-bg-base text-text-muted text-sm font-semibold"
               >
                 Close
               </button>
@@ -637,8 +637,8 @@ const shift = useOperatorShiftClock();
               transition={{ duration: 0.18 }}
               className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50"
             >
-              <div className="scan-error w-full max-w-md p-5 rounded-2xl text-center space-y-3 bg-rose-500/10 border border-rose-500/30">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-action-danger">
+              <div className="surface-card scan-error w-full max-w-md p-5 text-center space-y-3 bg-rose-500/10">
+                <div className="size-5 rounded-full flex items-center justify-center mx-auto bg-rose-500/20 text-action-danger">
                   <AlertCircle className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
@@ -672,7 +672,7 @@ const shift = useOperatorShiftClock();
                         else if (lastRollRef.current) { startScan(lastRollRef.current); }
                         else { reset(); }
                       }}
-                      className="min-h11 px-4 py-2 rounded-xl bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
+                      className="surface-card min-h11 px-4 py-2 bg-action-success text-black font-bold text-xs hover:bg-action-success transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
@@ -690,7 +690,7 @@ const shift = useOperatorShiftClock();
                         reset();
                       }
                     }}
-                    className="min-h11 px-4 py-2 rounded-xl bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
+                    className="surface-card min-h11 px-4 py-2 bg-action-danger text-white font-semibold text-xs hover:bg-action-danger transition-colors active:scale-[0.98] flex items-center justify-center"
                   >
                     {isAuthError ? "Dismiss & Sign In Again" : "Dismiss"}
                   </button>
@@ -722,7 +722,7 @@ const shift = useOperatorShiftClock();
           of a frozen empty desk. */}
       {!scannerOpen && !needsAssignment && (
         <div className="fixed inset-0 z-50 bg-bg-base flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-bg-surface border border-border rounded-2xl p-6 text-center space-y-3">
+          <div className="surface-card w-full max-w-sm bg-bg-surface p-6 text-center space-y-3">
             <p className="text-sm font-bold text-text-primary">Scanner paused</p>
             <p className="text-xs text-text-muted">
               Camera stopped. Re-open it to continue scanning, or go back to the dashboard.

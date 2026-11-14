@@ -102,28 +102,28 @@ export default function SysAdminAttendancePage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="px-3 py-1.5 min-h11 rounded-lg bg-bg-surface border border-border text-sm"
+              className="surface-card px-3 py-1.5 min-h11 bg-bg-surface text-sm"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <div className="surface-card bg-bg-surface p-4 text-center">
             <p className="text-2xl font-bold text-action-success">{stats.present}</p>
             <p className="text-xs text-text-muted">Present</p>
           </div>
-          <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <div className="surface-card bg-bg-surface p-4 text-center">
             <p className="text-2xl font-bold text-action-warning">{stats.late}</p>
             <p className="text-xs text-text-muted">Late</p>
           </div>
-          <div className="bg-bg-surface rounded-xl border border-border p-4 text-center">
+          <div className="surface-card bg-bg-surface p-4 text-center">
             <p className="text-2xl font-bold text-action-danger">{stats.absent}</p>
             <p className="text-xs text-text-muted">Absent</p>
           </div>
         </div>
 
         <div className="bg-bg-surface rounded-xl border border-border">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="surface-card p-4 flex items-center justify-between">
             <h3 className="font-semibold flex items-center gap-2">
               <CalendarDays className="w-5 h-5 text-action-primary" />
               {new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}

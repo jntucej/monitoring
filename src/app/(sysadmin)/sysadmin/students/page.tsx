@@ -562,16 +562,16 @@ const api = useApi();
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-              <GraduationCap className="w-7 h-7 text-action-success" />
+              <GraduationCap className="size-5 text-action-success" />
               Student Management
             </p>
             <p className="text-sm text-text-muted mt-1">Manage student roster. {students.length} records.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setShowBulkModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h11 rounded-xl bg-sky-600 text-white text-sm font-semibold hover:bg-action-info">
+            <button onClick={() => setShowBulkModal(true)} className="surface-card flex items-center gap-2 px-4 py-2.5 min-h-[2.75rem] bg-action-info text-white text-sm font-semibold hover:bg-action-primary-hover">
               <Upload className="w-4 h-4" /> Bulk Import
             </button>
-            <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-4 py-2.5 min-h11 rounded-xl bg-action-success text-white text-sm font-semibold hover:bg-action-success shadow-lg shadow-emerald-900/30">
+            <button onClick={() => setShowCreateModal(true)} className="surface-card flex items-center gap-2 px-4 py-2.5 min-h11 bg-action-success text-white text-sm font-semibold hover:bg-action-success">
               <UserPlus className="w-4 h-4" /> Add Student
             </button>
           </div>
@@ -581,23 +581,23 @@ const api = useApi();
           <div className="relative flex-1 min-w55">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <input type="text" placeholder="Search by name, roll, email..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full min-h11 pl-10 pr-4 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:borderaction-success" />
+              className="surface-card w-full min-h11 pl-10 pr-4 py-2.5 bg-bg-elevated text-sm text-white placeholder-slate-500 focus:outline-none focus:" />
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <SlidersHorizontal className="w-3.5 h-3.5 text-text-muted" />
-            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)} className="surface-card bg-bg-elevated px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Courses</option>
               {courses.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="surface-card bg-bg-elevated px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Branches</option>
               {branches.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
-            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} className="surface-card bg-bg-elevated px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Years</option>
               {years.map((y) => <option key={y} value={y}>Year {y}</option>)}
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-bg-elevated border border-border rounded-lg px-3 py-2 min-h11 text-xs text-text-secondary">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="surface-card bg-bg-elevated px-3 py-2 min-h11 text-xs text-text-secondary">
               <option value="ALL">All Status</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option>
             </select>
           </div>
@@ -607,41 +607,41 @@ const api = useApi();
         {!loading && totalStudents > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* KPI strip */}
-            <div className="rounded-xl border border-border bg-bg-elevated p-4 flex flex-col justify-between">
+            <div className="surface-card bg-bg-elevated p-4 flex flex-col justify-between">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider">Total Students</div>
               <div className="mt-2 text-3xl font-bold text-white">{totalStudents.toLocaleString()}</div>
               <div className="mt-1 text-xs text-action-success">{activeCount.toLocaleString()} active ({totalStudents ? Math.round((activeCount / totalStudents) * 100) : 0}%)</div>
             </div>
-            <div className="rounded-xl border border-border bg-bg-elevated p-4 flex flex-col justify-between">
+            <div className="surface-card bg-bg-elevated p-4 flex flex-col justify-between">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider">Largest Branch</div>
               <div className="mt-2 text-3xl font-bold text-action-success">{topBranch ? topBranch[0] : "—"}</div>
               <div className="mt-1 text-xs text-text-muted">{topBranch ? `${topBranch[1].toLocaleString()} students` : "No branch data"}</div>
             </div>
-            <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="surface-card bg-bg-elevated p-4">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">Course (B.Tech / M.Tech)</div>
               <div className="space-y-1.5">
                 {byCourse.map(([c, n]) => (
                   <div key={c} className="flex items-center gap-2 text-xs">
-                    <div className="w-14 text-text-secondary text-right">{c}</div>
-                    <div className="flex-1 h-2 rounded-full bg-bg-elevated overflow-hidden">
+                    <div className="w-5 text-text-secondary text-right">{c}</div>
+                    <div className="flex-1 h-4 rounded-full bg-bg-elevated overflow-hidden">
                       <div className={`h-full rounded-full ${c === "M.Tech" ? "bg-unit-c" : "bg-action-info"}`} style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
-                    <div className="w-10 text-text-muted text-right">{n.toLocaleString()}</div>
+                    <div className="w-5 text-text-muted text-right">{n.toLocaleString()}</div>
                   </div>
                 ))}
               </div>
             </div>
             {/* Branch distribution — canonical 5 branches decoded from roll */}
-            <div className="rounded-xl border border-border bg-bg-elevated p-4 sm:col-span-2">
+            <div className="surface-card bg-bg-elevated p-4 sm:col-span-2">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">Branch / Department Distribution</div>
               <div className="space-y-2">
                 {byBranchCanonical.entries.map(([b, n]) => (
                   <div key={b} className="flex items-center gap-2 text-xs">
-                    <div className="w-16 text-text-secondary truncate text-right">{b}</div>
-                    <div className="flex-1 h-2 rounded-full bg-bg-elevated overflow-hidden">
+                    <div className="w-5 text-text-secondary truncate text-right">{b}</div>
+                    <div className="flex-1 h-4 rounded-full bg-bg-elevated overflow-hidden">
                       <div className="h-full bg-action-success rounded-full" style={{ width: `${totalStudents ? (n / totalStudents) * 100 : 0}%` }} />
                     </div>
-                    <div className="w-12 text-text-muted text-right">{n.toLocaleString()}</div>
+                    <div className="w-5 text-text-muted text-right">{n.toLocaleString()}</div>
                   </div>
                 ))}
                 {byBranchCanonical.unassigned > 0 && (
@@ -650,9 +650,9 @@ const api = useApi();
               </div>
             </div>
             {/* Year distribution */}
-            <div className="rounded-xl border border-border bg-bg-elevated p-4">
+            <div className="surface-card bg-bg-elevated p-4">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">Year Distribution</div>
-              <div className="flex items-end gap-2 h-20">
+              <div className="flex items-end gap-2 h-5">
                 {(() => {
                   const maxCount = byYear.reduce((m, [, n]) => Math.max(m, n), 0);
                   return byYear.map(([y, n]) => (
@@ -666,7 +666,7 @@ const api = useApi();
               </div>
             </div>
             {/* Batch → cohort spans with regular/lateral split + live year + graduation */}
-            <div className="rounded-xl border border-border bg-bg-elevated p-4 sm:col-span-2">
+            <div className="surface-card bg-bg-elevated p-4 sm:col-span-2">
               <div className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-3">
                 Batch Cohorts · Regular vs Lateral · Graduation Year
               </div>
@@ -692,10 +692,10 @@ const api = useApi();
                           <span className={c.course === "M.Tech" ? "text-unit-c" : "text-action-info"}>{c.course}</span>
                         </td>
                         <td className="pr-3 py-1 text-right">{c.regular}</td>
-                        <td className="pr-3 py-1 text-right text-purple-300">{c.lateral}</td>
+                        <td className="pr-3 py-1 text-right text-unit-c">{c.lateral}</td>
                         <td className="pr-3 py-1 text-right font-semibold text-white">{c.total}</td>
                         <td className="pr-3 py-1 text-center text-action-success">{c.liveYearRegular || "—"}</td>
-                        <td className="pr-3 py-1 text-center text-purple-300">{c.liveYearLateral || "—"}</td>
+                        <td className="pr-3 py-1 text-center text-unit-c">{c.liveYearLateral || "—"}</td>
                         <td className="py-1 text-right font-mono text-action-warning">{c.graduationYear}</td>
                       </tr>
                     ))}
@@ -711,9 +711,9 @@ const api = useApi();
 
 
         {loadError && (
-          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-red-800/60 bg-red-950/40 text-sm text-red-300">
+          <div className="surface-card flex items-center justify-between gap-3 px-4 py-3 bg-action-danger/10 text-sm text-action-danger">
             <span><strong className="font-semibold">Failed to load roster:</strong> {loadError}</span>
-            <button onClick={() => loadStudents()} className="px-3 py-1.5 rounded-lg bg-red-900/60 text-red-100 text-xs font-semibold hover:bg-red-800 whitespace-nowrap">Retry</button>
+            <button onClick={() => loadStudents()} className="surface-card px-3 py-1.5 bg-action-danger text-white text-xs font-semibold hover:bg-action-danger/80 whitespace-nowrap">Retry</button>
           </div>
         )}
 
@@ -725,13 +725,13 @@ const api = useApi();
             </h2>
             <div className="flex flex-wrap gap-2">
               {recentStudents.map((s) => (
-                <div key={s.id} className="flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-xl bg-bg-elevated border border-emerald-900/50">
+                <div key={s.id} className="surface-card flex items-center gap-2 pl-3 pr-1.5 py-1.5 bg-bg-elevated">
                   <div className="text-xs">
                     <span className="font-semibold text-white">{s.name}</span>
                     <span className="ml-2 font-mono text-action-success">{s.roll || s.uniqueId}</span>
                   </div>
-                  <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-1.5 rounded-lg hover:bg-bg-elevated text-action-success" title={`Enrollment ${s.name}`}><KeyRound className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => openEditModal(s)} className="p-1.5 rounded-lg hover:bg-bg-elevated text-action-primary" title={`Edit ${s.name}`}>
+                  <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-1.5 hover:bg-bg-elevated text-action-success" title={`Enrollment ${s.name}`}><KeyRound className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => openEditModal(s)} className="surface-card p-1.5 hover:bg-bg-elevated text-action-primary" title={`Edit ${s.name}`}>
                     <Edit className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -775,7 +775,7 @@ const api = useApi();
                       <td className="px-4 py-3 font-mono text-xs text-action-success">{s.roll || s.uniqueId || "—"}</td>
                       <td className="px-4 py-3 font-medium text-white">{s.name}</td>
                       <td className="px-4 py-3 text-xs">
-                        <span className={`px-2 py-0.5 rounded-md font-medium ${courseOf(s) === "M.Tech" ? "bg-purple-500/15 text-unit-c border border-purple-500/30" : "bg-sky-500/15 text-action-info border border-sky-500/30"}`}>
+                        <span className={`px-2 py-0.5 rounded-md font-medium ${courseOf(s) === "M.Tech" ? "bg-unit-c/15 text-unit-c border border-unit-c/30" : "bg-action-info/15 text-action-info border border-action-info/30"}`}>
                           {courseOf(s)}
                         </span>
                       </td>
@@ -785,7 +785,7 @@ const api = useApi();
                         <select
                           value={s.status}
                           onChange={(e) => handleSetStatus(s, e.target.value)}
-                          className="rounded-lg border border-border bg-bg-surface px-2 py-1 min-h11 text-xs"
+                          className="surface-card bg-bg-surface px-2 py-1 min-h11 text-xs"
                         >
                           {STATUS_OPTIONS.map((o) => (
                             <option key={o.value} value={o.value}>{o.label}</option>
@@ -794,11 +794,11 @@ const api = useApi();
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
-                          <button onClick={() => openLinkParentModal(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-unit-c" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
-                          <button onClick={() => handleResetPassword(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-warning" title="Reset Password"><Lock className="w-4 h-4" /></button>
-                          <button onClick={() => openEditModal(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-action-primary" title="Edit"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteStudent(s)} className="p-2 min-h11 min-w11 flex items-center justify-center rounded-lg hover:bg-bg-elevated text-red-400" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
+                          <button onClick={() => openLinkParentModal(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-unit-c" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
+                          <button onClick={() => handleResetPassword(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-warning" title="Reset Password"><Lock className="w-4 h-4" /></button>
+                          <button onClick={() => openEditModal(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-primary" title="Edit"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteStudent(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-danger" title="Delete"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -822,49 +822,49 @@ const api = useApi();
       {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-bg-elevated border border-border rounded-2xl w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="surface-card flex items-center justify-between px-5 py-4">
                 <h2 className="text-lg font-bold text-white">Add New Student</h2>
-                <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-bg-elevated text-text-muted"><X className="w-5 h-5" /></button>
+                <button onClick={() => setShowCreateModal(false)} className="surface-card p-1 hover:bg-bg-elevated text-text-muted"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleCreateStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Roll Number <span className="text-text-muted font-normal">(legacy — optional if Custom Unique ID set)</span></label>
-                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="22CS101" />
+                    <input type="text" value={createForm.roll} onChange={(e) => setCreateForm({ ...createForm, roll: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" placeholder="22CS101" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Custom Unique ID <span className="text-text-muted font-normal">(optional — auto ucej-s-NNNN if blank)</span></label>
-                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="e.g. ucej-s-0042 (overrides auto)" />
+                    <input type="text" value={createForm.customUniqueId} onChange={(e) => setCreateForm({ ...createForm, customUniqueId: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" placeholder="e.g. ucej-s-0042 (overrides auto)" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Full Name *</label>
-                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                    <input type="text" required value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                    <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                    <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Branch <span className="text-text-muted font-normal">(optional — auto-detected from roll when blank)</span></label>
-                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" placeholder="Auto from roll (e.g. CSE)" />
+                  <input type="text" value={createForm.branch} onChange={(e) => setCreateForm({ ...createForm, branch: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" placeholder="Auto from roll (e.g. CSE)" />
                   {createForm.roll && getDepartmentFromRoll(createForm.roll) && (
                     <div className="mt-1 text-xs text-action-success">Detected: {getDepartmentFromRoll(createForm.roll)}</div>
                   )}
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:borderaction-success" />
+                  <textarea rows={3} value={createForm.customMetaJson} onChange={(e) => setCreateForm({ ...createForm, customMetaJson: e.target.value })} className="surface-card w-full px-3 py-2 bg-bg-surface text-xs font-mono text-text-secondary focus:outline-none focus:" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
-                  <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Creating..." : "Create Student"}</button>
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="surface-card px-4 py-2 bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button type="submit" disabled={busy} className="surface-card px-4 py-2 bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Creating..." : "Create Student"}</button>
                 </div>
               </form>
             </div>
@@ -876,47 +876,47 @@ const api = useApi();
         {editingStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-bg-elevated border border-border rounded-2xl w-full max-w-lg shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="surface-card flex items-center justify-between px-5 py-4">
                 <h2 className="text-lg font-bold text-white">Edit Student — {editingStudent.roll || editingStudent.uniqueId}</h2>
-                <button onClick={() => setEditingStudent(null)} className="p-1 rounded-lg hover:bg-bg-elevated text-text-muted"><X className="w-5 h-5" /></button>
+                <button onClick={() => setEditingStudent(null)} className="surface-card p-1 hover:bg-bg-elevated text-text-muted"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleEditStudent} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
               <UserRolesPanel userId={editingStudent.id} />
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Full Name</label>
-                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Email</label>
-                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                    <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-text-muted block mb-1">Phone</label>
-                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                    <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Branch</label>
-                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:borderaction-success" />
+                  <input type="text" value={editForm.branch} onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-bg-surface/60 border border-border rounded-xl">
+                <div className="surface-card grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-bg-surface/60">
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Password (Optional)</label>
-                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
+                    <input type="password" placeholder="New Auth Password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-xs text-white focus:outline-none focus:" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-action-warning block mb-1">Reset Kiosk PIN (Optional)</label>
-                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs text-white focus:outline-none focus:border-action-warning" />
+                    <input type="text" placeholder="4-8 digit PIN" value={editForm.newPin} onChange={(e) => setEditForm({ ...editForm, newPin: e.target.value })} className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-xs text-white focus:outline-none focus:" />
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-text-muted block mb-1">Custom Metadata (JSON)</label>
-                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="w-full px-3 py-2 bg-bg-surface border border-border rounded-xl text-xs font-mono text-text-secondary focus:outline-none focus:borderaction-success" />
+                  <textarea rows={4} value={editForm.customMetaJson} onChange={(e) => setEditForm({ ...editForm, customMetaJson: e.target.value })} className="surface-card w-full px-3 py-2 bg-bg-surface text-xs font-mono text-text-secondary focus:outline-none focus:" />
                 </div>
                 <div className="pt-2 flex justify-end gap-2">
-                  <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 min-h11 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
-                  <button type="submit" disabled={busy} className="px-4 py-2 min-h11 rounded-xl bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
+                  <button type="button" onClick={() => setEditingStudent(null)} className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button type="submit" disabled={busy} className="surface-card px-4 py-2 min-h11 bg-action-success text-white text-xs font-semibold hover:bg-action-success disabled:opacity-50">{busy ? "Saving..." : "Update Student"}</button>
                 </div>
               </form>
             </div>
@@ -927,12 +927,12 @@ const api = useApi();
         {linkStudent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-bg-elevated border border-border rounded-2xl w-full max-w-sm shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="surface-card flex items-center justify-between px-5 py-4">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <LinkIcon className="w-4 h-4 text-unit-c" />
                   Link Guardian — {linkStudent.roll || linkStudent.uniqueId || linkStudent.name}
                 </h2>
-                <button onClick={() => setLinkStudent(null)} className="p-1 rounded-lg hover:bg-bg-elevated text-text-muted"><X className="w-4 h-4" /></button>
+                <button onClick={() => setLinkStudent(null)} className="surface-card p-1 hover:bg-bg-elevated text-text-muted"><X className="w-4 h-4" /></button>
               </div>
               <div className="p-5 space-y-4">
                 <p className="text-xs text-text-muted">
@@ -944,7 +944,7 @@ const api = useApi();
                   <select id="guardian"
                     value={selectedParentId}
                     onChange={(e) => setSelectedParentId(e.target.value)}
-                    className="w-full min-h11 px-3 py-2 bg-bg-surface border border-border rounded-xl text-sm text-white focus:outline-none focus:border-unit-c"
+                    className="surface-card w-full min-h11 px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
                   >
                     <option value="">Select guardian…</option>
                     {parents.map((p) => (
@@ -955,11 +955,11 @@ const api = useApi();
                   </select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setLinkStudent(null)} className="px-4 py-2 min-h11 rounded-xl bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
+                  <button onClick={() => setLinkStudent(null)} className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-secondary text-xs font-semibold hover:bg-bg-elevated">Cancel</button>
                   <button
                     onClick={handleLinkParent}
                     disabled={linkBusy || !selectedParentId}
-                    className="px-4 py-2 min-h11 rounded-xl bg-unit-c text-white text-xs font-semibold hover:bg-unit-c disabled:opacity-50 flex items-center gap-2"
+                    className="surface-card px-4 py-2 min-h11 bg-unit-c text-white text-xs font-semibold hover:bg-unit-c disabled:opacity-50 flex items-center gap-2"
                   >
                     {linkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LinkIcon className="w-3.5 h-3.5" />}
                     Link

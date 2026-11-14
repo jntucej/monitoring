@@ -58,11 +58,11 @@ export function GatesView() {
             {gates.map((g) => (
               <li
                 key={g.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{g.name}</p>
-                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {g.status ?? "ACTIVE"}
                   </span>
                 </div>
@@ -80,7 +80,7 @@ export function GatesView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "ACTIVE"}
                     </span>
                   ),

@@ -9,7 +9,7 @@ export function HandoverStreak() {
 
   if (handoverStreak === 0 && cleanStreak === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <section className="surface-card bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
           <Repeat className="size-4 text-action-info" />
           <h2 className="text-sm font-semibold text-text-primary">
@@ -24,7 +24,7 @@ export function HandoverStreak() {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Repeat className="size-4 text-action-info" />
         <h2 className="text-sm font-semibold text-text-primary">
@@ -58,7 +58,7 @@ export function HandoverStreak() {
       </div>
 
       {handoverStreak >= 3 && (
-        <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-action-primary/10 px-2.5 py-1.5 text-xs text-action-primary">
+        <p className="surface-card mt-3 flex items-center gap-1.5 bg-action-primary/10 px-2.5 py-1.5 text-xs text-action-primary">
           <CheckCircle2 className="size-3" />
           {handoverStreak} clean handovers — the next shift trusts your notes.
         </p>

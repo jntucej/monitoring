@@ -102,7 +102,7 @@ export default function AboutPage() {
           <BookOpen className="h-5 w-5 text-action-primary" /> Programmes
         </h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <div className="surface-card bg-bg-surface p-4">
             <h3 className="font-semibold">B.Tech</h3>
             <ul className="mt-2 space-y-1 text-sm text-text-secondary">
               {UG.map((p) => (
@@ -110,7 +110,7 @@ export default function AboutPage() {
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-border bg-bg-surface p-4">
+          <div className="surface-card bg-bg-surface p-4">
             <h3 className="font-semibold">M.Tech</h3>
             <ul className="mt-2 space-y-1 text-sm text-text-secondary">
               {PG.map((p) => (
@@ -169,7 +169,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="mt-10 rounded-xl border border-border bg-bg-surface p-5 text-sm">
+      <div className="surface-card mt-10 bg-bg-surface p-5 text-sm">
         <strong className="block">Need help?</strong>
         <p className="mt-1 text-text-secondary">
           Visit the{" "}

@@ -40,13 +40,13 @@ export const DecisionCard = memo(function DecisionCard({
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-text-muted">{ticket}</span>
             {urgency === "overdue" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger">
-                <AlertTriangle className="h-3 w-3" /> Overdue
+              <span className="surface-card inline-flex items-center gap-1 bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-action-danger">
+                <AlertTriangle className="size-3.5" /> Overdue
               </span>
             )}
             {slaDeadline && urgency === "due" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
-                <Clock className="h-3 w-3" /> Due soon
+              <span className="surface-card inline-flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
+                <Clock className="size-3.5" /> Due soon
               </span>
             )}
           </div>
@@ -58,25 +58,25 @@ export const DecisionCard = memo(function DecisionCard({
       <div className="flex shrink-0 items-center gap-1">
         {onApprove && (
           <button onClick={onApprove} disabled={busy}
-            className="rounded-lg bg-emerald-500/10 p-2 text-action-success transition-colors hover:bg-emerald-500/20 disabled:opacity-50">
+            className="surface-card bg-emerald-500/10 p-2 text-action-success transition-colors hover:bg-emerald-500/20 disabled:opacity-50">
             <Check className="h-4 w-4" />
           </button>
         )}
         {onReject && (
           <button onClick={onReject} disabled={busy}
-            className="rounded-lg bg-rose-500/10 p-2 text-action-danger transition-colors hover:bg-rose-500/20 disabled:opacity-50">
+            className="surface-card bg-rose-500/10 p-2 text-action-danger transition-colors hover:bg-rose-500/20 disabled:opacity-50">
             <X className="h-4 w-4" />
           </button>
         )}
         {onDelegate && (
           <button onClick={onDelegate} disabled={busy}
-            className="rounded-lg bg-[var(--bg-subtle)] p-2 text-text-muted transition-colors hover:bg-[var(--bg-subtle-hover)] disabled:opacity-50">
+            className="surface-card bg-[var(--bg-subtle)] p-2 text-text-muted transition-colors hover:bg-[var(--bg-subtle-hover)] disabled:opacity-50">
             <UserPlus className="h-4 w-4" />
           </button>
         )}
         {onOpen && (
           <button onClick={onOpen}
-            className="rounded-lg bg-[var(--bg-subtle)] p-2 text-text-muted transition-colors hover:bg-[var(--bg-subtle-hover)]">
+            className="surface-card bg-[var(--bg-subtle)] p-2 text-text-muted transition-colors hover:bg-[var(--bg-subtle-hover)]">
             <ExternalLink className="h-4 w-4" />
           </button>
         )}

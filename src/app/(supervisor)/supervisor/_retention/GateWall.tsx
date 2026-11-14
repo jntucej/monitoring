@@ -24,7 +24,7 @@ function fmtLastActivity(iso: string | null): string {
 export function GateWall({ gates }: { gates: Gate[] }) {
   if (gates.length === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <section className="surface-card bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
           <DoorOpen className="size-4 text-action-info" />
           <h2 className="text-sm font-semibold text-text-primary">Gates</h2>
@@ -37,7 +37,7 @@ export function GateWall({ gates }: { gates: Gate[] }) {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <DoorOpen className="size-4 text-action-info" />

@@ -151,7 +151,7 @@ export function MealReviewPanel() {
     return (
       <WidgetBoundary title="Meal Reviews">
         <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-5 w-full" />)}
         </div>
       </WidgetBoundary>
     );
@@ -171,9 +171,9 @@ export function MealReviewPanel() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
+            className="surface-card inline-flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
           >
-            <RefreshCw className="h-4 w-4" /> Refresh
+            <RefreshCw className="h-5 w-5" /> Refresh
           </button>
         </div>
 
@@ -203,7 +203,7 @@ export function MealReviewPanel() {
             </div>
           </div>
           {error && (
-            <div className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
+            <div className="surface-card mt-3 bg-rose-500/10 p-3 text-sm text-action-danger">
               {error}{" "}
               <button type="button" onClick={() => void load()} className="underline">Retry</button>
             </div>
@@ -279,7 +279,7 @@ export function MealReviewPanel() {
                         setCommentDraft((prev) => ({ ...prev, [key]: v }));
                         if (selected && v !== (existing?.comment ?? "")) void submit(today, meal, selected);
                       }}
-                      className="mt-2 w-full rounded-md border border-border bg-[var(--bg)] px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-action-primary"
+                      className="surface-card mt-2 w-full bg-[var(--bg)] px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-action-primary"
                     />
                     {savingKey === key && (
                       <div className="mt-2 flex items-center gap-1.5 text-xs text-text-muted">
@@ -309,7 +309,7 @@ export function MealReviewPanel() {
                 .map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-surface/60 px-3 py-2"
+                    className="surface-card flex items-center justify-between gap-2 bg-bg-surface/60 px-3 py-2"
                   >
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-text-primary">
@@ -331,7 +331,7 @@ export function MealReviewPanel() {
           <EmptyState
             title="No reviews yet"
             description="Rate a meal above as soon as its serving window is open."
-            icon={<UtensilsCrossed className="h-8 w-8" />}
+            icon={<UtensilsCrossed className="size-5" />}
           />
         )}
       </div>

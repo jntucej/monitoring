@@ -21,7 +21,7 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
   const all = [...(outpasses ?? []), ...(leaves ?? [])];
   return (
     <PrincipalWidgetBoundary title="Outpass and Leave Requests">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <ClipboardCheck className="w-4 h-4 text-action-warning" />
           <span className="text-xs font-semibold uppercase tracking-wide">Outpass &amp; Leave Requests</span>
@@ -54,7 +54,7 @@ export const OutpassLeavePanel = memo(function OutpassLeavePanel({
                     <td className="px-3 py-2 text-text-muted capitalize whitespace-nowrap">{r.workflow_type.replace(/_/g, " ")}</td>
                     <td className="px-3 py-2 text-text-muted whitespace-nowrap">{r.current_stage || "—"}</td>
                     <td className="px-3 py-2">
-                      <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-action-warning whitespace-nowrap">
+                      <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium bg-amber-400/10 text-action-warning whitespace-nowrap">
                         {r.status}
                       </span>
                     </td>

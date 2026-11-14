@@ -49,7 +49,7 @@ export default function AntiRaggingPage() {
         <p className="text-sm text-text-muted">
           Only the Principal&apos;s office will see this report. You may be contacted via the secure channels you provided.
         </p>
-        <div className="pt-4 border-t space-y-2">
+        <div className="surface-card pt-4 space-y-2">
           <p className="text-sm font-medium">Helpline references:</p>
           <ul className="text-sm list-disc pl-5 text-text-muted space-y-1">
             <li>UGC Anti-Ragging Helpline: 1800-180-5522</li>
@@ -75,7 +75,7 @@ export default function AntiRaggingPage() {
         <select id="category"
           value={form.category}
           onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="w-full min-h11 border rounded p-2 text-sm"
+          className="surface-card w-full min-h11 p-2 text-sm"
         >
           <option value="ragging">Ragging</option>
           <option value="harassment">Harassment</option>
@@ -93,7 +93,7 @@ export default function AntiRaggingPage() {
           placeholder="Describe what happened in detail…"
           value={form.narrative}
           onChange={(e) => setForm({ ...form, narrative: e.target.value })}
-          className="w-full border rounded p-2 text-sm"
+          className="surface-card w-full p-2 text-sm"
         />
       </div>
 
@@ -103,11 +103,11 @@ export default function AntiRaggingPage() {
           placeholder="e.g. Hostel B Mess, Corridor 2"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          className="w-full min-h11 border rounded p-2 text-sm"
+          className="surface-card w-full min-h11 p-2 text-sm"
         />
       </div>
 
-      <button type="submit" disabled={busy} className="inline-flex min-h11 items-center justify-center px-4 py-2 bg-action-danger text-white rounded text-sm font-medium disabled:opacity-50">
+      <button type="submit" disabled={busy} className="surface-card inline-flex min-h11 items-center justify-center px-4 py-2 bg-action-danger text-white text-sm font-medium disabled:opacity-50">
         {busy ? "Filing confidential report..." : "Submit Confidential Report"}
       </button>
     </form>

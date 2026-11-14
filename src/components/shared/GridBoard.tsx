@@ -122,7 +122,7 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
           <Loader2 className="w-4 h-4 animate-spin" /> Loading tickets&hellip;
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="surface-card py-6 text-xs text-action-warning bg-amber-400/10 p-3">
           {error}
         </div>
       ) : empty ? (
@@ -137,7 +137,7 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
             return (
               <section
                 key={col}
-                className="rounded-xl border border-border bg-bg-elevated p-3 min-w-0"
+                className="surface-card bg-bg-elevated p-3 min-w-0"
                 aria-label={`${col} tickets`}
               >
                 <header className="flex items-center justify-between px-1 pb-2">
@@ -159,7 +159,7 @@ export function GridBoard({ source, groupBy, columns, onSelect }: GridBoardProps
                         <button
                           type="button"
                           onClick={() => onSelect?.(ticketToBoardRow(t))}
-                          className="w-full text-left rounded-lg border border-border bg-bg-base p-3 min-w-0 hover:border-action-primary/40 transition-colors"
+                          className="surface-card w-full text-left bg-bg-base p-3 min-w-0 hover: transition-colors"
                         >
                           <div className="flex items-center justify-between gap-2 min-w-0">
                             <span className="text-xs font-mono font-semibold text-text-primary truncate">

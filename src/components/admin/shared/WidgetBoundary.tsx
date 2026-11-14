@@ -12,7 +12,7 @@ export class WidgetBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200">
+        <div className="surface-card bg-rose-500/5 p-4 text-sm text-rose-200">
           <p className="flex items-center gap-2 font-medium">
             <AlertTriangle className="h-4 w-4" />
             {this.props.title ?? "Widget"} failed to load

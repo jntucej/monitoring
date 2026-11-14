@@ -38,14 +38,14 @@ export function StudentDashboardWidgets() {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="surface-card bg-rose-500/5 p-4 text-sm text-rose-200 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p>Could not load dashboard: {error}</p>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-300 text-xs font-bold hover:bg-rose-500/20 transition self-start sm:self-auto"
+          className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/10 text-rose-300 text-xs font-bold hover:bg-rose-500/20 transition self-start sm:self-auto"
         >
-          <RefreshCw className="h-3 w-3" /> Retry
+          <RefreshCw className="size-3.5" /> Retry
         </button>
       </div>
     );

@@ -72,23 +72,23 @@ function StudentAttendanceCalendarInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <div className="flex items-center gap-2">
-        <CalendarDays className="w-5 h-5 text-action-primary" />
+        <CalendarDays className="w-4 h-4 text-action-primary" />
         <p className="text-sm font-semibold text-text-primary">Attendance Calendar</p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
           Attendance data unavailable: {error}. Check your connection or retry later.
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-bg-surface p-4 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 min-w-0">
         {/* Month navigation */}
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
             onClick={prevMonth}
-            className="min-h11 inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             ← Prev
           </button>
@@ -98,7 +98,7 @@ function StudentAttendanceCalendarInner() {
           <button
             type="button"
             onClick={nextMonth}
-            className="min-h11 inline-flex items-center justify-center rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
           >
             Next →
           </button>
@@ -118,7 +118,7 @@ function StudentAttendanceCalendarInner() {
         ) : (
           <div className="grid grid-cols-7 gap-1">
             {grid.map((dayNum, i) => {
-              if (dayNum === null) return <div key={`empty-${i}`} className="h-10" />;
+              if (dayNum === null) return <div key={`empty-${i}`} className="h-4" />;
               const dayKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
               const day = days.find((d) => d.date === dayKey);
               const state: "present" | "absent" | "unmarked" | "today" | "future" =
@@ -136,7 +136,7 @@ function StudentAttendanceCalendarInner() {
                   key={dayNum}
                   type="button"
                   onClick={() => setSelectedDate(isSelected ? null : dayKey)}
-                  className={`h-10 rounded-lg text-xs font-bold flex items-center justify-center transition-colors ${
+                  className={`h-4 rounded-lg text-xs font-bold flex items-center justify-center transition-colors ${
                     state === "present"
                       ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
                       : state === "absent"
@@ -155,15 +155,15 @@ function StudentAttendanceCalendarInner() {
 
         {/* Legend */}
         <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500/40 border border-emerald-500/60" /> Present</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500/40 border border-rose-500/60" /> Absent</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-bg-elevated border border-border" /> Unmarked</span>
+          <span className="flex items-center gap-1.5"><span className="size-4 bg-emerald-500/40 border border-emerald-500/60" /> Present</span>
+          <span className="flex items-center gap-1.5"><span className="size-4 bg-rose-500/40 border border-rose-500/60" /> Absent</span>
+          <span className="flex items-center gap-1.5"><span className="size-4 bg-bg-elevated border border-border" /> Unmarked</span>
         </div>
       </div>
 
       {/* Day detail */}
       {selected && (
-        <div className="rounded-xl border border-border bg-bg-elevated p-4 text-xs min-w-0">
+        <div className="surface-card bg-bg-elevated p-4 text-xs min-w-0">
           <p className="font-bold text-text-primary mb-2">{selected.date}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -186,21 +186,21 @@ function StudentAttendanceCalendarInner() {
       {/* Monthly summary */}
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+          <div className="surface-card bg-emerald-500/5 p-3">
             <div className="flex items-center gap-1.5 text-action-success mb-1">
               <CheckCircle2 className="w-4 h-4" />
               <span className="text-xs font-bold">Present</span>
             </div>
             <p className="text-xl font-black text-action-success">{summary.present}</p>
           </div>
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3">
+          <div className="surface-card bg-rose-500/5 p-3">
             <div className="flex items-center gap-1.5 text-action-danger mb-1">
               <XCircle className="w-4 h-4" />
               <span className="text-xs font-bold">Absent</span>
             </div>
             <p className="text-xl font-black text-action-danger">{summary.absent}</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-elevated p-3">
+          <div className="surface-card bg-bg-elevated p-3">
             <div className="flex items-center gap-1.5 text-text-muted mb-1">
               <Clock className="w-4 h-4" />
               <span className="text-xs font-bold">Unmarked</span>
@@ -211,13 +211,13 @@ function StudentAttendanceCalendarInner() {
       )}
 
       {/* CTA to history */}
-      <div className="rounded-xl border border-dashed border-border bg-bg-elevated/50 p-3 text-xs flex items-center justify-between gap-3 min-w-0">
+      <div className="surface-card bg-bg-elevated/50 p-3 text-xs flex items-center justify-between gap-3 min-w-0">
         <span className="text-text-muted min-w-0 truncate">
           See your full gate entry/exit history for day-by-day detail.
         </span>
         <Link
           href="/student/history"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-action-success hover:bg-emerald-500/20 shrink-0"
+          className="surface-card inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-action-success hover:bg-emerald-500/20 shrink-0"
         >
           Entry/Exit History <ArrowRight className="w-3.5 h-3.5" />
         </Link>

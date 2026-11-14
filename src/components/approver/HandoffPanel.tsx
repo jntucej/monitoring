@@ -108,7 +108,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
       aria-label="OIE Handoff"
     >
       {/* Header */}
-      <header className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border">
+      <header className="surface-card flex items-center justify-between gap-2 px-4 py-3">
         <div className="flex items-center gap-2 min-w-0">
           <ArrowLeftRight className="w-4 h-4 text-action-primary shrink-0" />
           <h2 className="text-sm font-bold text-text-primary truncate">
@@ -218,7 +218,7 @@ export function HandoffPanel({ onForwarded }: HandoffPanelProps) {
                     type="button"
                     disabled={isSending}
                     onClick={() => void sendToOie(ticket)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-action-primary/40 bg-action-primary/10 px-3 py-1.5 text-xs font-semibold text-action-primary hover:bg-action-primary/20 disabled:opacity-50 transition-colors shrink-0"
+                    className="surface-card inline-flex items-center gap-1.5 bg-action-primary/10 px-3 py-1.5 text-xs font-semibold text-action-primary hover:bg-action-primary/20 disabled:opacity-50 transition-colors shrink-0"
                   >
                     {isSending ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" />

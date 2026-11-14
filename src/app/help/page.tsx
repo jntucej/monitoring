@@ -112,7 +112,7 @@ export default function HelpPage() {
         </div>
       </section>
 
-      <div className="mt-10 rounded-xl border border-border bg-bg-surface p-5 text-sm">
+      <div className="surface-card mt-10 bg-bg-surface p-5 text-sm">
         <strong>Already signed in?</strong>
         <p className="mt-1 text-text-secondary">
           Use the in-app{" "}

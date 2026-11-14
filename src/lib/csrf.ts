@@ -34,7 +34,7 @@ export function validateCsrf(req: NextRequest): CsrfValidationResult {
   }
 
   // Check Sec-Fetch-Site if provided by modern browsers.
-  // Issue #390: narrow from accepting 'same-site' to only 'same-origin' | 'none'.
+  // Issue issue-390: narrow from accepting 'same-site' to only 'same-origin' | 'none'.
   // 'same-site' permits requests from other subdomains (e.g. evil.college.edu).
   // 'same-origin' means same scheme + host + port — the correct check for state-
   // changing requests. 'none' covers direct user navigations.

@@ -66,7 +66,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+    <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
       <div className="flex items-center gap-2 text-text-muted min-w-0">
         <Icon className="w-4 h-4 shrink-0" />
         <span className="text-xs font-semibold uppercase tracking-wide truncate">{label}</span>
@@ -93,7 +93,7 @@ function SectionLink({
   return (
     <Link
       href={href}
-      className="rounded-xl border border-border bg-bg-base p-4 min-w-0 hover:bg-bg-elevated/50 transition-colors"
+      className="surface-card bg-bg-base p-4 min-w-0 hover:bg-bg-elevated/50 transition-colors"
     >
       <p className="text-sm font-semibold text-white">{title}</p>
       <p className="text-xs text-text-muted mt-1">{sub}</p>
@@ -174,7 +174,7 @@ function DeputyWardenDailyOverviewInner() {
       </div>
 
       {(presenceError || outpassError) && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">
@@ -184,7 +184,7 @@ function DeputyWardenDailyOverviewInner() {
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -231,7 +231,7 @@ function DeputyWardenDailyOverviewInner() {
 
       {/* Authority note */}
       <WidgetBoundary title="Authority Scope">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0">
             <Gavel className="w-5 h-5 text-action-info shrink-0" />
             <p className="text-sm text-text-secondary min-w-0">

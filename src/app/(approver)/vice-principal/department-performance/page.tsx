@@ -70,7 +70,7 @@ function VpDepartmentPerformanceInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Department Performance">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <Building2 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -80,21 +80,21 @@ function VpDepartmentPerformanceInner() {
 
           {/* KPI row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <School className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Departments</span>
               </div>
               <p className="text-xl font-bold text-white">{totals.departments}</p>
             </div>
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <Users className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Total Students</span>
               </div>
               <p className="text-xl font-bold text-action-info">{totals.students || "—"}</p>
             </div>
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-wide">Faculty</span>
@@ -104,7 +104,7 @@ function VpDepartmentPerformanceInner() {
           </div>
 
           {deptError && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
+            <div className="surface-card mb-3 bg-amber-500/10 p-3 text-xs text-action-warning">
               Department data unavailable right now: {deptError}
             </div>
           )}
@@ -137,7 +137,7 @@ function VpDepartmentPerformanceInner() {
                   </div>
                   <div className="h-2 rounded-full bg-bg-elevated overflow-hidden" role="presentation">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all motion-reduce:transition-none"
+                      className="h-full rounded-pill bg-action-info transition-all motion-reduce:transition-none"
                       style={{ width: `${d.pct}%` }}
                     />
                   </div>
@@ -149,7 +149,7 @@ function VpDepartmentPerformanceInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Role Analytics Signal">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <TrendingUp className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -159,7 +159,7 @@ function VpDepartmentPerformanceInner() {
           {analytics?.data?.metrics && analytics.data.metrics.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
               {analytics.data.metrics.map((m) => (
-                <div key={m.key} className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+                <div key={m.key} className="surface-card bg-bg-elevated/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted truncate">{m.label}</p>
                   <p className="text-lg font-bold text-white">
                     {m.value}
@@ -179,7 +179,7 @@ function VpDepartmentPerformanceInner() {
             onClick={() => {
               void refreshAnalytics();
             }}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated transition-colors"
+            className="surface-card mt-4 inline-flex items-center gap-1.5 bg-bg-elevated px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated transition-colors"
           >
             <Loader2 className={`w-3.5 h-3.5 ${!analytics ? "animate-spin" : "hidden"}`} />
             Refresh signals

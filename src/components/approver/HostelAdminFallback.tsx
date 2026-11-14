@@ -17,7 +17,7 @@ export function HostelAdminFallback({
 }: HostelAdminFallbackProps) {
   return (
     <Card className="p-8 text-center max-w-md mx-auto">
-      <Building2 className="w-10 h-10 mx-auto mb-3 text-text-muted" />
+      <Building2 className="size-6 mx-auto mb-3 text-text-muted" />
       <h3 className="font-semibold mb-2">{feature} is managed by admin</h3>
       <p className="text-sm text-text-muted mb-4">{reason}</p>
       <Link

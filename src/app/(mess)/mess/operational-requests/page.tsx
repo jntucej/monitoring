@@ -56,7 +56,7 @@ function fmtTs(iso: string | null | undefined): string {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -64,7 +64,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -170,7 +170,7 @@ function MessOperationalRequestsInner() {
         <button
           type="button"
           onClick={() => setFormOpen((o) => !o)}
-          className="inline-flex min-h11 items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-action-success hover:bg-emerald-500/20 shrink-0"
+          className="surface-card inline-flex min-h11 items-center gap-2 bg-emerald-500/10 px-4 py-2 text-sm text-action-success hover:bg-emerald-500/20 shrink-0"
         >
           <Plus className="w-4 h-4" />
           {formOpen ? "Close form" : "Raise Request"}
@@ -189,7 +189,7 @@ function MessOperationalRequestsInner() {
         <WidgetBoundary title="Raise Operational Request">
           <form
             onSubmit={submitRequest}
-            className="rounded-xl border border-border bg-bg-base p-4 space-y-3 min-w-0"
+            className="surface-card bg-bg-base p-4 space-y-3 min-w-0"
           >
             <p className="text-xs text-text-muted">
               Requests are routed to the caretaker / facilities authority via the approvals
@@ -204,7 +204,7 @@ function MessOperationalRequestsInner() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Water filter replacement for mess"
-                className="mt-1 w-full min-h11 rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success min-w-0"
+                className="surface-card mt-1 w-full min-h11 bg-bg-surface px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus: min-w-0"
               />
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
@@ -215,7 +215,7 @@ function MessOperationalRequestsInner() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="mt-1 w-full min-h11 rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -231,7 +231,7 @@ function MessOperationalRequestsInner() {
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="mt-1 w-full min-h11 rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:borderaction-success"
+                  className="surface-card mt-1 w-full min-h11 bg-bg-surface px-3 py-2 text-sm text-white focus:outline-none focus:"
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p} value={p}>
@@ -250,14 +250,14 @@ function MessOperationalRequestsInner() {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 placeholder="Context, affected area, urgency notes (optional)"
-                className="mt-1 w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success min-w-0"
+                className="surface-card mt-1 w-full bg-bg-surface px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus: min-w-0"
               />
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="submit"
                 disabled={submitting || !title.trim()}
-                className="inline-flex min-h11 items-center gap-2 rounded-lg bg-action-success hover:bg-action-success disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
+                className="surface-card inline-flex min-h11 items-center gap-2 bg-action-success hover:bg-action-success disabled:opacity-40 px-4 py-2 text-sm font-semibold text-white transition"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -274,7 +274,7 @@ function MessOperationalRequestsInner() {
       {/* Queue */}
       <WidgetBoundary title="Operational Requests">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <Wrench className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Mess Operational Requests

@@ -140,22 +140,22 @@ export function ProfileMenuButton({
         className={cn(
           "group relative inline-flex items-center gap-2 rounded-full border border-border bg-bg-surface p-1 transition-all hover:bg-bg-elevated",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary",
-          compact ? "w-9 h-9 justify-center" : "w-9 h-9 sm:w-auto sm:pr-3 sm:pl-1"
+          compact ? "size-6 justify-center" : "size-6 sm:w-auto sm:pr-3 sm:pl-1"
         )}
       >
         {user?.photoUrl || user?.avatarUrl ? (
           <img
             src={user.photoUrl || user.avatarUrl!}
             alt=""
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+            className="size-6 sm:w-6 sm:h-6 rounded-full object-cover"
           />
         ) : (
-          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-xs font-bold ring-2 ring-action-primary/25">
+          <span className="size-6 sm:w-6 sm:h-6 rounded-full bg-action-primary/20 text-action-primary flex items-center justify-center text-xs font-bold ring-2 ring-action-primary/25">
             {initials || "U"}
           </span>
         )}
         {!compact && (
-          <span className="hidden sm:block text-left min-w-0">
+          <span className="hidden sm:block text-left min-w-4">
             <span className="block text-xs font-semibold text-text-primary truncate max-w35">
               {user?.name || "Account"}
             </span>
@@ -167,9 +167,9 @@ export function ProfileMenuButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-72 max-w-xs rounded-2xl border border-border bg-bg-surface shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
+        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-6 max-w-xs rounded-2xl border border-border bg-bg-surface shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
           {/* Identity */}
-          <div className="px-4 py-3 border-b border-border">
+          <div className="surface-card px-4 py-3">
             <p className="text-sm font-bold text-text-primary truncate">
               {user?.name || "Account"}
             </p>
@@ -179,9 +179,9 @@ export function ProfileMenuButton({
           </div>
 
           {/* Appearance & Backgrounds */}
-          <div className="px-4 py-3 border-b border-border space-y-2.5">
+          <div className="surface-card px-4 py-3 space-y-2.5">
             <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" /> Appearance &amp; Backgrounds
+              <Sparkles className="size-3.5" /> Appearance &amp; Backgrounds
             </p>
 
 
@@ -204,7 +204,7 @@ export function ProfileMenuButton({
                       onClick={() => pickAccent(id)}
                       aria-label={`Use ${a.label} accent`}
                       className={cn(
-                        "w-8 h-8 min-w8 min-h8 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-all active:scale-95",
+                        "size-6 min-w8 min-h8 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all active:scale-95",
                         a.swatch,
                         active ? cn("ring-2 ring-offset-2 ring-offset-[var(--bg-surface)]", a.ring) : "opacity-70 hover:opacity-100"
                       )}
@@ -236,7 +236,7 @@ export function ProfileMenuButton({
               type="button"
               onClick={signOut}
               disabled={signingOut}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left disabled:opacity-60"
+              className="surface-card w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left disabled:opacity-60"
             >
               {signingOut ? (
                 <Loader2 className="w-4 h-4 animate-spin text-red-400" />
@@ -267,7 +267,7 @@ function MenuRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors text-left"
+      className="surface-card w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors text-left"
     >
       <Icon className="w-4 h-4 text-text-muted" />
       <span className="flex-1 truncate">{label}</span>

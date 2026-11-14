@@ -66,44 +66,44 @@ export function CampusStatusBar() {
     : 0;
 
   return (
-    <div className="bg-bg-surface border-b border-border p-3">
+    <div className="surface-card bg-bg-surface p-3">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs font-bold uppercase tracking-widest text-text-muted">
           🏫 Campus Occupancy Overview
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-        <Link href="/admin/students" className="flex flex-col items-center p-2 rounded-lg bg-blue-500/5 border border-blue-500/15 hover:bg-blue-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/students" className="surface-card flex flex-col items-center p-2 bg-blue-500/5 hover:bg-blue-500/10 transition cursor-pointer text-center">
           <GraduationCap className="w-4 h-4 text-action-primary mb-1" />
           <span className="text-xs text-blue-400/80 hidden sm:inline">Students</span><span className="text-base sm:hidden">📚</span>
           <span className="text-lg font-black text-action-primary">{studentStats.onCampus}</span>
           <span className="text-xs text-text-muted hidden sm:inline">{studentStats.inToday}in/{studentStats.outToday}out</span>
         </Link>
-        <Link href="/admin/faculty" className="flex flex-col items-center p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/15 hover:bg-emerald-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/faculty" className="surface-card flex flex-col items-center p-2 bg-emerald-500/5 hover:bg-emerald-500/10 transition cursor-pointer text-center">
           <UserCheck className="w-4 h-4 text-action-success mb-1" />
           <span className="text-xs text-emerald-400/80 hidden sm:inline">Faculty</span><span className="text-base sm:hidden">👨‍🏫</span>
           <span className="text-lg font-black text-action-success">{facultyStats.onCampus}</span>
           <span className="text-xs text-text-muted hidden sm:inline">{facultyRate}%</span>
         </Link>
-        <Link href="/admin/staff" className="flex flex-col items-center p-2 rounded-lg bg-purple-500/5 border border-purple-500/15 hover:bg-purple-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/staff" className="surface-card flex flex-col items-center p-2 bg-purple-500/5 hover:bg-purple-500/10 transition cursor-pointer text-center">
           <Briefcase className="w-4 h-4 text-unit-c mb-1" />
           <span className="text-xs text-purple-400/80 hidden sm:inline">Staff</span><span className="text-base sm:hidden">💼</span>
           <span className="text-lg font-black text-unit-c">{staffStats.onCampus}</span>
           <span className="text-xs text-text-muted hidden sm:inline">{staffStats.inToday}in</span>
         </Link>
-        <Link href="/admin/workers" className="flex flex-col items-center p-2 rounded-lg bg-amber-500/5 border border-amber-500/15 hover:bg-amber-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/workers" className="surface-card flex flex-col items-center p-2 bg-amber-500/5 hover:bg-amber-500/10 transition cursor-pointer text-center">
           <HardHat className="w-4 h-4 text-action-warning mb-1" />
           <span className="text-xs text-amber-400/80 hidden sm:inline">Workers</span><span className="text-base sm:hidden">🔧</span>
           <span className="text-lg font-black text-action-warning">{workerStats.onCampus}</span>
           <span className="text-xs text-text-muted hidden sm:inline">{workerStats.inToday}in</span>
         </Link>
-        <Link href="/admin/students" className="flex flex-col items-center p-2 rounded-lg bg-cyan-500/5 border border-cyan-500/15 hover:bg-cyan-500/10 transition cursor-pointer text-center">
+        <Link href="/admin/students" className="surface-card flex flex-col items-center p-2 bg-cyan-500/5 hover:bg-cyan-500/10 transition cursor-pointer text-center">
           <Users className="w-4 h-4 text-cyan-400 mb-1" />
           <span className="text-xs text-cyan-400/80 hidden sm:inline">Visitors</span><span className="text-base sm:hidden">👤</span>
           <span className="text-lg font-black text-cyan-400">{visitorStats.onCampus}</span>
           <span className="text-xs text-text-muted hidden sm:inline">online</span>
         </Link>
-        <Link href="/admin/reports" className="flex flex-col items-center p-2 rounded-lg bg-bg-elevated/5 border border-border/15 hover:bg-bg-elevated/10 transition cursor-pointer text-center">
+        <Link href="/admin/reports" className="surface-card flex flex-col items-center p-2 bg-bg-elevated/5 hover:bg-bg-elevated/10 transition cursor-pointer text-center">
           <Activity className="w-4 h-4 text-text-muted mb-1" />
           <span className="text-xs text-text-muted/80 hidden sm:inline">Today</span><span className="text-base sm:hidden">📊</span>
           <span className="text-lg font-black text-text-secondary">{totalScans}</span>

@@ -33,7 +33,7 @@ interface PermissionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
+    <div className="surface-card bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
       {message}
     </div>
   );
@@ -41,14 +41,14 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
       </span>
       <button
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -91,7 +91,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
                 {r.workflow_type.replace(/_/g, " ")}
               </td>
               <td className="px-4 py-3">
-                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-amber-400/30 bg-amber-400/10 text-action-warning whitespace-nowrap">
+                <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium bg-amber-400/10 text-action-warning whitespace-nowrap">
                   {r.status}
                 </span>
               </td>
@@ -113,13 +113,13 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
         </tbody>
       </table>
       {rows.length > 0 && (
-        <div className="px-4 py-3 border-t border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
           <p className="text-xs text-text-muted min-w-0">
             {rows.length} pending at the OIE stage — all are actionable.
           </p>
           <a
             href="/exam/permissions"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
+            className="surface-card inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
           >
             Open Approvals Desk <ArrowRight className="w-3.5 h-3.5" />
           </a>
@@ -160,7 +160,7 @@ function OieRecordsInner() {
         href="/oie"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Page toolbar */}
@@ -182,7 +182,7 @@ function OieRecordsInner() {
 
       <WidgetBoundary title="Assigned Operational Records">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <FileText className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -198,7 +198,7 @@ function OieRecordsInner() {
           ) : (
             <TicketTable rows={oieRows} />
           )}
-          <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
+          <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
             restricted at this tier — this desk surfaces only the records assigned to the
             OIE examination duties.

@@ -88,7 +88,7 @@ export default function VisitorVisitPage() {
     <WidgetBoundary name="visitor-visit">
       <div className="mx-auto max-w-md space-y-4 p-4">
         <h1 className="text-lg font-semibold">Your visit</h1>
-        <div className="space-y-2 rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="surface-card space-y-2 bg-bg-surface p-4">
           <p className="text-sm text-text-secondary">
             Host: <strong>{d.hostInfo.name ?? "—"}</strong>
           </p>
@@ -99,7 +99,7 @@ export default function VisitorVisitPage() {
             Status: {state === "ACTIVE" ? "Checked in" : "Completed"}
             {d.approvalStatus.checkedInAt && (
               <span className="ml-2 inline-flex items-center gap-1 text-xs text-text-muted">
-                <Clock className="h-3 w-3" />
+                <Clock className="size-3.5" />
                 {new Date(d.approvalStatus.checkedInAt).toLocaleString()}
               </span>
             )}
@@ -108,7 +108,7 @@ export default function VisitorVisitPage() {
         <button
           onClick={act}
           disabled={acting}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+          className="surface-card flex w-full items-center justify-center gap-2 bg-action-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
         >
           {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
           {action.label}

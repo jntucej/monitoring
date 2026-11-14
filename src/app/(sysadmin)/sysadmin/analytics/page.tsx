@@ -119,10 +119,10 @@ function SysAdminAnalyticsInner() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-4 md:py-6">
       <PageHeader title="Analytics" subtitle="Traffic, occupancy, and demographic breakdowns" onRefresh={load} />
-      {error && <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">{error}</div>}
+      {error && <div className="surface-card p-3 text-sm text-action-danger">{error}</div>}
 
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex flex-wrap gap-1 glass-card p-1">
+        <div className="surface-card flex flex-wrap gap-1 p-1">
           {([7, 14, 30] as const).map((d) => (
             <button key={d} onClick={() => setRange(d)} className={`text-xs px-3 py-1 min-h11 rounded-lg flex items-center justify-center ${range === d ? "bg-action-primary text-white" : "text-text-muted hover:text-text-primary"}`}>
               {d}d
@@ -130,25 +130,25 @@ function SysAdminAnalyticsInner() {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={exportCsv} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60"><Download className="w-3.5 h-3.5" /> CSV</button>
-          <button onClick={load} className="flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 rounded-lg border border-border hover:bg-bg-surface/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
+          <button onClick={exportCsv} className="surface-card flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60"><Download className="w-3.5 h-3.5" /> CSV</button>
+          <button onClick={load} className="surface-card flex items-center gap-1.5 text-xs px-3 py-1.5 min-h11 hover:bg-bg-surface/60"><RefreshCw className="w-3.5 h-3.5" /> Refresh</button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><TrendingUp className="w-3.5 h-3.5 text-action-primary" /> Total entries</div>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.entries.toLocaleString() ?? "—"}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><TrendingUp className="w-3.5 h-3.5 text-action-danger" /> Total exits</div>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.exits.toLocaleString() ?? "—"}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><Users className="w-3.5 h-3.5 text-action-info" /> Peak on campus</div>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.peakOnCampus ?? "—"}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <div className="flex items-center gap-2 text-xs text-text-muted mb-1"><Activity className="w-3.5 h-3.5 text-action-warning" /> Peak hour</div>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{data?.totals.peakHour ?? "—"}</p>
         </div>
@@ -156,7 +156,7 @@ function SysAdminAnalyticsInner() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <WidgetBoundary title="Traffic">
-          <div className="glass-card p-4">
+          <div className="surface-card p-4">
             <header className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">Gate traffic</h2>
               <ChartTypeSwitcher value={trafficType} onChange={setTrafficType} compact />
@@ -165,7 +165,7 @@ function SysAdminAnalyticsInner() {
           </div>
         </WidgetBoundary>
         <WidgetBoundary title="Campus occupancy">
-          <div className="glass-card p-4">
+          <div className="surface-card p-4">
             <header className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">On campus over time</h2>
               <ChartTypeSwitcher value={campusType} onChange={setCampusType} compact />
@@ -174,7 +174,7 @@ function SysAdminAnalyticsInner() {
           </div>
         </WidgetBoundary>
         <WidgetBoundary title="By department">
-          <div className="glass-card p-4">
+          <div className="surface-card p-4">
             <header className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Department breakdown</h2></header>
             <div style={{ height: 260 }}>
               <ChartRenderer type="bar" data={deptData} series={[{ key: "count", label: "Users", color: CHART_PALETTE.primary, type: "bar" }]} xKey="code" />
@@ -182,7 +182,7 @@ function SysAdminAnalyticsInner() {
           </div>
         </WidgetBoundary>
         <WidgetBoundary title="By role">
-          <div className="glass-card p-4">
+          <div className="surface-card p-4">
             <header className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">Role distribution</h2>
               <ChartTypeSwitcher value={roleType} onChange={setRoleType} compact />

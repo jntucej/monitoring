@@ -2,7 +2,7 @@
  * scanStore — the in-flight scan flow of the gate kiosk.
  *
  * Part of the operator-store split (UI-audit fix 6): the original single
- * store re-rendered the gate page on every field change (the React #310
+ * store re-rendered the gate page on every field change (the React issue-310
  * "too many re-renders" loop the comment in gate/[gateId]/page.tsx warned
  * about). Components now subscribe to the narrowest store that covers the
  * fields they render:

@@ -29,7 +29,7 @@ export function ChartTypeSwitcher({
   compact?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border bg-bg-surface p-1">
+    <div className="surface-card flex flex-wrap items-center gap-1 bg-bg-surface p-1">
       {CHART_TYPE_OPTIONS.map((c) => {
         const Icon = c.icon;
         const active = value === c.id;

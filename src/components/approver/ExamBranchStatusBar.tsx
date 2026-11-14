@@ -58,13 +58,13 @@ export function ExamBranchStatusBar({
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Exam Branch status bar"
     >
       {/* Left: branch · pending · handoff · discrepancies */}
       <div className="flex items-center gap-4 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-primary shrink-0" />
+          <span className="size-2 rounded-full bg-action-primary shrink-0" />
           <span className="text-text-muted uppercase tracking-wider">
             {branch ?? "branch"}
           </span>

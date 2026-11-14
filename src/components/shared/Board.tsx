@@ -113,7 +113,7 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
           <Loader2 className="w-4 h-4 animate-spin" /> Loading today&rsquo;s scans&hellip;
         </div>
       ) : error ? (
-        <div className="py-6 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg p-3">
+        <div className="surface-card py-6 text-xs text-action-warning bg-amber-400/10 p-3">
           {error}
         </div>
       ) : rows.length === 0 ? (
@@ -148,7 +148,7 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
                 >
                   {/* direction arrow */}
                   <span
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    className={`size-6 rounded-lg flex items-center justify-center shrink-0 ${
                       isFlagged
                         ? "bg-amber-500/15 text-action-warning"
                         : isIn
@@ -182,7 +182,7 @@ export function Board({ source, itemKey, onSelect }: BoardProps) {
                       {row.gate_name || row.gate_id || "Gate"}
                     </span>
                     {row.reason ? (
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-bg-elevated text-text-secondary max-w-[70px] truncate">
+                      <span className="surface-card text-xs px-1.5 py-0.5 bg-bg-elevated text-text-secondary max-w-[70px] truncate">
                         {row.reason}
                       </span>
                     ) : null}

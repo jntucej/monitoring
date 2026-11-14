@@ -112,7 +112,7 @@ export default function AdminConsoleLayout({
               aria-label="Open navigation"
               aria-expanded={mobileOpen}
               className={cn(
-                "absolute left-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-lg",
+                "absolute left-3 top-3 z-30 inline-flex size-6 items-center justify-center rounded-lg",
                 "border border-border bg-bg-surface/90 backdrop-blur",
                 "text-text-muted hover:text-text-primary",
                 "shadow-sm pt-safe"

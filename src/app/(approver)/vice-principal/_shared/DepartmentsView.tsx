@@ -69,7 +69,7 @@ export function DepartmentsView() {
             {(d?.departments ?? []).map((dept: VPAcademics["departments"][0]) => (
               <li
                 key={dept.code}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>

@@ -94,7 +94,7 @@ function ExamBranchRecordsInner() {
         href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Toolbar */}
@@ -108,7 +108,7 @@ function ExamBranchRecordsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Records unavailable: {error}</span>
@@ -116,7 +116,7 @@ function ExamBranchRecordsInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -126,17 +126,17 @@ function ExamBranchRecordsInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Records Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">Total Records</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalCount}</p>
             <p className="text-xs text-text-muted">All exam workflow requests</p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">Pending</p>
             <p className="mt-1 text-2xl font-bold text-action-warning">{pendingCount}</p>
             <p className="text-xs text-text-muted">Awaiting stage action</p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">Resolved</p>
             <p className="mt-1 text-2xl font-bold text-action-success">{resolvedCount}</p>
             <p className="text-xs text-text-muted">Approved or rejected</p>
@@ -147,7 +147,7 @@ function ExamBranchRecordsInner() {
       {/* Records list */}
       <WidgetBoundary title="Candidate & Examination Records">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ClipboardList className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -168,7 +168,7 @@ function ExamBranchRecordsInner() {
             </div>
           ) : requests.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <UserCheck className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <UserCheck className="size-6 mx-auto text-text-muted mb-2" />
               <p className="text-sm text-text-muted">No examination records yet.</p>
               <p className="text-xs text-text-muted mt-1">
                 Records appear when exam workflow requests are created.

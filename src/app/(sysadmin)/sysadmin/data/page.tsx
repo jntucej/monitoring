@@ -17,7 +17,7 @@ export default function DataManagementHubPage() {
 
       {/* Quick Status Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-bg-base border border-border shadow-sm space-y-2">
+        <div className="surface-card p-4 bg-bg-base space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-secondary uppercase">Retention Policy</span>
             <Clock className="w-4 h-4 text-sky-500" />
@@ -26,7 +26,7 @@ export default function DataManagementHubPage() {
           <p className="text-xs text-text-muted">30 daily, 12 weekly, 12 monthly tiers</p>
         </div>
 
-        <div className="p-4 rounded-xl bg-bg-base border border-border shadow-sm space-y-2">
+        <div className="surface-card p-4 bg-bg-base space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-secondary uppercase">Integrity Verification</span>
             <ShieldCheck className="w-4 h-4 text-action-success" />
@@ -37,7 +37,7 @@ export default function DataManagementHubPage() {
 
         <Link
           href="/sysadmin/compliance"
-          className="p-4 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm space-y-2"
+          className="surface-card p-4 bg-bg-base hover: (--primary)] transition group space-y-2"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-text-secondary uppercase">Compliance Hub</span>

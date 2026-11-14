@@ -123,7 +123,7 @@ export function EntryExitChart() {
   usePolling(load, { intervalMs: 60_000, enabled: isVisible });
 
   return (
-    <div ref={containerRef} className="bg-bg-surface rounded-xl border border-border p-6 h-96">
+    <div ref={containerRef} className="surface-card bg-bg-surface p-6 h-96">
       <h3 className="font-semibold mb-4">Weekly Entry/Exit</h3>
       {!isVisible || loading ? (
         <div className="h-[80%] flex items-center justify-center text-text-muted text-sm">

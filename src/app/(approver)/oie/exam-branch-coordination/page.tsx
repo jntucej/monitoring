@@ -41,7 +41,7 @@ interface PermissionsResponse {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
+    <div className="surface-card bg-bg-base p-8 text-center min-w-0">
       <div className="flex flex-col items-center gap-2">
         <Inbox className="w-5 h-5 text-text-muted" />
         <p className="max-w-md text-sm text-text-muted">{message}</p>
@@ -52,7 +52,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -60,7 +60,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -107,7 +107,7 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
                 {r.current_stage?.replace(/_/g, " ")}
               </td>
               <td className="px-4 py-3">
-                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-purple-400/30 bg-purple-400/10 text-unit-c whitespace-nowrap">
+                <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium bg-purple-400/10 text-unit-c whitespace-nowrap">
                   {r.status}
                 </span>
               </td>
@@ -128,13 +128,13 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
           ))}
         </tbody>
       </table>
-      <div className="px-4 py-3 border-t border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+      <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
         <p className="text-xs text-text-muted min-w-0">
           {rows.length} item(s) awaiting exam-branch coordination
         </p>
         <a
           href="/exam/permissions"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-unit-c hover:bg-purple-500/20 shrink-0"
+          className="surface-card inline-flex items-center gap-1.5 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-unit-c hover:bg-purple-500/20 shrink-0"
         >
           Open Exam Branch Desk <ArrowRight className="w-3.5 h-3.5" />
         </a>
@@ -174,7 +174,7 @@ function ExamBranchCoordinationInner() {
         href="/oie"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -196,28 +196,28 @@ function ExamBranchCoordinationInner() {
       {/* KPI strip */}
       <WidgetBoundary title="Exam-Branch Coordination KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <Users className="w-4 h-4 shrink-0" />
               <span>Exam Branch Queue</span>
             </div>
             <p className="text-2xl font-bold text-unit-c mt-2">{total}</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <Inbox className="w-4 h-4 shrink-0" />
               <span>Stage</span>
             </div>
             <p className="text-2xl font-bold text-white mt-2">exam_branch</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <GitMerge className="w-4 h-4 shrink-0" />
               <span>Workflow</span>
             </div>
             <p className="text-2xl font-bold text-action-info mt-2">exam</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+          <div className="surface-card bg-bg-base p-4 min-w-0">
             <div className="flex items-center gap-2 text-text-muted text-xs font-semibold uppercase tracking-wide">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>Action Required</span>
@@ -229,7 +229,7 @@ function ExamBranchCoordinationInner() {
 
       <WidgetBoundary title="Exam-Branch Coordination Queue">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <GitMerge className="w-4 h-4 text-unit-c shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
               Coordination Queue with Exam Branch
@@ -242,7 +242,7 @@ function ExamBranchCoordinationInner() {
           ) : (
             <CoordinationTable rows={rows} />
           )}
-          <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
+          <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             OIE coordinates with the Exam Branch on candidate eligibility, scheduling, and
             access confirmation. Items here are pending exam-branch sign-off.
           </div>

@@ -275,7 +275,7 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
     if (error || !detail) {
       return (
         <div className="flex flex-col items-center gap-2 p-6 text-center">
-          <XCircle className="h-7 w-7 text-action-danger" />
+          <XCircle className="size-6 text-action-danger" />
           <p className="text-sm text-text-secondary">
             {error ?? "Ticket not found"}
           </p>
@@ -294,10 +294,10 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
           <span className="font-mono text-sm font-bold text-text-primary">
             {detail.ticket_number}
           </span>
-          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-xs text-text-secondary">
+          <span className="surface-card bg-bg-elevated px-1.5 py-0.5 text-xs text-text-secondary">
             {detail.workflow_type}
           </span>
-          <span className="rounded bg-bg-elevated border border-border px-1.5 py-0.5 text-xs text-text-secondary">
+          <span className="surface-card bg-bg-elevated px-1.5 py-0.5 text-xs text-text-secondary">
             {detail.status}
           </span>
           {detail.sla_deadline ? (
@@ -308,7 +308,7 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
         </div>
 
         {/* Vertical timeline */}
-        <ol className="relative border-l border-border ml-3 pl-2 space-y-0">
+        <ol className="surface-card relative ml-3 pl-2 space-y-0">
           {nodes.map((entry, i) => (
             <TimelineNode
               key={`${entry.action}-${i}`}
@@ -324,7 +324,7 @@ export function RequestTimeline({ ticket, compact = false }: RequestTimelineProp
   }, [loading, error, detail, nodes, isTerminal]);
 
   const inner = (
-    <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface/40 p-4 sm:p-5 min-w-0">
       {content}
     </div>
   );

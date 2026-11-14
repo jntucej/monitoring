@@ -89,7 +89,7 @@ function AdminWorkflowConfigurationInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Pass Types">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <GitBranch className="w-3.5 h-3.5 text-action-success" /> Pass Types
             </div>
@@ -101,7 +101,7 @@ function AdminWorkflowConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Pending">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <FileCheck className="w-3.5 h-3.5 text-action-warning" /> Awaiting Approval
             </div>
@@ -113,7 +113,7 @@ function AdminWorkflowConfigurationInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Clock className="w-3.5 h-3.5 text-action-primary" /> Standard SLA
             </div>
@@ -128,7 +128,7 @@ function AdminWorkflowConfigurationInner() {
       {/* Per-pass-type definitions */}
       <WidgetBoundary title="Workflow Definitions">
         <div className="rounded-2xl border border-border bg-bg-elevated overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-border">
+          <div className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
               <GitBranch className="w-4 h-4 text-action-success" />
               Per-pass-type definitions
@@ -140,7 +140,7 @@ function AdminWorkflowConfigurationInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter pass types…"
-                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:borderaction-success"
+                className="surface-card w-full bg-bg-surface pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:"
               />
               {query && (
                 <button
@@ -195,11 +195,11 @@ function AdminWorkflowConfigurationInner() {
                       </td>
                       <td className="py-3 px-4">
                         {p.requires_approval ? (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 text-action-warning px-2 py-0.5 text-xs font-medium">
-                            <CheckCircle2 className="w-3 h-3" /> {p.approval_flow || "Approval"}
+                          <span className="surface-card inline-flex items-center gap-1 bg-amber-500/15 text-action-warning px-2 py-0.5 text-xs font-medium">
+                            <CheckCircle2 className="size-3.5" /> {p.approval_flow || "Approval"}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-bg-elevated text-text-muted px-2 py-0.5 text-xs font-medium">
+                          <span className="surface-card inline-flex items-center gap-1 bg-bg-elevated text-text-muted px-2 py-0.5 text-xs font-medium">
                             Direct issue
                           </span>
                         )}
@@ -216,11 +216,11 @@ function AdminWorkflowConfigurationInner() {
                       <td className="py-3 px-4">
                         {p.is_active ? (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-action-success">
-                            <CheckCircle2 className="w-3 h-3" /> Active
+                            <CheckCircle2 className="size-3.5" /> Active
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs font-medium text-text-muted">
-                            <XCircle className="w-3 h-3" /> Disabled
+                            <XCircle className="size-3.5" /> Disabled
                           </span>
                         )}
                       </td>
@@ -234,7 +234,7 @@ function AdminWorkflowConfigurationInner() {
       </WidgetBoundary>
 
       {/* Read-only notice */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+      <div className="surface-card bg-amber-500/[0.06] p-4 flex items-start gap-3">
         <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-action-warning">Read-only view</p>

@@ -81,7 +81,7 @@ export function MyWorkPanel() {
 
   return (
     <WidgetBoundary title="My Work">
-      <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+      <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -90,8 +90,8 @@ export function MyWorkPanel() {
               My Work Items
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border text-text-secondary bg-bg-base border-border shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
+          <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-text-secondary bg-bg-base shrink-0">
+            <span className="size-0 rounded-full bg-action-primary" />
             {tasks.length} open
           </span>
         </div>
@@ -107,7 +107,7 @@ export function MyWorkPanel() {
             {tasks.map((t) => (
               <li
                 key={t.id}
-                className="rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0"
+                className="surface-card bg-bg-elevated px-3 py-2 min-w-0"
               >
                 <div className="flex items-center justify-between gap-2 min-w-0">
                   <p className="text-xs font-mono font-semibold text-text-primary truncate">
@@ -133,12 +133,12 @@ export function MyWorkPanel() {
           <EmptyState
             title="No open work items"
             description="Your open maintenance work orders will appear here when assigned."
-            icon={<Inbox className="w-6 h-6 text-text-muted" />}
+            icon={<Inbox className="w-4 h-4 text-text-muted" />}
           />
         )}
 
         {/* Footer: last update */}
-        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2 min-w-0">
+        <div className="surface-card mt-3 pt-3 flex items-center justify-between gap-2 min-w-0">
           <span className="text-xs text-text-muted truncate">
             {data?.data?.completedLastWeek
               ? `${data.data.completedLastWeek} completed last week`

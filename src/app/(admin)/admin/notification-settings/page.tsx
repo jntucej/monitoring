@@ -73,7 +73,7 @@ function AdminNotificationSettingsInner() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Queue Depth">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Gauge className="w-3.5 h-3.5 text-action-success" /> Total Queued
             </div>
@@ -85,7 +85,7 @@ function AdminNotificationSettingsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Preferences">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Bell className="w-3.5 h-3.5 text-action-primary" /> Preferences Configured
             </div>
@@ -97,7 +97,7 @@ function AdminNotificationSettingsInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Channels">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Inbox className="w-3.5 h-3.5 text-action-warning" /> Active Channels
             </div>
@@ -174,7 +174,7 @@ function AdminNotificationSettingsInner() {
 
           {/* Top notification types */}
           {(d?.top_types?.length ?? 0) > 0 && (
-            <div className="border-t border-border p-4">
+            <div className="surface-card p-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
                 Most-sent notification types
               </h3>
@@ -182,7 +182,7 @@ function AdminNotificationSettingsInner() {
                 {d!.top_types.map((t) => (
                   <span
                     key={t.type}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-bg-elevated px-2 py-1 text-xs text-text-secondary"
+                    className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-2 py-1 text-xs text-text-secondary"
                   >
                     {t.type.replace(/_/g, " ")}
                     <span className="tabular-nums text-action-success">{t.count}</span>
@@ -195,7 +195,7 @@ function AdminNotificationSettingsInner() {
       </WidgetBoundary>
 
       {/* Read-only notice + CTA */}
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+      <div className="surface-card bg-amber-500/[0.06] p-4 flex items-start gap-3">
         <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-action-warning">Read-only view</p>

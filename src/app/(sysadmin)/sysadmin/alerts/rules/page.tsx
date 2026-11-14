@@ -109,7 +109,7 @@ export default function AlertRulesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Bell className="w-6 h-6 text-action-warning" /> Alert Rules Management
+              <Bell className="w-5 h-5 text-action-warning" /> Alert Rules Management
             </p>
             <p className="text-sm text-text-muted">Configure real-time monitoring and threshold alerts.</p>
           </div>
@@ -166,7 +166,7 @@ export default function AlertRulesPage() {
                           <Button
                             variant={rule.enabled ? "secondary" : "primary"}
                             size="sm"
-                            className="text-xs py-1 h-7"
+                            className="text-xs py-1 h-5"
                             onClick={() => handleToggle(rule.id, rule.enabled)}
                           >
                             {rule.enabled ? "Disable" : "Enable"}
@@ -261,7 +261,7 @@ export default function AlertRulesPage() {
               <Input label="Threshold" type="number" value={formData.threshold} onChange={(e) => setFormData({ ...formData, threshold: e.target.value })} required />
               <Input label="Window (Mins)" type="number" value={formData.durationMinutes} onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })} required />
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-border">
+            <div className="surface-card flex justify-end gap-2 pt-4">
               <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button type="submit" variant="primary" loading={saving}>Save Rule</Button>
             </div>

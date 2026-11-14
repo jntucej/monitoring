@@ -49,9 +49,9 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
     : "No recent gate activity";
 
   return (
-    <div className="rounded-xl border border-border bg-bg-surface p-4 flex items-center justify-between gap-3 flex-wrap min-w-0">
+    <div className="surface-card bg-bg-surface p-4 flex items-center justify-between gap-3 flex-wrap min-w-0">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="relative w-12 h-12 rounded-full border-2 border-border overflow-hidden shrink-0">
+        <div className="relative size-6 rounded-full border-2 border-border overflow-hidden shrink-0">
           {ward.photoUrl ? (
              
             <img src={ward.photoUrl} alt={name} className="rounded-full w-full h-full object-cover" />
@@ -65,7 +65,7 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
           <p className="text-sm font-semibold text-text-primary truncate">{name}</p>
           <p className="text-xs font-mono text-text-muted">{roll || "—"}</p>
           <p className="text-xs text-text-muted mt-0.5 flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
+            <MapPin className="size-3.5" />
             {lastSeen}
           </p>
         </div>
@@ -218,7 +218,7 @@ function ChildStatusInner() {
       </div>
 
       {personsError && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             Could not load wards.
@@ -226,7 +226,7 @@ function ChildStatusInner() {
           <button
             type="button"
             onClick={() => void refreshPersons()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
           >
             Retry
           </button>
@@ -234,11 +234,11 @@ function ChildStatusInner() {
       )}
 
       {anyLoading ? (
-        <div className="rounded-xl border border-border bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
+        <div className="surface-card bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading ward status…
         </div>
       ) : wards.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-bg-base/60 p-8 text-center text-sm text-text-muted">
+        <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
           No wards linked to your account yet.
         </div>
       ) : (
@@ -251,7 +251,7 @@ function ChildStatusInner() {
       )}
 
       <WidgetBoundary title="Recent Gate Activity">
-        <div className="rounded-xl border border-border bg-bg-surface p-4">
+        <div className="surface-card bg-bg-surface p-4">
           <ActivityFeed activities={activity} wardName={activityWard} />
         </div>
       </WidgetBoundary>

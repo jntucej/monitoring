@@ -17,7 +17,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   // Subscribe via individual selectors, not the whole store object. A full
   // `useAuthStore()` call re-renders this component on every store field
   // change (including transient loading flags), which cascades into the
-  // child shell and triggers the React #310 "too many re-renders" loop on
+  // child shell and triggers the React issue-310 "too many re-renders" loop on
   // operator consoles where AuthGuard wraps RoleDesktopShell.
   const user = useAuthStore((s) => s.user);
   const authenticated = useAuthStore((s) => s.authenticated);
@@ -116,7 +116,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     router.replace("/login");
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="w-10 h-10 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );
@@ -125,7 +125,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="w-10 h-10 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
       </div>
     );

@@ -181,7 +181,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+        <div className="surface-card flex items-center gap-2 px-4 py-3">
           <Search className="w-4 h-4 text-text-muted shrink-0" />
           <input
             ref={inputRef}
@@ -195,7 +195,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
             aria-label="Command input"
           />
-          <kbd className="text-xs font-mono px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted border border-border">esc</kbd>
+          <kbd className="surface-card text-xs font-mono px-1.5 py-0.5 bg-bg-elevated text-text-muted">esc</kbd>
         </div>
 
         {/* Command list */}
@@ -219,7 +219,7 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
                     }`}
                   >
                     <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                      className={`size-6 rounded-lg flex items-center justify-center shrink-0 ${
                         isActive ? "bg-action-primary/20 text-action-primary" : "bg-bg-elevated text-text-secondary"
                       }`}
                     >

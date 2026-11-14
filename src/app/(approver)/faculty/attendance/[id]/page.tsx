@@ -79,7 +79,7 @@ function ClassAttendanceInner() {
   return (
     <div className="space-y-4 p-2 min-w-0">
       {details ? (
-        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" /> Attendance
           </p>
@@ -92,19 +92,19 @@ function ClassAttendanceInner() {
 
       {/* Today's counts */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 min-w-0">
+        <div className="surface-card bg-emerald-500/5 p-3 min-w-0">
           <p className="text-xs uppercase font-bold tracking-wider text-action-success flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Present
           </p>
           <p className="text-2xl font-bold text-action-success mt-1">{present}</p>
         </div>
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-3 min-w-0">
+        <div className="surface-card bg-rose-500/5 p-3 min-w-0">
           <p className="text-xs uppercase font-bold tracking-wider text-action-danger flex items-center gap-1">
             <XCircle className="w-3.5 h-3.5" /> Absent
           </p>
           <p className="text-2xl font-bold text-action-danger mt-1">{absent}</p>
         </div>
-        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs uppercase font-bold tracking-wider text-text-muted">
             Rate
           </p>
@@ -113,7 +113,7 @@ function ClassAttendanceInner() {
       </div>
 
       {/* Weekly heatmap (7 columns) */}
-      <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+      <div className="surface-card bg-bg-surface p-3 min-w-0">
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2">
           This week
         </p>

@@ -40,7 +40,7 @@ export const PrincipalStageTag = memo(function PrincipalStageTag({
         tc.border
       )}
     >
-      <Clock className="h-3 w-3" />
+      <Clock className="size-3.5" />
       {stage.replace(/_/g, " ")}
     </span>
   );
@@ -66,7 +66,7 @@ export const PrincipalCatchUpCard = memo(function PrincipalCatchUpCard() {
   const d = (data?.data as Record<string, unknown>) ?? null;
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-4">
         <Inbox className="h-4 w-4 text-action-primary" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
@@ -135,7 +135,7 @@ export const PrincipalAgingStrip = memo(function PrincipalAgingStrip() {
   const quickWins = (d?.quickWins as Array<Record<string, unknown>>) ?? [];
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-3">
         <Zap className="h-4 w-4 text-action-warning" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
@@ -191,7 +191,7 @@ export const PrincipalQuickWins = memo(function PrincipalQuickWins() {
   const activeDelegations = (d?.activeDelegations as Array<Record<string, unknown>>) ?? [];
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-3">
         <ShieldCheck className="h-4 w-4 text-action-success" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
@@ -205,7 +205,7 @@ export const PrincipalQuickWins = memo(function PrincipalQuickWins() {
       {!loading && activeDelegations.length > 0 && (
         <ul className="space-y-2">
           {activeDelegations.map((r, i) => (
-            <li key={i} className="rounded-lg border border-border bg-bg-elevated p-2.5 flex items-center gap-2">
+            <li key={i} className="surface-card bg-bg-elevated p-2.5 flex items-center gap-2">
               <UserCheck className="h-3.5 w-3.5 text-action-success shrink-0" />
               <span className="text-xs font-medium text-text-primary flex-1 truncate">
                 {String(r.name ?? "rule")}
@@ -241,7 +241,7 @@ export const PrincipalWeekDigest = memo(function PrincipalWeekDigest() {
   const series = (d?.series as Array<{ label: string; count: number }>) ?? [];
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-4">
         <Calendar className="h-4 w-4 text-unit-c" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
@@ -309,7 +309,7 @@ export const PrincipalDelegationInForce = memo(function PrincipalDelegationInFor
   const activeDelegations = (d?.activeDelegations as Array<Record<string, unknown>>) ?? [];
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-3">
         <Activity className="h-4 w-4 text-cyan-400" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
@@ -323,7 +323,7 @@ export const PrincipalDelegationInForce = memo(function PrincipalDelegationInFor
       {!loading && activeDelegations.length > 0 && (
         <div className="space-y-2">
           {activeDelegations.map((r, i) => (
-            <div key={i} className="rounded-lg border border-border bg-bg-elevated p-2.5">
+            <div key={i} className="surface-card bg-bg-elevated p-2.5">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-action-success shrink-0" />
                 <span className="text-xs font-medium text-text-primary flex-1 truncate">
@@ -371,7 +371,7 @@ export const PrincipalSlaHeatmap = memo(function PrincipalSlaHeatmap() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+    <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-4 w-4 text-action-danger" />
         <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">

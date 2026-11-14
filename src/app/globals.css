@@ -160,6 +160,15 @@ p, li, .text-body { color: var(--color-text-secondary); }
 }
 .glass-card:hover { border-color: var(--color-border-strong); }
 
+/* Card primitive: border + radius only. Padding lives on the content,
+   so a card + inner div can never stack two padding treatments
+   (unslop-ui card-lasagna rule). */
+.surface-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
 .glass-panel,
 .liquid-glass {
   background: var(--color-surface);

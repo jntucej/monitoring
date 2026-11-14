@@ -67,14 +67,14 @@ function AdminAlumniInner() {
 
       <WidgetBoundary title="Alumni roster">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-3">
+          <div className="surface-card p-4 flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search alumni by name / roll / email…"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                className="surface-card w-full pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
               />
             </div>
             <button onClick={load} className="text-text-muted hover:text-text-primary"><RefreshCw className="w-4 h-4" /></button>

@@ -50,9 +50,7 @@ export const BotWelcome = memo(function BotWelcome({
               transition={{ delay: i * 0.04 }}
               disabled={disabled}
               onClick={() => onChip(label)}
-              className="text-xs px-2.5 py-1 rounded-full border border-border
-                         hover:bg-bg-elevated active:scale-95 transition
-                         disabled:opacity-50 text-text-secondary"
+              className="surface-card text-xs px-2.5 py-1 hover:bg-bg-elevated active:scale-95 transition disabled:opacity-50 text-text-secondary"
             >
               {label}
             </motion.button>
@@ -69,9 +67,7 @@ export const BotWelcome = memo(function BotWelcome({
             transition={{ delay: 0.1 + i * 0.04 }}
             disabled={disabled}
             onClick={() => onChip(s)}
-            className="text-left text-xs px-3 py-2 rounded-lg border border-border
-                       hover:bg-bg-elevated active:scale-[0.99] transition
-                       disabled:opacity-50 text-text-secondary"
+            className="surface-card text-left text-xs px-3 py-2 hover:bg-bg-elevated active:scale-[0.99] transition disabled:opacity-50 text-text-secondary"
           >
             {s}
           </motion.button>

@@ -364,12 +364,12 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
 
   return (
     <section
-      className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0"
+      className="surface-card bg-bg-surface/60 p-4 min-w-0"
       aria-label="Escalation panel"
     >
       {/* Critical banner */}
       {criticalCount > 0 ? (
-        <div className="flex items-center gap-2 rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 mb-3">
+        <div className="surface-card flex items-center gap-2 bg-rose-400/10 px-3 py-2 mb-3">
           <ShieldAlert className="w-4 h-4 text-action-danger shrink-0" />
           <span className="text-xs font-bold text-action-danger">
             {criticalCount} critical {criticalCount === 1 ? "item" : "items"} require immediate attention
@@ -392,13 +392,13 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
           type="button"
           onClick={handleRefresh}
           disabled={escLoading}
-          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Refresh escalation panel"
         >
           {escLoading ? (
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <Loader2 className="size-3.5 animate-spin" />
           ) : (
-            <Radio className="w-3 h-3" />
+            <Radio className="size-3.5" />
           )}
           <span>Refresh</span>
         </button>
@@ -431,7 +431,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
           <span>Loading escalations…</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-4">
+        <div className="surface-card bg-bg-base/50 px-3 py-4">
           <div className="flex items-start gap-2">
             <XCircle className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
             <p className="text-xs text-text-muted">
@@ -449,7 +449,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
             return (
               <li
                 key={row.key}
-                className="rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0"
+                className="surface-card bg-bg-elevated px-3 py-2 min-w-0"
               >
                 {/* Row header: severity icon + title + age + SLA badge */}
                 <div className="flex items-center gap-2 min-w-0">
@@ -469,7 +469,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                     </span>
                   ) : null}
                   <span className="inline-flex items-center gap-1 shrink-0 text-xs font-mono text-text-muted">
-                    <Clock className="w-3 h-3" />
+                    <Clock className="size-3.5" />
                     {row.age}
                   </span>
                 </div>
@@ -481,7 +481,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                   </span>
                   {row.assignedTo ? (
                     <span className="inline-flex items-center gap-0.5 truncate">
-                      <UserPlus className="w-3 h-3 shrink-0" />
+                      <UserPlus className="size-3.5 shrink-0" />
                       {row.assignedTo}
                     </span>
                   ) : null}
@@ -506,10 +506,10 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                           : "border-border bg-bg-base text-text-secondary hover:border-action-primary/40"
                       }`}
                     >
-                      <UserPlus className="w-3 h-3" />
+                      <UserPlus className="size-3.5" />
                       Assign
                       {isActive ? (
-                        <ChevronDown className="w-3 h-3" />
+                        <ChevronDown className="size-3.5" />
                       ) : null}
                     </button>
                   ) : null}
@@ -520,9 +520,9 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       type="button"
                       onClick={() => handleResolve(row)}
                       disabled={isBusy}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border border-emerald-400/30 bg-emerald-400/10 text-action-success hover:bg-emerald-400/20 transition-colors disabled:opacity-40"
+                      className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-emerald-400/10 text-action-success hover:bg-emerald-400/20 transition-colors disabled:opacity-40"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="size-3.5" />
                       Resolve
                     </button>
                   ) : null}
@@ -533,28 +533,28 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                       type="button"
                       onClick={() => handleEscalate(row)}
                       disabled={isBusy}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold border border-rose-400/30 bg-rose-400/10 text-action-danger hover:bg-rose-400/20 transition-colors disabled:opacity-40"
+                      className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold bg-rose-400/10 text-action-danger hover:bg-rose-400/20 transition-colors disabled:opacity-40"
                     >
-                      <AlertTriangle className="w-3 h-3" />
+                      <AlertTriangle className="size-3.5" />
                       Escalate
                     </button>
                   ) : null}
 
                   {/* Busy indicator */}
                   {isBusy ? (
-                    <Loader2 className="w-3 h-3 animate-spin text-text-muted" />
+                    <Loader2 className="size-3.5 animate-spin text-text-muted" />
                   ) : null}
                 </div>
 
                 {/* Assignee dropdown (shown when Assign is toggled) */}
                 {isActive && row.alertId && !isBusy ? (
-                  <div className="mt-2 rounded-lg border border-border bg-bg-base/50 p-2">
+                  <div className="surface-card mt-2 bg-bg-base/50 p-2">
                     <label className="text-xs font-semibold text-text-muted mb-1 block">
                       Assign to
                     </label>
                     {assigneeLoading ? (
                       <div className="flex items-center gap-1.5 text-xs text-text-muted">
-                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <Loader2 className="size-3.5 animate-spin" />
                         <span>Loading assignees…</span>
                       </div>
                     ) : assignees.length === 0 ? (
@@ -568,7 +568,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                             key={a.id}
                             type="button"
                             onClick={() => handleAssign(row, a.id)}
-                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-mono border border-border bg-bg-elevated text-text-secondary hover:border-action-primary/40 hover:text-text-primary transition-colors"
+                            className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono bg-bg-elevated text-text-secondary hover: hover:text-text-primary transition-colors"
                           >
                             {a.name}
                             <span className="text-text-muted/60">

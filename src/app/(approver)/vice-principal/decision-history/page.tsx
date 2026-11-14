@@ -83,7 +83,7 @@ function VpDecisionHistoryInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Decision History">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-text-muted mb-3 min-w-0">
             <History className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -113,7 +113,7 @@ function VpDecisionHistoryInner() {
           </div>
 
           {error && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
+            <div className="surface-card mb-3 bg-amber-500/10 p-3 text-xs text-action-warning">
               History unavailable: {error}
             </div>
           )}
@@ -134,7 +134,7 @@ function VpDecisionHistoryInner() {
               {merged.slice(0, 20).map((r) => (
                 <li
                   key={`${r.status}-${r.id}`}
-                  className="rounded-lg border border-border bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="surface-card bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${

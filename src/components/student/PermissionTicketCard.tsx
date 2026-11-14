@@ -57,12 +57,12 @@ export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardP
 
   return (
     <div
-      className="group bg-bg-surface border border-border rounded-xl p-4 transition-all duration-150 hover:bordertext-muted hover:shadow-sm"
+      className="surface-card group bg-bg-surface p-4 transition-all duration-150 hover: hover:"
     >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-lg bg-bg-elevated border border-border font-mono text-sm font-bold text-action-primary tracking-wide">
+          <span className="surface-card px-2.5 py-1 bg-bg-elevated font-mono text-sm font-bold text-action-primary tracking-wide">
             {ticket.ticket_number}
           </span>
           <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${workflow.className}`}>

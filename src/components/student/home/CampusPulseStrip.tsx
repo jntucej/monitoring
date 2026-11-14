@@ -13,7 +13,7 @@ export function CampusPulseStrip() {
   });
   if (!data?.stats) return null;
   return (
-    <div className="flex items-center justify-between rounded-xl border border-border bg-bg-surface/50 px-3 py-2 text-xs text-text-muted">
+    <div className="surface-card flex items-center justify-between bg-bg-surface/50 px-3 py-2 text-xs text-text-muted">
       <span className="inline-flex items-center gap-1">
         <Users className="h-3.5 w-3.5" aria-hidden />
         {data.stats.onCampusNow} on campus now

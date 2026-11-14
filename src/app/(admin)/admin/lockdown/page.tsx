@@ -106,7 +106,7 @@ function AdminLockdownInner() {
             iconTone="accent"
           >
             <div className="space-y-3">
-              <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-action-danger flex items-start gap-2.5">
+              <div className="surface-card bg-rose-500/10 p-3 text-xs text-action-danger flex items-start gap-2.5">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   Gates are in lockdown mode. Unauthorized movement is being blocked
@@ -126,7 +126,7 @@ function AdminLockdownInner() {
                 <button
                   onClick={() => setConfirmLift(true)}
                   disabled={busy}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50"
+                  className="surface-card inline-flex items-center gap-2 px-4 py-2.5 bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50"
                 >
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
                   Lift Lockdown
@@ -166,7 +166,7 @@ function AdminLockdownInner() {
                     <select
                       value={draft.scope}
                       onChange={(e) => setDraft((d) => ({ ...d, scope: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                      className="surface-card w-full px-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     >
                       <option value="all-gates">All gates</option>
                       <option value="entry">Entry gates</option>
@@ -183,11 +183,11 @@ function AdminLockdownInner() {
                       value={draft.message}
                       onChange={(e) => setDraft((d) => ({ ...d, message: e.target.value }))}
                       placeholder="e.g. Emergency: seal campus"
-                      className="w-full px-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                      className="surface-card w-full px-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                     />
                   </label>
                 </div>
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
+                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
                   <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>
                     Broadcasting a lockdown immediately blocks gate movement in the
@@ -199,7 +199,7 @@ function AdminLockdownInner() {
                     type="button"
                     onClick={() => setConfirmBroadcast(true)}
                     disabled={busy}
-                    className="px-5 py-2.5 rounded-xl bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
+                    className="surface-card px-5 py-2.5 bg-action-danger hover:bg-action-danger text-white text-xs font-bold disabled:opacity-50 inline-flex items-center gap-2"
                   >
                     {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldAlert className="w-4 h-4" />}
                     Broadcast Lockdown

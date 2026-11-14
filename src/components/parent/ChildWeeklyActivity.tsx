@@ -122,7 +122,7 @@ export function ChildWeeklyActivity() {
 
   if (loading && !hasData) {
     return (
-      <div className="bg-bg-surface rounded-xl border border-border p-6 flex items-center gap-3 text-text-muted text-sm">
+      <div className="surface-card bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading weekly activity…
       </div>
     );
@@ -135,7 +135,7 @@ export function ChildWeeklyActivity() {
         const maxCount = c.bars.reduce((m, b) => Math.max(m, b.inCount + b.outCount), 0);
         const heightPct = (n: number) => (maxCount ? Math.max(6, Math.round((n / maxCount) * 100)) : 0);
         return (
-          <div key={c.roll} className="bg-bg-surface rounded-xl border border-border p-5">
+          <div key={c.roll} className="surface-card bg-bg-surface p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-action-success" />
@@ -143,10 +143,10 @@ export function ChildWeeklyActivity() {
               </h3>
               <div className="flex items-center gap-3 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-action-success inline-block" /> In ({c.totalIn})
+                  <span className="size-2 rounded-sm bg-action-success inline-block" /> In ({c.totalIn})
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-action-danger inline-block" /> Out ({c.totalOut})
+                  <span className="size-2 rounded-sm bg-action-danger inline-block" /> Out ({c.totalOut})
                 </span>
               </div>
             </div>
@@ -175,7 +175,7 @@ export function ChildWeeklyActivity() {
               })}
             </div>
             <div className="mt-3 text-xs text-text-muted flex items-center gap-1">
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="size-3.5" />
               {c.totalIn + c.totalOut === 0
                 ? "No gate activity recorded in the last 7 days."
                 : `${c.totalIn + c.totalOut} gate events across the last 7 days.`}

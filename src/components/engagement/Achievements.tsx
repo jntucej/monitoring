@@ -56,11 +56,11 @@ function AchievementIcon({ icon, earned, tier }: { icon: string | null; earned: 
   const cls = TIER_STYLES[tier] ?? TIER_STYLES.bronze;
   return (
     <div
-      className={`flex h-11 w-11 items-center justify-center rounded-xl border ${
+      className={`flex h-4 w-4 items-center justify-center rounded-xl border ${
         earned ? cls : "border-border bg-[var(--bg-raised)]/40 text-text-muted opacity-50"
       }`}
     >
-      <Icon className="h-5 w-5" aria-hidden />
+      <Icon className="h-4 w-4" aria-hidden />
     </div>
   );
 }
@@ -98,7 +98,7 @@ export function Achievements() {
 
   return (
     <WidgetBoundary title="Achievements">
-      <section aria-label="Achievements" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="Achievements" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
             <Award className="h-4 w-4 text-action-success" aria-hidden />
@@ -110,14 +110,14 @@ export function Achievements() {
               Loading…
             </span>
           ) : (
-            <span className="rounded-full bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
+            <span className="surface-card bg-[var(--bg-raised)] px-2.5 py-0.5 text-xs font-medium text-text-muted">
               {earned.length} / {available.length} unlocked
             </span>
           )}
         </div>
 
         {error && !loading ? (
-          <div className="mt-5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-5 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : available.length === 0 && !loading ? (
           <p className="mt-5 text-sm text-text-muted">
             No achievements are available right now.
@@ -159,7 +159,7 @@ export function Achievements() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1">
-                            <Lock className="h-3 w-3" aria-hidden />
+                            <Lock className="size-3.5" aria-hidden />
                             locked
                           </span>
                         )}

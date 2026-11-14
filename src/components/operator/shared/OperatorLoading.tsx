@@ -19,7 +19,7 @@ export function OperatorPageLoading() {
 
 export function OperatorWidgetLoading() {
   return (
-    <div className="rounded-xl border border-border bg-bg-surface animate-pulse p-4 space-y-3">
+    <div className="surface-card bg-bg-surface animate-pulse p-4 space-y-3">
       <div className="h-4 w-1/4 bg-bg-elevated rounded" />
       <div className="h-4 w-1/2 bg-bg-elevated rounded" />
       <div className="h-20 bg-bg-elevated rounded" />

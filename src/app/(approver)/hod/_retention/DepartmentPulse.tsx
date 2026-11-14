@@ -31,7 +31,7 @@ export function DepartmentPulse({
       : "text-text-muted";
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-text-primary">
           Department pulse
@@ -60,7 +60,7 @@ export function DepartmentPulse({
       </p>
 
       {myRank <= 3 && (
-        <p className="mt-3 rounded-lg bg-action-primary/10 px-2.5 py-1.5 text-xs text-action-primary">
+        <p className="surface-card mt-3 bg-action-primary/10 px-2.5 py-1.5 text-xs text-action-primary">
           {myRank === 1
             ? "Your department has the best attendance in the college today. Keep it up."
             : `You're in the top ${myRank} departments. Students feel it.`}

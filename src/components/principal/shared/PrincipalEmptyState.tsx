@@ -12,8 +12,8 @@ export function PrincipalEmptyState({
   description?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-8 text-center">
-      <AlertCircle className="mx-auto h-8 w-8 text-text-muted" />
+    <div className="surface-card bg-bg-surface p-8 text-center">
+      <AlertCircle className="mx-auto size-6 text-text-muted" />
       <p className="mt-3 text-sm font-medium text-text-primary">{title}</p>
       <p className="mt-1 text-xs text-text-muted">{description}</p>
     </div>

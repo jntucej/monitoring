@@ -17,8 +17,8 @@ export default function OperatorError({
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center p-6">
-      <div className="glass-card max-w-md w-full p-6 text-center space-y-4">
-        <div className="mx-auto w-12 h-12 rounded-full bg-action-danger/10 flex items-center justify-center">
+      <div className="surface-card max-w-md w-full p-6 text-center space-y-4">
+        <div className="mx-auto size-6 rounded-full bg-action-danger/10 flex items-center justify-center">
           <AlertTriangle className="w-6 h-6 text-action-danger" />
         </div>
         <h2 className="text-lg font-semibold text-text-primary">Something went wrong</h2>
@@ -31,7 +31,7 @@ export default function OperatorError({
         <button
           type="button"
           onClick={reset}
-          className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="surface-card inline-flex items-center gap-2 bg-action-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           <RefreshCw className="w-4 h-4" />
           Try again

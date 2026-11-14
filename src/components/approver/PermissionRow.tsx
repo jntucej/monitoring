@@ -135,7 +135,7 @@ export function PermissionRow({
 
         <div className="space-y-1 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-bg-elevated border border-border text-action-primary">
+            <span className="surface-card font-mono text-xs font-bold px-2 py-0.5 bg-bg-elevated text-action-primary">
               {request.ticket_number}
             </span>
             <span className="font-semibold text-sm text-text-primary">
@@ -164,28 +164,28 @@ export function PermissionRow({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
             {details?.year && details?.section && (
               <span className="flex items-center gap-1">
-                <User className="w-3 h-3 text-text-muted" />
+                <User className="size-3.5 text-text-muted" />
                 Year {details.year} - Sec {details.section}
               </span>
             )}
             {details?.hostel_block && (
               <span className="flex items-center gap-1">
-                <Building className="w-3 h-3 text-text-muted" />
+                <Building className="size-3.5 text-text-muted" />
                 Block {details.hostel_block} ({details.room_number || "—"})
               </span>
             )}
             <span className="flex items-center gap-1">
-              <Shield className="w-3 h-3 text-text-muted" />
+              <Shield className="size-3.5 text-text-muted" />
               Stage: {STAGE_LABELS[request.current_stage] || request.current_stage}
             </span>
             {request.document_required && (
               <span className="flex items-center gap-1 text-action-warning font-medium">
-                <FileText className="w-3 h-3" />
+                <FileText className="size-3.5" />
                 Doc Req
               </span>
             )}
             <span className="flex items-center gap-1 text-text-muted">
-              <Clock className="w-3 h-3" />
+              <Clock className="size-3.5" />
               {formatDateTime(request.created_at)}
             </span>
             <SlaBadge slaDeadline={request.sla_deadline} status={request.status} />
@@ -199,7 +199,7 @@ export function PermissionRow({
             type="button"
             onClick={() => onQuickApprove(request.ticket_number)}
             disabled={loadingAction}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-action-success hover:bg-emerald-700 text-white transition-colors disabled:opacity-50"
+            className="surface-card px-3 py-1.5 text-xs font-semibold bg-action-success hover:bg-emerald-700 text-white transition-colors disabled:opacity-50"
           >
             Approve
           </button>
@@ -209,7 +209,7 @@ export function PermissionRow({
             type="button"
             onClick={() => onQuickReject(request.ticket_number)}
             disabled={loadingAction}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-action-danger hover:bg-rose-700 text-white transition-colors disabled:opacity-50"
+            className="surface-card px-3 py-1.5 text-xs font-semibold bg-action-danger hover:bg-rose-700 text-white transition-colors disabled:opacity-50"
           >
             Reject
           </button>
@@ -217,7 +217,7 @@ export function PermissionRow({
         <button
           type="button"
           onClick={() => onViewDetails(request.ticket_number)}
-          className="p-1.5 rounded-lg border border-border bg-bg-elevated hover:bg-bg-surface text-text-secondary hover:text-text-primary transition-colors"
+          className="surface-card p-1.5 bg-bg-elevated hover:bg-bg-surface text-text-secondary hover:text-text-primary transition-colors"
           title="View full details"
           aria-label="View full details"
         >

@@ -11,7 +11,7 @@ export function EmergencyPulse({
   if (items.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border-2 border-action-danger/50 bg-action-danger/5 p-4 sm:p-5">
+    <section className="surface-card bg-action-danger/5 p-4 sm:p-5">
       <header className="mb-2 flex items-center gap-2">
         <AlertTriangle className="size-4 text-action-danger" />
         <h2 className="text-sm font-semibold text-action-danger">
@@ -24,7 +24,7 @@ export function EmergencyPulse({
           <li key={item.ticket}>
             <Link
               href={`/principal/approvals?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex min-h11 items-center gap-2 rounded-lg p-1.5 text-xs transition hover:bg-action-danger/10"
+              className="surface-card flex min-h11 items-center gap-2 p-1.5 text-xs transition hover:bg-action-danger/10"
             >
               <span className="min-w-0 flex-1 truncate font-medium text-text-primary">
                 {item.subject}

@@ -157,14 +157,14 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           <button
             onClick={() => setReloadKey((k) => k + 1)}
             disabled={loading}
-            className="p-1.5 text-xs bg-bg-elevated border border-border rounded-md flex items-center gap-1.5 hover:bg-bg-base"
+            className="surface-card p-1.5 text-xs bg-bg-elevated flex items-center gap-1.5 hover:bg-bg-base"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
           </button>
           <button
             onClick={handleExport}
             disabled={items.length === 0}
-            className="p-1.5 text-xs bg-bg-elevated border border-border rounded-md flex items-center gap-1.5 hover:bg-bg-base disabled:opacity-40 disabled:cursor-not-allowed"
+            className="surface-card p-1.5 text-xs bg-bg-elevated flex items-center gap-1.5 hover:bg-bg-base disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Download className="w-3.5 h-3.5" />
           </button>
@@ -183,25 +183,25 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value)}
           placeholder="Action (e.g. GATE_ONLINE)"
-          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
+          className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           value={userIdFilter}
           onChange={(e) => setUserIdFilter(e.target.value)}
           placeholder="User ID"
-          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
+          className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           type="date"
           value={fromFilter}
           onChange={(e) => setFromFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
+          className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
         <input
           type="date"
           value={toFilter}
           onChange={(e) => setToFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm bg-bg-surface text-text-primary border border-border"
+          className="surface-card px-3 py-2 text-sm bg-bg-surface text-text-primary"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             setPage(1);
             setReloadKey((k) => k + 1);
           }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-action-primary text-white"
+          className="surface-card px-3 py-1.5 text-sm font-medium bg-action-primary text-white"
         >
           Apply
         </button>
@@ -222,7 +222,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             setToFilter("");
             setPage(1);
           }}
-          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-bg-surface text-text-muted border border-border"
+          className="surface-card px-3 py-1.5 text-sm font-medium bg-bg-surface text-text-muted"
         >
           Reset
         </button>
@@ -257,7 +257,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
                       {l.timestamp ? new Date(l.timestamp).toLocaleString("en-IN") : "—"}
                     </td>
                     <td className="py-2.5 px-4">
-                      <code className="text-xs bg-bg-elevated border border-border rounded px-1.5 py-0.5 text-action-success">
+                      <code className="surface-card text-xs bg-bg-elevated px-1.5 py-0.5 text-action-success">
                         {l.action}
                       </code>
                     </td>
@@ -273,13 +273,13 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           </div>
         )}
 
-        <div className="p-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
+        <div className="surface-card p-3 flex items-center justify-between text-xs text-text-muted">
           <span>Total: {total} items</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page <= 1}
-              className="p-1 rounded border border-border disabled:opacity-40"
+              className="surface-card p-1 disabled:opacity-40"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -287,7 +287,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page >= totalPages}
-              className="p-1 rounded border border-border disabled:opacity-40"
+              className="surface-card p-1 disabled:opacity-40"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

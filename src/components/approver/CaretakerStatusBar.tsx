@@ -47,7 +47,7 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Caretaker status bar"
     >
       {/* Left: hostel · open · urgent · last update */}
@@ -61,7 +61,7 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
         </span>
 
         <span className="inline-flex items-center gap-1.5 text-text-muted">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-warning shrink-0" />
+          <span className="size-2 rounded-full bg-action-warning shrink-0" />
           open
           <span className="font-mono tabular-nums font-bold text-action-warning">
             {counts?.open ?? 0}
@@ -69,7 +69,7 @@ export function CaretakerStatusBar({ counts, refreshing = false }: CaretakerStat
         </span>
 
         <span className="inline-flex items-center gap-1.5 text-text-muted">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-danger shrink-0" />
+          <span className="size-2 rounded-full bg-action-danger shrink-0" />
           urgent
           <span className="font-mono tabular-nums font-bold text-action-danger">
             {counts?.urgent ?? 0}

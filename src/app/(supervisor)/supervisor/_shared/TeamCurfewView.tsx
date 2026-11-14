@@ -27,7 +27,7 @@ export function TeamCurfewView() {
         <p className="text-xs text-text-muted">Worker and resident night presence verification</p>
       </header>
 
-      <div className="rounded-2xl border border-border bg-bg-surface p-5">
+      <div className="surface-card bg-bg-surface p-5">
         <div className="flex items-center gap-3">
           <Moon className="size-5 text-action-info" />
           <div>
@@ -50,7 +50,7 @@ export function TeamCurfewView() {
                   <p className="font-semibold text-text-primary">{w.name}</p>
                   <p className="text-xs text-text-muted">{w.staffCategory}</p>
                 </div>
-                <span className="rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
+                <span className="surface-card bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
                   {w.gateName ?? "Unassigned"}
                 </span>
               </li>

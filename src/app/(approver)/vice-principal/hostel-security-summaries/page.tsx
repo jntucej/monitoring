@@ -67,7 +67,7 @@ function VpHostelSecurityInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Hostel & Security Rollup">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -77,7 +77,7 @@ function VpHostelSecurityInner() {
 
           {/* KPI row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <Users className="w-4 h-4 text-action-success" />
                 <span className="text-xs uppercase tracking-wide">On Campus Now</span>
@@ -86,7 +86,7 @@ function VpHostelSecurityInner() {
                 {matrixLoading ? <Loader2 className="w-5 h-5 animate-spin inline text-text-muted" /> : onCampus}
               </p>
             </div>
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <Building2 className="w-4 h-4 text-action-info" />
                 <span className="text-xs uppercase tracking-wide">Active Gates</span>
@@ -95,7 +95,7 @@ function VpHostelSecurityInner() {
                 {matrixLoading && !matrix ? "…" : gateTotals.filter((g) => g.total > 0).length}
               </p>
             </div>
-            <div className="rounded-lg bg-bg-elevated/40 p-3 min-w-0">
+            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
               <div className="flex items-center gap-2 text-text-muted">
                 <Siren className="w-4 h-4 text-action-danger" />
                 <span className="text-xs uppercase tracking-wide">Unresolved Alerts</span>
@@ -146,7 +146,7 @@ function VpHostelSecurityInner() {
       </WidgetBoundary>
 
       <WidgetBoundary title="Security Alerts">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <Siren className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -158,7 +158,7 @@ function VpHostelSecurityInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Checking access…
             </div>
           ) : alertsProbe.restricted ? (
-            <div className="rounded-xl border-border bg-bg-elevated/20 p-5 text-center text-sm text-text-muted min-w-0">
+            <div className="surface-card bg-bg-elevated/20 p-5 text-center text-sm text-text-muted min-w-0">
               <Siren className="w-5 h-5 text-text-muted mx-auto mb-2" />
               <p className="max-w-md mx-auto">
                 Campus alert detail is restricted at the Vice Principal tier. The Principal and
@@ -167,7 +167,7 @@ function VpHostelSecurityInner() {
               </p>
             </div>
           ) : alertsProbe.error ? (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning min-w-0">
+            <div className="surface-card bg-amber-500/10 p-3 text-xs text-action-warning min-w-0">
               Alerts unavailable right now: {alertsProbe.error}
             </div>
           ) : activeAlerts.length === 0 ? (
@@ -180,7 +180,7 @@ function VpHostelSecurityInner() {
               {activeAlerts.slice(0, 10).map((a) => (
                 <li
                   key={a.id}
-                  className="rounded-lg border border-border bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="surface-card bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${

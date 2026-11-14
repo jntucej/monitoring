@@ -91,7 +91,7 @@ export function MyTicketsPanel({
           {backHref && (
             <Link
               href={backHref}
-              className="rounded-md p-1.5 hover:bg-bg-elevated"
+              className="surface-card p-1.5 hover:bg-bg-elevated"
               aria-label="Back"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -110,7 +110,7 @@ export function MyTicketsPanel({
             type="button"
             onClick={() => void refresh()}
             disabled={loading}
-            className="rounded-md p-2 hover:bg-bg-elevated disabled:opacity-50"
+            className="surface-card p-2 hover:bg-bg-elevated disabled:opacity-50"
             aria-label="Refresh tickets"
           >
             {loading
@@ -120,7 +120,7 @@ export function MyTicketsPanel({
           {canCreate && newTicketHref && (
             <Link
               href={newTicketHref}
-              className="flex items-center gap-1.5 rounded-md bg-action-primary px-3 py-2 text-sm text-white"
+              className="surface-card flex items-center gap-1.5 bg-action-primary px-3 py-2 text-sm text-white"
             >
               <Plus className="h-4 w-4" />
               New Ticket
@@ -158,13 +158,13 @@ export function MyTicketsPanel({
 
       {/* Error banner */}
       {error && (
-        <div className="flex items-center gap-2 rounded-md border border-action-danger/40 bg-action-danger/10 p-3 text-sm text-action-danger">
+        <div className="surface-card flex items-center gap-2 bg-action-danger/10 p-3 text-sm text-action-danger">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1 truncate">{error}</span>
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-md bg-bg-elevated px-2 py-1 text-xs"
+            className="surface-card bg-bg-elevated px-2 py-1 text-xs"
           >
             Retry
           </button>
@@ -181,7 +181,7 @@ export function MyTicketsPanel({
       {/* Empty state */}
       {!loading && filtered.length === 0 && !error && (
         <EmptyState
-          icon={<Inbox className="h-8 w-8" />}
+          icon={<Inbox className="size-6" />}
           title={filter === "ALL" ? "No tickets yet" : `No ${filter.toLowerCase()} tickets`}
           description={
             filter === "ALL"
@@ -192,7 +192,7 @@ export function MyTicketsPanel({
             canCreate && newTicketHref ? (
               <Link
                 href={newTicketHref}
-                className="inline-flex items-center gap-1.5 rounded-md bg-action-primary px-3 py-2 text-sm text-white"
+                className="surface-card inline-flex items-center gap-1.5 bg-action-primary px-3 py-2 text-sm text-white"
               >
                 <Plus className="h-4 w-4" />
                 New Ticket

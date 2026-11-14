@@ -98,7 +98,7 @@ function ExamBranchDiscrepanciesInner() {
         href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Toolbar */}
@@ -112,7 +112,7 @@ function ExamBranchDiscrepanciesInner() {
       </div>
 
       {error && !forbidden && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Discrepancies unavailable: {error}</span>
@@ -120,7 +120,7 @@ function ExamBranchDiscrepanciesInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -130,12 +130,12 @@ function ExamBranchDiscrepanciesInner() {
       {/* KPI cards */}
       <WidgetBoundary title="Discrepancy Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">Open Discrepancies</p>
             <p className="mt-1 text-2xl font-bold text-white">{totalOpen}</p>
             <p className="text-xs text-text-muted">Unresolved alerts visible to this role</p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">Critical</p>
             <p
               className={`mt-1 text-2xl font-bold ${
@@ -146,7 +146,7 @@ function ExamBranchDiscrepanciesInner() {
             </p>
             <p className="text-xs text-text-muted">Requires immediate attention</p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+          <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
             <p className="text-xs text-text-muted uppercase tracking-wide">High</p>
             <p
               className={`mt-1 text-2xl font-bold ${
@@ -163,7 +163,7 @@ function ExamBranchDiscrepanciesInner() {
       {/* Discrepancy list */}
       <WidgetBoundary title="Attendance Discrepancies">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <CircleAlert className="w-4 h-4 text-action-danger shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -175,7 +175,7 @@ function ExamBranchDiscrepanciesInner() {
 
           {forbidden ? (
             <div className="p-6 text-center min-w-0">
-              <ShieldAlert className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <ShieldAlert className="size-4 mx-auto text-text-muted mb-2" />
               <p className="text-sm text-text-muted">
                 Access to live discrepancies is restricted.
               </p>
@@ -189,13 +189,13 @@ function ExamBranchDiscrepanciesInner() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-14 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
+                  className="h-4 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : alerts.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <CircleAlert className="w-8 h-8 mx-auto text-action-success mb-2" />
+              <CircleAlert className="size-4 mx-auto text-action-success mb-2" />
               <p className="text-sm text-text-muted">
                 No open discrepancies.
               </p>
@@ -217,7 +217,7 @@ function ExamBranchDiscrepanciesInner() {
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${sev.badge}`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                        <span className={`size-0 rounded-full ${sev.dot}`} />
                         {alert.severity.toUpperCase()}
                       </span>
                       <span className="text-sm font-medium text-white min-w-0 flex-1 truncate">

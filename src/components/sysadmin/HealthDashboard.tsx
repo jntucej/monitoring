@@ -55,25 +55,25 @@ export function HealthDashboard() {
     switch (status) {
       case "healthy":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-action-success border border-emerald-500/20">
+          <span className="surface-card inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-emerald-500/10 text-action-success">
             <CheckCircle2 className="w-3.5 h-3.5" /> Healthy
           </span>
         );
       case "degraded":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-action-warning border border-amber-500/20">
+          <span className="surface-card inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-amber-500/10 text-action-warning">
             <AlertTriangle className="w-3.5 h-3.5" /> Degraded
           </span>
         );
       case "unhealthy":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-action-danger border border-rose-500/20">
+          <span className="surface-card inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-rose-500/10 text-action-danger">
             <XCircle className="w-3.5 h-3.5" /> Unhealthy
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-bg-elevated0/10 text-text-muted border border-border/20">
+          <span className="surface-card inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold bg-bg-elevated0/10 text-text-muted">
             Unknown
           </span>
         );
@@ -83,22 +83,22 @@ export function HealthDashboard() {
   const getSeverityBadge = (severity: "info" | "warning" | "critical") => {
     switch (severity) {
       case "critical":
-        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/30">CRITICAL</span>;
+        return <span className="surface-card px-2 py-0.5 text-xs font-bold bg-rose-500/20 text-action-danger">CRITICAL</span>;
       case "warning":
-        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-action-warning border border-amber-500/30">WARNING</span>;
+        return <span className="surface-card px-2 py-0.5 text-xs font-bold bg-amber-500/20 text-action-warning">WARNING</span>;
       default:
-        return <span className="px-2 py-0.5 rounded text-xs font-bold bg-sky-500/20 text-action-info border border-sky-500/30">INFO</span>;
+        return <span className="surface-card px-2 py-0.5 text-xs font-bold bg-sky-500/20 text-action-info">INFO</span>;
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-bg-surface p-6 rounded-2xl border border-border shadow-sm">
+      <div className="surface-card flex flex-col md:flex-row md:items-center justify-between gap-4 bg-bg-surface p-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-              <Activity className="w-6 h-6 text-action-info" /> System Health & Telemetry
+              <Activity className="w-5 h-5 text-action-info" /> System Health & Telemetry
             </h2>
             {health && getStatusBadge(health.status)}
           </div>
@@ -110,14 +110,14 @@ export function HealthDashboard() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs font-medium flex items-center gap-3">
+        <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-xs font-medium flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-action-danger shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
+        <div className="surface-card bg-bg-surface p-4 space-y-1">
           <div className="text-xs text-text-muted flex items-center justify-between">
             <span>Active Users</span>
             <Users className="w-4 h-4 text-action-info" />
@@ -126,7 +126,7 @@ export function HealthDashboard() {
           <p className="text-xs text-text-muted">{health?.metrics?.activeSessions ?? 0} active sessions</p>
         </div>
 
-        <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
+        <div className="surface-card bg-bg-surface p-4 space-y-1">
           <div className="text-xs text-text-muted flex items-center justify-between">
             <span>Requests / Min</span>
             <Zap className="w-4 h-4 text-action-warning" />
@@ -135,7 +135,7 @@ export function HealthDashboard() {
           <p className="text-xs text-text-muted">Live API throughput</p>
         </div>
 
-        <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
+        <div className="surface-card bg-bg-surface p-4 space-y-1">
           <div className="text-xs text-text-muted flex items-center justify-between">
             <span>Avg Latency</span>
             <Clock className="w-4 h-4 text-action-success" />
@@ -148,7 +148,7 @@ export function HealthDashboard() {
           </p>
         </div>
 
-        <div className="bg-bg-surface border border-border p-4 rounded-xl space-y-1">
+        <div className="surface-card bg-bg-surface p-4 space-y-1">
           <div className="text-xs text-text-muted flex items-center justify-between">
             <span>Error Rate</span>
             <AlertTriangle className="w-4 h-4 text-action-danger" />
@@ -163,9 +163,9 @@ export function HealthDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
           onClick={() => router.push("/sysadmin/audit")}
-          className="bg-bg-surface border border-border p-5 rounded-2xl space-y-4 cursor-pointer hover:border-sky-500/40 hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-action-info transition-colors">
               <Database className="w-4 h-4 text-action-info" /> Database
             </h3>
@@ -177,7 +177,7 @@ export function HealthDashboard() {
               <span className="font-mono text-text-primary font-medium">{health?.components?.database?.latency ?? 0} ms</span>
             </div>
             {health?.components?.database?.error && (
-              <div className="p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-action-danger font-mono text-xs">
+              <div className="surface-card p-2.5 bg-rose-500/10 text-action-danger font-mono text-xs">
                 {health.components.database.error}
               </div>
             )}
@@ -189,9 +189,9 @@ export function HealthDashboard() {
 
         <div
           onClick={() => router.push("/admin/gates")}
-          className="bg-bg-surface border border-border p-5 rounded-2xl space-y-4 cursor-pointer hover:border-purple-500/40 hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-unit-c transition-colors">
               <Server className="w-4 h-4 text-unit-c" /> Gate Turnstiles
             </h3>
@@ -214,9 +214,9 @@ export function HealthDashboard() {
 
         <div
           onClick={() => router.push("/sysadmin/security")}
-          className="bg-bg-surface border border-border p-5 rounded-2xl space-y-4 cursor-pointer hover:border-emerald-500/40 hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-action-success transition-colors">
               <Shield className="w-4 h-4 text-action-success" /> Subsystems
             </h3>
@@ -241,12 +241,12 @@ export function HealthDashboard() {
       </div>
 
       {/* Recent Alerts */}
-      <div className="bg-bg-surface border border-border p-6 rounded-2xl space-y-4">
+      <div className="surface-card bg-bg-surface p-6 space-y-4">
         <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-action-warning" /> System Alerts
         </h3>
         {!health?.recentAlerts || health.recentAlerts.length === 0 ? (
-          <div className="py-6 text-center text-xs text-text-muted border border-dashed border-border rounded-xl">
+          <div className="surface-card py-6 text-center text-xs text-text-muted">
             No active system alerts recorded. All subsystems operating normally.
           </div>
         ) : (

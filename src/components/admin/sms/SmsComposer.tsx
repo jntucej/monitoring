@@ -80,7 +80,7 @@ export function SmsComposer() {
           <MessageSquare className="w-4 h-4" aria-hidden="true" /> Template
         </h3>
         <select
-          className="w-full border border-border bg-bg-surface px-2 py-2 rounded text-sm"
+          className="surface-card w-full bg-bg-surface px-2 py-2 text-sm"
           value={code}
           onChange={(e) => {
             setCode(e.target.value);
@@ -99,14 +99,14 @@ export function SmsComposer() {
 
         {tpl && (
           <>
-            <pre className="text-xs p-2 rounded bg-bg-elevated whitespace-pre-wrap overflow-x-auto">
+            <pre className="surface-card text-xs p-2 bg-bg-elevated whitespace-pre-wrap overflow-x-auto">
               {tpl.body}
             </pre>
             <p className="text-xs text-text-muted">
               Variables: {tpl.variables.length ? tpl.variables.join(", ") : "none"}
             </p>
             {!tpl.dlt_template_id && (
-              <div className="flex items-start gap-2 text-xs text-action-warning bg-action-warning/10 p-2 rounded">
+              <div className="surface-card flex items-start gap-2 text-xs text-action-warning bg-action-warning/10 p-2">
                 <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden="true" />
                 <span>
                   This template has no DLT_TEMPLATE_ID yet. SMS will queue as &ldquo;failed&rdquo; and

@@ -72,7 +72,7 @@ function VpDelegatedResponsibilitiesInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="Delegated Responsibilities">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <Briefcase className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -81,7 +81,7 @@ function VpDelegatedResponsibilitiesInner() {
           </div>
 
           {/* Scope card */}
-          <div className="mb-4 rounded-lg border border-sky-500/20 bg-sky-500/5 p-4 text-sm text-text-secondary min-w-0">
+          <div className="surface-card mb-4 bg-sky-500/5 p-4 text-sm text-text-secondary min-w-0">
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-action-info shrink-0 mt-0.5" />
               <div>
@@ -100,7 +100,7 @@ function VpDelegatedResponsibilitiesInner() {
             {DUTIES.map((d) => (
               <div
                 key={d.title}
-                className="rounded-lg border border-border bg-bg-surface/40 p-3 flex flex-col gap-2 min-w-0"
+                className="surface-card bg-bg-surface/40 p-3 flex flex-col gap-2 min-w-0"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <ClipboardCheck className="w-4 h-4 text-action-info shrink-0" />
@@ -112,7 +112,7 @@ function VpDelegatedResponsibilitiesInner() {
                     href={d.href}
                     className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-action-info hover:text-action-info transition-colors"
                   >
-                    {d.hrefLabel} <ArrowRight className="w-3 h-3" />
+                    {d.hrefLabel} <ArrowRight className="size-3.5" />
                   </Link>
                 )}
               </div>
@@ -120,7 +120,7 @@ function VpDelegatedResponsibilitiesInner() {
           </div>
 
           {/* Delegation backend status */}
-          <div className="mt-4 rounded-lg border border-border bg-bg-surface/40 p-4 min-w-0">
+          <div className="surface-card mt-4 bg-bg-surface/40 p-4 min-w-0">
             <div className="flex items-start gap-3">
               <ScrollText className="w-5 h-5 text-text-muted shrink-0 mt-0.5" />
               <div className="min-w-0">

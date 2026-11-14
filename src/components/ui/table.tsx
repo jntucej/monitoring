@@ -93,7 +93,7 @@ function Table<T extends Record<string, any>>({
         </tbody>
       </table>
       {pagination && onPageChange && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border/40 text-xs text-text-muted">
+        <div className="surface-card flex items-center justify-between px-4 py-3 text-xs text-text-muted">
           <span>
             {(pagination.page - 1) * pagination.limit + 1}-
             {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
@@ -102,9 +102,9 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
               disabled={pagination.page === 1}
-              className="p-1 rounded hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
+              className="surface-card p-1 hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="w-3 h-3" />
+              <ChevronLeft className="size-3.5" />
             </button>
             <span className="px-2">
               Page {pagination.page} of {Math.ceil(pagination.total / pagination.limit) || 1}
@@ -112,9 +112,9 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => onPageChange(pagination.page + 1)}
               disabled={pagination.page * pagination.limit >= pagination.total}
-              className="p-1 rounded hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
+              className="surface-card p-1 hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronRight className="w-3 h-3" />
+              <ChevronRight className="size-3.5" />
             </button>
           </div>
         </div>

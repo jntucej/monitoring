@@ -7,7 +7,7 @@ export default function SubjectFacultyAttendancePage() {
   return (
     <div className="p-6">
       <EmptyState
-        icon={<ClipboardList className="w-8 h-8" />}
+        icon={<ClipboardList className="size-6" />}
         title="Subject Attendance"
         description="Record and track subject class attendance."
       />

@@ -21,7 +21,7 @@ export default function CurfewCard({ payload }: StudentWidgetProps) {
   const off = circ * (1 - score / 100);
 
   return (
-    <article className="rounded-2xl border border-border bg-bg-surface p-5">
+    <article className="surface-card bg-bg-surface p-5">
       <header className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Curfew Score</h3>
         <span className={`flex items-center gap-1 text-xs ${trendColor}`}>
@@ -43,15 +43,15 @@ export default function CurfewCard({ payload }: StudentWidgetProps) {
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl border border-border py-2">
+        <div className="surface-card py-2">
           <dt className="text-xs uppercase text-text-muted">On time</dt>
           <dd className="text-sm font-semibold text-action-success tabular-nums">{data.today.onTime}</dd>
         </div>
-        <div className="rounded-xl border border-border py-2">
+        <div className="surface-card py-2">
           <dt className="text-xs uppercase text-text-muted">Late</dt>
           <dd className="text-sm font-semibold text-action-warning tabular-nums">{data.today.late}</dd>
         </div>
-        <div className="rounded-xl border border-border py-2">
+        <div className="surface-card py-2">
           <dt className="text-xs uppercase text-text-muted">Violations</dt>
           <dd className="text-sm font-semibold text-action-danger tabular-nums">{data.today.violations}</dd>
         </div>

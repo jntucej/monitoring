@@ -75,14 +75,14 @@ export function AcademicPersonalSection() {
     const filled = rows.filter((r) => value(r.key) !== "—");
     if (filled.length === 0) return null;
     return (
-      <div key={id} className="bg-bg-surface border border-border rounded-2xl p-4 sm:p-5 shadow-md">
+      <div key={id} className="surface-card bg-bg-surface p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-action-primary">{icon}</span>
           <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">{title}</h3>
         </div>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
           {filled.map((r) => (
-            <div key={r.key} className="flex items-baseline justify-between gap-3 py-1 border-b border-border/40 last:border-b-0">
+            <div key={r.key} className="surface-card flex items-baseline justify-between gap-3 py-1 last:">
               <dt className="text-xs sm:text-xs font-medium text-text-muted">{r.label}</dt>
               <dd className="text-xs sm:text-xs font-semibold text-text-primary text-right break-words">
                 {value(r.key)}

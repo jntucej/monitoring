@@ -70,7 +70,7 @@ export function ExceptionsView() {
         <div className="space-y-3">
           {absent.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
-              <header className="border-b border-border px-4 py-3">
+              <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Absent today ({absent.length})</h2>
               </header>
               <ul className="divide-y divide-border">
@@ -88,7 +88,7 @@ export function ExceptionsView() {
 
           {late.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
-              <header className="border-b border-border px-4 py-3">
+              <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Late arrivals ({late.length})</h2>
               </header>
               <ul className="divide-y divide-border">
@@ -104,7 +104,7 @@ export function ExceptionsView() {
 
           {flagged.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
-              <header className="border-b border-border px-4 py-3">
+              <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Flagged ({flagged.length})</h2>
               </header>
               <ul className="divide-y divide-border">

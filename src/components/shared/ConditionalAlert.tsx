@@ -53,7 +53,7 @@ export function ConditionalAlert({ ctx, limit = 5 }: ConditionalAlertProps) {
                   href={a.href}
                   className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-action-success hover:underline"
                 >
-                  {a.ctaLabel ?? "Open"} <ChevronRight className="h-3 w-3" />
+                  {a.ctaLabel ?? "Open"} <ChevronRight className="size-3.5" />
                 </a>
               )}
             </div>

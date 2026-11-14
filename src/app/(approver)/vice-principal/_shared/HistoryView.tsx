@@ -59,7 +59,7 @@ export function HistoryView({
         <MiniStat label="Escalated" value={d?.totals.escalated} tone="warn" />
       </div>
 
-      <section className="rounded-2xl border border-border bg-bg-surface p-4">
+      <section className="surface-card bg-bg-surface p-4">
         <h2 className="mb-3 text-sm font-semibold">Decisions over time</h2>
         <div className="h-52 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -76,7 +76,7 @@ export function HistoryView({
       </section>
 
       <section className="rounded-2xl border border-border bg-bg-surface">
-        <header className="border-b border-border px-4 py-3">
+        <header className="surface-card px-4 py-3">
           <h2 className="text-sm font-semibold">Decision history</h2>
         </header>
         {loading && !d ? (

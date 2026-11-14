@@ -88,19 +88,19 @@ function AdminPassesInner() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5" /> Total</p>
           <p className="text-2xl font-bold text-text-primary tabular-nums">{rows.length}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-action-warning" /> Pending</p>
           <p className="text-2xl font-bold text-action-warning tabular-nums">{pending}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-action-success" /> Active</p>
           <p className="text-2xl font-bold text-action-success tabular-nums">{active}</p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-action-danger" /> Closed</p>
           <p className="text-2xl font-bold text-action-danger tabular-nums">{rows.length - pending - active}</p>
         </div>
@@ -108,7 +108,7 @@ function AdminPassesInner() {
 
       <WidgetBoundary title="Pass records">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-2 min-h11">
+          <div className="surface-card p-4 flex items-center gap-2 min-h11">
             <Search className="w-4 h-4 text-text-muted" />
             <input
               value={query}

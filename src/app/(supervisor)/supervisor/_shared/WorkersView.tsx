@@ -91,13 +91,13 @@ export function WorkersView() {
         </div>
         {totals && (
           <div className="flex gap-3 text-xs">
-            <span className="rounded-full bg-action-primary/10 px-3 py-1 font-medium text-action-primary">
+            <span className="surface-card bg-action-primary/10 px-3 py-1 font-medium text-action-primary">
               {totals.onPost} on post
             </span>
-            <span className="rounded-full bg-action-info/10 px-3 py-1 font-medium text-action-info">
+            <span className="surface-card bg-action-info/10 px-3 py-1 font-medium text-action-info">
               {totals.securityOnDuty} security
             </span>
-            <span className="rounded-full bg-action-danger/10 px-3 py-1 font-medium text-action-danger">
+            <span className="surface-card bg-action-danger/10 px-3 py-1 font-medium text-action-danger">
               {totals.absent} absent
             </span>
           </div>
@@ -113,7 +113,7 @@ export function WorkersView() {
             placeholder="Search workers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-h11 rounded-xl border border-border bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="surface-card w-full min-h11 bg-bg-surface py-2 pl-9 pr-3 text-xs text-text-primary placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
         </div>
 
@@ -121,7 +121,7 @@ export function WorkersView() {
           <select
             value={selectedGate}
             onChange={(e) => setSelectedGate(e.target.value)}
-            className="min-h11 rounded-xl border border-border bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
+            className="surface-card min-h11 bg-bg-surface px-3 py-2 text-xs text-text-primary focus:outline-none"
           >
             <option value="all">All Gates</option>
             {gates.map((g) => (
@@ -134,7 +134,7 @@ export function WorkersView() {
       </div>
 
       {/* Category chips */}
-      <div className="flex flex-wrap gap-1.5 border-b border-border pb-3">
+      <div className="surface-card flex flex-wrap gap-1.5 pb-3">
         {CATEGORIES.map((c) => (
           <button
             key={c.id}
@@ -153,7 +153,7 @@ export function WorkersView() {
       {loading && filtered.length === 0 ? (
         <ListSkeleton />
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-bg-surface p-8 text-center text-xs text-text-muted">
+        <div className="surface-card bg-bg-surface p-8 text-center text-xs text-text-muted">
           No workers match your filter.
         </div>
       ) : (
@@ -173,7 +173,7 @@ export function WorkersView() {
                   onClick={() => setActiveWorker(w)}
                   className="flex cursor-pointer items-center gap-3 p-3 text-xs transition hover:bg-bg-elevated"
                 >
-                  <span className={`size-2 shrink-0 rounded-full ${statusColor}`} />
+                  <span className={`size-4 shrink-0 rounded-full ${statusColor}`} />
                   <Icon className="size-4 shrink-0 text-text-muted" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-text-primary">{w.name}</p>
@@ -182,15 +182,15 @@ export function WorkersView() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
-                      <MapPin className="size-3" />
+                    <span className="surface-card flex items-center gap-1 bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
+                      <MapPin className="size-4" />
                       {w.gateName ?? "Unassigned"}
                     </span>
                     {w.phoneTail && (
                       <a
                         href={`tel:***${w.phoneTail}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="rounded-lg p-1.5 text-action-primary hover:bg-action-primary/10"
+                        className="surface-card p-1.5 text-action-primary hover:bg-action-primary/10"
                         title={`Call ${w.name}`}
                       >
                         <Phone className="size-4" />
@@ -212,8 +212,8 @@ export function WorkersView() {
             onClick={() => setActiveWorker(null)}
             aria-hidden="true"
           />
-          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-bg-surface p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+          <div className="surface-card relative z-10 w-full max-w-md bg-bg-surface p-6">
+            <div className="surface-card mb-4 flex items-center justify-between pb-3">
               <div>
                 <h3 className="text-base font-bold text-text-primary">{activeWorker.name}</h3>
                 <p className="text-xs text-text-muted">{activeWorker.designation ?? activeWorker.staffCategory}</p>
@@ -221,7 +221,7 @@ export function WorkersView() {
               <button
                 onClick={() => setActiveWorker(null)}
                 aria-label="Close"
-                className="flex size-11 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
+                className="flex size-4 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
               >
                 <X className="size-4" />
               </button>
@@ -243,7 +243,7 @@ export function WorkersView() {
                 <div className="pt-3">
                   <a
                     href={`tel:***${activeWorker.phoneTail}`}
-                    className="flex min-h11 items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
+                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
                   >
                     <Phone className="size-4" />
                     Call Worker (***{activeWorker.phoneTail})

@@ -135,7 +135,7 @@ export function CampusAssistant() {
         {rows.length > 0 && (
           <ul className="space-y-1 text-xs text-text-primary">
             {rows.map((line, i) => (
-              <li key={i} className="rounded-lg bg-[var(--bg-raised)]/50 px-2.5 py-1.5">
+              <li key={i} className="surface-card bg-[var(--bg-raised)]/50 px-2.5 py-1.5">
                 {line}
               </li>
             ))}
@@ -150,7 +150,7 @@ export function CampusAssistant() {
             className="inline-flex items-center gap-1 text-xs font-medium text-indigo-300 hover:text-indigo-200 motion-safe:transition-colors motion-reduce:transition-none"
           >
             Open {msg.page.replace(/^\//, "")}
-            <ArrowUpRight className="h-3 w-3" aria-hidden />
+            <ArrowUpRight className="size-3.5" aria-hidden />
           </a>
         )}
       </div>
@@ -159,10 +159,10 @@ export function CampusAssistant() {
 
   return (
     <WidgetBoundary title="Campus Assistant">
-      <section aria-label="Campus assistant" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="Campus assistant" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/15 text-unit-c">
-            <Bot className="h-4.5 w-4.5" aria-hidden />
+          <div className="flex size-4 items-center justify-center rounded-lg bg-violet-500/15 text-unit-c">
+            <Bot className="size-4" aria-hidden />
           </div>
           <div>
             <h2 className="text-sm font-bold text-text-primary">Campus Assistant</h2>
@@ -174,12 +174,12 @@ export function CampusAssistant() {
 
         <div
           ref={listRef}
-          className="mt-4 max-h-72 space-y-3 overflow-y-auto rounded-xl border border-border bg-[var(--bg-raised)]/20 p-3"
+          className="surface-card mt-4 max-h-4 space-y-3 overflow-y-auto bg-[var(--bg-raised)]/20 p-3"
           aria-label="Assistant conversation"
         >
           {messages.length === 0 && !pending ? (
             <div className="flex flex-col items-center gap-2.5 py-6 text-center text-text-muted">
-              <MessageSquare className="h-5 w-5 opacity-50" aria-hidden />
+              <MessageSquare className="h-4 w-4 opacity-50" aria-hidden />
               <p className="max-w-xs text-xs">
                 Ask me about your pending requests, upcoming events, announcements, or
                 your personal goals.
@@ -190,7 +190,7 @@ export function CampusAssistant() {
                     key={q}
                     type="button"
                     onClick={() => void ask(q)}
-                    className="rounded-full border border-border bg-bg-surface px-2.5 py-1 text-xs text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+                    className="surface-card bg-bg-surface px-2.5 py-1 text-xs text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
                   >
                     {q}
                   </button>
@@ -247,14 +247,14 @@ export function CampusAssistant() {
             }}
             placeholder="Ask about requests, events, announcements, goals…"
             aria-label="Campus assistant question"
-            className="flex-1 rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/40 motion-safe:transition-shadow motion-reduce:transition-none"
+            className="surface-card flex-1 bg-bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/40 motion-safe:transition- motion-reduce:transition-none"
           />
           <button
             type="button"
             onClick={() => void ask(input)}
             disabled={pending || !input.trim()}
             aria-label="Send question"
-            className="rounded-lg border border-violet-500/40 bg-violet-500/20 p-2 text-violet-200 hover:bg-violet-500/30 motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="surface-card bg-violet-500/20 p-2 text-violet-200 hover:bg-violet-500/30 motion-safe:transition-colors motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" aria-hidden />
           </button>

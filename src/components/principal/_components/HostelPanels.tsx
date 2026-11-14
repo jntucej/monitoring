@@ -10,7 +10,7 @@ import type {PresenceMatrixData} from "./types";
 function PlaceholderBadge({ note }: { note: string }) {
   return (
     <span
-      className="ml-auto inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-action-warning"
+      className="surface-card ml-auto inline-flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-action-warning"
       title={note}
     >
       Not connected
@@ -22,12 +22,12 @@ function PlaceholderBadge({ note }: { note: string }) {
 export const HostelOccupancyPanel = memo(function HostelOccupancyPanel() {
   return (
     <PrincipalWidgetBoundary title="Hostel Occupancy">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-4">
           <Building2 className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Occupancy</span>
         </div>
-        <div className="rounded-lg border border-border/40 bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
+        <div className="surface-card bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-text-muted shrink-0" />
           Block-level occupancy detail is maintained by the hostel manager.
           Gate-level presence is shown in the Live Gate Presence panel above.
@@ -41,13 +41,13 @@ export const HostelOccupancyPanel = memo(function HostelOccupancyPanel() {
 export const ResidentDirectoryPanel = memo(function ResidentDirectoryPanel() {
   return (
     <PrincipalWidgetBoundary title="Resident Directory">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <Users className="w-4 h-4 text-unit-c" />
           <span className="text-xs font-semibold uppercase tracking-wide">Resident Directory</span>
           <PlaceholderBadge note="No data source connected yet — wire to /api/students?hostel_block=… to enable" />
         </div>
-        <div className="rounded-lg border border-border/40 bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
+        <div className="surface-card bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-text-muted shrink-0" />
           Resident lookup is an operator-facing tool. Block &amp; room occupancy is maintained by the hostel manager.
         </div>
@@ -68,13 +68,13 @@ export const HostelAttendancePanel = memo(function HostelAttendancePanel({ matri
   const total = rows.reduce((s, r) => s + r.total, 0);
   return (
     <PrincipalWidgetBoundary title="Hostel Attendance">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <CheckCircle2 className="w-4 h-4 text-action-success" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Attendance</span>
         </div>
         {rows.length === 0 ? (
-          <div className="rounded-lg border border-border/40 bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
+          <div className="surface-card bg-bg-elevated/20 p-3 text-xs text-text-muted flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-text-muted shrink-0" />
             Detailed hostel attendance is managed by the hostel manager. Gate-level presence is shown below.
           </div>
@@ -131,7 +131,7 @@ export const HostelOverviewPanel = memo(function HostelOverviewPanel({
   );
   return (
     <PrincipalWidgetBoundary title="Hostel Overview">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <Building2 className="w-4 h-4 text-action-primary" />
           <span className="text-xs font-semibold uppercase tracking-wide">Hostel Overview</span>

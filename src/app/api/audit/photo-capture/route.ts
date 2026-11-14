@@ -1,7 +1,7 @@
 /**
  * POST /api/audit/photo-capture
  *
- * Issue #385: log that the operator captured a photo for visual verification
+ * Issue issue-385: log that the operator captured a photo for visual verification
  * at the gate. The photo itself is never stored — this is a consent/audit trail
  * only, so that if a student later queries an unauthorized photo event, there
  * is a timestamped record of who captured it and for what purpose.

@@ -78,21 +78,21 @@ export function UserAnalytics() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <Users className="h-8 w-8 text-action-success" />
+          <Users className="size-6 text-action-success" />
           <div>
             <div className="text-xs text-text-secondary">Daily Active Users (DAU)</div>
             <div className="text-2xl font-bold">{trends.dau}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <TrendingUp className="h-8 w-8 text-action-primary" />
+          <TrendingUp className="size-6 text-action-primary" />
           <div>
             <div className="text-xs text-text-secondary">Monthly Active Users (MAU)</div>
             <div className="text-2xl font-bold">{trends.mau}</div>
           </div>
         </Card>
         <Card className="p-4 flex items-center gap-3">
-          <UserX className="h-8 w-8 text-unit-c" />
+          <UserX className="size-6 text-unit-c" />
           <div>
             <div className="text-xs text-text-secondary">DAU / MAU Ratio</div>
             <div className="text-2xl font-bold">

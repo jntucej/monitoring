@@ -141,19 +141,19 @@ export function SupportDashboard() {
 
       {metrics && (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <Card className="p-4 border text-center">
+          <Card className="surface-card p-4 text-center">
             <div className="text-xs text-text-muted">Total Tickets</div>
             <div className="text-2xl font-bold">{String(m.totalTickets ?? 0)}</div>
           </Card>
-          <Card className="p-4 border text-center">
+          <Card className="surface-card p-4 text-center">
             <div className="text-xs text-action-warning font-medium">Open</div>
             <div className="text-2xl font-bold text-amber-600">{String(m.openTickets ?? 0)}</div>
           </Card>
-          <Card className="p-4 border text-center">
+          <Card className="surface-card p-4 text-center">
             <div className="text-xs text-action-success font-medium">Resolved</div>
             <div className="text-2xl font-bold text-action-success">{String(m.resolvedTickets ?? 0)}</div>
           </Card>
-          <Card className="p-4 border text-center">
+          <Card className="surface-card p-4 text-center">
             <div className="text-xs text-action-primary font-medium">Avg Resolution Time</div>
             <div className="text-2xl font-bold text-blue-600">{String(m.avgResolutionHours ?? "—")} hrs</div>
           </Card>
@@ -168,10 +168,10 @@ export function SupportDashboard() {
             </CardTitle>
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-text-muted" />
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-1.5 border rounded text-xs">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="surface-card p-1.5 text-xs">
                 {STATUS_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
               </select>
-              <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="p-1.5 border rounded text-xs">
+              <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="surface-card p-1.5 text-xs">
                 {PRIORITY_OPTIONS.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
               </select>
             </div>

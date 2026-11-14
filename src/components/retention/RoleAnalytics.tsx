@@ -95,7 +95,7 @@ export function RoleAnalytics() {
 
   return (
     <WidgetBoundary title="Role Analytics">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -106,8 +106,8 @@ export function RoleAnalytics() {
 
           {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1">
-              <Filter className="h-3 w-3 text-text-muted" />
+            <div className="surface-card flex items-center gap-1.5 bg-bg-surface/40 px-2 py-1">
+              <Filter className="size-3.5 text-text-muted" />
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value as "7d" | "30d")}
@@ -123,7 +123,7 @@ export function RoleAnalytics() {
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
+                className="surface-card bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
                 aria-label="Department"
               >
                 <option value="">All depts</option>
@@ -139,7 +139,7 @@ export function RoleAnalytics() {
               <select
                 value={gate}
                 onChange={(e) => setGate(e.target.value)}
-                className="rounded-lg border border-border/50 bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
+                className="surface-card bg-bg-surface/40 px-2 py-1 text-xs text-text-secondary focus:outline-none"
                 aria-label="Gate"
               >
                 <option value="">All gates</option>
@@ -165,14 +165,14 @@ export function RoleAnalytics() {
             {metrics.map((m) => (
               <div
                 key={m.key}
-                className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
+                className="surface-card bg-bg-elevated/30 p-3"
               >
                 <p className="text-xs text-text-muted flex items-center gap-1">
-                  {m.key === "active_alerts" && <AlertTriangle className="h-3 w-3" />}
+                  {m.key === "active_alerts" && <AlertTriangle className="size-3.5" />}
                   {m.key.includes("turnaround") || m.key.includes("resolution") ? (
-                    <Clock className="h-3 w-3" />
+                    <Clock className="size-3.5" />
                   ) : (
-                    <TrendingUp className="h-3 w-3" />
+                    <TrendingUp className="size-3.5" />
                   )}
                   {m.label}
                 </p>
@@ -187,7 +187,7 @@ export function RoleAnalytics() {
 
         {/* Chart */}
         {seriesData.length > 0 ? (
-          <div className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3">
+          <div className="surface-card bg-bg-elevated/30 p-3">
             <p className="text-xs text-text-muted mb-2">{chartConfig.title}</p>
             <ChartRenderer
               type={chartConfig.type}

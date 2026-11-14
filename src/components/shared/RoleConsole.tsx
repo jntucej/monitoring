@@ -953,7 +953,7 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
           Skipped when `bare` — the parent shell already owns the header
           chrome (e.g. the operator's slim OperatorShell rail). */}
       {showOpsHeader && (
-        <header className="flex items-center justify-between gap-3 px-4 py-2 border-b border-border bg-bg-base/80 backdrop-blur-md sticky top-0 z-30">
+        <header className="surface-card flex items-center justify-between gap-3 px-4 py-2 bg-bg-base/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0">
             <span className="font-mono text-xs uppercase tracking-widest text-text-muted shrink-0">
               {roleLabel}
@@ -965,12 +965,12 @@ export function RoleConsole({ role, roleRoot, groups, children, bare }: RoleCons
           <button
             type="button"
             onClick={openCommandBar}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:border-action-primary/40 transition-colors"
+            className="surface-card inline-flex items-center gap-2 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover: transition-colors"
             aria-label="Open command palette"
           >
             <Command className="w-3.5 h-3.5" />
             <span>Command</span>
-            <kbd className="hidden sm:inline text-xs font-mono px-1.5 py-0.5 rounded bg-bg-base text-text-muted border border-border">
+            <kbd className="surface-card hidden sm:inline text-xs font-mono px-1.5 py-0.5 bg-bg-base text-text-muted">
               ⌘K
             </kbd>
           </button>

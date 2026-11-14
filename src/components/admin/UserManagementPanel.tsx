@@ -341,27 +341,27 @@ function UserManagementPanelBody({
         <div className="flex items-center gap-2">
           <button
             onClick={loadUsers}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-xs font-semibold text-text-primary hover:bg-bg-elevated transition"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-text-primary hover:bg-bg-elevated transition"
           >
             <Search className="w-3.5 h-3.5" />
             Refresh
           </button>
           <button
             onClick={() => { setBulkOpen(true); setBulkResult(null); }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-2 bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition"
           >
             <Upload className="w-3.5 h-3.5" />
             Bulk Import
           </button>
         </div>
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-5">
           <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, roll, email, or role…"
-            className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-9 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="surface-card w-full bg-bg-surface pl-9 pr-9 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-purple-500/50"
           />
           {query && (
             <button
@@ -383,7 +383,7 @@ function UserManagementPanelBody({
       )}
 
       {error && (
-        <div className="px-4 py-2.5 rounded-lg bg-rose-500/10 text-action-danger text-sm">{error}</div>
+        <div className="surface-card px-4 py-2.5 bg-rose-500/10 text-action-danger text-sm">{error}</div>
       )}
 
       {/* Table */}
@@ -427,7 +427,7 @@ function UserManagementPanelBody({
                       <td className="p-4 text-xs">
                         {guardianLabel(u) ? (
                           <span className="inline-flex items-center gap-1 text-text-secondary">
-                            <Hash className="w-3 h-3 text-text-muted" />
+                            <Hash className="size-3.5 text-text-muted" />
                             {guardianLabel(u)}
                           </span>
                         ) : (
@@ -452,7 +452,7 @@ function UserManagementPanelBody({
                           <button
                             onClick={() => openSecretModal("password", u)}
                             title="Reset password"
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-text-muted hover:bg-bg-elevated hover:text-text-primary transition"
+                            className="surface-card inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-bg-elevated hover:text-text-primary transition"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Password</span>
@@ -467,20 +467,20 @@ function UserManagementPanelBody({
           </table>
         </div>
         {filtered.length > pageSize && (
-          <div className="flex items-center justify-between px-4 py-2.5 text-xs text-text-muted border-t border-border">
+          <div className="surface-card flex items-center justify-between px-4 py-2.5 text-xs text-text-muted">
             <span>{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setQuery(query)}
                 disabled={page <= 1}
-                className="px-2.5 py-1 rounded border border-border disabled:opacity-40"
+                className="surface-card px-2.5 py-1 disabled:opacity-40"
               >
                 Prev
               </button>
               <button
                 onClick={() => setQuery(query)}
                 disabled={page * pageSize >= filtered.length}
-                className="px-2.5 py-1 rounded border border-border disabled:opacity-40"
+                className="surface-card px-2.5 py-1 disabled:opacity-40"
               >
                 Next
               </button>
@@ -507,10 +507,10 @@ function UserManagementPanelBody({
       {/* Password / PIN reset modal */}
       {modal && modalTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl">
+          <div className="surface-card relative w-full max-w-md bg-bg-surface p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-action-primary flex items-center justify-center">
+                <div className="size-5 rounded-xl bg-blue-500/20 text-action-primary flex items-center justify-center">
                   <KeyRound className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary">
@@ -535,13 +535,13 @@ function UserManagementPanelBody({
             />
             {secretError && <p className="mt-2 text-xs text-action-danger">{secretError}</p>}
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={closeSecretModal} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition">
+              <button onClick={closeSecretModal} className="surface-card px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition">
                 Cancel
               </button>
               <button
                 onClick={submitSecret}
                 disabled={busy || !secretValue}
-                className="rounded-lg bg-action-primary hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-40"
+                className="surface-card bg-action-primary hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-40"
               >
                 {busy ? <Loader2 className="w-4 h-4 animate-spin inline" /> : "Confirm"}
               </button>
@@ -553,10 +553,10 @@ function UserManagementPanelBody({
       {/* Bulk import modal */}
       {bulkOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-auto">
-          <div className="relative w-full max-w-2xl bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl my-4">
+          <div className="surface-card relative w-full max-w-2xl bg-bg-surface p-6 my-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-action-primary flex items-center justify-center">
+                <div className="size-5 rounded-xl bg-blue-500/20 text-action-primary flex items-center justify-center">
                   <Upload className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary">Bulk import users</h3>
@@ -589,7 +589,7 @@ function UserManagementPanelBody({
               <button
                 onClick={validateBulk}
                 disabled={bulkValidating}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition disabled:opacity-40 mb-4"
+                className="surface-card inline-flex items-center gap-1.5 px-3 py-2 bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition disabled:opacity-40 mb-4"
               >
                 {bulkValidating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
                 Validate
@@ -598,15 +598,15 @@ function UserManagementPanelBody({
 
             {bulkSummary && (
               <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="rounded-lg bg-bg-elevated p-3 text-center">
+                <div className="surface-card bg-bg-elevated p-3 text-center">
                   <div className="text-xl font-bold text-text-primary">{bulkSummary.valid}</div>
                   <div className="text-xs text-text-muted">Valid</div>
                 </div>
-                <div className="rounded-lg bg-bg-elevated p-3 text-center">
+                <div className="surface-card bg-bg-elevated p-3 text-center">
                   <div className="text-xl font-bold text-action-danger">{bulkSummary.invalid}</div>
                   <div className="text-xs text-text-muted">Invalid</div>
                 </div>
-                <div className="rounded-lg bg-bg-elevated p-3 text-center">
+                <div className="surface-card bg-bg-elevated p-3 text-center">
                   <div className="text-xl font-bold text-text-primary">{bulkSummary.total}</div>
                   <div className="text-xs text-text-muted">Total</div>
                 </div>
@@ -614,7 +614,7 @@ function UserManagementPanelBody({
             )}
 
             {bulkInvalid.length > 0 && (
-              <div className="max-h-40 overflow-auto rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 mb-4 text-xs">
+              <div className="surface-card max-h-5 overflow-auto bg-rose-500/5 p-3 mb-4 text-xs">
                 <div className="font-semibold text-action-danger mb-2">Invalid rows</div>
                 {bulkInvalid.map((row, i) => (
                   <div key={i} className="mb-1.5">
@@ -626,25 +626,25 @@ function UserManagementPanelBody({
             )}
 
             {bulkResult && (
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-500/10 text-action-success text-sm mb-4">
+              <div className="surface-card flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 text-action-success text-sm mb-4">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 Imported {bulkResult.imported}, failed {bulkResult.failed}
               </div>
             )}
 
             {bulkError && (
-              <div className="px-4 py-2.5 rounded-lg bg-rose-500/10 text-action-danger text-sm mb-4">{bulkError}</div>
+              <div className="surface-card px-4 py-2.5 bg-rose-500/10 text-action-danger text-sm mb-4">{bulkError}</div>
             )}
 
             <div className="flex justify-end gap-3">
-              <button onClick={closeBulk} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition">
+              <button onClick={closeBulk} className="surface-card px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition">
                 Close
               </button>
               {bulkValid.length > 0 && !bulkResult && (
                 <button
                   onClick={() => setBulkCommitConfirm(true)}
                   disabled={bulkCommitting}
-                  className="rounded-lg bg-action-success hover:bg-action-success px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-40"
+                  className="surface-card bg-action-success hover:bg-action-success px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-40"
                 >
                   Commit {bulkValid.length}
                 </button>

@@ -95,7 +95,7 @@ function AdminSubjectsInner() {
 
       <WidgetBoundary title="Subject catalog">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-2">
+          <div className="surface-card p-4 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-action-primary" />
             <span className="text-sm font-semibold">{subjects.length} subjects</span>
             <div className="ml-auto relative">
@@ -104,7 +104,7 @@ function AdminSubjectsInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter…"
-                className="pl-8 pr-3 py-1.5 rounded-lg bg-bg-elevated border border-border text-xs w-40"
+                className="surface-card pl-8 pr-3 py-1.5 bg-bg-elevated text-xs w-40"
               />
             </div>
           </div>
@@ -122,10 +122,10 @@ function AdminSubjectsInner() {
                   {list.map((s) => (
                     <div
                       key={s.code}
-                      className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated/40 p-3"
+                      className="surface-card flex items-center gap-3 bg-bg-elevated/40 p-3"
                     >
                       <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        className="size-2 rounded-full shrink-0"
                         style={{ backgroundColor: s.color || "var(--action-primary)" }}
                       />
                       <div className="min-w-0 flex-1">

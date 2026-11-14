@@ -53,7 +53,7 @@ function Inner() {
           {list.map((n) => (
             <li
               key={n.id}
-              className="rounded-xl border border-border bg-bg-surface p-3"
+              className="surface-card bg-bg-surface p-3"
             >
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />

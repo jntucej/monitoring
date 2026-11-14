@@ -39,7 +39,7 @@ interface AttendanceResponse {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -47,7 +47,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -122,7 +122,7 @@ function MessMealAttendanceInner() {
 
       <WidgetBoundary title="Meal Attendance">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <Users className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">Meal Attendance</span>
@@ -137,21 +137,21 @@ function MessMealAttendanceInner() {
           ) : blocks.length > 0 ? (
             <div className="min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Declared Present</p>
                   <p className="mt-1 text-lg font-bold text-action-info">{d?.totals?.declared}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Confirmed Served</p>
                   <p className="mt-1 text-lg font-bold text-action-success">{d?.totals?.confirmed}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Veg / Non-Veg</p>
                   <p className="mt-1 text-lg font-bold text-white">
                     {d?.totals?.veg} / {d?.totals?.nonVeg}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Attendance Rate</p>
                   <p className={`mt-1 text-lg font-bold ${rateColor(d?.totals?.attendanceRate ?? 0)}`}>
                     {d?.totals?.attendanceRate}%
@@ -191,7 +191,7 @@ function MessMealAttendanceInner() {
                 </table>
               </div>
 
-              <div className="px-4 py-3 border-t border-border text-xs text-text-muted min-w-0">
+              <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
                 Attendance is computed from mess preferences (declared present) vs confirmed
                 servings recorded at the{" "}
                 <Link href="/mess/scan" className="text-action-success hover:underline">

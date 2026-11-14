@@ -65,14 +65,14 @@ function AdminParentsInner() {
 
       <WidgetBoundary title="Guardians">
         <div className="glass-card">
-          <div className="p-4 border-b border-border flex items-center gap-3">
+          <div className="surface-card p-4 flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search guardians by name / email / phone…"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-bg-elevated border border-border text-sm text-text-primary focus:outline-none focus:border-action-primary"
+                className="surface-card w-full pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
               />
             </div>
             <button onClick={load} className="text-text-muted hover:text-text-primary"><RefreshCw className="w-4 h-4" /></button>
@@ -88,14 +88,14 @@ function AdminParentsInner() {
             <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
+                  <div className="size-6 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <Users className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-semibold text-text-primary">{r.name}</p>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted uppercase tracking-wide">{r.status}</span>
-                      {r.uniqueId && <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted font-mono">{r.uniqueId}</span>}
+                      <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated text-text-muted uppercase tracking-wide">{r.status}</span>
+                      {r.uniqueId && <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated text-text-muted font-mono">{r.uniqueId}</span>}
                     </div>
                     <p className="text-xs text-text-muted font-mono mt-0.5">{r.email}{r.phone ? ` · ${r.phone}` : ""}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -103,7 +103,7 @@ function AdminParentsInner() {
                         <span className="text-xs text-text-muted">No linked children</span>
                       )}
                       {r.children.map((c) => (
-                        <span key={c.id} className="px-2 py-0.5 rounded-lg bg-action-primary/10 border border-action-primary/20 text-xs text-action-primary">
+                        <span key={c.id} className="surface-card px-2 py-0.5 bg-action-primary/10 text-xs text-action-primary">
                           {c.name} {c.roll ? `· ${c.roll}` : ""}
                         </span>
                       ))}

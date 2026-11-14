@@ -87,15 +87,15 @@ const api = useApi();
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+        <div className="surface-card p-2.5 bg-[var(--bg-surface-elevated)]">
           <span className="text-text-secondary">Platform Target</span>
           <div className="font-bold text-sm uppercase">{config.platform}</div>
         </div>
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+        <div className="surface-card p-2.5 bg-[var(--bg-surface-elevated)]">
           <span className="text-text-secondary">Sync Schedule</span>
           <div className="font-bold text-sm">{config.sync_schedule}</div>
         </div>
-        <div className="p-2.5 rounded bg-[var(--bg-surface-elevated)] border border-border">
+        <div className="surface-card p-2.5 bg-[var(--bg-surface-elevated)]">
           <span className="text-text-secondary">Last Synced</span>
           <div className="font-bold text-sm">{new Date(config.last_synced_at).toLocaleTimeString()}</div>
         </div>

@@ -29,7 +29,7 @@ export function PrincipalDigest() {
 
   return (
     <WidgetBoundary title="Weekly digest">
-      <div className="rounded-2xl border border-border bg-bg-surface p-5">
+      <div className="surface-card bg-bg-surface p-5">
         <p className="text-xs uppercase tracking-wide text-text-muted">
           Your week
         </p>
@@ -47,7 +47,7 @@ export function PrincipalDigest() {
           ))}
         </div>
         {d.insight && (
-          <p className="mt-4 border-t border-border pt-3 text-xs italic text-text-muted">
+          <p className="surface-card mt-4 pt-3 text-xs italic text-text-muted">
             {d.insight}
           </p>
         )}

@@ -148,7 +148,7 @@ function AdminStudentDetail() {
                       </span>
                       <span className="text-text-muted">{h.gate ?? "—"}</span>
                       <span className="ml-auto text-xs text-text-muted flex items-center gap-1.5">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="size-3.5" />
                         {h.timestamp ? new Date(h.timestamp).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—"}
                       </span>
                     </li>
@@ -160,7 +160,7 @@ function AdminStudentDetail() {
             <div className="flex">
               <Link
                 href="/admin/students"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-text-secondary hover:text-text-primary border border-border rounded-lg px-3 py-2">
+                className="surface-card inline-flex items-center gap-2 text-xs font-semibold text-text-secondary hover:text-text-primary px-3 py-2">
                 <ArrowLeft className="w-3.5 h-3.5" /> Back to roster
               </Link>
             </div>

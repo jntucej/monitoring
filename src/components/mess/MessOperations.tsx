@@ -66,7 +66,7 @@ export function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-bg-elevated p-4 sm:p-5 space-y-3">
+    <div className="surface-card bg-bg-elevated p-4 sm:p-5 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xs font-bold uppercase tracking-wider text-white">{title}</h2>
@@ -195,15 +195,15 @@ export function MenuItemsTab() {
   return (
     <div className="space-y-4">
       {itemsRes.error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-xs">
+        <div className="surface-card flex items-center gap-2 p-3 bg-rose-500/10 text-action-danger text-xs">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{itemsRes.error}</span>
           <button
           type="button"
             onClick={() => void itemsRes.refresh()}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1 px-2 py-1 bg-rose-500/20 hover:bg-rose-500/30"
           >
-            <RefreshCw className="w-3 h-3" /> Retry
+            <RefreshCw className="size-3.5" /> Retry
           </button>
         </div>
       )}
@@ -215,7 +215,7 @@ export function MenuItemsTab() {
           <button
           type="button"
             onClick={startNew}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold transition"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-2 bg-action-success hover:bg-action-success text-white text-xs font-bold transition"
           >
             <Plus className="w-3.5 h-3.5" /> Add item
           </button>
@@ -244,15 +244,15 @@ export function MenuItemsTab() {
                   <tr key={it.id} className="hover:bg-bg-elevated/30 transition">
                     <td className="py-2.5 pr-2 text-text-muted tabular-nums">{it.sortOrder}</td>
                     <td className="py-2.5 px-2">
-                      <span className="font-mono text-xs text-text-secondary bg-bg-elevated/60 border border-border rounded px-1.5 py-0.5">
+                      <span className="surface-card font-mono text-xs text-text-secondary bg-bg-elevated/60 px-1.5 py-0.5">
                         {it.code}
                       </span>
                     </td>
                     <td className="py-2.5 px-2 font-semibold text-white">{it.label}</td>
                     <td className="py-2.5 px-2">
                       {it.isPrimary ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-action-success text-xs font-bold border border-emerald-500/20">
-                          <Check className="w-3 h-3" /> Primary
+                        <span className="surface-card inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-action-success text-xs font-bold">
+                          <Check className="size-3.5" /> Primary
                         </span>
                       ) : (
                         <span className="text-xs text-text-muted">Sub-item</span>
@@ -263,18 +263,18 @@ export function MenuItemsTab() {
                         <button
                         type="button"
                           onClick={() => startEdit(it)}
-                          className="w-7 h-7 rounded-lg bg-bg-elevated hover:bg-bg-elevated border border-border text-text-muted hover:text-white flex items-center justify-center transition"
+                          className="size-6 bg-bg-elevated hover:bg-bg-elevated border border-border text-text-muted hover:text-white flex items-center justify-center transition"
                           aria-label={`Edit ${it.label}`}
                         >
-                          <Pencil className="w-3 h-3" />
+                          <Pencil className="size-3.5" />
                         </button>
                         <button
                         type="button"
                           onClick={() => setDeleteId(it.id)}
-                          className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-action-danger flex items-center justify-center transition"
+                          className="size-6 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-action-danger flex items-center justify-center transition"
                           aria-label={`Delete ${it.label}`}
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="size-3.5" />
                         </button>
                       </div>
                     </td>
@@ -303,7 +303,7 @@ export function MenuItemsTab() {
                 value={editing.code}
                 onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase() })}
                 placeholder="RICE"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:"
               />
             </label>
             <label className="block">
@@ -312,7 +312,7 @@ export function MenuItemsTab() {
                 value={editing.label}
                 onChange={(e) => setEditing({ ...editing, label: e.target.value })}
                 placeholder="Rice"
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white placeholder-slate-600 focus:outline-none focus:"
               />
             </label>
             <label className="block">
@@ -321,7 +321,7 @@ export function MenuItemsTab() {
                 type="number"
                 value={editing.sortOrder}
                 onChange={(e) => setEditing({ ...editing, sortOrder: Number(e.target.value) || 0 })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
               />
             </label>
             <div>
@@ -330,22 +330,14 @@ export function MenuItemsTab() {
                 <button
                 type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: true })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
-                    editing.isPrimary
-                      ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
-                      : "bg-bg-surface border-border text-text-muted hover:border-emerald-500/30"
-                  }`}
+                  className={` flex-1 px-3 py-2 rounded-xl text-xs font-bold transition "text-action-success" "text-text-muted "text-action-success" "text-text-muted" `}
                 >
                   Primary
                 </button>
                 <button
                 type="button"
                   onClick={() => setEditing({ ...editing, isPrimary: false })}
-                  className={`flex-1 px-3 py-2 rounded-xl text-xs font-bold border transition ${
-                    !editing.isPrimary
-                      ? "bg-bg-elevated/15 border-border/40 text-text-secondary"
-                      : "bg-bg-surface border-border text-text-muted hover:border-border/30"
-                  }`}
+                  className={` flex-1 px-3 py-2 rounded-xl text-xs font-bold transition "text-text-secondary" "text-text-muted "text-text-secondary" "text-text-muted" `}
                 >
                   Sub-item
                 </button>
@@ -356,7 +348,7 @@ export function MenuItemsTab() {
           type="button"
             onClick={() => void saveItem()}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
+            className="surface-card inline-flex items-center gap-1.5 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             {editing.id ? "Update item" : "Add item"}
@@ -555,15 +547,15 @@ export function MealDaysTab() {
   return (
     <div className="space-y-4">
       {daysRes.error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-xs">
+        <div className="surface-card flex items-center gap-2 p-3 bg-rose-500/10 text-action-danger text-xs">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{daysRes.error}</span>
           <button
           type="button"
             onClick={() => void daysRes.refresh()}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1 px-2 py-1 bg-rose-500/20 hover:bg-rose-500/30"
           >
-            <RefreshCw className="w-3 h-3" /> Retry
+            <RefreshCw className="size-3.5" /> Retry
           </button>
         </div>
       )}
@@ -579,7 +571,7 @@ export function MealDaysTab() {
               type="date"
               value={draft.mealDate}
               onChange={(e) => setDraft({ ...draft, mealDate: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+              className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
             />
           </label>
           <label className="block">
@@ -587,7 +579,7 @@ export function MealDaysTab() {
             <select
               value={draft.dayType}
               onChange={(e) => setDraft({ ...draft, dayType: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+              className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
             >
               {DAY_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -602,7 +594,7 @@ export function MealDaysTab() {
               type="time"
               value={draft.windowOpens}
               onChange={(e) => setDraft({ ...draft, windowOpens: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+              className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
             />
           </label>
           <label className="block">
@@ -611,7 +603,7 @@ export function MealDaysTab() {
               type="time"
               value={draft.windowCloses}
               onChange={(e) => setDraft({ ...draft, windowCloses: e.target.value })}
-              className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+              className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
             />
           </label>
         </div>
@@ -632,18 +624,14 @@ export function MealDaysTab() {
                     type="button"
                     key={it.id}
                     onClick={() => toggleItem(it.id)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition ${
-                      on
-                        ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
-                        : "bg-bg-surface border-border text-text-muted hover:border-emerald-500/30"
-                    }`}
+                    className={` inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition "text-action-success" "text-text-muted "text-action-success" "text-text-muted" `}
                   >
-                    {on && <Check className="w-3 h-3" />}
+                    {on && <Check className="size-3.5" />}
                     {it.isPrimary ? (
                       it.label === "Veg" || it.label.toLowerCase() === "veg" ? (
-                        <Leaf className="w-3 h-3" />
+                        <Leaf className="size-3.5" />
                       ) : (
-                        <Beef className="w-3 h-3" />
+                        <Beef className="size-3.5" />
                       )
                     ) : null}
                     {it.label}
@@ -658,7 +646,7 @@ export function MealDaysTab() {
         type="button"
           onClick={() => void createDay()}
           disabled={creating}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
+          className="surface-card inline-flex items-center gap-1.5 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
         >
           {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
           Create meal day
@@ -711,7 +699,7 @@ export function MealDaysTab() {
                           return (
                             <span
                               key={iid}
-                              className="px-1.5 py-0.5 rounded bg-bg-elevated/60 border border-border text-xs text-text-secondary"
+                              className="surface-card px-1.5 py-0.5 bg-bg-elevated/60 text-xs text-text-secondary"
                             >
                               {it?.label ?? iid.slice(0, 6)}
                             </span>
@@ -725,18 +713,18 @@ export function MealDaysTab() {
                         <button
                         type="button"
                           onClick={() => startEditDay(d)}
-                          className="w-7 h-7 rounded-lg bg-bg-elevated hover:bg-bg-elevated border border-border text-text-muted hover:text-white flex items-center justify-center transition"
+                          className="size-6 bg-bg-elevated hover:bg-bg-elevated border border-border text-text-muted hover:text-white flex items-center justify-center transition"
                           aria-label="Edit"
                         >
-                          <Pencil className="w-3 h-3" />
+                          <Pencil className="size-3.5" />
                         </button>
                         <button
                         type="button"
                           onClick={() => setCancelDayId(d.id)}
-                          className="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-action-danger flex items-center justify-center transition"
+                          className="size-6 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-action-danger flex items-center justify-center transition"
                           aria-label="Cancel day"
                         >
-                          <Ban className="w-3 h-3" />
+                          <Ban className="size-3.5" />
                         </button>
                       </div>
                     </td>
@@ -765,7 +753,7 @@ export function MealDaysTab() {
                 type="date"
                 value={editingDraft.mealDate}
                 onChange={(e) => setEditingDraft({ ...editingDraft, mealDate: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
               />
             </label>
             <label className="block">
@@ -773,7 +761,7 @@ export function MealDaysTab() {
               <select
                 value={editingDraft.dayType}
                 onChange={(e) => setEditingDraft({ ...editingDraft, dayType: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
               >
                 {DAY_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -788,7 +776,7 @@ export function MealDaysTab() {
                 type="time"
                 value={editingDraft.windowOpens}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowOpens: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
               />
             </label>
             <label className="block">
@@ -797,7 +785,7 @@ export function MealDaysTab() {
                 type="time"
                 value={editingDraft.windowCloses}
                 onChange={(e) => setEditingDraft({ ...editingDraft, windowCloses: e.target.value })}
-                className="mt-1 w-full px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white focus:outline-none focus:borderaction-success"
+                className="surface-card mt-1 w-full px-3 py-2 bg-bg-surface text-sm text-white focus:outline-none focus:"
               />
             </label>
           </div>
@@ -814,13 +802,9 @@ export function MealDaysTab() {
                         key={it.id}
                         type="button"
                         onClick={() => toggleEditItem(it.id)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition ${
-                        on
-                          ? "bg-emerald-500/15 border-emerald-500/40 text-action-success"
-                          : "bg-bg-surface border-border text-text-muted hover:border-emerald-500/30"
-                      }`}
+                      className={` inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition "text-action-success" "text-text-muted "text-action-success" "text-text-muted" `}
                     >
-                      {on && <Check className="w-3 h-3" />}
+                      {on && <Check className="size-3.5" />}
                       {it.label}
                     </button>
                   );
@@ -832,7 +816,7 @@ export function MealDaysTab() {
           type="button"
             onClick={() => void saveEditDay()}
             disabled={creating}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
+            className="surface-card inline-flex items-center gap-1.5 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition"
           >
             {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             Save changes
@@ -967,15 +951,15 @@ export function TodayTab() {
   return (
     <div className="space-y-4">
       {(menuRes.error || mealCountsRes.error || consumptionRes.error) && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-xs">
+        <div className="surface-card flex items-center gap-2 p-3 bg-rose-500/10 text-action-danger text-xs">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">{[menuRes.error, mealCountsRes.error, consumptionRes.error].filter(Boolean).join(" · ")}</span>
           <button
             type="button"
             onClick={() => { void menuRes.refresh(); void mealCountsRes.refresh(); void consumptionRes.refresh(); }}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/20 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1 px-2 py-1 bg-rose-500/20 hover:bg-rose-500/30"
           >
-            <RefreshCw className="w-3 h-3" /> Retry
+            <RefreshCw className="size-3.5" /> Retry
           </button>
         </div>
       )}
@@ -989,11 +973,11 @@ export function TodayTab() {
           ) : (
             <ul className="space-y-1.5">
               {menu.map((it) => (
-                <li key={it.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-bg-surface/60 border border-border">
+                <li key={it.id} className="surface-card flex items-center justify-between px-3 py-2 bg-bg-surface/60">
                   <div className="flex items-center gap-2 min-w-0">
                     {it.code === "VEG" ? <Leaf className="w-3.5 h-3.5 text-action-success shrink-0" /> : <Beef className="w-3.5 h-3.5 text-action-danger shrink-0" />}
                     <span className="font-semibold text-white text-xs truncate">{it.label}</span>
-                    <span className="font-mono text-xs text-text-muted bg-bg-elevated/60 border border-border rounded px-1.5 py-0.5">{it.code}</span>
+                    <span className="surface-card font-mono text-xs text-text-muted bg-bg-elevated/60 px-1.5 py-0.5">{it.code}</span>
                   </div>
                   <span className={`text-xs font-bold uppercase ${it.isAvailable ? "text-action-success" : "text-text-muted line-through"}`}>
                     {it.isAvailable ? "Available" : "Unavailable"}
@@ -1007,17 +991,17 @@ export function TodayTab() {
         <SectionCard title="Token Status" subtitle="Issued · verified · remaining">
           <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <Users className="w-4 h-4 text-action-info mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{issued}</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Issued</p>
               </div>
-              <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <Check className="w-4 h-4 text-action-success mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{confirmed}</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Verified</p>
               </div>
-              <div className="rounded-xl bg-bg-surface/60 border border-border p-3 text-center">
+              <div className="surface-card bg-bg-surface/60 p-3 text-center">
                 <Ticket className="w-4 h-4 text-action-warning mx-auto mb-1" />
                 <p className="text-lg font-black text-white tabular-nums">{remaining}</p>
                 <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Remaining</p>
@@ -1028,9 +1012,9 @@ export function TodayTab() {
                 <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Final headcount</span>
                 <div className="mt-1 flex gap-2">
                   <input type="number" min={0} value={headcount} onChange={(e) => setHeadcount(e.target.value)} placeholder={String(confirmed)}
-                    className="flex-1 px-3 py-2 rounded-xl bg-bg-surface border border-border text-sm text-white placeholder-slate-600 focus:outline-none focus:borderaction-success" />
+                    className="surface-card flex-1 px-3 py-2 bg-bg-surface text-sm text-white placeholder-slate-600 focus:outline-none focus:" />
                   <button type="button" onClick={() => setConfirmFinalize(true)} disabled={!messDayId || finalizing}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition">
+                    className="surface-card inline-flex items-center gap-1.5 px-4 py-2 bg-action-success hover:bg-action-success disabled:opacity-40 text-white text-xs font-bold transition">
                     {finalizing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />} Finalize Day
                   </button>
                 </div>
@@ -1038,7 +1022,7 @@ export function TodayTab() {
             </div>
             <div>
               <button type="button" onClick={() => setConfirmRevoke(true)} disabled={!messDayId || revoking}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600/80 hover:bg-action-danger disabled:opacity-40 text-white text-xs font-bold transition w-full">
+                className="surface-card inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600/80 hover:bg-action-danger disabled:opacity-40 text-white text-xs font-bold transition w-full">
                 {revoking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />} Revoke All Tokens
               </button>
             </div>
@@ -1161,7 +1145,7 @@ export function AnalyticsTab() {
   return (
     <div className="space-y-4">
       {daysRes.error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 text-action-danger text-xs">
+        <div className="surface-card flex items-center gap-2 p-3 bg-rose-500/10 text-action-danger text-xs">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="flex-1">Could not load meal days: {daysRes.error}</span>
         </div>
@@ -1175,7 +1159,7 @@ export function AnalyticsTab() {
           type="button"
             onClick={() => void loadAnalytics()}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-bg-elevated hover:bg-bg-elevated border border-border text-text-secondary text-xs font-bold transition disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-2 bg-bg-elevated hover:bg-bg-elevated text-text-secondary text-xs font-bold transition disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             Reload

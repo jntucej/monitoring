@@ -88,7 +88,7 @@ export function StudentContextPanel({
 
   if (loading && !student) {
     return (
-      <aside className="min-w-0 w-full border-l border-border bg-bg-surface p-4">
+      <aside className="surface-card min-w-0 w-full bg-bg-surface p-4">
         <div className="flex items-center gap-2 py-6 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading student…
         </div>
@@ -97,7 +97,7 @@ export function StudentContextPanel({
   }
 
   return (
-    <aside className="min-w-0 w-full border-l border-border bg-bg-surface p-4 md:sticky md:top-4 md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
+    <aside className="surface-card min-w-0 w-full bg-bg-surface p-4 md:sticky md:top-4 md:max-h-[calc(100dvh-6rem)] md:overflow-y-auto">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="min-w-0">
@@ -112,7 +112,7 @@ export function StudentContextPanel({
           type="button"
           onClick={onClose}
           aria-label="Close context panel"
-          className="rounded p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated"
+          className="surface-card p-1 text-text-muted hover:text-text-primary hover:bg-bg-elevated"
         >
           <X className="w-4 h-4" />
         </button>
@@ -120,13 +120,13 @@ export function StudentContextPanel({
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-3">
+        <div className="surface-card bg-emerald-400/10 p-3">
           <div className="flex items-center gap-1.5 text-xs text-action-success">
             <Clock className="w-3.5 h-3.5" /> Present
           </div>
           <p className="mt-1 text-xl font-bold text-action-success tabular-nums">{present}</p>
         </div>
-        <div className="rounded-lg border border-rose-400/30 bg-rose-400/10 p-3">
+        <div className="surface-card bg-rose-400/10 p-3">
           <div className="flex items-center gap-1.5 text-xs text-action-danger">
             <CalendarDays className="w-3.5 h-3.5" /> Absent
           </div>
@@ -153,7 +153,7 @@ export function StudentContextPanel({
             {rows.map((r, i) => (
               <li
                 key={r.id ?? `${r.date}-${i}`}
-                className="flex items-center justify-between gap-2 rounded-md border border-border bg-bg-elevated px-3 py-2 text-xs"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-3 py-2 text-xs"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <User className="w-3.5 h-3.5 text-text-muted shrink-0" />

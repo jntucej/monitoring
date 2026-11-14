@@ -50,14 +50,14 @@ export function SupervisorStatusBar({ counts, lastScan, refreshing = false }: Su
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Supervisor status bar"
     >
       {/* Left: gates · escalations · incidents · shift */}
       <div className="flex items-center gap-4 min-w-0">
         {/* Live indicator */}
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${refreshing ? "bg-action-warning animate-pulse" : "bg-action-success"}`} />
+          <span className={`size-2 rounded-full shrink-0 ${refreshing ? "bg-action-warning animate-pulse" : "bg-action-success"}`} />
           <span className="text-text-muted">
             {counts?.gatesOnline ?? 0} gates online
           </span>

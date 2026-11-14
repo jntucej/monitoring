@@ -96,7 +96,7 @@ export function DelegationForm({
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="e.g. Exam delegation"
-            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
+            className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div>
@@ -107,7 +107,7 @@ export function DelegationForm({
             id="dlg-workflow"
             value={form.workflowType}
             onChange={(e) => setForm((f) => ({ ...f, workflowType: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
+            className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           >
             {["hostel", "exam", "gate", "memo", "staff_leave"].map((w) => (
               <option key={w} value={w}>{w.replace(/_/g, " ")}</option>
@@ -122,7 +122,7 @@ export function DelegationForm({
             id="dlg-role"
             value={form.delegateRole}
             onChange={(e) => setForm((f) => ({ ...f, delegateRole: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
+            className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           >
             {["vice_principal", "hod", "supervisor", "oie", "hostel_manager"].map((r) => (
               <option key={r} value={r}>{r.replace(/_/g, " ")}</option>
@@ -138,7 +138,7 @@ export function DelegationForm({
             type="number"
             value={form.priority}
             onChange={(e) => setForm((f) => ({ ...f, priority: parseInt(e.target.value) || 0 }))}
-            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
+            className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div className="sm:col-span-2 lg:col-span-2">
@@ -151,14 +151,14 @@ export function DelegationForm({
             value={form.reason}
             onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
             placeholder="Why is this delegation needed?"
-            className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary"
+            className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary"
           />
         </div>
         <div className="flex items-end">
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            className="surface-card inline-flex items-center gap-2 bg-action-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? "Saving…" : <><Plus className="w-4 h-4" /> Create Rule</>}
           </button>
@@ -200,7 +200,7 @@ export function DelegationCard({ rule }: { rule: DelegationRule }) {
  */
 export function DelegationConflictNotice({ ruleName }: { ruleName: string }) {
   return (
-    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-action-warning text-xs flex items-center gap-2">
+    <div className="surface-card p-3 bg-amber-500/10 text-action-warning text-xs flex items-center gap-2">
       <AlertTriangle className="w-4 h-4 shrink-0" />
       <span>
         A delegation rule already exists for <strong>{ruleName}</strong>. Consider whether this new rule should override or replace it.
@@ -242,7 +242,7 @@ export function DelegationHistory() {
 
   return (
     <PrincipalWidgetBoundary title="Delegation History">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         {loading ? (
           <div className="space-y-2">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-8 w-full" />)}

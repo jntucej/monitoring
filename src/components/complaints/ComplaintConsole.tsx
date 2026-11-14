@@ -55,14 +55,14 @@ export function ComplaintConsole({
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">{title}</h1>
         {role === "student" && (
-          <Link href="/student/complaints/new" className="px-4 py-2 rounded bg-bg-surface text-white text-sm">
+          <Link href="/student/complaints/new" className="surface-card px-4 py-2 bg-bg-surface text-white text-sm">
             Raise complaint
           </Link>
         )}
       </div>
 
       <div className="flex gap-3">
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border rounded p-2 text-sm">
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="surface-card p-2 text-sm">
           <option value="">All statuses</option>
           <option value="submitted">Submitted</option>
           <option value="acknowledged">Acknowledged</option>
@@ -71,7 +71,7 @@ export function ComplaintConsole({
           <option value="closed">Closed</option>
         </select>
         {role !== "student" && (
-          <select value={mine} onChange={(e) => setMine(e.target.value)} className="border rounded p-2 text-sm">
+          <select value={mine} onChange={(e) => setMine(e.target.value)} className="surface-card p-2 text-sm">
             <option value="false">Queue ({role})</option>
             <option value="true">My filings</option>
           </select>
@@ -95,7 +95,7 @@ export function ComplaintConsole({
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium uppercase bg-bg-elevated text-text-secondary">
+                  <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium uppercase bg-bg-elevated text-text-secondary">
                     {c.status}
                   </span>
                   <p className="text-xs text-text-muted mt-1">{new Date(c.createdAt).toLocaleDateString()}</p>

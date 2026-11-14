@@ -139,15 +139,15 @@ function KpiCard({
   loading?: boolean;
 }) {
   const tints: Record<string, string> = {
-    emerald: "from-emerald-500/20 to-emerald-500/0 text-action-success",
-    sky:     "from-sky-500/20 to-sky-500/0 text-action-info",
-    amber:   "from-amber-500/20 to-amber-500/0 text-action-warning",
-    rose:    "from-rose-500/20 to-rose-500/0 text-action-danger",
-    violet:  "from-violet-500/20 to-violet-500/0 text-unit-c",
+    emerald: "bg-action-success/10 text-action-success",
+    sky:     "bg-action-info/10 text-action-info",
+    amber:   "bg-action-warning/10 text-action-warning",
+    rose:    "bg-action-danger/10 text-action-danger",
+    violet:  "bg-unit-c/10 text-unit-c",
   };
   return (
     <Card className="relative overflow-hidden">
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tints[accent]} opacity-40`} />
+      <div className={`pointer-events-none absolute inset-0 ${tints[accent]} opacity-40`} />
       <CardContent className="relative flex items-start justify-between gap-3 p-4">
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
@@ -171,7 +171,7 @@ function StatusPill({ status }: { status: ScheduledJobStatus }) {
   const Icon = meta.icon;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-medium ${meta.color}`}>
-      <Icon className={`h-3 w-3 ${status === "RUNNING" ? "animate-spin" : ""}`} />
+      <Icon className={`size-3.5 ${status === "RUNNING" ? "animate-spin" : ""}`} />
       {meta.label}
     </span>
   );
@@ -182,7 +182,7 @@ function CategoryPill({ category }: { category: ScheduledJobCategory }) {
   const Icon = meta.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-xs ${meta.tint}`}>
-      <Icon className="h-3 w-3" />
+      <Icon className="size-3.5" />
       {meta.label}
     </span>
   );
@@ -215,7 +215,7 @@ function ScheduleEditor({
           </p>
         </div>
 
-        <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+        <div className="surface-card bg-white/5 p-3">
           <p className="text-xs text-text-muted">Preview</p>
           <p className="mt-0.5 text-sm font-medium text-text-primary">{describeCron(expr)}</p>
         </div>
@@ -227,7 +227,7 @@ function ScheduleEditor({
               <button
                 key={p.value}
                 onClick={() => setExpr(p.value)}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-text-secondary transition hover:border-emerald-400/40 hover:text-action-success"
+                className="surface-card bg-white/5 px-3 py-1 text-xs text-text-secondary transition hover: hover:text-action-success"
               >
                 {p.label}
               </button>
@@ -279,11 +279,11 @@ function RunsTimeline({ runs, loading }: { runs: Run[]; loading: boolean }) {
                 <span className="capitalize text-text-muted">{r.triggered_by}</span>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
-                <span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" />{fmtDuration(r.duration_ms)}</span>
-                <span className="inline-flex items-center gap-1"><Activity className="h-3 w-3" />{fmtNumber(r.records_affected)} records</span>
+                <span className="inline-flex items-center gap-1"><Timer className="size-3.5" />{fmtDuration(r.duration_ms)}</span>
+                <span className="inline-flex items-center gap-1"><Activity className="size-3.5" />{fmtNumber(r.records_affected)} records</span>
               </div>
               {r.error_message && (
-                <p className="mt-1.5 rounded border border-rose-500/20 bg-rose-500/5 px-2 py-1 text-xs text-action-danger">
+                <p className="surface-card mt-1.5 bg-rose-500/5 px-2 py-1 text-xs text-action-danger">
                   {r.error_message}
                 </p>
               )}
@@ -509,7 +509,7 @@ export function ScheduledJobsPanel() {
   return (
     <div className="space-y-6">
       {!loading && rows.length === 0 && (
-        <div className="flex items-start gap-3 rounded-xl border border-border/20 bg-bg-elevated/5 p-4 text-sm">
+        <div className="surface-card flex items-start gap-3 bg-bg-elevated/5 p-4 text-sm">
           <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-muted" />
           <div className="text-text-muted/90">
             <p className="font-medium">No scheduled jobs configured</p>
@@ -635,7 +635,7 @@ export function ScheduledJobsPanel() {
                     <div className="flex flex-wrap items-start gap-3 p-4">
                       <button
                         onClick={() => toggleExpanded(row.id)}
-                        className="mt-1 rounded-md border border-white/10 bg-white/5 p-1 text-text-muted transition hover:text-text-primary"
+                        className="surface-card mt-1 bg-white/5 p-1 text-text-muted transition hover:text-text-primary"
                       >
                         {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       </button>
@@ -652,7 +652,7 @@ export function ScheduledJobsPanel() {
                         <p className="mt-1 line-clamp-2 text-xs text-text-muted">{row.description}</p>
                         <div className="mt-1.5 flex flex-wrap items-center gap-1">
                           {row.tags.map((t) => (
-                            <span key={t} className="rounded bg-white/5 px-1.5 py-0.5 text-xs text-text-muted">
+                            <span key={t} className="surface-card bg-white/5 px-1.5 py-0.5 text-xs text-text-muted">
                               #{t}
                             </span>
                           ))}
@@ -661,7 +661,7 @@ export function ScheduledJobsPanel() {
 
                       <div className="w-[210px]">
                         <p className="flex items-center gap-1 text-xs uppercase tracking-wider text-text-muted">
-                          <Clock className="h-3 w-3" /> Schedule
+                          <Clock className="size-3.5" /> Schedule
                         </p>
                         <p className="mt-0.5 text-sm font-medium text-text-primary">
                           {describeCron(row.cron_expression)}

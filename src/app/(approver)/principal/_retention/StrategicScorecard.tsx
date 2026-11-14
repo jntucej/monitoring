@@ -24,7 +24,7 @@ export function StrategicScorecard({
   const unblocked = usePrincipalRetention((s) => s.unblockedToday);
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-text-primary">
           Your impact

@@ -14,7 +14,7 @@ export interface UpcomingItem {
 export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
   if (items.length === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <section className="surface-card bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
           <Clock className="size-4 text-text-muted" />
           <h2 className="text-sm font-semibold text-text-primary">Due soon</h2>
@@ -27,7 +27,7 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center gap-2">
         <Clock className="size-4 text-action-warning" />
         <h2 className="text-sm font-semibold text-text-primary">
@@ -40,7 +40,7 @@ export function UpcomingPreview({ items }: { items: UpcomingItem[] }) {
           <li key={item.ticket}>
             <Link
               href={`/principal/approvals?ticket=${encodeURIComponent(item.ticket)}`}
-              className="flex min-h11 items-center gap-2 rounded-lg p-2 text-xs transition hover:bg-bg-elevated"
+              className="surface-card flex min-h11 items-center gap-2 p-2 text-xs transition hover:bg-bg-elevated"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-text-primary">{item.subject}</p>

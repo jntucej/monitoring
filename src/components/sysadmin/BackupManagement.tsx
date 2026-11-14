@@ -90,8 +90,8 @@ const api = useApi();
   };
 
   return (
-    <div className="bg-bg-surface border border-border rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3 border-b border-border pb-3">
+    <div className="surface-card bg-bg-surface p-5 space-y-4">
+      <div className="surface-card flex items-center justify-between flex-wrap gap-3 pb-3">
         <div>
           <h3 className="font-semibold text-white flex items-center gap-2">
             <Database className="w-5 h-5 text-action-info" /> Database Backup & Restore
@@ -99,14 +99,14 @@ const api = useApi();
           <p className="text-xs text-text-muted">Create snapshots or restore database state.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleVerifyBackup} disabled={verifying || busy} className="px-3 py-1.5 text-xs font-semibold bg-emerald-700 hover:bg-action-success text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+          <button onClick={handleVerifyBackup} disabled={verifying || busy} className="surface-card px-3 py-1.5 text-xs font-semibold bg-emerald-700 hover:bg-action-success text-white flex items-center gap-1.5 disabled:opacity-50">
             {verifying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify Integrity
           </button>
-          <label className="cursor-pointer px-3 py-1.5 text-xs font-semibold bg-bg-elevated border border-border rounded-lg hover:bg-bg-base flex items-center gap-1.5">
+          <label className="surface-card cursor-pointer px-3 py-1.5 text-xs font-semibold bg-bg-elevated hover:bg-bg-base flex items-center gap-1.5">
             <Upload className="w-3.5 h-3.5 text-action-warning" /> Restore Snapshot
             <input type="file" accept=".json" onChange={handleFileRestore} className="hidden" disabled={busy} />
           </label>
-          <button onClick={handleCreateBackup} disabled={busy} className="px-3 py-1.5 text-xs font-semibold bg-sky-600 hover:bg-action-info text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50">
+          <button onClick={handleCreateBackup} disabled={busy} className="surface-card px-3 py-1.5 text-xs font-semibold bg-sky-600 hover:bg-action-info text-white flex items-center gap-1.5 disabled:opacity-50">
             {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Backup Now
           </button>
         </div>
@@ -137,14 +137,14 @@ const api = useApi();
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-xs uppercase bg-emerald-500/10 text-action-success font-bold border border-emerald-500/20">{b.status}</span>
+                  <span className="surface-card px-2 py-0.5 text-xs uppercase bg-emerald-500/10 text-action-success font-bold">{b.status}</span>
                 </div>
               </div>
             ))}
           </div>
 
           {verifications.length > 0 && (
-            <div className="pt-2 border-t border-border">
+            <div className="surface-card pt-2">
               <h4 className="text-xs font-semibold text-text-muted uppercase mb-2">Recent Verification History</h4>
               <div className="divide-y divide-border border border-border rounded-lg overflow-hidden text-xs">
                 {verifications.slice(0, 3).map((v) => (
@@ -153,7 +153,7 @@ const api = useApi();
                       <span className="font-semibold text-action-success font-mono">Verified: {v.recordsVerified || v.records_verified || 0} records</span>
                       <p className="text-xs text-text-muted">{new Date(v.verifiedAt || v.created_at || Date.now()).toLocaleString("en-IN")}</p>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-xs uppercase bg-emerald-500/20 text-action-success font-bold">{v.status || "PASSED"}</span>
+                    <span className="surface-card px-2 py-0.5 text-xs uppercase bg-emerald-500/20 text-action-success font-bold">{v.status || "PASSED"}</span>
                   </div>
                 ))}
               </div>

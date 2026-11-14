@@ -109,7 +109,7 @@ export function UniversalSupportForm({
   return (
     <form
       onSubmit={submit}
-      className="space-y-3 rounded-xl border border-border bg-bg-surface p-4"
+      className="surface-card space-y-3 bg-bg-surface p-4"
     >
       <h2 className="text-sm font-semibold text-text-primary">Create Support Request</h2>
 
@@ -191,7 +191,7 @@ export function UniversalSupportForm({
       <button
         type="submit"
         disabled={busy}
-        className="flex items-center gap-2 rounded-md bg-action-primary px-3 py-2 text-sm text-white disabled:opacity-50"
+        className="surface-card flex items-center gap-2 bg-action-primary px-3 py-2 text-sm text-white disabled:opacity-50"
       >
         {busy ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

@@ -66,7 +66,7 @@ export function ChartTypeSwitcher({
           value={value}
           onChange={(e) => onChange(e.target.value as ChartType)}
           aria-label="Chart type"
-          className="appearance-none rounded-lg border border-border bg-bg-surface py-1.5 pl-3 pr-8 text-xs font-medium text-text-primary outline-none focus:border-emerald-500/40"
+          className="surface-card appearance-none bg-bg-surface py-1.5 pl-3 pr-8 text-xs font-medium text-text-primary outline-none focus:"
         >
           {CHART_TYPE_OPTIONS.map((c) => (
             <option key={c.id} value={c.id}>{c.label}</option>
@@ -76,7 +76,7 @@ export function ChartTypeSwitcher({
       </div>
 
       {/* Full icon-button row (sm+) */}
-      <div className="hidden sm:flex flex-wrap items-center gap-1 rounded-lg border border-border bg-bg-surface p-1">
+      <div className="surface-card hidden sm:flex flex-wrap items-center gap-1 bg-bg-surface p-1">
         {CHART_TYPE_OPTIONS.map(iconBtn)}
       </div>
     </div>

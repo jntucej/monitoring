@@ -76,11 +76,11 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
       </div>
       <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-text-muted">
         <dt className="flex items-center gap-1">
-          <Clock className="h-3 w-3" aria-hidden /> Issued
+          <Clock className="size-3.5" aria-hidden /> Issued
         </dt>
         <dd>{formatTime(pass.issued_at)}</dd>
         <dt className="flex items-center gap-1">
-          <CalendarClock className="h-3 w-3" aria-hidden /> Window
+          <CalendarClock className="size-3.5" aria-hidden /> Window
         </dt>
         <dd>
           {pass.expires_at
@@ -106,12 +106,12 @@ export function PassPreview({ pass, reason }: PassPreviewProps) {
       )}
       {pass.status?.toUpperCase() === "EXPIRED" && (
         <p className="mt-1.5 flex items-center gap-1 text-xs text-action-danger">
-          <XCircle className="h-3 w-3" aria-hidden /> This pass has lapsed — flag the scan.
+          <XCircle className="size-3.5" aria-hidden /> This pass has lapsed — flag the scan.
         </p>
       )}
       {pass.status?.toUpperCase() === "VALID" && (
         <p className="mt-1.5 flex items-center gap-1 text-xs text-action-success">
-          <CheckCircle2 className="h-3 w-3" aria-hidden /> Pass is live — safe to proceed.
+          <CheckCircle2 className="size-3.5" aria-hidden /> Pass is live — safe to proceed.
         </p>
       )}
     </div>

@@ -71,7 +71,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2">
+    <div className="surface-card bg-bg-base p-4 flex flex-col gap-2">
       <div className="flex items-center gap-2 text-text-muted">
         <Icon className="w-4 h-4" />
         <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
@@ -88,7 +88,7 @@ function StatCard({
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-xl border border-dashed border-border bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
+    <div className="surface-card bg-bg-elevated/30 p-8 text-center text-sm text-text-muted">
       {message}
     </div>
   );
@@ -96,14 +96,14 @@ function EmptyState({ message }: { message: string }) {
 
 function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2">
       <span className="flex items-center gap-2">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         {message}
       </span>
       <button
         onClick={onRetry}
-        className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20"
+        className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20"
       >
         Retry
       </button>
@@ -240,7 +240,7 @@ function HostelPermissionsInner() {
       {/* occupancy heatmap — gate × role matrix */}
       <WidgetBoundary title="Hostel Occupancy">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+          <div className="surface-card px-4 py-3 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-action-success" />
             <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
               Live Gate Occupancy

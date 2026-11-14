@@ -131,7 +131,7 @@ export function TodayMealsPanel() {
   const visible = days.length > 0 ? days : [];
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <UtensilsCrossed className="w-4 h-4 text-action-primary shrink-0" />
@@ -149,7 +149,7 @@ export function TodayMealsPanel() {
         <EmptyState
           title="No mess days scheduled"
           description="There is no published mess schedule to serve yet."
-          icon={<CalendarDays className="w-5 h-5" />}
+          icon={<CalendarDays className="w-4 h-4" />}
         />
       ) : (
         <ul className="space-y-1.5 max-h60 overflow-y-auto custom-scrollbar pr-1 mb-3">
@@ -158,7 +158,7 @@ export function TodayMealsPanel() {
             return (
               <li
                 key={row.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+                className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
               >
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-text-primary truncate">
@@ -174,7 +174,7 @@ export function TodayMealsPanel() {
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold border shrink-0 ${STATUS_TONE[status]}`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  <span className="size-0 rounded-full bg-current" />
                   {STATUS_LABEL[status]}
                 </span>
               </li>
@@ -186,13 +186,13 @@ export function TodayMealsPanel() {
       {/* Today's serving counts (only when an active day has counts). */}
       {countsData?.data ? (
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
+          <div className="surface-card bg-bg-base/50 px-2.5 py-1.5 min-w-0">
             <p className="text-xs text-text-muted">Declared present</p>
             <p className="text-sm font-bold text-text-primary font-mono tabular-nums">
               {countsData.data.declaredPresent}
             </p>
           </div>
-          <div className="rounded-lg border border-border bg-bg-base/50 px-2.5 py-1.5 min-w-0">
+          <div className="surface-card bg-bg-base/50 px-2.5 py-1.5 min-w-0">
             <p className="text-xs text-text-muted">Confirmed served</p>
             <p className="text-sm font-bold text-action-success font-mono tabular-nums">
               {countsData.data.confirmed}

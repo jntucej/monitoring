@@ -31,7 +31,7 @@ export function TicketKpiStrip({ counts, loading }: TicketKpiStripProps) {
       {items.map((it) => (
         <div
           key={it.label}
-          className="rounded-xl border border-border bg-bg-surface p-3"
+          className="surface-card bg-bg-surface p-3"
         >
           <div className="flex items-center gap-2 text-xs text-text-muted">
             {loading

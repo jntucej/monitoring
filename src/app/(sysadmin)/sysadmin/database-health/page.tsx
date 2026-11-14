@@ -58,7 +58,7 @@ function DatabaseHealthInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Database health data unavailable: {error}
         </div>
@@ -72,7 +72,7 @@ function DatabaseHealthInner() {
             ))
           ) : (
             <>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Connectivity</p>
                 <p className={`mt-1 text-xl font-bold ${d?.status === "healthy" ? "text-action-success" : "text-action-danger"}`}>
                   {d?.status ?? "unknown"}
@@ -81,33 +81,33 @@ function DatabaseHealthInner() {
                   {d?.latencyMs != null ? `${d.latencyMs} ms round-trip` : "latency unavailable"}
                 </p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Database Size</p>
                 <p className="mt-1 text-xl font-bold text-action-info">{d?.databaseSize ?? "N/A"}</p>
                 <p className="text-xs text-text-muted">pg_database_size(current)</p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Connections</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {d?.connections ? `${d.connections.active} / ${d.connections.total}` : "N/A"}
                 </p>
                 <p className="text-xs text-text-muted">active / total sessions</p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Longest Query</p>
                 <p className="mt-1 text-xl font-bold text-action-warning">
                   {d?.longestQuery != null ? `${d.longestQuery}s` : "idle"}
                 </p>
                 <p className="text-xs text-text-muted">active query running time</p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Cache Hit Ratio</p>
                 <p className="mt-1 text-xl font-bold text-action-success">
                   {d?.cacheHitRatio != null ? `${d.cacheHitRatio}%` : "N/A"}
                 </p>
                 <p className="text-xs text-text-muted">shared buffers hit / read</p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+              <div className="surface-card bg-bg-base p-4 min-w-0">
                 <p className="text-xs text-text-muted uppercase">Data &amp; Backups</p>
                 <p className="mt-1 text-xl font-bold text-text-secondary">Governed</p>
                 <p className="text-xs text-text-muted">See Backup Status for dump freshness</p>

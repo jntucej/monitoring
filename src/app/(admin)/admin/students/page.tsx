@@ -204,10 +204,10 @@ function AdminStudentsInner() {
         <Skeleton className="h-10 w-64" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-2xl" />
+            <Skeleton key={i} className="h-24 rounded-card" />
           ))}
         </div>
-        <Skeleton className="h-72 rounded-2xl" />
+        <Skeleton className="h-72 rounded-card" />
       </div>
     );
   }
@@ -230,14 +230,14 @@ function AdminStudentsInner() {
       />
 
       {error && (
-        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
+        <div className="surface-card p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Total students</p>
           <p className="text-2xl font-bold text-text-primary tabular-nums">
             {data?.total ?? 0}
@@ -249,7 +249,7 @@ function AdminStudentsInner() {
             height={24}
           />}
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Active</p>
           <p className="text-2xl font-bold text-action-primary tabular-nums">
             {data?.active ?? 0}
@@ -259,7 +259,7 @@ function AdminStudentsInner() {
             counts={[data?.active ?? 0, data?.suspended ?? 0]}
           />
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">On campus today</p>
           <p className="text-2xl font-bold text-action-info tabular-nums">
             {data?.onCampusToday ?? 0}
@@ -268,7 +268,7 @@ function AdminStudentsInner() {
             {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
           </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Hostellers</p>
           <p className="text-2xl font-bold text-unit-c tabular-nums">
             {data?.byType.find((t) => t.type === "hosteller")?.count ?? 0}
@@ -280,7 +280,7 @@ function AdminStudentsInner() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 section-offscreen">
         {/* Facet rail */}
         <WidgetBoundary title="Filters">
-          <aside className="glass-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
+          <aside className="surface-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Department
@@ -290,10 +290,10 @@ function AdminStudentsInner() {
                   <button
                     key={d.code}
                     onClick={() => toggleIn(deptFilter, d.code, setDeptFilter)}
-                    className={`text-xs px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 transition ${
                       deptFilter.includes(d.code)
-                        ? "border-transparent text-white"
-                        : "border-border text-text-primary"
+                        ? "bg-bg-elevated text-white"
+                        : "text-text-primary"
                     }`}
                     style={deptFilter.includes(d.code) ? { background: deptColor(d.code) } : undefined}
                   >
@@ -312,10 +312,10 @@ function AdminStudentsInner() {
                   <button
                     key={y.year}
                     onClick={() => toggleIn(yearFilter, y.year, setYearFilter)}
-                    className={`text-xs px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 transition ${
                       yearFilter.includes(y.year)
-                        ? "border-action-primary bg-action-primary/10 text-action-primary"
-                        : "border-border text-text-primary"
+                        ? "bg-action-primary/10 text-action-primary"
+                        : "text-text-primary"
                     }`}
                   >
                     Year {y.year} <span className="opacity-70">{y.count}</span>
@@ -333,10 +333,10 @@ function AdminStudentsInner() {
                   <button
                     key={t}
                     onClick={() => setTypeFilter(t)}
-                    className={`text-xs px-2 py-1 rounded-full border transition ${
+                    className={`text-xs px-2 py-1 transition ${
                       typeFilter === t
-                        ? "border-action-primary bg-action-primary/10 text-action-primary"
-                        : "border-border text-text-primary"
+                        ? "bg-action-primary/10 text-action-primary"
+                        : "text-text-primary"
                     }`}
                   >
                     {t === "all" ? "All" : t === "hosteller" ? "Hostellers" : "Day scholars"}
@@ -355,7 +355,7 @@ function AdminStudentsInner() {
                 }}
                 className="text-xs text-action-primary hover:underline flex items-center gap-1"
               >
-                <X className="w-3 h-3" /> Clear filters
+                <X className="size-3.5" /> Clear filters
               </button>
             )}
           </aside>
@@ -369,7 +369,7 @@ function AdminStudentsInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, roll, or email…"
-              className="w-full min-h11 pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+              className="surface-card w-full min-h11 pl-9 pr-3 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 
@@ -403,12 +403,12 @@ function AdminStudentsInner() {
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
+                            className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
                             style={{ background: deptColor(r.department) }}
                           >
                             {initials(r.name)}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-4">
                             <p className="text-text-primary font-medium truncate">{r.name}</p>
                             <p className="text-xs text-text-muted font-mono">{r.roll ?? "—"}</p>
                           </div>
@@ -416,7 +416,7 @@ function AdminStudentsInner() {
                       </td>
                       <td className="px-4 py-2.5">
                         <span
-                          className="text-xs uppercase tracking-wide px-2 py-0.5 rounded-full font-medium"
+                          className="surface-card text-xs uppercase tracking-wide px-2 py-0.5 font-medium"
                           style={{
                             background: `${deptColor(r.department)}22`,
                             color: deptColor(r.department),
@@ -429,11 +429,11 @@ function AdminStudentsInner() {
                       <td className="px-4 py-2.5">
                         {r.isHosteller ? (
                           <span className="flex items-center gap-1 text-xs text-unit-c">
-                            <Home className="w-3 h-3" /> Hosteller
+                            <Home className="size-3.5" /> Hosteller
                           </span>
                         ) : (
                           <span className="flex items-center gap-1 text-xs text-action-info">
-                            <Building2 className="w-3 h-3" /> Day
+                            <Building2 className="size-3.5" /> Day
                           </span>
                         )}
                       </td>
@@ -461,11 +461,11 @@ function AdminStudentsInner() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setActive(null)}
           />
-          <aside className="relative w-full max-w-md h-full glass-card border-l border-border p-5 overflow-y-auto">
+          <aside className="surface-card relative w-full max-w-md h-full p-5 overflow-y-auto">
             <header className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold text-white"
+                  className="size-6 rounded-full flex items-center justify-center text-sm font-semibold text-white"
                   style={{ background: deptColor(active.department) }}
                 >
                   {initials(active.name)}
@@ -481,9 +481,9 @@ function AdminStudentsInner() {
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-2 min-h11 min-w11 flex items-center justify-center rounded hover:bg-bg-surface/60"
+                className="surface-card min-h11 min-w11 flex items-center justify-center hover:bg-bg-surface/60"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </header>
 
@@ -518,7 +518,7 @@ function AdminStudentsInner() {
                 <div className="col-span-2">
                   <dt className="text-text-muted">Email</dt>
                   <dd className="flex items-center gap-1 text-text-primary">
-                    <Mail className="w-3 h-3" /> {active.email}
+                    <Mail className="size-3.5" /> {active.email}
                   </dd>
                 </div>
               )}
@@ -526,7 +526,7 @@ function AdminStudentsInner() {
                 <div className="col-span-2">
                   <dt className="text-text-muted">Phone</dt>
                   <dd className="flex items-center gap-1 text-text-primary">
-                    <Phone className="w-3 h-3" /> {active.phone}
+                    <Phone className="size-3.5" /> {active.phone}
                   </dd>
                 </div>
               )}
@@ -539,7 +539,7 @@ function AdminStudentsInner() {
                 </div>
               )}
             </dl>
-            <div className="mt-6 pt-4 border-t border-border">
+            <div className="surface-card mt-6 pt-4">
               <a
                 href={`/admin/students/${active.roll ?? active.id}`}
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"

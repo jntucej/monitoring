@@ -65,7 +65,7 @@ export default function MessBillPage() {
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="min-h11 border rounded p-2 text-sm bg-white"
+          className="surface-card min-h11 p-2 text-sm"
         />
       </div>
 
@@ -73,16 +73,16 @@ export default function MessBillPage() {
         <p className="text-text-muted text-sm">Loading bill details…</p>
       ) : data ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 border rounded bg-white shadow-sm space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <span className="text-xs font-medium uppercase text-text-muted">Meals Served</span>
             <p className="text-2xl font-bold text-text-primary">{data.totalServed}</p>
           </div>
-          <div className="p-4 border rounded bg-white shadow-sm space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <span className="text-xs font-medium uppercase text-text-muted">Total Amount</span>
             <p className="text-2xl font-bold text-action-success">₹{data.totalAmount}</p>
             <p className="text-xs text-text-muted">@ ₹{data.mealRate} per meal</p>
           </div>
-          <div className="p-4 border rounded bg-white shadow-sm space-y-1">
+          <div className="surface-card p-4 space-y-1">
             <span className="text-xs font-medium uppercase text-text-muted">Daily Cutoff</span>
             <p className="text-sm font-medium text-text-primary mt-1">{data.cutoffTime}</p>
             <p className="text-xs text-text-muted">Opt out before cutoff to skip billing.</p>
@@ -90,7 +90,7 @@ export default function MessBillPage() {
         </div>
       ) : null}
 
-      <div className="border rounded bg-white p-6 space-y-4 shadow-sm">
+      <div className="surface-card p-6 space-y-4">
         <h2 className="font-semibold text-text-primary">Opt out of a upcoming meal</h2>
         <form onSubmit={optOut} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
           <div>
@@ -100,7 +100,7 @@ export default function MessBillPage() {
               required
               value={optOutDate}
               onChange={(e) => setOptOutDate(e.target.value)}
-              className="w-full min-h11 border rounded p-2 text-sm"
+              className="surface-card w-full min-h11 p-2 text-sm"
             />
           </div>
           <div>
@@ -108,7 +108,7 @@ export default function MessBillPage() {
             <select id="meal"
               value={optOutType}
               onChange={(e) => setOptOutType(e.target.value)}
-              className="w-full min-h11 border rounded p-2 text-sm bg-white"
+              className="surface-card w-full min-h11 p-2 text-sm"
             >
               <option value="BREAKFAST">Breakfast</option>
               <option value="LUNCH">Lunch</option>
@@ -121,10 +121,10 @@ export default function MessBillPage() {
               placeholder="e.g. Going home"
               value={optOutReason}
               onChange={(e) => setOptOutReason(e.target.value)}
-              className="w-full min-h11 border rounded p-2 text-sm"
+              className="surface-card w-full min-h11 p-2 text-sm"
             />
           </div>
-          <button type="submit" className="w-full min-h11 inline-flex items-center justify-center px-4 py-2 rounded bg-bg-surface text-white text-sm font-medium">
+          <button type="submit" className="surface-card w-full min-h11 inline-flex items-center justify-center px-4 py-2 bg-bg-surface text-white text-sm font-medium">
             Confirm opt-out
           </button>
         </form>

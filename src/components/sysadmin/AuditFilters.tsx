@@ -28,21 +28,21 @@ export function AuditFilters({
   loading, exportDisabled
 }: AuditFiltersProps) {
   return (
-    <div className="bg-bg-surface p-4 rounded-xl border border-border space-y-3">
+    <div className="surface-card bg-bg-surface p-4 space-y-3">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h2 className="text-sm font-semibold text-white">Filter Audit Trail</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-1.5 text-xs bg-bg-elevated border border-border rounded-md flex items-center gap-1.5 hover:bg-bg-base"
+            className="surface-card p-1.5 text-xs bg-bg-elevated flex items-center gap-1.5 hover:bg-bg-base"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
           </button>
           <button
             onClick={onExport}
             disabled={exportDisabled}
-            className="px-2.5 py-1.5 text-xs bg-action-primary text-white rounded-md flex items-center gap-1.5 font-semibold disabled:opacity-50"
+            className="surface-card px-2.5 py-1.5 text-xs bg-action-primary text-white flex items-center gap-1.5 font-semibold disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
@@ -55,7 +55,7 @@ export function AuditFilters({
           <select id="action"
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="w-full bg-bg-elevated border border-border rounded px-2.5 py-1.5 focus:outline-none"
+            className="surface-card w-full bg-bg-elevated px-2.5 py-1.5 focus:outline-none"
           >
             <option value="">All Actions</option>
             <option value="LOGIN">LOGIN</option>
@@ -75,7 +75,7 @@ export function AuditFilters({
             placeholder="Search User ID..."
             value={userIdFilter}
             onChange={(e) => setUserIdFilter(e.target.value)}
-            className="w-full bg-bg-elevated border border-border rounded px-2.5 py-1.5 focus:outline-none"
+            className="surface-card w-full bg-bg-elevated px-2.5 py-1.5 focus:outline-none"
           />
         </div>
 
@@ -85,7 +85,7 @@ export function AuditFilters({
             type="date"
             value={fromFilter}
             onChange={(e) => setFromFilter(e.target.value)}
-            className="w-full bg-bg-elevated border border-border rounded px-2.5 py-1.5 focus:outline-none"
+            className="surface-card w-full bg-bg-elevated px-2.5 py-1.5 focus:outline-none"
           />
         </div>
 
@@ -95,17 +95,17 @@ export function AuditFilters({
             type="date"
             value={toFilter}
             onChange={(e) => setToFilter(e.target.value)}
-            className="w-full bg-bg-elevated border border-border rounded px-2.5 py-1.5 focus:outline-none"
+            className="surface-card w-full bg-bg-elevated px-2.5 py-1.5 focus:outline-none"
           />
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2 border-t border-border">
+      <div className="surface-card flex justify-end gap-2 pt-2">
         <button onClick={onReset} className="text-xs text-text-muted hover:text-white underline">
           Reset
         </button>
-        <button onClick={onApply} className="px-3 py-1 bg-sky-600 hover:bg-action-info text-white rounded text-xs font-semibold flex items-center gap-1">
-          <Filter className="w-3 h-3" /> Apply
+        <button onClick={onApply} className="surface-card px-3 py-1 bg-sky-600 hover:bg-action-info text-white text-xs font-semibold flex items-center gap-1">
+          <Filter className="size-3.5" /> Apply
         </button>
       </div>
     </div>

@@ -38,7 +38,7 @@ export function TodayStatus() {
   const time = data?.lastScan ? getTimeAgo(data.lastScan.timestamp) : "—";
 
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <p className="text-sm text-text-secondary">{greeting()},</p>
       <h1 className="text-xl font-semibold text-text-primary">
         {user?.name ?? "Student"}

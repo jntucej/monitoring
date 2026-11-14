@@ -61,11 +61,11 @@ export function ExamsView() {
             {exceptions.map((e, idx) => (
               <li
                 key={e.id ?? idx}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
-                  <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                     {e.status ?? "PENDING"}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ export function ExamsView() {
                 {
                   header: "Status",
                   accessor: (r) => (
-                    <span className="rounded-full bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
                       {r.status ?? "PENDING"}
                     </span>
                   ),

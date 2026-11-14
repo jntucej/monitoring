@@ -192,21 +192,21 @@ export function UserManagement() {
   };
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h3 className="font-semibold">User Management</h3>
         {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-action-success" : "text-action-danger"}`}>{msg}</div>}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowBulkModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-bg-elevated border border-border text-white hover:bg-bg-base"
+            className="surface-card inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-bg-elevated text-white hover:bg-bg-base"
           >
             <Upload className="w-4 h-4 text-action-info" />
             Bulk Import
           </button>
           <button
             onClick={() => setShowForm((s) => !s)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700"
+            className="surface-card inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-sky-600 text-white hover:bg-sky-700"
           >
             <UserPlus className="w-5 h-5" />
             Add User
@@ -215,7 +215,7 @@ export function UserManagement() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="mb-4 p-4 bg-bg-base rounded-lg space-y-3">
+        <form onSubmit={submit} className="surface-card mb-4 p-4 bg-bg-base space-y-3">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1" htmlFor="name">Name</label>
             <input id="name"
@@ -223,7 +223,7 @@ export function UserManagement() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. John Doe"
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
@@ -233,7 +233,7 @@ export function UserManagement() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. john@example.com"
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             />
           </div>
           <div>
@@ -241,7 +241,7 @@ export function UserManagement() {
             <select id="role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+              className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
             >
               <option value="admin">Admin</option>
               <option value="operator">Operator</option>
@@ -274,7 +274,7 @@ export function UserManagement() {
                 value={customUniqueId}
                 onChange={(e) => setCustomUniqueId(e.target.value)}
                 placeholder={`auto: ucej-${role === "student" ? "s" : role === "parent" ? "p" : role === "guardian" ? "g" : role === "visitor" ? "v" : "w"}-NNNN`}
-                className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+                className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
               />
             </div>
           )}
@@ -286,7 +286,7 @@ export function UserManagement() {
               <select
                 value={gateId}
                 onChange={(e) => setGateId(e.target.value)}
-                className="block w-full rounded-md border-border bg-bg-elevated text-white sm:text-sm p-2"
+                className="surface-card block w-full bg-bg-elevated text-white sm:text-sm p-2"
               >
                 <option value="">— No gate —</option>
                 {gates.map((g) => (
@@ -301,14 +301,14 @@ export function UserManagement() {
             <button
               type="submit"
               disabled={busy}
-              className="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 disabled:opacity-50"
+              className="surface-card px-4 py-2 bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 disabled:opacity-50"
             >
               {busy ? "Adding…" : "Add User"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg border border-border text-sm font-medium"
+              className="surface-card px-4 py-2 text-sm font-medium"
             >
               Cancel
             </button>
@@ -322,7 +322,7 @@ export function UserManagement() {
         </div>
       ) : error ? (
         <div className="p-8 flex flex-col items-center gap-4 text-center">
-          <XCircle className="w-10 h-10 text-red-500" />
+          <XCircle className="size-5 text-red-500" />
           <h4 className="font-semibold text-lg">Could not load users</h4>
           <p className="text-sm text-text-muted">{typeof error === "string" ? error : (error as { message?: string } | null)?.message || String(error)}</p>
         </div>
@@ -333,7 +333,7 @@ export function UserManagement() {
       ) : (
         <div className="space-y-3">
           {users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg flex-wrap gap-2">
+            <div key={user.id} className="surface-card flex items-center justify-between p-3 bg-white/5 flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <User className="w-5 h-5 text-text-muted" />
                 <div>
@@ -346,20 +346,20 @@ export function UserManagement() {
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Thumbprint (biometric) registration status + actions */}
                 {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? (
-                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-emerald-500/10 text-action-success border border-emerald-500/25 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> Biometric ✓
+                  <span className="surface-card text-xs font-bold px-2 py-1 bg-emerald-500/10 text-action-success flex items-center gap-1">
+                    <ShieldCheck className="size-3.5" /> Biometric ✓
                   </span>
                 ) : (
-                  <span className="text-xs font-bold px-2 py-1 rounded-full bg-bg-elevated0/10 text-text-muted border border-border/25">
+                  <span className="surface-card text-xs font-bold px-2 py-1 bg-bg-elevated0/10 text-text-muted">
                     No biometric
                   </span>
                 )}
                 <button
                   onClick={() => registerThumbprint(user)}
                   disabled={busy}
-                  className="text-xs font-semibold px-3 py-1 rounded-full bg-sky-500/10 text-action-info border border-sky-500/20 hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
+                  className="surface-card text-xs font-semibold px-3 py-1 bg-sky-500/10 text-action-info hover:bg-sky-500/20 disabled:opacity-50 flex items-center gap-1"
                 >
-                  <Fingerprint className="w-3 h-3" />
+                  <Fingerprint className="size-3.5" />
                   {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) ? "Re-register" : "Register"}
                 </button>
                 {Boolean(user.thumbprintHash || user.thumbprintVerifiedAt || (user as UserType & { thumbprint_hash?: string }).thumbprint_hash || (user as UserType & { thumbprint_verified_at?: string }).thumbprint_verified_at) && (
@@ -375,7 +375,7 @@ export function UserManagement() {
                   value={user.role}
                   disabled={busy}
                   onChange={(e) => changeRole(user, e.target.value)}
-                  className="text-xs rounded-full bg-sky-500/10 text-action-info px-2 py-1 border border-sky-500/20"
+                  className="surface-card text-xs bg-sky-500/10 text-action-info px-2 py-1"
                 >
                   {["operator", "admin", "student", "parent", "faculty", "staff", "sysadmin", "caretaker", "deputy_warden", "hostel_manager", "principal", "vice_principal", "oie", "exam_branch"].map((r) => (
                     <option key={r} value={r}>{r}</option>

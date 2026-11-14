@@ -109,7 +109,7 @@ export function Hero() {
           onClick={() => router.push("/login")}
           strength={0.05}
           radius={80}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white shadow-lg hover:opacity-95"
+          className="surface-card inline-flex items-center gap-2 bg-[var(--home-accent-indigo,var(--action-primary))] px-6 py-3 font-semibold text-white hover:opacity-95"
         >
           <LogIn className="h-4 w-4" />
           {COLLEGE.primaryCTA}
@@ -117,7 +117,7 @@ export function Hero() {
         <button
           type="button"
           onClick={() => scrollTo("home-access-flow")}
-          className="inline-flex items-center gap-2 rounded-xl border border-[var(--home-border-hard,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,var(--bg-surface))] hover:bg-white/5"
+          className="surface-card inline-flex items-center gap-2 (--home- ,rgba(255,255,255,0.18))] px-6 py-3 font-semibold text-[var(--home-text-primary,var(--bg-surface))] hover:bg-white/5"
         >
           How it works
           <ArrowRight className="h-4 w-4" />

@@ -38,7 +38,7 @@ export default function AntiRaggingConfigPage() {
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       <h1 className="text-2xl font-semibold">Anti-Ragging Alert Configuration</h1>
-      <form onSubmit={save} className="space-y-4 bg-white p-6 border rounded shadow-sm">
+      <form onSubmit={save} className="surface-card space-y-4 bg-white p-6">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -53,10 +53,10 @@ export default function AntiRaggingConfigPage() {
             type="text"
             value={(config.extra_emails ?? []).join(", ")}
             onChange={(e) => setConfig({ ...config, extra_emails: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
-            className="w-full border rounded p-2 text-sm"
+            className="surface-card w-full p-2 text-sm"
           />
         </div>
-        <button type="submit" className="px-4 py-2 bg-bg-surface text-white rounded text-sm font-medium">
+        <button type="submit" className="surface-card px-4 py-2 bg-bg-surface text-white text-sm font-medium">
           Save Configuration
         </button>
       </form>

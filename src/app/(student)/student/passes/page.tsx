@@ -92,7 +92,7 @@ export default function StudentPassesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/student" className="min-h11 inline-flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors" aria-label="Back to student hub">
+            <Link href="/student" className="surface-card min-h11 inline-flex items-center justify-center p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors" aria-label="Back to student hub">
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <p className="text-xs text-text-muted">Digital Gate Passes</p>
@@ -104,14 +104,14 @@ export default function StudentPassesPage() {
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="min-h11 px-4 py-2.5 rounded-xl bg-action-primary text-white font-bold text-xs shadow-md hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="surface-card min-h11 px-4 py-2.5 bg-action-primary text-white font-bold text-xs hover:opacity-95 flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Apply Gate Pass</span>
         </button>
       </div>
 
-      <div className="p-3.5 rounded-xl bg-action-info/10 border borderaction-info/20 text-xs text-action-info flex items-center gap-2">
+      <div className="surface-card p-3.5 bg-action-info/10 text-xs text-action-info flex items-center gap-2">
         <Sparkles className="w-4 h-4 shrink-0 text-action-info" />
         <span>
           <strong>Daily Outing:</strong> Standard local outings do not require a gate pass. Apply for a pass only when requesting <strong>Day Pass</strong> or <strong>Home Out</strong> leave.
@@ -121,11 +121,11 @@ export default function StudentPassesPage() {
       {/* Pass list */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-action-primary animate-spin" />
+          <Loader2 className="size-5 text-action-primary animate-spin" />
         </div>
       ) : passes.length === 0 ? (
-        <div className="bg-bg-surface border border-border rounded-2xl p-12 text-center space-y-3">
-          <AlertCircle className="w-12 h-12 text-text-muted mx-auto" />
+        <div className="surface-card bg-bg-surface p-12 text-center space-y-3">
+          <AlertCircle className="size-5 text-text-muted mx-auto" />
           <h3 className="text-base font-bold text-text-primary">No passes found</h3>
           <p className="text-xs text-text-muted max-w-sm mx-auto">
             You haven&apos;t requested any gate passes yet. Tap &quot;Apply Gate Pass&quot; to create one.
@@ -139,11 +139,11 @@ export default function StudentPassesPage() {
             return (
               <div
                 key={pass.id}
-                className="bg-bg-surface border border-border rounded-2xl p-5 shadow-sm space-y-4 relative overflow-hidden"
+                className="surface-card bg-bg-surface p-5 space-y-4 relative overflow-hidden"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="p-2 rounded-xl bg-action-primary/10 text-action-primary border border-action-primary/20">
+                    <span className="surface-card p-2 bg-action-primary/10 text-action-primary">
                       <QrCode className="w-5 h-5" />
                     </span>
                     <div>
@@ -177,7 +177,7 @@ export default function StudentPassesPage() {
                 </div>
 
                 {(pass.status === "ACTIVE" || pass.finalStatus === "APPROVED") && (
-                  <div className="pt-2 border-t border-border flex items-center justify-between">
+                  <div className="surface-card pt-2 flex items-center justify-between">
                     <span className="text-xs font-semibold text-action-success flex items-center gap-1">
                       <Sparkles className="w-3.5 h-3.5" />
                       Ready to scan at campus gates
@@ -192,7 +192,7 @@ export default function StudentPassesPage() {
                           to: pass.to,
                         })
                       }
-                      className="px-3 py-1.5 rounded-lg bg-action-primary text-white text-xs font-bold hover:opacity-95 flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+                      className="surface-card px-3 py-1.5 bg-action-primary text-white text-xs font-bold hover:opacity-95 flex items-center gap-1.5 transition active:scale-95"
                     >
                       <QrCode className="w-3.5 h-3.5" />
                       <span>Show QR Pass</span>

@@ -22,7 +22,7 @@ export function ImpactCard({
   const pct = Math.round((onCampus / studentsTotal) * 100);
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GraduationCap className="size-4 text-action-primary" />
@@ -65,7 +65,7 @@ export function ImpactCard({
       </div>
 
       {decisionsToday > 0 && (
-        <p className="mt-3 flex items-center gap-1 rounded-lg bg-action-primary/5 px-2.5 py-1.5 text-xs text-action-primary">
+        <p className="surface-card mt-3 flex items-center gap-1 bg-action-primary/5 px-2.5 py-1.5 text-xs text-action-primary">
           You cleared {decisionsToday} approval{decisionsToday === 1 ? "" : "s"} for them today
           <ArrowRight className="size-3" />
         </p>

@@ -35,7 +35,7 @@ export function BreakdownPanel({ breakdown }: BreakdownPanelProps) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-bg-surface border border-border rounded-xl p-3 text-center"
+              className="surface-card bg-bg-surface p-3 text-center"
             >
               <p className="flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-text-muted">
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
@@ -45,10 +45,10 @@ export function BreakdownPanel({ breakdown }: BreakdownPanelProps) {
               <p className="text-xs text-text-muted uppercase font-semibold">Inside now</p>
               <div className="flex items-center justify-center gap-3 mt-1.5 text-xs font-bold">
                 <span className="text-action-success inline-flex items-center gap-0.5">
-                  <ArrowDownLeft className="w-3 h-3" /> {stat.inToday}
+                  <ArrowDownLeft className="size-3.5" /> {stat.inToday}
                 </span>
                 <span className="text-action-danger inline-flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3 h-3" /> {stat.outToday}
+                  <ArrowUpRight className="size-3.5" /> {stat.outToday}
                 </span>
               </div>
             </motion.div>

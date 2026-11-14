@@ -104,7 +104,7 @@ function AdminAlertsInner() {
         <div className="flex items-center gap-2">
           <button
             onClick={load}
-            className="p-2 rounded-lg bg-bg-surface border border-border text-text-muted hover:bg-bg-elevated"
+            className="surface-card p-2 bg-bg-surface text-text-muted hover:bg-bg-elevated"
             title="Refresh"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -127,7 +127,7 @@ function AdminAlertsInner() {
 
       <WidgetBoundary title="Alerts">
         <div className="bg-bg-surface rounded-xl border border-border">
-          <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="surface-card p-4 flex items-center justify-between">
             <h3 className="font-semibold flex items-center gap-2">
               <Bell className="w-5 h-5 text-action-warning" />
               <span>Alerts</span>
@@ -148,7 +148,7 @@ function AdminAlertsInner() {
                   return (
                     <div className="flex items-start gap-3">
                       <div
-                        className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg} ${style.text}`}
+                        className={`mt-0.5 size-5 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg} ${style.text}`}
                       >
                         {a.resolved ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                       </div>
@@ -190,9 +190,9 @@ function AdminAlertsInner() {
                     <button
                       onClick={() => setConfirmTarget(a)}
                       disabled={busyId === a.id}
-                      className="text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-action-success hover:bg-emerald-500/20 inline-flex items-center gap-1 disabled:opacity-50"
+                      className="surface-card text-xs px-2.5 py-1 bg-emerald-500/10 text-action-success hover:bg-emerald-500/20 inline-flex items-center gap-1 disabled:opacity-50"
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className="size-3.5" />
                       {busyId === a.id ? "Resolving…" : "Resolve"}
                     </button>
                   ) : (

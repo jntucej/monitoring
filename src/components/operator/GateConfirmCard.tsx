@@ -49,7 +49,7 @@ export function GateConfirmCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.16 }}
-      className="pointer-events-auto w-full max-w-md mx-auto bg-bg-surface border border-border rounded-2xl p-4 shadow-xl space-y-3"
+      className="surface-card pointer-events-auto w-full max-w-md mx-auto bg-bg-surface p-4 space-y-3"
     >
       <div className="flex items-center gap-3">
         <img
@@ -57,9 +57,9 @@ export function GateConfirmCard({
           alt={student.name || "Student"}
           width={56}
           height={56}
-          className="w-14 h-14 rounded-xl object-cover shrink-0 border border-border"
+          className="size-5 rounded-xl object-cover shrink-0 border border-border"
         />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-4 flex-1">
           <p className="font-bold text-sm text-text-primary truncate">{student.name || student.roll}</p>
           <p className="text-xs font-mono text-text-muted truncate">{student.roll}</p>
         </div>
@@ -77,7 +77,7 @@ export function GateConfirmCard({
       </div>
 
       {flagged && (
-        <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-rose-500/15 border border-rose-500/40 text-action-danger">
+        <div className="surface-card flex items-start gap-2 px-3 py-2 bg-rose-500/15 text-action-danger">
           <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="text-xs leading-snug">
             <span className="font-extrabold uppercase tracking-wide">{student.flagStatus}</span>
@@ -112,14 +112,14 @@ export function GateConfirmCard({
         <button
           type="button"
           onClick={onManualEntry}
-          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md hover:text-text-primary transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 px-2 py-1 hover:text-text-primary transition-colors"
         >
           <KeyRound className="w-3.5 h-3.5" /> Manual entry
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md hover:text-text-primary transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 px-2 py-1 hover:text-text-primary transition-colors"
         >
           <X className="w-3.5 h-3.5" /> Cancel
         </button>

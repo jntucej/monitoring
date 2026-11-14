@@ -78,7 +78,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
     <div className="space-y-6">
       {/* 5 KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-surface space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Briefcase className="w-3.5 h-3.5 text-unit-c" />
             Total Staff
@@ -89,7 +89,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <p className="text-xs text-text-muted font-mono">Administrative Roster</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-surface space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <CheckCircle2 className="w-3.5 h-3.5 text-action-success" />
             Present Today
@@ -100,7 +100,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <p className="text-xs text-text-muted">{summary.overallAttendanceRate}% daily rate</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-surface space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Building2 className="w-3.5 h-3.5 text-action-primary" />
             Currently Inside
@@ -111,7 +111,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <p className="text-xs text-text-muted">Inside Campus</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-bg-surface border border-border space-y-1">
+        <div className="surface-card p-4 bg-bg-surface space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-text-muted uppercase">
             <Clock className="w-3.5 h-3.5 text-action-warning" />
             Currently Outside
@@ -122,7 +122,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <p className="text-xs text-text-muted font-mono">Off Campus</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-bg-surface border border-rose-500/30 bg-rose-500/5 space-y-1">
+        <div className="surface-card p-4 bg-bg-surface bg-rose-500/5 space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-medium text-action-danger uppercase">
             <ShieldAlert className="w-3.5 h-3.5 text-action-danger" />
             Warnings (WRN)
@@ -134,7 +134,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
         </div>
       </div>
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-bg-surface border border-border p-4 rounded-2xl">
+      <div className="surface-card flex flex-col sm:flex-row gap-3 items-center justify-between bg-bg-surface p-4">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
@@ -142,7 +142,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, ID, designation..."
-            className="w-full pl-9 pr-4 py-2 bg-bg-base border border-border rounded-xl text-xs focus:outline-none focus:borderunit-c"
+            className="surface-card w-full pl-9 pr-4 py-2 bg-bg-base text-xs focus:outline-none focus:"
           />
         </div>
 
@@ -150,7 +150,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-bg-base border border-border text-xs focus:outline-none"
+            className="surface-card px-3 py-2 bg-bg-base text-xs focus:outline-none"
           >
             <option value="ALL">All Departments</option>
             {departments.map((d) => (
@@ -161,7 +161,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-bg-base border border-border text-xs focus:outline-none"
+            className="surface-card px-3 py-2 bg-bg-base text-xs focus:outline-none"
           >
             <option value="ALL">All Statuses</option>
             <option value="INSIDE">Currently Inside</option>
@@ -173,7 +173,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
       </div>
       {/* Staff Roster & Logs Table */}
       <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-border flex justify-between items-center">
+        <div className="surface-card p-4 flex justify-between items-center">
           <h3 className="font-bold text-sm flex items-center gap-2">
             <User className="w-4 h-4 text-unit-c" />
             Staff Members Roster & Status Logs
@@ -205,7 +205,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                   <tr key={staff.id} className="hover:bg-white/5 transition">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-purple-500/20 text-unit-c font-bold flex items-center justify-center text-xs">
+                        <div className="size-6 rounded-full bg-purple-500/20 text-unit-c font-bold flex items-center justify-center text-xs">
                           {staff.fullName.charAt(0)}
                         </div>
                         <div>
@@ -237,17 +237,17 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {staff.flagStatus ? (
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-rose-500/20 text-action-danger border border-rose-500/40 animate-pulse flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" />
+                          <span className="surface-card px-2 py-0.5 text-xs font-bold bg-rose-500/20 text-action-danger animate-pulse flex items-center gap-1">
+                            <AlertTriangle className="size-3.5" />
                             WRN
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-action-success">
+                          <span className="surface-card px-2 py-0.5 text-xs font-bold bg-emerald-500/10 text-action-success">
                             OK
                           </span>
                         )}
                         {staff.punctualityStatus === "LATE" && (
-                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-action-warning">
+                          <span className="surface-card px-2 py-0.5 text-xs font-bold bg-amber-500/20 text-action-warning">
                             LATE
                           </span>
                         )}
@@ -256,7 +256,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => setSelectedStaff(staff)}
-                        className="px-3 py-1 rounded-lg bg-purple-500/10 text-unit-c hover:bg-purple-500/20 text-xs font-semibold inline-flex items-center gap-1 transition"
+                        className="surface-card px-3 py-1 bg-purple-500/10 text-unit-c hover:bg-purple-500/20 text-xs font-semibold inline-flex items-center gap-1 transition"
                       >
                         Profile Logs <ChevronRight className="w-3.5 h-3.5" />
                       </button>
@@ -272,8 +272,8 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
       {selectedStaff && (
         <Modal isOpen={!!selectedStaff} onClose={() => setSelectedStaff(null)} title="Staff Member Profile & Scan Logs">
           <div className="space-y-4 max-w-xl mx-auto p-1">
-            <div className="p-4 rounded-xl bg-bg-surface border border-border flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-purple-500/20 text-unit-c font-black text-xl flex items-center justify-center border-2 border-purple-500/30">
+            <div className="surface-card p-4 bg-bg-surface flex items-center gap-4">
+              <div className="size-6 bg-purple-500/20 text-unit-c font-black text-xl flex items-center justify-center border-2 border-purple-500/30">
                 {selectedStaff.fullName.charAt(0)}
               </div>
               <div className="space-y-0.5">
@@ -284,18 +284,18 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-bg-base border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-base space-y-1">
                 <span className="text-text-muted flex items-center gap-1"><Mail className="w-3.5 h-3.5" /> Email</span>
                 <p className="font-semibold truncate">{selectedStaff.email || "N/A"}</p>
               </div>
-              <div className="p-3 rounded-lg bg-bg-base border border-border space-y-1">
+              <div className="surface-card p-3 bg-bg-base space-y-1">
                 <span className="text-text-muted flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> Phone</span>
                 <p className="font-semibold">{selectedStaff.phone || "N/A"}</p>
               </div>
             </div>
 
             {/* Movement Gate Logs */}
-            <div className="p-4 rounded-xl bg-bg-surface border border-border space-y-3">
+            <div className="surface-card p-4 bg-bg-surface space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <Activity className="w-4 h-4 text-unit-c" />
                 Recent Gate Movement Logs
@@ -306,7 +306,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
                   {selectedStaff.recentLogs.map((log) => (
                     <div
                       key={log.id}
-                      className="p-2.5 rounded-lg bg-bg-base border border-border flex items-center justify-between text-xs"
+                      className="surface-card p-2.5 bg-bg-base flex items-center justify-between text-xs"
                     >
                       <div className="flex items-center gap-2">
                         <span

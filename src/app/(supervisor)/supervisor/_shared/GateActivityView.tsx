@@ -53,7 +53,7 @@ export function GateActivityView() {
             {gates.map((g) => (
               <li
                 key={g.id}
-                className="rounded-xl border border-border bg-bg-surface p-3 text-xs"
+                className="surface-card bg-bg-surface p-3 text-xs"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

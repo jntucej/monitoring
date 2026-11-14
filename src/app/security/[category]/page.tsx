@@ -150,11 +150,11 @@ export default function SecurityCategoryPage({ params }: PageProps) {
       <div className="min-h-dvh bg-bg-base text-text-primary p-4 md:p-6 space-y-4 max-w-3xl mx-auto select-none">
         
         {/* Navigation Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="surface-card flex items-center justify-between gap-3 pb-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/security")}
-              className="p-2 rounded-xl bg-bg-surface border border-border text-text-muted hover:text-text-primary transition-all cursor-pointer"
+              className="surface-card p-2 bg-bg-surface text-text-muted hover:text-text-primary transition-all cursor-pointer"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -180,7 +180,7 @@ export default function SecurityCategoryPage({ params }: PageProps) {
             {details.metrics.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-xl border border-border bg-bg-surface p-3 flex items-center justify-between gap-2"
+                className="surface-card bg-bg-surface p-3 flex items-center justify-between gap-2"
               >
                 <span className="text-xs text-text-muted font-medium">{item.label}</span>
                 <span className="text-xs font-bold font-mono text-text-primary">
@@ -192,13 +192,13 @@ export default function SecurityCategoryPage({ params }: PageProps) {
         </div>
 
         {/* Compact Audit Log */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3.5 space-y-2">
+        <div className="surface-card bg-bg-surface p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-text-muted">
             <span>Security Audit Log</span>
             <span className="text-xs font-mono text-action-success">STATUS: OK</span>
           </div>
 
-          <div className="bg-bg-base rounded-lg p-2.5 border border-border/60 font-mono text-xs space-y-1 text-text-muted max-h-32 overflow-y-auto">
+          <div className="surface-card bg-bg-base p-2.5 font-mono text-xs space-y-1 text-text-muted max-h-32 overflow-y-auto">
             {logs.map((log, i) => (
               <div key={i} className="flex items-center gap-1.5 text-emerald-400/90">
                 <span>✓</span>

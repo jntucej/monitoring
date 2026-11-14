@@ -52,7 +52,7 @@ export function HealthTabContent({ tab }: { tab: Tab }) {
 
       <WidgetBoundary title="Health content">
         {error ? (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 text-sm text-rose-200">
+          <div className="surface-card bg-rose-500/5 p-4 text-sm text-rose-200">
             <p className="font-medium">Failed to load health data</p>
             <p className="mt-1 text-xs opacity-70">{error}</p>
           </div>

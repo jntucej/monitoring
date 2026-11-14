@@ -18,7 +18,7 @@ export interface ChartCardProps {
 
 export function ChartCard({ title, description, legend, children, actions }: ChartCardProps) {
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4">
+    <section className="surface-card bg-bg-surface p-4">
       <header className="mb-3 flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold truncate">{title}</h3>

@@ -173,7 +173,7 @@ export default function SysAdminAccessKeysPage() {
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+          <div className="size-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
             <KeyRound className="w-5 h-5 text-action-success" />
           </div>
           <div>
@@ -185,7 +185,7 @@ export default function SysAdminAccessKeysPage() {
         </div>
 
         {/* Generate by roll */}
-        <div className="border border-border rounded-xl bg-bg-surface p-4 space-y-3">
+        <div className="surface-card bg-bg-surface p-4 space-y-3">
           <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
             <UserPlus className="w-4 h-4 text-action-success" /> Generate code for a student
           </h2>
@@ -199,7 +199,7 @@ export default function SysAdminAccessKeysPage() {
                   value={rollInput}
                   onChange={(e) => setRollInput(e.target.value.toUpperCase())}
                   placeholder="e.g. 24JJ1A0501"
-                  className="w-full pl-9 pr-3 py-2 bg-bg-base border border-border rounded-lg font-mono text-sm text-text-primary placeholder-slate-600 focus:outline-none focus:borderaction-success"
+                  className="surface-card w-full pl-9 pr-3 py-2 bg-bg-base font-mono text-sm text-text-primary placeholder-slate-600 focus:outline-none focus:"
                 />
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function SysAdminAccessKeysPage() {
               <select id="purpose"
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:borderaction-success"
+                className="surface-card px-3 py-2 bg-bg-base text-sm text-text-primary focus:outline-none focus:"
               >
                 {PURPOSES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
@@ -216,7 +216,7 @@ export default function SysAdminAccessKeysPage() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-success hover:bg-action-success text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="surface-card inline-flex items-center gap-2 px-4 py-2 bg-action-success hover:bg-action-success text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
               {generating ? "Generating…" : "Generate"}
@@ -227,7 +227,7 @@ export default function SysAdminAccessKeysPage() {
 
         {/* Generated code display */}
         {generated && (
-          <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/30 space-y-2">
+          <div className="surface-card p-4 bg-emerald-500/5 space-y-2">
             <div className="text-xs uppercase font-bold text-text-muted tracking-wider flex items-center justify-between">
               <span>New code for {generated.userName ? `${generated.userName} (` : ""}{generated.userRoll}{generated.userName ? ")" : ""}</span>
               <span className="flex items-center gap-1 text-action-success normal-case font-mono text-xs">
@@ -236,7 +236,7 @@ export default function SysAdminAccessKeysPage() {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-3xl font-mono font-black tracking-[0.3em] text-action-success select-all">{generated.code}</span>
-              <button onClick={copyCode} className="inline-flex items-center gap-1.5 text-xs text-action-success hover:text-action-success px-2 py-1 rounded border border-emerald-500/30">
+              <button onClick={copyCode} className="surface-card inline-flex items-center gap-1.5 text-xs text-action-success hover:text-action-success px-2 py-1">
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 {copied ? "Copied" : "Copy"}
               </button>
@@ -255,7 +255,7 @@ export default function SysAdminAccessKeysPage() {
           </div>
 
           {loadError && (
-            <div className="mb-3 px-4 py-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-action-danger text-sm">
+            <div className="surface-card mb-3 px-4 py-3 bg-rose-500/10 text-action-danger text-sm">
               {loadError}
             </div>
           )}
@@ -314,7 +314,7 @@ export default function SysAdminAccessKeysPage() {
                             <button
                               onClick={() => handleInvalidate(c.id)}
                               title="Invalidate this code"
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-action-danger hover:bg-rose-500/10 border border-rose-500/30"
+                              className="surface-card inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/10"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Invalidate
                             </button>

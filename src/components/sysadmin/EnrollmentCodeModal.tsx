@@ -77,11 +77,11 @@ const api = useApi();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-bg-surface border border-border rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <div className="surface-card flex items-center justify-between px-5 py-4">
           <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
             <KeyRound className="w-5 h-5 text-action-success" /> Enrollment Code
           </h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-bg-elevated">
+          <button onClick={onClose} className="surface-card p-1 hover:bg-bg-elevated">
             <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
@@ -98,7 +98,7 @@ const api = useApi();
                 <select id="purpose"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary"
+                  className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm text-text-primary"
                 >
                   <option value="web_bootstrap">Web onboarding (password + PIN)</option>
                   <option value="mobile">Mobile device pairing (15 min)</option>
@@ -112,7 +112,7 @@ const api = useApi();
               <button
                 onClick={issue}
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-action-success hover:bg-action-success text-white text-sm font-bold disabled:opacity-50"
+                className="surface-card w-full py-2.5 bg-action-success hover:bg-action-success text-white text-sm font-bold disabled:opacity-50"
               >
                 {loading ? "Generating…" : "Generate Code"}
               </button>
@@ -121,7 +121,7 @@ const api = useApi();
 
           {issued && (
             <>
-              <div className="p-4 rounded-xl bg-bg-elevated border border-emerald-500/30 text-center space-y-2">
+              <div className="surface-card p-4 bg-bg-elevated text-center space-y-2">
                 <p className="text-xs uppercase font-bold text-text-muted tracking-wider">One-Time Code</p>
                 <p className="text-3xl font-mono font-black tracking-[0.35em] text-action-success select-all">
                   {issued.code}
@@ -150,7 +150,7 @@ const api = useApi();
                 Expires {new Date(issued.expiresAt).toLocaleString()}
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-action-warning space-y-1">
+              <div className="surface-card p-3 bg-amber-500/10 text-xs text-action-warning space-y-1">
                 <p className="font-semibold text-action-warning">Direct Activation Link:</p>
                 <p className="font-mono text-xs break-all select-all text-amber-300/90">
                   {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
@@ -158,7 +158,7 @@ const api = useApi();
               </div>
 
               {issued.telegramDeepLink && (
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs text-action-info space-y-1">
+                <div className="surface-card p-3 bg-sky-500/10 text-xs text-action-info space-y-1">
                   <p className="font-semibold text-sky-200">Telegram Deep Link (share with candidate):</p>
                   <p className="font-mono text-xs break-all select-all text-sky-300/90">
                     {issued.telegramDeepLink}
@@ -186,7 +186,7 @@ const api = useApi();
 
               <button
                 onClick={onClose}
-                className="w-full py-2.5 rounded-xl bg-bg-elevated border border-border text-text-primary text-sm font-semibold"
+                className="surface-card w-full py-2.5 bg-bg-elevated text-text-primary text-sm font-semibold"
               >
                 Done
               </button>

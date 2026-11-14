@@ -29,14 +29,14 @@ export const PresenceMatrixPanel = memo(function PresenceMatrixPanel({
 
   return (
     <PrincipalWidgetBoundary title="Live Gate Presence">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5 min-w-0">
         <div className="flex items-center gap-2 text-text-muted mb-4">
           <MapPin className="w-4 h-4" />
           <span className="text-xs font-semibold uppercase tracking-wide">Live Gate Presence</span>
         </div>
         {loading && <p className="text-sm text-text-muted">Loading…</p>}
         {error && !loading && (
-          <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2">
+          <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" /> Could not load presence matrix: {error}
           </div>
         )}

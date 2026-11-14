@@ -120,7 +120,7 @@ export function MaintenanceContent(
 
   if (error) {
     return (
-      <div className="rounded-xl border border-action-danger/30 bg-action-danger/10 p-4 text-sm text-action-danger">
+      <div className="surface-card bg-action-danger/10 p-4 text-sm text-action-danger">
         Failed to load maintenance data: {error}
       </div>
     );
@@ -147,7 +147,7 @@ export function MaintenanceContent(
       {/* KPI strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* scheduled */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Scheduled
           </p>
@@ -157,7 +157,7 @@ export function MaintenanceContent(
         </div>
 
         {/* in-progress */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             In Progress
           </p>
@@ -172,7 +172,7 @@ export function MaintenanceContent(
         </div>
 
         {/* next window countdown */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Next Window
           </p>
@@ -182,7 +182,7 @@ export function MaintenanceContent(
         </div>
 
         {/* notifications sent */}
-        <div className="rounded-xl border border-border bg-bg-surface p-3">
+        <div className="surface-card bg-bg-surface p-3">
           <p className="text-xs uppercase tracking-wide text-text-muted mb-1">
             Notifications
           </p>
@@ -193,7 +193,7 @@ export function MaintenanceContent(
       </div>
 
       {/* Signature visual: 30-day Gantt */}
-      <div className="rounded-xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-text-primary">
             30-Day Maintenance Windows

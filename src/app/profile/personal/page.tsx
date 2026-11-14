@@ -80,20 +80,20 @@ export function ProfilePersonalPanel() {
     finally { setSavingName(false); }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin w-8 h-8 text-action-primary" /></div>;
-  if (!profile) return <div className="max-w-2xl mx-auto mt-16 glass-card p-8 text-center"><p className="text-text-secondary">Could not load profile.</p><Button className="mt-4" onClick={load}>Retry</Button></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="animate-spin size-6 text-action-primary" /></div>;
+  if (!profile) return <div className="surface-card max-w-2xl mx-auto mt-16 p-8 text-center"><p className="text-text-secondary">Could not load profile.</p><Button className="mt-4" onClick={load}>Retry</Button></div>;
 
   const initials = profile.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <div className="relative min-h-dvh overflow-hidden bg-bg-base text-text-primary">
-      <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(139,92,246,0.14), transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.14), transparent 60%)" }} />
+      <div aria-hidden="true" className="absolute inset-0 bg-surface-muted" />
       <ParticleField color="var(--unit-c)" />
       <AmbientGlow color="rgba(139,92,246,0.18)" />
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 space-y-6">
-        <div className="glass-card p-6 flex items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-bold">{initials || <UserIcon className="w-8 h-8" />}</div>
-          <div className="flex-1 min-w-0">
+        <div className="surface-card p-6 flex items-center gap-5">
+          <div className="w-6 h-6 rounded-card bg-action-success flex items-center justify-center text-white text-2xl font-bold">{initials || <UserIcon className="size-6" />}</div>
+          <div className="flex-1 min-w-4">
             <p className="text-sm font-medium text-text-secondary mb-3">{profile.name}</p>
             <p className="text-sm text-text-secondary truncate">{profile.email}</p>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -103,7 +103,7 @@ export function ProfilePersonalPanel() {
           </div>
         </div>
 
-        <form onSubmit={saveName} className="glass-card p-6 space-y-5">
+        <form onSubmit={saveName} className="surface-card p-6 space-y-5">
           <h2 className="text-lg font-semibold text-text-primary">Personal details</h2>
           <div>
             <label className="block text-sm mb-1 text-text-secondary">Full name</label>

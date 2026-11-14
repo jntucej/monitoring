@@ -36,7 +36,7 @@ interface PermissionPoliciesData {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-2 animate-pulse">
+    <div className="surface-card bg-bg-elevated p-4 space-y-2 animate-pulse">
       <div className="h-3 w-24 rounded bg-bg-elevated" />
       <div className="h-5 w-32 rounded bg-bg-elevated" />
       <div className="h-3 w-40 rounded bg-bg-elevated" />
@@ -82,7 +82,7 @@ function AdminPermissionPoliciesInner() {
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <WidgetBoundary title="Workflow Types">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <GitBranch className="w-3.5 h-3.5 text-action-success" /> Workflow Types
             </div>
@@ -94,7 +94,7 @@ function AdminPermissionPoliciesInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Open Requests">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <FileCheck className="w-3.5 h-3.5 text-action-warning" /> Open Requests
             </div>
@@ -108,7 +108,7 @@ function AdminPermissionPoliciesInner() {
         </WidgetBoundary>
 
         <WidgetBoundary title="Standard SLA">
-          <div className="rounded-xl border border-border bg-bg-elevated p-4">
+          <div className="surface-card bg-bg-elevated p-4">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
               <Clock className="w-3.5 h-3.5 text-action-primary" /> Standard SLA
             </div>
@@ -123,7 +123,7 @@ function AdminPermissionPoliciesInner() {
       {/* Workflow table */}
       <WidgetBoundary title="Permission Workflow Policies">
         <div className="rounded-2xl border border-border bg-bg-elevated overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-border">
+          <div className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
               <ShieldCheck className="w-4 h-4 text-action-success" />
               Workflow stage definitions
@@ -135,7 +135,7 @@ function AdminPermissionPoliciesInner() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter workflows…"
-                className="w-full rounded-lg bg-bg-surface border border-border pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:borderaction-success"
+                className="surface-card w-full bg-bg-surface pl-8 pr-8 py-1.5 text-xs text-white placeholder:text-text-muted focus:outline-none focus:"
               />
               {query && (
                 <button
@@ -192,7 +192,7 @@ function AdminPermissionPoliciesInner() {
                             {w.stages.map((s) => (
                               <span
                                 key={s.stage}
-                                className="inline-flex items-center gap-1 rounded-md bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
+                                className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary"
                               >
                                 {s.stage}
                                 {s.open > 0 && <span className="text-action-success tabular-nums">{s.open}</span>}
@@ -211,7 +211,7 @@ function AdminPermissionPoliciesInner() {
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {w.approver_roles.map((r) => (
-                            <span key={r} className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-xs text-blue-300">
+                            <span key={r} className="surface-card bg-blue-500/10 px-2 py-0.5 text-xs text-blue-300">
                               {r}
                             </span>
                           ))}
@@ -225,7 +225,7 @@ function AdminPermissionPoliciesInner() {
           )}
 
           {/* Role policy (read-only) */}
-          <div className="p-4 border-t border-border">
+          <div className="surface-card p-4">
             <div className="flex items-center gap-2 text-xs text-text-muted">
               <Users className="w-3.5 h-3.5 text-action-success" />
               {loading
@@ -238,7 +238,7 @@ function AdminPermissionPoliciesInner() {
 
       {/* Read-only notice */}
       <WidgetBoundary title="Editing note">
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4 flex items-start gap-3">
+        <div className="surface-card bg-amber-500/[0.06] p-4 flex items-start gap-3">
           <Lock className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-semibold text-action-warning">Read-only view</p>

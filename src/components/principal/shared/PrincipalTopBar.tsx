@@ -20,7 +20,7 @@ export const PrincipalTopBar = memo(function PrincipalTopBar({
   onMenuClick,
 }: PrincipalTopBarProps) {
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-bg-surface px-4">
+    <header className="surface-card sticky top-0 z-40 flex h-14 items-center justify-between bg-bg-surface px-4">
       <div className="flex items-center gap-3">
         <button onClick={onMenuClick} className="md:hidden p-1.5 text-text-muted hover:text-text-primary">
           <Menu className="h-5 w-5" />

@@ -41,7 +41,7 @@ export function BetweenClasses({
   // No classes today
   if (schedule.length === 0) {
     return (
-      <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <section className="surface-card bg-bg-surface p-4 sm:p-5">
         <header className="mb-2 flex items-center gap-2">
           <Clock className="size-4 text-action-info" />
           <h2 className="text-sm font-semibold text-text-primary">Teaching day</h2>
@@ -55,7 +55,7 @@ export function BetweenClasses({
   const canClearApprovals = timeUntilNext !== null && timeUntilNext > 8 * 60_000;
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="size-4 text-action-info" />
@@ -67,7 +67,7 @@ export function BetweenClasses({
       </header>
 
       {current && (
-        <div className="mb-3 rounded-lg bg-action-primary/10 p-2.5">
+        <div className="surface-card mb-3 bg-action-primary/10 p-2.5">
           <p className="text-xs uppercase tracking-wider text-action-primary">
             In class now
           </p>
@@ -81,7 +81,7 @@ export function BetweenClasses({
       )}
 
       {next && canClearApprovals && (
-        <div className="mb-3 rounded-lg bg-action-warning/10 p-2.5">
+        <div className="surface-card mb-3 bg-action-warning/10 p-2.5">
           <p className="text-xs uppercase tracking-wider text-action-warning">
             You have time
           </p>
@@ -97,7 +97,7 @@ export function BetweenClasses({
       )}
 
       {next && !canClearApprovals && (
-        <div className="mb-3 rounded-lg bg-bg-elevated p-2.5">
+        <div className="surface-card mb-3 bg-bg-elevated p-2.5">
           <p className="text-xs uppercase tracking-wider text-text-muted">
             Next class
           </p>
@@ -135,7 +135,7 @@ export function BetweenClasses({
       {pendingCount > 0 && (
         <a
           href="/hod/approvals/pending"
-          className="mt-3 flex min-h11 items-center justify-center gap-1 rounded-lg border border-action-primary/30 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
+          className="surface-card mt-3 flex min-h11 items-center justify-center gap-1 bg-action-primary/5 px-3 py-2 text-xs font-medium text-action-primary transition hover:bg-action-primary/10"
         >
           Clear {pendingCount} approval{pendingCount === 1 ? "" : "s"} now
           <ArrowRight className="size-3" />

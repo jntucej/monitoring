@@ -68,8 +68,8 @@ export function AppLoadingScreen() {
       </div>
 
       {/* Brand logo */}
-      <div className={`flex items-center justify-center w-16 h-16 rounded-2xl ${cardBg} shadow-2xl`}>
-        <Shield className="w-8 h-8 text-action-primary animate-pulse" />
+      <div className={`flex items-center justify-center size-6 rounded-2xl ${cardBg} shadow-2xl`}>
+        <Shield className="size-6 text-action-primary animate-pulse" />
       </div>
 
       {/* App name */}
@@ -77,7 +77,7 @@ export function AppLoadingScreen() {
         Gate Monitor
       </p>
       <p className={`mt-1 text-xs ${textMuted} flex items-center gap-1.5`}>
-        <Loader2 className="w-3 h-3 animate-spin" />
+        <Loader2 className="size-3.5 animate-spin" />
         {loading ? "Loading your session…" : "Loading…"}
       </p>
 
@@ -86,7 +86,7 @@ export function AppLoadingScreen() {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className={`w-1.5 h-1.5 rounded-full "bg-bg-base" animate-pulse`}
+            className={`size-2 rounded-full "bg-bg-base" animate-pulse`}
             style={{ animationDelay: `${i * 150}ms` }}
           />
         ))}

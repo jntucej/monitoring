@@ -126,7 +126,7 @@ export function GateModeBanner({
           ].join(" ")}
           aria-label={`Gate mode: ${label}${isMaintenance ? " — tap to override" : ""}`}
         >
-          <Icon className="h-3 w-3" aria-hidden />
+          <Icon className="size-3.5" aria-hidden />
           {label}
         </button>
 
@@ -153,7 +153,7 @@ export function GateModeBanner({
             className="ml-1 inline-flex items-center gap-1 text-xs text-white/90 underline underline-offset-2"
             aria-label="Dismiss lockdown message (scan remains disabled)"
           >
-            <X className="h-3 w-3" aria-hidden /> dismiss message
+            <X className="size-3.5" aria-hidden /> dismiss message
           </button>
         )}
       </div>
@@ -161,7 +161,7 @@ export function GateModeBanner({
       {lockdown && (
         <div
           role="alert"
-          className="mt-1 max-w-md rounded-md border border-action-danger bg-action-danger/10 px-2 py-1 text-xs text-action-danger"
+          className="surface-card mt-1 max-w-md bg-action-danger/10 px-2 py-1 text-xs text-action-danger"
         >
           <strong>Campus lockdown.</strong>{" "}
           {lockdown.message ?? "Scans are disabled until an administrator lifts the lockdown."}

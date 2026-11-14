@@ -46,7 +46,7 @@ function GateArc({
 
   return (
     <div
-      className="flex flex-col items-center rounded-lg border p-3"
+      className="surface-card flex flex-col items-center p-3"
       style={{
         borderColor: "var(--border)",
         background: "var(--bg-surface)",
@@ -109,7 +109,7 @@ function IncidentRow({ incident }: { incident: SafetyData["incidents"][number] }
     <li className="relative pl-5">
       {/* timeline dot */}
       <span
-        className="absolute left-0 top-1 h-2.5 w-2.5 rounded-full"
+        className="absolute left-0 top-1 size-2 rounded-full"
         style={{
           background: incident.resolved ? "var(--text-muted)" : sevColor,
           opacity: incident.resolved ? 0.5 : 1,
@@ -124,7 +124,7 @@ function IncidentRow({ incident }: { incident: SafetyData["incidents"][number] }
           {incident.title}
         </span>
         <span
-          className="rounded px-1 text-xs font-medium"
+          className="surface-card px-1 text-xs font-medium"
           style={{ background: "var(--bg-surface)", color: sevColor, border: "1px solid var(--border)" }}
         >
           {sev}
@@ -134,8 +134,8 @@ function IncidentRow({ incident }: { incident: SafetyData["incidents"][number] }
         </span>
         {!incident.resolved && (
           <span
-            className="rounded px-1 text-xs font-semibold uppercase"
-            style={{ background: "var(--action-danger)", color: "#fff" }}
+            className="surface-card px-1 text-xs font-semibold uppercase"
+            style={{ background: "var(--action-danger)", color: "var(--color-surface)" }}
           >
             open
           </span>
@@ -177,7 +177,7 @@ export function SafetyContent({ data }: SafetyContentProps) {
 
       {/* incident timeline */}
       <div
-        className="rounded-lg border p-4"
+        className="surface-card p-4"
         style={{ borderColor: "var(--border)", background: "var(--bg-surface)" }}
       >
         <p className="mb-3 text-sm font-semibold" style={{ color: VIZ_THEME.text }}>
@@ -188,7 +188,7 @@ export function SafetyContent({ data }: SafetyContentProps) {
             No incidents recorded.
           </p>
         ) : (
-          <ul className="space-y-3 border-l pl-4" style={{ borderLeft: "1px solid var(--border)" }}>
+          <ul className="surface-card space-y-3 pl-4" style={{ borderLeft: "1px solid var(--border)" }}>
             {sortedIncidents.map((inc) => (
               <IncidentRow key={inc.id} incident={inc} />
             ))}

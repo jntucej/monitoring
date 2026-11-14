@@ -200,13 +200,13 @@ function AdminStaffInner() {
   if (!stats && !rows.length && !error) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
-        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-6 w-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-2xl" />
+            <Skeleton key={i} className="h-6 rounded-2xl" />
           ))}
         </div>
-        <Skeleton className="h-72 rounded-2xl" />
+        <Skeleton className="h-6 rounded-2xl" />
       </div>
     );
   }
@@ -225,14 +225,14 @@ function AdminStaffInner() {
       />
 
       {error && (
-        <div className="glass-card border border-action-danger/30 p-3 text-sm text-action-danger">
+        <div className="surface-card p-3 text-sm text-action-danger">
           {error}
         </div>
       )}
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Total staff</p>
           <p className="text-2xl font-bold text-text-primary tabular-nums">
             {stats?.total ?? rows.length}
@@ -249,19 +249,19 @@ function AdminStaffInner() {
             height={24}
           />
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Faculty</p>
           <p className="text-2xl font-bold text-action-success tabular-nums">
             {roleCounts.faculty}
           </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Staff</p>
           <p className="text-2xl font-bold text-teal-400 tabular-nums">
             {roleCounts.staff}
           </p>
         </div>
-        <div className="glass-card p-4">
+        <div className="surface-card p-4">
           <p className="text-xs text-text-muted">Workers</p>
           <p className="text-2xl font-bold text-text-secondary tabular-nums">
             {roleCounts.worker}
@@ -273,7 +273,7 @@ function AdminStaffInner() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 section-offscreen">
         {/* Facet rail */}
         <WidgetBoundary title="Filters">
-          <aside className="glass-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
+          <aside className="surface-card p-4 space-y-4 lg:sticky lg:top-4 self-start">
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">
                 Role
@@ -292,7 +292,7 @@ function AdminStaffInner() {
                       }`}
                       style={roleFilter.includes(r) ? { background: ROLE_COLOR[r] } : undefined}
                     >
-                      <Icon className="w-3 h-3" /> {r}{" "}
+                      <Icon className="size-3.5" /> {r}{" "}
                       <span className="opacity-70">{roleCounts[r]}</span>
                     </button>
                   );
@@ -326,7 +326,7 @@ function AdminStaffInner() {
                 }}
                 className="text-xs text-action-primary hover:underline flex items-center gap-1"
               >
-                <X className="w-3 h-3" /> Clear filters
+                <X className="size-3.5" /> Clear filters
               </button>
             )}
           </aside>
@@ -340,7 +340,7 @@ function AdminStaffInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name, email, or department…"
-              className="w-full min-h11 pl-9 pr-3 py-2 rounded-xl border border-border bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
+              className="surface-card w-full min-h11 pl-9 pr-3 py-2 bg-bg-surface/40 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-action-primary/40"
             />
           </div>
 
@@ -374,24 +374,24 @@ function AdminStaffInner() {
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
+                            className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-white shrink-0"
                             style={{ background: ROLE_COLOR[r.role] }}
                           >
                             {initials(r.name)}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-4">
                             <p className="text-text-primary font-medium truncate">
                               {r.name}
                             </p>
                             <p className="text-xs text-text-muted truncate flex items-center gap-1">
-                              <Mail className="w-3 h-3" /> {r.email ?? "—"}
+                              <Mail className="size-3.5" /> {r.email ?? "—"}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-2.5">
                         <span
-                          className="text-xs uppercase tracking-wide px-2 py-0.5 rounded-full font-medium"
+                          className="surface-card text-xs uppercase tracking-wide px-2 py-0.5 font-medium"
                           style={{
                             background: `${ROLE_COLOR[r.role]}22`,
                             color: ROLE_COLOR[r.role],
@@ -434,11 +434,11 @@ function AdminStaffInner() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setActive(null)}
           />
-          <aside className="relative w-full max-w-md h-full glass-card border-l border-border p-5 overflow-y-auto">
+          <aside className="surface-card relative w-full max-w-md h-full p-5 overflow-y-auto">
             <header className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-semibold text-white"
+                  className="size-6 rounded-full flex items-center justify-center text-sm font-semibold text-white"
                   style={{ background: ROLE_COLOR[active.role] }}
                 >
                   {initials(active.name)}
@@ -452,9 +452,9 @@ function AdminStaffInner() {
               </div>
               <button
                 onClick={() => setActive(null)}
-                className="p-2 min-h11 min-w11 flex items-center justify-center rounded hover:bg-bg-surface/60"
+                className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-surface/60"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </header>
 

@@ -74,7 +74,7 @@ export function PrincipalDashboardPanel() {
   const pendingApprovals = data?.data?.pendingApprovals ?? 0;
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -83,8 +83,8 @@ export function PrincipalDashboardPanel() {
             Principal Dashboard
           </span>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border border-border bg-bg-elevated text-text-secondary">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-warning" />
+        <span className="surface-card inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary">
+          <span className="size-2 rounded-full bg-action-warning" />
           {pendingApprovals} pending
         </span>
       </div>
@@ -100,7 +100,7 @@ export function PrincipalDashboardPanel() {
           {alerts.map((a) => (
             <li
               key={a.id}
-              className="flex items-start justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+              className="surface-card flex items-start justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-text-primary truncate">

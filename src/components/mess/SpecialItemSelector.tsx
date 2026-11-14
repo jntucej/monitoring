@@ -91,7 +91,7 @@ export function SpecialItemSelector() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-action-danger">
+      <div className="surface-card bg-rose-500/10 p-4 text-sm text-action-danger">
         {error}
         <button type="button" onClick={() => void load()} className="ml-2 underline">Retry</button>
       </div>
@@ -103,7 +103,7 @@ export function SpecialItemSelector() {
       <EmptyState
         title="No special items yet"
         description="Your mess in-charge will announce special items ahead of the event."
-        icon={<Sparkles className="h-8 w-8" />}
+        icon={<Sparkles className="size-6" />}
       />
     );
   }
@@ -121,7 +121,7 @@ export function SpecialItemSelector() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
+            className="surface-card inline-flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-bg-surface"
           >
             <RefreshCw className="h-4 w-4" /> Refresh
           </button>
@@ -141,7 +141,7 @@ export function SpecialItemSelector() {
           );
 
           return (
-            <div key={ev.id} className="rounded-xl border border-border bg-bg-surface/60 p-4">
+            <div key={ev.id} className="surface-card bg-bg-surface/60 p-4">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <h3 className="text-base font-semibold text-text-primary">{ev.title}</h3>
@@ -154,7 +154,7 @@ export function SpecialItemSelector() {
                   <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${
                     open ? "border-emerald-500/40 text-action-success" : "border-border/40 text-text-muted"
                   }`}>
-                    <Clock className="h-3 w-3" />
+                    <Clock className="size-3.5" />
                     {open ? countdownLabel(ev.interestDeadline) : status}
                   </span>
                 </div>
@@ -179,7 +179,7 @@ export function SpecialItemSelector() {
                               isOn ? CAT_TONE[cat] : "border-border text-text-secondary"
                             } ${!open ? "opacity-60" : "hover:brightness-110"}`}
                           >
-                            {isOn ? <CheckCircle2 className="h-4 w-4" /> : <span className="h-4 w-4 rounded-full border border-current" />}
+                            {isOn ? <CheckCircle2 className="h-4 w-4" /> : <span className="h-4 w-4 border border-current" />}
                             {it.label}
                           </button>
                         );
@@ -196,7 +196,7 @@ export function SpecialItemSelector() {
                     type="button"
                     disabled={savingEventId === ev.id}
                     onClick={() => void save(ev)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-action-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                    className="surface-card inline-flex items-center gap-2 bg-action-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
                   >
                     {savingEventId === ev.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Save selection
@@ -205,13 +205,13 @@ export function SpecialItemSelector() {
               )}
 
               {canGetToken && ev.myItemIds.length > 0 && (
-                <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2">
+                <div className="surface-card mt-3 flex items-center justify-between gap-2 bg-emerald-500/5 p-2">
                   <div className="text-xs text-text-secondary">
                     Serving window is open. Get your token to redeem your meal.
                   </div>
                   <Link
                     href={`/student/mess/token/${ev.id}`}
-                    className="rounded-md bg-emerald-500/90 px-3 py-1.5 text-xs font-medium text-white"
+                    className="surface-card bg-emerald-500/90 px-3 py-1.5 text-xs font-medium text-white"
                   >
                     Get token →
                   </Link>

@@ -123,7 +123,7 @@ export function useApi() {
       }
     }
 
-    // Handle 304 Not Modified explicitly (Issue #558)
+    // Handle 304 Not Modified explicitly (Issue issue-558)
     if (res.status === 304) {
       return { success: true, data: undefined };
     }

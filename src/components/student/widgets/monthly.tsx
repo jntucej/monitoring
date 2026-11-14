@@ -20,7 +20,7 @@ export default function MonthlyCard({ payload }: StudentWidgetProps) {
     ["Night",         data.night,   "text-violet-400"],
   ];
   return (
-    <article className="rounded-2xl border border-border bg-bg-surface p-5">
+    <article className="surface-card bg-bg-surface p-5">
       <header className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Monthly Outing</h3>
         <span className="text-xs text-text-muted">{data.yearMonth}</span>
@@ -37,7 +37,7 @@ export default function MonthlyCard({ payload }: StudentWidgetProps) {
             <dd className={`font-medium tabular-nums ${cls}`}>{value}</dd>
           </div>
         ))}
-        <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-sm">
+        <div className="surface-card mt-2 flex items-center justify-between pt-2 text-sm">
           <dt className="flex items-center gap-1 text-text-secondary">
             <Clock className="h-3.5 w-3.5" /> Time outside
           </dt>

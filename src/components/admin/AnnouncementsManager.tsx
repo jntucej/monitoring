@@ -202,7 +202,7 @@ export function AnnouncementsManager() {
       </div>
 
       {showCreate && (
-        <Card className="border p-4">
+        <Card className="surface-card p-4">
           <form onSubmit={handleCreate} className="space-y-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
               <Megaphone className="w-5 h-5 text-action-warning" /> Create Broadcast
@@ -214,14 +214,14 @@ export function AnnouncementsManager() {
                 required
                 placeholder="Title"
                 maxLength={200}
-                className="p-2 border rounded text-sm"
+                className="surface-card p-2 text-sm"
               />
-              <select value={audience} onChange={(e) => setAudience(e.target.value)} className="p-2 border rounded text-sm">
+              <select value={audience} onChange={(e) => setAudience(e.target.value)} className="surface-card p-2 text-sm">
                 {AUDIENCE_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
-              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-2 border rounded text-sm">
+              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="surface-card p-2 text-sm">
                 {PRIORITY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
@@ -234,7 +234,7 @@ export function AnnouncementsManager() {
               rows={3}
               placeholder="Message body..."
               maxLength={10000}
-              className="w-full p-2 border rounded text-sm"
+              className="surface-card w-full p-2 text-sm"
             />
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2 text-sm">
@@ -260,7 +260,7 @@ export function AnnouncementsManager() {
                   type="datetime-local"
                   value={publishAt}
                   onChange={(e) => setPublishAt(e.target.value)}
-                  className="p-1.5 border rounded text-sm"
+                  className="surface-card p-1.5 text-sm"
                 />
               )}
             </div>
@@ -277,10 +277,10 @@ export function AnnouncementsManager() {
 
       <div className="space-y-4">
         {announcements.length === 0 && (
-          <Card className="border p-6 text-center text-sm text-text-muted">No announcements yet.</Card>
+          <Card className="surface-card p-6 text-center text-sm text-text-muted">No announcements yet.</Card>
         )}
         {announcements.map((a) => (
-          <Card key={a.id} className="border p-4">
+          <Card key={a.id} className="surface-card p-4">
             <div className="flex justify-between items-start gap-4">
               <div className="space-y-1 min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">

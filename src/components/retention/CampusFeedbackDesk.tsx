@@ -126,11 +126,11 @@ export function CampusFeedbackDesk() {
 
   return (
     <WidgetBoundary title="Campus Feedback Desk">
-      <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-elevated/40 p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-cyan-400" />
+            <MessageSquare className="h-6 w-6 text-cyan-400" />
             <h3 className="text-sm font-medium text-text-primary">Feedback & Issues</h3>
             <span className="text-xs text-text-muted">
               {reports.length} report(s)
@@ -139,7 +139,7 @@ export function CampusFeedbackDesk() {
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 hover:bg-cyan-500/20 transition-colors motion-reduce:transition-none"
+            className="surface-card flex items-center gap-1.5 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 hover:bg-cyan-500/20 transition-colors motion-reduce:transition-none"
           >
             <Send className="h-3.5 w-3.5" />
             {showForm ? "Cancel" : "New Report"}
@@ -147,20 +147,20 @@ export function CampusFeedbackDesk() {
         </div>
 
         {submitSuccess && (
-          <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-action-success">
+          <div className="surface-card mb-3 bg-emerald-500/10 p-2.5 text-xs text-action-success">
             Report submitted. You&#39;ll see status updates here.
           </div>
         )}
 
         {/* New Report Form */}
         {showForm && (
-          <div className="mb-4 space-y-3 rounded-lg border border-border/50 bg-bg-surface/40 p-4">
+          <div className="surface-card mb-4 space-y-3 bg-bg-surface/40 p-4">
             <div>
               <label className="block text-xs text-text-muted mb-1.5" htmlFor="category">Category</label>
               <select id="category"
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value)}
-                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="surface-card w-full bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               >
                 {FEEDBACK_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -178,7 +178,7 @@ export function CampusFeedbackDesk() {
                 value={formSubject}
                 onChange={(e) => setFormSubject(e.target.value)}
                 placeholder="Brief description of the issue"
-                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                className="surface-card w-full bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
               />
             </div>
             <div>
@@ -188,14 +188,14 @@ export function CampusFeedbackDesk() {
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={3}
                 placeholder="Additional context (optional)"
-                className="w-full rounded-lg border border-border/50 bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
+                className="surface-card w-full bg-bg-elevated/50 px-3 py-2 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
               />
             </div>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={!formSubject.trim() || submitting}
-              className="flex items-center gap-1.5 rounded-lg bg-cyan-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-cyan-500 disabled:opacity-40 transition-colors motion-reduce:transition-none"
+              className="surface-card flex items-center gap-1.5 bg-cyan-500/80 px-4 py-2 text-xs font-medium text-white hover:bg-cyan-500 disabled:opacity-40 transition-colors motion-reduce:transition-none"
             >
               {submitting ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -209,19 +209,19 @@ export function CampusFeedbackDesk() {
 
         {/* Reports List */}
         {loading ? (
-          <div className="h-24 animate-pulse rounded bg-bg-elevated/20" />
+          <div className="h-6 animate-pulse rounded bg-bg-elevated/20" />
         ) : reports.length === 0 ? (
           <p className="text-xs text-text-muted py-6 text-center">
             No reports yet. Be the first to flag an issue.
           </p>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-6 overflow-y-auto">
             {reports.map((report) => {
               const stepIdx = getStepIndex(report.status);
               return (
                 <div
                   key={report.id}
-                  className="rounded-lg border border-border/40 bg-bg-elevated/30 p-3"
+                  className="surface-card bg-bg-elevated/30 p-3"
                 >
                   {/* Subject + Status Badge */}
                   <div className="flex items-start gap-2">
@@ -230,7 +230,7 @@ export function CampusFeedbackDesk() {
                     >
                       {STATUS_ICONS[report.status] ?? <AlertTriangle className="h-3.5 w-3.5" />}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-2">
                       <p className="text-xs font-medium text-text-secondary truncate">
                         {report.subject}
                       </p>
@@ -284,19 +284,19 @@ export function CampusFeedbackDesk() {
                   <div className="mt-3 space-y-1.5">
                     {report.assignedTo && (
                       <p className="text-xs text-text-muted flex items-center gap-1">
-                        <User className="h-3 w-3" />
+                        <User className="size-3.5" />
                         Assigned to: <span className="text-text-secondary">{report.assignedTo}</span>
                       </p>
                     )}
                     {report.reviewerNote && (
                       <p className="text-xs text-text-muted flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" />
+                        <MessageSquare className="size-3.5" />
                         <span className="line-clamp-2">{report.reviewerNote}</span>
                       </p>
                     )}
                     {report.notes && report.status === "in_progress" && (
                       <p className="text-xs text-text-muted flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="size-3.5" />
                         <span className="line-clamp-2">{report.notes}</span>
                       </p>
                     )}

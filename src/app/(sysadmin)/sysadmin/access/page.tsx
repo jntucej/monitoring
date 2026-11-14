@@ -17,10 +17,10 @@ export default function AccessHubPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           href="/sysadmin/roles"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-44"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-blue-500/10 text-action-primary">
+            <div className="surface-card p-3 bg-blue-500/10 text-action-primary">
               <UserCheck className="w-6 h-6" />
             </div>
             <ArrowUpRight className="w-5 h-5 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -35,10 +35,10 @@ export default function AccessHubPage() {
 
         <Link
           href="/sysadmin/sessions"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-44"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-amber-500/10 text-action-warning">
+            <div className="surface-card p-3 bg-amber-500/10 text-action-warning">
               <Lock className="w-6 h-6" />
             </div>
             <ArrowUpRight className="w-5 h-5 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -53,10 +53,10 @@ export default function AccessHubPage() {
 
         <Link
           href="/sysadmin/promotions"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-44"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-44"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-emerald-500/10 text-action-success">
+            <div className="surface-card p-3 bg-emerald-500/10 text-action-success">
               <Users className="w-6 h-6" />
             </div>
             <ArrowUpRight className="w-5 h-5 text-text-muted group-hover:text-[var(--primary)] transition" />

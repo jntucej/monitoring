@@ -2,7 +2,7 @@
  * operatorStore — façade over the split operator stores (UI-audit fix 6).
  *
  * The single store from 2025 re-rendered the gate kiosk on every field
- * change ("too many re-renders" React #310). It is now split into:
+ * change ("too many re-renders" React issue-310). It is now split into:
  *
  *   useScanStore  — the in-flight scan flow + today's stats (scanStore.ts)
  *   useGateStore  — gate identity + live mode/lockdown (gateStore.ts)
@@ -128,7 +128,7 @@ function getStatusStripImpl(
 /**
  * Compose the two split stores into the legacy single-object shape.
  * Prefer subscribing to useScanStore / useGateStore directly with narrow
- * selectors — that is what actually stops the #310 re-render loop.
+ * selectors — that is what actually stops the issue-310 re-render loop.
  */
 export function useOperatorStore(): OperatorState {
   const scan = useScanStore();

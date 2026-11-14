@@ -45,7 +45,7 @@ export function WeekBar() {
   const data = useSyncExternalStore(subscribe, getSnapshot, () => emptySnapshot);
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated/50 px-3 py-2 text-xs">
+    <div className="surface-card mb-4 flex flex-wrap items-center justify-between gap-2 bg-bg-elevated/50 px-3 py-2 text-xs">
       <span className="text-text-muted">
         <span className="font-semibold text-text-primary">{data.sessionDecisions}</span> decisions this session
         {data.todayWinsCount > 0 && (
@@ -58,7 +58,7 @@ export function WeekBar() {
       <div className="flex items-center gap-2">
         {data.teachingStreak > 0 && (
           <div
-            className="flex items-center gap-1 rounded-full border border-[var(--action-info,var(--action-primary))]/30 bg-[var(--action-info,var(--action-primary))]/10 px-2 py-0.5 text-xs text-[var(--action-info,var(--action-primary))]"
+            className="surface-card flex items-center gap-1 (--action-info,var(--action-primary))]/30 bg-[var(--action-info,var(--action-primary))]/10 px-2 py-0.5 text-xs text-[var(--action-info,var(--action-primary))]"
             title="Class marking streak"
           >
             <GraduationCap className="size-3" aria-hidden />
@@ -67,7 +67,7 @@ export function WeekBar() {
         )}
         {data.facultyStreak > 0 && (
           <div
-            className="flex items-center gap-1 rounded-full border border-action-warning/30 bg-action-warning/10 px-2 py-0.5 text-xs text-action-warning"
+            className="surface-card flex items-center gap-1 bg-action-warning/10 px-2 py-0.5 text-xs text-action-warning"
             title="Zero-escalation faculty streak"
           >
             <Flame className="size-3" aria-hidden />

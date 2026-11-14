@@ -71,15 +71,15 @@ export const BotBubble = memo(function BotBubble({
             )
           ) : isStreaming ? (
             <span className="inline-flex items-center gap-1 py-0.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-current animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="size-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="size-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="size-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "300ms" }} />
             </span>
           ) : null}
         </div>
 
         {!isUser && cites.length > 0 && !isStreaming && (
-          <div className="mt-2 pt-2 border-t border-border">
+          <div className="surface-card mt-2 pt-2">
             <CitationChip cites={cites} />
           </div>
         )}
@@ -91,7 +91,7 @@ export const BotBubble = memo(function BotBubble({
                 onClick={retryThis}
                 className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-success transition"
               >
-                <RotateCcw className="h-3 w-3" /> {retryLabel}
+                <RotateCcw className="size-3.5" /> {retryLabel}
               </button>
             ) : (
               <>

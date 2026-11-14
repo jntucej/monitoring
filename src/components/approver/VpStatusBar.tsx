@@ -32,7 +32,7 @@ export function VpStatusBar({ counts, lastScan, refreshing }: VpStatusBarProps) 
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-1.5 border-t border-border bg-bg-base/90 backdrop-blur-sm text-xs font-mono min-w-0"
+      className="surface-card flex items-center gap-3 px-4 py-1.5 bg-bg-base/90 backdrop-blur-sm text-xs font-mono min-w-0"
       role="status"
       aria-live="polite"
     >
@@ -62,7 +62,7 @@ export function VpStatusBar({ counts, lastScan, refreshing }: VpStatusBarProps) 
 
       <span className="ml-auto flex items-center gap-1.5 shrink-0 text-text-muted">
         {refreshing ? (
-          <Loader2 className="w-3 h-3 animate-spin" />
+          <Loader2 className="size-3.5 animate-spin" />
         ) : (
           <span className="text-xs">
             {lastScan ? `scan ${new Date(lastScan).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "no data"}

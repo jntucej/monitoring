@@ -54,7 +54,7 @@ export default function VerifyTokenPage() {
                   key={ev.id}
                   type="button"
                   onClick={() => setActiveEventId(ev.id)}
-                  className="flex min-h11 items-center justify-between rounded-lg border border-border px-3 py-2 text-left text-sm hover:bg-bg-elevated"
+                  className="surface-card flex min-h11 items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg-elevated"
                 >
                   <span>
                     <span className="font-medium text-text-primary">{ev.title}</span>

@@ -65,7 +65,7 @@ function PersonDashboardInner() {
   return (
     <div className="space-y-6 pb-12">
       {/* Dynamic Tab Heading */}
-      <div className="text-center sm:text-left border-b border-border pb-4 space-y-1">
+      <div className="surface-card text-center sm:text-left pb-4 space-y-1">
         <p className="text-2xl font-extrabold tracking-tight text-text-primary">
           {currentTab === "idcard" && "Campus Pass Hub"}
           {currentTab === "passes" && "Gate Passes Desk"}

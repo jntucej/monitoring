@@ -73,19 +73,19 @@ export function EmergencyPlaybook({
           <motion.div
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 26, stiffness: 260 }}
-            className="fixed right-0 top-0 z-[var(--z-modal)] h-full w-full max-w-md max-w-[100vw] overflow-y-auto border-l border-border bg-bg-surface p-6"
+            className="surface-card fixed right-0 top-0 z-[var(--z-modal)] h-full w-full max-w-md max-w-[100vw] overflow-y-auto bg-bg-surface p-6"
           >
             <div className="flex items-start justify-between">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-3 py-1 text-xs font-medium text-action-danger">
-                  <Siren className="h-3 w-3" /> Emergency playbook
+                <div className="surface-card inline-flex items-center gap-2 bg-rose-500/10 px-3 py-1 text-xs font-medium text-action-danger">
+                  <Siren className="size-3.5" /> Emergency playbook
                 </div>
                 <p className="mt-3 text-sm text-text-muted">
                   One-tap actions. Each is audit-logged.
                 </p>
               </div>
               <button onClick={onClose}
-                className="rounded-lg p-1.5 text-text-muted hover:bg-[var(--bg-subtle)]">
+                className="surface-card p-1.5 text-text-muted hover:bg-[var(--bg-subtle)]">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -119,21 +119,21 @@ export function EmergencyPlaybook({
             {confirming && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                className="mt-6 rounded-xl border border-border bg-[var(--bg-subtle)] p-4"
+                className="surface-card mt-6 bg-[var(--bg-subtle)] p-4"
               >
                 <p className="text-sm text-text-primary">{confirming.confirm}</p>
                 <div className="mt-3 flex gap-2">
                   <button
                     onClick={() => fire(confirming)}
                     disabled={pending === confirming.id}
-                    className="inline-flex items-center gap-1 rounded-lg bg-action-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-action-danger disabled:opacity-50"
+                    className="surface-card inline-flex items-center gap-1 bg-action-danger px-3 py-1.5 text-xs font-medium text-white hover:bg-action-danger disabled:opacity-50"
                   >
-                    {pending === confirming.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    {pending === confirming.id ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                     Confirm
                   </button>
                   <button
                     onClick={() => setConfirming(null)}
-                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-bg-surface"
+                    className="surface-card px-3 py-1.5 text-xs font-medium text-text-muted hover:bg-bg-surface"
                   >
                     Cancel
                   </button>

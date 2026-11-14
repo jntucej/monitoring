@@ -50,7 +50,7 @@ export function LiveEventsPanel() {
 
   return (
     <WidgetBoundary title="Live Events">
-      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5 min-w-0">
+      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5 min-w-0">
         {/* Header: live indicator + session counter */}
         <div className="flex items-center justify-between mb-4 gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -119,7 +119,7 @@ export function LiveEventsPanel() {
                         {e.title}
                       </p>
                       {e.fresh && (
-                        <span className="text-xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-action-success border border-emerald-500/30 shrink-0">
+                        <span className="surface-card text-xs font-mono uppercase tracking-wider px-1.5 py-0.5 bg-emerald-500/15 text-action-success shrink-0">
                           new
                         </span>
                       )}
@@ -148,8 +148,8 @@ export function LiveEventsPanel() {
 
         {/* Footer: last-event heartbeat */}
         {lastEventAt && (
-          <p className="text-xs font-mono text-text-muted mt-3 pt-3 border-t border-border flex items-center gap-1.5">
-            <Gauge className="w-3 h-3" />
+          <p className="surface-card text-xs font-mono text-text-muted mt-3 pt-3 flex items-center gap-1.5">
+            <Gauge className="size-3.5" />
             last event {timeAgo(lastEventAt)}
           </p>
         )}

@@ -22,7 +22,7 @@ export function FocusZone({
 }) {
   if (!item) {
     return (
-      <section className="rounded-2xl border border-action-primary/30 bg-action-primary/5 p-4 sm:p-5">
+      <section className="surface-card bg-action-primary/5 p-4 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="flex size-4 items-center justify-center rounded-full bg-action-primary/20">
             <Target className="size-4 text-action-primary" aria-hidden />
@@ -71,14 +71,14 @@ export function FocusZone({
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
           onClick={onEnterFocus}
-          className="flex min-h11 flex-1 items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-action-primary/90"
+          className="surface-card flex min-h11 flex-1 items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-action-primary/90"
         >
           Open in focus mode
           <ArrowRight className="size-4" />
         </button>
         <Link
           href={item.href}
-          className="flex min-h11 flex-1 items-center justify-center rounded-xl border border-border bg-bg-surface px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-bg-elevated"
+          className="surface-card flex min-h11 flex-1 items-center justify-center bg-bg-surface px-4 py-2.5 text-sm font-medium text-text-primary transition hover:bg-bg-elevated"
         >
           View details
         </Link>

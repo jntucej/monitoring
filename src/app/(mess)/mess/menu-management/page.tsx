@@ -61,7 +61,7 @@ function fmtDate(d: string | null | undefined): string {
 
 function WidgetError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+    <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
       <span className="flex items-center gap-2 min-w-0">
         <AlertTriangle className="w-4 h-4 shrink-0" />
         <span className="truncate">{message}</span>
@@ -69,7 +69,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="min-h11 inline-flex items-center justify-center rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+        className="surface-card min-h11 inline-flex items-center justify-center px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
       >
         Retry
       </button>
@@ -95,7 +95,7 @@ function MessMenuInner() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       <WidgetBoundary title="Menu Management">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex items-center gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex items-center gap-2 min-w-0">
             <UtensilsCrossed className="w-4 h-4 text-action-success shrink-0" />
             <span className="text-sm font-semibold text-white truncate">Current Menu</span>
           </div>
@@ -122,7 +122,7 @@ function MessMenuInner() {
                   <div className="flex-1" />
                   <Link
                     href="/mess/scan"
-                    className="inline-flex min-h11 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
+                    className="surface-card inline-flex min-h11 items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 shrink-0"
                   >
                     <Eye className="w-3.5 h-3.5" /> Token Scanner
                   </Link>
@@ -145,11 +145,11 @@ function MessMenuInner() {
                           <td className="px-3 py-2.5 text-text-muted font-mono text-xs whitespace-nowrap">{item.code}</td>
                           <td className="px-3 py-2.5">
                             {item.isAvailable ? (
-                              <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-emerald-400/30 bg-emerald-400/10 text-action-success whitespace-nowrap">
+                              <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium bg-emerald-400/10 text-action-success whitespace-nowrap">
                                 Available
                               </span>
                             ) : (
-                              <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border border-rose-400/30 bg-rose-400/10 text-action-danger whitespace-nowrap">
+                              <span className="surface-card inline-block px-2 py-0.5 text-xs font-medium bg-rose-400/10 text-action-danger whitespace-nowrap">
                                 Unavailable
                               </span>
                             )}

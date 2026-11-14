@@ -92,7 +92,7 @@ function FacultyInner() {
       <PageHeader title="Faculty" subtitle="Class scope & HOD-stage queue" />
       {classes.length > 1 ? (
         /* Scope picker: year × section chips, persisted in URL */
-        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
             <PencilLine className="w-3.5 h-3.5" /> Your classes
           </p>
@@ -118,7 +118,7 @@ function FacultyInner() {
         </div>
       ) : activeClass ? (
         /* Single resolved class banner */
-        <div className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+        <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5" /> Your class
           </p>

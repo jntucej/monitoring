@@ -160,7 +160,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
     "w-full px-3 py-2 bg-bg-base border border-border rounded-lg text-sm text-text-primary";
 
   return (
-    <div className="bg-bg-surface rounded-xl border border-border p-6">
+    <div className="surface-card bg-bg-surface p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold flex items-center gap-2 text-text-primary">
           <ScrollText className="w-5 h-5 text-action-warning" />
@@ -169,9 +169,9 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
         <button
           type="button"
           onClick={openCreate}
-          className="text-xs flex items-center gap-1 bg-bg-base px-2 py-1 rounded border border-border hover:bg-[var(--bg-surface-hover)] text-text-primary"
+          className="surface-card text-xs flex items-center gap-1 bg-bg-base px-2 py-1 hover:bg-[var(--bg-surface-hover)] text-text-primary"
         >
-          <Plus className="w-3 h-3" /> Add Reason
+          <Plus className="size-3.5" /> Add Reason
         </button>
       </div>
 
@@ -239,7 +239,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
       {/* Create / Edit modal */}
       {formOpen && form && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-bg-surface border border-border rounded-2xl p-6 shadow-2xl">
+          <div className="surface-card relative w-full max-w-lg bg-bg-surface p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text-primary">
                 {editingIndex === null ? "New Exit Reason" : "Edit Exit Reason"}
@@ -356,11 +356,11 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
+            <div className="surface-card flex justify-end gap-3 mt-6 pt-4">
               <button
                 type="button"
                 onClick={() => setFormOpen(false)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
+                className="surface-card px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-elevated transition-colors"
               >
                 Cancel
               </button>
@@ -368,7 +368,7 @@ export function ExitReasonsManager({ initialReasons, onChanged }: Props) {
                 type="button"
                 onClick={() => void saveForm()}
                 disabled={loading}
-                className="rounded-lg px-4 py-2 text-sm font-semibold bg-action-primary text-white hover:brightness-110 disabled:opacity-50"
+                className="surface-card px-4 py-2 text-sm font-semibold bg-action-primary text-white hover:brightness-110 disabled:opacity-50"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : "Save"}
               </button>

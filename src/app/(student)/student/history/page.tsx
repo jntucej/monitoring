@@ -50,7 +50,7 @@ const api = useApi();
         <div>
           <p className="text-text-muted">All your gate activity</p>
         </div>
-        <div className="flex flex-wrap items-center gap-1 bg-bg-surface border border-border rounded-lg p-1">
+        <div className="surface-card flex flex-wrap items-center gap-1 bg-bg-surface p-1">
           {(["ALL", "IN", "OUT"] as const).map((f) => (
             <button
               key={f}
@@ -74,7 +74,7 @@ const api = useApi();
           </div>
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-sm text-text-muted">
-            <Filter className="w-8 h-8 mx-auto opacity-40 mb-2" />
+            <Filter className="size-5 mx-auto opacity-40 mb-2" />
             No scans match this filter.
           </div>
         ) : (
@@ -83,7 +83,7 @@ const api = useApi();
               const isIn = s.direction === "IN";
               return (
                 <div key={s.id} className="p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isIn ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
+                  <div className={`size-5 rounded-lg flex items-center justify-center ${isIn ? "bg-emerald-500/10 text-action-success" : "bg-rose-500/10 text-action-danger"}`}>
                     {isIn ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
                   </div>
                   <div className="flex-1">

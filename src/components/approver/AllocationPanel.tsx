@@ -156,7 +156,7 @@ export function AllocationPanel() {
   // ── Loading state ──
   if (data.status === "loading") {
     return (
-      <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+      <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
         <PanelHeader hostel={assignedHostel} />
         <p className="text-xs text-text-muted italic px-1 py-4 text-center">
           Loading room &amp; bed data…
@@ -168,10 +168,10 @@ export function AllocationPanel() {
   // ── No room data: EmptyState fallback ──
   if (data.status === "empty") {
     return (
-      <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+      <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
         <PanelHeader hostel={assignedHostel} />
         <EmptyState
-          icon={<BedDouble className="w-6 h-6" />}
+          icon={<BedDouble className="w-2 h-2" />}
           title="No room data available"
           description="Assign beds in the admin panel. The room &amp; bed grid will appear here once room data is published for your hostel."
         />
@@ -182,7 +182,7 @@ export function AllocationPanel() {
   const { rooms, unallocated } = data;
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       <PanelHeader hostel={assignedHostel} />
 
       {/* Two columns on desktop: unallocated list | room-bed grid. Stacked on mobile. */}
@@ -207,7 +207,7 @@ export function AllocationPanel() {
                       e.dataTransfer.setData("text/plain", u.roll);
                       e.dataTransfer.effectAllowed = "move";
                     }}
-                    className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-bg-elevated px-2.5 py-2 cursor-grab active:cursor-grabbing hover:border-action-primary/40 transition-colors select-none"
+                    className="surface-card flex items-center gap-2 bg-bg-elevated px-2.5 py-2 cursor-grab active:cursor-grabbing hover: transition-colors select-none"
                     aria-label={`Drag ${u.name} to a bed`}
                   >
                     <Circle className="w-2 h-2 text-text-muted shrink-0" />
@@ -289,7 +289,7 @@ export function AllocationPanel() {
           </div>
 
           <p className="mt-3 text-xs text-text-muted flex items-center gap-1">
-            <Lock className="w-3 h-3" />
+            <Lock className="size-3.5" />
             Drag a student onto a free bed to allocate.
           </p>
         </div>
@@ -302,7 +302,7 @@ function PanelHeader({ hostel }: { hostel: string | null }) {
   return (
     <div className="flex items-center justify-between gap-2 mb-3">
       <div className="flex items-center gap-2 min-w-0">
-        <BedDouble className="w-4 h-4 text-action-primary shrink-0" />
+        <BedDouble className="w-2 h-2 text-action-primary shrink-0" />
         <span className="text-sm font-bold text-text-primary truncate">
           Room &amp; Bed Allocation
         </span>

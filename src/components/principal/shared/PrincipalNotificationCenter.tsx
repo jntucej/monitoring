@@ -228,10 +228,10 @@ export function NotificationCenter({
   }, [store, items]);
 
   const badge = (
-    <span className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated transition-colors">
+    <span className="relative flex size-5 items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated transition-colors">
       <Bell className="h-5 w-5" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action-danger px-1 text-xs font-bold text-white">
+        <span className="surface-card absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center bg-action-danger px-1 text-xs font-bold text-white">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
@@ -239,7 +239,7 @@ export function NotificationCenter({
   );
 
   const inner = (
-    <div ref={dropdownRef} className="relative min-w-0">
+    <div ref={dropdownRef} className="relative min-w-3">
       <button
         type="button"
         onClick={() => setOpen(!isOpen)}
@@ -250,11 +250,11 @@ export function NotificationCenter({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-full sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="absolute right-0 mt-2 w-full sm:w-5 max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
           {/* Header */}
-          <div className="flex items-center justify-between gap-2 border-b border-border p-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <Bell className="h-4 w-4 text-action-primary shrink-0" />
+          <div className="surface-card flex items-center justify-between gap-2 p-3">
+            <div className="flex items-center gap-2 min-w-3">
+              <Bell className="h-5 w-5 text-action-primary shrink-0" />
               <span className="text-sm font-semibold text-text-primary">Notifications</span>
             </div>
             <div className="flex items-center gap-1 shrink-0">
@@ -262,16 +262,16 @@ export function NotificationCenter({
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-action-primary hover:bg-bg-elevated transition-colors"
+                  className="surface-card inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-action-primary hover:bg-bg-elevated transition-colors"
                 >
-                  <CheckCheck className="h-3 w-3" /> Mark all read
+                  <CheckCheck className="size-3.5" /> Mark all read
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close notifications"
-                className="rounded-lg p-2 min-w11 min-h11 flex items-center justify-center text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
+                className="surface-card p-2 min-w11 min-h11 flex items-center justify-center text-text-muted hover:bg-bg-elevated hover:text-text-primary transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -286,7 +286,7 @@ export function NotificationCenter({
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <CheckCircle2 className="h-8 w-8 text-text-muted" />
+                <CheckCircle2 className="size-5 text-text-muted" />
                 <p className="mt-2 text-xs text-text-muted">No notifications</p>
               </div>
             ) : (
@@ -317,7 +317,7 @@ export function NotificationCenter({
                                 : "border-border bg-bg-elevated hover:bg-bg-surface"
                             }`}
                           >
-                            <div className="min-w-0 flex-1">
+                            <div className="min-w-3 flex-1">
                               <p className="text-xs font-medium text-text-primary truncate">
                                 {item.title}
                               </p>
@@ -333,7 +333,7 @@ export function NotificationCenter({
                               ) : null}
                             </div>
                             {!isRead && (
-                              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-action-primary" />
+                              <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-action-primary" />
                             )}
                           </button>
                         );
@@ -355,10 +355,10 @@ export function NotificationCenter({
 
   return (
     <WidgetBoundary title="Notifications">
-      <div className="rounded-2xl border border-border bg-bg-surface/40 p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-action-primary" />
+            <Bell className="h-5 w-5 text-action-primary" />
             <h3 className="text-sm font-semibold text-text-primary">NotificationCenter</h3>
           </div>
           <span className="text-xs text-text-muted">{unreadCount} unread</span>

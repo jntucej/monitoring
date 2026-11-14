@@ -43,7 +43,7 @@ function UrgencyDot({ urgency }: { urgency: Urgency }) {
   return (
     <span
       aria-label={`urgency ${urgency}`}
-      className={`inline-block h-2 w-2 shrink-0 rounded-full ${URGENCY_DOT[urgency]}`}
+      className={`inline-block h-3 w-3 shrink-0 rounded-full ${URGENCY_DOT[urgency]}`}
     />
   );
 }
@@ -83,7 +83,7 @@ export function AttentionQueue() {
     <WidgetBoundary title="Attention Queue">
       <section
         aria-label="Attention queue"
-        className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0"
+        className="surface-card bg-bg-surface p-5 min-w-3"
       >
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
@@ -106,17 +106,17 @@ export function AttentionQueue() {
             Loading attention queue…
           </div>
         ) : error && !data ? (
-          <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-200">
             {error}
           </div>
         ) : data?.empty ? (
           <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
-            <CheckCircle className="h-6 w-6 text-action-success" aria-hidden />
+            <CheckCircle className="h-4 w-4 text-action-success" aria-hidden />
             <p className="text-sm">All clear — nothing needs your attention right now.</p>
           </div>
         ) : items.length === 0 ? (
           <div className="mt-4 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
-            <Inbox className="h-6 w-6 opacity-50" aria-hidden />
+            <Inbox className="h-4 w-4 opacity-50" aria-hidden />
             <p className="text-sm">Nothing here yet.</p>
           </div>
         ) : (
@@ -124,12 +124,12 @@ export function AttentionQueue() {
             {items.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
+                className="surface-card bg-[var(--bg-raised)]/40 p-3.5"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 flex-1 items-start gap-2">
+                  <div className="flex min-w-3 flex-1 items-start gap-2">
                     <UrgencyDot urgency={item.urgency} />
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-3 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">
                         {item.title}
                       </p>
@@ -139,10 +139,10 @@ export function AttentionQueue() {
                   <a
                     href={item.ctaHref}
                     aria-label={`Open ${item.title}`}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-indigo-500/20 px-2.5 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30 hover:text-indigo-200"
+                    className="surface-card inline-flex shrink-0 items-center gap-1 bg-indigo-500/20 px-2.5 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30 hover:text-indigo-200"
                   >
                     Open
-                    <ArrowRight className="h-3 w-3" aria-hidden />
+                    <ArrowRight className="size-3.5" aria-hidden />
                   </a>
                 </div>
               </li>

@@ -19,7 +19,7 @@ type ComplaintsData = ComplaintRow[] | { data?: { complaints?: ComplaintRow[] } 
 function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
   const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
   return (
-    <div className="rounded-xl border border-border bg-[var(--bg-elev-1)] p-4 min-w-0">
+    <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
       <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
@@ -46,7 +46,7 @@ export default function EmoLandingPage() {
 
       <Link
         href="/emo/complaints"
-        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h11"
+        className="surface-card group flex items-center justify-between p-4 hover:bg-[var(--bg-elev-1)] min-h11"
       >
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-5 h-5 text-action-warning" />
@@ -61,7 +61,7 @@ export default function EmoLandingPage() {
       </Link>
       <Link
         href="/emo/complaints?status=resolved"
-        className="group flex items-center justify-between rounded-xl border border-border p-4 hover:bg-[var(--bg-elev-1)] min-h11"
+        className="surface-card group flex items-center justify-between p-4 hover:bg-[var(--bg-elev-1)] min-h11"
       >
         <div className="flex items-center gap-3">
           <Wrench className="w-5 h-5 text-action-success" />

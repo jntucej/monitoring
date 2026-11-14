@@ -50,7 +50,7 @@ function VisitorRequestInner() {
         href="/visitor"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Visitor Portal
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Visitor Portal
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
@@ -64,7 +64,7 @@ function VisitorRequestInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Request data unavailable: {error}</span>
@@ -72,7 +72,7 @@ function VisitorRequestInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -81,7 +81,7 @@ function VisitorRequestInner() {
 
       <WidgetBoundary title="Visit Request">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border">
+          <div className="surface-card px-4 py-3">
             <div className="flex items-center gap-2 min-w-0">
               <FileText className="w-4 h-4 text-action-info shrink-0" />
               <span className="text-sm font-semibold text-white truncate">What you requested to visit</span>
@@ -94,19 +94,19 @@ function VisitorRequestInner() {
           ) : (
             <div className="p-4 min-w-0 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">State</p>
                   <p className={`mt-1 text-base font-bold ${stateTone}`}>{stateLabel}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Host</p>
                   <p className="mt-1 text-base text-text-primary">{req?.hostName ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Purpose</p>
                   <p className="mt-1 text-base text-text-primary">{req?.purpose ?? "—"}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Requested</p>
                   <p className="mt-1 text-base font-semibold text-action-warning">{fmt(req?.requestedAt)}</p>
                 </div>

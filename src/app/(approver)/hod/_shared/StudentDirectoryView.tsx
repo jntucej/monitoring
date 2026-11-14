@@ -62,7 +62,7 @@ export function StudentDirectoryView() {
             {students.map((s) => (
               <li
                 key={s.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -71,7 +71,7 @@ export function StudentDirectoryView() {
                       {s.roll ?? s.uniqueId ?? "—"}
                     </p>
                   </div>
-                  <span className="rounded-full bg-bg-elevated border border-border px-2 py-0.5 text-xs text-text-secondary">
+                  <span className="surface-card bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
                     {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
                   </span>
                 </div>

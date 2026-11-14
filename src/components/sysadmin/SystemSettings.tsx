@@ -63,7 +63,7 @@ const api = useApi();
 
   return (
     <div className="space-y-6">
-      <div className="bg-bg-surface rounded-xl border border-border p-6">
+      <div className="surface-card bg-bg-surface p-6">
         <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
           <h3 className="font-semibold">System Settings</h3>
           {msg && <div className={`text-sm ${msg.startsWith("✅") ? "text-action-success" : "text-action-danger"}`}>{msg}</div>}
@@ -75,7 +75,7 @@ const api = useApi();
           </div>
         ) : error ? (
           <div className="p-8 flex flex-col items-center gap-4 text-center">
-            <XCircle className="w-10 h-10 text-red-500" />
+            <XCircle className="size-6 text-red-500" />
             <h4 className="font-semibold text-lg">Could not load settings</h4>
             <p className="text-sm text-text-muted">{typeof error === "string" ? error : (error as any)?.message || String(error)}</p>
           </div>

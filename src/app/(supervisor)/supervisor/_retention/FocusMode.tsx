@@ -144,10 +144,10 @@ export function FocusMode({
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-2xl rounded-3xl border border-border bg-bg-surface p-6 shadow-2xl sm:p-8">
-        <header className="mb-6 flex items-center justify-between border-b border-border pb-4">
+      <div className="surface-card relative w-full max-w-2xl bg-bg-surface p-6 sm:p-8">
+        <header className="surface-card mb-6 flex items-center justify-between pb-4">
           <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-action-primary animate-pulse" />
+            <span className="size-4 rounded-full bg-action-primary animate-pulse" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-text-primary">
               Supervisor Focus Mode
             </h2>
@@ -159,7 +159,7 @@ export function FocusMode({
             <button
               onClick={onClose}
               aria-label="Close"
-              className="flex size-11 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
+              className="flex size-4 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
             >
               ✕
             </button>
@@ -180,7 +180,7 @@ export function FocusMode({
             </p>
             <button
               onClick={onClose}
-              className="mt-6 min-h11 rounded-xl bg-action-primary px-5 py-2 text-sm font-medium text-white"
+              className="surface-card mt-6 min-h11 bg-action-primary px-5 py-2 text-sm font-medium text-white"
             >
               Exit Focus Mode
             </button>
@@ -195,7 +195,7 @@ export function FocusMode({
               className="space-y-6"
             >
               <div className="flex items-center justify-between">
-                <span className="rounded-full bg-bg-elevated px-2.5 py-1 text-xs font-semibold uppercase text-text-muted">
+                <span className="surface-card bg-bg-elevated px-2.5 py-1 text-xs font-semibold uppercase text-text-muted">
                   {current.kind} · {current.ticket}
                 </span>
                 {current.slaDeadline && (
@@ -212,11 +212,11 @@ export function FocusMode({
                 </p>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-border">
+              <div className="surface-card flex gap-3 pt-4">
                 <button
                   disabled={busy}
                   onClick={() => act("resolve")}
-                  className="flex min-h11 flex-1 items-center justify-center gap-2 rounded-xl bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
+                  className="surface-card flex min-h11 flex-1 items-center justify-center gap-2 bg-action-primary py-3 text-sm font-medium text-white transition hover:bg-action-primary/90 disabled:opacity-50"
                 >
                   <Check className="size-4" />
                   Resolve / Clear (A)
@@ -224,7 +224,7 @@ export function FocusMode({
                 <button
                   disabled={busy}
                   onClick={() => act("escalate")}
-                  className="flex min-h11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
+                  className="surface-card flex min-h11 flex-1 items-center justify-center gap-2 bg-bg-base py-3 text-sm font-medium text-text-primary transition hover:bg-bg-elevated disabled:opacity-50"
                 >
                   <ArrowUpRight className="size-4" />
                   Escalate higher (E)
@@ -233,7 +233,7 @@ export function FocusMode({
 
               <footer className="flex items-center justify-center gap-4 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
-                  <Keyboard className="size-3" /> Shortcuts: <kbd className="rounded border px-1">A</kbd> resolve, <kbd className="rounded border px-1">E</kbd> escalate, <kbd className="rounded border px-1">Esc</kbd> exit
+                  <Keyboard className="size-4" /> Shortcuts: <kbd className="surface-card px-1">A</kbd> resolve, <kbd className="surface-card px-1">E</kbd> escalate, <kbd className="surface-card px-1">Esc</kbd> exit
                 </span>
               </footer>
             </motion.div>

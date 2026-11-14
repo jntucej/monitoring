@@ -68,7 +68,7 @@ function VpAnalyticsInner() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
       <WidgetBoundary title="VP Analytics">
-        <div className="rounded-xl border border-border bg-bg-base p-4 min-w-0">
+        <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-text-muted mb-4 min-w-0">
             <BarChart3 className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
@@ -78,7 +78,7 @@ function VpAnalyticsInner() {
           </div>
 
           {error && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-action-warning">
+            <div className="surface-card mb-3 bg-amber-500/10 p-3 text-xs text-action-warning">
               Analytics unavailable: {error}
             </div>
           )}
@@ -92,7 +92,7 @@ function VpAnalyticsInner() {
           ) : (
             <div className="grid gap-4 md:grid-cols-3 min-w-0">
               {/* By stage */}
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-text-muted">
                   <ScrollText className="w-3.5 h-3.5" /> By stage
                 </div>
@@ -113,7 +113,7 @@ function VpAnalyticsInner() {
               </div>
 
               {/* By status */}
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-text-muted">
                   <CheckCircle2 className="w-3.5 h-3.5" /> By status
                 </div>
@@ -134,7 +134,7 @@ function VpAnalyticsInner() {
               </div>
 
               {/* Recent approved tickets */}
-              <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-xs text-text-muted">
                   <Clock className="w-3.5 h-3.5" /> Recent tickets
                 </div>

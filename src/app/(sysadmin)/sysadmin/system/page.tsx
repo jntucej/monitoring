@@ -17,10 +17,10 @@ export default function SystemHubPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Link
           href="/sysadmin/health"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-emerald-500/10 text-action-success">
+            <div className="surface-card p-3 bg-emerald-500/10 text-action-success">
               <Activity className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -33,10 +33,10 @@ export default function SystemHubPage() {
 
         <Link
           href="/sysadmin/jobs"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-blue-500/10 text-action-primary">
+            <div className="surface-card p-3 bg-blue-500/10 text-action-primary">
               <Clock className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -49,10 +49,10 @@ export default function SystemHubPage() {
 
         <Link
           href="/sysadmin/integrations"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-purple-500/10 text-unit-c">
+            <div className="surface-card p-3 bg-purple-500/10 text-unit-c">
               <Database className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -65,10 +65,10 @@ export default function SystemHubPage() {
 
         <Link
           href="/sysadmin/scheduling"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-amber-500/10 text-action-warning">
+            <div className="surface-card p-3 bg-amber-500/10 text-action-warning">
               <Sparkles className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -81,10 +81,10 @@ export default function SystemHubPage() {
 
         <Link
           href="/sysadmin/navigation"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-sky-500/10 text-sky-500">
+            <div className="surface-card p-3 bg-sky-500/10 text-sky-500">
               <Layout className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />
@@ -97,10 +97,10 @@ export default function SystemHubPage() {
 
         <Link
           href="/sysadmin/infrastructure"
-          className="p-5 rounded-xl bg-bg-base border border-border hover:border-[var(--primary)] transition group shadow-sm flex flex-col justify-between h-40"
+          className="surface-card p-5 bg-bg-base hover: (--primary)] transition group flex flex-col justify-between h-40"
         >
           <div className="flex items-start justify-between">
-            <div className="p-3 rounded-lg bg-rose-500/10 text-action-danger">
+            <div className="surface-card p-3 bg-rose-500/10 text-action-danger">
               <Server className="w-5 h-5" />
             </div>
             <ArrowUpRight className="w-4 h-4 text-text-muted group-hover:text-[var(--primary)] transition" />

@@ -89,13 +89,13 @@ export function GateSchedule() {
       )}
 
       {showAddRule && (
-        <Card className="border p-4 bg-bg-elevated dark:bg-bg-elevated/40">
+        <Card className="surface-card p-4 bg-bg-elevated dark:bg-bg-elevated/40">
           <form onSubmit={handleCreateRule} className="space-y-4">
             <h3 className="font-semibold text-lg">New Access Rule</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input value={ruleName} onChange={(e) => setRuleName(e.target.value)} required placeholder="Rule Name" className="p-2 border rounded text-sm" />
-              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="p-2 border rounded text-sm" />
-              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="p-2 border rounded text-sm" />
+              <input value={ruleName} onChange={(e) => setRuleName(e.target.value)} required placeholder="Rule Name" className="surface-card p-2 text-sm" />
+              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="surface-card p-2 text-sm" />
+              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="surface-card p-2 text-sm" />
             </div>
             <Button type="submit" size="sm">Save Rule</Button>
           </form>

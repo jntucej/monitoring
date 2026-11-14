@@ -16,7 +16,7 @@ export default function SubjectFacultyTodayPage() {
     <div className="p-6">
       <PageHeader title="Subject Faculty" subtitle="Subject-scoped teaching view" />
       <EmptyState
-        icon={<LayoutDashboard className="w-8 h-8" />}
+        icon={<LayoutDashboard className="size-6" />}
         title="Subject Faculty Today"
         description="Daily teaching schedule and class overview."
       />

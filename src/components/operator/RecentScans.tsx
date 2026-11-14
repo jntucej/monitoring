@@ -29,18 +29,18 @@ const Row = memo(function Row({
     <button
       type="button"
       onClick={() => onSelect?.(scan)}
-      className="w-full flex items-center justify-between text-xs py-3 px-2 border-b border-border/30 last:border-b-0 hover:bg-bg-base rounded-xl transition-colors text-left min-h11"
+      className="surface-card w-full flex items-center justify-between text-xs py-3 px-2 last: hover:bg-bg-base transition-colors text-left min-h11"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === "IN" ? "bg-emerald-500/10 text-action-success" : "bg-action-danger/10 text-action-danger"}`}>
-          <User className="w-4.5 h-4.5" />
+        <div className={`size-6 rounded-xl flex items-center justify-center shrink-0 ${scan.direction === "IN" ? "bg-emerald-500/10 text-action-success" : "bg-action-danger/10 text-action-danger"}`}>
+          <User className="size-4" />
         </div>
         <div className="min-w-0">
           <p className="font-bold text-text-primary truncate">{scan.name}</p>
           <p className="text-xs text-text-muted font-mono">{scan.roll}</p>
           {scan.operatorName ? (
             <p className="text-xs text-text-secondary inline-flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3" /> by {scan.operatorName}
+              <ShieldCheck className="size-3.5" /> by {scan.operatorName}
             </p>
           ) : null}
         </div>
@@ -88,7 +88,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
   const newestId = filteredScans[0]?.id;
 
   return (
-    <div className="bg-bg-surface rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+    <div className="surface-card bg-bg-surface p-5 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold text-sm text-text-primary">Recent Access Activity</h3>
@@ -96,7 +96,7 @@ export function RecentScans({ scans, onSelect }: RecentScansProps) {
         </div>
 
         {/* Live Filter Stream */}
-        <div className="flex items-center gap-1 bg-bg-elevated p-1 rounded-xl border border-border self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
+        <div className="surface-card flex items-center gap-1 bg-bg-elevated p-1 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
           {(["ALL", "IN", "OUT", "FLAGGED"] as ScanFilter[]).map((tab) => {
             const isActive = filter === tab;
             return (

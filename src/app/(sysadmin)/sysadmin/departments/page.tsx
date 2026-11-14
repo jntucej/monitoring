@@ -99,7 +99,7 @@ const api = useApi();
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              <Building2 className="w-6 h-6 text-action-success" />
+              <Building2 className="w-5 h-5 text-action-success" />
               Department & HOD Governance Desk
             </p>
             <p className="text-sm text-text-muted">
@@ -117,7 +117,7 @@ const api = useApi();
                 hodUserId: null,
               })
             }
-            className="px-4 py-2 bg-action-success hover:bg-action-success text-white font-semibold rounded-xl text-xs flex items-center gap-2 transition"
+            className="surface-card px-4 py-2 bg-action-success hover:bg-action-success text-white font-semibold text-xs flex items-center gap-2 transition"
           >
             <Plus className="w-4 h-4" /> Add Department
           </button>
@@ -188,14 +188,14 @@ const api = useApi();
                           onClick={() =>
                             setEditingDept({ ...d, hodIdInput: "", hodUserId: null })
                           }
-                          className="p-1.5 rounded-lg bg-bg-elevated hover:text-action-success transition"
+                          className="surface-card p-1.5 bg-bg-elevated hover:text-action-success transition"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(d.code)}
-                          className="p-1.5 rounded-lg bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
+                          className="surface-card p-1.5 bg-rose-500/10 text-action-danger hover:bg-rose-500/20 transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -209,7 +209,7 @@ const api = useApi();
         </div>
         {editingDept && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="surface-card bg-bg-surface max-w-md w-full p-6 space-y-4">
               <h3 className="text-lg font-bold text-text-primary">
                 {editingDept.code ? "Edit Department" : "Create New Department"}
               </h3>
@@ -225,7 +225,7 @@ const api = useApi();
                     value={editingDept.code || ""}
                     onChange={(e) => setEditingDept({ ...editingDept, code: e.target.value.toUpperCase() })}
                     placeholder="e.g. CSE"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm font-mono text-text-primary focus:outline-none focus:borderaction-success"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm font-mono text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -239,7 +239,7 @@ const api = useApi();
                     value={editingDept.name || ""}
                     onChange={(e) => setEditingDept({ ...editingDept, name: e.target.value })}
                     placeholder="e.g. Computer Science & Engineering"
-                    className="w-full px-3 py-2 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary focus:outline-none focus:borderaction-success"
+                    className="surface-card w-full px-3 py-2 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
                   />
                 </div>
 
@@ -259,18 +259,18 @@ const api = useApi();
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                <div className="surface-card flex justify-end gap-2 pt-4">
                   <button
                     type="button"
                     onClick={() => setEditingDept(null)}
-                    className="px-4 py-2 bg-bg-elevated text-text-muted rounded-xl text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={!editingDept.code || !editingDept.name || !editingDept.hodUserId}
-                    className="px-4 py-2 bg-action-success text-white rounded-xl text-xs font-semibold hover:bg-action-success transition disabled:opacity-50 disabled:pointer-events-none"
+                    className="surface-card px-4 py-2 bg-action-success text-white text-xs font-semibold hover:bg-action-success transition disabled:opacity-50 disabled:pointer-events-none"
                   >
                     Save Department
                   </button>

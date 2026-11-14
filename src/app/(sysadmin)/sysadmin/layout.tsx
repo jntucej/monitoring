@@ -91,7 +91,7 @@ export default function SysadminConsoleLayout({
           <div className="hidden md:flex md:h-full">
             <Sidebar overview={overview} />
             <main className="flex-1 overflow-y-auto">
-              <div className="flex items-center justify-between gap-3 border-b border-border bg-bg-surface px-4 py-2 sm:px-6">
+              <div className="surface-card flex items-center justify-between gap-3 bg-bg-surface px-4 py-2 sm:px-6">
                 <span className="text-xs font-semibold tracking-wide text-text-muted">
                   JNTU CEEJ · SysAdmin
                 </span>
@@ -109,7 +109,7 @@ export default function SysadminConsoleLayout({
               aria-label="Open navigation"
               aria-expanded={mobileOpen}
               className={cn(
-                "absolute left-3 top-3 z-30 inline-flex h-10 w-10 items-center justify-center rounded-lg",
+                "absolute left-3 top-3 z-30 inline-flex size-6 items-center justify-center rounded-lg",
                 "border border-border bg-bg-surface/90 backdrop-blur",
                 "text-text-muted hover:text-text-primary",
                 "shadow-sm pt-safe"

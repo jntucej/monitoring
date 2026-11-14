@@ -3,14 +3,14 @@
 /**
  * EmptyState — a reusable empty/zero-state UI component.
  *
- * Issue #391: the live region is decoupled from the visual content so
+ * Issue issue-391: the live region is decoupled from the visual content so
  * screen readers only announce when the message *changes*, not on every
  * parent re-render (which would fire on every keypress in a filter list).
  *
- * Issue #397: wraps content in `relative z-10` so it renders above modal
+ * Issue issue-397: wraps content in `relative z-10` so it renders above modal
  * backdrops that use isolation/z-index stacking on Safari.
  *
- * Issue #402: in development, warns when an `action` element has no onClick
+ * Issue issue-402: in development, warns when an `action` element has no onClick
  * handler and is not disabled — catching silent no-op buttons before they ship.
  */
 
@@ -25,7 +25,7 @@ export interface EmptyStateProps {
   className?: string;
 }
 
-// Issue #402: dev-only guard to catch action buttons with no click handler.
+// Issue issue-402: dev-only guard to catch action buttons with no click handler.
 function warnActionWithNoHandler(action: ReactNode): void {
   if (process.env.NODE_ENV !== "development") return;
   if (!action || typeof action !== "object") return;
@@ -51,7 +51,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   warnActionWithNoHandler(action);
 
-  // Issue #391: track the last announced message so the live region only
+  // Issue issue-391: track the last announced message so the live region only
   // updates when the content *changes*. Re-renders with the same text are
   // silent — prevents screen readers from re-announcing on every keystroke
   // in a filtered list that mounts EmptyState mid-interaction.
@@ -83,7 +83,7 @@ export function EmptyState({
         {announced}
       </div>
 
-      {/* Issue #397: z-10 ensures this content renders above modal backdrops
+      {/* Issue issue-397: z-10 ensures this content renders above modal backdrops
           that create a new stacking context (e.g. Safari + isolation:isolate) */}
       <div
         className={`relative z-10 flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}

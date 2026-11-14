@@ -63,7 +63,7 @@ export function ActivePassCard() {
 
   if (passes.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-center gap-2 text-text-secondary">
           <Ticket className="h-5 w-5" aria-hidden />
           <span className="text-sm">No active pass</span>
@@ -80,7 +80,7 @@ export function ActivePassCard() {
 
   if (passes.length > 1) {
     return (
-      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-center gap-2 text-text-primary">
           <Ticket className="h-5 w-5" aria-hidden />
           <span className="text-sm font-medium">
@@ -99,7 +99,7 @@ export function ActivePassCard() {
 
   // Single pass — inline QR.
   return (
-    <div className="rounded-2xl border border-action-primary/40 bg-bg-surface p-4">
+    <div className="surface-card bg-bg-surface p-4">
       <div className="mb-2 flex items-center gap-2">
         <QrCode className="h-4 w-4 text-action-primary" aria-hidden />
         <span className="text-sm font-medium text-text-primary">
@@ -107,7 +107,7 @@ export function ActivePassCard() {
         </span>
       </div>
       {qr ? (
-        <div className="flex justify-center rounded-xl bg-white p-3">
+        <div className="surface-card flex justify-center bg-white p-3">
           <QRCodeCanvas value={qr} size={180} level="M" />
         </div>
       ) : (

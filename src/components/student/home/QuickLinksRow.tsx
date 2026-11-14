@@ -24,7 +24,7 @@ export function QuickLinksRow() {
         <Link
           key={href}
           href={href}
-          className="flex flex-col items-center gap-1 rounded-xl border border-border bg-bg-surface py-3 text-xs text-text-secondary"
+          className="surface-card flex flex-col items-center gap-1 bg-bg-surface py-3 text-xs text-text-secondary"
         >
           <Icon className="h-5 w-5" aria-hidden />
           <span>{label}</span>

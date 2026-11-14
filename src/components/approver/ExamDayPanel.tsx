@@ -107,7 +107,7 @@ export function ExamDayPanel() {
   const isOpen = examDay === "open";
 
   return (
-    <section className="rounded-xl border border-border bg-bg-surface/60 p-4 min-w-0">
+    <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header: gate state pill */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -127,7 +127,7 @@ export function ExamDayPanel() {
               : "text-action-danger bg-rose-400/10 border-rose-400/20"
           }`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? "bg-action-success" : "bg-action-danger"}`} />
+          <span className={`size-2 rounded-full ${isOpen ? "bg-action-success" : "bg-action-danger"}`} />
           {isOpen ? "Open" : "Closed"}
         </span>
       </div>
@@ -138,7 +138,7 @@ export function ExamDayPanel() {
           {todaySessions.map((r) => (
             <li
               key={r.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-bg-elevated px-2.5 py-1.5 min-w-0"
+              className="surface-card flex items-center justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
             >
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-text-primary truncate">
@@ -155,7 +155,7 @@ export function ExamDayPanel() {
           ))}
         </ul>
       ) : (
-        <div className="rounded-lg border border-border bg-bg-base/50 px-3 py-3 mb-3">
+        <div className="surface-card bg-bg-base/50 px-3 py-3 mb-3">
           <div className="flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-text-muted shrink-0 mt-0.5" />
             <p className="text-xs text-text-muted">
@@ -172,7 +172,7 @@ export function ExamDayPanel() {
           type="button"
           disabled={busy || isOpen}
           onClick={() => void setDay(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-action-success hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="surface-card inline-flex items-center justify-center gap-2 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-action-success hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <DoorOpen className="w-3.5 h-3.5" />}
           Open day access
@@ -181,7 +181,7 @@ export function ExamDayPanel() {
           type="button"
           disabled={busy || !isOpen}
           onClick={() => void setDay(false)}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-action-danger hover:bg-rose-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="surface-card inline-flex items-center justify-center gap-2 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-action-danger hover:bg-rose-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <DoorClosed className="w-3.5 h-3.5" />}
           Close day access

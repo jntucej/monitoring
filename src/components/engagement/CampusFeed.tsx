@@ -76,10 +76,10 @@ function formatWhen(iso: string | null): string | null {
 function VerifiedBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-action-success"
+      className="surface-card inline-flex items-center gap-1 bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-action-success"
       title="Published by an administrator"
     >
-      <ShieldCheck className="h-3 w-3" aria-hidden />
+      <ShieldCheck className="size-3.5" aria-hidden />
       Verified notice
     </span>
   );
@@ -156,7 +156,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
 
   return (
     <WidgetBoundary title="Campus Feed">
-      <section aria-label="Campus feed" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="Campus feed" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
             <Megaphone className="h-4 w-4 text-action-primary" aria-hidden />
@@ -196,7 +196,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
             Loading feed…
           </div>
         ) : error && !data ? (
-          <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
         ) : items.length === 0 ? (
           <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />
@@ -207,7 +207,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
             {items.map((item) => (
               <li
                 key={item.key}
-                className="rounded-xl border border-border bg-[var(--bg-raised)]/40 p-3.5"
+                className="surface-card bg-[var(--bg-raised)]/40 p-3.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
@@ -219,8 +219,8 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                     <p className="truncate text-sm font-semibold text-text-primary">{item.title}</p>
                     {item.isOfficial && <VerifiedBadge />}
                     {item.followed && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-indigo-300">
-                        <Star className="h-3 w-3" aria-hidden />
+                      <span className="surface-card inline-flex items-center gap-1 bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-indigo-300">
+                        <Star className="size-3.5" aria-hidden />
                         Followed
                       </span>
                     )}
@@ -228,10 +228,10 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-xs text-text-muted">{item.body}</p>
                 <p className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-text-muted">
-                  <User className="h-3 w-3" aria-hidden />
+                  <User className="size-3.5" aria-hidden />
                   {item.meta}
                   <span aria-hidden>·</span>
-                  <Clock className="h-3 w-3" aria-hidden />
+                  <Clock className="size-3.5" aria-hidden />
                   <span>{new Date().toLocaleDateString()}</span>
                 </p>
               </li>

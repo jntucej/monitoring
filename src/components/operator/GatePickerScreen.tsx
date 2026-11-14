@@ -102,7 +102,7 @@ export function GatePickerScreen() {
   if (loading) {
     return (
       <div className="min-h-dvh bg-bg-base flex-col items-center justify-center gap-3">
-        <div className="w-10 h-10 border-t-transparent rounded-full animate-spin" />
+        <div className="size-6 border-t-transparent rounded-full animate-spin" />
         <p className="font-semibold text-text-muted">Loading gates…</p>
       </div>
     );
@@ -113,7 +113,7 @@ export function GatePickerScreen() {
       <div className="w-full max-w-md space-y-4">
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-action-success flex items-center justify-center mx-auto">
+          <div className="size-6 rounded-full bg-emerald-500/15 text-action-success flex items-center justify-center mx-auto">
             <MapPin className="w-6 h-6" />
           </div>
           <h1 className="font-bold text-text-primary">
@@ -126,14 +126,14 @@ export function GatePickerScreen() {
 
         {/* Gate list */}
         {error && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-rose-500/10 border-rose-500/30 text-xs">
+          <div className="surface-card flex items-start gap-2 p-3 bg-rose-500/10 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {gates.length === 0 ? (
-          <div className="rounded-xl border-border bg-bg-surface p-6 text-text-muted">
+          <div className="surface-card bg-bg-surface p-6 text-text-muted">
             No active gates found. Contact your supervisor.
           </div>
         ) : (
@@ -159,10 +159,10 @@ export function GatePickerScreen() {
                   ].join(" ")}
                 >
                   {selected === g.id && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                    <div className="size-4 rounded-full bg-white" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-4">
                   <div className="font-semibold text-sm truncate">{g.name}</div>
                   {g.location && (
                     <div className="text-text-muted truncate">
@@ -185,7 +185,7 @@ export function GatePickerScreen() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !selected}
-          className="w-full py-3 px-4 rounded-xl bg-action-primary hover:brightness-110 disabled:opacity-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+          className="surface-card w-full py-3 px-4 bg-action-primary hover:brightness-110 disabled:opacity-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
         >
           {submitting ? (
             <>

@@ -43,13 +43,13 @@ export function StaffStatusBar({ counts, refreshing = false }: StaffStatusBarPro
 
   return (
     <footer
-      className="flex items-center justify-between gap-4 px-4 py-2 border-t border-border bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Staff status bar"
     >
       {/* Left: shift · tasks · leaves · last scan */}
       <div className="flex items-center gap-4 min-w-0 flex-wrap">
         <span className="inline-flex items-center gap-1.5 min-w-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-action-success shrink-0" />
+          <span className="size-2 rounded-full bg-action-success shrink-0" />
           <span className="text-text-muted">shift</span>
           <span className="font-mono tabular-nums font-bold text-action-success">
             {counts?.shift || "—"}

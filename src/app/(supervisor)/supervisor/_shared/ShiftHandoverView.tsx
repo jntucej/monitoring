@@ -46,7 +46,7 @@ export function ShiftHandoverView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <HandoverStreak />
 
-        <div className="rounded-2xl border border-border bg-bg-surface p-5">
+        <div className="surface-card bg-bg-surface p-5">
           {done ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle2 className="size-10 text-action-primary mb-2" />
@@ -65,14 +65,14 @@ export function ShiftHandoverView() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Detail any ongoing gate repairs, guard adjustments, or active alerts..."
-                  className="mt-1 w-full rounded-xl border border-border bg-bg-base p-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
+                  className="surface-card mt-1 w-full bg-bg-base p-3 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex min-h11 w-full items-center justify-center gap-2 rounded-xl bg-action-primary py-2.5 text-xs font-semibold text-white transition hover:bg-action-primary/90 disabled:opacity-50"
+                className="surface-card flex min-h11 w-full items-center justify-center gap-2 bg-action-primary py-2.5 text-xs font-semibold text-white transition hover:bg-action-primary/90 disabled:opacity-50"
               >
                 <Send className="size-3.5" />
                 {submitting ? "Submitting..." : "Submit Shift Handover"}

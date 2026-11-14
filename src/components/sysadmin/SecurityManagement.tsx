@@ -117,7 +117,7 @@ const api = useApi();
               type="text"
               value={ipInput}
               onChange={(e) => setIpInput(e.target.value)}
-              className="w-full rounded-md bg-bg-surface border border-border px-3 py-2 text-xs text-text-primary"
+              className="surface-card w-full bg-bg-surface px-3 py-2 text-xs text-text-primary"
             />
           </div>
 

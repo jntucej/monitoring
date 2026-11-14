@@ -64,7 +64,7 @@ export function ReportsView() {
             {rows.map((row) => (
               <li
                 key={row.metric}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{row.metric}</p>

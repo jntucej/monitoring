@@ -214,8 +214,8 @@ export function PersonalizedCampusHome() {
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/20">
-              <User className="h-5 w-5 text-action-primary" />
+            <div className="flex size-6 items-center justify-center rounded-full bg-indigo-500/20">
+              <User className="h-4 w-4 text-action-primary" />
             </div>
             <div>
               <p className="text-sm font-medium text-text-primary">
@@ -230,13 +230,13 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Pending Tasks */}
-        <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-5">
+        <div className="surface-card bg-bg-elevated/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="h-4 w-4 text-action-warning" />
             <h3 className="text-sm font-medium text-text-secondary">Pending Tasks</h3>
           </div>
           {loading ? (
-            <div className="h-20 animate-pulse rounded bg-bg-elevated/30" />
+            <div className="h-6 animate-pulse rounded bg-bg-elevated/30" />
           ) : pendingTasks.length === 0 ? (
             <p className="text-xs text-text-muted">No pending tasks.</p>
           ) : (
@@ -252,13 +252,13 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Upcoming Events */}
-        <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-5">
+        <div className="surface-card bg-bg-elevated/40 p-5">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="h-4 w-4 text-action-success" />
             <h3 className="text-sm font-medium text-text-secondary">Upcoming Events</h3>
           </div>
           {loading ? (
-            <div className="h-20 animate-pulse rounded bg-bg-elevated/30" />
+            <div className="h-6 animate-pulse rounded bg-bg-elevated/30" />
           ) : events.length === 0 ? (
             <p className="text-xs text-text-muted">No upcoming events.</p>
           ) : (
@@ -278,7 +278,7 @@ export function PersonalizedCampusHome() {
 
         {/* Recommended Actions */}
         <div
-          className={`rounded-xl border border-border/50 bg-gradient-to-br from-indigo-900/40 to-slate-800/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3 ${
+          className={`rounded-card border border-border bg-surface-muted p-5 col-span-1 sm:col-span-2 lg:col-span-3 ${
             pinnedWidgets.includes("feed") ? "ring-1 ring-indigo-500/30" : ""
           }`}
         >
@@ -311,7 +311,7 @@ export function PersonalizedCampusHome() {
         </div>
 
         {/* Quick Access Strip */}
-        <div className="rounded-xl border border-border/50 bg-bg-elevated/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
+        <div className="surface-card bg-bg-elevated/40 p-5 col-span-1 sm:col-span-2 lg:col-span-3">
           <h3 className="text-xs font-medium text-text-muted mb-3">Quick Access</h3>
           <div className="flex flex-wrap gap-2">
             {[
@@ -324,7 +324,7 @@ export function PersonalizedCampusHome() {
               <button
                 key={label}
                 type="button"
-                className="flex items-center gap-1.5 rounded-lg border border-border/50 bg-bg-elevated/30 px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
+                className="surface-card flex items-center gap-1.5 bg-bg-elevated/30 px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated/40 transition-colors motion-reduce:transition-none"
               >
                 <Icon className="h-3.5 w-3.5" />
                 {label}

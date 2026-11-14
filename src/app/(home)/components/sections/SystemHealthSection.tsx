@@ -13,10 +13,10 @@ const AUDIT_METRICS = [
 export function SystemHealthSection() {
   return (
     <section aria-label="System Health and Audits" className="mx-auto w-full max-w-6xl px-6 py-16">
-      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-md">
+      <div className="surface-card bg-white/[0.03] p-8 backdrop-blur-md">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-action-success border border-emerald-500/20">
+            <div className="surface-card inline-flex items-center gap-2 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-action-success">
               <Activity className="h-3.5 w-3.5 animate-pulse" />
               Live Telemetry &amp; Compliance Audit
             </div>
@@ -28,7 +28,7 @@ export function SystemHealthSection() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/5 px-4 py-2 text-sm font-medium border border-white/10">
+            <span className="surface-card inline-flex items-center gap-1.5 bg-white/5 px-4 py-2 text-sm font-medium">
               <ShieldCheck className="h-4 w-4 text-[var(--home-accent-gold,var(--action-warning))]" />
               Production Hardened
             </span>
@@ -43,7 +43,7 @@ export function SystemHealthSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="rounded-2xl border border-white/10 bg-white/5 p-5"
+              className="surface-card bg-white/5 p-5"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-widest text-text-muted">

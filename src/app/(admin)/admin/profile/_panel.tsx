@@ -147,7 +147,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
       <WidgetBoundary title="Account">
         <SectionCard title="Account" description="Signed in to the admin console" icon={Shield} showHeader={false}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-action-primary/15 flex items-center justify-center text-xl sm:text-2xl font-black text-action-primary ring-2 ring-action-primary/25 overflow-hidden shrink-0">
+            <div className="size-6 sm:w-6 sm:h-6 rounded-2xl bg-action-primary/15 flex items-center justify-center text-xl sm:text-2xl font-black text-action-primary ring-2 ring-action-primary/25 overflow-hidden shrink-0">
               {photoUrl ? <img src={photoUrl} alt="" width={80} height={80} className="w-full h-full object-cover" /> : initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -157,9 +157,9 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                 {user?.email || "admin@jntuhcej.ac.in"}
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-action-primary/15 text-action-primary uppercase tracking-wider">{role || "ADMIN"}</span>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-action-success border border-emerald-500/30 flex items-center gap-1">
-                  <Shield className="w-3 h-3" /> Active
+                <span className="surface-card px-2 py-0.5 text-xs font-bold bg-action-primary/15 text-action-primary uppercase tracking-wider">{role || "ADMIN"}</span>
+                <span className="surface-card px-2 py-0.5 text-xs font-semibold bg-emerald-500/10 text-action-success flex items-center gap-1">
+                  <Shield className="size-3.5" /> Active
                 </span>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                     <Field value={confirmPassword} onChange={setConfirmPassword} type={showPw ? "text" : "password"} placeholder="Repeat new password" required />
                   </div>
                 </div>
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
+                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
                   <KeyRound className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>Changing your password revokes every other active session and device immediately.</span>
                 </div>
@@ -257,7 +257,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                     const active = accent === id;
                     return (
                       <button key={id} type="button" onClick={() => pickAccent(id)} aria-pressed={active} aria-label={`Use ${a.label} accent`} title={a.label}
-                        className={cn("w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-95", a.swatch,
+                        className={cn("size-6 rounded-2xl flex items-center justify-center transition-all active:scale-95", a.swatch,
                           active ? "ring-2 ring-offset-2 ring-offset-[var(--bg-surface)] ring-white/70 scale-105" : "opacity-70 hover:opacity-100")}>
                         {active && <Check className="w-4 h-4 text-white" />}
                       </button>
@@ -320,7 +320,7 @@ function InfoTile({ icon: Icon, tone, title, body, action }: {
 }) {
   const toneClass = tone === "sky" ? "text-action-info" : tone === "rose" ? "text-action-danger" : "text-action-success";
   return (
-    <div className="rounded-2xl border border-border bg-bg-surface p-4 space-y-1.5">
+    <div className="surface-card bg-bg-surface p-4 space-y-1.5">
       <div className={cn("flex items-center gap-2 font-bold text-sm", toneClass)}>
         <Icon className="w-4 h-4" />
         {title}

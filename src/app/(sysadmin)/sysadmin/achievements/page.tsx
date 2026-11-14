@@ -77,7 +77,7 @@ function SysadminAchievementsInner() {
             <div className="divide-y divide-border">
               {earned.map((a) => (
                 <div key={a.code} className="p-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                  <div className="size-6 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
                     <span className="text-lg">{a.icon || "🏆"}</span>
                   </div>
                   <div className="flex-1">
@@ -104,7 +104,7 @@ function SysadminAchievementsInner() {
             <div className="divide-y divide-border">
               {unearned.map((a) => (
                 <div key={a.code} className="p-3 flex items-center gap-3 opacity-70">
-                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center shrink-0">
+                  <div className="size-6 rounded-xl bg-bg-elevated flex items-center justify-center shrink-0">
                     <span className="text-lg">{a.icon || "⭐"}</span>
                   </div>
                   <div className="flex-1">
@@ -112,7 +112,7 @@ function SysadminAchievementsInner() {
                     <p className="text-xs text-text-muted">{a.description}</p>
                   </div>
                   {a.tier && (
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-bg-elevated text-text-muted shrink-0">{a.tier}</span>
+                    <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated text-text-muted shrink-0">{a.tier}</span>
                   )}
                 </div>
               ))}

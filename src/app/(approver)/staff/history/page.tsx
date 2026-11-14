@@ -49,7 +49,7 @@ function StaffHistoryInner() {
         href="/staff"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Staff Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Staff Overview
       </Link>
 
       {/* Page toolbar */}
@@ -63,7 +63,7 @@ function StaffHistoryInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">History data unavailable: {error}</span>
@@ -71,7 +71,7 @@ function StaffHistoryInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -80,7 +80,7 @@ function StaffHistoryInner() {
 
       <WidgetBoundary title="History">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ShieldCheck className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">History</span>
@@ -96,19 +96,19 @@ function StaffHistoryInner() {
           ) : (
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Status</p>
                   <p className="mt-1 text-lg font-bold text-action-success">Live</p>
                   <p className="text-xs text-text-muted">History data streams from the campus gate network.</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Last Updated</p>
                   <p className="mt-1 text-lg font-bold text-action-info">
                     {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
                   </p>
                   <p className="text-xs text-text-muted">Auto-refreshes every 30 seconds.</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Records</p>
                   <p className="mt-1 text-lg font-bold text-action-warning">
                     {Array.isArray((data as unknown as { data?: unknown[] })?.data)

@@ -112,7 +112,7 @@ function ExamBranchReportsInner() {
         href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Toolbar */}
@@ -126,7 +126,7 @@ function ExamBranchReportsInner() {
       </div>
 
       {presenceError && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Reports data unavailable: {presenceError}</span>
@@ -134,7 +134,7 @@ function ExamBranchReportsInner() {
           <button
             type="button"
             onClick={() => void refreshPresence()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -144,7 +144,7 @@ function ExamBranchReportsInner() {
       {/* Top KPI cards */}
       <WidgetBoundary title="Examination-Day Reports">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+          <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-text-muted min-w-0">
               <Users className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -152,13 +152,13 @@ function ExamBranchReportsInner() {
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : (
               <p className="text-2xl font-bold text-action-success">{totalOnCampus}</p>
             )}
             <p className="text-xs text-text-muted">All roles inside active gates</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+          <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-text-muted min-w-0">
               <ChartBar className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -166,13 +166,13 @@ function ExamBranchReportsInner() {
               </span>
             </div>
             {presenceLoading && !presence ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : (
               <p className="text-2xl font-bold text-action-info">{gates.length}</p>
             )}
             <p className="text-xs text-text-muted">Gates reporting in real-time</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+          <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-text-muted min-w-0">
               <FileBarChart className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -180,7 +180,7 @@ function ExamBranchReportsInner() {
               </span>
             </div>
             {analyticsLoading && !analytics ? (
-              <Loader2 className="w-5 h-5 animate-spin motion-reduce:animate-none text-text-muted" />
+              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none text-text-muted" />
             ) : hasMeaningfulMetrics ? (
               <p className="text-2xl font-bold text-action-warning">{metrics.length} metrics</p>
             ) : (
@@ -192,7 +192,7 @@ function ExamBranchReportsInner() {
                 : "Analytics not available for this role"}
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-base p-4 flex flex-col gap-2 min-w-0">
+          <div className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2 text-text-muted min-w-0">
               <Clock className="w-4 h-4 shrink-0" />
               <span className="text-xs font-semibold uppercase tracking-wide truncate">
@@ -215,7 +215,7 @@ function ExamBranchReportsInner() {
       {/* Gate × role matrix */}
       <WidgetBoundary title="Gate Occupancy Matrix">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <ChartBar className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white truncate">
@@ -232,13 +232,13 @@ function ExamBranchReportsInner() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
+                  className="h-4 rounded-lg border border-border bg-bg-surface/40 animate-pulse motion-reduce:animate-none"
                 />
               ))}
             </div>
           ) : gates.length === 0 ? (
             <div className="p-6 text-center min-w-0">
-              <ChartBar className="w-8 h-8 mx-auto text-text-muted mb-2" />
+              <ChartBar className="size-4 mx-auto text-text-muted mb-2" />
               <p className="text-sm text-text-muted">No active gates reporting.</p>
             </div>
           ) : (
@@ -297,7 +297,7 @@ function ExamBranchReportsInner() {
         <WidgetBoundary title="Role Analytics">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
             {metrics.map((m) => (
-              <div key={m.key} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+              <div key={m.key} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                 <p className="text-xs text-text-muted uppercase tracking-wide">{m.label}</p>
                 <p className="mt-1 text-xl font-bold text-white">
                   {m.value}

@@ -14,7 +14,7 @@ function StudentProfileSecurityInner() {
     <div className="space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Section header */}
       <div className="flex items-center gap-2">
-        <User className="w-5 h-5 text-action-primary" />
+        <User className="w-4 h-4 text-action-primary" />
         <p className="text-sm font-semibold text-text-primary">Profile &amp; Account Security</p>
       </div>
 
@@ -26,7 +26,7 @@ function StudentProfileSecurityInner() {
             href="/profile"
             className="text-xs font-semibold text-action-primary hover:underline"
           >
-            Edit profile <ArrowRight className="w-3 h-3 inline" />
+            Edit profile <ArrowRight className="size-3.5 inline" />
           </Link>
         </div>
         <UserProfileTab />
@@ -40,9 +40,9 @@ function StudentProfileSecurityInner() {
           {/* Password */}
           <Link
             href="/settings/password"
-            className="rounded-xl border border-border bg-bg-surface p-4 hover:border-action-primary/40 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
-            <div className="w-9 h-9 rounded-lg bg-action-primary/10 flex items-center justify-center shrink-0">
+            <div className="size-4 rounded-lg bg-action-primary/10 flex items-center justify-center shrink-0">
               <KeyRound className="w-4 h-4 text-action-primary" />
             </div>
             <div className="min-w-0">
@@ -51,7 +51,7 @@ function StudentProfileSecurityInner() {
                 Set or update your login password. You will be signed out of all devices after a change.
               </p>
               <p className="text-xs font-bold text-action-primary mt-1.5 flex items-center gap-1">
-                Change password <ArrowRight className="w-3 h-3" />
+                Change password <ArrowRight className="size-3.5" />
               </p>
             </div>
           </Link>
@@ -59,9 +59,9 @@ function StudentProfileSecurityInner() {
           {/* Notifications */}
           <Link
             href="/settings/notifications"
-            className="rounded-xl border border-border bg-bg-surface p-4 hover:border-action-primary/40 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
-            <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+            <div className="size-4 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
               <Bell className="w-4 h-4 text-sky-500" />
             </div>
             <div className="min-w-0">
@@ -70,7 +70,7 @@ function StudentProfileSecurityInner() {
                 Choose which events you want notified for — passes, leave approvals, curfew, announcements.
               </p>
               <p className="text-xs font-bold text-sky-500 mt-1.5 flex items-center gap-1">
-                Configure channels <ArrowRight className="w-3 h-3" />
+                Configure channels <ArrowRight className="size-3.5" />
               </p>
             </div>
           </Link>
@@ -78,9 +78,9 @@ function StudentProfileSecurityInner() {
           {/* Active sessions */}
           <Link
             href="/student/profile-security/sessions"
-            className="rounded-xl border border-border bg-bg-surface p-4 hover:border-action-primary/40 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
-            <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+            <div className="size-4 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
               <Eye className="w-4 h-4 text-action-warning" />
             </div>
             <div className="min-w-0">
@@ -89,7 +89,7 @@ function StudentProfileSecurityInner() {
                 Review where you are signed in. Sign out of any unfamiliar device immediately.
               </p>
               <p className="text-xs font-bold text-action-warning mt-1.5 flex items-center gap-1">
-                Review sessions <ArrowRight className="w-3 h-3" />
+                Review sessions <ArrowRight className="size-3.5" />
               </p>
             </div>
           </Link>
@@ -97,7 +97,7 @@ function StudentProfileSecurityInner() {
       </section>
 
       {/* Authority / scoping note */}
-      <div className="rounded-xl border border-border bg-bg-elevated/40 p-4 text-xs min-w-0">
+      <div className="surface-card bg-bg-elevated/40 p-4 text-xs min-w-0">
         <p className="font-bold text-text-secondary flex items-center gap-2 mb-1.5">
           <Lock className="w-3.5 h-3.5 shrink-0" /> Data scoping
         </p>

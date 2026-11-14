@@ -42,10 +42,10 @@ function MovementRow({ scan }: { scan: Scan }) {
     minute: "2-digit",
   });
   return (
-    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border/50 last:border-0">
+    <div className="surface-card flex items-center justify-between gap-3 py-2.5 last:">
       <div className="flex items-center gap-3 min-w-0">
         <div
-          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+          className={`size-6 rounded-lg flex items-center justify-center shrink-0 ${
             isIn ? "bg-emerald-500/15 text-action-success" : "bg-rose-500/15 text-action-danger"
           }`}
         >
@@ -137,7 +137,7 @@ function MovementInfoInner() {
       </div>
 
       {personsError && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             Could not load ward movement records.
@@ -145,7 +145,7 @@ function MovementInfoInner() {
           <button
             type="button"
             onClick={() => void refreshPersons()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
           >
             Retry
           </button>
@@ -153,11 +153,11 @@ function MovementInfoInner() {
       )}
 
       {personsLoading ? (
-        <div className="rounded-xl border border-border bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
+        <div className="surface-card bg-bg-surface p-6 flex items-center gap-3 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading movement records…
         </div>
       ) : total === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-bg-base/60 p-8 text-center text-sm text-text-muted">
+        <div className="surface-card bg-bg-base/60 p-8 text-center text-sm text-text-muted">
           No wards linked to your account yet. Movement records appear once a student is linked.
         </div>
       ) : (
@@ -199,7 +199,7 @@ function MovementInfoInner() {
                 accent: "text-action-info",
               },
             ].map((kpi) => (
-              <div key={kpi.label} className="rounded-xl border border-border bg-bg-surface p-3 min-w-0">
+              <div key={kpi.label} className="surface-card bg-bg-surface p-3 min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">{kpi.label}</p>
                 <p className={`text-lg font-bold mt-0.5 ${kpi.accent}`}>{kpi.value}</p>
               </div>
@@ -208,7 +208,7 @@ function MovementInfoInner() {
 
           {/* movement feed */}
           <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3 flex-wrap">
+            <div className="surface-card px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
                   Recent gate movements

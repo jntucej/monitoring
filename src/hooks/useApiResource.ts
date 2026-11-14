@@ -114,7 +114,7 @@ export function useApiResource<T>(
     if (!url || enabled === false) {
       // Guard: without this, an early-return in the hook would change
       // the hook-call count on the next render when url/enabled flip,
-      // throwing React #310 in every consuming component.
+      // throwing React issue-310 in every consuming component.
       setLoading(false);
       return;
     }

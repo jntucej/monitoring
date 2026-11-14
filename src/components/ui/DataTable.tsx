@@ -126,7 +126,7 @@ export function DataTable<T>({
           data.map((item) => (
             <div
               key={keyExtractor(item)}
-              className="rounded-xl border border-border bg-bg-surface p-4 shadow-sm"
+              className="surface-card bg-bg-surface p-4"
             >
               {columns.map((col, idx) => (
                 <div

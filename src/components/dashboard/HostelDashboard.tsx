@@ -84,7 +84,7 @@ export function HostelDashboard() {
           <p className="text-sm text-text-muted mt-1">Live hostel permissions — boys, girls, stages, overdue, biometric.</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted bg-bg-surface border border-border px-3 py-1.5 rounded-lg">Last refreshed: {new Date().toLocaleTimeString()}</span>
+          <span className="surface-card text-xs text-text-muted bg-bg-surface px-3 py-1.5">Last refreshed: {new Date().toLocaleTimeString()}</span>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export function HostelDashboard() {
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs text-text-muted">
               {stageData.map((s) => (
                 <div key={s.stage} className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.count > 0 ? "var(--action-primary)" : "var(--border)" }} />
+                  <span className="size-3.5 rounded-full" style={{ backgroundColor: s.count > 0 ? "var(--action-primary)" : "var(--border)" }} />
                   <span>{s.stage.replace(/_/g, " ")}</span>
                   <span className="font-semibold text-text-primary">{s.count}</span>
                 </div>

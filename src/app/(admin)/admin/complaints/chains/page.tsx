@@ -29,7 +29,7 @@ export default function ChainsPage() {
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
       <h1 className="text-2xl font-semibold">Complaint escalation chains</h1>
       <p className="text-sm text-text-muted">
-        Chains are seeded via migration. To modify, edit <code className="px-1 bg-bg-elevated rounded">complaint_escalation_chains</code> directly.
+        Chains are seeded via migration. To modify, edit <code className="surface-card px-1 bg-bg-elevated">complaint_escalation_chains</code> directly.
       </p>
       <div className="border rounded bg-white overflow-x-auto">
         <table className="w-full text-sm">

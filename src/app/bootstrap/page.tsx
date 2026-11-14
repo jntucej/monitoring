@@ -112,10 +112,10 @@ function BootstrapPageInner() {
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-bg-base p-4 sm:p-8 relative overflow-x-hidden">
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-6 h-6 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="w-full max-w-md space-y-5">
         <div className="text-center space-y-1.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-action-success mx-auto flex items-center justify-center shadow-xs">
+          <div className="size-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-action-success mx-auto flex items-center justify-center shadow-xs">
             <KeyRound className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-text-primary">Activate Your Account</h1>
@@ -126,16 +126,16 @@ function BootstrapPageInner() {
           </p>
         </div>
 
-        <div className="rounded-3xl bg-bg-surface border border-border p-6 sm:p-8 space-y-5 shadow-2xl">
+        <div className="surface-card bg-bg-surface p-6 sm:p-8 space-y-5">
           {error && (
-            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-xs text-action-danger">
+            <div className="surface-card flex items-start gap-2.5 p-3.5 bg-rose-500/10 text-xs text-action-danger">
               <AlertCircle className="w-4 h-4 shrink-0 text-action-danger mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {state === "success" && (
-            <div className="flex items-center gap-2.5 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-action-success font-semibold">
+            <div className="surface-card flex items-center gap-2.5 p-3.5 bg-emerald-500/10 text-xs text-action-success font-semibold">
               <CheckCircle2 className="w-4 h-4 shrink-0 text-action-success" />
               <span>Account activated successfully! Redirecting to login…</span>
             </div>
@@ -157,7 +157,7 @@ function BootstrapPageInner() {
                     placeholder="e.g. 24JJ1A0501 or EMP-001"
                     required
                     autoCapitalize="characters"
-                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success font-medium uppercase"
+                    className="surface-card w-full bg-bg-base px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus: font-medium uppercase"
                   />
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
@@ -176,7 +176,7 @@ function BootstrapPageInner() {
                     type="text"
                     value={uniqueId}
                     readOnly
-                    className="w-full rounded-xl bg-bg-elevated border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary/60 font-medium cursor-not-allowed"
+                    className="surface-card w-full bg-bg-elevated px-3.5 py-2.5 pl-10 text-sm text-text-primary/60 font-medium cursor-not-allowed"
                   />
                   <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
@@ -204,7 +204,7 @@ function BootstrapPageInner() {
                     placeholder="e.g. ABCD1234"
                     required
                     maxLength={12}
-                    className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success font-bold uppercase"
+                    className="surface-card w-full bg-bg-base px-3.5 py-2.5 pl-10 text-sm font-mono tracking-widest text-text-primary placeholder:text-text-muted/50 focus:outline-none focus: font-bold uppercase"
                   />
                   <KeyRound className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                 </div>
@@ -212,7 +212,7 @@ function BootstrapPageInner() {
             )}
 
             {urlToken && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-action-success">
+              <div className="surface-card flex items-center gap-2 p-3 bg-emerald-500/10 text-xs text-action-success">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-action-success" />
                 <span>Secure activation link verified. Set your password below to finish.</span>
               </div>
@@ -232,7 +232,7 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="At least 8 characters"
-                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success"
+                  className="surface-card w-full bg-bg-base px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:"
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
@@ -252,7 +252,7 @@ function BootstrapPageInner() {
                   required
                   minLength={8}
                   placeholder="Re-enter your password"
-                  className="w-full rounded-xl bg-bg-base border border-border px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:borderaction-success"
+                  className="surface-card w-full bg-bg-base px-3.5 py-2.5 pl-10 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:"
                 />
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               </div>
@@ -261,7 +261,7 @@ function BootstrapPageInner() {
             <button
               type="submit"
               disabled={state === "submitting" || state === "success"}
-              className="w-full rounded-xl bg-action-success hover:bg-action-success text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 shadow-md mt-2"
+              className="surface-card w-full bg-action-success hover:bg-action-success text-white font-bold text-sm transition-all disabled:opacity-50 py-3 flex items-center justify-center gap-2 active:scale-95 mt-2"
             >
               {state === "submitting" ? (
                 <>
@@ -277,7 +277,7 @@ function BootstrapPageInner() {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-border text-center">
+          <div className="surface-card pt-2 text-center">
             <p className="text-xs text-text-muted">
               Already activated your account?{" "}
               <Link href="/login" className="text-action-success hover:underline font-semibold">

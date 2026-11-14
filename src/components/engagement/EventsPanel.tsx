@@ -45,7 +45,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
 
   return (
     <WidgetBoundary title="Campus Events">
-      <section aria-label="Campus events" className="rounded-2xl border border-border bg-bg-surface p-5 min-w-0">
+      <section aria-label="Campus events" className="surface-card bg-bg-surface p-5 min-w-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-bold text-text-primary">
             <CalendarDays className="h-4 w-4 text-action-info" aria-hidden />
@@ -54,7 +54,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-lg px-2 py-1 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+            className="surface-card px-2 py-1 text-xs font-medium text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
             aria-label="Refresh events"
           >
             Refresh
@@ -67,7 +67,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
             Loading events…
           </div>
         ) : error && events.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
             {error}
           </div>
         ) : shown.length === 0 ? (

@@ -36,7 +36,7 @@ export function CinematicLoader({
           <p className="mb-12 text-xs uppercase tracking-[0.4em] text-white/40">
             {COPY[mode].label}
           </p>
-          <div className="relative mb-10 h-16 w-16 rounded-full bg-cyan-300/20" />
+          <div className="relative mb-10 size-6 rounded-full bg-cyan-300/20" />
           <p className="text-sm text-white/55">{COPY[mode].line}</p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function CinematicLoader({
           {copy.label}
         </p>
 
-        <div className="relative mb-10 h-16 w-16">
+        <div className="relative mb-10 size-6">
           <motion.span
             className="absolute inset-0 rounded-full"
             style={{
@@ -78,7 +78,7 @@ export function CinematicLoader({
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.span
-            className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300"
+            className="absolute left-1/2 top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300"
             animate={{ scale: [1, 1.15, 1], opacity: [0.85, 1, 0.85] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             style={{

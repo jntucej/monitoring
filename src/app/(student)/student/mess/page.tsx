@@ -20,7 +20,7 @@ export default function StudentMessLanding() {
           <Link
             key={c.href}
             href={c.href}
-            className="rounded-xl border border-border bg-bg-surface p-4 hover:border-action-primary/40 hover:bg-action-primary/5 transition-colors"
+            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors"
           >
             <p className="text-sm font-bold text-text-primary">{c.title}</p>
             <p className="text-xs text-text-muted mt-0.5">{c.sub}</p>

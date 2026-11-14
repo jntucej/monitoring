@@ -60,7 +60,7 @@ export function HostelActivityFeed() {
 
   return (
     <PrincipalWidgetBoundary title="Hostel Activity Feed">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+      <div className="surface-card bg-bg-surface p-4 sm:p-5">
         <div className="flex items-center gap-2 text-text-muted mb-3">
           <Activity className="w-4 h-4 text-action-info" />
           <span className="text-xs font-semibold uppercase tracking-wide">
@@ -83,7 +83,7 @@ export function HostelActivityFeed() {
             {events.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center gap-2 text-xs p-2 rounded-lg bg-bg-elevated border border-border"
+                className="surface-card flex items-center gap-2 text-xs p-2 bg-bg-elevated"
               >
                 {e.type === "entry" ? (
                   <ArrowDownRight className="w-3.5 h-3.5 text-action-success shrink-0" />
@@ -98,7 +98,7 @@ export function HostelActivityFeed() {
                   <span className="text-text-muted truncate hidden sm:block">{e.gate_name}</span>
                 )}
                 <span className="text-text-muted font-mono shrink-0">
-                  <Clock className="w-3 h-3 inline mr-0.5" />
+                  <Clock className="size-3.5 inline mr-0.5" />
                   {fmtTime(e.timestamp)}
                 </span>
               </li>

@@ -64,7 +64,7 @@ export function TeamRoster() {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-surface p-4 sm:p-5">
+    <section className="surface-card bg-bg-surface p-4 sm:p-5">
       <header className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="size-4 text-action-info" />
@@ -114,7 +114,7 @@ export function TeamRoster() {
 
           {/* Absent alert */}
           {absent.length > 0 && (
-            <div className="mb-3 rounded-lg bg-action-danger/10 px-3 py-2 text-xs">
+            <div className="surface-card mb-3 bg-action-danger/10 px-3 py-2 text-xs">
               <p className="font-medium text-action-danger">
                 {absent.length} not accounted for
               </p>
@@ -128,7 +128,7 @@ export function TeamRoster() {
           {/* Grouped by gate */}
           <div className="space-y-2">
             {Array.from(byGate.entries()).slice(0, 4).map(([gate, rows]) => (
-              <div key={gate} className="rounded-lg border border-border bg-bg-base/30 p-2">
+              <div key={gate} className="surface-card bg-bg-base/30 p-2">
                 <div className="mb-1 flex items-center gap-1.5">
                   <MapPin className="size-3 text-text-muted" />
                   <span className="text-xs font-medium text-text-primary">{gate}</span>

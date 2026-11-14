@@ -31,7 +31,7 @@ export const PrincipalNotifications = memo(function PrincipalNotifications({
         )}
       </button>
       {notifications.length > 0 && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border bg-bg-surface p-3 shadow-lg">
+        <div className="surface-card absolute right-0 top-full mt-2 w-80 bg-bg-surface p-3">
           <p className="mb-2 text-xs font-semibold text-text-muted">Notifications</p>
           {notifications.slice(0, 5).map((n) => (
             <div key={n.id} className={`mb-2 rounded-lg p-2 ${n.read ? "" : "bg-bg-elevated"}`}>

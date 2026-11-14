@@ -46,7 +46,7 @@ export function EscalationsView() {
               <li key={item.id}>
                 <button
                   onClick={() => setSelected(item)}
-                  className="w-full min-h11 rounded-xl border border-border bg-bg-surface p-3 text-left"
+                  className="surface-card w-full min-h11 bg-bg-surface p-3 text-left"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">

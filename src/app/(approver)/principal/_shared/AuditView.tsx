@@ -54,7 +54,7 @@ export function AuditView() {
             {logs.map((log) => (
               <li
                 key={log.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{log.action}</p>

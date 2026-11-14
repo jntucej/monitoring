@@ -117,11 +117,11 @@ export default function GateDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface border border-border p-5 rounded-2xl shadow-sm">
+        <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
-              className="p-2 rounded-xl bg-bg-elevated border border-border hover:bg-bg-base text-text-muted hover:text-text-primary transition-colors"
+              className="surface-card p-2 bg-bg-elevated hover:bg-bg-base text-text-muted hover:text-text-primary transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -153,7 +153,7 @@ export default function GateDetailPage() {
             <button
               onClick={fetchGateDetails}
               disabled={loading}
-              className="px-3 py-2 rounded-xl bg-bg-elevated border border-border text-xs font-semibold hover:bg-bg-base flex items-center gap-1.5 transition-colors"
+              className="surface-card px-3 py-2 bg-bg-elevated text-xs font-semibold hover:bg-bg-base flex items-center gap-1.5 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
@@ -163,7 +163,7 @@ export default function GateDetailPage() {
                 <button
                   onClick={() => setConfirmDeactivate(true)}
                   disabled={toggleBusy}
-                  className="px-3 py-2 rounded-xl bg-bg-elevated border border-rose-500/30 text-action-danger text-xs font-semibold hover:bg-rose-500/10 flex items-center gap-1.5 transition-colors"
+                  className="surface-card px-3 py-2 bg-bg-elevated text-action-danger text-xs font-semibold hover:bg-rose-500/10 flex items-center gap-1.5 transition-colors"
                 >
                   <Power className="w-3.5 h-3.5" /> Deactivate
                 </button>
@@ -171,14 +171,14 @@ export default function GateDetailPage() {
                 <button
                   onClick={() => toggleActive(true)}
                   disabled={toggleBusy}
-                  className="px-3 py-2 rounded-xl bg-action-success hover:bg-action-success text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  className="surface-card px-3 py-2 bg-action-success hover:bg-action-success text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
                 >
                   <Power className="w-3.5 h-3.5" /> Activate
                 </button>
               )
             )}
             {isSentinel && (
-              <span className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-action-warning text-xs font-semibold">
+              <span className="surface-card flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 text-action-warning text-xs font-semibold">
                 <Lock className="w-3.5 h-3.5" /> System sentinel gate — read-only
               </span>
             )}
@@ -186,7 +186,7 @@ export default function GateDetailPage() {
         </div>
 
         {operatorNote && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-sm flex items-center gap-2">
+          <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{operatorNote}</span>
           </div>
@@ -235,7 +235,7 @@ export default function GateDetailPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <WidgetBoundary title="Scan Stream">
-                <div className="lg:col-span-2 bg-bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-sm">
+                <div className="surface-card lg:col-span-2 bg-bg-surface p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
                       <Activity className="w-4 h-4 text-action-success" />
@@ -298,21 +298,21 @@ export default function GateDetailPage() {
 
               <WidgetBoundary title="Assigned Operator">
                 <div className="space-y-4">
-                  <div className="bg-bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-sm">
+                  <div className="surface-card bg-bg-surface p-5 space-y-4">
                     <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
                       <UserCheck className="w-4 h-4 text-unit-c" />
                       Active Gate Operator
                     </h3>
 
                     {data?.activeOperator ? (
-                      <div className="p-3.5 rounded-xl bg-bg-base border border-border flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-purple-500/20 text-unit-c font-bold flex items-center justify-center border border-purple-500/30">
+                      <div className="surface-card p-3.5 bg-bg-base flex items-center gap-3">
+                        <div className="size-5 bg-purple-500/20 text-unit-c font-bold flex items-center justify-center border border-purple-500/30">
                           {data.activeOperator.name.charAt(0)}
                         </div>
                         <div>
                           <p className="text-xs font-bold text-text-primary">{data.activeOperator.name}</p>
                           <p className="text-xs text-text-muted">{data.activeOperator.email ?? "No email"}</p>
-                          <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-action-success">
+                          <span className="surface-card inline-block mt-1 px-2 py-0.5 text-xs font-bold bg-emerald-500/10 text-action-success">
                             Active On Duty
                           </span>
                         </div>

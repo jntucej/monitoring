@@ -19,7 +19,7 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-dvh flex-col bg-bg-base">
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-bg-surface px-3">
+      <header className="surface-card flex h-11 shrink-0 items-center justify-between bg-bg-surface px-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -27,7 +27,7 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
             aria-label="Open navigation"
             className="flex size-11 min-h11 min-w11 items-center justify-center rounded-md text-text-secondary hover:bg-bg-elevated"
           >
-            <Menu className="size-5" />
+            <Menu className="size-4" />
           </button>
           <span className="text-sm font-semibold text-text-primary">
             Vice Principal
@@ -52,8 +52,8 @@ export function VPMobileShell({ children }: { children: React.ReactNode }) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-bg-surface shadow-xl">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <aside className="absolute inset-y-0 left-0 flex w-11 max-w-[85vw] flex-col bg-bg-surface shadow-xl">
+            <div className="surface-card flex items-center justify-between px-4 py-3">
               <span className="text-sm font-semibold">Navigation</span>
               <button
                 type="button"

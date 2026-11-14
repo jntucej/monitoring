@@ -69,7 +69,7 @@ function ExamSuperintendentIncidentsInner() {
         href="/exam/superintendent"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Page toolbar */}
@@ -83,7 +83,7 @@ function ExamSuperintendentIncidentsInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Incidents data unavailable: {error}</span>
@@ -91,7 +91,7 @@ function ExamSuperintendentIncidentsInner() {
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -100,7 +100,7 @@ function ExamSuperintendentIncidentsInner() {
 
       <WidgetBoundary title="Exam Incidents">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <BellRing className="w-4 h-4 text-action-warning shrink-0" />
               <span className="text-sm font-semibold text-white">Exam-Related Alerts & Exceptions</span>
@@ -138,7 +138,7 @@ function ExamSuperintendentIncidentsInner() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
                     {exceptions.slice(0, 9).map((row, i) => (
-                      <div key={row.id ?? i} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                      <div key={row.id ?? i} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                         <p className="text-sm font-semibold text-action-warning truncate">
                           {row.title ?? (row.id ? `Exception ${row.id.slice(0, 8)}` : "Exam exception")}
                         </p>
@@ -155,7 +155,7 @@ function ExamSuperintendentIncidentsInner() {
                   </p>
                   <div className="space-y-2 min-w-0">
                     {examAlerts.slice(0, 12).map((a) => (
-                      <div key={a.id} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                      <div key={a.id} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-medium text-text-secondary truncate">{a.title ?? a.message ?? "Alert"}</p>
                           <span

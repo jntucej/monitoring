@@ -22,19 +22,19 @@ export default function GlobalNotFound() {
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg bg-action-success px-4 py-2 text-sm font-semibold text-black hover:bg-action-success"
+            className="surface-card inline-flex items-center gap-2 bg-action-success px-4 py-2 text-sm font-semibold text-black hover:bg-action-success"
           >
             Home <ArrowRight className="h-3.5 w-3.5" />
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-elevated"
+            className="surface-card inline-flex items-center gap-2 bg-white px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-elevated"
           >
             Sign in
           </Link>
           <Link
             href="/help"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-elevated"
+            className="surface-card inline-flex items-center gap-2 bg-white px-4 py-2 text-sm font-semibold text-text-primary hover:bg-bg-elevated"
           >
             Help
           </Link>

@@ -80,7 +80,7 @@ function RedisWorkerInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Service data unavailable: {error}
         </div>
@@ -90,7 +90,7 @@ function RedisWorkerInner() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-w-0">
           {/* Redis card */}
           <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+            <div className="surface-card px-4 py-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Redis (cache layer)</span>
               <StatusPill status={d?.redis?.status} />
             </div>
@@ -102,17 +102,17 @@ function RedisWorkerInner() {
               </div>
             ) : d?.redisDetails ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 min-w-0">
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase">Clients</p>
                   <p className="text-lg font-bold text-action-info">
                     {d.redisDetails.connectedClients != null ? d.redisDetails.connectedClients : "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase">Memory</p>
                   <p className="text-lg font-bold text-action-info">{formatBytes(d.redisDetails.usedMemoryBytes)}</p>
                 </div>
-                <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase">Ops/sec</p>
                   <p className="text-lg font-bold text-action-info">
                     {d.redisDetails.opsPerSecond != null ? d.redisDetails.opsPerSecond : "—"}
@@ -132,7 +132,7 @@ function RedisWorkerInner() {
 
           {/* Worker card */}
           <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+            <div className="surface-card px-4 py-3 flex items-center justify-between">
               <span className="text-sm font-semibold text-white">Background Worker</span>
               <StatusPill status={d?.worker?.status} />
             </div>

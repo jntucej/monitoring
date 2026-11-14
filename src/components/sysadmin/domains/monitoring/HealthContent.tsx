@@ -21,7 +21,7 @@ export type TabId = "app" | "database" | "infra" | "redis";
 function KpiNumber({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
   return (
     <div
-      className="rounded-lg border p-3 bg-bg-surface"
+      className="surface-card p-3 bg-bg-surface"
       style={{ borderColor: "var(--border)" }}
     >
       <p className="text-xs uppercase tracking-wide" style={{ color: VIZ_THEME.muted }}>{label}</p>
@@ -154,7 +154,7 @@ export function HealthContent({ data, activeTab, tab }: HealthContentProps) {
     <div className="space-y-4">
       {/* active section */}
       <div
-        className="rounded-lg border p-4"
+        className="surface-card p-4"
         style={{ borderColor: "var(--border)", background: "var(--bg-surface)" }}
       >
         {currentView === "app" && <AppSection data={data.app} />}

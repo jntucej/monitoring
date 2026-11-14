@@ -69,7 +69,7 @@ function SysadminRetentionInner() {
             <div className="divide-y divide-border">
               {rows.map((r) => (
                 <div key={r.id} className="p-4 flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
+                  <div className="size-6 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <Clock className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">

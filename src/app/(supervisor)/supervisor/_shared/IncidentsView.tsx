@@ -49,7 +49,7 @@ export function IncidentsView() {
             {rows.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-border bg-bg-surface p-3 text-xs"
+                className="surface-card bg-bg-surface p-3 text-xs"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-text-primary">{item.title}</span>

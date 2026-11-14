@@ -71,7 +71,7 @@ export function PrincipalSidebar({
 
   return (
     <div className="flex h-full w-full flex-col bg-bg-surface">
-      <header className="shrink-0 border-b border-border px-4 py-3">
+      <header className="surface-card shrink-0 px-4 py-3">
         <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
           Principal
         </p>
@@ -103,9 +103,9 @@ export function PrincipalSidebar({
         )}
       </nav>
 
-      <footer className="shrink-0 border-t border-border p-2 space-y-1">
+      <footer className="surface-card shrink-0 p-2 space-y-1">
         {/* Streak pill */}
-        <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
+        <div className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs">
           <Flame className="size-3.5 text-action-warning" />
           <span className="text-text-muted">Authority streak</span>
           <span className="ml-auto font-semibold tabular-nums text-text-primary">
@@ -121,7 +121,7 @@ export function PrincipalSidebar({
             window.dispatchEvent(new CustomEvent("principal:open-focus-mode"));
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
+          className="surface-card flex w-full items-center gap-2 px-3 py-1.5 text-xs text-action-primary hover:bg-action-primary/10"
         >
           <Target className="size-3.5" />
           Focus mode
@@ -130,7 +130,7 @@ export function PrincipalSidebar({
         <Link
           href="/principal/profile"
           onClick={close}
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
+          className="surface-card flex items-center gap-2 px-3 py-1.5 text-xs text-text-muted hover:bg-bg-elevated"
         >
           Account settings
         </Link>

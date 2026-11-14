@@ -61,11 +61,11 @@ export function IncidentsView() {
             {alerts.map((a) => (
               <li
                 key={a.id}
-                className="rounded-xl border border-border bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3"
               >
                 <div className="flex items-start justify-between">
                   <p className="text-sm font-medium">{a.title ?? a.message ?? "Alert"}</p>
-                  <span className="rounded-full bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
+                  <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
                     {a.severity ?? "alert"}
                   </span>
                 </div>
@@ -86,7 +86,7 @@ export function IncidentsView() {
                 {
                   header: "Severity",
                   accessor: (r) => (
-                    <span className="rounded-full bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
+                    <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
                       {r.severity ?? "normal"}
                     </span>
                   ),

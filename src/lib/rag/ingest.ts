@@ -22,7 +22,7 @@ export function sanitizeKbContent(content: string): string {
   clean = clean.replace(/<script[\s\S]*?<\/script>/gi, "");
   clean = clean.replace(/<style[\s\S]*?<\/style>/gi, "");
   clean = clean.replace(/<\/?(?:untrusted_context|system_prompt|instructions)>/gi, "");
-  clean = clean.replace(/(?:display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*0|opacity\s*:\s*0|color\s*:\s*(?:white|#fff(?:fff)?|rgba?\([^)]+\)))/gi, "");
+  clean = clean.replace(/(?:display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*0|opacity\s*:\s*0|color\s*:\s*(?:white|\u007fff(?:\u007fff\u007fff)?(?:fff)?|rgba?\([^)]+\)))/gi, "");
 
   // 4. Normalize newlines
   return clean.replace(/\r\n/g, "\n");

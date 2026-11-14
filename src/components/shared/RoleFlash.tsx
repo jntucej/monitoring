@@ -104,7 +104,7 @@ export function RoleFlash({ role, onNavigate, label, icon: Icon }: RoleFlashProp
         initial={false}
         animate={{ scale: dismissed ? 1 : 1, x: dismissed ? 0 : nudge * (direction === "right" ? 1 : -1) }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-bg-elevated text-action-primary"
+        className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-border bg-bg-elevated text-action-primary"
       >
         {Icon ? <Icon className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
       </motion.span>

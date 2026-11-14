@@ -33,7 +33,7 @@ export function DrawerItem({ href, label, icon: Icon, active: _active = false }:
       <Icon className={cn("w-5 h-5 shrink-0", isActive && "text-action-primary")} />
       <span className="flex-1 truncate">{label}</span>
       {isActive && (
-        <span className="w-1.5 h-1.5 rounded-full bg-action-primary" />
+        <span className="size-2 rounded-full bg-action-primary" />
       )}
     </Link>
   );

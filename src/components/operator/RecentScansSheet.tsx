@@ -112,7 +112,7 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
             className="absolute inset-x-0 bottom-0 max-h-[70dvh] rounded-t-2xl bg-bg-surface border-t border-border shadow-2xl flex flex-col"
             style={{ maxHeight: "70dvh" }}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="surface-card flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
                 <ScanLine className="h-4 w-4 text-text-muted" aria-hidden />
                 <h2 className="text-sm font-bold text-text-primary">
@@ -141,10 +141,10 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
                     key={scan.id}
                     type="button"
                     onClick={() => setDetailScan(scan)}
-                    className="w-full flex items-center gap-3 rounded-lg border border-border bg-bg-base p-3 text-left hover:border-border transition-colors"
+                    className="surface-card w-full flex items-center gap-3 bg-bg-base p-3 text-left hover: transition-colors"
                   >
                     <div
-                      className={`h-9 w-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                      className={`size-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                         scan.direction === "IN"
                           ? "bg-emerald-500/15 text-action-success"
                           : "bg-amber-500/15 text-action-warning"
@@ -152,7 +152,7 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
                     >
                       {scan.direction === "IN" ? "IN" : "OUT"}
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-4 flex-1">
                       <p className="text-sm font-semibold text-text-primary truncate">
                         {scan.name || scan.roll || "Unknown"}
                       </p>
@@ -188,7 +188,7 @@ export function RecentScansSheet({ scans, gateName }: RecentScansSheetProps) {
 function ScanDetailPanel({ scan, onClose }: { scan: RecentScan; onClose: () => void }) {
   return (
     <div className="fixed inset-x-0 top-0 z-90 mx-auto w-full max-w-md p-4" role="dialog" aria-modal="true" aria-label="Scan detail">
-      <div className="rounded-2xl border border-border bg-bg-surface p-4 shadow-2xl space-y-2">
+      <div className="surface-card bg-bg-surface p-4 space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-text-primary">
             {scan.name || scan.roll} · {scan.direction}

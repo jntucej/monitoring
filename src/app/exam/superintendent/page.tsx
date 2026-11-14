@@ -69,7 +69,7 @@ function ExamSuperintendentAccessInner() {
         href="/exam/superintendent"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="w-3 h-3 rotate-180" /> Back to Overview
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Overview
       </Link>
 
       {/* Page toolbar */}
@@ -83,7 +83,7 @@ function ExamSuperintendentAccessInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">
           <span className="flex items-center gap-2 min-w-0">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span className="truncate">Exam access data unavailable: {error}</span>
@@ -91,7 +91,7 @@ function ExamSuperintendentAccessInner() {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-lg border border-amber-500/40 px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
+            className="surface-card px-3 py-1 text-xs font-semibold hover:bg-amber-500/20 shrink-0"
           >
             Retry
           </button>
@@ -100,7 +100,7 @@ function ExamSuperintendentAccessInner() {
 
       <WidgetBoundary title="Exam Access">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-          <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
               <KeyRound className="w-4 h-4 text-action-success shrink-0" />
               <span className="text-sm font-semibold text-white">Who Is Authorised for Exam Access</span>
@@ -117,13 +117,13 @@ function ExamSuperintendentAccessInner() {
                 <div key={i} className="h-14 animate-pulse rounded-lg bg-bg-elevated/40" />
               ))
             ) : stageSummary.length === 0 ? (
-              <div className="col-span-full rounded-lg border border-border bg-bg-surface/30 p-4 text-center min-w-0">
+              <div className="surface-card col-span-full bg-bg-surface/30 p-4 text-center min-w-0">
                 <ShieldCheck className="w-5 h-5 text-text-muted mx-auto mb-2" />
                 <p className="text-sm text-text-muted">No exam workflow records in the clearance pipeline right now.</p>
               </div>
             ) : (
               stageSummary.slice(0, 8).map((s, i) => (
-                <div key={`${s.current_stage}-${s.status}-${i}`} className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                <div key={`${s.current_stage}-${s.status}-${i}`} className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">
                     {s.current_stage ?? "unknown"} / {s.status ?? "any"}
                   </p>
@@ -138,7 +138,7 @@ function ExamSuperintendentAccessInner() {
           <div className="px-4 pb-4 min-w-0">
             <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-2">Recent Authorisations</p>
             {!busy && authorised.length === 0 && (
-              <div className="rounded-lg border border-border bg-bg-surface/30 p-6 text-center min-w-0">
+              <div className="surface-card bg-bg-surface/30 p-6 text-center min-w-0">
                 <p className="text-sm text-text-muted">No authorised exam access records in view.</p>
               </div>
             )}

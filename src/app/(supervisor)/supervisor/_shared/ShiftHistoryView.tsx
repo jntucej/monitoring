@@ -17,21 +17,21 @@ export function ShiftHistoryView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="surface-card bg-bg-surface p-4">
           <p className="text-xs uppercase text-text-muted">Current Streak</p>
           <p className="text-2xl font-bold text-action-primary mt-1">{cleanStreak} shifts</p>
         </div>
-        <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="surface-card bg-bg-surface p-4">
           <p className="text-xs uppercase text-text-muted">Best Shift Streak</p>
           <p className="text-2xl font-bold text-action-info mt-1">{bests.longestZeroIncidentShiftStreak} shifts</p>
         </div>
-        <div className="rounded-2xl border border-border bg-bg-surface p-4">
+        <div className="surface-card bg-bg-surface p-4">
           <p className="text-xs uppercase text-text-muted">Most In A Shift</p>
           <p className="text-2xl font-bold text-action-warning mt-1">{bests.mostEscalationsInShift} cleared</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-bg-surface p-5">
+      <div className="surface-card bg-bg-surface p-5">
         <div className="flex items-center gap-3">
           <CheckCircle2 className="size-5 text-action-primary" />
           <div>

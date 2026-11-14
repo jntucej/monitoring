@@ -31,7 +31,7 @@ function SafetyInner() {
       />
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-700">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-amber-700">
           Safety state unavailable: {error}
         </div>
       )}

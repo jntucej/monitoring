@@ -76,7 +76,7 @@ function ApplicationHealthInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-action-warning">
+        <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Application health data unavailable: {error}
         </div>
@@ -84,12 +84,12 @@ function ApplicationHealthInner() {
 
       <WidgetBoundary title="Application Health">
         {!busy && !health ? (
-          <div className="rounded-xl border border-border bg-bg-base p-8 text-center min-w-0">
+          <div className="surface-card bg-bg-base p-8 text-center min-w-0">
             <p className="text-sm text-text-muted">No application health data available.</p>
           </div>
         ) : (
           <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
-            <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
+            <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm font-semibold text-white">Process &amp; Request Metrics</span>
               <span
                 className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -110,29 +110,29 @@ function ApplicationHealthInner() {
                 ))
               ) : (
                 <>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Uptime</p>
                     <p className="text-lg font-bold text-action-info">{formatUptime(safeHealth.uptimeSeconds)}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Active Users</p>
                     <p className="text-lg font-bold text-action-success">{safeHealth.metrics.activeUsers}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Active Sessions</p>
                     <p className="text-lg font-bold text-action-success">{safeHealth.metrics.activeSessions}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Req/min</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.requestsPerMinute}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Error Rate</p>
                     <p className={`text-lg font-bold ${safeHealth.metrics.errorRate > 5 ? "text-action-danger" : "text-action-success"}`}>
                       {safeHealth.metrics.errorRate}%
                     </p>
                   </div>
-                  <div className="rounded-lg border border-border bg-bg-surface/40 p-3 min-w-0">
+                  <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                     <p className="text-xs text-text-muted uppercase">Avg Response</p>
                     <p className="text-lg font-bold text-white">{safeHealth.metrics.avgResponseTime}ms</p>
                   </div>
@@ -144,7 +144,7 @@ function ApplicationHealthInner() {
                 <p className="text-xs font-semibold uppercase text-text-muted mb-2">Recent Alerts</p>
                 <div className="space-y-2 min-w-0">
                   {safeHealth.recentAlerts.slice(0, 5).map((a) => (
-                    <div key={a.id} className="rounded-lg border border-border bg-bg-surface/40 p-3 flex items-center justify-between gap-2">
+                    <div key={a.id} className="surface-card bg-bg-surface/40 p-3 flex items-center justify-between gap-2">
                       <span className="text-sm text-text-secondary truncate">{a.message}</span>
                       <span
                         className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${

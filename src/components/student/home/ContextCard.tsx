@@ -65,7 +65,7 @@ export function ContextCard() {
 
   if (curfew === "none") {
     return (
-      <div className="rounded-2xl border border-border bg-bg-surface p-4">
+      <div className="surface-card bg-bg-surface p-4">
         <div className="flex items-center gap-2 text-text-muted">
           <CheckCircle2 className="h-5 w-5" aria-hidden />
           <span className="text-sm">
@@ -77,7 +77,7 @@ export function ContextCard() {
   }
 
   return (
-    <div className="rounded-2xl border-2 borderalert-warning bgalert-warning/10 p-4">
+    <div className="surface-card bgalert-warning/10 p-4">
       <div className="flex items-start gap-2">
         <AlertTriangle
           className="h-5 w-5 textalert-warning"

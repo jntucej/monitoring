@@ -18,7 +18,7 @@ export const useMouseParallax = (factor: number = 0.02, damping: number = 20, st
   const breakpoints = useBreakpoint({ sm: '(min-width: 640px)', md: '(min-width: 768px)', lg: '(min-width: 1024px)' });
   const isDesktopDevice = breakpoints.md || false;
 
-  // Issue #399: respect prefers-reduced-motion (WCAG 2.2 §2.3.3).
+  // Issue issue-399: respect prefers-reduced-motion (WCAG 2.2 §2.3.3).
   // Users who set "reduce motion" in their OS must never see the parallax effect.
   const [reducedMotion, setReducedMotion] = useState(false);
 

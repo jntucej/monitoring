@@ -85,7 +85,7 @@ export function SustainabilityDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 flex items-center gap-3">
-          <FileText className="h-8 w-8 text-action-primary" />
+          <FileText className="size-6 text-action-primary" />
           <div>
             <div className="text-xs text-text-secondary">Digital Passes Issued</div>
             <div className="text-2xl font-bold">{metrics.digital_passes_count.toLocaleString()}</div>
@@ -94,7 +94,7 @@ export function SustainabilityDashboard() {
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Leaf className="h-8 w-8 text-action-success" />
+          <Leaf className="size-6 text-action-success" />
           <div>
             <div className="text-xs text-text-secondary">Paper Saved (Sheets)</div>
             <div className="text-2xl font-bold">{metrics.paper_saved_sheets.toLocaleString()}</div>
@@ -103,7 +103,7 @@ export function SustainabilityDashboard() {
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Trees className="h-8 w-8 text-action-warning" />
+          <Trees className="size-6 text-action-warning" />
           <div>
             <div className="text-xs text-text-secondary">Trees Equivalent Saved</div>
             <div className="text-2xl font-bold">{metrics.trees_equivalent} Trees</div>
@@ -112,7 +112,7 @@ export function SustainabilityDashboard() {
         </Card>
 
         <Card className="p-4 flex items-center gap-3">
-          <Zap className="h-8 w-8 text-unit-c" />
+          <Zap className="size-6 text-unit-c" />
           <div>
             <div className="text-xs text-text-secondary">Carbon Offset (kg CO2)</div>
             <div className="text-2xl font-bold">{metrics.carbon_saved_kg} kg</div>

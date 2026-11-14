@@ -17,7 +17,7 @@ export function RoleMobileShell({
 
   return (
     <div className="flex h-dvh flex-col bg-bg-base">
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-bg-surface px-3">
+      <header className="surface-card flex h-12 shrink-0 items-center justify-between bg-bg-surface px-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -46,7 +46,7 @@ export function RoleMobileShell({
             aria-hidden
           />
           <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-bg-surface shadow-xl">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div className="surface-card flex items-center justify-between px-4 py-3">
               <span className="text-sm font-semibold">Navigation</span>
               <button
                 onClick={() => setOpen(false)}

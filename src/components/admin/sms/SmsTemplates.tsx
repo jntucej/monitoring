@@ -137,7 +137,7 @@ export function SmsTemplates() {
                 value={editBody}
                 onChange={(e) => setEditBody(e.target.value)}
                 rows={4}
-                className="mt-1 w-full border border-border bg-bg-surface p-2 rounded text-sm font-mono"
+                className="surface-card mt-1 w-full bg-bg-surface p-2 text-sm font-mono"
               />
               <p className="text-xs text-text-muted mt-1">
                 Variables: {selected.variables.length ? selected.variables.map((v) => `{#${v}#}`).join("  ") : "none"}

@@ -74,12 +74,12 @@ export function ClassRoster({
             description={msg}
           />
         ) : (
-          <div className="py-4 px-3 text-xs text-action-warning bg-amber-400/10 border border-amber-400/20 rounded-lg">
+          <div className="surface-card py-4 px-3 text-xs text-action-warning bg-amber-400/10">
             Failed to load this class: {msg}
             <button
               type="button"
               onClick={() => void refresh()}
-              className="ml-3 rounded-md border border-border bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary hover:text-text-primary"
+              className="surface-card ml-3 bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary hover:text-text-primary"
             >
               Retry
             </button>
@@ -137,7 +137,7 @@ export function ClassRoster({
       </div>
 
       {/* Today's attendance note for the caller's subject */}
-      <div className="rounded-lg border border-border bg-bg-elevated px-3 py-2 text-xs text-text-muted">
+      <div className="surface-card bg-bg-elevated px-3 py-2 text-xs text-text-muted">
         Today&apos;s attendance for{" "}
         <span className="font-mono font-semibold text-action-primary">
           {subject ?? "your subject"}
@@ -159,7 +159,7 @@ export function ClassRoster({
               key={stu.id}
               type="button"
               onClick={() => handleSelect(stu)}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-elevated px-3 py-2 min-w-0 text-left hover:border-action-primary/40 transition-colors"
+              className="surface-card flex items-center justify-between gap-3 bg-bg-elevated px-3 py-2 min-w-0 text-left hover: transition-colors"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate text-text-primary">

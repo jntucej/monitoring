@@ -48,7 +48,7 @@ function ModeCard({
       } ${disabled && !selected ? "opacity-40 cursor-not-allowed" : ""}`}
     >
       <div className="flex items-center gap-3">
-        <Icon className={`w-5 h-5 shrink-0 ${selected ? "text-current" : "text-text-muted"}`} />
+        <Icon className={`w-4 h-4 shrink-0 ${selected ? "text-current" : "text-text-muted"}`} />
         <div className="min-w-0">
           <p className={`text-sm font-bold ${selected ? "text-current" : "text-text-primary"}`}>{label}</p>
           <p className={`text-xs mt-0.5 ${selected ? "text-current/80" : "text-text-muted"}`}>{description}</p>
@@ -132,7 +132,7 @@ function OperatorModeInner() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger flex items-center gap-2 min-w-0">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span className="truncate">{error}</span>
           <button type="button" onClick={() => void loadMode()} className="ml-auto min-h11 inline-flex items-center text-xs font-semibold hover:underline shrink-0">Retry</button>
@@ -140,13 +140,13 @@ function OperatorModeInner() {
       )}
 
       {submitMsg && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-action-success min-w-0">
+        <div className="surface-card bg-emerald-500/10 p-3 text-sm text-action-success min-w-0">
           {submitMsg}
         </div>
       )}
 
       <OperatorWidgetBoundary title="Current Mode">
-        <div className="rounded-xl border border-border bg-bg-elevated p-4 min-w-0">
+        <div className="surface-card bg-bg-elevated p-4 min-w-0">
           {loading ? (
             <div className="flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
@@ -154,7 +154,7 @@ function OperatorModeInner() {
             </div>
           ) : mode ? (
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6 text-action-primary shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-action-primary shrink-0" />
               <div>
                 <p className="text-sm font-bold text-text-primary">
                   {modes.find((m) => m.mode === mode)?.label || mode}
@@ -201,7 +201,7 @@ function OperatorModeInner() {
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Scheduled system update"
               disabled={submitting}
-              className="w-full min-h11 px-3 py-2.5 rounded-lg border border-border bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none disabled:opacity-50"
+              className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none disabled:opacity-50"
             />
           </div>
 
@@ -212,7 +212,7 @@ function OperatorModeInner() {
               if (selected) void handleSetMode(selected.mode);
             }}
             disabled={submitting || !mode}
-            className="w-full min-h11 inline-flex items-center justify-center rounded-lg bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
+            className="surface-card w-full min-h11 inline-flex items-center justify-center bg-action-primary px-4 py-2.5 text-sm font-bold text-black hover:brightness-110 disabled:opacity-40 transition disabled:cursor-not-allowed"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

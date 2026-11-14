@@ -33,7 +33,7 @@ export function FloatingOrbs() {
                   <stop offset="100%" stopColor="var(--unit-c)" stopOpacity={"0.15"} />
                 </linearGradient>
                 <linearGradient id="discGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fff" stopOpacity="0.95" />
+                  <stop offset="0%" stopColor="var(--color-surface)" stopOpacity="0.95" />
                   <stop offset="100%" stopColor="var(--unit-c)" stopOpacity="0.7" />
                 </linearGradient>
               </defs>
@@ -58,7 +58,7 @@ export function FloatingOrbs() {
         </motion.div>
       ) : (
         <div
-          className="absolute inset-0 opacity-30 bg-gradient-to-br from-action-primary/10 via-transparent to-unit-c/10"
+          className="absolute inset-0 opacity-30 bg-surface-muted"
           aria-hidden="true"
         />
       )}

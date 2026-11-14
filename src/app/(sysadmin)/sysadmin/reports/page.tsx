@@ -84,7 +84,7 @@ export default function SysAdminReportsPage() {
       <div className="space-y-6 p-4 md:p-6">
         <PageHeader title="Reports" subtitle="Generate and download campus reports" />
 
-        <div className="glass-card p-5 space-y-4">
+        <div className="surface-card p-5 space-y-4">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-action-primary" />
             <h2 className="text-base font-semibold text-text-primary">Generate report</h2>
@@ -94,7 +94,7 @@ export default function SysAdminReportsPage() {
               <button
                 key={t}
                 onClick={() => generate(t)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm hover:bg-bg-surface/60"
+                className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:bg-bg-surface/60"
               >
                 <BarChart3 className="w-3.5 h-3.5" /> {t}
               </button>
@@ -102,7 +102,7 @@ export default function SysAdminReportsPage() {
           </div>
         </div>
 
-        <div className="glass-card p-5 space-y-3">
+        <div className="surface-card p-5 space-y-3">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-action-info" />
             <h2 className="text-base font-semibold text-text-primary">Recent reports</h2>
@@ -116,14 +116,14 @@ export default function SysAdminReportsPage() {
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text-primary truncate">{r.title}</p>
                     <p className="text-xs text-text-muted flex items-center gap-1.5">
-                      <Clock className="w-3 h-3" /> {r.range} · {new Date(r.generatedAt).toLocaleString("en-IN")}
+                      <Clock className="size-3.5" /> {r.range} · {new Date(r.generatedAt).toLocaleString("en-IN")}
                     </p>
                   </div>
                   <button
                     onClick={() => downloadReportCSV(r, data)}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border border-border hover:bg-bg-surface/60"
+                    className="surface-card inline-flex items-center gap-1 text-xs px-2.5 py-1 hover:bg-bg-surface/60"
                   >
-                    <Download className="w-3 h-3" /> CSV
+                    <Download className="size-3.5" /> CSV
                   </button>
                 </li>
               ))}

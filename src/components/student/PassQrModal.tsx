@@ -104,19 +104,19 @@ export function PassQrModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-    <div className="bg-bg-surface border border-border rounded-3xl p-4 sm:p-6 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full shadow-2xl relative space-y-4 overflow-y-auto max-h-[90dvh]">
+    <div className="surface-card bg-bg-surface p-4 sm:p-6 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full relative space-y-4 overflow-y-auto max-h-[90dvh]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-bg-elevated transition"
+          className="surface-card absolute top-4 right-4 p-2 text-text-muted hover:text-text-primary hover:bg-bg-elevated transition"
           aria-label="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-action-primary/10 text-action-primary border border-action-primary/20">
+          <div className="surface-card p-2.5 bg-action-primary/10 text-action-primary">
             <QrCode className="w-6 h-6" />
           </div>
           <div>
@@ -128,12 +128,12 @@ export function PassQrModal({
         {/* Body Content */}
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-8 h-8 text-action-primary animate-spin" />
+            <Loader2 className="size-6 text-action-primary animate-spin" />
             <p className="text-xs text-text-muted">Generating signed security credential…</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-action-danger text-xs flex flex-col items-center text-center space-y-2">
-            <AlertCircle className="w-8 h-8 text-action-danger" />
+          <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-xs flex flex-col items-center text-center space-y-2">
+            <AlertCircle className="size-6 text-action-danger" />
             <span className="font-semibold text-rose-200">Credential Not Available</span>
             <p className="text-xs text-rose-300/80">{error}</p>
           </div>
@@ -142,7 +142,7 @@ export function PassQrModal({
             {/* QR Canvas */}
             <div
               ref={qrRef}
-              className="bg-white p-5 rounded-2xl flex flex-col items-center justify-center shadow-inner border border-border"
+              className="surface-card bg-white p-5 flex flex-col items-center justify-center"
             >
               <QRCodeCanvas
                 value={qrText || ""}
@@ -151,14 +151,14 @@ export function PassQrModal({
                 includeMargin
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
-              <div className="mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1 rounded-full border border-border">
-                <span className="w-2 h-2 rounded-full bg-action-success animate-ping" />
+              <div className="surface-card mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1">
+                <span className="w-4 h-4 rounded-full bg-action-success animate-ping" />
                 Live Gate Token • Refreshes in {expiresIn}s
               </div>
             </div>
 
             {/* Window and Instructions */}
-            <div className="bg-bg-elevated p-3 rounded-2xl border border-border text-xs space-y-1.5">
+            <div className="surface-card bg-bg-elevated p-3 text-xs space-y-1.5">
               <div className="flex items-center gap-1.5 text-action-success font-semibold text-xs">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Approved Pass</span>
@@ -176,7 +176,7 @@ export function PassQrModal({
             {/* Download Button */}
             <button
               onClick={downloadQr}
-              className="w-full py-2.5 rounded-xl bg-bg-elevated border border-border text-text-primary text-xs font-bold hover:bg-bg-base flex items-center justify-center gap-2 transition"
+              className="surface-card w-full py-2.5 bg-bg-elevated text-text-primary text-xs font-bold hover:bg-bg-base flex items-center justify-center gap-2 transition"
             >
               <Download className="w-4 h-4" />
               <span>Save Pass QR Image</span>
