@@ -33,6 +33,7 @@ bad UI — the "top pain" notes which. Auth is injected via storage-state seeds
 | vice_principal | /vice-principal | 40% | .44 | .25 | 8 completed, 10 abandoned, 2 timed out | Empty approval views lack guidance; loading state has no nav/content |
 | principal | /principal | 30% | .19 | .75 | 6 completed, 12 timed out, 2 abandoned | No visible approve button on rows (FIXED via DataTable onRowClick) |
 | sysadmin | /sysadmin | 30% | .25 | .50 | 6 completed, 6 abandoned, 8 timed out | No visible acknowledge button on alert rows; action location unclear |
+| hostel_manager | /hostel-manager | n/a | — | — | panel hung (chromium stall in harness) | console renders fine in live DOM; not an app defect |
 
 ## MFA note (resolved 2026-11-15)
 
@@ -48,7 +49,13 @@ was performed and none is required.
 
 ## Defects found & status
 
-FIXED & deployed this pass (commits `53a7bfa0`, `db253077`, `0fa66c66`):
+> **Note on "top pain" column:** several panels ran *before* the fixes below
+> shipped, so the top-pain text can describe an already-cleared defect.
+> Cleared-by-fix: supervisor `$h.map` crash, exam_branch OIE 403,
+> transactions indefinite-spinner, mangled-Tailwind "garbled text",
+> principal no-approve-button (DataTable onRowClick).
+
+FIXED & deployed this pass:
 - **supervisor** `$h.map is not a function` crash → `EscalationsView` now guards
   `.map` on `data.escalatedPermissions` (array) instead of the whole `data`
   object; normalizes `student_name` so the name column renders.
