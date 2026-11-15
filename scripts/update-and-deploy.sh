@@ -5,6 +5,11 @@
 # ============================================================================
 set -euo pipefail
 
+BASE_DIR="/opt/monitoring"
+ENV_FILE="${BASE_DIR}/env/production.env"
+# Compose invocations resolve bind mounts against the project directory.
+COMPOSE=(docker compose --project-directory "${BASE_DIR}" \
+         -f "${BASE_DIR}/compose/docker-compose.yml" --env-file "${ENV_FILE}")
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -14,7 +19,7 @@ git checkout main
 git pull origin main
 
 echo "==> Rebuilding web + worker images..."
-docker compose build web worker
+"${COMPOSE[@]}" build web worker
 
 # P0-3: apply pending migrations (advisory-lock, idempotent) BEFORE the app
 # starts, so web/worker never boot against an un-migrated schema. The
@@ -22,10 +27,10 @@ docker compose build web worker
 # web/worker; this explicit run also surfaces a failing migration to the
 # operator HERE (abort, stack not restarted) instead of at container start.
 echo "==> Running migrations (migrate service)..."
-docker compose run --rm migrate
+"${COMPOSE[@]}" run --rm migrate
 
 echo "==> Restarting stack..."
-docker compose up -d postgres redis web worker
+"${COMPOSE[@]}" up -d postgres redis web worker
 
 echo "==> Verifying..."
 sleep 5

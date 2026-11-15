@@ -5,6 +5,12 @@
 set -e
 
 COMPOSE_DIR="/opt/monitoring/compose"
+BASE_DIR="/opt/monitoring"
+ENV_FILE="${BASE_DIR}/env/production.env"
+# Compose invocations resolve bind mounts against the project directory
+# (${BASE_DIR}), not the compose file's directory.
+COMPOSE=(docker compose --project-directory "${BASE_DIR}" \
+         -f "${COMPOSE_DIR}/docker-compose.yml" --env-file "${ENV_FILE}")
 LOG_FILE="/opt/monitoring/logs/gate-watchdog.log"
 MIGRATIONS_DIR="$COMPOSE_DIR/database/migrations"
 POSTGRES_CONTAINER="gate_postgres"
@@ -20,11 +26,11 @@ log() {
 # 1. Ensure all gate containers are running
 log "=== Watchdog check $(date) ==="
 
-MISSING=$(docker compose -f "$COMPOSE_DIR/docker-compose.yml" ps --format "{{.Name}}\t{{.Status}}" 2>/dev/null | grep -v "Up" | awk '{print $1}' || true)
+MISSING=$("${COMPOSE[@]}" ps --format "{{.Name}}\t{{.Status}}" 2>/dev/null | grep -v "Up" | awk '{print $1}' || true)
 if [ -n "$MISSING" ]; then
     log "WARNING: Some containers not running: $MISSING"
     log "Restarting missing containers..."
-    docker compose -f "$COMPOSE_DIR/docker-compose.yml" up -d --remove-orphans 2>&1 | tee -a "$LOG_FILE"
+    "${COMPOSE[@]}" up -d --remove-orphans 2>&1 | tee -a "$LOG_FILE"
 fi
 
 # 2. Ensure DB has required roles (supabase compatibility)
@@ -83,5 +89,5 @@ fi
 
 # 6. Final health check
 log "Final status:"
-docker compose -f "$COMPOSE_DIR/docker-compose.yml" ps 2>&1 | tee -a "$LOG_FILE"
+"${COMPOSE[@]}" ps 2>&1 | tee -a "$LOG_FILE"
 log "=== Watchdog check complete ==="

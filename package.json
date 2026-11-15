@@ -41,11 +41,12 @@
     "test:gate:e2e": "jest --config tests/gate/jest.config.mjs tests/gate/e2e",
     "test:gate:ci": "jest --config tests/gate/jest.config.mjs --ci --coverage",
     "test:gate:watch": "jest --config tests/gate/jest.config.mjs --watch",
-    "test:ci:deep": "npm run test:ci && npm run test:vitest && npm run test:gate:ci && bash scripts/verify-all-fixes.sh && npx tsx scripts/verify-permission-workflow.ts && bash scripts/verify-no-heavy-first-load.sh && npx tsx scripts/verify-all-roles.ts && npx tsx scripts/verify-feature-actions.ts && bash scripts/verify-falco-routing.sh && npx playwright test tests/a11y.spec.ts --reporter=line",
+    "test:ci:deep": "npm run test:ci && npm run test:vitest && npm run test:gate:ci && bash scripts/verify-all-fixes.sh && npx tsx scripts/verify-permission-workflow.ts && bash scripts/verify-no-heavy-first-load.sh && npx tsx scripts/verify-all-roles.ts && npx tsx scripts/verify-feature-actions.ts && bash scripts/verify-falco-routing.sh && npx playwright test tests/a11y.spec.ts --reporter=line && bash scripts/verify-ops-batch.sh",
     "test:vitest": "vitest run tests/unit",
     "test:roles": "npx tsx scripts/verify-all-roles.ts",
     "test:features": "npx tsx scripts/verify-feature-actions.ts",
-    "test:a11y": "playwright test tests/a11y.spec.ts"
+    "test:a11y": "playwright test tests/a11y.spec.ts",
+    "verify:ops": "bash scripts/verify-ops-batch.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1160.0",

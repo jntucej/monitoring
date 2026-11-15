@@ -6,7 +6,11 @@
 set -euo pipefail
 
 LOG_FILE="/var/log/gate-monitor-heal.log"
+BASE_DIR="/opt/monitoring"
 REPO_DIR="/opt/monitoring/compose"
+ENV_FILE="${BASE_DIR}/env/production.env"
+COMPOSE=(docker compose --project-directory "${BASE_DIR}" \
+         -f "${REPO_DIR}/docker-compose.yml" --env-file "${ENV_FILE}")
 SSH_KEY="$HOME/.ssh/myrepo_deploy"
 REMOTE_HOST="root@192.168.1.36"
 TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
@@ -62,15 +66,15 @@ check_all_running() {
 # Restart failed containers
 fix_containers() {
     log "Restarting containers..."
-    docker compose -f /opt/monitoring/compose/docker-compose.yml restart 2>/dev/null || true
+    "${COMPOSE[@]}" restart 2>/dev/null || true
     sleep 5
     
     # Check again
     if ! check_docker; then
         log "Containers still unhealthy, rebuilding..."
         send_telegram "🔧 <b>Rebuilding Containers...</b>"
-        docker compose -f /opt/monitoring/compose/docker-compose.yml build web --no-cache 2>/dev/null || true
-        docker compose -f /opt/monitoring/compose/docker-compose.yml up -d --remove-orphans 2>/dev/null || true
+        "${COMPOSE[@]}" build web --no-cache 2>/dev/null || true
+        "${COMPOSE[@]}" up -d --remove-orphans 2>/dev/null || true
         sleep 15
     fi
 }
@@ -102,8 +106,8 @@ deploy_with_retry() {
         fi
         
         # Build and deploy
-        if docker compose -f /opt/monitoring/compose/docker-compose.yml build web --no-cache 2>/dev/null && \
-           docker compose -f /opt/monitoring/compose/docker-compose.yml up -d --remove-orphans 2>/dev/null; then
+        if "${COMPOSE[@]}" build web --no-cache 2>/dev/null && \
+           "${COMPOSE[@]}" up -d --remove-orphans 2>/dev/null; then
             log "Build and deploy successful"
             
             # Wait for health check

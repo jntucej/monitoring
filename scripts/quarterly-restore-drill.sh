@@ -76,7 +76,7 @@ ROLES_OK=true
 for ROLE in student operator hod sysadmin; do
   FOUND=$(docker exec "$PG_CONTAINER" psql -U postgres -d "$SCRATCH" -tAc \
     "SELECT count(*) FROM public.users u JOIN public.user_roles ur ON ur.user_id=u.id
-     WHERE u.status='active' AND ur.role='$ROLE' LIMIT 1;" 2>/dev/null || echo 0)
+     WHERE u.status='ACTIVE' AND ur.role='$ROLE' LIMIT 1;" 2>/dev/null || echo 0)
   if [ "${FOUND:-0}" -ge 1 ]; then
     log "role $ROLE: active user present in restored DB"
   else
