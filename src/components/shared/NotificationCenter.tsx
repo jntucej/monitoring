@@ -231,7 +231,7 @@ export function NotificationCenter({
     <span className="relative flex size-5 items-center justify-center rounded-xl border border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated transition-colors">
       <Bell className="h-5 w-5" />
       {unreadCount > 0 && (
-        <span className="surface-card absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center bg-action-danger px-1 text-xs font-bold text-white">
+        <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action-danger px-1 text-xs font-bold text-white shadow-sm">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
