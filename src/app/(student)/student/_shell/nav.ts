@@ -15,7 +15,6 @@ export const STUDENT_NAV: NavEntry[] = [
       { href: "/student/permissions", label: "My tickets" },
       { href: "/student/permissions/new", label: "New request" },
       { href: "/student/passes", label: "Passes" },
-      { href: "/student/attendance", label: "Attendance" },
     ],
   },
   {
@@ -30,6 +29,7 @@ export const STUDENT_NAV: NavEntry[] = [
   {
     kind: "group", id: "campus", label: "Campus", icon: BookOpen,
     children: [
+      { href: "/student/attendance", label: "Attendance" },
       { href: "/student/campus", label: "Campus home" },
       { href: "/student/activity", label: "My activity" },
       { href: "/student/achievements", label: "Achievements" },
