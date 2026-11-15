@@ -567,6 +567,11 @@ const shift = useOperatorShiftClock();
                 Close
               </button>
             </div>
+            {activeLockdown && (
+              <p className="text-xs font-semibold text-action-danger" role="alert">
+                Verification is blocked by the active campus lockdown. This button is disabled until an administrator lifts it — look up a person at /operator/lookup in the meantime.
+              </p>
+            )}
           </form>
         </div>
       )}
@@ -742,16 +747,23 @@ const shift = useOperatorShiftClock();
       )}
 
       {/* ── Two decisions, always in the same place ── */}
+      {/* pointer-events-none on the full-width container so it does NOT
+          overlay the Scanner's "Can't see the code?" action row (Enter Roll
+          Manually / Upload QR Image) that sits at the same vertical band.
+          The v2/v3 synthetic runs found that button unclickable ("Enter
+          Roll Manually triggers no visible change") — this z-70 bar was
+          intercepting the pointer events over it. Only the two decision
+          buttons themselves are clickable. */}
       {!needsAssignment && scannerOpen && (
-        <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-1.5 px-4">
-          <div className="w-full max-w-md">
+        <div className="fixed bottom-4 inset-x-0 z-70 flex flex-col items-center gap-1.5 px-4 pointer-events-none">
+          <div className="w-full max-w-md pointer-events-auto">
             {state !== "confirming" && (
               <p className="text-center text-xs text-text-muted mb-1.5" aria-live="polite">
                 Scan a pass or enter a roll, then choose entry or exit.
               </p>
             )}
           </div>
-          <div className="w-full max-w-md grid grid-cols-2 gap-2">
+          <div className="w-full max-w-md grid grid-cols-2 gap-2 pointer-events-auto">
             <button
               type="button"
               disabled={!canConfirm}

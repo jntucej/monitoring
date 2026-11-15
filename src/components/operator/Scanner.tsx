@@ -766,7 +766,7 @@ export function Scanner({
                     still verify a pass. */}
                 <p className="text-xs font-semibold text-text-primary max-w-xs">
                   {onManualEntryClick
-                    ? "You can still verify a pass below — enter the roll number or upload a photo of the code."
+                    ? "Live camera scanning is unavailable on this device. Use the manual or photo options below (a campus lockdown, if active, blocks all verification — see the status strip above)."
                     : "Upload a photo of the code below to continue."}
                 </p>
                 <button
@@ -806,7 +806,7 @@ export function Scanner({
                 {onManualEntryClick && (
                   <button
                     type="button"
-                    onClick={() => { stopCamera(); onClose(); onManualEntryClick(); }}
+                    onClick={() => { stopCamera(); onManualEntryClick(); }}
                     className="surface-card w-full sm:flex-1 py-2.5 bg-bg-elevated hover:bg-bg-elevated text-text-secondary font-semibold text-xs transition-all flex items-center justify-center gap-2"
                   >
                     <KeyRound className="w-4 h-4 text-text-muted shrink-0" />

@@ -172,10 +172,10 @@ export function GateModeBanner({
         >
           <ShieldAlert className="size-3.5 shrink-0" aria-hidden />
           <span>
-            <strong>Campus lockdown — scans are blocked.</strong>{" "}
-            {lockdown.message ?? "An administrator must lift the lockdown before the camera can verify passes."}
+            <strong>Campus lockdown — all scans are blocked.</strong>{" "}
+            {lockdown.message ?? "An administrator must lift the lockdown before any pass (camera, manual, or photo) can be verified."}
             {lockdown.scopes.length > 0 && <> Scopes: {lockdown.scopes.join(", ")}.</>}
-            {" Manual roll entry and photo upload below still work — lockdown only blocks live camera scans."}
+            {" Manual roll entry and photo upload are disabled until the lockdown is lifted — you can still look up a person at /operator/lookup, but you cannot record an entry or exit."}
           </span>
         </div>
       )}
