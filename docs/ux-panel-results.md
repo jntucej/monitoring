@@ -89,3 +89,31 @@ OPEN (feature gaps or env state, not UI defects — left as-is):
 MFA-gated roles (principal, sysadmin, vice_principal, hostel) are now
 password-only (MFA disabled on those 4 roles, see note above) and
 **have all been panel-tested**.
+
+## Anti-slop detector gate (Impeccable, 2026-11-15)
+
+Ran the `impeccable detect` anti-slop/a11y detector against the **live,
+authenticated** consoles via CDP (headless Chromium with storage-state
+injected + a DevTools port; script: `scripts/impeccable-console-sweep.sh`,
+host: `scripts/cdp-scan-host.js`). Findings cleared:
+
+- **White-on-white notification badge** (operator/principal/shared `NotificationCenter`):
+  the unread-count pill used `.surface-card` (white bg) *plus* `bg-action-danger` —
+  the white won, so `text-white` rendered on white (invisible, 1.0:1). Dropped
+  `.surface-card`; now a `rounded-full bg-action-danger` pill. (commit `b6a368e1`.)
+- **Low-contrast pale accent text** on light surfaces (staff, oie flagged
+  `#ffccd3` rose + `#53eafd` cyan at ~1.4:1): the app is light-mode
+  (`--color-surface:#fff`), so sub-WCAG Tailwind shades (`text-cyan/rose/sky/
+  emerald/amber 200-300`) failed 4.5:1. Darkened to 600/700 across 47 files.
+  Post-fix detector: **staff 0 hard findings, oie 0 hard findings**.
+  (commit `4ea01307`.)
+- **admin straggler**: a lone word ("management.") left on the last of 2 lines
+  (10% of the measure). Tightened the Command-Overview copy.
+  (commit `9721cdfb`.)
+
+Remaining (not defects, or need a design-brief decision):
+- `skipped-heading` on supervisor/operator = **detector false positive** — the
+  real DOM is h1(sr-only)→h2→h3 (a valid outline); the rule de-dupes by text.
+- `flat-type-hierarchy` (advisory, not a failure): body 12px vs h2/h3 14px,
+  largest step 1.17× (target 1.25×). Global type-scale change — left for a
+  design-brief decision (per the gate's own rule: "update DESIGN.md first").
