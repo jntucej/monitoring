@@ -2,6 +2,13 @@
 *.md
 **/*.md
 docs/**
+team/**
+release-evidence/**
+.swarm-parallel/**
+test-workflow.txt
+
+# AI tooling / agent configs (not part of the app)
+.hermes/**
 
 # Build artifacts & caches
 .next/**
@@ -29,6 +36,17 @@ playwright-report/**
 test-results/**
 repomix-output.*
 repomix-output*
+security-test.py
+security-test-results.json
+load-test.js
+security/**
+
+# Load-test / scratch dirs
+load/**
+videoeditor/**
+db/**
+monitoring/**
+bot_daemon.py
 
 # Environment & Secrets
 .env*
