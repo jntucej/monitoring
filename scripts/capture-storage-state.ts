@@ -54,9 +54,11 @@ const loginPath =
   ).catch(() => console.log("WARN: mycampus-auth.authenticated never became true before capture"));
   await page.waitForTimeout(1500);
 
-  // MFA gate? If we're on an MFA screen, report it.
-  if (url.includes("mfa") || url.includes("two-factor") || /verify/i.test(await page.evaluate(() => document.body.innerText.slice(0, 200)))) {
-    console.log("MFA gate detected — student seed requires a TOTP code; cannot capture autonomously.");
+  // MFA gate? Only trust the URL — the app's dashboard text can contain
+  // "verify" (e.g. "verify your pass") and false-fire a body-text match.
+  // A real MFA screen lives at /mfa or a login-challenge URL.
+  if (url.includes("/mfa") || url.includes("two-factor") || url.includes("/login")) {
+    console.log(`MFA gate / still on login (${url}) — needs a TOTP code; cannot capture autonomously.`);
     await browser.close();
     process.exit(2);
   }
