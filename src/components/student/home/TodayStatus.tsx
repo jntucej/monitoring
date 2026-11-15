@@ -63,6 +63,26 @@ export function TodayStatus() {
           </span>
         )}
       </div>
+      {/* The panel's #1 pain was "no clear curfew/campus-allowed view." The
+          dashboard already fetches curfew data — surface it here so a student
+          can tell at a glance whether they're in good standing, instead of
+          hunting the sub-routes. */}
+      {data?.curfew?.today && (
+        <div className="mt-3 flex items-center justify-between rounded-lg bg-bg-elevated/40 px-3 py-2 text-sm">
+          <span className="text-text-secondary">Curfew status</span>
+          <span
+            className={
+              data.curfew.today.late > 0
+                ? "font-medium textaction-warning"
+                : "font-medium text-action-success"
+            }
+          >
+            {data.curfew.today.late > 0
+              ? `${data.curfew.today.late} late return${data.curfew.today.late > 1 ? "s" : ""} this week`
+              : "On time"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

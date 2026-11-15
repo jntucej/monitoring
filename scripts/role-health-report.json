@@ -1,247 +1,506 @@
 [
   {
-    "role": "operator",
-    "leaf": "/operator",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      },
-      {
-        "url": "/api/admin/alerts/stream",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()",
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/announcements",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/alerts",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/claim",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/alumni",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/exceptions",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/kiosk-pin",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/advanced",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/lookup",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/occupancy",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      },
-      {
-        "url": "/api/admin/alerts/stream",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()",
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/manual-entry",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/predictive",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/mode",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/sustainability",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/notifications",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/traffic",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/pass-verification",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/analytics/users",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      },
-      {
-        "url": "/api/admin/alerts/stream",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()",
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/password",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/announcements",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/profile",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/anti-ragging-config",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      },
-      {
-        "url": "/api/admin/alerts/stream",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()",
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/stats",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/attendance",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
   },
   {
-    "role": "operator",
-    "leaf": "/operator/transactions",
-    "status": "broken",
+    "role": "admin",
+    "leaf": "/admin/attendance/bulk-import",
+    "status": "ok",
     "errors": [],
-    "apiFailures": [
-      {
-        "url": "/api/admin/alerts?limit=5",
-        "status": 403
-      }
-    ],
-    "consoleErrors": [
-      "Failed to load resource: the server responded with a status of 403 ()"
-    ]
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/audit-logs",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/classes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/complaints/categories",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/complaints/chains",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/dashboard",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/departments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/events",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/faculty",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/faculty-assignments",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gate-device-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gates",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/gates/schedule",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/health",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/institutional-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/kb",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/lockdown",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/analytics",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/days",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/items",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/mess/today",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/notification-settings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/occupancy",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/overview",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/parents",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/passes",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/permission-policies",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/appearance",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/personal",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/profile/security",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/reports",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/roles",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sessions",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/settings",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sms/compose",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sms/queue",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/staff",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/student-representatives",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/students",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/students/import",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/subjects",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/support",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/sustainability",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/users",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/visitors",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/workers",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
+  },
+  {
+    "role": "admin",
+    "leaf": "/admin/workflow-configuration",
+    "status": "ok",
+    "errors": [],
+    "apiFailures": [],
+    "consoleErrors": []
   }
 ]

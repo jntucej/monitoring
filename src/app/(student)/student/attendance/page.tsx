@@ -64,6 +64,46 @@ export default function AttendancePage() {
           You are below 75%. Attend consistently to avoid detention.
         </p>
       )}
+      {/* The panel's pain: "attendance page lacks a daily breakdown." The
+          calendar payload already carries per-day status — render it so a
+          student can see which days were present/absent/unmarked. */}
+      {data?.data?.days && data.data.days.length > 0 && (
+        <div className="surface-card rounded-xl p-4">
+          <h2 className="mb-3 text-sm font-semibold text-text-secondary">
+            This month, day by day
+          </h2>
+          <ul className="grid grid-cols-1 gap-1.5" role="list">
+            {data.data.days.map((d) => {
+              const label = new Date(d.date + "T00:00:00").toLocaleDateString(
+                undefined,
+                { month: "short", day: "numeric" }
+              );
+              // The API returns "PRESENT"/"IN"/"present" for present and
+              // "ABSENT"/"OUT"/"absent" for absent (see attendance-calendar
+              // route). Normalize to a single label + tone.
+              const raw = (d.status ?? "").toUpperCase();
+              let status: string;
+              let cls: string;
+              if (["PRESENT", "IN"].includes(raw)) {
+                status = "present";
+                cls = "text-action-success";
+              } else if (["ABSENT", "OUT"].includes(raw)) {
+                status = "absent";
+                cls = "textalert-critical";
+              } else {
+                status = "unmarked";
+                cls = "text-text-muted";
+              }
+              return (
+                <li key={d.date} className="flex items-center justify-between text-sm">
+                  <span className="text-text-secondary">{label}</span>
+                  <span className={`font-medium ${cls}`}>{status}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
