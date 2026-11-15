@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,16 +168,39 @@ export function GateModeBanner({
         <div
           role="alert"
           className={compact
-            ? "mt-1 flex items-center gap-2 max-w-md bg-action-danger/10 px-2.5 py-1.5 text-xs text-action-danger"
-            : "surface-card mt-1 max-w-md bg-action-danger/10 px-2 py-1 text-xs text-action-danger"}
+            ? "mt-1 flex flex-col gap-1.5 max-w-md bg-action-danger/10 px-2.5 py-2 text-xs text-action-danger"
+            : "surface-card mt-1 max-w-md bg-action-danger/10 px-2 py-2 text-xs text-action-danger"}
         >
-          <ShieldAlert className="size-3.5 shrink-0" aria-hidden />
-          <span>
-            <strong>Campus lockdown — all scans are blocked.</strong>{" "}
-            {lockdown.message ?? "An administrator must lift the lockdown before any pass (camera, manual, or photo) can be verified."}
-            {lockdown.scopes.length > 0 && <> Scopes: {lockdown.scopes.join(", ")}.</>}
-            {" Manual roll entry and photo upload are disabled until the lockdown is lifted — you can still look up a person at /operator/lookup, but you cannot record an entry or exit."}
-          </span>
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="size-3.5 shrink-0" aria-hidden />
+            <span>
+              <strong>Campus lockdown — all scans are blocked.</strong>{" "}
+              {lockdown.message ?? "An administrator must lift the lockdown before any pass (camera, manual, or photo) can be verified."}
+              {lockdown.scopes.length > 0 && <> Scopes: {lockdown.scopes.join(", ")}.</>}
+            </span>
+          </div>
+          {/* Actionable path during lockdown. The previous version only said
+              "manual entry disabled" with no next step, which the 20-persona
+              runs scored 42x as "blocks verification without an actionable
+              path". Two concrete moves: a still-available read-only lookup
+              (clickable), and an escalation inbox for flagging the person. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-5.5">
+            <Link
+              href="/operator/lookup"
+              className="font-semibold text-action-danger underline underline-offset-2 hover:text-action-danger/80"
+            >
+              Look up a person
+            </Link>
+            <Link
+              href="/operator/exceptions"
+              className="font-semibold text-action-danger underline underline-offset-2 hover:text-action-danger/80"
+            >
+              Flag / escalate
+            </Link>
+            <span className="text-action-danger/80">
+              Scans resume when security administration lifts the lockdown.
+            </span>
+          </div>
         </div>
       )}
 

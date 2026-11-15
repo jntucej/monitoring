@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
@@ -569,7 +570,15 @@ const shift = useOperatorShiftClock();
             </div>
             {activeLockdown && (
               <p className="text-xs font-semibold text-action-danger" role="alert">
-                Verification is blocked by the active campus lockdown. This button is disabled until an administrator lifts it — look up a person at /operator/lookup in the meantime.
+                Verification is blocked by the active campus lockdown. This button is disabled until an administrator lifts it.{" "}
+                <Link href="/operator/lookup" className="underline underline-offset-2">
+                  Look up a person
+                </Link>{" "}
+                or{" "}
+                <Link href="/operator/exceptions" className="underline underline-offset-2">
+                  flag / escalate
+                </Link>{" "}
+                in the meantime.
               </p>
             )}
           </form>
