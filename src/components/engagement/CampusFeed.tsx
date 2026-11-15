@@ -196,7 +196,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
             Loading feed…
           </div>
         ) : error && !data ? (
-          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-600">{error}</div>
         ) : items.length === 0 ? (
           <div className="mt-6 flex flex-col items-center gap-2 py-8 text-center text-text-muted">
             <Inbox className="h-6 w-6 opacity-50" aria-hidden />

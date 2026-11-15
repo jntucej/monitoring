@@ -97,7 +97,7 @@ const api = useApi();
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-semibold">A temporary password was set for your account.</p>
-            <p className="mt-0.5 text-amber-200/80">
+            <p className="mt-0.5 text-amber-700/80">
               You must choose a new password now — the one an administrator or the
               enrollment process set for you is valid until you replace it.
             </p>
@@ -123,7 +123,7 @@ const api = useApi();
             <p className="text-sm font-medium text-action-success dark:text-action-success">
               Password changed successfully.
             </p>
-            <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-1">
+            <p className="text-xs text-emerald-700/80 dark:text-emerald-700/80 mt-1">
               Signing you out…
             </p>
           </div>

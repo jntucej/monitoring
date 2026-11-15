@@ -218,7 +218,7 @@ function ChildStatusInner() {
       </div>
 
       {personsError && (
-        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200 flex items-center justify-between gap-3">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             Could not load wards.

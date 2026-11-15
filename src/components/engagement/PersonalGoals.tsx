@@ -147,7 +147,7 @@ export function PersonalGoals() {
             Loading goals…
           </div>
         ) : error ? (
-          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-600">{error}</div>
         ) : (
           <ul className="mt-4 space-y-3" aria-label="Goal list">
             {goals.map((goal) => {

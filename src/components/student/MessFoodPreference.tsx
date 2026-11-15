@@ -310,7 +310,7 @@ function MessFoodPreferenceInner() {
           <Lock className="w-4 h-4 text-action-warning mt-0.5 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs font-bold text-action-warning">Selection window locked</p>
-            <p className="text-xs text-amber-200/80 mt-0.5">
+            <p className="text-xs text-amber-700/80 mt-0.5">
               {myPref
                 ? `Your choice: ${myPref.primaryItem === "VEG" ? "Veg" : "Non-Veg"} · ${myPref.willBePresent ? "Present" : "Absent"}${
                     myPref.subItemLabels?.length ? ` · ${myPref.subItemLabels.join(", ")}` : ""

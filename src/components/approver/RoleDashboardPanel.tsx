@@ -139,7 +139,7 @@ export function RoleDashboardPanel({
             Could not load KPIs: {resource.error}{" "}
             <button
               onClick={() => resource.refresh()}
-              className="underline hover:text-rose-200"
+              className="underline hover:text-rose-600"
             >
               Retry
             </button>

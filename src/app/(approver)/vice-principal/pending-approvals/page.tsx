@@ -131,7 +131,7 @@ function VpPendingApprovalsInner() {
           </div>
 
           {actionOk && (
-            <div className="surface-card mb-3 flex items-center gap-2 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+            <div className="surface-card mb-3 flex items-center gap-2 bg-emerald-500/10 p-3 text-xs text-emerald-700">
               <CheckCircle2 className="w-4 h-4 shrink-0" /> {actionOk}
             </div>
           )}

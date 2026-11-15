@@ -187,7 +187,7 @@ function AdminLockdownInner() {
                     />
                   </label>
                 </div>
-                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
+                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-700/90 flex items-start gap-2.5">
                   <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>
                     Broadcasting a lockdown immediately blocks gate movement in the

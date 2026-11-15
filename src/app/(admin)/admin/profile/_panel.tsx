@@ -224,7 +224,7 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
                     <Field value={confirmPassword} onChange={setConfirmPassword} type={showPw ? "text" : "password"} placeholder="Repeat new password" required />
                   </div>
                 </div>
-                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
+                <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-700/90 flex items-start gap-2.5">
                   <KeyRound className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>Changing your password revokes every other active session and device immediately.</span>
                 </div>

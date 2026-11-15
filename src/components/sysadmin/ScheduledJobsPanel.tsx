@@ -115,7 +115,7 @@ const CATEGORY_META: Record<
 > = {
   maintenance:   { label: "Maintenance",   icon: Settings2, tint: "text-text-secondary" },
   notifications: { label: "Notifications", icon: Bell,      tint: "text-indigo-300" },
-  analytics:     { label: "Analytics",     icon: BarChart3, tint: "text-cyan-300"   },
+  analytics:     { label: "Analytics",     icon: BarChart3, tint: "text-cyan-700"   },
   security:      { label: "Security",      icon: Shield,    tint: "text-action-warning"  },
   cleanup:       { label: "Cleanup",       icon: Trash2,    tint: "text-action-danger"   },
 };

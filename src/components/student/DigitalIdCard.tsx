@@ -245,7 +245,7 @@ const api = useApi();
           <p className="text-xs font-semibold text-action-success uppercase tracking-wide mb-1">
             Today&apos;s Mess Code
           </p>
-          <p className="text-xs text-emerald-300/80 mb-2">
+          <p className="text-xs text-emerald-700/80 mb-2">
             Show this code at the mess counter
           </p>
           <div className="font-mono text-3xl font-black tracking-[0.35em] text-action-success text-center py-2">

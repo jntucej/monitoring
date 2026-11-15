@@ -198,7 +198,7 @@ function PassLeaveSubmissionInner() {
       </div>
 
       {personsError && (
-        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600">
           Could not load wards.{" "}
           <button type="button" onClick={() => void refreshPersons()} className="underline font-semibold">
             Retry

@@ -134,8 +134,8 @@ export function PassQrModal({
         ) : error ? (
           <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-xs flex flex-col items-center text-center space-y-2">
             <AlertCircle className="size-6 text-action-danger" />
-            <span className="font-semibold text-rose-200">Credential Not Available</span>
-            <p className="text-xs text-rose-300/80">{error}</p>
+            <span className="font-semibold text-rose-600">Credential Not Available</span>
+            <p className="text-xs text-rose-600/80">{error}</p>
           </div>
         ) : (
           <div className="space-y-4">

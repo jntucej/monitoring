@@ -102,7 +102,7 @@ function RequestStatusContent({ ticketParam }: { ticketParam: string }) {
       </div>
 
       {error && (
-        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-200">
+        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600">
           {error}
         </div>
       )}

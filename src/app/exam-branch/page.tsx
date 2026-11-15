@@ -176,12 +176,12 @@ function ExamBranchPassQueueInner() {
           <ShieldCheck className="w-4 h-4 shrink-0" />
           Pass clearances require OIE approval. Exam branch cannot self-clear.
         </p>
-        <p className="mt-1 text-xs text-sky-200/60">
+        <p className="mt-1 text-xs text-sky-600/60">
           Items here are visible for preparation only. Final approval is owned
           by the OIE — see the{" "}
           <Link
             href="/exam-branch/oie-approval-requests"
-            className="underline decoration-dotted hover:text-sky-100"
+            className="underline decoration-dotted hover:text-sky-600"
           >
             OIE Approvals
           </Link>{" "}

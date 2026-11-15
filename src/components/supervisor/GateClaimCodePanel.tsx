@@ -249,7 +249,7 @@ export function GateClaimCodePanel() {
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="text-xs text-emerald-300/70">
+            <p className="text-xs text-emerald-700/70">
               Give this 6-digit code to the operator. They enter it before it expires to claim the gate —
               one-time use, shown only once.
             </p>

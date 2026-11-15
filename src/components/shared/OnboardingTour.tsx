@@ -61,9 +61,9 @@ export function OnboardingTour() {
   return (
     <Card className="border-cyan-500/30 bg-cyan-950/20 mb-6 relative overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center gap-2 text-cyan-400">
+        <div className="flex items-center gap-2 text-cyan-600">
           <Compass className="h-5 w-5 animate-pulse" />
-          <CardTitle className="text-sm font-semibold text-cyan-300">
+          <CardTitle className="text-sm font-semibold text-cyan-700">
             Interactive Onboarding: {nextStep.title}
           </CardTitle>
         </div>

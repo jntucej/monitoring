@@ -263,7 +263,7 @@ function AdminOverviewInner() {
         <Info className="w-5 h-5 text-action-warning shrink-0" />
         <div>
           <p className="text-xs font-semibold text-action-warning">Command Overview</p>
-          <p className="text-xs text-amber-300/70 mt-0.5">
+          <p className="text-xs text-amber-700/70 mt-0.5">
             All modules pull from the same live telemetry feed. The Dashboard page shows real-time
             status; drill into individual modules for deeper management.
           </p>

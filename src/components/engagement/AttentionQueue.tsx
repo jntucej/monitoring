@@ -106,7 +106,7 @@ export function AttentionQueue() {
             Loading attention queue…
           </div>
         ) : error && !data ? (
-          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-4 bg-rose-500/10 p-3 text-sm text-rose-600">
             {error}
           </div>
         ) : data?.empty ? (

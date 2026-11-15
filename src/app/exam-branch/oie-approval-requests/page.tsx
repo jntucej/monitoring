@@ -100,7 +100,7 @@ function OieApprovalRequestsInner() {
           <ShieldCheck className="w-4 h-4 shrink-0" />
           OIE approval required
         </p>
-        <p className="mt-1 text-xs text-emerald-200/70 leading-relaxed">
+        <p className="mt-1 text-xs text-emerald-700/70 leading-relaxed">
           Items on this page are pending <strong>OIE review</strong>. The exam branch cannot
           approve or reject them — only the Office of the Instructor of Examinations (OIE) can
           make the final call. Bypassing OIE approval is not permitted. If you need to expedite

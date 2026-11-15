@@ -557,7 +557,7 @@ const api = useApi();
                 </div>
               </div>
 
-              <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-300/90 flex items-start gap-2.5">
+              <div className="surface-card bg-amber-500/10 p-3 text-xs text-amber-700/90 flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-action-warning shrink-0 mt-0.5" />
                 <span>
                   <strong>Zero-Trust Revocation:</strong> Changing this password increments the account&apos;s session version. All other browser tabs and active API sessions will be signed out immediately.

@@ -110,7 +110,7 @@ export function ActivityTimeline({ limit = 12 }: { limit?: number }) {
             Loading activity…
           </div>
         ) : error && !data ? (
-          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-600">
             {error}
           </div>
         ) : items.length === 0 ? (

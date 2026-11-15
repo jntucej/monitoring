@@ -249,9 +249,9 @@ export function BulkUserImportModal({ onClose, onSuccess }: BulkUserImportModalP
                   <div className="surface-card bg-amber-500/10 p-2 text-action-warning">
                     <b>{preview.skippedRows.length}</b> row(s) match existing students — they will be skipped (no update).
                     {preview.skippedRows.slice(0, 5).map((s) => (
-                      <div key={s.roll} className="pl-2 text-amber-300/80">row {s.row} · {s.roll}{s.name ? ` (${s.name})` : ""}</div>
+                      <div key={s.roll} className="pl-2 text-amber-700/80">row {s.row} · {s.roll}{s.name ? ` (${s.name})` : ""}</div>
                     ))}
-                    {preview.skippedRows.length > 5 && <div className="pl-2 text-amber-300/60">… and {preview.skippedRows.length - 5} more</div>}
+                    {preview.skippedRows.length > 5 && <div className="pl-2 text-amber-700/60">… and {preview.skippedRows.length - 5} more</div>}
                   </div>
                 )}
                 {preview.errors.length > 0 && (

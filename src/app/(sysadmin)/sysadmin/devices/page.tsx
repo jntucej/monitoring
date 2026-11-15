@@ -167,7 +167,7 @@ const api = useApi();
           <AlertTriangle className="w-5 h-5 text-action-warning shrink-0 mt-0.5" />
           <div>
             <h3 className="text-sm font-semibold text-action-warning">Hardware Readiness Notice</h3>
-            <p className="text-xs text-amber-300/80 mt-0.5 leading-relaxed">
+            <p className="text-xs text-amber-700/80 mt-0.5 leading-relaxed">
               Enable only when corresponding hardware is installed and tested.
             </p>
           </div>

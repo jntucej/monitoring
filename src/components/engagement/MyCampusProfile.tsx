@@ -122,7 +122,7 @@ export function MyCampusProfile() {
             Loading your campus profile…
           </div>
         ) : error && !data ? (
-          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-600">
             {error}
             <div className="mt-2">
               <button

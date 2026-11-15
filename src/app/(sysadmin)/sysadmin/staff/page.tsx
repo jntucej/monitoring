@@ -238,7 +238,7 @@ const api = useApi();
       principal: "bg-action-danger/20 text-action-danger border-action-danger/30",
       vice_principal: "bg-action-danger/20 text-action-danger border-action-danger/30",
       oie: "bg-unit-c/20 text-unit-c border-unit-c/30",
-      exam_branch: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
+      exam_branch: "bg-fuchsia-500/20 text-fuchsia-600 border-fuchsia-500/30",
     };
     return c[role] || "bg-bg-elevated text-text-secondary border-border";
   };

@@ -67,7 +67,7 @@ export function EventsPanel({ limit = 12 }: { limit?: number }) {
             Loading events…
           </div>
         ) : error && events.length === 0 ? (
-          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-200">
+          <div className="surface-card mt-6 bg-rose-500/10 p-3 text-sm text-rose-600">
             {error}
           </div>
         ) : shown.length === 0 ? (

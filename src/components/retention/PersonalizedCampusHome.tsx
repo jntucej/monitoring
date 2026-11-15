@@ -292,7 +292,7 @@ export function PersonalizedCampusHome() {
                 key={i}
                 className={`flex items-center gap-2 rounded-lg border p-3 text-xs ${
                   a.priority === "high"
-                    ? "border-rose-500/30 bg-rose-500/10 text-rose-200"
+                    ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
                     : a.priority === "medium"
                     ? "border-amber-500/30 bg-amber-500/10 text-action-warning"
                     : "border-border/50 bg-bg-elevated/30 text-text-secondary"

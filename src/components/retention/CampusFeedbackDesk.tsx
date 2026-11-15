@@ -44,7 +44,7 @@ const STATUS_COLORS: Record<string, string> = {
   submitted: "text-action-warning",
   acknowledged: "text-action-primary",
   assigned: "text-unit-c",
-  in_progress: "text-cyan-400",
+  in_progress: "text-cyan-600",
   resolved: "text-action-success",
   feedback: "text-action-primary",
 };
@@ -130,7 +130,7 @@ export function CampusFeedbackDesk() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-cyan-400" />
+            <MessageSquare className="h-6 w-6 text-cyan-600" />
             <h3 className="text-sm font-medium text-text-primary">Feedback & Issues</h3>
             <span className="text-xs text-text-muted">
               {reports.length} report(s)
@@ -139,7 +139,7 @@ export function CampusFeedbackDesk() {
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="surface-card flex items-center gap-1.5 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300 hover:bg-cyan-500/20 transition-colors motion-reduce:transition-none"
+            className="surface-card flex items-center gap-1.5 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-700 hover:bg-cyan-500/20 transition-colors motion-reduce:transition-none"
           >
             <Send className="h-3.5 w-3.5" />
             {showForm ? "Cancel" : "New Report"}
@@ -262,7 +262,7 @@ export function CampusFeedbackDesk() {
                             />
                             <span
                               className={`mt-1 text-xs ${
-                                done ? "text-cyan-300" : "text-text-muted"
+                                done ? "text-cyan-700" : "text-text-muted"
                               }`}
                             >
                               {step.label}

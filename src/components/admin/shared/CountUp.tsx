@@ -25,7 +25,7 @@ export function SineWaveLoader({ className = "" }: { className?: string }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className={`inline-flex items-center gap-2.5 px-3 py-1 rounded-xl bg-bg-surface/90 border border-cyan-500/40 text-cyan-300 font-mono text-xs shadow-[0_0_18px_rgba(6,182,212,0.3)] backdrop-blur-md select-none ${className}`}
+      className={`inline-flex items-center gap-2.5 px-3 py-1 rounded-xl bg-bg-surface/90 border border-cyan-500/40 text-cyan-700 font-mono text-xs shadow-[0_0_18px_rgba(6,182,212,0.3)] backdrop-blur-md select-none ${className}`}
     >
       {/* Dynamic Animated Sine Wave SVG */}
       <svg className="w-10 h-3.5 shrink-0 overflow-visible" viewBox="0 0 100 24" fill="none">
@@ -69,7 +69,7 @@ export function SineWaveLoader({ className = "" }: { className?: string }) {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="font-black text-xs uppercase tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+        className="font-black text-xs uppercase tracking-widest text-cyan-700 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]"
       >
         FETCHING LIVE TELEMETRY…
       </motion.span>

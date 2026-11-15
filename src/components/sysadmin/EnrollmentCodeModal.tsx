@@ -152,14 +152,14 @@ const api = useApi();
 
               <div className="surface-card p-3 bg-amber-500/10 text-xs text-action-warning space-y-1">
                 <p className="font-semibold text-action-warning">Direct Activation Link:</p>
-                <p className="font-mono text-xs break-all select-all text-amber-300/90">
+                <p className="font-mono text-xs break-all select-all text-amber-700/90">
                   {issued.bootstrapLink || (typeof window !== "undefined" ? `${window.location.origin}/bootstrap?code=${issued.code}` : `/bootstrap?code=${issued.code}`)}
                 </p>
               </div>
 
               {issued.telegramDeepLink && (
                 <div className="surface-card p-3 bg-sky-500/10 text-xs text-action-info space-y-1">
-                  <p className="font-semibold text-sky-200">Telegram Deep Link (share with candidate):</p>
+                  <p className="font-semibold text-sky-600">Telegram Deep Link (share with candidate):</p>
                   <p className="font-mono text-xs break-all select-all text-sky-300/90">
                     {issued.telegramDeepLink}
                   </p>

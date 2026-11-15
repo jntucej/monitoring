@@ -207,7 +207,7 @@ export function SchedulingPanel() {
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <div>
             <p className="font-medium">Could not load ai smart scheduling assistant</p>
-            <p className="text-rose-300/80">{suggestions.error}</p>
+            <p className="text-rose-600/80">{suggestions.error}</p>
           </div>
         </div>
       ) : null}

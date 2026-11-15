@@ -281,7 +281,7 @@ export function AlumniPanel({ tab }: { tab: AlumniTab }) {
         <ShieldAlert className="text-action-warning shrink-0 mt-0.5" size={20} />
         <div>
           <p className="text-action-warning text-sm font-medium">Before deprovisioning, a pg_dump backup is recommended.</p>
-          <p className="text-amber-300/70 text-xs mt-1">
+          <p className="text-amber-700/70 text-xs mt-1">
             The master-backup cron runs every 5 min. Historical scan/attendance data is preserved —
             only the active flag changes.
           </p>

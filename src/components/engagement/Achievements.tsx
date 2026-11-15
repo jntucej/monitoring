@@ -117,7 +117,7 @@ export function Achievements() {
         </div>
 
         {error && !loading ? (
-          <div className="surface-card mt-5 bg-rose-500/10 p-3 text-sm text-rose-200">{error}</div>
+          <div className="surface-card mt-5 bg-rose-500/10 p-3 text-sm text-rose-600">{error}</div>
         ) : available.length === 0 && !loading ? (
           <p className="mt-5 text-sm text-text-muted">
             No achievements are available right now.

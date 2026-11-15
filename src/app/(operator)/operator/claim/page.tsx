@@ -124,7 +124,7 @@ export default function OperatorClaimPage() {
                   <button
                     type="button"
                     onClick={() => router.push(`/gate/${user.gateId}`)}
-                    className="underline underline-offset-2 hover:text-rose-200"
+                    className="underline underline-offset-2 hover:text-rose-600"
                   >
                     Open your current gate
                   </button>
