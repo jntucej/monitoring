@@ -1,0 +1,62 @@
+# Gate 6 — Human Sign-Off Record (evidence package). Filled by the validation agent.
+# The APPROVAL itself must be applied by a NAMED HUMAN. Do not self-approve.
+#
+# To approve: a human edits the block below, sets status: approved, fills
+# approver + timestamp + file_hash, commits it. The pipeline is complete only when
+# this file shows status: approved against the exact commit hash.
+
+release:
+  commit_hash: bc1d5096406785f779397c668b358a7df46edfeb
+  tree_hash: bc8b83b684a532ec07d8f07e2b5809162687d58d
+  repo: jntucej/monitoring.git
+  branch: main
+  target: https://monitor.ucej.in
+
+evidence_package:
+  gate1_load:        load/k6-gate.mjs            # written, thresholds in-script; NOT executed (prod, deferred)
+  gate2_secrets:     release-evidence/985c30db/gitleaks-history.json   # 1503 commits, allowlisted → exit 0
+  gate2_sca:         release-evidence/985c30db/sca-trivy.json         # 0 HIGH/CRITICAL, trivy exit 0
+  gate2_sast:        scripts/check-security.sh   # PASS (repo invariant SAST; semgrep binary pending network)
+  gate2_dast:        security/zap-gate.md        # command staged; NOT executed (prod, deferred)
+  gate3_a11y:        Playwright a11y.spec.ts      # 9/9, 0 critical/serious (axe-core)
+  gate3_visual:      tests/ui-all-roles.spec.ts   # functional journey PASS; screenshot baselines stale-vs-prod (inconclusive, not a defect)
+  gate4_tests:       vitest 12/12 + jest 150/150 + test:ci 19/19     # all PASS
+  gate4_migration:   up PASS + rollback PASS (simulated break kept old image; site stayed 200)
+  gate4_smoke:       health 200/0.27s, root boots, admin login 200    # PASS
+  gate5_readiness:   docs/release-readiness-985c30db.md              # aggregated go/no-go
+
+gate_status:
+  G1_traffic_load:      DEFERRED_PROD   # Tier-2; k6 script ready; needs human to run / provide staging
+  G2a_secrets:          PASS            # Tier-1 (allowlist in .gitleaks-allowlist.toml)
+  G2b_sca:              PASS            # Tier-1 (next 16.4.1, nodemailer 10.5.0, source-map-js 1.2.2)
+  G2c_sast:             PASS_PROXY      # Tier-1; repo check-security.sh green; semgrep binary blocked by flaky network
+  G2d_dast:             DEFERRED_PROD   # Tier-1; ZAP command staged; needs human go-ahead / staging
+  G3_ui_a11y:           PASS            # Tier-2 (axe 0 critical/serious); visual-reg inconclusive vs prod
+  G4_functional:        PASS            # Tier-1 (all suites + migration up/rollback + smoke)
+  G5_readiness:         CONDITIONAL_GO  # Tier-1; 2 prod-touching gates deferred to human
+  G6_signoff:           PENDING_HUMAN   # Tier-1; this record; human must approve the commit hash
+
+open_warn_items:
+  - gate: G1
+    item: "Load test not run against prod (no staging env). 200-VU headroom unverified."
+    owner: release-engineer
+    mitigation: "Run k6 run load/k6-gate.mjs in a low-traffic window, or stand up a staging clone."
+  - gate: G2d
+    item: "ZAP DAST not run against prod (active scanner = WAF/lockout risk)."
+    owner: security
+    mitigation: "Point ZAP at a staging clone, or approve a scoped public-surface scan per security/zap-gate.md."
+  - gate: G3
+    item: "Screenshot baselines (2026-11-04) predate this session's UI changes; spec's request-API login doesn't share cookies with the screenshot page against prod → captures /login."
+    owner: qa
+    mitigation: "Run the screenshot suite in CI (webServer shares the session); do NOT regenerate baselines from the prod capture."
+  - gate: G2c
+    item: "semgrep binary blocked by flaky network (large native wheel). Repo SAST proxy (check-security.sh) is green."
+    owner: security
+    mitigation: "Re-run semgrep when network is stable, or run it in CI where the registry is reachable."
+
+approval:
+  status: PENDING_HUMAN   # human must change to: approved
+  approver: ""            # human: name (required)
+  timestamp: ""           # human: ISO-8601 (required)
+  file_hash: "bc8b83b684a532ec07d8f07e2b5809162687d58d"
+  notes: "Agent assembled this package. No deploy/merge/sign-off occurs until a named human sets status: approved."
