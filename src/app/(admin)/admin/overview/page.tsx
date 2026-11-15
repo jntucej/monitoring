@@ -264,8 +264,8 @@ function AdminOverviewInner() {
         <div>
           <p className="text-xs font-semibold text-action-warning">Command Overview</p>
           <p className="text-xs text-amber-700/70 mt-0.5">
-            All modules pull from the same live telemetry feed. The Dashboard page shows real-time
-            status; drill into individual modules for deeper management.
+            All modules read from one live telemetry feed. The Dashboard shows real-time status; open
+            a module to go deeper.
           </p>
         </div>
       </div>
