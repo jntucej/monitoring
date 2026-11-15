@@ -24,6 +24,11 @@
           "icon": "QrCode"
         },
         {
+          "label": "Scan Exceptions",
+          "href": "/admin/exceptions",
+          "icon": "Shield"
+        },
+        {
           "label": "Analytics Dashboard",
           "href": "/admin/analytics",
           "icon": "Activity"
