@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import {
   Shield,
   AlertTriangle,
@@ -23,6 +23,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { QuickActions } from "@/components/admin/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { LiveEventsPanel } from "@/components/shared/LiveEventsPanel";
+import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
@@ -151,7 +152,7 @@ function AdminOverviewInner() {
                     key={card.label}
                     href={card.href}
                     aria-label={`${card.label}: ${fmt(card.value)}`}
-                    className="surface-card group bg-bg-surface p-4 hover: hover:bg-emerald-500/5 transition-all"
+                    className="surface-card group bg-bg-surface p-4 hover:bg-emerald-500/5 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="surface-card p-2 bg-emerald-500/10 text-action-success">
@@ -225,7 +226,7 @@ function AdminOverviewInner() {
                 key={i}
                 href={mod.href}
                 aria-label={mod.label}
-                className="surface-card group p-4 bg-bg-surface hover: hover:bg-emerald-500/5 transition-all cursor-pointer"
+                className="surface-card group p-4 bg-bg-surface hover:bg-emerald-500/5 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -274,10 +275,8 @@ function AdminOverviewInner() {
 
 export default function AdminOverviewPage() {
   return (
-    
+    <Suspense fallback={<PageLoading />}>
       <AdminOverviewInner />
-    
-    
-
+    </Suspense>
   );
 }
