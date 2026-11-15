@@ -98,6 +98,7 @@ export function ApprovalsView({
 
           <div className="hidden md:block">
             <DataTable<PermissionItem>
+              onRowClick={(item) => setSelected(item)}
               columns={[
                 { header: "Ticket", accessor: (r) => r.ticket_number },
                 { header: "Student", accessor: (r) => r.student?.name ?? "—" },

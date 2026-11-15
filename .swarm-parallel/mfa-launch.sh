@@ -4,6 +4,11 @@
 # Sequential + MAX_CONCURRENT=2 to respect the OmniRoute circuit breaker.
 set +e
 cd /opt/monitoring/compose/.swarm-parallel
+# Route litellm's openai/ models to the local OmniRoute instance (zero external
+# cost). Without these, ux-swarm falls back to api.openai.com with the local
+# key and every agent errors (AuthenticationError).
+export OPENAI_API_BASE="http://localhost:20128/v1"
+export OPENAI_API_KEY="$OMNIROUTE_API_KEY"
 run() {
   role="$1"; console="$2"; task="$3"; seedname="$4"
   seaddir="/opt/monitoring/compose/.swarm-parallel/$role"
@@ -18,8 +23,8 @@ run() {
 }
 run principal "/principal" \
   "As the principal, open the principal console, check today's gate status and unresolved exceptions, and approve one pending item you can action. Note any confusion." \
-  "principal/.swarm/principal-storage.json"
+  "principal-storage.json"
 run sysadmin "/sysadmin" \
   "As the system administrator, open the sysadmin console, check the gate fleet health and scan exceptions, and acknowledge one alert. Note any confusion." \
-  "sysadmin/.swarm/sysadmin-storage.json"
+  "sysadmin-storage.json"
 echo "MFA-CHAIN-DONE"

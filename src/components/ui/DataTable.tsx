@@ -28,6 +28,15 @@ export interface DataTableProps<T> {
    * so the identifier column (roll / ticket / gate code) is always visible.
    */
   stickyFirstColumn?: boolean;
+  /**
+   * Optional row-activation handler. When set, both the desktop `<tr>` and the
+   * mobile card become a clickable row (cursor-pointer, role="button",
+   * Enter/Space keydown) that fires this. Used by the approver consoles so a
+   * list row opens its detail sheet — the panel agents couldn't discover the
+   * open action because rows looked inert. Backward-compatible: omit and
+   * rows stay non-interactive exactly as before.
+   */
+  onRowClick?: (item: T) => void;
 }
 
 /**
@@ -48,6 +57,7 @@ export function DataTable<T>({
   keyExtractor,
   mobileLayout = "cards",
   stickyFirstColumn = true,
+  onRowClick,
 }: DataTableProps<T>) {
   const breakpoints = useBreakpoint({ sm: "(min-width: 640px)", md: "(min-width: 768px)" });
   const isMobile = !breakpoints.md;
@@ -92,7 +102,26 @@ export function DataTable<T>({
               </tr>
             ) : (
               data.map((item) => (
-                <tr key={keyExtractor(item)} className="hover:bg-[var(--bg-active)] transition-colors">
+                <tr
+                  key={keyExtractor(item)}
+                  className={
+                    "hover:bg-[var(--bg-active)] transition-colors" +
+                    (onRowClick ? " cursor-pointer" : "")
+                  }
+                  onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onRowClick(item);
+                          }
+                        }
+                      : undefined
+                  }
+                  role={onRowClick ? "button" : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                >
                   {columns.map((col, idx) => (
                     <td
                       key={idx}
@@ -126,7 +155,23 @@ export function DataTable<T>({
           data.map((item) => (
             <div
               key={keyExtractor(item)}
-              className="surface-card bg-bg-surface p-4"
+              className={
+                "surface-card bg-bg-surface p-4" +
+                (onRowClick ? " cursor-pointer" : "")
+              }
+              onClick={onRowClick ? () => onRowClick(item) : undefined}
+              onKeyDown={
+                onRowClick
+                  ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onRowClick(item);
+                      }
+                    }
+                  : undefined
+              }
+              role={onRowClick ? "button" : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
             >
               {columns.map((col, idx) => (
                 <div
