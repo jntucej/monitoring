@@ -10,6 +10,7 @@ import {
   ScanLine,
   LayoutDashboard,
   ClipboardList,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
@@ -66,13 +67,19 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
   // Approvers (including admin/sysadmin)
   if (APPROVER_ROLES.has(role)) {
     const target = APPROVER_HOMES[role] ?? { home: "/", inbox: "/", escalated: "/" };
-    return [
+    const actions: { label: string; icon: typeof Inbox; href: string }[] = [
       { label: "Open Approval Inbox", icon: Inbox, href: target.inbox },
       { label: "View Escalated", icon: ArrowUpRight, href: target.escalated ?? target.inbox },
       { label: "New Request", icon: FilePlus2, href: role === "admin" ? "/admin/permission-policies" : target.inbox },
       { label: "All Pending", icon: Ticket, href: target.inbox },
+      // Admin/sysadmin can review today's flagged/denied/manual/corrected gate
+      // scans across all gates — the panel's "no path to review exceptions" gap.
+      ...(role === "admin" || role === "sysadmin"
+        ? [{ label: "Scan Exceptions", icon: AlertTriangle, href: "/admin/exceptions" }]
+        : []),
       { label: "Dashboard", icon: LayoutDashboard, href: target.home },
     ];
+    return actions;
   }
 
   // Student

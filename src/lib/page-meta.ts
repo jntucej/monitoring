@@ -4,6 +4,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/admin": { title: "Admin Overview", description: "Campus dashboard and live telemetry" },
   "/admin/attendance": { title: "Attendance", description: "Student and staff attendance records" },
   "/admin/alerts": { title: "Alerts", description: "System alerts and notifications" },
+  "/admin/exceptions": { title: "Scan Exceptions", description: "Today's flagged, denied, manual, and corrected gate scans across all gates" },
   "/admin/analytics": { title: "Analytics", description: "Occupancy trends and analytics" },
   "/admin/analytics/advanced": { title: "Advanced Analytics", description: "Deep-dive analytics and reporting" },
   "/admin/analytics/predictive": { title: "Predictive Analytics", description: "AI-powered predictions and forecasting" },
