@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { Wrench } from "lucide-react";
-import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
@@ -22,7 +21,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 export default function CaretakerPage() {
   return (
     <Suspense fallback={<PageLoading />}>
-      <AuthGuard allowedRoles={["caretaker", "admin", "sysadmin"]}>
         <div className="space-y-6">
           <PageHeader title="Caretaker" subtitle="Facilities & maintenance" />
           <WidgetBoundary name="RoleDashboardPanel" title="Caretaker Dashboard">
@@ -82,7 +80,6 @@ export default function CaretakerPage() {
           </WidgetBoundary>
 
         </div>
-      </AuthGuard>
     </Suspense>
   );
 }

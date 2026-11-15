@@ -328,6 +328,17 @@ p, li, .text-body { color: var(--color-text-secondary); }
 }
 
 /* ── A11Y ──────────────────────────────────────────────────────── */
+/* Tactile button press: a fast, subtle scale on :active gives operational
+   consoles physical feel without the floaty magnetic lag. Scoped to real
+   interactive buttons (not disabled) and disabled under reduced-motion so
+   the motion-respecting rule below wins. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.985);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
