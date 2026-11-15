@@ -20,7 +20,7 @@ export function GateCard({ gate }: GateCardProps) {
   return (
     <Link
       href={`/admin/gates/${gate.id}`}
-      className="surface-card p-4 sm: sm: last: hover:bg-bg-elevated/30 cursor-pointer transition group"
+      className="surface-card p-4 hover:bg-bg-elevated/30 cursor-pointer transition group"
     >
       <div className="flex items-center justify-between mb-1 sm:mb-2">
         <span className="font-semibold text-xs sm:text-sm text-text-primary group-hover:text-action-success transition-colors">{gate.name}</span>

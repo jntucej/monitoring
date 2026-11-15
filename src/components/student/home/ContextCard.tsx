@@ -77,10 +77,10 @@ export function ContextCard() {
   }
 
   return (
-    <div className="surface-card bgalert-warning/10 p-4">
+    <div className="surface-card bg-alert-warning/10 p-4">
       <div className="flex items-start gap-2">
         <AlertTriangle
-          className="h-5 w-5 textalert-warning"
+          className="h-5 w-5 text-alert-warning"
           aria-hidden
         />
         <div className="flex-1">

@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 
 export const FACULTY_NAV: NavEntry[] = [
-  { kind: "link", href: "/faculty", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/faculty", label: "My Day", icon: LayoutDashboard },
   {
     kind: "group", id: "class", label: "My class", icon: BookOpen,
     children: [

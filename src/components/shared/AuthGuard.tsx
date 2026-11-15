@@ -115,18 +115,19 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   if (timedOut && !hasHydrated) {
     router.replace("/login");
     return (
-      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
+      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary" role="status" aria-live="polite" aria-busy="true">
+        <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin motion-reduce:animate-none mb-4" aria-hidden />
+        <p className="text-xs font-semibold text-text-muted">Checking your session…</p>
       </div>
     );
   }
 
   if (!hasHydrated || isChecking || !authenticated || !user) {
     return (
-      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary">
-        <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-semibold text-text-muted">Verifying security credentials...</p>
+      <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary" role="status" aria-live="polite" aria-busy="true">
+        <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin motion-reduce:animate-none mb-4" aria-hidden />
+        <p className="text-xs font-semibold text-text-muted">Loading your dashboard…</p>
+        <span className="sr-only">Please wait while we load your account details.</span>
       </div>
     );
   }

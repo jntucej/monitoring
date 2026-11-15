@@ -89,7 +89,7 @@ function FacultyClassIndexInner() {
           <Link
             key={c.id}
             href={`/faculty/class/${encodeURIComponent(c.id)}`}
-            className="surface-card flex items-center justify-between gap-2 bg-bg-surface p-3 hover: hover:bg-bg-elevated transition-colors"
+            className="surface-card flex items-center justify-between gap-2 bg-bg-surface p-3 hover:bg-bg-elevated transition-colors"
           >
             <div className="min-w-0">
               <p className="text-sm font-semibold text-text-primary truncate">

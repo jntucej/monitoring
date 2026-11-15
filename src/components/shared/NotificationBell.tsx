@@ -140,8 +140,8 @@ export function NotificationBell() {
         animate={isGlossyMotion && unreadCount > 0 ? { rotate: [0, -15, 15, -10, 10, 0] } : {}}
         transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 5 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="surface-card relative p-2 text-text-muted hover:text-text-primary hover:bg-[var(--bg-card)] transition-all hover: active:scale-95 focus:outline-none"
-        aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
+        className="surface-card relative p-2 text-text-muted hover:text-text-primary hover:bg-[var(--bg-card)] transition-all active:scale-95 focus:outline-none"
+        aria-label={`Open notification feed ${unreadCount > 0 ? `(${unreadCount} unread)` : ''}`}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (

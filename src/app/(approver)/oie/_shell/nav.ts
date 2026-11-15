@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 export const OIE_NAV: NavEntry[] = [
-  { kind: "link", href: "/oie", label: "Today", icon: LayoutDashboard },
+  { kind: "link", href: "/oie", label: "Exam Day Overview", icon: LayoutDashboard },
   {
     kind: "group", id: "queue", label: "Exam queue", icon: CheckSquare,
     children: [

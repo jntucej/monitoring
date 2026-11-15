@@ -416,7 +416,7 @@ export default function MessScanPage() {
     <Suspense
       fallback={
         <div className="p-8 flex items-center justify-center min-h-[50vh]">
-          <div className="size-6 border-4 borderaction-success border-t-transparent animate-spin" />
+          <div className="size-6 border-4 border-action-success border-t-transparent animate-spin" />
         </div>
       }
     >

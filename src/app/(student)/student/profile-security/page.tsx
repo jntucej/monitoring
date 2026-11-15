@@ -40,7 +40,7 @@ function StudentProfileSecurityInner() {
           {/* Password */}
           <Link
             href="/settings/password"
-            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
             <div className="size-4 rounded-lg bg-action-primary/10 flex items-center justify-center shrink-0">
               <KeyRound className="w-4 h-4 text-action-primary" />
@@ -59,7 +59,7 @@ function StudentProfileSecurityInner() {
           {/* Notifications */}
           <Link
             href="/settings/notifications"
-            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
             <div className="size-4 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
               <Bell className="w-4 h-4 text-sky-500" />
@@ -78,7 +78,7 @@ function StudentProfileSecurityInner() {
           {/* Active sessions */}
           <Link
             href="/student/profile-security/sessions"
-            className="surface-card bg-bg-surface p-4 hover: hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
+            className="surface-card bg-bg-surface p-4 hover:bg-action-primary/5 transition-colors flex items-start gap-3 min-w-0"
           >
             <div className="size-4 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
               <Eye className="w-4 h-4 text-action-warning" />

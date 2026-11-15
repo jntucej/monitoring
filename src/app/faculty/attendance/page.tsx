@@ -120,7 +120,7 @@ function FacultyAttendanceInner() {
       {/* Loading state */}
       {loading && records.length === 0 && !error ? (
         <div className="flex justify-center items-center py-20">
-          <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin" />
+          <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin" />
         </div>
       ) : !error && records.length === 0 && departmentSummaries.length === 0 ? (
         /* Empty state — no attendance records yet */

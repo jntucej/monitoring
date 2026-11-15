@@ -257,7 +257,7 @@ export default function AdminReportsPage() {
                 key={t}
                 onClick={() => generate(t)}
                 disabled={busy !== null || loading}
-                className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-bg-base hover: disabled:opacity-50"
+                className="surface-card inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-bg-base hover:disabled:opacity-50"
               >
                 {busy === t && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Generate {t}

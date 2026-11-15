@@ -227,7 +227,7 @@ function ScheduleEditor({
               <button
                 key={p.value}
                 onClick={() => setExpr(p.value)}
-                className="surface-card bg-white/5 px-3 py-1 text-xs text-text-secondary transition hover: hover:text-action-success"
+                className="surface-card bg-white/5 px-3 py-1 text-xs text-text-secondary transition hover:text-action-success"
               >
                 {p.label}
               </button>

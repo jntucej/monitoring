@@ -320,7 +320,7 @@ export default function SecurityPage() {
                 <div
                   key={card.id}
                   onClick={() => router.push(`/security/${card.id}`)}
-                  className="surface-card group relative bg-bg-surface p-4 hover: hover:bg-bg-elevated transition-all cursor-pointer select-none space-y-3 active:scale-[0.99]"
+                  className="surface-card group relative bg-bg-surface p-4 hover:bg-bg-elevated transition-all cursor-pointer select-none space-y-3 active:scale-[0.99]"
                 >
                   {/* Card Header */}
                   <div className="flex items-center justify-between gap-2">

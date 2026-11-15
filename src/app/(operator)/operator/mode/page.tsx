@@ -180,7 +180,7 @@ function OperatorModeInner() {
               description={m.description}
               icon={m.icon}
               color={
-                m.mode === "OPEN" ? "text-action-success borderaction-success"
+                m.mode === "OPEN" ? "text-action-success border-action-success"
                 : m.mode === "CURFEW" ? "text-action-primary border-action-primary"
                 : "text-action-warning border-action-warning"
               }

@@ -173,7 +173,7 @@ function ContactInfoInner() {
               required
               minLength={2}
               maxLength={100}
-              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus: disabled:opacity-50"
+              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:outline-none focus:disabled:opacity-50"
             />
           </div>
 
@@ -188,7 +188,7 @@ function ContactInfoInner() {
               onChange={(e) => setPhone(e.target.value)}
               disabled={busy || loading}
               placeholder="+91 90000 00000"
-              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus: disabled:opacity-50"
+              className="surface-card w-full bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:disabled:opacity-50"
             />
           </div>
 

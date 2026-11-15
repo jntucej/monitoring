@@ -352,7 +352,7 @@ function MessFoodPreferenceInner() {
               <button
                 type="button"
                 onClick={() => setPrimaryItem("VEG")}
-                className={` py-2.5 rounded-xl text-xs font-black tracking-wide transition-all "VEG" "borderaction-success text-emerald-950 "text-action-success hover:bg-emerald-500/20" "VEG" "borderaction-success text-emerald-950" "text-action-success hover:bg-emerald-500/20" `}
+                className={` py-2.5 rounded-xl text-xs font-black tracking-wide transition-all "VEG" "border-action-success text-emerald-950 "text-action-success hover:bg-emerald-500/20" "VEG" "border-action-success text-emerald-950" "text-action-success hover:bg-emerald-500/20" `}
               >
                 🥬 VEG
               </button>
@@ -382,7 +382,7 @@ function MessFoodPreferenceInner() {
                         className={` flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition "text-action-success" "text-text-muted "text-action-success" "text-text-muted" `}
                       >
                         <span
-                          className={` inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm "bg-action-success borderaction-success text-emerald-950" "" `}
+                          className={` inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm "bg-action-success border-action-success text-emerald-950" "" `}
                         >
                           {on && <Check className="size-4" />}
                         </span>

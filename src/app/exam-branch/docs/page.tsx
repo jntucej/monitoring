@@ -122,7 +122,7 @@ function ExamBranchDocsInner() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search exam documentation…"
-                className="surface-card w-full bg-bg-surface pl-9 pr-3 py-2 text-sm text-text-secondary placeholder:text-text-muted focus: focus:outline-none"
+                className="surface-card w-full bg-bg-surface pl-9 pr-3 py-2 text-sm text-text-secondary placeholder:text-text-muted focus:outline-none"
                 aria-label="Search exam documentation"
               />
             </div>

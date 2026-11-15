@@ -49,7 +49,7 @@ export function TodayStatus() {
             state.tone === "in"
               ? "text-action-success"
               : state.tone === "out"
-                ? "textalert-warning"
+                ? "text-alert-warning"
                 : "text-text-muted"
           }`}
           aria-hidden
@@ -73,7 +73,7 @@ export function TodayStatus() {
           <span
             className={
               data.curfew.today.late > 0
-                ? "font-medium textaction-warning"
+                ? "font-medium text-action-warning"
                 : "font-medium text-action-success"
             }
           >

@@ -256,7 +256,7 @@ function DrawerLink({ href, children }: { href: string; children: React.ReactNod
   return (
     <a
       href={href}
-      className="surface-card px-2.5 py-0.5 text-xs text-text-secondary hover: hover:text-action-primary"
+      className="surface-card px-2.5 py-0.5 text-xs text-text-secondary hover:text-action-primary"
     >
       {children}
     </a>

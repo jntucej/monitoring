@@ -22,7 +22,7 @@ export default function OccupancyPage() {
               onClick={() => setActiveTab("heatmap")}
               className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
                 activeTab === "heatmap"
-                  ? "borderaction-success text-action-success"
+                  ? "border-action-success text-action-success"
                   : "border-transparent text-text-secondary"
               }`}
             >

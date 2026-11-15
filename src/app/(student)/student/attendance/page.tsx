@@ -60,7 +60,7 @@ export default function AttendancePage() {
         </p>
       </div>
       {pct < 75 && s && s.total > 0 && (
-        <p className="surface-card bgalert-warning/10 p-3 text-sm textalert-warning">
+        <p className="surface-card bg-alert-warning/10 p-3 text-sm text-alert-warning">
           You are below 75%. Attend consistently to avoid detention.
         </p>
       )}
@@ -89,7 +89,7 @@ export default function AttendancePage() {
                 cls = "text-action-success";
               } else if (["ABSENT", "OUT"].includes(raw)) {
                 status = "absent";
-                cls = "textalert-critical";
+                cls = "text-alert-critical";
               } else {
                 status = "unmarked";
                 cls = "text-text-muted";

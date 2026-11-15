@@ -86,7 +86,7 @@ export function AppLoadingScreen() {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className={`size-2 rounded-full "bg-bg-base" animate-pulse`}
+            className={`size-2 rounded-full bg-bg-base animate-pulse`}
             style={{ animationDelay: `${i * 150}ms` }}
           />
         ))}

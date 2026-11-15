@@ -169,7 +169,7 @@ export function HealthDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div
           onClick={() => router.push("/sysadmin/audit")}
-          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover:bg-bg-elevated transition-all group"
         >
           <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-action-info transition-colors">
@@ -195,7 +195,7 @@ export function HealthDashboard() {
 
         <div
           onClick={() => router.push("/admin/gates")}
-          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover:bg-bg-elevated transition-all group"
         >
           <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-unit-c transition-colors">
@@ -220,7 +220,7 @@ export function HealthDashboard() {
 
         <div
           onClick={() => router.push("/sysadmin/security")}
-          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover: hover:bg-bg-elevated transition-all group"
+          className="surface-card bg-bg-surface p-5 space-y-4 cursor-pointer hover:bg-bg-elevated transition-all group"
         >
           <div className="surface-card flex items-center justify-between pb-3">
             <h3 className="font-bold text-sm text-text-primary flex items-center gap-2 group-hover:text-action-success transition-colors">

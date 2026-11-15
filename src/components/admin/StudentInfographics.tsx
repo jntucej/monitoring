@@ -135,7 +135,7 @@ const api = useApi();
 
   if (loading && !stats) return (
     <div className="flex justify-center items-center py-12">
-      <div className="size-6 border-4 borderaction-success border-t-transparent rounded-full animate-spin" />
+      <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!stats) return null;

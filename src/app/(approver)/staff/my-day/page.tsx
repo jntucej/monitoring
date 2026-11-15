@@ -90,9 +90,9 @@ function StaffMydayInner() {
             <div className="p-4 min-w-0 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Movements</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wide">Check-in / out</p>
                   <p className="mt-1 text-lg font-bold text-action-success">{summary?.movementsToday ?? 0}</p>
-                  <p className="text-xs text-text-muted">Recent in/out events.</p>
+                  <p className="text-xs text-text-muted">Your gate in/out events today.</p>
                 </div>
                 <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
                   <p className="text-xs text-text-muted uppercase tracking-wide">Open requests</p>

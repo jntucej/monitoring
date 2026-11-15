@@ -421,7 +421,7 @@ export function Communities() {
                       <button
                         type="button"
                         onClick={() => setComposerOpen(true)}
-                        className="surface-card flex w-full items-center gap-2 bg-bg-surface/60 px-3 py-2.5 text-xs text-text-muted hover: hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
+                        className="surface-card flex w-full items-center gap-2 bg-bg-surface/60 px-3 py-2.5 text-xs text-text-muted hover:text-text-primary motion-safe:transition-colors motion-reduce:transition-none"
                       >
                         <Plus className="h-3.5 w-3.5" aria-hidden />
                         Start a discussion in {selected.name}

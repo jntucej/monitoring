@@ -57,7 +57,7 @@ export function PermissionTicketCard({ ticket, onSelect }: PermissionTicketCardP
 
   return (
     <div
-      className="surface-card group bg-bg-surface p-4 transition-all duration-150 hover: hover:"
+      className="surface-card group bg-bg-surface p-4 transition-all duration-150 hover:"
     >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">

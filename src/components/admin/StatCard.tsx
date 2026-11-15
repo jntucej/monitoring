@@ -46,7 +46,7 @@ export function StatCard({ label, emoji, value, icon: Icon, color, trend, onClic
           tabIndex={0}
           onClick={handleClick}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } }}
-          className="surface-card group relative overflow-hidden bg-bg-surface sm: hover: p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover: hover:"
+          className="surface-card group relative overflow-hidden bg-bg-surface sm: hover: p-3.5 sm:p-5 transition-all duration-300 cursor-pointer hover:"
           title={`Click to view context & breakdown for ${label}`}
         >
           {/* Reactive Ambient Back Glow */}

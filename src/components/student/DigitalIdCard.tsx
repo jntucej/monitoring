@@ -160,7 +160,7 @@ const api = useApi();
   return (
     <div className="surface-card bg-bg-surface p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-6 sm:w-28 md:w-28 lg:w-6 h-6 sm:h-28 md:h-28 lg:h-6 rounded-full mb-3 sm:mb-4 border-4 borderaction-info overflow-hidden">
+      <div className="relative w-6 sm:w-28 md:w-28 lg:w-6 h-6 sm:h-28 md:h-28 lg:h-6 rounded-full mb-3 sm:mb-4 border-4 border-action-info overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 

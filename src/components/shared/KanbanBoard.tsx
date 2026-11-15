@@ -140,7 +140,7 @@ export function KanbanBoard({ source, itemKey, columns, onSelect }: KanbanBoardP
                         key={item.id || item.ticket_number}
                         type="button"
                         onClick={() => onSelect(toBoardRow(item))}
-                        className="surface-card w-full text-left bg-bg-elevated hover: hover:bg-bg-base transition-colors p-3 space-y-2"
+                        className="surface-card w-full text-left bg-bg-elevated hover:bg-bg-base transition-colors p-3 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="surface-card font-mono text-xs font-bold px-1.5 py-0.5 bg-bg-base text-action-primary truncate">

@@ -30,28 +30,28 @@ export function StatusBadge({ direction, reason, className, size = "md" }: Statu
   const isEntry = direction === "IN";
 
   const bgColor = isEntry
-    ? "bgaction-primary/10"
+    ? "bg-action-primary/10"
     : reason === "Day Out"
-    ? "bgaction-warning/10"
+    ? "bg-action-warning/10"
     : reason === "Leave"
-    ? "bgaction-info/10"
-    : "bgaction-danger/10";
+    ? "bg-action-info/10"
+    : "bg-action-danger/10";
 
   const textColor = isEntry
-    ? "textaction-primary"
+    ? "text-action-primary"
     : reason === "Day Out"
-    ? "textaction-warning"
+    ? "text-action-warning"
     : reason === "Leave"
-    ? "textaction-info"
-    : "textaction-danger";
+    ? "text-action-info"
+    : "text-action-danger";
 
   const dotColor = isEntry
-    ? "bgaction-primary"
+    ? "bg-action-primary"
     : reason === "Day Out"
-    ? "bgaction-warning"
+    ? "bg-action-warning"
     : reason === "Leave"
-    ? "bgaction-info"
-    : "bgaction-danger";
+    ? "bg-action-info"
+    : "bg-action-danger";
 
   const icon = isEntry ? "⬇" : reason === "Home Out" ? "🏠" : reason === "Day Out" ? "☀️" : reason === "Leave" ? "📝" : "🚶";
   const label = isEntry ? "ENTRY" : reason ? reason.toUpperCase() : "EXIT";

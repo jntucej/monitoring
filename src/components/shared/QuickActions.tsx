@@ -149,7 +149,7 @@ export function QuickActions({ compact = false }: QuickActionsProps) {
             key={a.label}
             type="button"
             onClick={() => navigate(a.href)}
-            className="surface-card group flex items-center gap-3 bg-bg-surface p-3.5 text-left transition-all hover: hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring active:scale-[0.98]"
+            className="surface-card group flex items-center gap-3 bg-bg-surface p-3.5 text-left transition-all hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring active:scale-[0.98]"
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-bg-elevated border border-border text-action-primary">
               <a.icon className="h-4 w-4" />

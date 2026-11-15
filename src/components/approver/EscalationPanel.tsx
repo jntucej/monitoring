@@ -568,7 +568,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
                             key={a.id}
                             type="button"
                             onClick={() => handleAssign(row, a.id)}
-                            className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono bg-bg-elevated text-text-secondary hover: hover:text-text-primary transition-colors"
+                            className="surface-card inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono bg-bg-elevated text-text-secondary hover:text-text-primary transition-colors"
                           >
                             {a.name}
                             <span className="text-text-muted/60">

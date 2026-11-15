@@ -106,7 +106,7 @@ const api = useApi();
             id="passType"
             value={passType || passTypes[0]?.code || ""}
             onChange={(e) => setPassType(e.target.value)}
-            className="surface-card mt-1 block w-full bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus: focus:outline-none focus:ringaction-info sm:text-sm"
+            className="surface-card mt-1 block w-full bg-bg-elevated py-2 pl-3 pr-10 text-base text-text-primary focus:outline-none focus:ringaction-info sm:text-sm"
             disabled={loadingPassTypes}
             required
           >
@@ -152,7 +152,7 @@ const api = useApi();
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="Optional details for the admin…"
-            className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-white shadow-sm focus:borderaction-info focus:ringaction-info sm:text-sm"
+            className="mt-1 block w-full rounded-md border-border bg-bg-elevated text-white shadow-sm focus:border-action-info focus:ringaction-info sm:text-sm"
           ></textarea>
         </div>
         <button

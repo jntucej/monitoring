@@ -105,7 +105,7 @@ export function ChildActivityPanel() {
           type="button"
           onClick={handleRefresh}
           disabled={busy || loading}
-          className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover: disabled:opacity-40 transition-colors"
+          className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-2.5 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary hover:disabled:opacity-40 transition-colors"
           aria-label="Refresh child activity"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${busy || loading ? "animate-spin" : ""}`} />

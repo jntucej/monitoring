@@ -564,7 +564,7 @@ export default function RolesManagementPage() {
                       value={u.branch}
                       disabled={hodBranchBusy === u.id}
                       onChange={(e) => void assignHodBranch(u.id, e.target.value)}
-                      className="surface-card min-w23 px-2 py-1.5 bg-bg-elevated text-xs font-mono text-text-primary focus:outline-none focus: disabled:opacity-50"
+                      className="surface-card min-w23 px-2 py-1.5 bg-bg-elevated text-xs font-mono text-text-primary focus:outline-none focus:disabled:opacity-50"
                       aria-label={`Assign branch to ${u.name}`}
                     >
                       <option value="">— none —</option>
