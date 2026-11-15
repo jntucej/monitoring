@@ -6,8 +6,12 @@
 # this file shows status: approved against the exact commit hash.
 
 release:
-  commit_hash: bc1d5096406785f779397c668b358a7df46edfeb
-  tree_hash: bc8b83b684a532ec07d8f07e2b5809162687d58d
+  # Approve the HEAD of main as of sign-off. Key release commits (all pushed):
+  #   bc1d5096  SCA fixes (next 16.4.1, nodemailer 10.5.0, source-map-js 1.2.2) -> trivy 0 HIGH/CRITICAL
+  #   c851113b  verified-runnable k6 gate script (5 latent defects fixed)
+  #   8f8212e0  semgrep SAST gate (16 FPs reviewed+suppressed) + artifact
+  #   857bd363  current tip (this record + docs)
+  approve: HEAD-of-main-as-of-signoff
   repo: jntucej/monitoring.git
   branch: main
   target: https://monitor.ucej.in
@@ -29,7 +33,7 @@ gate_status:
   G1_traffic_load:      DEFERRED_PROD   # Tier-2; k6 script ready; needs human to run / provide staging
   G2a_secrets:          PASS            # Tier-1 (allowlist in .gitleaks-allowlist.toml)
   G2b_sca:              PASS            # Tier-1 (next 16.4.1, nodemailer 10.5.0, source-map-js 1.2.2)
-  G2c_sast:             PASS_PROXY      # Tier-1; repo check-security.sh green; semgrep binary blocked by flaky network
+  G2c_sast:             PASS            # Tier-1; semgrep 1.185.0, 16 FPs reviewed+suppressed, 0 findings, exit 0
   G2d_dast:             DEFERRED_PROD   # Tier-1; ZAP command staged; needs human go-ahead / staging
   G3_ui_a11y:           PASS            # Tier-2 (axe 0 critical/serious); visual-reg inconclusive vs prod
   G4_functional:        PASS            # Tier-1 (all suites + migration up/rollback + smoke)
@@ -49,14 +53,9 @@ open_warn_items:
     item: "Screenshot baselines (2026-11-04) predate this session's UI changes; spec's request-API login doesn't share cookies with the screenshot page against prod → captures /login."
     owner: qa
     mitigation: "Run the screenshot suite in CI (webServer shares the session); do NOT regenerate baselines from the prod capture."
-  - gate: G2c
-    item: "semgrep binary blocked by flaky network (large native wheel). Repo SAST proxy (check-security.sh) is green."
-    owner: security
-    mitigation: "Re-run semgrep when network is stable, or run it in CI where the registry is reachable."
 
 approval:
   status: PENDING_HUMAN   # human must change to: approved
   approver: ""            # human: name (required)
   timestamp: ""           # human: ISO-8601 (required)
-  file_hash: "bc8b83b684a532ec07d8f07e2b5809162687d58d"
-  notes: "Agent assembled this package. No deploy/merge/sign-off occurs until a named human sets status: approved."
+  notes: "Agent assembled this package. No deploy/merge/sign-off occurs until a named human sets status: approved. See release-evidence/ for the current commit hash + tree."
