@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
@@ -76,6 +76,17 @@ function OperatorTransactionsInner() {
   const busy = loading && !data;
   const rows = data?.data?.transactions ?? [];
   const counts = data?.data?.counts;
+
+  // Indefinite-spinner guard: after ~8s with no data, the loading state stops
+  // being a silent "Loading…" and surfaces "taking longer than usual" + Retry.
+  // This is the panel's #1 operator-console finding ("indefinite loading, no
+  // progress/timeout indicator"). Resets as soon as data (or an error) lands.
+  const [slowLoading, setSlowLoading] = useState(false);
+  useEffect(() => {
+    if (!busy) { setSlowLoading(false); return; }
+    const t = setTimeout(() => setSlowLoading(true), 8000);
+    return () => clearTimeout(t);
+  }, [busy]);
 
   const filtered = useMemo(() => {
     if (filter === "ALL") return rows;
@@ -167,9 +178,23 @@ function OperatorTransactionsInner() {
           </div>
 
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0" role="status" aria-busy="true">
-              <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
-              Loading today&rsquo;s movements…
+            <div className="p-4 flex flex-wrap items-center justify-between gap-2 text-sm text-text-muted min-w-0" role="status" aria-busy="true">
+              <span className="flex items-center gap-2 min-w-0">
+                <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
+                {slowLoading
+                  ? "Still loading — this is taking longer than usual."
+                  : "Loading today\u2019s movements\u2026"}
+              </span>
+              {slowLoading && (
+                <button
+                  type="button"
+                  onClick={() => void refreshAll()}
+                  className="surface-card min-h11 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold hover:bg-bg-elevated/40 shrink-0"
+                >
+                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                  Retry
+                </button>
+              )}
             </div>
           ) : filtered.length === 0 ? (
             <div className="p-6 text-center min-w-0 space-y-3">
