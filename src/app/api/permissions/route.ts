@@ -24,7 +24,7 @@ const STAGES_BY_ROLE: Record<string, string[]> = {
   hostel_manager:  ["hostel_manager"],
   caretaker:       ["caretaker"],
   oie:             ["oie"],
-  exam_branch:     ["exam_branch", "exam_branch_forwarded"],
+  exam_branch:     ["exam_branch", "exam_branch_forwarded", "oie"],
   exam_superintendent: ["exam_superintendent"],
   supervisor:      ["warden_or_principal", "principal"], // escalation chain
 };
