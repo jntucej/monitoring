@@ -33,6 +33,36 @@ const OUT_PATH = process.argv.includes("--out")
 
 const onlyRole = process.argv.find((a) => a.startsWith("--role="))?.split("=")[1];
 
+// A domcontentloaded on a heavy client-side-rendered Next.js app can stall
+// transiently under concurrent sweep load even when prod itself is fast
+// (curl confirms /login resolves in ~0.3s). One stalled goto must NOT abort
+// the whole role walk — retry a bounded number of times with backoff, and only
+// give up (rethrow) after all attempts, so a single flake degrades gracefully
+// instead of crashing main() and marking every remaining leaf broken.
+async function gotoRetry(
+  page: import("playwright").Page,
+  url: string,
+  { attempts = 3, timeout = 60_000, backoffMs = 4_000 } = {},
+): Promise<void> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout });
+      return;
+    } catch (e) {
+      lastErr = e;
+      // Reset to a known URL between attempts so a half-loaded document
+      // doesn't confuse the next goto; a blank reset is cheap and safe.
+      await page.goto("about:blank", { waitUntil: "domcontentloaded", timeout: 15_000 }).catch(() => {});
+      if (i < attempts - 1) {
+        console.log(`[goto-retry] ${url} attempt ${i + 1} stalled, retrying in ${backoffMs}ms`);
+        await new Promise((r) => setTimeout(r, backoffMs));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 interface Creds {
   role: string;
   login: string;
@@ -175,9 +205,9 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
       }
       if (!seedable) {
         // Navigate back to the app origin so storage is reachable, then seed.
-        // Heavy role roots (oie, exam_superintendent) can take >30s to
-        // reach domcontentloaded under prod load; use 60s.
-        await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        // Retry a stalled domcontentloaded (transient prod load) instead of
+        // aborting the whole walk.
+        await gotoRetry(page, `${origin}/login`);
       }
       await page.evaluate(([tok, ref, u, r]) => {
         sessionStorage.setItem("auth.token", tok as string);
@@ -200,9 +230,8 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     await seedStore();
     // First boot so the app's zustand rehydrate + persist cycle completes
     // against a live page (the store settles to its post-rehydrate shape).
-    // Heavy role roots (oie, exam_superintendent) can take >30s to reach
-    // domcontentloaded under prod load; use 60s.
-    await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    // Retry a stalled domcontentloaded instead of aborting the walk.
+    await gotoRetry(page, `${BASE}${roleRoot}`);
     await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
     await page.waitForTimeout(2000);
     // Re-seed over whatever the first boot wrote (logged-out shape).
@@ -210,10 +239,14 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
     let landed = "";
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt === 0) {
-        // Reload boots the app with the freshly seeded store.
-        await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
+        // Reload boots the app with the freshly seeded store. A stalled
+        // domcontentloaded under load should just retry the loop, not abort
+        // the whole walk.
+        await page
+          .reload({ waitUntil: "domcontentloaded", timeout: 60_000 })
+          .catch(() => {});
       } else {
-        await page.goto(`${BASE}${roleRoot}`, { waitUntil: "domcontentloaded", timeout: 60_000 });
+        await gotoRetry(page, `${BASE}${roleRoot}`).catch(() => {});
         await seedStore();
       }
       await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
@@ -365,7 +398,21 @@ async function main() {
     }
 
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    const logged = await login(ctx, c, inv.role, inv.root);
+    let logged: Awaited<ReturnType<typeof login>>;
+    try {
+      logged = await login(ctx, c, inv.role, inv.root);
+    } catch (e) {
+      // A hard failure inside login (e.g. a goto that stalled past all
+      // retries) must NOT abort the whole walk — record the role's leaves as
+      // broken-with-reason and continue to the next role.
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`[walk] ${inv.role}: login threw (${msg.slice(0, 120)}) — marking leaves broken, continuing`);
+      for (const leaf of [inv.root, ...inv.leaves]) {
+        report.push({ role: inv.role, leaf, status: "broken", errors: ["login-throw:" + msg.slice(0, 60)], apiFailures: [], consoleErrors: [] });
+      }
+      await ctx.close().catch(() => {});
+      continue;
+    }
     if (logged === "mfa") {
       // Credential verified, MFA gate fired. Leaves can't be walked in
       // headless mode without completing the WebAuthn ceremony — record
