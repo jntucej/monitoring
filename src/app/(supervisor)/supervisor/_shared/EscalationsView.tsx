@@ -12,7 +12,13 @@ import { WeekBar } from "./WeekBar";
 
 interface EscalationsResponse {
   success: boolean;
-  data: PermissionItem[];
+  data: {
+    escalatedPermissions: PermissionItem[];
+    activeAlerts: unknown[];
+    recentDecisions: unknown[];
+    scope: string;
+    counts: { escalated: number; alerts: number; decisions: number };
+  };
 }
 
 export function EscalationsView() {
@@ -23,7 +29,23 @@ export function EscalationsView() {
     { ttlMs: 15_000 }
   );
 
-  const rows = data?.data ?? [];
+  // The API returns data as an object (not a bare array): {
+  //   escalatedPermissions: PermissionItem[], activeAlerts, recentDecisions,
+  //   scope, counts }. Guard with Array.isArray so a null/object never
+  //   crashes the .map below (the "$h.map is not a function" crash).
+  // The API's escalatedPermissions rows carry a flat `student_name` (not the
+  // nested `student` object PermissionItem expects) — normalize it so the
+  // name column renders instead of "Unknown".
+  const rows: PermissionItem[] = (
+    Array.isArray(data?.data?.escalatedPermissions)
+      ? data.data.escalatedPermissions
+      : []
+  ).map((r) => {
+    const row = r as unknown as Record<string, unknown>;
+    const name = row.student_name ?? (row.student as { name?: string } | null)?.name ?? null;
+    if (!name) return r;
+    return { ...r, student: { name: String(name), ...(r.student ?? {}) } } as PermissionItem;
+  });
 
   return (
     <div className="space-y-4">
