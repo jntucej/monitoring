@@ -10,24 +10,14 @@ process.env.CRON_SECRET              = 'jest-cron-secret';
 process.env.KIOSK_SESSION_REQUIRE_PIN = 'true';
 
 // Jest's node test environment sandboxes `global` and does NOT expose the modern
-// web-fetch globals (Request / Response / Headers / FormData), even though the
-// underlying Node runtime (v18+) has them. The gate helpers
+// web-fetch / codec globals (Request / Response / Headers / FormData / TextEncoder),
+// even though the underlying Node runtime (v18+) has them. The gate helpers
 // (tests/gate/helpers/next-server.ts) extend `Request`, so the class must be a
-// real global for the suite to load. Polyfill them from Node's undici (the same
-// implementation Node's own fetch uses), only if missing — never clobber a real
-// one. This is a test-environment shim, not a production code change.
-import {
-  Request as NodeRequest,
-  Response as NodeResponse,
-  Headers as NodeHeaders,
-  FormData as NodeFormData,
-} from 'undici';
-
-const g = globalThis as Record<string, unknown>;
-if (typeof g.Request !== 'function') g.Request = NodeRequest;
-if (typeof g.Response !== 'function') g.Response = NodeResponse;
-if (typeof g.Headers !== 'function') g.Headers = NodeHeaders;
-if (typeof g.FormData !== 'function') g.FormData = NodeFormData;
+// real global for the suite to load. Load the shared shims in order — codecs
+// first (so undici can load), then fetch. Installs each global only if missing
+// (never clobbering a real one). Test-env shim, not prod.
+import './helpers/web-globals-codec';
+import './helpers/web-globals';
 
 jest.mock('pino', () => ({
   __esModule: true,

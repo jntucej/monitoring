@@ -5,13 +5,13 @@ import { cleanup } from '@testing-library/react';
 process.env.NODE_ENV = 'test';
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
 
-// In jsdom environment, copy node's native Request, Response, Headers from globalThis
-const g = globalThis as any;
-if (typeof g.Request === 'undefined' && typeof (global as any).Request !== 'undefined') {
-  g.Request = (global as any).Request;
-  g.Response = (global as any).Response;
-  g.Headers = (global as any).Headers;
-}
+// In jsdom environment, Request/Response/Headers/FormData/TextEncoder are NOT
+// available (jsdom has no fetch / codecs). Jest's global doesn't inherit Node's,
+// so the "copy from globalThis" trick is a no-op. Load the shared shims in order
+// (codecs first so undici can load, then fetch). Installs each global only if
+// missing. Test-env shim, not prod.
+import './helpers/web-globals-codec';
+import './helpers/web-globals';
 
 afterEach(() => cleanup());
 
