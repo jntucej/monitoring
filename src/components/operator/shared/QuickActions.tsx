@@ -10,6 +10,7 @@ import {
   ScanLine,
   LayoutDashboard,
   ClipboardList,
+  Clock,
 } from "lucide-react";
 import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -95,17 +96,15 @@ function actionsForRole(role: string | null, userGateId?: string | null): QuickA
     ];
   }
 
-  // Operator: one primary action only. The desk's own landing page already
-  // shows a single "Open gate desk" CTA to the assigned gate; a second
-  // near-identical "Start Scan"/"SCAN"/"Operator Desk" button here just
-  // confused operators about which one opens the scan surface (synthetic
-  // UX test, 20-persona run). "View Escalated" and "Operator Desk" both
-  // pointed at /operator — the page the operator is already on — so they
-  // are dead duplicates of the CTA. Keep only the gate-desk link.
+  // Operator: the landing page's hero already shows the primary "Open gate
+  // desk" CTA. A second near-identical button in QuickActions was the
+  // #2 friction point in the 20-persona run ("duplicate 'Open gate desk'
+  // elements lack visual distinction"). So QuickActions points at a
+  // distinct, useful destination instead of repeating the desk link.
   if (role === "operator") {
-    const gateHref = userGateId ? `/gate/${userGateId}` : "/operator/claim";
     return [
-      { label: userGateId ? "Open gate desk" : "Claim your gate", icon: ScanLine, href: gateHref },
+      { label: "My recent scans", icon: Clock, href: "/operator/transactions" },
+      { label: "Look up a person", icon: ScanLine, href: "/operator/lookup" },
     ];
   }
 

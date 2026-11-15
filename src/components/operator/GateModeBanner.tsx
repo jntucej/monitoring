@@ -37,6 +37,10 @@ export interface GateModeBannerProps {
   /** Dismisses the lockdown banner for this session only. The scan remains
    *  disabled until an admin lifts the lockdown (DELETE /api/admin/lockdown). */
   onDismissLockdown: () => void;
+  /** Compact: a single-line status strip (pill + one-line reason) instead of
+   *  the full card. Used on the scan desk so lockdown/curfew/maintenance
+   *  stop piling into 3-4 stacked cards that obscure the scan area. */
+  compact?: boolean;
 }
 
 function pillForMode(mode: GateMode, lockdown: LockdownInfo | null) {
@@ -80,6 +84,7 @@ export function GateModeBanner({
   scanningAllowed,
   onOverrideMaintenance,
   onDismissLockdown,
+  compact = false,
 }: GateModeBannerProps) {
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -161,13 +166,17 @@ export function GateModeBanner({
       {lockdown && (
         <div
           role="alert"
-          className="surface-card mt-1 max-w-md bg-action-danger/10 px-2 py-1 text-xs text-action-danger"
+          className={compact
+            ? "mt-1 flex items-center gap-2 max-w-md bg-action-danger/10 px-2.5 py-1.5 text-xs text-action-danger"
+            : "surface-card mt-1 max-w-md bg-action-danger/10 px-2 py-1 text-xs text-action-danger"}
         >
-          <strong>Campus lockdown.</strong>{" "}
-          {lockdown.message ?? "Scans are disabled until an administrator lifts the lockdown."}
-          {lockdown.scopes.length > 0 && (
-            <> Scopes: {lockdown.scopes.join(", ")}.</>
-          )}
+          <ShieldAlert className="size-3.5 shrink-0" aria-hidden />
+          <span>
+            <strong>Campus lockdown — scans are blocked.</strong>{" "}
+            {lockdown.message ?? "An administrator must lift the lockdown before the camera can verify passes."}
+            {lockdown.scopes.length > 0 && <> Scopes: {lockdown.scopes.join(", ")}.</>}
+            {" Manual roll entry and photo upload below still work — lockdown only blocks live camera scans."}
+          </span>
         </div>
       )}
 

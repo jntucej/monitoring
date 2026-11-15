@@ -6,7 +6,7 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useOperatorGate } from "@/hooks/useOperatorGate";
 import { normalizeScannedPayload } from "@/lib/barcode";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, AlertCircle, KeyRound, ShieldAlert, Wrench, Moon } from "lucide-react";
+import { RefreshCw, AlertCircle, KeyRound } from "lucide-react";
 // The two-decision rule: the bottom bar carries only IN / OUT. Manual entry
 // is reachable via "Enter Roll Manually" in the Scanner's "Can't see the code?"
 // row — no duplicate "Manual entry" button here (removed in this pass).
@@ -438,55 +438,22 @@ const shift = useOperatorShiftClock();
               <span title="Your 8-hour shift window begins the moment you confirm your first scan of the day.">shift window opens on your first scan</span>
             )}
           </div>
-          {/* A1: compact mode + lockdown banner (always visible, incl. OPEN). */}
+          {/* A1: single compact status strip (pill + one-line reason +
+              dismiss). The previous layout rendered this banner PLUS three
+              full-width cards (MAINTENANCE / CURFEW / LOCKDOWN) stacked
+              below it — up to four overlapping notifications that obscured
+              the scan area and read as contradictory ("scans disabled"
+              while the UI still shows scan options). The compact banner
+              carries the state, the reason, and one dismissal in one line,
+              and the three cards are gone. */}
           <GateModeBanner
             mode={gateMode as GateMode}
             lockdown={activeLockdown}
             scanningAllowed={gateMode === "OPEN" && !activeLockdown}
             onOverrideMaintenance={(reason) => overrideGateMode("OPEN", reason)}
             onDismissLockdown={dismissLockdown}
+            compact
           />
-
-          {/* OfflineBanner removed: the desk has no offline queue — a scan
-              failure surfaces via the standard error panel instead. The
-              global NetworkStatusBanner in SafeAreaAppShell still shows a
-              truthful offline hint on every page. */}
-
-          {gateMode === "MAINTENANCE" && (
-            <div className="surface-card bg-amber-500/10 p-4 space-y-1">
-              <div className="flex items-center gap-2">
-                <Wrench className="w-5 h-5 text-action-warning" />
-                <h3 className="font-extrabold text-sm text-action-warning uppercase tracking-wide">Maintenance Mode Active</h3>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Scheduled maintenance in progress. Routine scans are temporarily blocked.
-              </p>
-            </div>
-          )}
-
-          {gateMode === "CURFEW" && (
-            <div className="surface-card bg-indigo-500/10 p-4 space-y-1">
-              <div className="flex items-center gap-2">
-                <Moon className="w-5 h-5 text-action-primary" />
-                <h3 className="font-extrabold text-sm text-indigo-300 uppercase tracking-wide">Night Curfew Hours Active</h3>
-              </div>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Curfew restrictions in effect. An override reason is required for student exits.
-              </p>
-            </div>
-          )}
-
-          {activeLockdown && (
-            <div className="surface-card bg-action-danger text-white p-4 flex items-center gap-3 animate-pulse">
-              <ShieldAlert className="size-5 shrink-0 text-action-warning" />
-              <div className="min-w-0">
-                <h4 className="font-extrabold text-sm uppercase tracking-wider">Campus Lockdown In Effect</h4>
-                <p className="text-xs opacity-90">
-                  {activeLockdown.message || "All gate scans are currently restricted by security administration."}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         <AnimatePresence>
@@ -564,19 +531,23 @@ const shift = useOperatorShiftClock();
             onSubmit={submitManual}
             className="surface-card pointer-events-auto w-full max-w-md bg-bg-surface p-4 space-y-3"
           >
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-text-primary">Manual Student Lookup</h3>
-              <p className="text-xs text-text-muted">
-                Type &gt; then roll number (or paste a roll number directly).
+            <div className="space-y-1.5">
+              <label htmlFor="manual-roll-input" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                Roll / Employee / ID number
+              </label>
+              <p className="text-xs text-text-muted -mt-1">
+                Type &gt; then the number (or paste a roll number directly), then verify.
               </p>
             </div>
             <input
+              id="manual-roll-input"
               type="text"
               maxLength={11}
               autoFocus
               value={manualRollInput}
               onChange={(e) => setManualRollInput(e.target.value.toUpperCase())}
               placeholder="e.g. >24JJ1A0501"
+              aria-label="Enter roll or employee number to verify manually"
               className="surface-card w-full min-h11 px-4 py-3 bg-bg-base text-base font-mono font-bold tracking-wider text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
             />
             <div className="flex gap-2">
@@ -612,7 +583,7 @@ const shift = useOperatorShiftClock();
             className="fixed inset-0 z-60 flex items-center justify-center p-4 pointer-events-none"
           >
             <SuccessFlash
-              autoDismissMs={250}
+              autoDismissMs={1800}
               direction={lastScan?.direction}
               reason={lastScan?.reason as string}
             />
