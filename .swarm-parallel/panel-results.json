@@ -1,0 +1,448 @@
+{
+  "operator": {
+    "console": "/operator",
+    "runs": 3,
+    "latest_completion": 0.35,
+    "progression": [
+      0.3,
+      0.35,
+      0.35
+    ],
+    "sighted": 0.4375,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 6,
+      "completed": 7,
+      "timeout": 7
+    },
+    "top_pains": [
+      "Loading/verification overlays obscure UI and block interaction",
+      "Lockdown banner overlaps and obscures critical UI elements",
+      "Similar labels cause confusion about which action to take",
+      "Fallback actions for blocked scans are not prominent",
+      "Unclear which ID format or input method to use"
+    ]
+  },
+  "lookup": {
+    "console": "/operator/lookup",
+    "runs": 2,
+    "latest_completion": 0.85,
+    "progression": [
+      0.85,
+      0.85
+    ],
+    "sighted": 0.9375,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 1,
+      "completed": 17,
+      "timeout": 2
+    },
+    "top_pains": [
+      "Voice and command inputs clutter the simple ID lookup interface",
+      "Unclear loading or credential verification states block user interaction confidence",
+      "\"No scan history\" message is ambiguous and lacks task context",
+      "Visual clutter and decorative elements distract from primary search actions",
+      "Screen reader users lack accessible labels or result announcements"
+    ]
+  },
+  "transactions": {
+    "console": "/operator/transactions",
+    "runs": 2,
+    "latest_completion": 0.45,
+    "progression": [
+      0.5,
+      0.45
+    ],
+    "sighted": 0.4375,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 8,
+      "completed": 9,
+      "timeout": 3
+    },
+    "top_pains": [
+      "Indefinite loading state with no progress or timeout indicator",
+      "Empty state provides no guidance or next-step actions",
+      "Ambiguous labels and missing context for filters and counts",
+      "Broken or overlapping text rendering in UI elements",
+      "Redundant or conflicting empty-state messages stacked together"
+    ]
+  },
+  "student": {
+    "console": "/student",
+    "runs": 5,
+    "latest_completion": 0.15,
+    "progression": [
+      0.0,
+      0.0,
+      0.05,
+      0.1,
+      0.15
+    ],
+    "sighted": 0.125,
+    "blind": 0.25,
+    "status_breakdown": {
+      "abandoned": 4,
+      "completed": 3,
+      "timeout": 13
+    },
+    "top_pains": [
+      "Persistent loading spinners obscure content and cause interaction delays",
+      "Attendance data displays only unmarked statuses or zeros without explanation",
+      "No clear navigation link or section for class schedule",
+      "Ambiguous labels make it difficult to locate campus access rules",
+      "Clicking Attendance incorrectly navigates to Digital Gate Passes page"
+    ]
+  },
+  "admin": {
+    "console": "/admin",
+    "runs": 3,
+    "latest_completion": 0.2,
+    "progression": [
+      0.1,
+      0.15,
+      0.2
+    ],
+    "sighted": 0.25,
+    "blind": 0.0,
+    "status_breakdown": {
+      "completed": 4,
+      "timeout": 16
+    },
+    "top_pains": [
+      "Missing accessible labels on unlabeled sidebar buttons",
+      "Slow or stuck 'Verifying Credentials' loading states blocking dashboard access",
+      "No clear link or label for reviewing 'flagged scan exceptions'",
+      "Ambiguous 'Open Alerts' metric cards lacking clear navigation to details",
+      "Confusingly dated '29d ago' labels on 'most recent' alerts pages"
+    ]
+  },
+  "faculty": {
+    "console": "/faculty",
+    "runs": 1,
+    "latest_completion": 0.2,
+    "progression": [
+      0.2
+    ],
+    "sighted": 0.125,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 11,
+      "completed": 4,
+      "timeout": 5
+    },
+    "top_pains": [
+      "Page is stuck on a 'Loading...' spinner with no content visible yet \u2014 can't see today's classes/attendance, st",
+      "No visible navigation or dashboard content on first load, just an empty splash with a shield icon and 'Gate Mo",
+      "Page shows 'Loading...' with no timeout or error; can't see any classes, attendance, alerts, or flag option.",
+      "No navigation or retry button visible while loading.",
+      "Page shows 'Verifying loading credentials...' overlay with overlapping garbled text, but interactive elements "
+    ]
+  },
+  "guardian": {
+    "console": "/guardian",
+    "runs": 1,
+    "latest_completion": 0.15,
+    "progression": [
+      0.15
+    ],
+    "sighted": 0.125,
+    "blind": 0.25,
+    "status_breakdown": {
+      "abandoned": 14,
+      "completed": 3,
+      "timeout": 3
+    },
+    "top_pains": [
+      "Infinite verification spinner with no progress indicator, ETA, or error fallback",
+      "Guardian dashboard content and navigation remain inaccessible or missing after verification",
+      "Overlapping and garbled text in loading screen harms readability",
+      "Unfamiliar 'security credentials' jargon confuses guardian users during loading",
+      "Ambiguous assistant button label provides no utility during task completion"
+    ]
+  },
+  "staff": {
+    "console": "/staff",
+    "runs": 1,
+    "latest_completion": 0.35,
+    "progression": [
+      0.35
+    ],
+    "sighted": 0.375,
+    "blind": 0.25,
+    "status_breakdown": {
+      "abandoned": 6,
+      "completed": 7,
+      "timeout": 7
+    },
+    "top_pains": [
+      "Page is still loading with 'Loading...' indicator \u2014 no content visible yet",
+      "The 'Gate Monitor' label in the center is unclear \u2014 not obvious what this section does",
+      "Multiple 'Notifications' buttons ([18] and [19]) look like duplicates, confusing",
+      "No clear indication of where my personal check-in status or shift info would be",
+      "The check-in/check-out status is labeled as 'Movements Today' which is a bit vague \u2014 a quick scan doesn't imme"
+    ]
+  },
+  "oie": {
+    "console": "/oie",
+    "runs": 1,
+    "latest_completion": 0.35,
+    "progression": [
+      0.35
+    ],
+    "sighted": 0.4375,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 4,
+      "completed": 7,
+      "timeout": 9
+    },
+    "top_pains": [
+      "Page is still loading; nothing I need is visible yet.",
+      "Sidebar 'Today' label isn't obvious \u2014 had to guess it shows exam-day access",
+      "No clearly labeled 'candidate attendance' or 'coordination items' section on the Today view \u2014 had to guess tha",
+      "No obvious link or heading for 'today's exam-day access' status",
+      "Page is stuck on 'Loading\u2026' with no visible data yet, which feels like friction \u2014 I'm not sure if it will fini"
+    ]
+  },
+  "supervisor": {
+    "console": "/supervisor",
+    "runs": 1,
+    "latest_completion": 0.2,
+    "progression": [
+      0.2
+    ],
+    "sighted": 0.125,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 6,
+      "completed": 4,
+      "timeout": 10
+    },
+    "top_pains": [
+      "Page crashes showing cryptic technical error '$h.map is not a function'",
+      "No navigation, back links, or alternative paths visible on error page",
+      "'Try again' button repeatedly fails and does not resolve the error",
+      "Live campus event notifications visible but no actionable controls to open or respond",
+      "Loading or verifying screen provides no progress indication or status"
+    ]
+  },
+  "hod": {
+    "console": "/hod",
+    "runs": 1,
+    "latest_completion": 0.5,
+    "progression": [
+      0.5
+    ],
+    "sighted": 0.625,
+    "blind": 0.0,
+    "status_breakdown": {
+      "completed": 10,
+      "timeout": 10
+    },
+    "top_pains": [
+      "Duplicate 'Approvals' elements (link and button) confuse navigation intent",
+      "Gate Monitor loading overlay blocks content without status or timeout",
+      "No clear 'Faculty Movement' or transfer function available in UI",
+      "SLA breached badges lack context, priority, or actionable guidance",
+      "Faculty section labels (Directory/Attendance) do not clarify available actions"
+    ]
+  },
+  "caretaker": {
+    "console": "/caretaker",
+    "runs": 1,
+    "latest_completion": 0.55,
+    "progression": [
+      0.55
+    ],
+    "sighted": 0.5625,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 2,
+      "completed": 11,
+      "timeout": 7
+    },
+    "top_pains": [
+      "Broken /hostel URL returns unhelpful 404 with no path to console",
+      "Ambiguous sidebar labels obscure location of work orders and maintenance tasks",
+      "Empty states lack clear CTA to report new maintenance issues",
+      "No visible section or link for permissions and pending requests",
+      "Auto-opening chat assistant overlay blocks access to main content"
+    ]
+  },
+  "mess_incharge": {
+    "console": "/mess-incharge",
+    "runs": 1,
+    "latest_completion": 0.25,
+    "progression": [
+      0.25
+    ],
+    "sighted": 0.3125,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 2,
+      "completed": 5,
+      "timeout": 13
+    },
+    "top_pains": [
+      "Ambiguous zero/placeholder states obscure loading vs empty data",
+      "Unclear navigation labels and structure for meal sections",
+      "Unlabeled 'Open' links lack context for destinations",
+      "Unhelpful error messages and opaque retry actions",
+      "Security verification loading screens block initial access"
+    ]
+  },
+  "deputy_warden": {
+    "console": "/deputy-warden",
+    "runs": 1,
+    "latest_completion": 0.3,
+    "progression": [
+      0.3
+    ],
+    "sighted": 0.375,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 4,
+      "completed": 6,
+      "timeout": 10
+    },
+    "top_pains": [
+      "Stuck on 'Verifying security credentials' loading spinner without resolution",
+      "Ambiguous empty state fails to confirm data status or queue location",
+      "Unclear navigation hierarchy for safety, movement, and approvals sections",
+      "Unexpected redirect to login breaks task flow and confuses users",
+      "Jargon-heavy labels obscure functional meaning of key UI elements"
+    ]
+  },
+  "exam_branch": {
+    "console": "/exam-branch",
+    "runs": 1,
+    "latest_completion": 0.3,
+    "progression": [
+      0.3
+    ],
+    "sighted": 0.3125,
+    "blind": 0.25,
+    "status_breakdown": {
+      "abandoned": 4,
+      "completed": 6,
+      "timeout": 10
+    },
+    "top_pains": [
+      "Cryptic navigation labels hide task-specific destinations",
+      "Landing URLs resolve to dead-end 404 errors",
+      "HTTP 403 errors block critical queue data",
+      "Unexplained raw HTTP codes lack user guidance",
+      "KPI panels display empty 'coming soon' states"
+    ]
+  },
+  "exam_superintendent": {
+    "console": "/exam-superintendent",
+    "runs": 1,
+    "latest_completion": 0.3,
+    "progression": [
+      0.3
+    ],
+    "sighted": 0.375,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 11,
+      "completed": 6,
+      "timeout": 3
+    },
+    "top_pains": [
+      "No single entry point that clearly shows 'exam branch coordination' \u2014 I have to guess which menu items cover i",
+      "The Schedule page says 'No scheduled exam clearance deadlines in view' which is unclear \u2014 it's not obvious whe",
+      "The page only shows '12 pending exam clearance(s)' in the top right but doesn't list them anywhere visible, cr",
+      "Incidents are shown only as raw hex IDs (e.g. 'Exception 6db858ed') with no descriptions, timestamps, or sever",
+      "A banner reads 'Incidents data unavailable: HTTP 403' even though the exception list is showing \u2014 conflicting/"
+    ]
+  },
+  "parent": {
+    "console": "/parent",
+    "runs": 1,
+    "latest_completion": 0.15,
+    "progression": [
+      0.15
+    ],
+    "sighted": 0.1875,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 12,
+      "completed": 3,
+      "timeout": 5
+    },
+    "top_pains": [
+      "Indefinite loading spinner lacks progress indicator, timeout, or error message",
+      "Loading screen text is garbled, overlapping, or unreadable",
+      "No navigation menu or header visible during loading state",
+      "Assistant popup auto-opens and blocks dashboard content",
+      "Dashboard content is inaccessible to screen readers or keyboard users"
+    ]
+  },
+  "visitor": {
+    "console": "/visitor",
+    "runs": 1,
+    "latest_completion": 0.25,
+    "progression": [
+      0.25
+    ],
+    "sighted": 0.1875,
+    "blind": 0.5,
+    "status_breakdown": {
+      "abandoned": 8,
+      "completed": 5,
+      "timeout": 7
+    },
+    "top_pains": [
+      "Page stuck in loading/blank state, blocking all navigation",
+      "No active visit status prevents viewing host details or check-in",
+      "Unclear navigation paths to find visitor console or host details",
+      "Vague 'No action available' or 'NONE' status lacks next-step guidance",
+      "Ambiguous sidebar structure with overlapping 'Status' and 'My visit'"
+    ]
+  },
+  "worker": {
+    "console": "/worker",
+    "runs": 1,
+    "latest_completion": 0.35,
+    "progression": [
+      0.35
+    ],
+    "sighted": 0.375,
+    "blind": 0.25,
+    "status_breakdown": {
+      "abandoned": 5,
+      "completed": 7,
+      "timeout": 8
+    },
+    "top_pains": [
+      "Dashboard lacks clear labels for shifts, check-in/out, or work orders.",
+      "Page is stuck in a loading state with overlapping text.",
+      "System logs (SESSION_FAMILY_CREATED) displayed instead of human-readable worker info.",
+      "'ON SHIFT: No' status is ambiguous without check-in/out context.",
+      "Excessive navigation tabs and buttons require guessing to find relevant info."
+    ]
+  },
+  "emo": {
+    "console": "/emo",
+    "runs": 1,
+    "latest_completion": 0.0,
+    "progression": [
+      0.0
+    ],
+    "sighted": 0.0,
+    "blind": 0.0,
+    "status_breakdown": {
+      "abandoned": 20
+    },
+    "top_pains": [
+      "Cloudflare 502 Bad Gateway error blocks all access to the console",
+      "Infinite loading spinner with no error or status feedback",
+      "Unlabeled or vague buttons like 'Click to reveal' lack context",
+      "No semantic navigation structure or landmarks on the page",
+      "Cloudflare challenge is inaccessible to screen reader users"
+    ]
+  }
+}
