@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 
@@ -166,17 +167,40 @@ function OperatorTransactionsInner() {
           </div>
 
           {busy ? (
-            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
+            <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0" role="status" aria-busy="true">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" />
               Loading today&rsquo;s movements…
             </div>
           ) : filtered.length === 0 ? (
-            <div className="p-6 text-center min-w-0">
+            <div className="p-6 text-center min-w-0 space-y-3">
               <Inbox className="w-5 h-5 text-text-muted mx-auto mb-2" />
-              <p className="text-sm text-text-muted">
-                No {filter === "ALL" ? "" : filter === "IN" ? "entry" : "exit"} transactions
-                recorded yet today.
-              </p>
+              {counts && counts.total > 0 ? (
+                <>
+                  <p className="text-sm text-text-muted">
+                    No {filter === "ALL" ? "" : filter === "IN" ? "entry" : "exit"} transactions in this view.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("ALL")}
+                    className="text-xs font-semibold text-action-primary underline underline-offset-2"
+                  >
+                    Show all {counts.total} today
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-text-muted">
+                    No transactions recorded yet today.
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    New scans from your gate desk will appear here as they happen.{" "}
+                    <Link href="/operator/exceptions" className="font-semibold text-action-primary underline underline-offset-2">
+                      Flag or review exceptions
+                    </Link>{" "}
+                    in the meantime.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <>

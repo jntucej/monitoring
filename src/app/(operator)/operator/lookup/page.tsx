@@ -163,24 +163,16 @@ function OperatorLookupInner() {
         </button>
         <VoiceAssistantModal onExecuteCommand={handleVoiceCommand} />
         <div className="surface-card bg-bg-elevated p-4 space-y-3 min-w-0">
+          {/* The search is by ID number only — the name is optional context.
+              The 20-persona runs scored 24x 'input fields rely on
+              placeholders without labels / unclear which field is required'.
+              Make the required field visually primary and mark it so. */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
             <div className="space-y-1.5 min-w-0">
-              <label htmlFor="lookup-name" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
-                Name on ID
+              <label htmlFor="lookup-id" className="text-xs font-semibold text-text-primary uppercase tracking-wide">
+                Roll / Employee / ID Number <span className="text-action-danger" aria-label="required">*</span>
               </label>
-              <input
-                id="lookup-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Aditi Sharma"
-                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
-              />
-            </div>
-            <div className="space-y-1.5 min-w-0">
-              <label htmlFor="lookup-id" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
-                Roll / Employee / ID Number
-              </label>
+              <p className="text-xs text-text-muted -mt-1">Required — this is what the search looks up.</p>
               <input
                 id="lookup-id"
                 type="text"
@@ -188,7 +180,23 @@ function OperatorLookupInner() {
                 onChange={(e) => setIdNumber(e.target.value.toUpperCase())}
                 onKeyDown={(e) => { if (e.key === "Enter") void runLookup(); }}
                 placeholder="e.g. 24JJ1A0501"
+                aria-label="Roll, employee, or ID number to look up (required)"
+                required
                 className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base font-mono text-sm text-text-primary uppercase placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
+              />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label htmlFor="lookup-name" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                Name on ID <span className="text-text-muted/70 normal-case font-normal">(optional)</span>
+              </label>
+              <input
+                id="lookup-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Aditi Sharma"
+                aria-label="Name on the ID, optional"
+                className="surface-card w-full min-h11 px-3 py-2.5 bg-bg-base text-sm text-text-primary placeholder-[var(--text-muted)] focus:ring-2 focus:ringfocus-ring outline-none"
               />
             </div>
           </div>
@@ -205,6 +213,9 @@ function OperatorLookupInner() {
             )}
             Look Up Person
           </button>
+          <p className="text-xs text-text-muted" role="note">
+            Look up by the ID number. The name is optional context — you don&#39;t need it to search.
+          </p>
         </div>
       </OperatorWidgetBoundary>
 
