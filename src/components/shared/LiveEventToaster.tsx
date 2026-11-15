@@ -31,14 +31,26 @@ import { useUIStore } from "@/stores/uiStore";
 import { useLiveEventStore, type LiveEvent } from "@/stores/liveEventStore";
 import type { ToastVariant } from "@/components/ui/toast";
 
-const ACTIVE_ROLES = new Set([
-  "admin",
-  "sysadmin",
-  "operator",
-  "supervisor",
-  "vice_principal",
-  "principal",
-]);
+// The toaster hits two different alert endpoints, each with its own role
+// gate (withAuthorization.requiredRole). Hitting the wrong one for a role
+// 403s on EVERY page the role loads — which the role sweep flagged as 34
+// broken operator/supervisor leaves. Map each role to an endpoint it is
+// actually authorized on:
+//   /api/admin/alerts(+/stream)  -> admin, sysadmin only
+//   /api/alerts                 -> admin, sysadmin, supervisor, principal
+// operator is in NEITHER gate, so it gets no stream (inert mount, no
+// doomed request) rather than a guaranteed-403 one.
+function endpointForRole(role: string | null): { list: string; stream: string | null } | null {
+  if (role === "admin" || role === "sysadmin") {
+    return { list: "/api/admin/alerts", stream: "/api/admin/alerts/stream" };
+  }
+  if (role === "supervisor" || role === "principal" || role === "vice_principal") {
+    // /api/alerts is the role-gated (non-stream) endpoint these roles can
+    // read. There is no role-gated SSE stream, so we poll it.
+    return { list: "/api/alerts", stream: null };
+  }
+  return null;
+}
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -91,7 +103,11 @@ export function LiveEventToaster() {
 
   useEffect(() => {
     if (!hydrateState) return;
-    if (!ACTIVE_ROLES.has(role ?? "") || !userId) return;
+    if (!userId) return;
+    const ep = endpointForRole(role);
+    // operator (and any role not mapped) gets no stream — mount is inert,
+    // no doomed 403 request.
+    if (!ep) return;
 
     let stopped = false;
 
@@ -108,32 +124,33 @@ export function LiveEventToaster() {
       });
     };
 
-    // ── Primary path: SSE ────────────────────────────────────────────────
-    const streamUrl = `/api/admin/alerts/stream`;
-    try {
-      const es = new EventSource(streamUrl);
-      eventSourceRef.current = es;
-      es.onmessage = (m) => {
-        try {
-          const parsed = JSON.parse(m.data);
-          if (parsed && parsed.id) ingest(rowToEvent(parsed));
-        } catch {
-          /* malformed frame — ignore, don't break the stream */
-        }
-      };
-      es.onerror = () => {
-        // SSE failed — the poll fallback below keeps working. We do not
-        // re-open the EventSource (the browser auto-reconnects).
-      };
-    } catch {
-      // EventSource constructor threw — polling only.
+    // ── Primary path: SSE (admin roles only; others fall back to poll) ──
+    if (ep.stream) {
+      try {
+        const es = new EventSource(ep.stream);
+        eventSourceRef.current = es;
+        es.onmessage = (m) => {
+          try {
+            const parsed = JSON.parse(m.data);
+            if (parsed && parsed.id) ingest(rowToEvent(parsed));
+          } catch {
+            /* malformed frame — ignore, don't break the stream */
+          }
+        };
+        es.onerror = () => {
+          // SSE failed — the poll fallback below keeps working. We do not
+          // re-open the EventSource (the browser auto-reconnects).
+        };
+      } catch {
+        /* EventSource constructor threw — polling only. */
+      }
     }
 
-    // ── Fallback path: polling (also runs in parallel for safety) ───────
+    // ── Fallback path: polling (all mapped roles) ─────
     const poll = async () => {
       if (stopped) return;
       try {
-        const res = await fetch("/api/admin/alerts?limit=5", { cache: "no-store" });
+        const res = await fetch(`${ep.list}?limit=5`, { cache: "no-store" });
         if (res.ok) {
           const json = await res.json();
           const rows = Array.isArray(json?.data) ? json.data : [];

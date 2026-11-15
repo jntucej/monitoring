@@ -89,6 +89,7 @@ export function getRoleTier(role: string): number {
     parent: 25,
     visitor: 10,
     guard: 20,
+    supervisor: 60,
     operator: 20,
   };
   return t[role] ?? 0;
