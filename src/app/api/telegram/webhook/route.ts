@@ -33,7 +33,8 @@ import { query, withTransaction, getTelegramPool, getPostgresPool } from "@/lib/
 import { hashDeepLinkToken } from "@/lib/telegram-deep-link";
 import { addAudit } from "@/lib/db";
 import { compare } from "@/server/lib/crypto";
-import { executeBotCommand, getRoleCommands, type BotContext } from "@/lib/bot-commands";
+import { executeBotCommand, getRoleCommands, getMenuKeyboard, parseMenuCallback, type BotContext } from "@/lib/bot-commands";
+import { sendTelegramMessage } from "@/lib/telegram";
 import type { Pool, PoolClient } from "pg";
 
 /**
@@ -85,6 +86,11 @@ interface TelegramUpdate {
     contact?: TelegramContact;
     from?: { id?: number; username?: string };
     chat?: { id?: number };
+  };
+  callback_query?: {
+    data?: string;
+    from?: { id?: number; username?: string };
+    message?: { chat?: { id?: number } };
   };
 }
 
@@ -207,10 +213,16 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const update = (await req.json().catch(() => null)) as TelegramUpdate | null;
   const message = update?.message;
-  const telegramUserId = message?.from?.id;
-  const telegramChatId = message?.chat?.id;
+  const callbackQuery = update?.callback_query;
 
-  if (!telegramUserId || !telegramChatId || !message) {
+  // For callback queries (inline button clicks), the chat/user come from the callback
+  const telegramUserId = callbackQuery?.from?.id ?? message?.from?.id;
+  const telegramChatId = callbackQuery?.message?.chat?.id ?? message?.chat?.id;
+
+  if (!message && !callbackQuery) {
+    return NextResponse.json({ ok: false, error: { code: "BAD_UPDATE" } });
+  }
+  if (!telegramUserId || !telegramChatId) {
     return NextResponse.json({ ok: false, error: { code: "BAD_UPDATE" } });
   }
 
@@ -228,7 +240,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   await claimUpdateId(update.update_id);
 
   // ── Step 1: /start TOKEN ───────────────────────────────────────────────────
-  if (message.text?.startsWith("/start ")) {
+  if (message?.text?.startsWith("/start ")) {
     const token = message.text.slice(7).trim();
     if (!token) return NextResponse.json({ ok: true, ignored: true });
 
@@ -313,7 +325,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   // ── Step 2: contact (shared phone number) — the hard gate ────────────────
-  const contact = message.contact;
+  const contact = message?.contact;
   if (contact?.phone_number) {
     // Rule 1: the shared contact card must belong to the SENDER.
     // A forwarded card carries a different user_id → reject immediately.
@@ -448,7 +460,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
 
   // ── Step 3: Slash Commands ──────────────────────────────────────────────
-  const text = (message.text ?? "").trim();
+  const text = (message?.text ?? "").trim();
 
   // /help — role-aware commands
   if (text === "/help" || text.startsWith("/help@")) {
@@ -756,6 +768,89 @@ export async function POST(req: NextRequest): Promise<Response> {
       `✅ ${roll} linked to this chat.\nSend \`/verify <code>\` with your 6-digit code to complete verification.`,
     );
 
+    return NextResponse.json({ ok: true });
+  }
+
+  // /menu — send interactive inline keyboard
+  if (text === "/menu" || text.startsWith("/menu@")) {
+    const { rows: menuUserRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+      `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+
+    if (menuUserRows.length === 0) {
+      await replyToChat(
+        telegramChatId,
+        "Account not linked. Use /link <id> first, then try /menu.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    const user = menuUserRows[0];
+    const keyboard = getMenuKeyboard(user.role);
+
+    // Send the menu with inline buttons
+    await sendTelegramMessage(
+      telegramChatId,
+      `📋 *${user.role.toUpperCase().replace("_", " ")} Menu*\n\nPick an option below:`,
+      { replyMarkup: keyboard.replyMarkup, parseMode: "Markdown" }
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  // Handle inline keyboard callback queries (menu button clicks)
+  const callbackData = (callbackQuery?.data ?? "").trim();
+  if (callbackData) {
+    const parsed = parseMenuCallback(callbackData);
+    if (parsed) {
+      const { role, cmd } = parsed;
+
+      // Look up the user
+      const { rows: cbUserRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+        `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+        [telegramChatId],
+      );
+
+      if (cbUserRows.length === 0) {
+        await replyToChat(telegramChatId, "Account not linked. Use /link <id> first.");
+      } else {
+        const user = cbUserRows[0];
+
+        // Edit the menu message with the result
+        const pool = await getPostgresPool();
+        const client = await pool.connect();
+        try {
+          await client.query("SET ROLE gate_app");
+          const ctx: BotContext = {
+            chatId: telegramChatId,
+            userId: user.id,
+            uniqueId: user.unique_id,
+            name: user.name,
+            role: user.role,
+            status: user.status,
+            client,
+          };
+          let result: string;
+          if (cmd === "help") {
+            const cmds = getRoleCommands(user.role);
+            result = (
+              "🤖 *Gate Monitor Assistant*\n\n" +
+              cmds.map((c) => `• ${c.cmd} — ${c.desc}`).join("\n")
+            );
+          } else {
+            result = await executeBotCommand(ctx, `/${cmd}`);
+          }
+          await sendTelegramMessage(
+            telegramChatId,
+            result,
+            { parseMode: "Markdown" }
+          );
+        } finally {
+          await client.query("RESET ROLE").catch(() => undefined);
+          client.release();
+        }
+      }
+    }
     return NextResponse.json({ ok: true });
   }
 
