@@ -57,6 +57,52 @@ export async function getPostgresPool(): Promise<Pool> {
   return poolInstance!;
 }
 
+// ── Telegram bot pool (isolated DB, read-only for gate_app) ────────────────
+let telegramPoolInstance: Pool | null = null;
+
+/**
+ * Dedicated pool for the telegram_bot database.
+ * Uses TELEGRAM_DATABASE_URL when set, otherwise falls back to the main pool.
+ */
+export async function getTelegramPool(): Promise<Pool> {
+  if (typeof window !== "undefined") {
+    throw new Error("PostgreSQL pool cannot be accessed from client-side code");
+  }
+
+  const telegramUrl = process.env.TELEGRAM_DATABASE_URL;
+  if (!telegramUrl) {
+    return getPostgresPool();
+  }
+
+  if (!telegramPoolInstance) {
+    const pg = await getPgModule();
+    const PgPool = pg.Pool || pg.default?.Pool;
+
+    telegramPoolInstance = new PgPool({
+      connectionString: telegramUrl,
+      max: parseInt(process.env.TELEGRAM_PG_MAX_POOL || "5", 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+      statement_timeout: 30000,
+      query_timeout: 30000,
+      idle_in_transaction_session_timeout: 10000,
+      ssl:
+        process.env.PG_SSL === "true"
+          ? { rejectUnauthorized: process.env.PG_SSL_REJECT_UNAUTHORIZED !== "false" }
+          : undefined,
+    }) as Pool;
+
+    telegramPoolInstance.on("error", (err: unknown, client: unknown) => {
+      console.error("[TelegramPool Error]", {
+        err,
+        client: client ? "idle" : "unknown",
+      });
+    });
+  }
+
+  return telegramPoolInstance!;
+}
+
 /**
  * Execute a parameterized query using a fast pool connection (no audit context).
  * Automatically retries on deadlock (40P01) or serialization failure (40001) with jitter.

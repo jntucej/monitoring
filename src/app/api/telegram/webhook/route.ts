@@ -29,9 +29,46 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { query, withTransaction } from "@/lib/postgres";
+import { query, withTransaction, getTelegramPool } from "@/lib/postgres";
 import { hashDeepLinkToken } from "@/lib/telegram-deep-link";
 import { addAudit } from "@/lib/db";
+import type { Pool, PoolClient } from "pg";
+
+/**
+ * Query helper that uses the telegram pool when TELEGRAM_DATABASE_URL is set,
+ * otherwise falls back to the main pool (current behavior).
+ */
+async function tgQuery<T extends Record<string, unknown> = Record<string, unknown>>(
+  text: string,
+  params: unknown[] = []
+): Promise<{ rows: T[]; rowCount: number | null }> {
+  const pool = await getTelegramPool();
+  const client = await pool.connect();
+  try {
+    const res = await client.query<T>(text, params);
+    return { rows: res.rows, rowCount: res.rowCount };
+  } finally {
+    client.release();
+  }
+}
+
+async function tgTransaction<T>(
+  fn: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const pool = await getTelegramPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
 
 interface TelegramContact {
   phone_number?: string;
@@ -92,14 +129,14 @@ function verifyTelegramSecret(req: NextRequest): NextResponse | null {
 async function claimUpdateId(updateId: number | undefined): Promise<boolean> {
   if (updateId === undefined) return true; // no update_id → nothing to dedupe on
   try {
-    await query(
+    await tgQuery(
       `INSERT INTO public.telegram_webhook_dedupe (update_id, processed_at)
        VALUES ($1, NOW())
        ON CONFLICT (update_id) DO NOTHING`,
       [updateId],
     );
     // Purge entries older than 48h (idempotent, cheap — partial index).
-    await query(
+    await tgQuery(
       `DELETE FROM public.telegram_webhook_dedupe
        WHERE processed_at < NOW() - INTERVAL '48 hours'`
     ).catch(() => undefined);
@@ -113,7 +150,7 @@ async function claimUpdateId(updateId: number | undefined): Promise<boolean> {
 async function isReplayedUpdate(updateId: number | undefined): Promise<boolean> {
   if (updateId === undefined) return false;
   try {
-    const { rows } = await query(
+    const { rows } = await tgQuery(
       `SELECT 1 FROM public.telegram_webhook_dedupe
        WHERE update_id = $1 AND processed_at > NOW() - INTERVAL '48 hours'`,
       [updateId],
@@ -194,22 +231,29 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (!token) return NextResponse.json({ ok: true, ignored: true });
 
     const tokenHash = hashDeepLinkToken(token);
-    const result = await withTransaction(async (client) => {
-      // FOR UPDATE serializes two concurrent /start deliveries for the
-      // same token — only the first can claim it.
+    const result = await tgTransaction(async (client) => {
+      // SELECT without FOR UPDATE — the isolated telegram DB has no RLS
+      // and no cross-DB row locks; dedupe + used_at check prevent
+      // double-verification in concurrent cases.
       const { rows } = await client.query(
-        `SELECT id, user_id FROM public.telegram_deep_links
+        `SELECT id, user_id, user_unique_id, user_name, user_phone
+           FROM public.telegram_deep_links
           WHERE token_hash = $1
             AND used_at IS NULL
-            AND expires_at > NOW()
-          FOR UPDATE`,
+            AND expires_at > NOW()`,
         [tokenHash],
       );
       if (rows.length === 0) {
-        return { ok: false as const };
+        return { ok: false as const, user: null as null | { uniqueId: string; name: string; phone: string } };
       }
 
-      const link = rows[0] as { id: string; user_id: string };
+      const link = rows[0] as {
+        id: string;
+        user_id: string;
+        user_unique_id: string | null;
+        user_name: string | null;
+        user_phone: string | null;
+      };
 
       // Claim the token; verification happens in step 2.
       await client.query(
@@ -221,17 +265,23 @@ export async function POST(req: NextRequest): Promise<Response> {
         [link.id, telegramUserId, telegramChatId],
       );
 
-      // Carry the Telegram identity forward — NOT a verified identity yet.
+      // Log the claim in the verification log (isolated DB).
       await client.query(
-        `UPDATE public.users
-            SET telegram_chat_id = $2,
-                telegram_user_id = $3
-          WHERE id = $1`,
-        [link.user_id, telegramChatId, telegramUserId],
-      );
+        `INSERT INTO public.telegram_verification_log
+           (user_unique_id, telegram_chat_id, telegram_user_id, result)
+         VALUES ($1, $2, $3, 'claimed')`,
+        [link.user_unique_id ?? link.user_id, telegramChatId, telegramUserId],
+      ).catch(() => undefined);
 
-      return { ok: true as const, userId: link.user_id };
-    });
+      return {
+        ok: true as const,
+        user: {
+          uniqueId: link.user_unique_id ?? "",
+          name: link.user_name ?? "",
+          phone: link.user_phone ?? "",
+        },
+      };
+    }).catch(() => ({ ok: false as const, user: null as null | { uniqueId: string; name: string; phone: string } }));
 
     if (!result.ok) {
       await replyToChat(
@@ -253,7 +303,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       details: {
         result: result.ok ? "token_claimed" : "invalid_or_expired",
         telegramChatId,
-        userId: "userId" in result ? result.userId : null,
+        userId: result.user?.uniqueId ?? null,
       },
     }).catch(() => undefined);
 
@@ -291,8 +341,10 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
 
     // Find the claimed link for this Telegram account (if any).
-    const { rows: linkRows } = await query<{ user_id: string }>(
-      `SELECT user_id FROM public.telegram_deep_links
+    // Uses the isolated telegram DB (tgQuery) for deep link lookups.
+    const { rows: linkRows } = await tgQuery<{ user_id: string; user_unique_id: string | null; user_phone: string | null }>(
+      `SELECT user_id, user_unique_id, user_phone
+         FROM public.telegram_deep_links
         WHERE telegram_chat_id = $1
           AND used_at IS NOT NULL
           AND expires_at > NOW()
@@ -309,12 +361,13 @@ export async function POST(req: NextRequest): Promise<Response> {
       return NextResponse.json({ ok: true });
     }
 
-    const candidateUserId = linkRows[0].user_id;
+    const claimedLink = linkRows[0];
+    const candidateUniqueId = claimedLink.user_unique_id ?? claimedLink.user_id;
 
-    // Rule 2: shared number must EXACTLY match the number on record.
+    // Look up the candidate's phone from the MAIN users table (via main pool).
     const { rows: userRows } = await query<{ phone: string | null }>(
-      `SELECT phone FROM public.users WHERE id = $1`,
-      [candidateUserId],
+      `SELECT phone FROM public.users WHERE unique_id = $1`,
+      [candidateUniqueId],
     );
     const expectedDigits = userRows[0]?.phone ? normalizePhone(userRows[0].phone) : "";
 
@@ -323,14 +376,13 @@ export async function POST(req: NextRequest): Promise<Response> {
         telegramChatId,
         "The phone number you shared does not match our records. Verification is blocked — please contact your admin to resolve this.",
       );
-      await withTransaction(async (client) => {
-        await client.query(
-          `UPDATE public.users
-              SET telegram_verification_failed_at = NOW()
-            WHERE id = $1`,
-          [candidateUserId],
-        );
-      }).catch(() => undefined);
+      // Log the failure in the isolated telegram DB.
+      await tgQuery(
+        `INSERT INTO public.telegram_verification_log
+           (user_unique_id, telegram_chat_id, telegram_user_id, shared_phone_last4, result)
+         VALUES ($1, $2, $3, $4, 'phone_mismatch')`,
+        [candidateUniqueId, telegramChatId, telegramUserId, sharedDigits.slice(-4)],
+      ).catch(() => undefined);
       await addAudit({
         action: "TELEGRAM_DEEP_LINK_FAILED",
         userId: "system",
@@ -338,31 +390,40 @@ export async function POST(req: NextRequest): Promise<Response> {
         details: {
           reason: "phone_mismatch",
           telegramChatId,
-          candidateUserId,
+          candidateUniqueId,
           sharedDigits: sharedDigits.slice(-4).padStart(4, "*"), // last 4 only in audit
         },
       }).catch(() => undefined);
       return NextResponse.json({ ok: true });
     }
 
-    // Both checks passed → verified. Burn the enrollment code atomically.
+    // Both checks passed → verified.
+    // Update main users table + burn enrollment code (via main pool).
     await withTransaction(async (client) => {
       await client.query(
         `UPDATE public.users
             SET telegram_verified_at = NOW(),
                 telegram_verification_failed_at = NULL
-          WHERE id = $1`,
-        [candidateUserId],
+          WHERE unique_id = $1`,
+        [candidateUniqueId],
       );
       await client.query(
         `UPDATE public.enrollment_codes
             SET used_at = NOW()
-          WHERE user_id = $1
+          WHERE user_id = (SELECT id FROM public.users WHERE unique_id = $1)
             AND purpose = 'web_bootstrap_tg'
             AND used_at IS NULL`,
-        [candidateUserId],
+        [candidateUniqueId],
       );
     }).catch(() => undefined);
+
+    // Log the verification in the isolated telegram DB.
+    await tgQuery(
+      `INSERT INTO public.telegram_verification_log
+         (user_unique_id, telegram_chat_id, telegram_user_id, shared_phone_last4, result)
+       VALUES ($1, $2, $3, $4, 'verified')`,
+      [candidateUniqueId, telegramChatId, telegramUserId, sharedDigits.slice(-4)],
+    ).catch(() => undefined);
 
     const base = process.env.PUBLIC_BASE_URL ?? "https://monitor.ucej.in";
     await replyToChat(
@@ -376,7 +437,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       userName: "telegram-webhook",
       details: {
         telegramChatId,
-        candidateUserId,
+        candidateUniqueId,
         matchedDigitsLast4: sharedDigits.slice(-4),
       },
     }).catch(() => undefined);
