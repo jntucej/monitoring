@@ -32,6 +32,7 @@ import { timingSafeEqual } from "crypto";
 import { query, withTransaction, getTelegramPool } from "@/lib/postgres";
 import { hashDeepLinkToken } from "@/lib/telegram-deep-link";
 import { addAudit } from "@/lib/db";
+import { compare } from "@/server/lib/crypto";
 import type { Pool, PoolClient } from "pg";
 
 /**
@@ -441,6 +442,269 @@ export async function POST(req: NextRequest): Promise<Response> {
         matchedDigitsLast4: sharedDigits.slice(-4),
       },
     }).catch(() => undefined);
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Step 3: Slash Commands ──────────────────────────────────────────────
+  const text = (message.text ?? "").trim();
+
+  // /help — reply with available commands
+  if (text === "/help" || text.startsWith("/help@")) {
+    await replyToChat(
+      telegramChatId,
+      "🤖 *Gate Monitor Student Assistant*\n\n" +
+        "Available commands:\n" +
+        "• `/status` — View your onboarding and profile status\n" +
+        "• `/link <roll>` — Link this Telegram account to your student roll number\n" +
+        "• `/verify <code>` — Verify your account using a 6-digit verification code\n" +
+        "• `/help` — Show this help message\n\n" +
+        "Need help? Contact the sysadmin or campus gate security.",
+    );
+    return NextResponse.json({ ok: true });
+  }
+
+  // /status — reply with the student's current onboarding status
+  if (text === "/status" || text.startsWith("/status@")) {
+    // Look up by telegram_chat_id in users
+    const { rows: userRows } = await query<{
+      unique_id: string;
+      name: string;
+      role: string;
+      status: string;
+      onboarded_at: string | null;
+      telegram_verified_at: string | null;
+    }>(
+      `SELECT unique_id, name, role, status, onboarded_at, telegram_verified_at
+         FROM public.users
+        WHERE telegram_chat_id = $1
+        LIMIT 1`,
+      [telegramChatId],
+    );
+
+    if (userRows.length === 0) {
+      await replyToChat(
+        telegramChatId,
+        "Account not linked. Please use `/link <roll>` or use the deep link provided by your administrator.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    const u = userRows[0];
+    const onboardedStr = u.onboarded_at
+      ? `Completed on ${new Date(u.onboarded_at).toLocaleString()}`
+      : "Pending onboarding";
+    const verifiedStr = u.telegram_verified_at
+      ? `Verified on ${new Date(u.telegram_verified_at).toLocaleString()}`
+      : "Not verified";
+
+    await replyToChat(
+      telegramChatId,
+      `📋 *Account Status*\n\n` +
+        `• Student Roll: ${u.unique_id}\n` +
+        `• Name: ${u.name}\n` +
+        `• Account Status: ${u.status}\n` +
+        `• Onboarding: ${onboardedStr}\n` +
+        `• Telegram Verified: ${verifiedStr}`,
+    );
+
+    // Update last_seen_at
+    await tgQuery(
+      `UPDATE public.telegram_user_profiles
+          SET last_seen_at = NOW(), updated_at = NOW()
+        WHERE telegram_chat_id = $1`,
+      [telegramChatId],
+    ).catch(() => undefined);
+
+    await query(
+      `UPDATE public.users
+          SET telegram_last_seen_at = NOW()
+        WHERE telegram_chat_id = $1`,
+      [telegramChatId],
+    ).catch(() => undefined);
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // /verify <code> — look up pending verification, match code, link & update
+  if (text.startsWith("/verify")) {
+    const code = text.slice(7).trim();
+    if (!code) {
+      await replyToChat(
+        telegramChatId,
+        "Please provide the 6-digit code. Example: `/verify 123456`",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Look for pending codes in telegram_bot DB
+    // A student might have linked their chat via /link, or we search active codes
+    // First, check if this chat is already associated with a student
+    const { rows: linkedUsers } = await query<{ unique_id: string }>(
+      `SELECT unique_id FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+
+    let targetRoll: string | null = linkedUsers[0]?.unique_id ?? null;
+
+    // If not directly linked yet, check telegram_user_profiles or telegram_deep_links
+    if (!targetRoll) {
+      const { rows: profileRows } = await tgQuery<{ user_unique_id: string }>(
+        `SELECT user_unique_id FROM public.telegram_user_profiles WHERE telegram_chat_id = $1 LIMIT 1`,
+        [telegramChatId],
+      );
+      targetRoll = profileRows[0]?.user_unique_id ?? null;
+    }
+
+    // Look for valid, unused verify codes
+    let candidateCodes: Array<{ id: string; user_unique_id: string; code_hash: string }>;
+    if (targetRoll) {
+      const { rows } = await tgQuery<{ id: string; user_unique_id: string; code_hash: string }>(
+        `SELECT id, user_unique_id, code_hash
+           FROM public.telegram_verify_codes
+          WHERE UPPER(user_unique_id) = UPPER($1)
+            AND used_at IS NULL
+            AND expires_at > NOW()
+          ORDER BY created_at DESC`,
+        [targetRoll],
+      );
+      candidateCodes = rows;
+    } else {
+      const { rows } = await tgQuery<{ id: string; user_unique_id: string; code_hash: string }>(
+        `SELECT id, user_unique_id, code_hash
+           FROM public.telegram_verify_codes
+          WHERE used_at IS NULL
+            AND expires_at > NOW()
+          ORDER BY created_at DESC
+          LIMIT 20`,
+      );
+      candidateCodes = rows;
+    }
+
+    let matchedCodeRow: { id: string; user_unique_id: string } | null = null;
+    for (const c of candidateCodes) {
+      const isMatch = await compare(code, c.code_hash).catch(() => false);
+      if (isMatch) {
+        matchedCodeRow = c;
+        break;
+      }
+    }
+
+    if (!matchedCodeRow) {
+      await replyToChat(
+        telegramChatId,
+        "❌ Invalid or expired verification code. Please check your code or request a new one from the portal.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    const verifiedRoll = matchedCodeRow.user_unique_id.trim().toUpperCase();
+
+    // Mark code as used
+    await tgQuery(
+      `UPDATE public.telegram_verify_codes SET used_at = NOW() WHERE id = $1`,
+      [matchedCodeRow.id],
+    );
+
+    // Link telegram_chat_id to users table in main DB
+    await withTransaction(async (client) => {
+      await client.query(
+        `UPDATE public.users
+            SET telegram_chat_id = $1,
+                telegram_user_id = $2,
+                telegram_verified_at = NOW(),
+                telegram_last_seen_at = NOW(),
+                telegram_verification_failed_at = NULL
+          WHERE UPPER(unique_id) = $3`,
+        [telegramChatId, telegramUserId, verifiedRoll],
+      );
+    });
+
+    // Update telegram_user_profiles
+    await tgQuery(
+      `INSERT INTO public.telegram_user_profiles
+         (user_unique_id, telegram_chat_id, telegram_user_id, bot_subscribed, last_seen_at, updated_at)
+       VALUES ($1, $2, $3, true, NOW(), NOW())
+       ON CONFLICT (user_unique_id)
+       DO UPDATE SET
+         telegram_chat_id = EXCLUDED.telegram_chat_id,
+         telegram_user_id = EXCLUDED.telegram_user_id,
+         bot_subscribed = true,
+         last_seen_at = NOW(),
+         updated_at = NOW()`,
+      [verifiedRoll, telegramChatId, telegramUserId],
+    );
+
+    await replyToChat(
+      telegramChatId,
+      `✅ Verification successful! Your Telegram account is now linked to student ${verifiedRoll}.`,
+    );
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // /link <roll> — link this Telegram account to that student roll number
+  // (requires the student to have a pending verification code)
+  if (text.startsWith("/link")) {
+    const roll = text.slice(5).trim().toUpperCase();
+    if (!roll) {
+      await replyToChat(
+        telegramChatId,
+        "Please provide your student roll number. Example: `/link 24JJ1A0501`",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Check if student exists in main DB
+    const { rows: studentRows } = await query<{ id: string; unique_id: string; name: string }>(
+      `SELECT id, unique_id, name FROM public.users WHERE UPPER(unique_id) = $1 AND role = 'student' LIMIT 1`,
+      [roll],
+    );
+
+    if (studentRows.length === 0) {
+      await replyToChat(
+        telegramChatId,
+        `Student with roll number "${roll}" was not found. Please verify your roll number.`,
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Requires the student to have a pending verification code
+    const { rows: pendingCodes } = await tgQuery<{ id: string }>(
+      `SELECT id FROM public.telegram_verify_codes
+        WHERE UPPER(user_unique_id) = $1
+          AND used_at IS NULL
+          AND expires_at > NOW()
+        LIMIT 1`,
+      [roll],
+    );
+
+    if (pendingCodes.length === 0) {
+      await replyToChat(
+        telegramChatId,
+        `No pending verification code found for roll number ${roll}. Please request a verification code from the portal or administrator first, then use \`/verify <code>\`.`,
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Store pending association in telegram_user_profiles so subsequent /verify can match
+    await tgQuery(
+      `INSERT INTO public.telegram_user_profiles
+         (user_unique_id, telegram_chat_id, telegram_user_id, last_seen_at, updated_at)
+       VALUES ($1, $2, $3, NOW(), NOW())
+       ON CONFLICT (user_unique_id)
+       DO UPDATE SET
+         telegram_chat_id = EXCLUDED.telegram_chat_id,
+         telegram_user_id = EXCLUDED.telegram_user_id,
+         last_seen_at = NOW(),
+         updated_at = NOW()`,
+      [roll, telegramChatId, telegramUserId],
+    );
+
+    await replyToChat(
+      telegramChatId,
+      `Pending verification code detected for ${roll}!\nPlease send \`/verify <code>\` with your 6-digit code to complete the link.`,
+    );
 
     return NextResponse.json({ ok: true });
   }

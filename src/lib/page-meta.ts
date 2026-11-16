@@ -51,6 +51,7 @@ export const PAGE_META: Record<string, { title: string; description?: string }> 
   "/sysadmin/sessions": { title: "Sessions", description: "Active session management" },
   "/sysadmin/staff": { title: "Staff", description: "Staff accounts and oversight" },
   "/sysadmin/students": { title: "Students", description: "Student accounts and lifecycle" },
+  "/sysadmin/bot": { title: "Telegram Bot", description: "Telegram bot assistant and student verification" },
   "/sysadmin/parents": { title: "Parents & Guardians", description: "Parent accounts and guardian links" },
   "/sysadmin/system": { title: "System", description: "System configuration and monitoring" },
   "/gate/[gateId]": { title: "Gate Terminal", description: "Gate scanner desk and operations" },

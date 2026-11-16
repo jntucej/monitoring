@@ -104,6 +104,44 @@ export async function getTelegramPool(): Promise<Pool> {
 }
 
 /**
+ * Execute a query against the isolated telegram_bot database.
+ */
+export async function tgQuery<T extends QueryResultRow = any>(
+  text: string,
+  params: unknown[] = []
+): Promise<QueryResult<T>> {
+  const pool = await getTelegramPool();
+  const client = await pool.connect();
+  try {
+    const res = await client.query<T>(text, params);
+    return res;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Execute a transaction against the isolated telegram_bot database.
+ */
+export async function tgTransaction<T>(
+  fn: (client: PoolClient) => Promise<T>
+): Promise<T> {
+  const pool = await getTelegramPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
  * Execute a parameterized query using a fast pool connection (no audit context).
  * Automatically retries on deadlock (40P01) or serialization failure (40001) with jitter.
  */

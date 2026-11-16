@@ -19,6 +19,7 @@ export function GovernanceModules() {
           links={[
             { label: "SysAdmin Profile & Credentials", href: "/sysadmin/profile" },
             { label: "Manage Students Roster", href: "/sysadmin/students" },
+            { label: "Telegram Bot Integration", href: "/sysadmin/bot" },
             { label: "Manage Staff Roster", href: "/sysadmin/staff" },
             { label: "Roles & Permissions", href: "/sysadmin/roles" },
             { label: "Role Elevation Requests", href: "/sysadmin/promotions" },
