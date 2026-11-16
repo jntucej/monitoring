@@ -124,3 +124,4 @@ scripts/smoke-report.json
 .metrics.token
 .swarm/
 worker/node_modules/
+.alertmanager-token/
