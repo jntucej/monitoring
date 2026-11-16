@@ -29,7 +29,6 @@ services:
       # postgresql.conf above must carry `include_dir = 'conf.d'` for this
       # to take effect — add that line in compose/postgres/postgresql.conf.
       - ./pgaudit.conf:/var/lib/postgresql/conf.d/pgaudit.conf:ro
- (fix(ops): batch remediation — 23 findings)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s
@@ -417,7 +416,6 @@ services:
     cap_drop: [ALL]
     security_opt:
       - no-new-privileges:true
- (fix(ops): batch remediation — 23 findings)
 
   alertmanager:
     image: prom/alertmanager:v0.28.1
@@ -474,7 +472,6 @@ services:
     environment:
       HOST_ROOT: /host
     networks: [gate-net]
- (fix(ops): batch remediation — 23 findings)
 
   # D6: host metrics for Prometheus filesystem/disk alerts. cAdvisor only
   # sees container metrics; the host-level disk alerts in rules.yml
