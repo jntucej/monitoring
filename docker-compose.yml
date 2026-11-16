@@ -21,14 +21,6 @@ services:
       GATE_APP_PASSWORD: ${GATE_APP_PASSWORD:-${POSTGRES_PASSWORD}}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Production hardening: disable log statement dumps (each DML statement
-      # is written to pg_log, filling the disk and leaking query text).
-      # The application maintains its own audit_logs table.
-      - ./compose/postgres/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
-      # D4: pgaudit extension config (installed by 03b-harden.sh). The
-      # postgresql.conf above must carry `include_dir = 'conf.d'` for this
-      # to take effect — add that line in compose/postgres/postgresql.conf.
-      - ./pgaudit.conf:/var/lib/postgresql/conf.d/pgaudit.conf:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-gate_monitor}"]
       interval: 5s
