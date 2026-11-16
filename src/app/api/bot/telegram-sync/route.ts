@@ -156,25 +156,25 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
 
     // ── Action 3: verify ───────────────────────────────────────────────────────
     if (action === "verify") {
-      const { studentUniqueId, code } = body as {
-        studentUniqueId?: string;
+      const { userUniqueId, code } = body as {
+        userUniqueId?: string;
         code?: string;
       };
 
-      if (!studentUniqueId || !code) {
+      if (!userUniqueId || !code) {
         return NextResponse.json(
           {
             success: false,
             error: {
               code: "BAD_REQUEST",
-              message: "studentUniqueId and code are required for verify action",
+              message: "userUniqueId and code are required for verify action",
             },
           },
           { status: 400 }
         );
       }
 
-      const roll = studentUniqueId.trim().toUpperCase();
+      const roll = userUniqueId.trim().toUpperCase();
       const codeTrimmed = String(code).trim();
 
       // Look up student in main DB
@@ -187,7 +187,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
       }>(
         `SELECT id, unique_id, name, telegram_chat_id, telegram_user_id
            FROM public.users
-          WHERE UPPER(unique_id) = $1 AND role = 'student'
+          WHERE UPPER(unique_id) = $1
           LIMIT 1`,
         [roll]
       );
@@ -280,7 +280,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }): Promise
         data: {
           action: "verify",
           verified: true,
-          studentUniqueId: roll,
+          userUniqueId: roll,
           name: student.name,
         },
       });

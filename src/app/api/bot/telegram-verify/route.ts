@@ -13,19 +13,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const { studentUniqueId, verifyCode } = body as {
-      studentUniqueId?: string;
+    const { userUniqueId, verifyCode } = body as {
+      userUniqueId?: string;
       verifyCode?: string;
     };
 
-    if (!studentUniqueId || typeof studentUniqueId !== "string") {
+    if (!userUniqueId || typeof userUniqueId !== "string") {
       return NextResponse.json(
-        { success: false, error: { code: "BAD_REQUEST", message: "studentUniqueId is required" } },
+        { success: false, error: { code: "BAD_REQUEST", message: "userUniqueId is required" } },
         { status: 400 }
       );
     }
 
-    const roll = studentUniqueId.trim().toUpperCase();
+    const roll = userUniqueId.trim().toUpperCase();
 
     // 1. Look up student in main DB (gate_monitor)
     const { rows: userRows } = await query<{
@@ -38,14 +38,14 @@ export async function POST(req: NextRequest) {
     }>(
       `SELECT id, unique_id, name, role, telegram_chat_id, telegram_user_id
          FROM public.users
-        WHERE UPPER(unique_id) = $1 AND role = 'student'
+        WHERE UPPER(unique_id) = $1
         LIMIT 1`,
       [roll]
     );
 
     if (userRows.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: "NOT_FOUND", message: "Student not found" } },
+        { success: false, error: { code: "NOT_FOUND", message: "Account not found" } },
         { status: 404 }
       );
     }
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         success: true,
         data: {
           verified: true,
-          studentUniqueId: roll,
+          userUniqueId: roll,
           name: student.name,
         },
       });
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        studentUniqueId: roll,
+        userUniqueId: roll,
         name: student.name,
         sentViaTelegram,
         code: sentViaTelegram ? undefined : rawCode,

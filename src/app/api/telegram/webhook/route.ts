@@ -453,13 +453,14 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (text === "/help" || text.startsWith("/help@")) {
     await replyToChat(
       telegramChatId,
-      "🤖 *Gate Monitor Student Assistant*\n\n" +
-        "Available commands:\n" +
-        "• `/status` — View your onboarding and profile status\n" +
-        "• `/link <roll>` — Link this Telegram account to your student roll number\n" +
-        "• `/verify <code>` — Verify your account using a 6-digit verification code\n" +
-        "• `/help` — Show this help message\n\n" +
-        "Need help? Contact the sysadmin or campus gate security.",
+      "🤖 *Gate Monitor Assistant*\n\n" +
+        "Commands:\n" +
+        "• `/status` — Your account, onboarding and resource status\n" +
+        "• `/link <id>` — Link this chat to your account (needs a pending code)\n" +
+        "• `/verify <code>` — Verify with your 6-digit code\n" +
+        "• `/cancel` — Abort a pending link/verify flow\n" +
+        "• `/help` — Show this help\n\n" +
+        "Each account gets its own resource view. Your data stays yours.",
     );
     return NextResponse.json({ ok: true });
   }
@@ -493,19 +494,22 @@ export async function POST(req: NextRequest): Promise<Response> {
     const u = userRows[0];
     const onboardedStr = u.onboarded_at
       ? `Completed on ${new Date(u.onboarded_at).toLocaleString()}`
-      : "Pending onboarding";
+      : "Pending";
     const verifiedStr = u.telegram_verified_at
       ? `Verified on ${new Date(u.telegram_verified_at).toLocaleString()}`
       : "Not verified";
+    const roleLabel = u.role.toUpperCase().replace("_", " ");
 
     await replyToChat(
       telegramChatId,
-      `📋 *Account Status*\n\n` +
-        `• Student Roll: ${u.unique_id}\n` +
+      `📋 *Account Status — ${roleLabel}*\n\n` +
+        `• ID: ${u.unique_id}\n` +
         `• Name: ${u.name}\n` +
-        `• Account Status: ${u.status}\n` +
+        `• Role: ${roleLabel}\n` +
+        `• Account: ${u.status}\n` +
         `• Onboarding: ${onboardedStr}\n` +
-        `• Telegram Verified: ${verifiedStr}`,
+        `• Telegram: ${verifiedStr}\n\n` +
+        `Type /help for available commands.`,
     );
 
     // Update last_seen_at
@@ -547,13 +551,21 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     let targetRoll: string | null = linkedUsers[0]?.unique_id ?? null;
 
-    // If not directly linked yet, check telegram_user_profiles or telegram_deep_links
+    // SECURITY: only check codes for users bound to THIS Telegram chat
     if (!targetRoll) {
       const { rows: profileRows } = await tgQuery<{ user_unique_id: string }>(
         `SELECT user_unique_id FROM public.telegram_user_profiles WHERE telegram_chat_id = $1 LIMIT 1`,
         [telegramChatId],
       );
       targetRoll = profileRows[0]?.user_unique_id ?? null;
+    }
+
+    if (!targetRoll) {
+      await replyToChat(
+        telegramChatId,
+        "No account is linked to this Telegram chat. Use `/link <id>` first to associate your account, then request a verification code.",
+      );
+      return NextResponse.json({ ok: true });
     }
 
     // Look for valid, unused verify codes
@@ -570,15 +582,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       );
       candidateCodes = rows;
     } else {
-      const { rows } = await tgQuery<{ id: string; user_unique_id: string; code_hash: string }>(
-        `SELECT id, user_unique_id, code_hash
-           FROM public.telegram_verify_codes
-          WHERE used_at IS NULL
-            AND expires_at > NOW()
-          ORDER BY created_at DESC
-          LIMIT 20`,
-      );
-      candidateCodes = rows;
+      // SECURITY: never scan all codes — only the sender's own account
+      candidateCodes = [];
     }
 
     let matchedCodeRow: { id: string; user_unique_id: string } | null = null;
@@ -650,23 +655,46 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (!roll) {
       await replyToChat(
         telegramChatId,
-        "Please provide your student roll number. Example: `/link 24JJ1A0501`",
+        "Please provide your account ID. Example: `/link 24JJ1A0501`",
       );
       return NextResponse.json({ ok: true });
     }
 
-    // Check if student exists in main DB
-    const { rows: studentRows } = await query<{ id: string; unique_id: string; name: string }>(
-      `SELECT id, unique_id, name FROM public.users WHERE UPPER(unique_id) = $1 AND role = 'student' LIMIT 1`,
+    // Check if the account exists and is ACTIVE (any role)
+    const { rows: userRows2 } = await query<{ id: string; unique_id: string; name: string; role: string; status: string; telegram_chat_id: number | null }>(
+      `SELECT id, unique_id, name, role, status, telegram_chat_id
+         FROM public.users WHERE UPPER(unique_id) = $1 LIMIT 1`,
       [roll],
     );
 
-    if (studentRows.length === 0) {
+    if (userRows2.length === 0) {
       await replyToChat(
         telegramChatId,
-        `Student with roll number "${roll}" was not found. Please verify your roll number.`,
+        `Account "${roll}" was not found. Please check your ID and try again.`,
       );
       return NextResponse.json({ ok: true });
+    }
+
+    const acct = userRows2[0];
+    if (acct.status !== "ACTIVE") {
+      await replyToChat(
+        telegramChatId,
+        `Account ${roll} is not active (${acct.status}). Contact the administrator if you believe this is an error.`,
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // SECURITY: warn if this account is already linked to a different Telegram
+    if (acct.telegram_chat_id && acct.telegram_chat_id !== telegramChatId) {
+      await replyToChat(
+        telegramChatId,
+        `⚠️ Account ${roll} is already linked to a different Telegram account.\n` +
+        `Linking will take over that association. Proceed only if this is your account.\n` +
+        `Send "/link ${roll} confirm" to proceed, or "/cancel" to abort.`,
+      );
+      if (!text.includes("confirm")) {
+        return NextResponse.json({ ok: true });
+      }
     }
 
     // Requires the student to have a pending verification code
@@ -687,7 +715,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       return NextResponse.json({ ok: true });
     }
 
-    // Store pending association in telegram_user_profiles so subsequent /verify can match
+    // Store binding in telegram_user_profiles
     await tgQuery(
       `INSERT INTO public.telegram_user_profiles
          (user_unique_id, telegram_chat_id, telegram_user_id, last_seen_at, updated_at)
@@ -701,11 +729,30 @@ export async function POST(req: NextRequest): Promise<Response> {
       [roll, telegramChatId, telegramUserId],
     );
 
-    await replyToChat(
-      telegramChatId,
-      `Pending verification code detected for ${roll}!\nPlease send \`/verify <code>\` with your 6-digit code to complete the link.`,
+    // Update main DB with the binding
+    await query(
+      `UPDATE public.users
+          SET telegram_chat_id = $1,
+              telegram_user_id = $2,
+              telegram_last_seen_at = NOW()
+        WHERE UPPER(unique_id) = $3`,
+      [telegramChatId, telegramUserId, roll],
     );
 
+    await replyToChat(
+      telegramChatId,
+      `✅ ${roll} linked to this chat.\nSend \`/verify <code>\` with your 6-digit code to complete verification.`,
+    );
+
+    return NextResponse.json({ ok: true });
+  }
+
+  // /cancel — abort any pending link/verify flow
+  if (text === "/cancel" || text.startsWith("/cancel@")) {
+    await replyToChat(
+      telegramChatId,
+      "✅ Canceled. No account was linked. Use /link <id> to start again if needed.",
+    );
     return NextResponse.json({ ok: true });
   }
 
