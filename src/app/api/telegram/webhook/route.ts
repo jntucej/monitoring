@@ -29,10 +29,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { query, withTransaction, getTelegramPool } from "@/lib/postgres";
+import { query, withTransaction, getTelegramPool, getPostgresPool } from "@/lib/postgres";
 import { hashDeepLinkToken } from "@/lib/telegram-deep-link";
 import { addAudit } from "@/lib/db";
 import { compare } from "@/server/lib/crypto";
+import { executeBotCommand, getRoleCommands, type BotContext } from "@/lib/bot-commands";
 import type { Pool, PoolClient } from "pg";
 
 /**
@@ -449,18 +450,29 @@ export async function POST(req: NextRequest): Promise<Response> {
   // ── Step 3: Slash Commands ──────────────────────────────────────────────
   const text = (message.text ?? "").trim();
 
-  // /help — reply with available commands
+  // /help — role-aware commands
   if (text === "/help" || text.startsWith("/help@")) {
+    // Look up the user's role to show relevant commands
+    const { rows: helpUserRows } = await query<{ role: string; name: string }>(
+      `SELECT role, name FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+    const role = helpUserRows[0]?.role ?? "guest";
+    const name = helpUserRows[0]?.name ?? "User";
+
+    const cmds = getRoleCommands(role);
+    const cmdList = cmds.map((c) => `• ${c.cmd} — ${c.desc}`).join("\n");
+
     await replyToChat(
       telegramChatId,
-      "🤖 *Gate Monitor Assistant*\n\n" +
-        "Commands:\n" +
-        "• `/status` — Your account, onboarding and resource status\n" +
-        "• `/link <id>` — Link this chat to your account (needs a pending code)\n" +
-        "• `/verify <code>` — Verify with your 6-digit code\n" +
-        "• `/cancel` — Abort a pending link/verify flow\n" +
-        "• `/help` — Show this help\n\n" +
-        "Each account gets its own resource view. Your data stays yours.",
+      `🤖 *Gate Monitor Assistant*\n\n` +
+        `Hi ${name}, you're linked as a *${role.toUpperCase().replace("_", " ")}*.\n\n` +
+        `Your commands:\n${cmdList}\n\n` +
+        `System commands:\n` +
+        `• /link <id> — Link this chat to your account\n` +
+        `• /verify <code> — Verify with your 6-digit code\n` +
+        `• /cancel — Abort a pending flow\n\n` +
+        `Each command shows only YOUR data. No cross-role leakage.`,
     );
     return NextResponse.json({ ok: true });
   }
@@ -744,6 +756,62 @@ export async function POST(req: NextRequest): Promise<Response> {
       `✅ ${roll} linked to this chat.\nSend \`/verify <code>\` with your 6-digit code to complete verification.`,
     );
 
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Role-based resource commands ──────────────────────────────────────
+  // Dispatch /passes, /curfew, /alerts, /complaint, /announce, /attendance,
+  // /students, /schedule, /shifts, /gates, /occupancy, /campus, /users,
+  // /complaints, /bot, /child, /dept based on the user's role.
+  const roleCmds = ["passes","curfew","alerts","complaint","announce","attendance",
+    "students","schedule","shifts","gates","occupancy","campus","users","complaints",
+    "bot","child","dept"];
+  const roleCmd = text.split(/\s+/)[0].replace("/","").replace("@cej_server_bot","").toLowerCase();
+
+  if (roleCmds.includes(roleCmd)) {
+    // Look up the user's role by telegram_chat_id
+    const { rows: roleUserRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+      `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+
+    if (roleUserRows.length === 0) {
+      await replyToChat(
+        telegramChatId,
+        `Account not linked. Use /link <id> first to associate your account, then try /${roleCmd}.`,
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    const user = roleUserRows[0];
+
+    // Execute the role-scoped command with a transaction
+    let result: string;
+    try {
+      const pool = await getPostgresPool();
+      const client = await pool.connect();
+      try {
+        await client.query("SET ROLE gate_app");
+        const ctx: BotContext = {
+          chatId: telegramChatId,
+          userId: user.id,
+          uniqueId: user.unique_id,
+          name: user.name,
+          role: user.role,
+          status: user.status,
+          client,
+        };
+        result = await executeBotCommand(ctx, text);
+      } finally {
+        await client.query("RESET ROLE").catch(() => undefined);
+        client.release();
+      }
+    } catch (err) {
+      console.error(`[Bot] /${roleCmd} error:`, err);
+      result = "⚠️ Something went wrong. Please try again later.";
+    }
+
+    await replyToChat(telegramChatId, result);
     return NextResponse.json({ ok: true });
   }
 
