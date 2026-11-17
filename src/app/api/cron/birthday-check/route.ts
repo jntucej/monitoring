@@ -10,6 +10,7 @@
 import { errMsg } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
+import { randomUUID } from "crypto";
 import { query } from "@/lib/postgres";
 
 export async function POST(req: NextRequest) {
@@ -47,16 +48,17 @@ export async function POST(req: NextRequest) {
     for (const u of bdayUsers) {
       // 1. In-app notification (the "for him only" part: recipient is
       //    the user themselves, not a role/broadcast).
+      const notifId = randomUUID();
       const ins = await query<{ id: string }>(
         `INSERT INTO public.notifications
-           (type, priority, title, message, recipient_id, recipient_type, channels, data)
+           (id, type, priority, title, message, recipient_id, recipient_type, channels, data)
          VALUES
-           ('birthday', 'low',
+           ($3, 'birthday', 'low',
             '🎂 Happy Birthday, ${u.name}!',
             'Wishing you a wonderful birthday and a great year ahead. — JNTUH CEJ',
             $1, 'user', ARRAY['in_app'], $2)
          RETURNING id`,
-        [u.id, JSON.stringify({ birthday: true, year, dobMonthDay: monthDay })],
+        [u.id, JSON.stringify({ birthday: true, year, dobMonthDay: monthDay }), notifId],
       );
       // Record the celebration (once per year).
       await query(

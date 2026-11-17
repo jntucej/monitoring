@@ -25,20 +25,25 @@ export async function POST(req: NextRequest) {
   try {
     // Unmatched scans: gate_logs rows where verify_mode_details shows a
     // mismatch / no-match in the last 15 minutes and no resolution yet.
+    // The live gate log table is movement_logs. Unmatched/unsure scans are
+    // the manual entries (is_manual = TRUE) in the last 15 minutes — the
+    // operator already fell back to a manual record, which is exactly the
+    // case the reconciliation agent resolves.
     const { rows } = await query<{
       gate_log_id: string;
       gate_id: string;
-      unique_id_attempted: string;
+      unique_id_attempted: string | null;
       timestamp_local: string;
     }>(
-      `SELECT id::text AS gate_log_id, gate_id,
-              (meta->>'unique_id_attempted') AS unique_id_attempted,
-              timestamp_local
-         FROM public.gate_logs
-        WHERE direction = 'OUT'
-          AND verify_mode_details LIKE '%mismatch%'
-          AND timestamp_local > now() - INTERVAL '15 minutes'
-        ORDER BY timestamp_local DESC
+      `SELECT ml.id::text AS gate_log_id,
+              ml.gate_id::text AS gate_id,
+              u.unique_id AS unique_id_attempted,
+              to_char(ml.timestamp, 'YYYY-MM-DD HH24:MI') AS timestamp_local
+         FROM public.movement_logs ml
+         LEFT JOIN public.users u ON u.id = ml.user_id
+        WHERE ml.is_manual = TRUE
+          AND ml.timestamp > now() - INTERVAL '15 minutes'
+        ORDER BY ml.timestamp DESC
         LIMIT 50`,
     );
 
@@ -55,7 +60,7 @@ export async function POST(req: NextRequest) {
               LIMIT 1`,
             [scan.unique_id_attempted],
           )
-        : { rows: [] };
+        : { rows: [] }; // no roll captured → operator prompt
 
       if (users.length > 0 && !users[0].flag_status) {
         // Auto-match: record the resolution (agent actor).

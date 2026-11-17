@@ -11,7 +11,7 @@
 import { errMsg } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
-import { sign as cryptoSign, verify, generateKeyPairSync } from "crypto";
+import { sign as cryptoSign, createPrivateKey, createPublicKey, generateKeyPairSync } from "crypto";
 import { query } from "@/lib/postgres";
 import { recordMutationAudit } from "@/middleware/entityAuthorization";
 
@@ -19,32 +19,27 @@ import { recordMutationAudit } from "@/middleware/entityAuthorization";
 // private key lives in a KMS / env var; the public key is distributed to
 // gate verifiers. For this build we generate a keypair on first run and
 // store it in exam_eligibility_keys (Phase 2 migrates to KMS).
-async function getExamKeyPair() {
+async function getExamKeyPair(): Promise<{ publicKey: string; privateKey: string }> {
   await query(`CREATE TABLE IF NOT EXISTS public.exam_eligibility_keys (
     id SERIAL PRIMARY KEY,
     public_key TEXT NOT NULL,
     private_key TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   );`);
-  const { rows } = await query<{ public_key: string }>(
-    `SELECT public_key FROM public.exam_eligibility_keys ORDER BY id DESC LIMIT 1`);
-  if (rows.length > 0) return { publicKey: rows[0].public_key };
-  // Generate a fresh Ed25519 keypair (private side kept in the DB for
-  // Phase 1; Phase 2 moves it to a KMS and the gate only gets the public key).
-  const { publicKey, privateKey } = generateEd25519();
+  const { rows } = await query<{ public_key: string; private_key: string | null }>(
+    `SELECT public_key, private_key FROM public.exam_eligibility_keys ORDER BY id DESC LIMIT 1`);
+  if (rows.length > 0 && rows[0].private_key) {
+    return { publicKey: rows[0].public_key, privateKey: rows[0].private_key };
+  }
+  // Generate a fresh Ed25519 keypair; store both sides in the DB for Phase 1.
+  const pair = generateKeyPairSync("ed25519");
+  const publicKey = pair.publicKey.export({ type: "spki", format: "der" }).toString("base64");
+  const privateKey = pair.privateKey.export({ type: "pkcs8", format: "der" }).toString("base64");
   await query(
     `INSERT INTO public.exam_eligibility_keys (public_key, private_key) VALUES ($1, $2)`,
     [publicKey, privateKey],
   );
-  return { publicKey };
-}
-
-function generateEd25519(): { publicKey: string; privateKey: string } {
-  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
-  return {
-    publicKey: publicKey.export({ type: "spki", format: "der" }).toString("base64"),
-    privateKey: privateKey.export({ type: "pkcs8", format: "der" }).toString("base64"),
-  };
+  return { publicKey, privateKey };
 }
 
 export async function POST(req: NextRequest) {
@@ -93,10 +88,12 @@ export async function POST(req: NextRequest) {
     // Sign the manifest (Ed25519, via crypto.sign(null, ...) which selects the
     // algorithm from the key type).
     const payload = JSON.stringify({ manifest, rules: r, generatedAt: new Date().toISOString() });
-    const { publicKey } = await getExamKeyPair();
-    const privRes = await query<{ private_key: string }>(
-      `SELECT private_key FROM public.exam_eligibility_keys WHERE private_key IS NOT NULL ORDER BY id DESC LIMIT 1`);
-    const sigKey = Buffer.from(privRes.rows[0]?.private_key ?? publicKey, "base64");
+    const { publicKey, privateKey } = await getExamKeyPair();
+    const sigKey = createPrivateKey({
+      key: Buffer.from(privateKey, "base64"),
+      format: "der",
+      type: "pkcs8",
+    });
     const signature = cryptoSign(null, Buffer.from(payload), sigKey).toString("base64");
 
     await query(
