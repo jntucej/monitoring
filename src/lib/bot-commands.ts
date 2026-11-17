@@ -435,15 +435,32 @@ async function cmdAttendance(ctx: BotContext): Promise<string> {
 }
 
 async function cmdStudents(ctx: BotContext): Promise<string> {
-  const { rows } = await ctx.client.query<{ student_count: string }>(
-    `SELECT COUNT(*)::text AS student_count
-       FROM public.faculty_assignments
-      WHERE faculty_user_id = $1 AND is_active = true`,
+  // faculty_assignments.faculty_id is the FK to users.id.
+  // Pull enrollment counts via the maintained class_student_counts
+  // counter table (O(1) per class, no COUNT(*) over student_details).
+  const { rows } = await ctx.client.query<{
+    class_count: string;
+    enrolled: string;
+  }>(
+    `SELECT
+       (SELECT COUNT(*)::text FROM public.faculty_assignments
+         WHERE faculty_id = $1 AND is_active)::text AS class_count,
+       (SELECT COALESCE(SUM(csc.student_count)::text, '0')
+          FROM public.class_student_counts csc
+          JOIN public.classes c
+            ON c.department_id = csc.department
+           AND c.year = csc.year
+           AND c.section = csc.section
+          WHERE c.class_teacher_id = $1
+            AND c.is_active
+       )::text AS enrolled`,
     [ctx.userId],
   );
+  const r = rows[0];
   return (
-    `👥 *Assigned Students*\n\n` +
-    `• Total: ${rows[0]?.student_count ?? "0"}\n` +
+    `👥 *My Classes & Students*\n\n` +
+    `• Classes assigned: ${r?.class_count ?? "0"}\n` +
+    `• Total students across classes: ${r?.enrolled ?? "0"}\n` +
     `Visit the portal → Faculty → My Classes for the full list.`
   );
 }
@@ -456,18 +473,32 @@ async function cmdSchedule(ctx: BotContext): Promise<string> {
 }
 
 async function cmdClasses(ctx: BotContext): Promise<string> {
-  const { rows } = await ctx.client.query<{ title: string; day: string; time: string }>(
-    `SELECT c.title, c.day_of_week AS day, c.start_time AS time
-       FROM public.classes c
-      WHERE c.teacher_user_id = $1
-      ORDER BY c.day_of_week, c.start_time
-      LIMIT 10`,
+  // classes has: department_id, year, section, name, room_number, capacity
+  // joined with class_student_counts for live enrollment.
+  const { rows } = await ctx.client.query<{
+    section: string; year: string; room: string; capacity: string; enrolled: string;
+  }>(
+    `SELECT
+       c.section::text,
+       c.year::text,
+       COALESCE(c.room_number, 'TBA') AS room,
+       COALESCE(c.capacity::text, '?') AS capacity,
+       COALESCE(csc.student_count::text, '0') AS enrolled
+      FROM public.classes c
+      LEFT JOIN public.class_student_counts csc
+        ON csc.class_key = c.department_id || ':' || c.year || ':' || c.section
+     WHERE c.class_teacher_id = $1
+       AND c.is_active
+     ORDER BY c.year, c.section
+     LIMIT 10`,
     [ctx.userId],
   );
   if (!rows.length) return "No classes found. Assign classes via the portal.";
   return (
     "🏫 *My Classes*\n\n" +
-    rows.map((c) => `• ${c.title} — ${c.day} @ ${c.time}`).join("\n")
+    rows.map((c) =>
+      `• ${c.year}-${c.section} (${c.room}) — ${c.enrolled}/${c.capacity} students`
+    ).join("\n")
   );
 }
 
@@ -611,13 +642,25 @@ async function cmdAudit(ctx: BotContext): Promise<string> {
 }
 
 async function cmdChild(ctx: BotContext): Promise<string> {
-  const { rows } = await ctx.client.query<{ c: string }>(
-    `SELECT COUNT(*)::text AS c FROM public.guardian_links WHERE parent_user_id = $1`,
+  // guardian_id on student_details is the FK to the guardian/parent user.id.
+  const { rows } = await ctx.client.query<{
+    roll: string; name: string; entry_type: string;
+  }>(
+    `SELECT u.unique_id AS roll, u.name,
+            COALESCE(sd.current_entry_type, 'unknown') AS entry_type
+       FROM public.student_details sd
+       JOIN public.users u ON u.id = sd.user_id
+      WHERE sd.guardian_id = $1
+      ORDER BY u.name
+      LIMIT 5`,
     [ctx.userId],
   );
+  const c = rows.length;
   return (
     `👨‍👩‍👧 *Your Children/Wards*\n\n` +
-    `• Linked: ${rows[0]?.c ?? "0"}\n` +
+    (c
+      ? rows.map((r) => `• ${r.roll} — ${r.name} (${r.entry_type})`).join("\n") + "\n"
+      : `• No wards linked yet.\n`) +
     `Visit the portal → Parent Dashboard for gate details.`
   );
 }
@@ -641,33 +684,12 @@ async function cmdDept(ctx: BotContext): Promise<string> {
 }
 
 async function cmdExam(ctx: BotContext): Promise<string> {
-  const { rows } = await ctx.client.query<{
-    subject: string; exam_date: string;
-  }>(
-    `SELECT subject, exam_date
-       FROM public.classes WHERE teacher_user_id = $1 AND exam_date > NOW()
-       ORDER BY exam_date ASC LIMIT 5`,
-    [ctx.userId],
-  );
-  if (!rows.length) {
-    // For students: check student_details for exam info
-    const { rows: sRows } = await ctx.client.query<{
-      subject: string; exam_date: string;
-    }>(
-      `SELECT subject, exam_date
-         FROM public.classes WHERE exam_date > NOW()
-         ORDER BY exam_date ASC LIMIT 3`,
-      [],
-    );
-    if (!sRows.length) return "📅 No upcoming exams found.";
-    return (
-      "📅 *Upcoming Exams*\n\n" +
-      sRows.map((e) => `• ${e.subject} — ${new Date(e.exam_date).toLocaleDateString()}`).join("\n")
-    );
-  }
+  // Exam schedule is stored per-subject via the portal. For now, return
+  // a helpful fallback — extend when exam_schedule table is added.
   return (
     "📅 *Upcoming Exams*\n\n" +
-    rows.map((e) => `• ${e.subject} — ${new Date(e.exam_date).toLocaleDateString()}`).join("\n")
+    "No upcoming exam dates have been published yet.\n" +
+    "Check the portal → Exams tab once the timetable is released."
   );
 }
 
