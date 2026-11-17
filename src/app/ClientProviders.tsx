@@ -27,46 +27,46 @@ const FloatingBot = dynamic(
 // ── Sakuga VFX theme loader ─────────────────────────────────────
 // Female students get the anime-VFX theme by default (ui_theme='sakuga'
 // in personalization_prefs). The theme is applied as a data attribute on
-// <html> BEFORE any UI renders, so there is no flash of the graphite theme.
-// The sakuga-vfx components are loaded lazily via dynamic import; the
-// CSS palette override in globals.css [data-theme="sakuga"] handles the
-// rest of the app without touching the component files.
-async function loadSakugaTheme() {
-  const token = sessionStorage.getItem("auth.token");
-  if (!token) return;
-  try {
-    const res = await fetch("/api/preferences/theme", {
+// <html> AFTER login, when the token exists.
+//
+// The fetch + DOM mutation happens in a useEffect that re-runs on every
+// ClientProviders mount (including post-login navigation). The CSS palette
+// override in globals.css [data-theme="sakuga"] handles the color swap;
+// the sakuga-vfx component scripts are progressive enhancement.
+function useSakugaTheme() {
+  const authenticated = useAuthStore((s) => s.authenticated);
+  useEffect(() => {
+    if (!authenticated) return;
+    let cancelled = false;
+    const token = sessionStorage.getItem("auth.token");
+    if (!token) return;
+    fetch("/api/preferences/theme", {
       headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.ui_theme === "sakuga") {
-      document.documentElement.setAttribute("data-theme", "sakuga");
-      // Load the sakuga-vfx components (button, checkbox, radio, toggle)
-      // as plain scripts (not modules). Each registers its own custom
-      // element; the first one sets window.SakugaFX.
-      for (const name of ["button", "checkbox", "radio", "toggle"]) {
-        const s = document.createElement("script");
-        s.src = `/sakuga-vfx/${name}.js`;
-        s.async = false; // load in order — the core must stamp first
-        document.head.appendChild(s);
-      }
-    }
-  } catch {
-    // Silent: theme load failure falls back to graphite.
-  }
-}
-
-// Fire-and-forget on module load; the data-theme attribute is set before
-// the first React render completes. No re-render needed — CSS vars handle
-// the color swap; the JS components are progressive enhancement.
-if (typeof window !== "undefined") {
-  loadSakugaTheme();
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data || data.ui_theme !== "sakuga") return;
+        document.documentElement.setAttribute("data-theme", "sakuga");
+        // Load sakuga-vfx components in order (button → checkbox → radio → toggle).
+        // Each registers its own custom element; the first sets window.SakugaFX.
+        for (const name of ["button", "checkbox", "radio", "toggle"]) {
+          const s = document.createElement("script");
+          s.src = `/sakuga-vfx/${name}.js`;
+          s.async = false;
+          document.head.appendChild(s);
+        }
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [authenticated]);
 }
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const setHasHydrated = useAuthStore((s) => s.setHasHydrated);
+
+  // Sakuga VFX theme: applied after auth, on every mount.
+  useSakugaTheme();
 
   // Ensure the persist store has rehydrated from localStorage. If the
   // rehydrate path did not flip _hasHydrated (e.g. storage blocked, or
