@@ -213,7 +213,7 @@ GRANT UPDATE (marks) ON marks TO addl_controller_academic_role;
 This is the separation-of-duties control at the database layer.
 
 ### 2.2 — Split hostel roles
-- `chief_warden` → bound to Principal's user, entity scope = all hostel blocks
+- `chief_warden` → role context on the Principal's user (not a separate account), entity scope = all hostel blocks
 - `hostel_manager` → one per college/unit, entity scope = all blocks under that unit
 - `deputy_warden` → one per block, entity scope = single block (BOYS_A, BOYS_B, GIRLS_A, GIRLS_B)
 - `mess_incharge` → entity scope = MESS_MAIN
@@ -333,7 +333,7 @@ supervisor with a reason. Supervisor override writes an
 
 **Critical control:** menu change above a cost threshold requires Mess
 Committee approval. The API checks `menu_item.cost_delta > threshold` →
-creates `pending_approvals` row → `chief_warden` approves.
+creates `pending_approvals` row → Principal (warden context) approves.
 
 ### 3.6 — Exam branch operations
 
@@ -518,7 +518,7 @@ for slot in yesterday_meal_slots():
         block_service_window(next_slot, reason="LEDGER_MISMATCH")
 ```
 Blocking a service window is the agent's strongest authority — and even
-that is reversible by `mess_incharge` or `chief_warden`.
+that is reversible by `mess_incharge` or the Principal (warden context).
 
 ### 5.5 — Third agent: complaint triage
 ```python

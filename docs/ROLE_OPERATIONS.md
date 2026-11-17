@@ -2110,7 +2110,7 @@ All of it is live on gate_monitor; migrations 20270114–20270117 applied.
 | Role | JNTUH CEJ desk | Primary new surface |
 |---|---|---|
 | `dean` | Associate Dean (Academics / Student Affairs) | two-person approver, /api/academic-status/pending |
-| `chief_warden` | Chief Warden (= Principal by convention) | /api/hostel-manager/incidents/[id]/escalate, menu-committee approvals |
+| `chief_warden` | Role context for the Principal when acting on hostel matters (not a separate account) | /api/hostel-manager/incidents/[id]/escalate, menu-committee approvals |
 | `controller_examinations` | Controller of Examinations | /api/exam/results/publish, eligibility-rules owner |
 | `addl_controller_academic` | Addl. Controller (Academic) | /api/faculty/marks/correct (only role that may fix locked marks) |
 | `addl_controller_results` | Addl. Controller (Results) | /api/exam/results/process — processes, never publishes |

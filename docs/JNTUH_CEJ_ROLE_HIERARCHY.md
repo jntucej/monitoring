@@ -56,7 +56,7 @@ with audit reason.
 
 | Role key | JNTUH CEJ entity | Operations |
 |---|---|---|
-| `chief_warden` (maps to `principal`) | Chief Warden = Principal | Overall hostel administration; approves hostel committee decisions; final hostel discipline authority; hostel budget oversight; logs decisions under chief_warden role context for separate audit |
+| `chief_warden` (= Principal) | Chief Warden is the Principal — one person, not a separate account. `chief_warden` is a **role context**: when the Principal acts on hostel matters, the audit trail logs `role_context='chief_warden'` so hostel actions are auditable separately from general principal actions. No distinct user carries this role; the `principal` user already holds warden authority. | Overall hostel administration; approves hostel committee decisions; final hostel discipline authority; hostel budget oversight; decisions logged under the chief_warden role context |
 | `hostel_manager` | Hostel Manager (teaching faculty in-charge, one per college/unit) | Room allotment; day-to-day mess facilities; supervises Deputy Wardens; hostel inventory; block-level occupancy |
 | `deputy_warden` | Deputy Warden (one per hostel block — 2 boys + 2 girls) | Block-level curfew verification; night attendance reconciliation; room vacate/allot within block; incident log; visitor log for that block; mess rule violation reporting |
 | `mess_incharge` | Warden (Mess) / Mess Committee operational lead | Menu finalization with Mess Committee; token issuance; consumption vs inventory reconciliation; vendor/contractor compliance; mess bill verification; rebate ledger |
@@ -113,9 +113,11 @@ Late corrections route through Addl. Controller (Academic) with audit reason.
 4. **Mess Committee review gate** — mess_incharge changes a menu item, but a
    change above the defined cost/calorie threshold requires Mess Committee
    approval, recorded in the system.
-5. **Chief Warden = Principal, distinct context** — hostel discipline
-   decisions are logged under the `chief_warden` role context so hostel
-   actions are auditable separately from general principal actions.
+5. **Chief Warden = Principal (one person, role context only)** — when the
+   Principal acts on hostel matters, the audit trail logs
+   `role_context='chief_warden'` so hostel actions are auditable
+   separately from general principal actions. No distinct warden
+   account exists or should be created.
 6. **Two-person rule for DEBARRED and SUSPENDED** — HOD flags → Dean
    (Academics) or Principal approves. A single HOD cannot debar
    unilaterally.

@@ -30,7 +30,7 @@ reliably detect and classify.
    Addl. Controller Automation) is non-negotiable — JNTUH CEJ's
    autonomous status means it runs its own exams, and the current single
    `exam_branch` role cannot enforce separation between marks entry and
-   result processing. The hostel chain — `chief_warden` (Principal) →
+   result processing. The hostel chain — Principal (acting as Chief Warden, role context only) →
    `hostel_manager` → `deputy_warden` (block-scoped) — must be wired to
    the gate so a student's pass is valid only when Deputy Warden approval
    and parent acknowledgement both exist. Without this, the gate remains
@@ -175,7 +175,7 @@ authority and the agents execute inside those boundaries continuously.
    - HOD agent: pre-screens academic-status flags with a blast-radius
      report before the HOD commits anything.
    - Deputy Warden agent: runs nightly curfew reconciliation and
-     prepares incident summaries for the Chief Warden.
+     prepares incident summaries for the Principal (warden context).
 
 2. **Bring Your Own Agent becomes a governance question, not a
    technical one.** The Jisc roundtable identifies this as the next
