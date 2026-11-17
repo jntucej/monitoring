@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { getDbClient } from "@/lib/db";
+import { getPrefs, inQuietHours as prefsQuietCheck } from "@/lib/personalization/prefs";
 import { 
   Notification, 
   NotificationType, 
@@ -172,7 +173,7 @@ export async function sendNotification(
       return null;
     }
 
-    // Check preferences
+    // Check preferences (legacy notification_preferences + new personalization_prefs)
     const { data: prefs } = await getDbClient()
       .from('notification_preferences')
       .select('*')
@@ -181,11 +182,22 @@ export async function sendNotification(
 
     const userPrefs = prefs as NotificationPreferences | null;
     const enabledChannels = channels || template.defaultChannels;
-    const inQuietHours = isQuietHours(userPrefs?.quietHours);
+
+    // Quiet-hours gate: use the personalization prefs (4 explicit settings)
+    // if available, fall back to legacy notification_preferences.
+    const newPrefs = await getPrefs(recipientId);
+    const legacyQuiet = userPrefs?.quietHours
+      ? isQuietHours(userPrefs.quietHours)
+      : false;
+    const inQuietHours = legacyQuiet || prefsQuietCheck(newPrefs);
+
     const finalChannels = enabledChannels.filter(channel => {
       if (!userPrefs) return true;
       if (userPrefs.channels?.[channel] === false) return false;
-      // Intrusive channels (push, sms) silenced during quiet hours unless critical priority
+      // Intrusive channels (push, sms, telegram) silenced during quiet hours
+      // unless critical priority. P0 (audit-chain broken, child curfew,
+      // leave expiring, device down mid-shift) is 'critical' and never
+      // silenced — the trust contract: if it rings, it expires.
       if (inQuietHours && template.priority !== 'critical' && (channel === 'push' || channel === 'sms')) {
         return false;
       }

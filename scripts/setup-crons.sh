@@ -168,6 +168,12 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # preview line; one next-morning reminder max.
 0 19 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/faculty-review >> /var/log/gate-cron.log 2>&1
+
+# Class-message relay fan-out (operator scope) — every 5 min: auto-releases
+# relay-mode class messages whose 30-min timer has expired; fans out to
+# students + creates receipt rows.
+*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/class-message-release >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

@@ -83,6 +83,8 @@ interface TelegramUpdate {
   update_id?: number;
   message?: {
     text?: string;
+    document?: { file_id?: string; file_name?: string; file_size?: number };
+    photo?: Array<{ file_id?: string }>;
     contact?: TelegramContact;
     from?: { id?: number; username?: string };
     chat?: { id?: number };
@@ -207,6 +209,14 @@ async function replyToChat(chatId: number, text: string, requestContact = false)
 function normalizePhone(p: string): string {
   return p.replace(/[^\d]/g, "");
 }
+
+// Module-scoped: pending CSV upload confirmations (draftId → parsed flags).
+// Single-instance Next.js server — safe for in-memory session state.
+const _registerUploads = new Map<string, {
+  flags: Record<string, boolean>;
+  userId: string;
+  userName: string;
+}>();
 
 export async function POST(req: NextRequest): Promise<Response> {
   const denied = verifyTelegramSecret(req);
@@ -865,6 +875,74 @@ export async function POST(req: NextRequest): Promise<Response> {
       return NextResponse.json({ ok: true });
     }
 
+    // CSV upload confirm/cancel (regup:<draftId>:<action>)
+    if (callbackData.startsWith("regup:")) {
+      const upMatch = callbackData.match(/^regup:([^:]+):(confirm|cancel)$/);
+      if (upMatch) {
+        const draftId = upMatch[1];
+        const action = upMatch[2];
+        const pending = _registerUploads.get(draftId);
+        if (pending && action === "confirm") {
+          const { rows: upUserRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+            `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+            [telegramChatId],
+          );
+          const upUser = upUserRows[0];
+          if (upUser) {
+            const pool = await getPostgresPool();
+            const client = await pool.connect();
+            try {
+              await client.query("SET ROLE gate_app");
+              const ctx: BotContext = {
+                chatId: telegramChatId,
+                userId: upUser.id,
+                uniqueId: upUser.unique_id,
+                name: upUser.name,
+                role: upUser.role,
+                status: upUser.status,
+                client,
+              };
+              const { submitRegister } = await import("@/lib/register");
+              const summary = await submitRegister(ctx.client, {
+                draftId,
+                actorId: pending.userId,
+                actorName: pending.userName,
+                presentFlags: pending.flags,
+                supersede: true,
+                reason: "faculty_csv_upload",
+              });
+              await sendTelegramMessage(
+                telegramChatId,
+                `Upload confirmed - ${summary.classCode} P${summary.periodNo}\n` +
+                  `Total ${summary.total} / Present ${summary.present} / Absent ${summary.absent}\n` +
+                  (summary.absentRolls.length ? `Absent: ${summary.absentRolls.join(", ")}` : "All present") +
+                  `\nSupersedes the CR's submission. CR/ICR notified.`,
+                { parseMode: "Markdown" },
+              ).catch(() => undefined);
+              _registerUploads.delete(draftId);
+            } finally {
+              await client.query("RESET ROLE").catch(() => undefined);
+              client.release();
+            }
+          }
+        } else {
+          _registerUploads.delete(draftId);
+          await replyToChat(telegramChatId, "Upload cancelled.");
+        }
+        // answer the callback
+        const token = process.env.TELEGRAM_BOT_TOKEN;
+        if (token && callbackQuery?.id) {
+          await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ callback_query_id: callbackQuery.id }),
+            signal: AbortSignal.timeout(5000),
+          }).catch(() => undefined);
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     const parsed = parseMenuCallback(callbackData);
     if (parsed) {
       const { role, cmd } = parsed;
@@ -973,6 +1051,135 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
 
     await replyToChat(telegramChatId, result);
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Document upload: CSV register / photo evidence ─────────────────────
+  const docFileId = message?.document?.file_id;
+  const docFileName = message?.document?.file_name ?? "";
+  if (docFileId && telegramChatId) {
+    // Pending upload confirmations: draftId → parsed flags
+    const registerUploadSessions = new Map<string, {
+      draftId: string; userId: string; userName: string;
+      presentFlags: Record<string, boolean>;
+    }>();
+    void registerUploadSessions; // module-level would be better; in-function for now
+
+    // Is there an open draft for this user's class?
+    const { rows: userRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+      `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+    const user = userRows[0];
+    if (user) {
+      const { rows: openDrafts } = await query<{ id: string; class_id: string; period_no: number; session_date: string; status: string }>(
+        `SELECT id, class_id, period_no, session_date, status
+           FROM public.class_register_drafts
+          WHERE opened_by = $1 AND status = 'open'
+          ORDER BY opened_at DESC LIMIT 1`,
+        [user.id],
+      );
+      const draft = openDrafts[0];
+      if (draft) {
+        const isCsv = /\.csv$/i.test(docFileName);
+        if (isCsv) {
+          // Download the CSV via the Telegram Bot API
+          const token = process.env.TELEGRAM_BOT_TOKEN;
+          let csvText = "";
+          if (token) {
+            try {
+              const fileInfo = await (
+                await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(docFileId)}`)
+              ).json();
+              if (fileInfo.ok && fileInfo.result?.file_path) {
+                const fileBuf = await (
+                  await fetch(`https://api.telegram.org/file/bot${token}/${fileInfo.result.file_path}`)
+                ).arrayBuffer();
+                csvText = Buffer.from(fileBuf).toString("utf-8");
+              }
+            } catch { /* download failed */ }
+          }
+          if (!csvText) {
+            await replyToChat(telegramChatId, "Could not download the CSV from Telegram. Try again or use the /register keyboard instead.");
+            return NextResponse.json({ ok: true });
+          }
+          const { rows: classRows } = await query<{ name: string }>(
+            `SELECT name FROM public.classes WHERE id = $1`,
+            [draft.class_id],
+          );
+          const { rows: rollRows } = await query<{ roll: string }>(
+            `SELECT sd.roll FROM public.student_details sd
+               JOIN public.users u ON u.id = sd.user_id
+              WHERE u.status = 'ACTIVE'
+                AND sd.roll IS NOT NULL
+                AND u.department_id = (SELECT department_id FROM public.classes WHERE id = $1)
+              ORDER BY sd.roll`,
+            [draft.class_id],
+          );
+          const rolls = rollRows.map((r) => r.roll);
+          const { validateCsv, submitRegister } = await import("@/lib/register");
+          const { rows: crSubmits } = await query<{ present_flags: string | null }>(
+            `SELECT present_flags::text FROM public.class_register_drafts
+              WHERE class_id = $1 AND session_date = $2 AND period_no = $3
+                AND status = 'submitted'
+              ORDER BY submitted_at DESC LIMIT 1`,
+            [draft.class_id, draft.session_date, draft.period_no],
+          );
+          const existingFlags: Record<string, boolean> = {};
+          if (crSubmits[0]?.present_flags) {
+            try {
+              const parsed = JSON.parse(crSubmits[0].present_flags);
+              for (const [k, v] of Object.entries(parsed)) existingFlags[k] = !!v;
+            } catch { /* malformed */ }
+          }
+          const validation = validateCsv(csvText, { rolls }, { presentFlags: existingFlags });
+          if (!validation.ok) {
+            await replyToChat(
+              telegramChatId,
+              "CSV validation failed:\n" + validation.errors.join("\n") + "\nFix and re-send.",
+            );
+            return NextResponse.json({ ok: true });
+          }
+          const deltaLines = validation.deltaAgainst && validation.deltaAgainst.length
+            ? `\nDiffers from CR's submit on ${validation.deltaAgainst.length}:\n` +
+              validation.deltaAgainst.slice(0, 10).map((d) => `  ${d.roll}: ${d.from} -> ${d.to}`).join("\n")
+            : "";
+          await sendTelegramMessage(
+            telegramChatId,
+            `Upload preview - P${draft.period_no} ${classRows[0]?.name ?? ""}\n` +
+              `${validation.present ?? 0} present / ${validation.absent ?? 0} absent` +
+              deltaLines +
+              "\nTap confirm to supersede the CR's submission.",
+            {
+              parseMode: "Markdown",
+              replyMarkup: {
+                inline_keyboard: [
+                  [
+                    { text: "Confirm upload", callback_data: `regup:${draft.id}:confirm` },
+                    { text: "Cancel", callback_data: `regup:${draft.id}:cancel` },
+                  ],
+                ],
+              },
+            },
+          ).catch(() => undefined);
+          // Stash for the confirm callback (module-scoped Map)
+          const flags: Record<string, boolean> = {};
+          for (const r of rolls) flags[r] = !(validation.absentRolls ?? []).includes(r);
+          _registerUploads.set(draft.id, { flags, userId: user.id, userName: user.name });
+        } else {
+          // Photo evidence: attach to the draft's audit row (not parsed)
+          await query(
+            `INSERT INTO public.audit_events
+               (actor_id, actor_type, role_context, action, resource, resource_id, after_state)
+             VALUES ($1, 'user', 'faculty', 'attendance_photo_evidence', 'class_register_drafts', $2, $3)`,
+            [user.id, draft.id, JSON.stringify({ file_name: docFileName, file_id: docFileId })],
+          ).catch(() => undefined);
+          await replyToChat(telegramChatId, `Photo attached to P${draft.period_no} as evidence. Not parsed - stored in the audit chain.`);
+        }
+      } else {
+        await replyToChat(telegramChatId, "No open register for your class. Run /register first, then upload.");
+      }
+    }
     return NextResponse.json({ ok: true });
   }
 
