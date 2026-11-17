@@ -497,12 +497,19 @@ export async function POST(req: NextRequest): Promise<Response> {
       name: string;
       role: string;
       status: string;
+      flag_status: string | null;
       onboarded_at: string | null;
       telegram_verified_at: string | null;
+      academic_status: string | null;
+      effective_year: number | null;
     }>(
-      `SELECT unique_id, name, role, status, onboarded_at, telegram_verified_at
-         FROM public.users
-        WHERE telegram_chat_id = $1
+      `SELECT u.unique_id, u.name, u.role, u.status, u.flag_status,
+              u.onboarded_at, u.telegram_verified_at,
+              sd.academic_status,
+              COALESCE(sd.year_override, sd.year) AS effective_year
+         FROM public.users u
+         LEFT JOIN public.student_details sd ON sd.user_id = u.id
+        WHERE u.telegram_chat_id = $1
         LIMIT 1`,
       [telegramChatId],
     );
@@ -524,16 +531,21 @@ export async function POST(req: NextRequest): Promise<Response> {
       : "Not verified";
     const roleLabel = u.role.toUpperCase().replace("_", " ");
 
+    let statusMsg =
+      `📋 *Account Status — ${roleLabel}*\n\n` +
+      `• ID: ${u.unique_id}\n` +
+      `• Name: ${u.name}\n` +
+      `• Role: ${roleLabel}\n` +
+      `• Account: ${u.status}\n` +
+      `• Onboarding: ${onboardedStr}\n` +
+      `• Telegram: ${verifiedStr}\n` +
+      (u.academic_status ? `• Academic: ${u.academic_status.replace(/_/g, " ")} — Year ${u.effective_year}\n` : "") +
+      (u.flag_status ? `• Flag: ${u.flag_status}\n` : "") +
+      `\nType /help for available commands.`;
+
     await replyToChat(
       telegramChatId,
-      `📋 *Account Status — ${roleLabel}*\n\n` +
-        `• ID: ${u.unique_id}\n` +
-        `• Name: ${u.name}\n` +
-        `• Role: ${roleLabel}\n` +
-        `• Account: ${u.status}\n` +
-        `• Onboarding: ${onboardedStr}\n` +
-        `• Telegram: ${verifiedStr}\n\n` +
-        `Type /help for available commands.`,
+      statusMsg,
     );
 
     // Update last_seen_at
