@@ -2216,19 +2216,55 @@ The 6 new entity roles and the 7 hierarchy controls are detailed in
 
 ---
 
+## What is NOT yet in the live system (planned, spec-complete)
+
+The personalization + register plan (12 design docs, 2026-11-17) is
+spec-complete on paper. The emitter policy table (block-kind →
+transition → priority → quiet-hours exemption → persona) is the single
+config that makes it buildable without touching the security model.
+What's been built and what's next:
+
+| Built (this commit chain) | Status |
+|---|---|
+| `class_periods` (timetable clock) | ✅ schema live |
+| `class_flexible` (extra/reschedule/substitute) | ✅ schema live |
+| `class_register_drafts` + `attendance_register_sessions` | ✅ schema live |
+| `class_reviews` (append-only trigger) | ✅ schema live |
+| `class_messages` + `class_message_receipts` | ✅ schema live |
+| `personalization_prefs` (4 settings) | ✅ schema live |
+| `attendance_seen` (block-level continuity) | ✅ schema live |
+| `users.is_cr`, `users.is_icr`, `users.duty_off_override` | ✅ schema live |
+| `src/lib/personalization/prefs.ts` | ✅ live |
+| `src/lib/register.ts` (keyboard, CSV, short labels) | ✅ live |
+| `src/lib/bot-personas.ts` (/now /settings /register /review /classes-add /message) | ✅ live |
+| Webhook register callbacks + answerCallbackQuery | ✅ live |
+| `register-open` cron agent (timetable auto-open) | ✅ live, */5 |
+| `faculty-review` cron agent (duty-off card) | ✅ live, 19:00 |
+| **CSV upload via Telegram document** | ⏳ next — the `/register template` + `/register upload` commands; the validation + delta preview logic is already in `register.ts` |
+| **Class-message relay fan-out + receipt tracking** | ⏳ next — the `class_messages` schema is live; the release-card → fan-out → receipt pipeline needs the webhook's `/message` handler |
+| **Flexible-class approval HOD flow** | ⏳ next — the `class_flexible` schema + `/classes-add` command are live; HOD approve/reject buttons + reschedule notice fan-out |
+| **Attendance-first /now for parent/guardian** | ⏳ next — the student's `/now` is live; parent/guardian child-scoped attendance block |
+| **Quiet-hours gate on all P1/P2 pushes** | ⏳ next — `inQuietHours()` is live in `prefs.ts`; wiring it into the push dispatcher |
+| **Tamper-evident chain over new audit actions** | ✅ already covered — `audit_events` is the chain's input; the new action names are registered |
+
+The 12 plan pastes are the design source of truth. The emitter policy
+table (one row per block-kind) is the next artifact to build — it's
+the single config file that makes the push policy a living table, not
+a launch artifact.
+
 ## Regeneration notes
 
-This doc is generated, not hand-maintained. To re-verify after any route/role change:
+This doc is generated, not hand-maintained. To re-verify after any
+route/role change:
 
 ```bash
 # 1. Tally (per-role counts, gated/open/cron) — stdlib-only, headless-safe:
 python3 scripts/regen_role_map.py . | jq .
-#    (script ships with the rbac-surface-docs skill; copy it into the repo to make it permanent)
 # 2. The summary JSON is the ground truth: total / gated / open / cron / by_role.
-# 3. Cross-check the doc's 'Roles at a glance' and per-route entries against the JSON,
-#    then commit + push (the deploy poller resets the tree to origin/main — an
-#    uncommitted doc edit is lost on the next cycle).
+# 3. Cross-check the doc's 'Roles at a glance' and per-route entries against
+#    the JSON, then commit + push (the deploy poller resets the tree to
+#    origin/main — an uncommitted doc edit is lost on the next cycle).
 ```
 
-*Last regenerated: 2026-11-17 · 583 routes total · 331 gated / 231 open / 21 cron · 
-306 inline + 19 tier + 6 const gate kinds resolved · 0 unknown gates · commit c2c32b14*
+*Last regenerated: 2026-11-17 · 583 routes total · 331 gated / 231 open / 21 cron ·
+306 inline + 19 tier + 6 const gate kinds resolved · 0 unknown gates · commit 5073bf81*
