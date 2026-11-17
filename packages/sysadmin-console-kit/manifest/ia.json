@@ -159,6 +159,13 @@
           "title": "Promotions",
           "kind": "kanban",
           "pollMs": 30000
+        },
+        {
+          "id": "academic-status",
+          "route": "academic-status",
+          "title": "Academic Status",
+          "kind": "table",
+          "pollMs": 120000
         }
       ],
       "icon": "Users"
