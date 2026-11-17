@@ -1963,3 +1963,31 @@ All roles also get: `/help` (role-aware menu), `/status` (account + academic sta
 
 ---
 *Regenerate this doc when roles change: `grep -rn requiredRole src/app/api` and re-run the analysis script that produced `docs/ROLE_OPERATIONS.md`.*
+
+---
+
+## Entity-aligned operational model
+
+The role permissions above are the generic authorization map. For JNTUH CEJ
+specifically — how each role maps to the college's actual administrative
+entities (5 engineering departments, hostel block system, examination
+branch desks, mess committee) and the hierarchy controls that bind them —
+see **`docs/JNTUH_CEJ_ROLE_HIERARCHY.md`**.
+
+Key differences from the generic model:
+
+- **Exam branch split** — one `exam_branch` role becomes four desks:
+  `controller_examinations`, `addl_controller_academic`,
+  `addl_controller_results`, `addl_controller_automation`. Separation of
+  duties: no single desk can enter AND publish a result.
+- **Hostel re-cast** — `warden` consolidated into `principal` (Chief
+  Warden). `hostel_manager` is one per college/unit; `deputy_warden` is
+  block-scoped (2 boys + 2 girls blocks).
+- **New `dean` role** — Associate Dean (Academics) and Associate Dean
+  (Student Affairs); required for the two-person DEBARRED/SUSPENDED
+  approval rule.
+- **Hostel leave gate chain** — gate pass valid only when Deputy Warden
+  approval + parent acknowledgement are both present; missing link =
+  PENDING, override = Supervisor + audit reason.
+- **HOD scope extended** — covers science/HSS HODs (Physics, Chemistry,
+  Math, English), not just the 5 engineering departments.
