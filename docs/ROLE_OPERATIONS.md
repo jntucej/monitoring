@@ -1,33 +1,27 @@
 # Role Operations Reference (GATE Monitor)
 
-Comprehensive map of every API route, its access tier, and which roles can use it. 
-This is the authoritative operational reference for the Gate Monitor system — 
-all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
-
-> **Grounding:** The 19 pre-existing routes (commit 3f810b25) were audited first; 
-> the autonomous build (commits 1ace14d7 → c2e53f1b) added 46 new routes, 
-> 6 entity roles, and 7 bounded agents. Every number below was regenerated 
-> from disk on 2026-11-17, not hand-copied.
+Authoritative map of every API route and which roles can reach it. 
+All 583 routes across 27 active roles — regenerated from the live route tree on 2026-11-17 
+(commit c2c32b14). Every tally in this doc is reproducible with one command; 
+the regeneration notes are at the end.
 
 ## How role access works
 
 - **APIs**: every route declares `requiredRole` (enforced by `withAuthorization`). 
-  The role list is the single gate; Postgres RLS provides defense-in-depth per-table.
-- **UI**: pages wrap content in `<AuthGuard allowedRoles={...}>`; unauthorized roles see a 403 page.
-- **Postgres RLS**: the `gate_app` role sees only the rows its policies allow 
-  (students see themselves; faculty see their classes; HODs see their department; 
-  admin/sysadmin see everything).
-- **Tiers** (`src/server/policy/roles.ts`): APPROVER · OPERATOR · ADMIN · SYSADMIN · MESS_INCHARGE · APP. 
-  `withAuthorization` accepts either an inline role list or a `TIER.X` constant. 
-  19 routes use tier constants; 311 use inline role lists; 232 are open to any 
-  authenticated user (self-service surface); 21 are cron-gated (agent endpoints).
-- **Delegation-aware**: since STEP 4.1, `withAuthorization` resolves the caller's 
-  *effective* role — the native role first, then any active, unexpired, 
-  non-revoked delegation whose role grant covers the requested role. 
-  Delegation IDs are recorded in the auth context and written to `audit_events`.
-- **Academic status**: `student_details.academic_status` ∈ {SUSPENDED, DEBARRED, LATERAL_JOIN} 
-  + `year_override`. HOD flags park in `pending_approvals`; Dean/Principal/VP 
-  approve via `/api/academic-status/pending`. DEBARRED blocks gate + exams until approved.
+  Gates come in three shapes: inline role lists (306 routes), tier constants 
+  like `TIER.APPROVER` (19 routes, resolved against `src/server/policy/roles.ts`), 
+  and local `const X_ROLES: Role[]` definitions (6 routes). This doc resolves all 
+  three — no route is counted by one gate kind and missed by another.
+- **UI**: pages wrap content in `<AuthGuard allowedRoles={...}>`; unauthorized roles see 403.
+- **Postgres RLS**: `gate_app` sees only the rows its policies allow (students see themselves; 
+  faculty see their classes; HODs see their department; admin/sysadmin see everything).
+- **Tiers** (`src/server/policy/roles.ts`): APPROVER · OPERATOR · ADMIN · SYSADMIN · MESS_INCHARGE · APP.
+- **Delegation-aware**: since STEP 4.1, `withAuthorization` resolves the caller's *effective* role — 
+  the native role first, then any active, unexpired, non-revoked delegation whose role grant 
+  covers the requested role. Delegation IDs are recorded in `audit_events`.
+- **Academic status**: `student_details.academic_status` ∈ {SUSPENDED, DEBARRED, LATERAL_JOIN} + 
+  `year_override`. HOD flags park in `pending_approvals`; Dean/Principal/VP approve via 
+  `/api/academic-status/pending`. DEBARRED blocks gate + exams until approved.
 
 ## Roles at a glance
 
@@ -38,19 +32,22 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 | APPROVER | principal, vice_principal, exam_branch, oie, hostel_manager, deputy_warden, caretaker, hod, staff, supervisor, exam_superintendent | 11 | Approval surfaces; entity-scoped |
 | OPERATOR | operator, principal, admin, sysadmin | 4 | Gate scanning; manual entry; transactions |
 | MESS_INCHARGE | mess_incharge, principal, admin, sysadmin | 4 | Mess console |
-| APP (all interactive) | 21 roles including student, parent, guardian, visitor, worker | 21 | Any authenticated user |
-| Entity-aligned (new) | dean, chief_warden (= principal context), controller_examinations, addl_controller_academic, addl_controller_results, addl_controller_automation | 6 | JNTUH CEJ desks; see `JNTUH_CEJ_ROLE_HIERARCHY.md` |
+| APP (all interactive) | 21 roles incl. student, parent, guardian, visitor, worker | 21 | Any authenticated user |
+| Entity-aligned (new) | dean, chief_warden (= principal context), controller_examinations, addl_controller_academic, addl_controller_results, addl_controller_automation | 6 | JNTUH CEJ desks |
 
 > **Note on `chief_warden`:** this is a *role context*, not a separate account. 
-> The Principal acts as Chief Warden; hostel actions are logged with 
-> `role_context='chief_warden'` in `audit_events` so they are auditable 
-> separately from general principal actions. No distinct user carries this string.
+The Chief Warden is the Principal — one person. When the Principal acts on hostel 
+matters the audit trail logs `role_context='chief_warden'` so hostel actions are 
+auditable separately from general principal actions. No distinct user carries this string.
+>
+> **Legacy keys with zero routes:** `warden` (folded into principal by migration 20261125000001), 
+`emo`, `hostel` (legacy compat — approver surface only, no dedicated routes).
 
 ---
 
 ## Per-role operations
 
-### Sysadmin (`sysadmin`) — 317 routes
+### Sysadmin (`sysadmin`) — 318 routes
 
 **`/api/academic-status/*`** (2)
 
@@ -211,6 +208,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/audit/*`** (1)
 
@@ -519,7 +520,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/workers/personal-history` — GET (rate-limited)
 - `/api/workers/shifts` — GET (rate-limited)
 
-### Admin (`admin`) — 293 routes
+### Admin (`admin`) — 294 routes
 
 **`/api/academic-status/*`** (2)
 
@@ -666,6 +667,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/audit/*`** (1)
 
@@ -958,7 +963,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/workers/personal-history` — GET (rate-limited)
 - `/api/workers/shifts` — GET (rate-limited)
 
-### Principal (`principal`) — 75 routes
+### Principal (`principal`) — 76 routes
 
 **`/api/academic-status/*`** (1)
 
@@ -986,6 +991,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1125,7 +1134,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/vp/history` — GET
 - `/api/vp/retention` — GET
 
-### Vice Principal (`vice_principal`) — 19 routes
+### Vice Principal (`vice_principal`) — 20 routes
 
 **`/api/academic-status/*`** (1)
 
@@ -1134,6 +1143,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/approver/*`** (1)
 
 - `/api/approver/academics-department` — GET PATCH
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/dashboard/*`** (1)
 
@@ -1189,7 +1202,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/delegations/graph` — GET (rate-limited)
 
-### HOD (`hod`) — 36 routes
+### HOD (`hod`) — 37 routes
 
 **`/api/academic-status/*`** (1)
 
@@ -1202,6 +1215,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/approver/*`** (1)
 
 - `/api/approver/academics-department` — GET PATCH
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/classes/*`** (3)
 
@@ -1269,7 +1286,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/students/register` — GET (rate-limited)
 - `/api/students/stats` — GET (rate-limited)
 
-### Faculty (`faculty`) — 38 routes
+### Faculty (`faculty`) — 39 routes
 
 **`/api/admin/*`** (1)
 
@@ -1283,6 +1300,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (2)
 
@@ -1354,7 +1375,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/support/tickets` — GET POST
 - `/api/support/tickets/[id]/comments` — GET POST
 
-### Staff (`staff`) — 21 routes
+### Staff (`staff`) — 22 routes
 
 **`/api/admin/*`** (1)
 
@@ -1364,6 +1385,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/announcements/[id]/dismiss` — POST
 - `/api/announcements/active` — GET
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1410,7 +1435,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/support/tickets` — GET POST
 - `/api/support/tickets/[id]/comments` — GET POST
 
-### Operator (`operator`) — 43 routes
+### Operator (`operator`) — 44 routes
 
 **`/api/admin/*`** (2)
 
@@ -1430,6 +1455,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/audit/*`** (1)
 
@@ -1518,7 +1547,7 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/voice/interpret` — POST
 
-### Supervisor (`supervisor`) — 43 routes
+### Supervisor (`supervisor`) — 44 routes
 
 **`/api/admin/*`** (2)
 
@@ -1532,6 +1561,10 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 **`/api/attendance_records/*`** (1)
 
 - `/api/attendance_records` — GET POST (rate-limited)
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1617,12 +1650,16 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/workers/personal-history` — GET (rate-limited)
 - `/api/workers/shifts` — GET (rate-limited)
 
-### Student (`student`) — 25 routes
+### Student (`student`) — 26 routes
 
 **`/api/announcements/*`** (2)
 
 - `/api/announcements/[id]/dismiss` — POST
 - `/api/announcements/active` — GET
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (2)
 
@@ -1674,12 +1711,16 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/support/tickets` — GET POST
 - `/api/support/tickets/[id]/comments` — GET POST
 
-### Parent (`parent`) — 17 routes
+### Parent (`parent`) — 18 routes
 
 **`/api/announcements/*`** (2)
 
 - `/api/announcements/[id]/dismiss` — POST
 - `/api/announcements/active` — GET
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1723,7 +1764,11 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/support/tickets` — GET POST
 - `/api/support/tickets/[id]/comments` — GET POST
 
-### Guardian (`guardian`) — 11 routes
+### Guardian (`guardian`) — 12 routes
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1757,7 +1802,11 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/students` — GET (rate-limited)
 
-### Visitor (`visitor`) — 5 routes
+### Visitor (`visitor`) — 6 routes
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/occupancy/*`** (1)
 
@@ -1770,11 +1819,15 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/visitors/me/check-out` — POST
 - `/api/visitors/mine` — GET (rate-limited)
 
-### Worker (`worker`) — 9 routes
+### Worker (`worker`) — 10 routes
 
 **`/api/admin/*`** (1)
 
 - `/api/admin/security/stats` — GET
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/campus/*`** (1)
 
@@ -1796,7 +1849,11 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 - `/api/workers/my-work-orders` — GET (rate-limited)
 - `/api/workers/personal-history` — GET (rate-limited)
 
-### Caretaker (`caretaker`) — 4 routes
+### Caretaker (`caretaker`) — 5 routes
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/exam/*`** (1)
 
@@ -1814,7 +1871,11 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/workers/shifts` — GET (rate-limited)
 
-### Deputy Warden (`deputy_warden`) — 6 routes
+### Deputy Warden (`deputy_warden`) — 7 routes
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/emergency/*`** (1)
 
@@ -1837,7 +1898,11 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/permissions/bulk` — POST (rate-limited)
 
-### Hostel Manager (`hostel_manager`) — 6 routes
+### Hostel Manager (`hostel_manager`) — 7 routes
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/emergency/*`** (1)
 
@@ -1860,11 +1925,15 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/permissions/bulk` — POST (rate-limited)
 
-### OIE (Officer-in-Charge) (`oie`) — 11 routes
+### OIE (Officer-in-Charge) (`oie`) — 12 routes
 
 **`/api/approver/*`** (1)
 
 - `/api/approver/academics-department` — GET PATCH
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/config/*`** (2)
 
@@ -1953,11 +2022,15 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/exam/hall-tickets/generate` — POST (rate-limited)
 
-### Exam Branch (legacy, compat only) (`exam_branch`) — 7 routes
+### Exam Branch (legacy, compat only) (`exam_branch`) — 8 routes
 
 **`/api/approver/*`** (1)
 
 - `/api/approver/academics-department` — GET PATCH
+
+**`/api/attention/*`** (1)
+
+- `/api/attention/queue` — GET (rate-limited)
 
 **`/api/exam/*`** (5)
 
@@ -1971,27 +2044,37 @@ all 583 routes across 27 roles, as of commit c2e53f1b (2026-11-17).
 
 - `/api/occupancy/presence-matrix` — GET (rate-limited)
 
+### EMO (Emergency Management Officer) (`emo`) — 0 routes (legacy/compat)
+
+Legacy approver-surface key — recognized by `withAuthorization` but owns no 
+dedicated route. The equivalent operations live under the mapped role.
+
+### Hostel (legacy) (`hostel`) — 0 routes (legacy/compat)
+
+Legacy approver-surface key — recognized by `withAuthorization` but owns no 
+dedicated route. The equivalent operations live under the mapped role.
+
 ---
 
 ## Open self-service surface (any authenticated user)
 
-232 routes have no `requiredRole` — they accept any logged-in user 
-and enforce ownership server-side (students see their own data, parents see their 
-own children, etc.). These are the daily self-service flows:
+231 routes have no `requiredRole` — they accept any logged-in user and 
+enforce ownership server-side (students see their own data, parents their children, 
+etc.). Grouped by domain below.
 
-- **`/api/admin`** — 17 routes: `/api/admin/anti-ragging-alert-config`, `/api/admin/approval-password-status/[userId]`, `/api/admin/audit/export`, `/api/admin/complaint-categories`, `/api/admin/complaint-categories/[code]`, `/api/ad…
+- **`/api/admin`** — 17 routes: `/api/admin/anti-ragging-alert-config`, `/api/admin/approval-password-status/[userId]`, `/api/admin/audit/export`, `/api/admin/complaint-categories`, `/api/admin/complaint-categories/[code]`, `/api/admin/dashboard`, `/api/admin/delegation-r…
 - **`/api/alerts`** — 1 routes: `/api/alerts`
 - **`/api/announcements`** — 2 routes: `/api/announcements/[id]`, `/api/announcements/[id]/follow`
 - **`/api/anti-ragging`** — 3 routes: `/api/anti-ragging/cases`, `/api/anti-ragging/cases/[id]`, `/api/anti-ragging/report`
 - **`/api/attachments`** — 1 routes: `/api/attachments/storage-status`
-- **`/api/attention`** — 2 routes: `/api/attention/queue`, `/api/attention/timeline`
-- **`/api/auth`** — 17 routes: `/api/auth/_drill/token-short`, `/api/auth/approval-password/rotate`, `/api/auth/approval-password/set`, `/api/auth/bootstrap`, `/api/auth/change-password`, `/api/auth/lock`, `/api/auth/login`, `/api/…
+- **`/api/attention`** — 1 routes: `/api/attention/timeline`
+- **`/api/auth`** — 17 routes: `/api/auth/_drill/token-short`, `/api/auth/approval-password/rotate`, `/api/auth/approval-password/set`, `/api/auth/bootstrap`, `/api/auth/change-password`, `/api/auth/lock`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/logout-all`, `/…
 - **`/api/bot`** — 4 routes: `/api/bot/chat`, `/api/bot/feedback`, `/api/bot/session/current`, `/api/bot/telegram-verify`
-- **`/api/campus`** — 15 routes: `/api/campus/achievements`, `/api/campus/communities`, `/api/campus/communities/[id]`, `/api/campus/communities/[id]/join`, `/api/campus/communities/[id]/leave`, `/api/campus/communities/[id]/posts`, …
-- **`/api/campus-extra`** — 8 routes: `/api/campus-extra/analytics`, `/api/campus-extra/calendar`, `/api/campus-extra/feedback`, `/api/campus-extra/handover`, `/api/campus-extra/knowledge`, `/api/campus-extra/portfolio`, `/api/campus-extr…
+- **`/api/campus`** — 15 routes: `/api/campus/achievements`, `/api/campus/communities`, `/api/campus/communities/[id]`, `/api/campus/communities/[id]/join`, `/api/campus/communities/[id]/leave`, `/api/campus/communities/[id]/posts`, `/api/campus/communities/[id]/report`, `…
+- **`/api/campus-extra`** — 8 routes: `/api/campus-extra/analytics`, `/api/campus-extra/calendar`, `/api/campus-extra/feedback`, `/api/campus-extra/handover`, `/api/campus-extra/knowledge`, `/api/campus-extra/portfolio`, `/api/campus-extra/saved-views`, `/api/campus-extra/task-…
 - **`/api/caretaker`** — 2 routes: `/api/caretaker/maintenance`, `/api/caretaker/summary`
 - **`/api/classes`** — 1 routes: `/api/classes/[id]/attendance`
-- **`/api/complaints`** — 31 routes: `/api/complaints`, `/api/complaints/[id]`, `/api/complaints/[id]/attachments`, `/api/complaints/[id]/attachments/[attId]`, `/api/complaints/[id]/call`, `/api/complaints/[id]/cosign`, `/api/complaints/…
+- **`/api/complaints`** — 31 routes: `/api/complaints`, `/api/complaints/[id]`, `/api/complaints/[id]/attachments`, `/api/complaints/[id]/attachments/[attId]`, `/api/complaints/[id]/call`, `/api/complaints/[id]/cosign`, `/api/complaints/[id]/feedback`, `/api/complaints/[id]/re…
 - **`/api/config`** — 6 routes: `/api/config/college-info`, `/api/config/emergency-contacts`, `/api/config/exit-reasons`, `/api/config/navigation`, `/api/config/pass-types`, `/api/config/roles`
 - **`/api/deputy-warden`** — 1 routes: `/api/deputy-warden/delegation`
 - **`/api/docs`** — 1 routes: `/api/docs`
@@ -2006,7 +2089,7 @@ own children, etc.). These are the daily self-service flows:
 - **`/api/hostel-manager`** — 2 routes: `/api/hostel-manager/housekeeping-tasks`, `/api/hostel-manager/summary`
 - **`/api/lockdown`** — 1 routes: `/api/lockdown/active`
 - **`/api/me`** — 3 routes: `/api/me/access-log`, `/api/me/consent`, `/api/me/health`
-- **`/api/mess`** — 29 routes: `/api/mess/days/[id]`, `/api/mess/events/[id]/token/[tokenId]/regenerate-code`, `/api/mess/events/[id]/token/[tokenId]/unlock`, `/api/mess/events/[id]/tokens`, `/api/mess/meal-tokens/[mealDayId]`, `/a…
+- **`/api/mess`** — 29 routes: `/api/mess/days/[id]`, `/api/mess/events/[id]/token/[tokenId]/regenerate-code`, `/api/mess/events/[id]/token/[tokenId]/unlock`, `/api/mess/events/[id]/tokens`, `/api/mess/meal-tokens/[mealDayId]`, `/api/mess/menu-items/[id]`, `/api/mess/my-…
 - **`/api/metrics`** — 1 routes: `/api/metrics`
 - **`/api/mobile`** — 5 routes: `/api/mobile/[...path]`, `/api/mobile/history`, `/api/mobile/idcard`, `/api/mobile/login`, `/api/mobile/profile`
 - **`/api/my`** — 1 routes: `/api/my/pass-notifications`
@@ -2017,7 +2100,7 @@ own children, etc.). These are the daily self-service flows:
 - **`/api/operator`** — 1 routes: `/api/operator/kiosk-session`
 - **`/api/parents`** — 5 routes: `/api/parents/me`, `/api/parents/me/children`, `/api/parents/me/children/[childId]/movements`, `/api/parents/me/children/[childId]/passes`, `/api/parents/me/consent`
 - **`/api/passes`** — 1 routes: `/api/passes`
-- **`/api/permissions`** — 20 routes: `/api/permissions`, `/api/permissions/[ticket]`, `/api/permissions/[ticket]/amend`, `/api/permissions/[ticket]/biometric`, `/api/permissions/[ticket]/comments`, `/api/permissions/[ticket]/document`, `…
+- **`/api/permissions`** — 20 routes: `/api/permissions`, `/api/permissions/[ticket]`, `/api/permissions/[ticket]/amend`, `/api/permissions/[ticket]/biometric`, `/api/permissions/[ticket]/comments`, `/api/permissions/[ticket]/document`, `/api/permissions/[ticket]/document/verif…
 - **`/api/profile`** — 1 routes: `/api/profile`
 - **`/api/status`** — 1 routes: `/api/status`
 - **`/api/student`** — 7 routes: `/api/student/emergency-alert`, `/api/student/guardian`, `/api/student/guardian-link`, `/api/student/meal-opt-out`, `/api/student/meal-opt-out/[id]`, `/api/student/mess-bill`, `/api/student/next-exam`
@@ -2034,10 +2117,10 @@ own children, etc.). These are the daily self-service flows:
 
 ## Bounded agents (cron, `x-cron-secret`-gated)
 
-These endpoints are not accessible to users — they are called by host cron 
-via `/etc/cron.d/gate-jobs`, authenticated with the shared `x-cron-secret`. 
-Each agent acts inside a role context and writes `audit_events` with 
-`actor_type='agent'`. None of them can mutate state outside their boundary.
+21 endpoints called by host cron from 
+`/etc/cron.d/gate-jobs`, authenticated with the shared `x-cron-secret`. Each agent 
+acts inside a role context and writes `audit_events` with `actor_type='agent'`. 
+None can mutate state outside that boundary.
 
 | Endpoint | Schedule | Bounded to | Function |
 |---|---|---|---|
@@ -2046,47 +2129,38 @@ Each agent acts inside a role context and writes `audit_events` with
 | `/api/cron/complaint-triage` | */30 | supervisor | Categorize, route, duplicate-flag, SLA-escalate open complaints |
 | `/api/cron/mess-reconcile` | 05:00 | mess_incharge | Hash-chained ledger: issued vs consumed vs boarders; anomaly blocks service |
 | `/api/cron/exam-eligibility-manifest` | 22:00 | oie | Precompute + Ed25519-sign candidate eligibility for exam day |
-| `/api/cron/birthday-check` | 00:30 | system | Personal in-app + Telegram birthday notification, once per year per user |
+| `/api/cron/birthday-check` | 00:30 | system | Personal in-app + Telegram birthday notification, once per year |
 | `/api/cron/audit-chain` | 02:00 | sysadmin | Tamper-evident SHA256 chain over `audit_events`; broken link → critical alert |
 
-Pre-existing housekeeping crons (not agents, but in the same cron file):
-`/api/cron/expire-passes` (15 min), `/api/cron/sla-breach-check` (hourly), 
-`/api/cron/alerts-evaluate` (hourly), `/api/cron/retention-run` (daily), 
-`/api/cron/audit-rotate` (daily), `/api/cron/mess-finalize` (post-dinner), 
-`/api/cron/mess-no-show-check` (post-dinner).
+Pre-existing housekeeping crons in the same file: `/api/cron/expire-passes` (15 min), 
+`sla-breach-check` (hourly), `alerts-evaluate` (hourly), `retention-run` (daily), 
+`audit-rotate` (daily), `mess-finalize` + `mess-no-show-check` (post-dinner).
 
 ---
 
 ## Cross-role security guarantees
 
-- **HOD scope lock**: HOD APIs read/write only their own department 
-  (enforced server-side: `auth.departmentId` must match; 403 otherwise). 
+- **HOD scope lock**: HOD APIs read/write only their own department (`auth.departmentId` must match; 403 otherwise). 
   Science/HSS HODs have their own `entity_scopes` rows — an EEE HOD never sees CSE data.
-- **Parent scope lock**: parents see only their linked children 
-  (`guardian_id` must equal `auth.userId` unless admin).
-- **Faculty scope lock**: faculty see only students in their assigned classes 
-  (via `class_teacher_id` or `faculty_assignments`).
+- **Parent scope lock**: parents see only their linked children (`guardian_id` = `auth.userId` unless admin).
+- **Faculty scope lock**: faculty see only students in their assigned classes (`class_teacher_id` / `faculty_assignments`).
 - **Guardian mapping**: wards resolved through `student_details.guardian_id`, not a guessed link table.
-- **RLS on `users`**: specific `users_gate_app_select/update/insert` policies; 
-  the broad write policy is the intentional app-role boundary; `relrowsecurity = on` verified.
-- **Telegram bot**: `/verify` is scoped to the sender's linked account only 
-  (no code enumeration); `/link` requires an explicit `confirm` flag before storing the binding.
-- **Suspended / debarred students**: `users.flag_status` is set alongside `academic_status`, 
-  so the gate scanner and RLS policies treat them as flagged automatically.
-- **Two-person rule (maker-checker)**: DEBARRED/SUSPENDED academic flags and high-risk grants 
-  park in `pending_approvals`; the DB `maker_ne_checker` CHECK is the floor, 
-  `/api/sysadmin/approvals/two-person` is the queue. A HOD's DEBARRED write returns 
-  `{ pending: true }` until a Dean/Principal signs off.
-- **Exam-desk separation of duties**: marks entry (faculty) ≠ result processing 
-  (`addl_controller_results`) ≠ result sign-off/publish (`controller_examinations`). 
-  No single role can both enter and publish a result.
-- **Delegation with TTL**: time-bound, scoped, revocable role grants 
-  (`delegations` table, `no_self_delegation` + `valid_window` constraints). 
-  `withAuthorization` falls back to an active delegation only when the native role is absent. 
-  The authority graph is queryable at `/api/delegations/graph`.
-- **Tamper-evident audit**: nightly SHA256 hash chain over `audit_events` 
-  (`audit_chain` + checkpoints); a broken link fires a critical alert. 
-  This is the integrity proof behind accreditation / legal export.
+- **RLS on `users`**: specific select/update/insert policies; `relrowsecurity = on` verified; 
+  nightly drift check at `/api/sysadmin/rls/drift`.
+- **Telegram bot**: `/verify` scoped to the sender's linked account only (no code enumeration); 
+  `/link` requires an explicit `confirm` flag before storing the binding.
+- **Suspended / debarred students**: `users.flag_status` set alongside `academic_status` — 
+  the gate scanner and RLS policies treat them as flagged automatically.
+- **Two-person rule (maker-checker)**: DEBARRED/SUSPENDED flags and high-risk grants park in 
+  `pending_approvals`; the DB `maker_ne_checker` CHECK is the floor, `/api/sysadmin/approvals/two-person` 
+  is the queue. A HOD's DEBARRED write returns `{ pending: true }` until a Dean/Principal signs off.
+- **Exam-desk separation of duties**: marks entry (faculty) ≠ result processing (`addl_controller_results`) 
+  ≠ result sign-off/publish (`controller_examinations`). No single role can both enter and publish a result.
+- **Delegation with TTL**: time-bound, scoped, revocable role grants (`delegations` table, 
+  `no_self_delegation` + `valid_window` constraints). `withAuthorization` falls back to an active 
+  delegation only when the native role is absent. Authority graph: `/api/delegations/graph`.
+- **Tamper-evident audit**: nightly SHA256 hash chain over `audit_events` (`audit_chain` + checkpoints); 
+  broken link fires a critical alert. The integrity proof behind accreditation/legal export.
 - **Hostel leave gate chain**: gate pass valid only when `leave_requests.status = 'GATE_ISSUED'` 
   (warden + parent both done). `/api/gate/verify-leave-chain` reports exactly which link is missing.
 
@@ -2094,8 +2168,7 @@ Pre-existing housekeeping crons (not agents, but in the same cron file):
 
 ## Telegram bot commands by role
 
-The bot exposes a role-aware command menu (102 commands total). 
-Each role sees only their own surface:
+Role-aware command menu — 102 commands total; each role sees only its own surface:
 
 - **`student`** (12): /passes /curfew /alerts /announce /complaint /exam /mess /guardian /fees /library /marks /health
 - **`parent`** (6): /child /curfew /announce /complaint /exam /mess
@@ -2118,20 +2191,17 @@ Each role sees only their own surface:
 The 6 new entity roles and the 7 hierarchy controls are detailed in 
 `docs/JNTUH_CEJ_ROLE_HIERARCHY.md`. Key points:
 
-- **Exam branch split** — one `exam_branch` role became four desks: 
-  `controller_examinations` (sign-off/publish), `addl_controller_academic` 
-  (marks correction), `addl_controller_results` (processing), 
-  `addl_controller_automation` (hall-ticket generation).
-- **Hostel re-cast** — `warden` was consolidated into `principal` (Chief 
-  Warden = Principal, role context only, not a separate account). 
-  `deputy_warden` and `hostel_manager` remain distinct roles.
-- **New `dean` role** — Associate Dean (Academics / Student Affairs), 
-  the two-person approver alongside the Principal.
-- **Hostel leave gate chain** — gate pass valid only when Deputy Warden 
-  approval + parent acknowledgement are both recorded. The `leave-chain` 
-  agent runs the clock: TTL reminders, escalation, auto-expiry, gate-token issuance.
-- **HOD scope extended** — covers science/HSS HODs (Physics, Chemistry, 
-  Mathematics, English) via `entity_scopes` seeds.
+- **Exam branch split** — one `exam_branch` role became four desks: `controller_examinations` 
+  (sign-off/publish), `addl_controller_academic` (marks correction), `addl_controller_results` 
+  (processing), `addl_controller_automation` (hall-ticket generation). The legacy `exam_branch` 
+  string remains in the registry for approver-surface compatibility only — no user carries it.
+- **Hostel re-cast** — `warden` was consolidated into `principal` (Chief Warden = Principal, 
+  role context only, not a separate account). `deputy_warden` and `hostel_manager` remain distinct.
+- **New `dean` role** — Associate Dean (Academics / Student Affairs), the two-person approver.
+- **Hostel leave gate chain** — Deputy Warden approval + parent acknowledgement, run on the clock 
+  by the `leave-chain` agent (TTL reminders, escalation, auto-expiry, gate-token issuance).
+- **HOD scope extended** — covers science/HSS HODs (Physics, Chemistry, Mathematics, English) 
+  via `entity_scopes` seeds.
 
 ---
 
@@ -2145,6 +2215,20 @@ The 6 new entity roles and the 7 hierarchy controls are detailed in
 - **`docs/RUNBOOK.md`** — autonomous agent cron table + what-to-check-on-alert
 
 ---
-*All 583 routes verified against disk on 2026-11-17. Regenerate by scanning 
-`src/app/api/**/*.ts` and extracting `requiredRole` arrays — see 
-`docs/ROLE_OPERATIONS.md` generation notes in `IMPLEMENTATION_BLUEPRINT.md`.*
+
+## Regeneration notes
+
+This doc is generated, not hand-maintained. To re-verify after any route/role change:
+
+```bash
+# 1. Tally (per-role counts, gated/open/cron) — stdlib-only, headless-safe:
+python3 scripts/regen_role_map.py . | jq .
+#    (script ships with the rbac-surface-docs skill; copy it into the repo to make it permanent)
+# 2. The summary JSON is the ground truth: total / gated / open / cron / by_role.
+# 3. Cross-check the doc's 'Roles at a glance' and per-route entries against the JSON,
+#    then commit + push (the deploy poller resets the tree to origin/main — an
+#    uncommitted doc edit is lost on the next cycle).
+```
+
+*Last regenerated: 2026-11-17 · 583 routes total · 331 gated / 231 open / 21 cron · 
+306 inline + 19 tier + 6 const gate kinds resolved · 0 unknown gates · commit c2c32b14*

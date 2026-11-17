@@ -36,7 +36,7 @@ reliably detect and classify.
    and parent acknowledgement both exist. Without this, the gate remains
    a standalone scanner rather than a verified leave-chain endpoint.
 
-2. **Instrumentation.** Every mutation across the 270 routes emits a
+2. **Instrumentation.** Every mutation across the 583 routes emits a
    structured audit event with actor, role, entity scope, delegation
    context (if any), and latency. The goal is a longitudinal dataset:
    which manual interventions recur, which roles escalate most, which

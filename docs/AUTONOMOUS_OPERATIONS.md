@@ -71,7 +71,7 @@ to an SMS OTP alone. The student taps at a device, and the bot enrollment
 is unlocked for that uniqueId for a short TTL.
 
 ### C. RLS misconfiguration on a new table
-23 roles × 270 routes means new tables are added frequently. A single
+29 roles × 583 routes means new tables are added frequently. A single
 migration that forgets `ENABLE ROW LEVEL SECURITY` or has a policy with
 `USING (true)` for gate_app exposes cross-department data. The RLS audit
 is currently manual.

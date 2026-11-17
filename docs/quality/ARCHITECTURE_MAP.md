@@ -122,7 +122,7 @@ Several `permissions/[ticket]/*` self-graded routes rely on **in-handler** stage
     `integrations/` (email, sms, lms, hr-sync, visitor-registration), `rag/` (prompt,
     retriever, llm, ingest, translate, workflows, roles, config).
 - `src/server/policy` — pure business rules (testable w/o HTTP): `roles.ts` (TIERs),
-  `routes.ts` (default role→route map, 23 roles), `gate-access.ts`, `student-exit.ts`,
+  `routes.ts` (default role→route map, 29 roles), `gate-access.ts`, `student-exit.ts`,
   `lockdown.ts`, `lockout.ts`, `dates.ts`, `anomalies.ts`, `passwords.ts`,
   `health/sanitize.ts`.
 - `src/server/services` + `src/server/repositories` — thin data services for occupancy,

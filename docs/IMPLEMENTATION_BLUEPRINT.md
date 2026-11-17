@@ -49,7 +49,7 @@ whether another role was needed to complete it. This is the priority
 list. You cannot safely automate what you have not measured.
 
 ### 0.4 — Role gap map
-Cross-check the 23 roles against JNTUH CEJ's actual organizational
+Cross-check the 29 roles against JNTUH CEJ's actual organizational
 entities (five B.Tech departments, five M.Tech, science/HSS HODs, 4
 hostel blocks, exam branch desks, Mess Committee). Every entity without
 a matching role or entity scope is a gap.
