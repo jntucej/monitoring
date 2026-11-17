@@ -701,7 +701,7 @@ and the follow-up STEP-3 build):
 |---|---|
 | STEP 0 — Baseline audit | ⚠️ Partial: route inventory exists (ROLE_OPERATIONS.md); RLS snapshot + manual-intervention log still open |
 | STEP 1 — DB foundation | ✅ Shipped: migrations 20270114 (new roles + two-person columns + view), 20270115 (entity_scopes, audit_events, pending_approvals, delegations, leave_requests), 20270116 (marks, assignments, materials, mentee, exam proposals, hall tickets, fees, library, scholarships, faculty leave) + supporting tables (visitor_watchlist, hostel_room_allotments, hostel_incidents, telegram_session_suspensions, config_exam_eligibility_rules, users.hostel_block) |
-| STEP 2 — Role split | ✅ Roles in registry + DB CHECK; ⚠️ exam_branch user not yet re-assigned to a desk |
+| STEP 2 — Role split | ✅ Done: registry + DB CHECK; the lone `exam_branch` user re-assigned to `addl_controller_academic` (least-privilege default); 3 desk shell accounts created (DISABLED, ready for credentialing) |
 | STEP 3 — Missing operations | ✅ Shipped (this build): |
 | · 3.1 student | fees, marks, library, scholarships endpoints (+ `/fees` `/library` `/marks` bot) |
 | · 3.2 faculty | marks entry/submit/correct (maker-checker: entrant ≠ corrector), assignments, materials, mentees, internal-exam propose (+ `/marks` `/assignments` `/mentees` bot) |
@@ -718,8 +718,7 @@ and the follow-up STEP-3 build):
 | STEP 6 — Self-healing | ❌ Not started (offline gate JWT verifier, risk pipeline, leave-chain TTL reminders) |
 | STEP 7 — Long-term governance | ❌ Not started (Merkle audit chain, delegation graph API, BYO-agent broker, PQ roadmap) |
 
-**Next in build order:** (1) re-assign the `EXAM_BRANCH` user to
-`addl_controller_academic` (least-privilege default per blueprint 2.1) or
-create the four desk accounts, (2) wire `resolveEffectiveRole` into
+**Next in build order:** (1) ~~re-assign EXAM_BRANCH user~~ ✅ done
+(commit 2efaf9c7+), (2) wire `resolveEffectiveRole` into
 `withAuthorization` for delegation fallback, (3) the four Phase-1 agents
 as cron jobs writing `actor_type='agent'` audit events.

@@ -93,15 +93,15 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 
 # api_metrics / audit rotation — daily 03:30 (purges api_metrics past
 # API_METRICS_RETENTION_DAYS, default 7d, so the table cannot grow unbounded)
-30 3 * * *  root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+30 3 * * *  root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/audit-rotate >> /var/log/gate-cron.log 2>&1
 
 # Expire stale gate passes — every 15 min
-*/15 * * * * root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+*/15 * * * * root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/expire-passes >> /var/log/gate-cron.log 2>&1
 
 # SLA breach sweep — hourly
-0 * * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+0 * * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/sla-breach >> /var/log/gate-cron.log 2>&1
 
 # Retention policy sweep — daily 04:30 (purges expired records per
@@ -115,8 +115,33 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # enabled alert_rules row; on breach persists an alerts row and POSTs to
 # every enabled endpoint in system_settings id='webhooks' (closes the
 # "webhooks configured but nothing fires" gap).
-*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
                 ${CRON_BASE}/api/cron/alerts-eval >> /var/log/gate-cron.log 2>&1
+
+# ── Phase 1 bounded agents (IMPLEMENTATION_BLUEPRINT STEP 5) ─────────────
+# All four agents act inside an existing role context, write audit_events
+# with actor_type='agent', and never mutate state outside that boundary.
+
+# Gate reconciliation agent (operator scope) — every 5 min: auto-resolves
+# unmatched scans from known rolls or prepares an operator prompt.
+*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/gate-reconcile >> /var/log/gate-cron.log 2>&1
+
+# Mess ledger agent (mess_incharge scope) — daily 05:00: hash-chained
+# reconciliation of tokens vs consumption vs enrolled boarders; anomaly
+# blocks the next service window (reversible by mess_incharge/chief_warden).
+0 5 * * *     root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/mess-reconcile >> /var/log/gate-cron.log 2>&1
+
+# Complaint triage agent (supervisor scope) — every 30 min: categorize,
+# route, dedupe-flag, SLA-escalate. Never closes complaints.
+*/30 * * * *  root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/complaint-triage >> /var/log/gate-cron.log 2>&1
+
+# Exam eligibility agent (OIE scope) — daily 22:00 (24h pre-exam window):
+# builds the signed eligibility manifest the exam-day gate checks offline.
+0 22 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
+                ${CRON_BASE}/api/cron/exam-eligibility-manifest >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

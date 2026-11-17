@@ -14,6 +14,7 @@ import { signTrustedHeaders } from "@/server/http/trusted-headers";
 import { metricsMiddleware } from "@/middleware/metrics";
 import { checkDeviceBinding } from "@/lib/device-binding";
 import { verifyAccessToken } from "@/lib/auth-token";
+import { resolveEffectiveRole } from "@/middleware/entityAuthorization";
 
 class AuthError extends Error {
   constructor(code: string, message: string, public status: number) {
@@ -144,10 +145,24 @@ export function withAuthorization(
             ? effectiveRequiredRole
             : [effectiveRequiredRole];
           const callerRoles = auth.roles && auth.roles.length ? auth.roles : [auth.role];
-          const ok = allowed.some((r) => callerRoles.includes(r));
+          let ok = allowed.some((r) => callerRoles.includes(r));
+          let delegationId: string | null = null;
+          // STEP 4.1 delegation fallback: a caller lacking the native role
+          // may still hold an active, un-revoked TTL delegation for it
+          // (public.delegations; see /api/admin/roles/delegate). The
+          // delegation id is carried into the audit trail.
+          if (!ok) {
+            const resolved = await resolveEffectiveRole(auth, allowed);
+            if (resolved.delegationId !== null) {
+              ok = true;
+              delegationId = resolved.delegationId;
+            }
+          }
           if (!ok) {
             throw new AuthError("FORBIDDEN", "Insufficient role", 403);
           }
+          // Expose delegation context to handlers that audit with it.
+          (auth as AuthContext & { delegationId?: string | null }).delegationId = delegationId;
         }
         if (options.requiredPermission) {
           await requireAuthPermission(bearer(req), options.requiredPermission);
