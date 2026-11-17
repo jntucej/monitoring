@@ -157,6 +157,17 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # over audit_events; broken chain fires a critical alert.
 0 2 * * *     root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/audit-chain >> /var/log/gate-cron.log 2>&1
+
+# Register auto-open (operator scope) — every 5 min: at each period
+# start, messages the 4 authorized takers (CR/ICR) to take attendance.
+*/5 * * * *   root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/register-open >> /var/log/gate-cron.log 2>&1
+
+# Faculty duty-off review (faculty scope) — daily 19:00 (last class end
+# + 30 min fallback): one card per faculty with classes today; tomorrow
+# preview line; one next-morning reminder max.
+0 19 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/faculty-review >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

@@ -88,6 +88,7 @@ interface TelegramUpdate {
     chat?: { id?: number };
   };
   callback_query?: {
+    id?: string;
     data?: string;
     from?: { id?: number; username?: string };
     message?: { chat?: { id?: number } };
@@ -813,6 +814,57 @@ export async function POST(req: NextRequest): Promise<Response> {
   // Handle inline keyboard callback queries (menu button clicks)
   const callbackData = (callbackQuery?.data ?? "").trim();
   if (callbackData) {
+    // Register keyboard callbacks (reg:<draftId>:<action>) — handled inline
+    // with the caller's own context; no menu parsing.
+    if (callbackData.startsWith("reg:")) {
+      const regMatch = callbackData.match(/^reg:([^:]+):(all|clear|submit|\d+[A-Z0-9]*)$/i);
+      if (regMatch) {
+        const draftId = regMatch[1];
+        const action = regMatch[2];
+        const { rows: regUserRows } = await query<{ id: string; unique_id: string; name: string; role: string; status: string }>(
+          `SELECT id, unique_id, name, role, status FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+          [telegramChatId],
+        );
+        if (regUserRows.length) {
+          const regUser = regUserRows[0];
+          const pool = await getPostgresPool();
+          const client = await pool.connect();
+          try {
+            await client.query("SET ROLE gate_app");
+            const ctx: BotContext = {
+              chatId: telegramChatId,
+              userId: regUser.id,
+              uniqueId: regUser.unique_id,
+              name: regUser.name,
+              role: regUser.role,
+              status: regUser.status,
+              client,
+            };
+            const { handleRegisterCallback } = await import("@/lib/bot-personas");
+            const reply = handleRegisterCallback(draftId, action, ctx);
+            if (reply) await replyToChat(telegramChatId, reply);
+          } catch {
+            await replyToChat(telegramChatId, "⚠️ Register action failed — re-run /register.");
+          } finally {
+            await client.query("RESET ROLE").catch(() => undefined);
+            client.release();
+          }
+        }
+      }
+      if (callbackQuery?.id) {
+        const token = process.env.TELEGRAM_BOT_TOKEN;
+        if (token && callbackQuery.id) {
+          await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ callback_query_id: callbackQuery.id }),
+            signal: AbortSignal.timeout(5000),
+          }).catch(() => undefined);
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
     const parsed = parseMenuCallback(callbackData);
     if (parsed) {
       const { role, cmd } = parsed;
@@ -873,7 +925,8 @@ export async function POST(req: NextRequest): Promise<Response> {
   const roleCmds = ["passes","curfew","alerts","complaint","announce","attendance",
     "students","schedule","shifts","gates","occupancy","campus","users","complaints",
     "bot","child","dept","exam","mess","guardian","health","events","delegation",
-    "backup","blocks","maintenance","visitor","classes","handover","menu","faculty","audit"];
+    "backup","blocks","maintenance","visitor","classes","handover","menu","faculty","audit",
+    "now","settings","register","review","classes-add","message"];
   const roleCmd = text.split(/\s+/)[0].replace("/","").replace("@cej_server_bot","").toLowerCase();
 
   if (roleCmds.includes(roleCmd)) {

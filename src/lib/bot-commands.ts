@@ -8,6 +8,10 @@
 
 import { query } from "@/lib/postgres";
 import { sendTelegramMessage } from "@/lib/telegram";
+import {
+  cmdNow, cmdSettings, cmdRegister,
+  cmdReview, cmdClassAdd, cmdMessage,
+} from "@/lib/bot-personas";
 import type { PoolClient } from "pg";
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -35,6 +39,8 @@ export interface InteractiveMenu {
 
 const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
   student: [
+    { cmd: "/now", desc: "Your today: attendance + schedule + results" },
+    { cmd: "/settings", desc: "Your 4 preferences" },
     { cmd: "/passes", desc: "Your gate passes" },
     { cmd: "/curfew", desc: "Curfew status & score" },
     { cmd: "/alerts", desc: "Active alerts near you" },
@@ -49,6 +55,12 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/health", desc: "System health for you" },
   ],
   faculty: [
+    { cmd: "/now", desc: "Your today: attendance + next class + results" },
+    { cmd: "/register", desc: "Take your class register (CR/ICR)" },
+    { cmd: "/review", desc: "Duty-off review + your log" },
+    { cmd: "/classes-add", desc: "Add extra/reschedule/substitute class" },
+    { cmd: "/message", desc: "Send to your students (relay or direct)" },
+    { cmd: "/settings", desc: "Your 4 preferences" },
     { cmd: "/attendance", desc: "Today's attendance summary" },
     { cmd: "/students", desc: "Your assigned students" },
     { cmd: "/schedule", desc: "Today's class schedule" },
@@ -62,6 +74,8 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/mentees", desc: "Your active mentees" },
   ],
   staff: [
+    { cmd: "/now", desc: "Your today" },
+    { cmd: "/settings", desc: "Your 4 preferences" },
     { cmd: "/shifts", desc: "Your upcoming shifts" },
     { cmd: "/gates", desc: "Gate status & recent scans" },
     { cmd: "/occupancy", desc: "Campus occupancy" },
@@ -79,6 +93,8 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/mess", desc: "Child's mess bill" },
   ],
   hod: [
+    { cmd: "/now", desc: "Your today: staff attendance + dept summary" },
+    { cmd: "/settings", desc: "Your 4 preferences" },
     { cmd: "/dept", desc: "Department overview" },
     { cmd: "/attendance", desc: "Dept attendance rate" },
     { cmd: "/alerts", desc: "Dept alerts" },
@@ -88,6 +104,8 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/events", desc: "Campus events" },
   ],
   principal: [
+    { cmd: "/now", desc: "Your today: staff attendance + campus summary" },
+    { cmd: "/settings", desc: "Your 4 preferences" },
     { cmd: "/campus", desc: "Campus-wide dashboard" },
     { cmd: "/attendance", desc: "Institution attendance" },
     { cmd: "/alerts", desc: "All active alerts" },
@@ -915,7 +933,13 @@ async function cmdMentees(ctx: BotContext): Promise<string> {
   return `🎓 *Your Mentees (${rows.length})*\n\n` + rows.map((r) => `• ${r.name} (${r.unique_id})`).join("\n");
 }
 
-const HANDLERS: Record<string, (ctx: BotContext) => Promise<string>> = {
+const HANDLERS: Record<string, (ctx: BotContext, text?: string) => Promise<string>> = {
+  now: cmdNow,
+  settings: cmdSettings,
+  register: cmdRegister,
+  review: cmdReview,
+  "classes-add": cmdClassAdd,
+  message: cmdMessage,
   status: cmdStatus,
   passes: cmdPasses,
   curfew: cmdCurfew,
@@ -1026,7 +1050,7 @@ export async function executeBotCommand(
   }
 
   try {
-    return await handler(ctx);
+    return await handler(ctx, rawCommand);
   } catch (err) {
     console.error(`[BotCmd] ${cmd} failed:`, err);
     return `⚠️ Something went wrong fetching /${cmd}. Please try again later.`;
