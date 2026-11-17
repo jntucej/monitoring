@@ -222,3 +222,26 @@ serves both accreditation and legal review.
 | 1 | Mid 2027–mid 2028 | Four bounded agents, service identities, signed exam manifest | Gate, mess, complaint, exam agents inside existing roles | Agents cannot mutate without role context |
 | 2 | Mid 2028–2029 | Offline gate primary, self-healing leave/mess/fee loops | Supervisor becomes exception manager; student/parent fee agents | Delegation TTL, anomaly fallback |
 | 3 | 2029–2030+ | Governed agent ecosystem, BYO-agent governance, tamper-evident audit | Every role agent-augmented; delegation graph machine-readable | Structural separations fixed; human commits consequences |
+
+## Where we are against the phases
+
+- **Phase 0 (harden + instrument):** ✅ done ahead of the original
+  mid-2027 window — entity locks (all 6 new roles + scope tables),
+  structured audit pipeline (`audit_events` with actor_type, entity
+  scope, delegation id, latency), two-person controls live on
+  DEBARRED/SUSPENDED and on high-risk grants.
+- **Phase 1 (bounded agents):** ✅ the four named agents are live as
+  cron routes inside their role contexts, plus a leave-chain agent and
+  the tamper-evident audit chain (a Phase-3 artifact shipped early).
+  SPIFFE machine identities + OPA PDP are the remaining Phase-1
+  items.
+- **Phase 2 (self-healing):** ◐ in progress — offline gate verifier
+  and multi-agent risk pipeline still need the edge hardware; the
+  leave chain is already self-executing (TTLs, reminders, auto-expiry,
+  gate-token issuance).
+- **Phase 3 (governed ecosystem):** ◐ delegation graph API and
+  tamper-evident audit are live; BYO-agent broker and
+  post-quantum credential migration remain.
+
+The condensed table at the end of this doc reflects the original plan;
+the implementation landed ahead of it for Phases 0–1.

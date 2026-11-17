@@ -145,3 +145,28 @@ The current ROLE_OPERATIONS.md is a permission map. This document turns it
 into an entity-aligned operational model matching how JNTUH CEJ actually
 governs its departments, hostels, mess, and examination branch — without
 weakening the tier controls.
+
+## Implementation status (live as of commit 7094367c)
+
+The entity model above is now wired into the running system:
+
+| Control from this doc | Shipped | Where |
+|---|---|---|
+| 6 new entity roles | ✅ | `users.role` CHECK + `config_roles_registry` (migration 20270114); `src/lib/roles.ts` has 29 roles |
+| exam_branch split | ✅ | the lone `exam_branch` user re-pointed to `addl_controller_academic`; 3 desk shell accounts created (DISABLED, ready to credential) |
+| Two-person DEBARRED/SUSPENDED | ✅ | HOD write parks in `status_pending_approver`; `/api/academic-status/pending` queue (GET/POST) for dean/principal/VP/chief_warden/admin/sysadmin; DB backstop trigger parks any direct-SQL write from a non-approver |
+| Hostel leave gate chain | ✅ | `leave_requests` state machine (migration 20270115) + `/api/parent/leave/acknowledge` + `/api/gate/verify-leave-chain` (returns exactly which link is missing) + `/api/cron/leave-chain` agent (TTL reminders, escalation, auto-expiry, gate-token issuance) |
+| Chief Warden escalation | ✅ | `/api/hostel-manager/incidents/[id]/escalate` — only `chief_warden`/`principal`; writes the academic two-person flow |
+| HOD scope incl. science HODs | ✅ | `/api/hod/exam-review` and academic-status GET/POST are `auth.departmentId`-locked; `entity_scopes` seeds all 9 departments (5 B.Tech + Physics/Chem/Math/English) |
+| Marks entry ≠ processing ≠ sign-off | ✅ | `/api/faculty/marks` (faculty DRAFT) → `/marks/submit` (LOCK) → `/api/exam/results/process` (addl_controller_results) → `/api/exam/results/publish` (controller_examinations only); corrections only via `/api/faculty/marks/correct` (academic desk, maker ≠ checker) |
+| Time-bound delegation | ✅ | `delegations` table (TTL + can_mutate + no-self-delegation) + `/api/admin/roles/delegate` + delegation-aware `withAuthorization` fallback + `/api/delegations/graph` (machine-readable authority graph) |
+| Mess Committee review gate | ⚠️ Partial | `mess_incharge` operations live (reconcile/anomaly/bills); the cost-threshold approval row still needs the menu-change hook |
+| chief_warden audit context | ✅ | hostel decisions write `audit_events` with `role_context='chief_warden'`, separate from principal actions |
+
+**Tier 6 completions (shipped):** student fee dues/receipts, library
+issues+fines, published-only grade card, scholarship status — and the
+`/fees` `/library` `/marks` bot commands. Parent: fee view, leave
+acknowledgement (the gate-chain link), guardian re-verification.
+
+Still planned (next build): HOD faculty-workload/grievance endpoints,
+parent fee payment gateway hook, and the Mess Committee threshold hook.

@@ -2019,3 +2019,105 @@ Key differences from the generic model:
   baseline audit through database foundation, role split, missing
   operations, enforcement wiring, bounded agents, self-healing loops,
   and long-term governance.
+
+## Shipped in the autonomous build (commit 1ace14d7 → 7094367c, 2026-11-17)
+
+The sections above were generated from the pre-build surface (270 routes, 23 roles). 
+Everything below is new since then: 29 roles, +46 API routes, 6 bounded agents, 
+the two-person academic-status flow, and the tamper-evident audit chain. 
+All of it is live on gate_monitor; migrations 20270114–20270117 applied.
+
+
+### Two-person academic status (HOD flags → Dean/Principal approves)
+
+- `/api/academic-status/pending` — GET, POST — roles: 
+
+### Faculty operations (3.2)
+
+- `/api/faculty/marks` — GET, POST — roles: faculty, hod, admin, sysadmin
+- `/api/faculty/marks/submit` — POST — roles: faculty, hod
+- `/api/faculty/marks/correct` — POST — roles: addl_controller_academic, admin, sysadmin
+- `/api/faculty/assignments` — GET, POST — roles: faculty, student, hod, admin, sysadmin
+- `/api/faculty/materials` — GET, POST — roles: faculty, student, parent, guardian, hod, admin, sysadmin
+- `/api/faculty/mentees` — GET — roles: faculty, hod, admin, sysadmin
+- `/api/faculty/internal-exam/propose` — POST — roles: faculty
+
+### HOD operations (3.3)
+
+- `/api/hod/exam-review` — GET, POST — roles: hod, controller_examinations, admin, sysadmin
+
+### Gate operator / supervisor (3.4)
+
+- `/api/supervisor/visitors/overstay` — GET — roles: supervisor, admin, sysadmin
+- `/api/supervisor/visitors/watchlist` — GET, POST — roles: supervisor, admin, sysadmin
+- `/api/operator/gate/device-health` — POST — roles: operator, supervisor, admin, sysadmin
+- `/api/operator/passes/batch-verify` — POST — roles: operator, supervisor, admin, sysadmin
+- `/api/gate/verify-leave-chain` — GET — roles: operator, supervisor, admin, sysadmin
+
+### Mess incharge (3.5)
+
+- `/api/mess/reconcile` — GET, POST — roles: mess_incharge, admin, sysadmin
+- `/api/mess/tokens/anomaly` — GET — roles: mess_incharge, admin, sysadmin
+- `/api/mess/bills` — GET — roles: mess_incharge, admin, sysadmin
+
+### Exam branch desks (3.6)
+
+- `/api/exam/eligibility-rules` — GET, POST — roles: controller_examinations, oie, exam_branch, admin, sysadmin
+- `/api/exam/hall-tickets/generate` — POST — roles: addl_controller_automation, exam_branch, admin, sysadmin
+- `/api/exam/results/process` — POST — roles: addl_controller_results, admin, sysadmin
+- `/api/exam/results/publish` — POST — roles: controller_examinations, admin, sysadmin
+
+### Hostel (3.7)
+
+- `/api/hostel-manager/rooms/allot` — POST — roles: hostel_manager, deputy_warden, chief_warden, admin, sysadmin
+- `/api/hostel-manager/incidents` — GET, POST — roles: hostel_manager, deputy_warden, chief_warden, principal, admin, sysadmin
+- `/api/hostel-manager/incidents/[id]/escalate` — POST — roles: chief_warden, principal, admin, sysadmin
+
+### Parent / guardian (3.8)
+
+- `/api/parent/leave/acknowledge` — POST — roles: parent, guardian, admin, sysadmin
+- `/api/guardian/links/reverify` — POST — roles: guardian, parent, admin, sysadmin
+
+### Student self-service (3.1)
+
+- `/api/student/fees` — GET — roles: student, parent, guardian, admin, sysadmin
+- `/api/student/marks` — GET — roles: student, parent, guardian, hod, admin, sysadmin
+- `/api/student/library` — GET — roles: student, admin, sysadmin
+- `/api/student/scholarships` — GET — roles: student, parent, guardian, admin, sysadmin
+
+### Admin / sysadmin (3.9)
+
+- `/api/admin/roles/delegate` — GET, POST — roles: admin, sysadmin
+- `/api/sysadmin/rls/drift` — GET — roles: sysadmin
+- `/api/sysadmin/bot/anomaly` — GET, POST — roles: sysadmin, admin
+- `/api/sysadmin/approvals/two-person` — GET, POST — roles: sysadmin, admin
+- `/api/delegations/graph` — GET — roles: admin, sysadmin, principal, dean
+
+### Bounded agents (STEP 5–6, cron, x-cron-secret)
+
+| Endpoint | Schedule | Bounded to | Function |
+|---|---|---|---|
+| `/api/cron/gate-reconcile` | */5 | operator | auto-resolve unmatched manual gate scans or prepare operator prompts |
+| `/api/cron/mess-reconcile` | 05:00 | mess_incharge | hash-chained ledger: issued vs consumed vs boarders; anomaly blocks service |
+| `/api/cron/complaint-triage` | */30 | supervisor | categorize, route, duplicate-flag, SLA-escalate open complaints |
+| `/api/cron/exam-eligibility-manifest` | 22:00 | oie | precompute + Ed25519-sign candidate eligibility for exam day |
+| `/api/cron/leave-chain` | */30 | deputy_warden | TTL reminders/escalations/auto-expiry on the hostel leave chain; issues gate token |
+| `/api/cron/audit-chain` | 02:00 | sysadmin | tamper-evident SHA256 chain over audit_events; broken link → critical alert |
+| `/api/cron/birthday-check` | 00:30 | system | personal in-app + Telegram birthday notification, once per year per user |
+
+### New roles (29 total, all in users.role CHECK + registry)
+
+| Role | JNTUH CEJ desk | Primary new surface |
+|---|---|---|
+| `dean` | Associate Dean (Academics / Student Affairs) | two-person approver, /api/academic-status/pending |
+| `chief_warden` | Chief Warden (= Principal by convention) | /api/hostel-manager/incidents/[id]/escalate, menu-committee approvals |
+| `controller_examinations` | Controller of Examinations | /api/exam/results/publish, eligibility-rules owner |
+| `addl_controller_academic` | Addl. Controller (Academic) | /api/faculty/marks/correct (only role that may fix locked marks) |
+| `addl_controller_results` | Addl. Controller (Results) | /api/exam/results/process — processes, never publishes |
+| `addl_controller_automation` | Addl. Controller (Automation) | /api/exam/hall-tickets/generate |
+
+### Related docs (all in this commit chain)
+- `docs/JNTUH_CEJ_ROLE_HIERARCHY.md` — entity model + 7 hierarchy controls
+- `docs/AUTONOMOUS_OPERATIONS.md` — control loops, threats, HA requirements
+- `docs/ROLE_EVOLUTION_2030.md` — Phase 0–3 time-lapse plan
+- `docs/IMPLEMENTATION_BLUEPRINT.md` — STEP 0–7 build order + live status table

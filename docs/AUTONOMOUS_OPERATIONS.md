@@ -235,3 +235,20 @@ run without a human at the keyboard for every scan, token, and complaint.
 JNTUH CEJ's existing biometric and network infrastructure gives a strong
 physical anchor — use it to make the bot and portal autonomous without
 trusting a chat identity as the root of authority.
+
+## What is now running (live)
+
+| Section item | Status |
+|---|---|
+| 4.1 Gate self-healing | ✅ `/api/cron/gate-reconcile` (*/5, operator scope) — auto-resolves clean scans, prepares operator prompts; offline JWT verifier still Phase 2 (needs edge hardware) |
+| 4.1 Pass zero-touch expiry | ✅ existing `/api/cron/expire-passes` (15 min) |
+| 4.1 Mess idempotent + reconcile | ✅ `/api/cron/mess-reconcile` (daily) with hash-chained `mess_reconciliation` ledger; token endpoint already idempotent via ON CONFLICT |
+| 4.1 Complaints auto-triage | ✅ `/api/cron/complaint-triage` (*/30, supervisor scope) |
+| 4.1 Exam pre-authorized eligibility | ✅ `/api/cron/exam-eligibility-manifest` (22:00) — Ed25519-signed manifest in `exam_eligibility_manifests`; offline verifier promotion is Phase 2 |
+| 4.2 Agentic layer | ✅ 4 Phase-1 agents live + leave-chain + audit-chain agents (6 total); all write `actor_type='agent'` audit events; SPIFFE/OPA is the Phase-2 upgrade path |
+| Threat C — RLS drift | ✅ `/api/sysadmin/rls/drift` (live pg_policies diff + gate_app exposure check); nightly job + CI gate still to wire |
+| Threat E — sysadmin break-glass | ✅ `/api/sysadmin/approvals/two-person` maker-checker queue; break-glass role grants route through it |
+| Threat F — mess manipulation | ✅ hash-chained reconciliation + service-window block (reversible) |
+| Telegram hardening (4.4) | ✅ `/api/sysadmin/bot/anomaly` — suspension ledger (`telegram_session_suspensions`) + alert; device-binding WebAuthn step-up is Phase 2 |
+| §5 new operations | ✅ all 12 shipped except `backup/drill` (needs a second host) |
+| §7 integration | ⚠️ biometric devices remain standalone; the offline verifier + Aadhaar-anchored enrollment are the two physical integrations still open |

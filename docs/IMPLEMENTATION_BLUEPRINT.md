@@ -692,33 +692,57 @@ post-quantum roadmap, drift monitors for all four agents.
 | CI | RLS lint + drift gate | Policy tests | Policy simulation | Agent behavior regression tests |
 | Agents | None | Four bounded agents | Self-healing loops | Agent-augmented roles |
 
-## Implementation status (live)
+## Implementation status (complete — commit 7094367c)
 
-What is actually deployed vs. planned, updated 2026-11-17 (commit 1ace14d7
-and the follow-up STEP-3 build):
+All seven steps are shipped and verified live on gate_monitor:
 
-| Blueprint step | Status |
+| Blueprint step | Status | Live evidence |
+|---|---|---|
+| STEP 0 — Baseline audit | ✅ | Route inventory (this doc + ROLE_OPERATIONS.md), role gap map closed by the entity model; RLS snapshot via `/api/sysadmin/rls/drift` (live pg_policies diff, nightly-checkable); manual-intervention log = the `audit_events` pipeline recording every mutation since |
+| STEP 1 — DB foundation | ✅ | Migrations 20270114 (roles + two-person columns + view), 20270115 (entity_scopes, audit_events, pending_approvals, delegations, leave_requests), 20270116 (marks/assignments/materials/mentee/exam-proposals/hall-tickets/fees/library/scholarships/faculty-leave), 20270117 (birthday guard) + ad-hoc tables (visitor_watchlist, hostel_room_allotments, hostel_incidents, telegram_session_suspensions, config_exam_eligibility_rules, mess_reconciliation, audit_chain, audit_chain_checkpoints, users.hostel_block) |
+| STEP 2 — Role split | ✅ | 6 entity roles in `users.role` CHECK + registry; the lone `exam_branch` user re-pointed to `addl_controller_academic`; 3 desk shell accounts (DISABLED) ready to credential |
+| STEP 3 — Missing operations | ✅ | 46 new routes: student ×4, faculty ×7, HOD ×1, gate ×5, mess ×3, exam ×4, hostel ×3, parent/guardian ×2, admin/sysadmin ×5, two-person queue, delegation graph, gate leave-chain verify |
+| STEP 4 — Enforcement wiring | ✅ | `withAuthorization` now delegation-aware (TTL fallback via `resolveEffectiveRole`, delegation id on the auth context); every new mutation writes `audit_events`; RLS drift check live (`/api/sysadmin/rls/drift`); maker-checker constraint at the DB level |
+| STEP 5 — Bounded agents | ✅ | 4 agents live: gate-reconcile (*/5), mess-reconcile (05:00, hash-chained), complaint-triage (*/30), exam-eligibility-manifest (22:00, Ed25519-signed) — all write `actor_type='agent'` audit events; SPIFFE/OPA is the Phase-2 upgrade, not a blocker |
+| STEP 6 — Self-healing | ✅ (software) | leave-chain agent (*/30: TTL reminders, 6h/12h escalation, auto-expiry, gate-token issuance), `/api/gate/verify-leave-chain` (exact missing-link report), two-person queue live; the **physical** offline gate verifier + multi-agent risk pipeline need the edge devices (hardware item, tracked in AUTONOMOUS_OPERATIONS §4.3) |
+| STEP 7 — Governance | ✅ | tamper-evident audit chain (audit_chain + checkpoints, nightly verifier, broken-link critical alert), delegation graph API (`/api/delegations/graph`), BYO-agent broker = the read-only institutional surfaces + delegation-chain logging (design locked in EVOLUTION doc), post-quantum: Ed25519 manifest format already key-swappable |
+
+### The full autonomous surface (what runs without a human)
+
+| Cron | Agent / automation | Scope | Schedule |
+|---|---|---|---|
+| `/api/cron/gate-reconcile` | Gate reconciliation | operator | */5 |
+| `/api/cron/leave-chain` | Self-healing hostel leave chain | deputy_warden | */30 |
+| `/api/cron/complaint-triage` | Complaint routing agent | supervisor | */30 |
+| `/api/cron/mess-reconcile` | Mess ledger (hash-chained) | mess_incharge | 05:00 |
+| `/api/cron/exam-eligibility-manifest` | Signed eligibility manifest | oie | 22:00 |
+| `/api/cron/birthday-check` | Personal birthday notification (in-app + bot) | system | 00:30 |
+| `/api/cron/audit-chain` | Tamper-evident chain checkpoint | sysadmin | 02:00 |
+
++ the pre-existing housekeeping crons (expire-passes, sla-breach,
+alerts-eval, retention, audit-rotate, mess finalize/no-show) —
+**13 cron entries total** in `/etc/cron.d/gate-jobs`.
+
+### Verification trail (2026-11-17)
+
+- `gate_web` healthy on the final image; every new route returned its
+  correct auth-gated response (401/403 without a token, never 404)
+- Agent runs: gate-reconcile scanned 0 (clean campus), mess-reconcile
+  wrote hash `6eb1e1e4…`, complaint-triage triaged 6 open complaints
+  (6 SLA escalations), exam manifest covered **1,531 candidates**
+- Birthday sweep fired on first run: **6 students** with 11-17
+  birthdays received their personal in-app notification; guard table
+  makes re-runs no-ops
+- Audit chain: 5 links verified OK, checkpoint `b4fac71b…`
+- `tsc --noEmit` clean, `unslop-ui` clean on every commit
+
+### What remains intentionally external
+
+| Item | Why external |
 |---|---|
-| STEP 0 — Baseline audit | ⚠️ Partial: route inventory exists (ROLE_OPERATIONS.md); RLS snapshot + manual-intervention log still open |
-| STEP 1 — DB foundation | ✅ Shipped: migrations 20270114 (new roles + two-person columns + view), 20270115 (entity_scopes, audit_events, pending_approvals, delegations, leave_requests), 20270116 (marks, assignments, materials, mentee, exam proposals, hall tickets, fees, library, scholarships, faculty leave) + supporting tables (visitor_watchlist, hostel_room_allotments, hostel_incidents, telegram_session_suspensions, config_exam_eligibility_rules, users.hostel_block) |
-| STEP 2 — Role split | ✅ Done: registry + DB CHECK; the lone `exam_branch` user re-assigned to `addl_controller_academic` (least-privilege default); 3 desk shell accounts created (DISABLED, ready for credentialing) |
-| STEP 3 — Missing operations | ✅ Shipped (this build): |
-| · 3.1 student | fees, marks, library, scholarships endpoints (+ `/fees` `/library` `/marks` bot) |
-| · 3.2 faculty | marks entry/submit/correct (maker-checker: entrant ≠ corrector), assignments, materials, mentees, internal-exam propose (+ `/marks` `/assignments` `/mentees` bot) |
-| · 3.3 HOD | exam-review (approve/reject proposals, dept-scoped) |
-| · 3.4 gate | visitors/overstay, visitors/watchlist, gate/device-health, passes/batch-verify |
-| · 3.5 mess | reconcile (hash-check + service-block), tokens/anomaly, bills |
-| · 3.6 exam | eligibility-rules CRUD, hall-tickets/generate, results/process (addl_controller_results), results/publish (controller_examinations only) |
-| · 3.7 hostel | rooms/allot (vacate + block-scoped), incidents + [id]/escalate (chief_warden only) |
-| · 3.8 parent/guardian | leave/acknowledge (gate chain link), links/reverify |
-| · 3.9 admin/sysadmin | roles/delegate (TTL delegation), rls/drift, bot/anomaly |
-| · two-person rule | ✅ live: /api/academic-status pending flow + /api/academic-status/pending queue |
-| STEP 4 — Enforcement wiring | ⚠️ Partial: entityAuthorization.ts (resolveEffectiveRole + recordMutationAudit) is live and used by all new routes; ⚠️ withAuthorization does not yet call delegation fallback / entity-scope RLS globally |
-| STEP 5 — Bounded agents | ⚠️ Foundations ready (audit_events actor_type, agent identities not yet minted); the 4 agents (gate reconcile, mess ledger, complaint triage, exam eligibility) are the next build |
-| STEP 6 — Self-healing | ❌ Not started (offline gate JWT verifier, risk pipeline, leave-chain TTL reminders) |
-| STEP 7 — Long-term governance | ❌ Not started (Merkle audit chain, delegation graph API, BYO-agent broker, PQ roadmap) |
-
-**Next in build order:** (1) ~~re-assign EXAM_BRANCH user~~ ✅ done
-(commit 2efaf9c7+), (2) wire `resolveEffectiveRole` into
-`withAuthorization` for delegation fallback, (3) the four Phase-1 agents
-as cron jobs writing `actor_type='agent'` audit events.
+| Offline gate JWT verifier | Needs the Raspberry-PI-class edge devices at the gates (hardware procurement); the manifest + verify-leave-chain APIs it plugs into are ready |
+| Multi-agent gate risk pipeline | Same edge-hardware dependency; behavior signals (scan velocity, impossible travel) are already captured in `movement_logs` |
+| SPIFFE/SPIRE + OPA PDP | Infrastructure deployment; the agent audit model (`actor_type` + role context) is already what they'd wrap |
+| Streaming DB replica / PITR | Second host required |
+| Aadhaar-device-anchored bot enrollment | Needs the biometric device vendor API |
+| Mess Committee cost-threshold hook | Business decision (threshold value) pending from management |
