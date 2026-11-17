@@ -691,3 +691,35 @@ post-quantum roadmap, drift monitors for all four agents.
 | Delegation | Manual role grants | TTL object in DB | PIM-style activation | Machine-readable delegation graph |
 | CI | RLS lint + drift gate | Policy tests | Policy simulation | Agent behavior regression tests |
 | Agents | None | Four bounded agents | Self-healing loops | Agent-augmented roles |
+
+## Implementation status (live)
+
+What is actually deployed vs. planned, updated 2026-11-17 (commit 1ace14d7
+and the follow-up STEP-3 build):
+
+| Blueprint step | Status |
+|---|---|
+| STEP 0 — Baseline audit | ⚠️ Partial: route inventory exists (ROLE_OPERATIONS.md); RLS snapshot + manual-intervention log still open |
+| STEP 1 — DB foundation | ✅ Shipped: migrations 20270114 (new roles + two-person columns + view), 20270115 (entity_scopes, audit_events, pending_approvals, delegations, leave_requests), 20270116 (marks, assignments, materials, mentee, exam proposals, hall tickets, fees, library, scholarships, faculty leave) + supporting tables (visitor_watchlist, hostel_room_allotments, hostel_incidents, telegram_session_suspensions, config_exam_eligibility_rules, users.hostel_block) |
+| STEP 2 — Role split | ✅ Roles in registry + DB CHECK; ⚠️ exam_branch user not yet re-assigned to a desk |
+| STEP 3 — Missing operations | ✅ Shipped (this build): |
+| · 3.1 student | fees, marks, library, scholarships endpoints (+ `/fees` `/library` `/marks` bot) |
+| · 3.2 faculty | marks entry/submit/correct (maker-checker: entrant ≠ corrector), assignments, materials, mentees, internal-exam propose (+ `/marks` `/assignments` `/mentees` bot) |
+| · 3.3 HOD | exam-review (approve/reject proposals, dept-scoped) |
+| · 3.4 gate | visitors/overstay, visitors/watchlist, gate/device-health, passes/batch-verify |
+| · 3.5 mess | reconcile (hash-check + service-block), tokens/anomaly, bills |
+| · 3.6 exam | eligibility-rules CRUD, hall-tickets/generate, results/process (addl_controller_results), results/publish (controller_examinations only) |
+| · 3.7 hostel | rooms/allot (vacate + block-scoped), incidents + [id]/escalate (chief_warden only) |
+| · 3.8 parent/guardian | leave/acknowledge (gate chain link), links/reverify |
+| · 3.9 admin/sysadmin | roles/delegate (TTL delegation), rls/drift, bot/anomaly |
+| · two-person rule | ✅ live: /api/academic-status pending flow + /api/academic-status/pending queue |
+| STEP 4 — Enforcement wiring | ⚠️ Partial: entityAuthorization.ts (resolveEffectiveRole + recordMutationAudit) is live and used by all new routes; ⚠️ withAuthorization does not yet call delegation fallback / entity-scope RLS globally |
+| STEP 5 — Bounded agents | ⚠️ Foundations ready (audit_events actor_type, agent identities not yet minted); the 4 agents (gate reconcile, mess ledger, complaint triage, exam eligibility) are the next build |
+| STEP 6 — Self-healing | ❌ Not started (offline gate JWT verifier, risk pipeline, leave-chain TTL reminders) |
+| STEP 7 — Long-term governance | ❌ Not started (Merkle audit chain, delegation graph API, BYO-agent broker, PQ roadmap) |
+
+**Next in build order:** (1) re-assign the `EXAM_BRANCH` user to
+`addl_controller_academic` (least-privilege default per blueprint 2.1) or
+create the four desk accounts, (2) wire `resolveEffectiveRole` into
+`withAuthorization` for delegation fallback, (3) the four Phase-1 agents
+as cron jobs writing `actor_type='agent'` audit events.

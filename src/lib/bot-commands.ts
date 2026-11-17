@@ -43,6 +43,9 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/exam", desc: "Your next exams" },
     { cmd: "/mess", desc: "Mess bill & meal opt-out" },
     { cmd: "/guardian", desc: "Your linked guardian" },
+    { cmd: "/fees", desc: "Your fee dues & receipts" },
+    { cmd: "/library", desc: "Library issues & fines" },
+    { cmd: "/marks", desc: "Your published grade card" },
     { cmd: "/health", desc: "System health for you" },
   ],
   faculty: [
@@ -54,6 +57,9 @@ const ROLE_COMMANDS: Record<string, Array<{ cmd: string; desc: string }>> = {
     { cmd: "/classes", desc: "Your classes (all)" },
     { cmd: "/complaints", desc: "Complaints in your dept" },
     { cmd: "/events", desc: "Campus events this week" },
+    { cmd: "/marks", desc: "Your classes' marks (drafts)" },
+    { cmd: "/assignments", desc: "Your open assignments" },
+    { cmd: "/mentees", desc: "Your active mentees" },
   ],
   staff: [
     { cmd: "/shifts", desc: "Your upcoming shifts" },
@@ -813,6 +819,102 @@ async function cmdVisitor(ctx: BotContext): Promise<string> {
 
 // ── Handler registry ─────────────────────────────────────────────────────
 
+
+// ── New STEP-3 handlers (student lifecycle + faculty ops) ──────────────
+
+async function cmdFees(ctx: BotContext): Promise<string> {
+  const { rows } = await ctx.client.query<{
+    fee_type: string; amount: string; paid: string; status: string; due_date: string | null;
+  }>(
+    `SELECT fee_type, amount::text AS amount, paid::text AS paid, status, due_date
+       FROM public.fee_items WHERE student_id = $1 ORDER BY due_date NULLS LAST`,
+    [ctx.userId],
+  );
+  if (rows.length === 0) return "💳 *Fees*\n\nNo fee items on record.";
+  const totalDue = rows.filter((r) => r.status !== "PAID" && r.status !== "WAIVED")
+    .reduce((s, r) => s + (Number(r.amount) - Number(r.paid)), 0);
+  const lines = rows.map((r) =>
+    `• ${r.fee_type}: ₹${r.paid}/${r.amount} — ${r.status}${r.due_date ? ` (due ${r.due_date})` : ""}`);
+  return `💳 *Fees*\n\n${lines.join("\n")}\n\n*Outstanding:* ₹${totalDue}`;
+}
+
+async function cmdLibrary(ctx: BotContext): Promise<string> {
+  const { rows } = await ctx.client.query<{
+    title: string; status: string; due_at: string | null; fine: string | null;
+  }>(
+    `SELECT lb.title, li.status, li.due_at, li.fine::text AS fine
+       FROM public.library_issues li
+       JOIN public.library_books lb ON lb.id = li.book_id
+      WHERE li.student_id = $1 ORDER BY li.issued_at DESC LIMIT 10`,
+    [ctx.userId],
+  );
+  if (rows.length === 0) return "📚 *Library*\n\nNo books issued.";
+  return "📚 *Library*\n\n" + rows.map((r) =>
+    `• ${r.title} — ${r.status}${r.due_at ? ` (due ${r.due_at.slice(0, 10)})` : ""}${r.fine && Number(r.fine) > 0 ? ` [fine ₹${r.fine}]` : ""}`).join("\n");
+}
+
+async function cmdMarks(ctx: BotContext): Promise<string> {
+  const { rows } = await ctx.client.query<{
+    exam_type: string; academic_year: number; term: string | null;
+    score: string | null; max_marks: string;
+  }>(
+    `SELECT exam_type, academic_year, term, score::text AS score, max_marks::text AS max_marks
+       FROM public.marks WHERE student_id = $1 AND status = 'PUBLISHED'
+      ORDER BY academic_year DESC, exam_type LIMIT 15`,
+    [ctx.userId],
+  );
+  if (rows.length === 0) return "📊 *Marks*\n\nNo published marks yet (drafts are hidden until results publish).";
+  return "📊 *Grade Card*\n\n" + rows.map((r) =>
+    `• ${r.exam_type} ${r.academic_year}${r.term ? ` ${r.term}` : ""}: ${r.score ?? "—"}/${r.max_marks}`).join("\n");
+}
+
+async function cmdAssignments(ctx: BotContext): Promise<string> {
+  // Faculty: their open assignments. Students: open assignments for their class.
+  if (ctx.role === "student") {
+    const { rows } = await ctx.client.query<{
+      title: string; due_at: string | null; status: string;
+    }>(
+      `SELECT a.title, a.due_at, a.status
+         FROM public.assignments a
+         JOIN public.classes c ON c.id = a.class_id
+         JOIN public.student_details sd ON sd.department = c.department_id::text
+        WHERE sd.user_id = $1 AND sd.year = c.year AND sd.section = c.section
+          AND a.status = 'OPEN'
+        ORDER BY a.due_at ASC LIMIT 10`,
+      [ctx.userId],
+    );
+    if (rows.length === 0) return "📝 *Assignments*\n\nNo open assignments.";
+    return "📝 *Open Assignments*\n\n" + rows.map((r) =>
+      `• ${r.title}${r.due_at ? ` (due ${r.due_at.slice(0, 10)})` : ""}`).join("\n");
+  }
+  // Faculty: their own open assignments with submission counts.
+  const { rows } = await ctx.client.query<{
+    title: string; due_at: string | null; subs: string;
+  }>(
+    `SELECT a.title, a.due_at,
+            (SELECT COUNT(*)::text FROM public.assignment_submissions s WHERE s.assignment_id = a.id) AS subs
+       FROM public.assignments a WHERE a.faculty_id = $1 AND a.status = 'OPEN'
+        ORDER BY a.due_at ASC LIMIT 10`,
+    [ctx.userId],
+  );
+  if (rows.length === 0) return "📝 *Assignments*\n\nNo open assignments.";
+  return "📝 *Your Open Assignments*\n\n" + rows.map((r) =>
+    `• ${r.title}${r.due_at ? ` (due ${r.due_at.slice(0, 10)})` : ""} — ${r.subs} submissions`).join("\n");
+}
+
+async function cmdMentees(ctx: BotContext): Promise<string> {
+  const { rows } = await ctx.client.query<{
+    name: string; unique_id: string;
+  }>(
+    `SELECT u.name, u.unique_id FROM public.mentee_assignments ma
+       JOIN public.users u ON u.id = ma.mentee_id
+      WHERE ma.mentor_id = $1 AND ma.status = 'ACTIVE' ORDER BY u.unique_id`,
+    [ctx.userId],
+  );
+  if (rows.length === 0) return "🎓 *Mentees*\n\nNo active mentees.";
+  return `🎓 *Your Mentees (${rows.length})*\n\n` + rows.map((r) => `• ${r.name} (${r.unique_id})`).join("\n");
+}
+
 const HANDLERS: Record<string, (ctx: BotContext) => Promise<string>> = {
   status: cmdStatus,
   passes: cmdPasses,
@@ -844,6 +946,11 @@ const HANDLERS: Record<string, (ctx: BotContext) => Promise<string>> = {
   backup: cmdBackup,
   blocks: cmdBlocks,
   maintenance: cmdMaintenance,
+  fees: cmdFees,
+  library: cmdLibrary,
+  marks: cmdMarks,
+  assignments: cmdAssignments,
+  mentees: cmdMentees,
   visitor: cmdVisitor,
 };
 
