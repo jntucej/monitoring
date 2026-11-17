@@ -1,0 +1,6 @@
+── k6 Gate 1 summary ──
+p95: 0ms  (SLO <500ms)
+p99: 0ms
+error rate: 0.00%  (SLO <1%)
+checks pass rate: 50.0%  (SLO >95%)
+See load/report.json for full metrics.

@@ -1,0 +1,1 @@
+{"http":{"values":{"rate":0,"p(95)":0,"p(99)":0}},"checks":{"type":"rate","contains":"default","values":{"rate":0.5,"passes":51,"fails":51}},"requests":{"type":"counter","contains":"default","values":{"count":51,"rate":8.053610108258868}},"thresholds":{"checks":["rate>0.95"],"http_req_duration":["p(95)<500"],"http_req_failed":["rate<0.01"]}}
