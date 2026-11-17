@@ -11,7 +11,7 @@ import { errMsg } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { randomUUID } from "crypto";
-import { query } from "@/lib/postgres";
+import { query, tgQuery } from "@/lib/postgres";
 
 export async function POST(req: NextRequest) {
   const unauthorized = requireCronAuth(req);
@@ -69,11 +69,14 @@ export async function POST(req: NextRequest) {
       if (ins.rows.length > 0) notified += 1;
 
       // 2. Telegram bot message (only for users with a linked bot account).
-      const link = await query<{ telegram_chat_id: number | null }>(
-        `SELECT telegram_chat_id FROM public.telegram_user_profiles
-          WHERE user_id = $1 AND telegram_chat_id IS NOT NULL
-          ORDER BY created_at DESC LIMIT 1`,
-        [u.id],
+      // telegram_user_profiles lives in the telegram_bot DB; use tgQuery.
+      const link = await tgQuery<{ user_unique_id: string | null; telegram_chat_id: number | null }>(
+        `SELECT user_unique_id, telegram_chat_id
+           FROM public.telegram_user_profiles
+          WHERE user_unique_id = $1
+          ORDER BY updated_at DESC
+          LIMIT 1`,
+        [u.unique_id],
       );
       if (link.rows.length > 0 && link.rows[0].telegram_chat_id) {
         const sent = await sendBirthdayTelegram(link.rows[0].telegram_chat_id, u.name);
