@@ -55,44 +55,51 @@ SECURITY DEFINER
 AS $$
 BEGIN
   IF TG_OP IN ('INSERT', 'UPDATE') THEN
-    INSERT INTO public.class_student_counts
-      (class_key, department, year, section, student_count, updated_at)
-    VALUES
-      (NEW.department || ':' || NEW.year || ':' || NEW.section,
-       NEW.department, NEW.year, NEW.section, 1, now())
-    ON CONFLICT (class_key) DO UPDATE SET
-      student_count = public.class_student_counts.student_count + 1,
-      updated_at    = now();
-  END IF;
-
-  IF TG_OP = 'DELETE' THEN
-    UPDATE public.class_student_counts
-       SET student_count = GREATEST(student_count - 1, 0),
-           updated_at    = now()
-     WHERE class_key = OLD.department || ':' || OLD.year || ':' || OLD.section;
-  END IF;
-
-  IF TG_OP = 'UPDATE' AND (OLD.department, OLD.year, OLD.section) IS DISTINCT FROM (NEW.department, NEW.year, NEW.section) THEN
-    -- Student moved to a different class: decrement old, increment new
-    UPDATE public.class_student_counts
-       SET student_count = GREATEST(student_count - 1, 0),
-           updated_at    = now()
-     WHERE class_key = OLD.department || ':' || OLD.year || ':' || OLD.section;
+    IF (TG_OP = 'UPDATE'
+        AND (OLD.department, OLD.year, OLD.section) IS NOT DISTINCT FROM (NEW.department, NEW.year, NEW.section)) THEN
+      -- No class change on UPDATE: return without touching the counter
+      RETURN COALESCE(NEW, OLD);
+    END IF;
 
     INSERT INTO public.class_student_counts
       (class_key, department, year, section, student_count, updated_at)
     VALUES
       (NEW.department || ':' || NEW.year || ':' || NEW.section,
-       NEW.department, NEW.year, NEW.section, 1, now())
+       NEW.department, NEW.year, NEW.section,
+       CASE WHEN TG_OP = 'INSERT' THEN 1 ELSE 0 END,
+       now())
     ON CONFLICT (class_key) DO UPDATE SET
-      student_count = public.class_student_counts.student_count + 1,
+      student_count = public.class_student_counts.student_count
+        + CASE WHEN TG_OP = 'INSERT' THEN 1 ELSE 0 END,
       updated_at    = now();
+  END IF;
+
+  IF TG_OP IN ('DELETE', 'UPDATE') THEN
+    UPDATE public.class_student_counts
+       SET student_count = GREATEST(
+             student_count - CASE WHEN TG_OP = 'DELETE' THEN 1 ELSE 0 END, 0),
+           updated_at    = now()
+     WHERE class_key =
+       COALESCE(
+         CASE WHEN TG_OP = 'DELETE'
+           THEN OLD.department || ':' || OLD.year || ':' || OLD.section
+           ELSE NULL
+         END,
+         CASE WHEN TG_OP = 'UPDATE'
+              AND (OLD.department, OLD.year, OLD.section) IS DISTINCT FROM
+                  (NEW.department, NEW.year, NEW.section)
+           THEN OLD.department || ':' || OLD.year || ':' || OLD.section
+           ELSE NULL
+         END
+       );
   END IF;
 
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
 
+-- Drop the old trigger first (idempotent), then recreate with the fixed logic.
+DROP TRIGGER IF EXISTS trg_class_student_count ON public.student_details;
 CREATE TRIGGER trg_class_student_count
   AFTER INSERT OR UPDATE OR DELETE ON public.student_details
   FOR EACH ROW EXECUTE FUNCTION public.fn_maintain_class_student_count();
