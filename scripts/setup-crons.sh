@@ -148,6 +148,15 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # calendar year (birthday_celebrated guard).
 30 0 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
                 ${CRON_BASE}/api/cron/birthday-check >> /var/log/gate-cron.log 2>&1
+# Leave chain agent (deputy_warden scope) — every 30 min: TTL
+# reminders + escalation + auto-expiry + gate token issuance.
+*/30 * * * *  root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/leave-chain >> /var/log/gate-cron.log 2>&1
+
+# Audit chain (sysadmin) — nightly 02:00: tamper-evident hash chain
+# over audit_events; broken chain fires a critical alert.
+0 2 * * *     root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/audit-chain >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"
