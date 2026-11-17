@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
            ('birthday', 'low',
             '🎂 Happy Birthday, ${u.name}!',
             'Wishing you a wonderful birthday and a great year ahead. — JNTUH CEJ',
-            $1, 'person', ARRAY['in_app'], $2)
+            $1, 'user', ARRAY['in_app'], $2)
          RETURNING id`,
         [u.id, JSON.stringify({ birthday: true, year, dobMonthDay: monthDay })],
       );
