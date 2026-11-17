@@ -861,7 +861,7 @@ export async function POST(req: NextRequest): Promise<Response> {
   const roleCmds = ["passes","curfew","alerts","complaint","announce","attendance",
     "students","schedule","shifts","gates","occupancy","campus","users","complaints",
     "bot","child","dept","exam","mess","guardian","health","events","delegation",
-    "backup","blocks","maintenance","visitor","classes","handover","menu","faculty"];
+    "backup","blocks","maintenance","visitor","classes","handover","menu","faculty","audit"];
   const roleCmd = text.split(/\s+/)[0].replace("/","").replace("@cej_server_bot","").toLowerCase();
 
   if (roleCmds.includes(roleCmd)) {
