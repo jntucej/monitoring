@@ -30,4 +30,17 @@ A mandatory checklist for incoming PRs and architecture reviews to ensure Gate M
 - [ ] **Data Export:** Are exports filtered for the caller's scope? Are formulas in CSVs escaped?
 
 ---
+
+## 6. Entity & Agent Controls (added 2026-11)
+- [ ] **Entity scope:** Does every new route filter by `auth.departmentId` / `hostel_block` / entity scope, or by `public.delegations` TTL where a role is delegated?
+- [ ] **Two-person rule:** Do high-impact flags (DEBARRED/SUSPENDED, sysadmin grants, mess contractor escalation) park in `pending_approvals` with the maker ≠ checker constraint (DB `maker_ne_checker` CHECK)?
+- [ ] **Agent audit:** Do agent actions write `audit_events` with `actor_type='agent'` and the role context of the boundary they run inside?
+- [ ] **Delegation TTL:** Does every delegation carry `starts_at`/`expires_at`/`revoked_at`, no-self-delegation, and does `withAuthorization` fall back to it only when the native role is absent?
+- [ ] **Leave chain:** Are hostel gate passes gated on `leave_requests.status = 'GATE_ISSUED'` (warden + parent both done)?
+- [ ] **RLS drift:** Is the nightly `pg_policies` diff (`/api/sysadmin/rls/drift`) checked, and do new tables that `gate_app` can read have RLS enabled with no `USING (true)` policies?
+- [ ] **Bot surface:** Do OPERATOR/APPROVER-tier mutations via the Telegram bot require step-up (device-bound) confirmation, and are anomalous-velocity sessions auto-suspended (`/api/sysadmin/bot/anomaly`)?
+
+*Cross-references: `docs/ROLE_OPERATIONS.md` (the full route→role map),
+`docs/IMPLEMENTATION_BLUEPRINT.md` (build status), `docs/AUTONOMOUS_OPERATIONS.md` (threat model + control loops).*
+
 *Maintained by: SecOps / Gate Monitor Technical Lead*

@@ -4,6 +4,43 @@ This document centralizes all comprehensive audit items, hardening recommendatio
 
 ---
 
+## ✅ Completed — Autonomous build (commit 1ace14d7 → 6806f481, 2026-11-17)
+
+Everything below was open on 2026-11-12 and is now **shipped and live** on
+gate_monitor. See `docs/IMPLEMENTATION_BLUEPRINT.md` for status + evidence.
+
+| Was | Now |
+|---|---|
+| Single `exam_branch` role, no exam-desk separation | 4 desk roles: `controller_examinations`, `addl_controller_academic`, `addl_controller_results`, `addl_controller_automation` |
+| No two-person DEBARRED/SUSPENDED | `status_pending_approver` + `pending_approvals` + `/api/academic-status/pending` + DB backstop trigger |
+| No hostel leave chain | `leave_requests` state machine + `/api/parent/leave/acknowledge` + `/api/gate/verify-leave-chain` + `/api/cron/leave-chain` agent |
+| No entity scoping | `entity_scopes` (20 seeds: 9 depts, 4 blocks, exam desks, mess, gate, lib, OIE) + `auth.departmentId` locks |
+| No delegation | `delegations` (TTL + can_mutate + no-self-delegation) + delegation-aware `withAuthorization` + `/api/delegations/graph` |
+| No structured audit | `audit_events` (actor_type incl. 'agent', entity_scope, delegation_id, latency) + nightly SHA256 `audit_chain` checkpoint |
+| No HOD exam-review | `/api/hod/exam-review` (dept-scoped) |
+| No student fee/library/marks self-service | `/api/student/fees|marks|library|scholarships` + bot `/fees /library /marks` |
+| No faculty marks entry / assignments / materials / mentees | `/api/faculty/marks*`, `/assignments`, `/materials`, `/mentees`, `/internal-exam/propose` |
+| No mess reconcile | `/api/mess/reconcile` + hash-chained `mess_reconciliation` + `/api/cron/mess-reconcile` |
+| No exam-eligibility manifest | `exam_proposals` + `/api/cron/exam-eligibility-manifest` (Ed25519-signed) |
+| No gate device-health / batch-verify | `/api/operator/gate/device-health`, `/api/operator/passes/batch-verify` |
+| No visitor watchlist / overstay | `/api/supervisor/visitors/watchlist|overstay` |
+| No RLS drift check | `/api/sysadmin/rls/drift` (live pg_policies diff) |
+| No bot anomaly ledger | `/api/sysadmin/bot/anomaly` + `telegram_session_suspensions` |
+| No birthday notification | `/api/cron/birthday-check` + `birthday_celebrated` guard |
+| No maker-checker queue | `/api/sysadmin/approvals/two-person` |
+| No agents at all | 6 agents live (gate/leave/complaint/mess/exam/audit) on cron |
+
+**Still open (external / hardware / business):**
+- **H1** — Offline gate JWT verifier + multi-agent risk pipeline (needs the edge devices)
+- **H2** — Aadhaar-device-anchored bot enrollment (needs the biometric vendor API)
+- **H3** — KMS hold of the Ed25519 exam keypair (needs a KMS host)
+- **H4** — Streaming DB replica / PITR (needs a second host)
+- **H5** — Mess Committee cost-threshold approval hook (business decision pending)
+- **H6** — SPIFFE/SPIRE machine identities + OPA PDP (infrastructure)
+- **H7** — HOD faculty-workload / grievance endpoints + parent fee-payment gateway hook (next build)
+
+---
+
 ## AX. Cookie & Session Security
 
 - **AX1 — Explicit Cookie Attributes**: Every `Set-Cookie` in `src/app/api/auth/*` must enforce `httpOnly: true`, `secure: true` (in production), `sameSite: "lax"`, `path: "/"`.

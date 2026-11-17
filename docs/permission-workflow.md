@@ -44,6 +44,16 @@ Four workflows are supported: hostel, exam, memo, staff leave.
 ## Roles Added
 `caretaker`, `deputy_warden`, `hostel_manager`, `principal`, `vice_principal`, `oie`, `exam_branch`.
 
+> **Entity-aligned update (2026-11):** the single `exam_branch` role was
+> split into four desks — `controller_examinations`,
+> `addl_controller_academic`, `addl_controller_results`,
+> `addl_controller_automation` — and six more entity roles joined the
+> registry: `dean`, `chief_warden`. The full 29-role list with entity
+> scopes is in `docs/JNTUH_CEJ_ROLE_HIERARCHY.md`. The legacy
+> `exam_branch` string remains valid for approver-surface
+> compatibility but no user carries it anymore (the lone user was
+> re-pointed to `addl_controller_academic`).
+
 ## Device Settings
 All device verification is **OFF by default**. Enable per device in `/sysadmin/devices` when hardware is ready. When disabled, biometric stages auto-pass with a soft note — the workflow does not block.
 

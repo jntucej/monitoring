@@ -70,3 +70,33 @@ docker compose --env-file /opt/monitoring/env/production.env logs -f worker
   ```bash
   docker compose --env-file /opt/monitoring/env/production.env restart caddy
   ```
+
+## Autonomous agents & cron (added 2026-11)
+
+Thirteen jobs run from `/etc/cron.d/gate-jobs` (host cron → Caddy →
+`/api/cron/*`, all authenticated with `x-cron-secret`). Log:
+`/var/log/gate-cron.log`.
+
+| Job | Schedule | What to check on alert |
+|---|---|---|
+| `gate-reconcile` | */5 | Unmatched manual scans → operator prompts in `alerts` |
+| `leave-chain` | */30 | Warden/parent TTL reminders + auto-expiry; gate tokens |
+| `complaint-triage` | */30 | SLA escalations → supervisor queue |
+| `mess-reconcile` | 05:00 | Hash-chained ledger; service-window block on anomaly |
+| `exam-eligibility-manifest` | 22:00 | Signed manifest for the next exam day |
+| `birthday-check` | 00:30 | Personal birthday notifications (once/year) |
+| `audit-chain` | 02:00 | **Broken chain = critical** — integrity review |
+| `expire-passes` / `sla-breach` / `alerts-eval` / `retention` / `audit-rotate` / `mess-finalize` / `mess-no-show-check` | various | Pre-existing housekeeping |
+
+**If `audit-chain` reports `brokenLinks > 0`:** freeze the affected
+`audit_events` rows, open a security incident, and do NOT re-run until
+the break is forensically explained — the chain is the integrity proof.
+
+**If `mess-reconcile` blocks a service window:** the block is reversible
+by `mess_incharge` or `chief_warden` resolving the underlying
+`mess_ledger` alert; the agent does not re-issue tokens on its own.
+
+**Agent identities are not user accounts.** They act inside a role
+context and are only visible in the audit trail as
+`actor_type='agent'` + `role_context`. There is no "service account"
+that bypasses RLS.

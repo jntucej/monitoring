@@ -113,3 +113,15 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
 | `clean_md.py` & `fix_types.py` | Python Scripts | Automated workspace code hygiene & documentation formatting tools. |
 
 | `date-fns` | `^4.4.0` | Immutable date arithmetic and formatting for curfew windows and pass expiration. |
+
+## Autonomous layer (added 2026-11)
+- **Ed25519** — exam-eligibility manifest signing (keypair in
+  `exam_eligibility_keys`; Phase 2 moves the private side to KMS).
+- **Host cron + `x-cron-secret`** — the 13-job autonomous surface
+  (agents + housekeeping); each job is a `/api/cron/*` POST behind
+  `requireCronAuth`.
+- **Hash-chain audit** — `audit_chain` / `audit_chain_checkpoints`
+  provide the tamper-evident lineage (SHA256, nightly checkpoint).
+- **Entity scoping** — `entity_scopes`, `delegations` (TTL),
+  `pending_approvals` (maker-checker), `leave_requests` (state
+  machine) are the schema behind the 29-role model.

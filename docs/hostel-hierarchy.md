@@ -361,3 +361,14 @@ The pure button matrix lives in `resolveEntryOptions` in
 `src/lib/permission-workflow.ts` and `src/lib/permission-workflow-pure.ts`
 so "use client" gate-operator components can import it without pulling the
 `pg` driver into the browser bundle.
+
+## Cross-references (2026-11)
+- The warden chain above is now entity-scoped: `deputy_warden` is
+  block-bound via `users.hostel_block`, and the gate–hostel–parent
+  leave chain runs through the `leave_requests` state machine
+  (DRAFT → WARDEN_APPROVED → PARENT_ACKNOWLEDGED → GATE_ISSUED).
+- The self-healing leave-chain agent (cron `*/30`) runs the TTL
+  reminders/escalations/auto-expiry on that state machine.
+- Full entity model: `docs/JNTUH_CEJ_ROLE_HIERARCHY.md`
+  (Tier 3 hostel & mess); operations + leave chain:
+  `docs/ROLE_OPERATIONS.md` "Shipped in the autonomous build".
