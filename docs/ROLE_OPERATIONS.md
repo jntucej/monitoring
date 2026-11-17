@@ -1991,3 +1991,14 @@ Key differences from the generic model:
   PENDING, override = Supervisor + audit reason.
 - **HOD scope extended** — covers science/HSS HODs (Physics, Chemistry,
   Math, English), not just the 5 engineering departments.
+
+## Related documents
+
+- **`docs/JNTUH_CEJ_ROLE_HIERARCHY.md`** — entity-aligned operational
+  model: how each role maps to JNTUH CEJ's actual administrative entities
+  (5 engineering departments, hostel blocks, exam branch desks, mess
+  committee) and the hierarchy controls that bind them.
+- **`docs/AUTONOMOUS_OPERATIONS.md`** — automation and resilience layer:
+  the control loops, agentic layer, HA requirements, and 30/60/90
+  sequence that make the system run without a human at the keyboard for
+  every event.
