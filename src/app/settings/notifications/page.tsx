@@ -29,6 +29,7 @@ export default function NotificationSettingsPage() {
       emergency_broadcast: true,
       pass_approved: true,
       pass_rejected: true,
+        birthday: true,
     },
     quietHours: { start: "22:00", end: "06:00" },
   });

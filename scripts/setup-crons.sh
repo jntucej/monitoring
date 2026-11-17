@@ -142,6 +142,12 @@ CRON_BASE="${CRON_BASE:-https://monitor.ucej.in}"
 # builds the signed eligibility manifest the exam-day gate checks offline.
 0 22 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \\
                 ${CRON_BASE}/api/cron/exam-eligibility-manifest >> /var/log/gate-cron.log 2>&1
+
+# Happy-birthday sweep (daily 00:30): in-app + Telegram birthday
+# notification for every ACTIVE user whose dob is today, once per
+# calendar year (birthday_celebrated guard).
+30 0 * * *    root  curl -sk -X POST -H "x-cron-secret: ${CRON_SECRET}" \
+                ${CRON_BASE}/api/cron/birthday-check >> /var/log/gate-cron.log 2>&1
 EOF
   chmod 600 /etc/cron.d/gate-jobs
   echo "✓ Installed /etc/cron.d/gate-jobs (mode 600 — contains CRON_SECRET)"

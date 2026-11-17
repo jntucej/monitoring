@@ -130,6 +130,14 @@ const TEMPLATES: Record<NotificationType, NotificationTemplate> = {
     defaultChannels: ['in_app'],
     priority: 'low',
   },
+  birthday: {
+    id: 'birthday',
+    type: 'birthday',
+    titleTemplate: '🎂 Happy Birthday, {{name}}!',
+    messageTemplate: 'Wishing you a wonderful birthday and a great year ahead. — JNTUH CEJ',
+    defaultChannels: ['in_app', 'push'],
+    priority: 'low',
+  },
 };
 
 export function isQuietHours(quietHours?: { start: string; end: string } | null, date = new Date()): boolean {
@@ -450,6 +458,7 @@ export async function getNotificationPreferences(
         emergency_broadcast: true,
         pass_approved: true,
         pass_rejected: true,
+        birthday: true,
       },
     };
   }

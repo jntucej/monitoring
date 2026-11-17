@@ -13,7 +13,8 @@ export type NotificationType =
   | 'pass_approved'
   | 'pass_rejected'
   | 'entry_recorded'
-  | 'exit_recorded';
+  | 'exit_recorded'
+  | 'birthday';
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical';
 
@@ -56,6 +57,7 @@ export interface NotificationPreferences {
     emergency_broadcast: boolean;
     pass_approved: boolean;
     pass_rejected: boolean;
+    birthday: boolean;
   };
   quietHours?: {
     start: string; // "22:00"
