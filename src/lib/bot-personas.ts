@@ -127,17 +127,24 @@ export async function cmdNow(ctx: BotContext): Promise<string> {
 
 export async function cmdSettings(ctx: BotContext): Promise<string> {
   const prefs = await getPrefs(ctx.userId);
+  const { rows: themeRows } = await ctx.client.query<{ ui_theme: string }>(
+    `SELECT ui_theme FROM public.personalization_prefs WHERE user_id = $1`,
+    [ctx.userId],
+  );
+  const theme = themeRows[0]?.ui_theme ?? "graphite";
   return (
     "⚙️ *Your settings*\n" +
     `Quiet hours: ${prefs.quiet_start} – ${prefs.quiet_end}\n` +
     `Density: ${prefs.density}\n` +
     `Digest: ${prefs.digest_time}\n` +
-    `Review consent: ${prefs.consent_given ? "given " + (prefs.consent_at ?? "") : "not yet"}\n\n` +
+    `Review consent: ${prefs.consent_given ? "given " + (prefs.consent_at ?? "") : "not yet"}\n` +
+    `Theme: ${theme === "sakuga" ? "Sakuga (anime)" : "Graphite"}\n\n` +
     "Change:\n" +
     "/settings quiet 22:00-07:00\n" +
     "/settings density detailed\n" +
     "/settings digest 08:30\n" +
-    "/settings consent  (accepts raw-review visibility once)"
+    "/settings consent  (accepts raw-review visibility once)\n" +
+    "/settings theme sakuga  or  /settings theme graphite"
   );
 }
 
@@ -172,7 +179,28 @@ export async function cmdSettingsApply(ctx: BotContext, text: string): Promise<s
       "Nothing is scored automatically. Consent recorded ✓"
     );
   }
-  return "Unknown setting. Try: /settings · /settings quiet · /settings density · /settings digest · /settings consent";
+  if (cmd === "theme") {
+    const t = (parts[2] ?? "").toLowerCase();
+    if (t !== "sakuga" && t !== "graphite") return "Theme is 'sakuga' or 'graphite'.";
+    await ctx.client.query(
+      `INSERT INTO public.personalization_prefs (user_id, ui_theme)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id) DO UPDATE SET ui_theme = EXCLUDED.ui_theme`,
+      [ctx.userId, t],
+    );
+    void recordMutationAudit({
+      actorId: ctx.userId,
+      roleContext: ctx.role ?? "student",
+      action: "ui_theme_changed",
+      resource: "personalization_prefs",
+      resourceId: ctx.userId,
+      afterState: { ui_theme: t },
+    }).catch(() => undefined);
+    return t === "sakuga"
+      ? "Theme: Sakuga (anime VFX) ✓ — active on next web login"
+      : "Theme: Graphite ✓ — active on next web login";
+  }
+  return "Unknown setting. Try: /settings · /settings quiet · /settings density · /settings digest · /settings consent · /settings theme";
 }
 
 // ── /register — the CR/ICR gray→green register ───────────────────────

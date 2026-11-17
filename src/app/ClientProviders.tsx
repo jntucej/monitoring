@@ -24,6 +24,46 @@ const FloatingBot = dynamic(
   { ssr: false, loading: () => null },
 );
 
+// ── Sakuga VFX theme loader ─────────────────────────────────────
+// Female students get the anime-VFX theme by default (ui_theme='sakuga'
+// in personalization_prefs). The theme is applied as a data attribute on
+// <html> BEFORE any UI renders, so there is no flash of the graphite theme.
+// The sakuga-vfx components are loaded lazily via dynamic import; the
+// CSS palette override in globals.css [data-theme="sakuga"] handles the
+// rest of the app without touching the component files.
+async function loadSakugaTheme() {
+  const token = sessionStorage.getItem("auth.token");
+  if (!token) return;
+  try {
+    const res = await fetch("/api/preferences/theme", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.ui_theme === "sakuga") {
+      document.documentElement.setAttribute("data-theme", "sakuga");
+      // Load the sakuga-vfx components (button, checkbox, radio, toggle)
+      // as plain scripts (not modules). Each registers its own custom
+      // element; the first one sets window.SakugaFX.
+      for (const name of ["button", "checkbox", "radio", "toggle"]) {
+        const s = document.createElement("script");
+        s.src = `/sakuga-vfx/${name}.js`;
+        s.async = false; // load in order — the core must stamp first
+        document.head.appendChild(s);
+      }
+    }
+  } catch {
+    // Silent: theme load failure falls back to graphite.
+  }
+}
+
+// Fire-and-forget on module load; the data-theme attribute is set before
+// the first React render completes. No re-render needed — CSS vars handle
+// the color swap; the JS components are progressive enhancement.
+if (typeof window !== "undefined") {
+  loadSakugaTheme();
+}
+
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const hasHydrated = useAuthStore((s) => s._hasHydrated);
   const setHasHydrated = useAuthStore((s) => s.setHasHydrated);

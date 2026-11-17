@@ -255,6 +255,100 @@ p, li, .text-body { color: var(--color-text-secondary); }
   border-radius: 3px;
 }
 
+/* ── SAKUGA THEME (anime VFX) — female student default ───────────
+   Activated by <html data-theme="sakuga">. The sakuga-vfx components
+   (button, checkbox, radio, toggle) load their own CSS vars via
+   :where(:root) — the page-level overrides below win without
+   touching the component files.
+
+   Palette (from sakuga-vfx/core.js, two-tone + line rule):
+     ink   #1d1a4a   card  #fff      pri #8f8df7
+     soft  #b8b3ff   acc   #ff5fa8  dim #8580b0
+
+   The perf reset above kills all CSS transitions/animations.
+   Sakuga components animate via JS (requestAnimationFrame springs),
+   so they work regardless. The CSS overrides here only change
+   the color palette and surface geometry — no new motion. */
+[data-theme="sakuga"] {
+  color-scheme: light;
+
+  --color-canvas:        #f5f3ff;
+  --color-surface:       #ffffff;
+  --color-surface-muted: #ede9ff;
+  --color-border:        #c4bcf5;
+  --color-border-strong: #8f8df7;
+
+  --color-text-primary:      #1d1a4a;
+  --color-text-secondary:    #3d3878;
+  --color-text-muted:        #6e68a8;
+  --color-text-muted-strong: #5a5490;
+
+  --color-action-primary:       #8f8df7;
+  --color-action-primary-hover: #7b79e8;
+  --color-action-danger:        #e83e8a;
+  --color-action-warning:       #d97706;
+  --color-action-success:       #16a34a;
+  --color-action-info:          #6366f1;
+
+  --color-entry-bg:  #fef2f8;  --color-entry-fg:  #9d2463;
+  --color-exit-bg:   #fef2f2;  --color-exit-fg:   #991b1b;
+  --color-dayout-bg: #fffbeb;  --color-dayout-fg: #92400e;
+  --color-leave-bg:  #eef2ff;  --color-leave-fg:  #3730a3;
+
+  --radius-card:  1rem;
+  --radius-input: 0.75rem;
+  --radius-pill:  9999px;
+  --spacing-card: 1.25rem;
+
+  --bg-base:             var(--color-canvas);
+  --bg-surface:          var(--color-surface);
+  --bg-elevated:         var(--color-surface-muted);
+  --text-primary:        var(--color-text-primary);
+  --text-secondary:      var(--color-text-secondary);
+  --text-muted:          var(--color-text-muted);
+  --border:              var(--color-border);
+  --border-strong:       var(--color-border-strong);
+  --border-subtle:       var(--color-border);
+  --action-primary:      var(--color-action-primary);
+  --action-danger:       var(--color-action-danger);
+  --action-warning:      var(--color-action-warning);
+  --action-success:      var(--color-action-success);
+  --action-info:         var(--color-action-info);
+  --alert-critical:      var(--color-action-danger);
+  --alert-warning:       var(--color-action-warning);
+  --alert-success:       var(--color-action-success);
+  --unit-a:              var(--color-action-primary);
+  --unit-b:              var(--color-action-info);
+  --unit-c:              var(--color-action-warning);
+  --canvas:              var(--color-canvas);
+  --focus-ring:          var(--color-action-primary);
+
+  /* Sakuga component CSS vars (override :where(:root) defaults) */
+  --sk-card:   #ffffff;
+  --sk-ink:    #1d1a4a;
+  --sk-dim:    #8580b0;
+  --sk-soft:   #b8b3ff;
+  --sk-pri:    #8f8df7;
+  --sk-pri-ink:#1d1a4a;
+  --sk-acc:    #ff5fa8;
+  --sk-track:  #e4e1f5;
+  --sk-r:      15px;
+  --sk-bw:     3.2px;
+  --sk-sh:     6px 7px 0 #b8b3ff;
+  --sk-btn-sh: var(--sk-sh);
+  --sk-btn-line: var(--sk-ink);
+  --sk-alt-sh: var(--sk-sh);
+  --sk-alt-line: var(--sk-ink);
+  --sk-tick:   var(--sk-ink);
+  --sk-fill:   var(--sk-acc);
+  --sk-on-pri: #fff;
+}
+
+[data-theme="sakuga"] body {
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+}
+
 /* ── PERF: skip offscreen section render ──────────────────────── */
 .section-offscreen {
   content-visibility: auto;
