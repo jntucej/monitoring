@@ -1,5 +1,5 @@
 // src/app/api/academic-status/route.ts
-// HOD academic status management:
+// HOD academic status management with two-person rule:
 //
 // GET  /api/academic-status?department=CSE
 //      → class-wise roster with per-student academic_status
@@ -7,10 +7,21 @@
 //
 // POST /api/academic-status
 //      { userId: string, academicStatus: "SUSPENDED"|"DEBARRED"|"LATERAL_JOIN"|null,
-//        yearOverride?: number, reason?: string }
+//        yearOverride?: number, reason?: string, approve?: boolean }
 //      → HOD may only flag students in their own department;
 //        admin/sysadmin may flag anyone.
-//      → clears a status by sending academicStatus: null.
+//      → Two-person rule: DEBARRED and SUSPENDED set by a HOD land in
+//        PENDING state (student keeps gate access). A dean / principal /
+//        vice_principal / chief_warden / admin / sysadmin approves with
+//        { userId, approve: true, reason }. Only after approval does
+//        users.flag_status sync and the gate sees the flag.
+//      → Clears a status by sending academicStatus: null (any role that
+//        may set it may clear it).
+//
+// GET  /api/academic-status/pending
+//      → list of pending DEBARRED/SUSPENDED flags awaiting approval,
+//        scoped to the approver's authority (admin/sysadmin see all;
+//        dean/principal see their relevant scope).
 
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
@@ -21,6 +32,8 @@ import { logAuditEvent } from "@/middleware/authorization";
 import type { AuthContext } from "@/lib/authContext";
 
 const VALID_STATUS = new Set(["SUSPENDED", "DEBARRED", "LATERAL_JOIN"]);
+const TWO_PERSON_STATUS = new Set(["DEBARRED", "SUSPENDED"]);
+const APPROVER_ROLES = new Set(["dean", "principal", "vice_principal", "chief_warden", "admin", "sysadmin"]);
 
 interface RosterRow {
   user_id: string;
@@ -111,6 +124,7 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
     academicStatus?: string | null;
     yearOverride?: number | null;
     reason?: string;
+    approve?: boolean;
   } | null;
 
   if (!body || typeof body.userId !== "string" || !body.userId.trim()) {
@@ -157,7 +171,42 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
     }
   }
 
-  // Apply the update
+  // ---- Two-person rule ----
+  // If an approver is approving/rejecting a pending status, do that.
+  if (body.approve === true) {
+    if (!APPROVER_ROLES.has(auth.role)) {
+      return fail("FORBIDDEN", "Approval requires dean / principal / vice_principal / chief_warden / admin / sysadmin", 403);
+    }
+    const { rows: pend } = await query<{ academic_status: string | null; status_pending_approver: string | null }>(
+      `SELECT academic_status, status_pending_approver FROM public.student_details WHERE user_id = $1`,
+      [body.userId.trim()],
+    );
+    if (!pend.length || !pend[0].status_pending_approver) {
+      return fail("VALIDATION_ERROR", "No pending status to approve for this student", 400);
+    }
+    const pendingStatus = pend[0].academic_status;
+    await query(
+      `UPDATE public.student_details
+          SET status_pending_approver = NULL,
+              status_approved_at      = now(),
+              status_approved_by      = $2,
+              status_rejected_at      = NULL,
+              status_rejected_by      = NULL,
+              status_reject_reason    = NULL
+        WHERE user_id = $1`,
+      [body.userId.trim(), auth.role],
+    );
+    // Now sync the flag so gate + RLS see it.
+    if (pendingStatus) {
+      await query(`UPDATE public.users SET flag_status = $1 WHERE id = $2`, [pendingStatus, body.userId.trim()]);
+    }
+    await logAuditEvent(`academic_status_approved:${pendingStatus}`, auth.userId, {
+      studentId: body.userId.trim(), approverRole: auth.role, reason,
+    }, null, auth.role);
+    return ok({ userId: body.userId.trim(), approved: pendingStatus });
+  }
+
+  // Normal set / clear path.
   await query(
     `UPDATE public.student_details
         SET academic_status = $1,
@@ -167,6 +216,23 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
       WHERE user_id = $4`,
     [status, status === "LATERAL_JOIN" || status === "DEBARRED" ? yearOverride : null, reason, body.userId.trim()],
   );
+
+  // Two-person rule: HOD (or any non-approver role) setting DEBARRED /
+  // SUSPENDED parks it in pending state; flag_status is NOT synced yet.
+  const isTwoPerson = status !== null && TWO_PERSON_STATUS.has(status) && !APPROVER_ROLES.has(auth.role);
+  if (isTwoPerson) {
+    await query(
+      `UPDATE public.student_details
+          SET status_pending_approver = $1,
+              status_approved_at = NULL, status_approved_by = NULL
+        WHERE user_id = $2`,
+      [status, body.userId.trim()],
+    );
+    await logAuditEvent(`academic_status_pending:${status}`, auth.userId, {
+      studentId: body.userId.trim(), setterRole: auth.role, reason,
+    }, null, auth.role);
+    return ok({ userId: body.userId.trim(), academicStatus: status, pending: true });
+  }
 
   // Sync users.flag_status so gate scanner + RLS see the flag
   if (status) {
@@ -186,12 +252,43 @@ async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   return ok({ userId: body.userId.trim(), academicStatus: status, yearOverride });
 }
 
+// ---- Pending queue: approvers see what's waiting for two-person sign-off ----
+async function implGetPending(req: NextRequest, ctx: { auth: AuthContext }) {
+  const { auth } = ctx;
+
+  // admin/sysadmin see everything; dean/principal/vice_principal/
+  // chief_warden see the queue (they are the approver set).
+  if (!APPROVER_ROLES.has(auth.role)) {
+    return fail("FORBIDDEN", "Pending queue is visible to approver roles only", 403);
+  }
+
+  const { rows } = await query<{
+    user_id: string; roll: string; name: string;
+    department: string | null; academic_status: string | null;
+    status_reason: string | null; status_set_at: string | null;
+  }>(
+    `SELECT sd.user_id, u.unique_id AS roll, u.name, sd.department,
+            sd.academic_status, sd.status_reason, sd.status_set_at
+       FROM public.student_details sd
+       JOIN public.users u ON u.id = sd.user_id
+      WHERE sd.status_pending_approver IS NOT NULL
+        AND u.role = 'student'
+      ORDER BY sd.status_set_at ASC`,
+  );
+
+  return ok({ pending: rows.map((r) => ({
+    userId: r.user_id, roll: r.roll, name: r.name,
+    department: r.department, status: r.academic_status,
+    reason: r.status_reason, setAt: r.status_set_at,
+  })) });
+}
+
 export const GET = withRateLimit(
   withAuthorization(implGet, { requiredRole: ["hod", "admin", "sysadmin"] }),
   { keyPrefix: "academic-status-get", maxRequests: 30, windowMs: 60_000 },
 );
 
 export const POST = withRateLimit(
-  withAuthorization(implPost, { requiredRole: ["hod", "admin", "sysadmin"] }),
+  withAuthorization(implPost, { requiredRole: ["hod", "dean", "principal", "vice_principal", "chief_warden", "admin", "sysadmin"] }),
   { keyPrefix: "academic-status-post", maxRequests: 20, windowMs: 60_000 },
 );

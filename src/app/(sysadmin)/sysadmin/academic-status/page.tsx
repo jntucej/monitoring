@@ -422,7 +422,7 @@ function AcademicStatusInner() {
 
 export default function AcademicStatusPage() {
   return (
-    <AuthGuard allowedRoles={["hod", "admin", "sysadmin"]}>
+    <AuthGuard allowedRoles={["hod", "dean", "principal", "vice_principal", "chief_warden", "admin", "sysadmin"]}>
       <WidgetBoundary>
         <AcademicStatusInner />
       </WidgetBoundary>

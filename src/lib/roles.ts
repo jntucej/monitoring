@@ -30,6 +30,13 @@ export const ROLES = {
   EXAM_SUPERINTENDENT: "exam_superintendent",
   MESS_INCHARGE:   "mess_incharge",
   EMO:             "emo",
+  // Entity-aligned roles (JNTUH CEJ org chart; see docs/JNTUH_CEJ_ROLE_HIERARCHY.md)
+  DEAN:                "dean",
+  CHIEF_WARDEN:        "chief_warden",
+  CONTROLLER_EXAMS:    "controller_examinations",
+  ADDL_CTRL_ACADEMIC:  "addl_controller_academic",
+  ADDL_CTRL_RESULTS:   "addl_controller_results",
+  ADDL_CTRL_AUTOMATION:"addl_controller_automation",
   // Legacy roles — folded but still recognized for approver surface compatibility
   HOSTEL:          "hostel",
 } as const;

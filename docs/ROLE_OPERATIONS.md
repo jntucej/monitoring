@@ -2002,3 +2002,20 @@ Key differences from the generic model:
   the control loops, agentic layer, HA requirements, and 30/60/90
   sequence that make the system run without a human at the keyboard for
   every event.
+
+## Related documents
+
+- **`docs/JNTUH_CEJ_ROLE_HIERARCHY.md`** — entity-aligned operational model:
+  how each role maps to JNTUH CEJ's actual administrative entities (5
+  engineering departments, hostel blocks, exam branch desks, mess
+  committee) and the hierarchy controls that bind them.
+- **`docs/AUTONOMOUS_OPERATIONS.md`** — automation and resilience layer:
+  control loops, agentic layer, HA requirements, and 30/60/90 sequence
+  that make the system run without a human at the keyboard for every event.
+- **`docs/ROLE_EVOLUTION_2030.md`** — time-lapse evolution plan
+  (Phase 0–3, now → 2030): how the role hierarchy gets more precisely
+  enforced as bounded agents take over steady-state operations.
+- **`docs/IMPLEMENTATION_BLUEPRINT.md`** — the full build order from
+  baseline audit through database foundation, role split, missing
+  operations, enforcement wiring, bounded agents, self-healing loops,
+  and long-term governance.
