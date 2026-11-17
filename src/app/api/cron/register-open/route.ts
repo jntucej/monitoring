@@ -25,29 +25,25 @@ export async function POST(req: NextRequest) {
     const nowM = new Date().getMinutes();
     const dayOfWeek = (new Date().getDay() + 1) % 7; // Mon=1 … Sun=7
 
-    // Find periods that just started (within the last 10 minutes)
+    // Find periods that just started (within the last 15 minutes)
+    const nowTs = new Date();
+    const nowHm = `${String(nowTs.getHours()).padStart(2, "0")}:${String(nowTs.getMinutes()).padStart(2, "0")}`;
     const { rows: periods } = await query<{
       period_no: number;
-      start_h: string;
       class_name: string;
       class_id: string;
       faculty_name: string;
       faculty_id: string;
     }>(
-      `SELECT cp.period_no::text, to_char(cp.start_time, 'HH24:MI') AS start_h,
-              c.name AS class_name, c.id AS class_id,
+      `SELECT cp.period_no, c.name AS class_name, c.id AS class_id,
               f.name AS faculty_name, f.id AS faculty_id
          FROM public.class_periods cp
          JOIN public.classes c ON c.id = cp.class_id
          LEFT JOIN public.users f ON f.id = cp.faculty_id
-        WHERE cp.day_of_week = $1
-          AND to_char(cp.start_time, 'HH24') = to_char($2, 'HH24')
-          AND (
-            to_char(cp.start_time, 'HH24MI') <= to_char($2, 'HH24MI')
-            AND to_char(cp.start_time, 'HH24MI') >=
-                to_char($2 - INTERVAL '15 minutes', 'HH24MI')
-          )`,
-      [dayOfWeek, new Date()],
+        WHERE cp.day_of_week = $1::int
+          AND cp.start_time <= $2::time
+          AND cp.end_time   >= $2::time`,
+      [dayOfWeek, nowHm],
     );
 
     let opened = 0;
