@@ -12,6 +12,7 @@ import { SafeAreaAppShell } from "@/components/shared/SafeAreaAppShell";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { LoadingStates } from "@/components/shared/LoadingStates";
 import { LiveEventToaster } from "@/components/shared/LiveEventToaster";
+import { ShakeDetector } from "@/components/shared/ShakeDetector";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
 // canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
@@ -75,6 +76,10 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           {/* LiveEventToaster: ambient SSE/poll-to-toast layer, gated
               per-role inside the component — inert for non-alert roles. */}
           {!isMarketing && <LiveEventToaster />}
+          {/* ShakeDetector: auto-files a T1 bug complaint on phone shake —
+              inert on desktop / no sensor API. Mounted in every non-marketing
+              page so mobile users get one-shake bug reporting anywhere. */}
+          {!isMarketing && <ShakeDetector />}
           {!isMarketing && !isGateKiosk && <FloatingBot />}
         </ToastProvider>
       </NavigationProvider>
