@@ -356,6 +356,7 @@ services:
     image: caddy:2-alpine
     container_name: gate_caddy
     restart: always
+    cap_drop: [ALL]
     ports:
       - "127.0.0.1:80:80"
       - "127.0.0.1:443:443"
@@ -414,6 +415,7 @@ services:
     image: prom/alertmanager:v0.28.1
     container_name: gate_alertmanager
     restart: always
+    cap_drop: [ALL]
     cpu_shares: 192
     mem_limit: 128m
     volumes:
