@@ -79,29 +79,18 @@ test.describe("network throttling — 3G simulation", () => {
         }
       });
 
-      // Wait for the first request to be in-flight (button should
-      // be disabled or show a spinner), then click again quickly.
-      // The timing matters: if the first request completes before
-      // the second click, the double-submit window has closed.
       await submit.click();
-      // Small delay to land in the in-flight window
       await page.waitForTimeout(200);
       await submit.click();
 
-      // Wait for navigation to /student (throttled, so allow 60s)
       await Promise.race([
         page.waitForURL((url) => url.pathname === "/student", { timeout: 60_000 }),
         page.waitForTimeout(60_000),
       ]);
 
-      // The double-click test documents the current behavior:
-      // if the button has an in-flight guard, 1 POST.
-      // If it doesn't, 2 POSTs — and that's a real UX bug to fix.
-      // Either way the test passes; the annotation records the count.
-      test.info().annotations.push({
-        type: "note",
-        description: `login fired ${loginPosts} POSTs on double-click — guard present if 1, missing if 2+`,
-      });
+      // inFlightRef guard: a second click while the first is in-flight
+      // is blocked synchronously. Exactly 1 POST is expected.
+      expect(loginPosts, `expected 1 login POST (in-flight guard active), got ${loginPosts}`).toBe(1);
     },
   );
 
