@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     );
     const alertRes = await query(
       `DELETE FROM public.security_alerts
-        WHERE resolved = TRUE
+        WHERE status = 'resolved'
           AND created_at < NOW() - ($1 || ' days')::INTERVAL`,
       [alertRetentionDays],
     );
