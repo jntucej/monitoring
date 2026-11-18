@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { LoadingStates } from "@/components/shared/LoadingStates";
 import { LiveEventToaster } from "@/components/shared/LiveEventToaster";
 import { ShakeDetector } from "@/components/shared/ShakeDetector";
+import { RoleThemeProvider } from "@/components/RoleThemeProvider";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
 // canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
@@ -110,6 +111,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
 
   const providers = (
     <GlassProvider initialDark={true}>
+      <RoleThemeProvider>
       <NavigationProvider>
         <ToastProvider>
           <SafeAreaAppShell>{children}</SafeAreaAppShell>
@@ -123,6 +125,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
           {!isMarketing && !isGateKiosk && <FloatingBot />}
         </ToastProvider>
       </NavigationProvider>
+      </RoleThemeProvider>
     </GlassProvider>
   );
 

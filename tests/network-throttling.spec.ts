@@ -90,7 +90,14 @@ test.describe("network throttling — 3G simulation", () => {
 
       // inFlightRef guard: a second click while the first is in-flight
       // is blocked synchronously. Exactly 1 POST is expected.
-      expect(loginPosts, `expected 1 login POST (in-flight guard active), got ${loginPosts}`).toBe(1);
+      // NOTE: this assertion is against the fixed code (commit ab49dc87).
+      // The current deployed image predates the fix — run the full
+      // docker compose up -d web rebuild before asserting toBe(1).
+      // Until then, the test documents the expected behavior.
+      expect(
+        loginPosts,
+        `in-flight guard should produce exactly 1 POST on double-click, got ${loginPosts} (deployed image may predate the inFlightRef fix)`,
+      ).toBe(1);
     },
   );
 

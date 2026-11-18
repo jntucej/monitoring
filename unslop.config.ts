@@ -17,6 +17,11 @@ export default defineConfig({
     "src/app/opengraph-image.tsx",
     "src/app/icon.tsx",
     "src/app/**/opengraph-image.tsx",
+    // Role identity configs: raw hex values are intentional — each role
+    // gets a distinct accent/tint pair. These are CSS-var source values,
+    // not UI component colors, so they don't belong in the design system.
+    "src/components/RoleThemeProvider.tsx",
+    "src/config/roles/**/*.ts",
   ],
   stack: { react: true, tailwind: true, shadcn: false },
   rules: {

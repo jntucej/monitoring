@@ -10,6 +10,8 @@ import { QuickLinksRow } from "@/components/student/home/QuickLinksRow";
 import { GuardianCallButton } from "@/components/student/home/GuardianCallButton";
 import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
 import { WifiOff, RotateCw } from "lucide-react";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 // Offline banner: visible when the browser loses connectivity.
 // Shows cached/SSR content + a banner, not a blank screen.
@@ -67,7 +69,9 @@ function StudentHomeInner() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
+      <Greeting />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
+      <RoleOnboarding />
       <WidgetBoundary name="today-status" resetKey={resetKey}>
         <TodayStatus />
       </WidgetBoundary>

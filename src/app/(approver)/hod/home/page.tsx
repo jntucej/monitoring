@@ -25,6 +25,8 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { PageHeader } from "@/components/shared/PageHeader";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 interface PriorityItem {
   id: string;
@@ -133,6 +135,8 @@ export default function HodTodayPage() {
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
 
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
+<Greeting />
+        <RoleOnboarding />
 <PageHeader title="Head of Department" subtitle="Department leadership console" />
         <WidgetBoundary name="HodKpis" title="HOD KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
