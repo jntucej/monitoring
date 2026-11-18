@@ -62,4 +62,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ verified: true });
 }
 
-export const POST = withRateLimit(withAuthorization(handlePost), { windowMs: 60_000, maxRequests: 5 });
+export const POST = withRateLimit(
+  withAuthorization(handlePost, { requiredRole: ["guardian", "parent", "admin", "sysadmin"] }),
+  { windowMs: 60_000, maxRequests: 5 }
+);

@@ -244,6 +244,24 @@ async function handleLoginInner(req: NextRequest) {
         role: user.role as Role,
         details: { identifier, ip: extractClientIp(req) },
       });
+      // Also audit the password-verified success here — the MFA challenge
+      // is returned to the client, but the password was verified. This
+      // completes the LOGIN_SUCCESS trail for MFA-required users.
+      await addAudit({
+        action: "LOGIN_SUCCESS",
+        userId: user.id,
+        userName: user.name || user.email,
+        role: user.role as Role,
+        details: {
+          identifier,
+          ip: extractClientIp(req),
+          userAgent: req.headers.get("user-agent") || "unknown",
+          endpoint: "/api/auth/login",
+          request_id: getRequestId(req),
+          mfaRequired: true,
+          mfaMethods: ["passkey", ...(user.totp_secret_hash ? ["totp"] : [])],
+        },
+      });
       return NextResponse.json({
         success: true,
         data: {
@@ -328,6 +346,26 @@ async function handleLoginInner(req: NextRequest) {
         userName: user.name || user.email,
         role: user.role as Role,
         details: { familyId },
+      });
+      // LOGIN_SUCCESS: audit the credential-verification moment, not just
+      // the session mint. This answers "when did user X last log in?"
+      // from audit_logs alone — previously only SESSION_FAMILY_CREATED
+      // fired (after session row insert), making the login trail
+      // incomplete for any login that bypassed the session insert
+      // (e.g. kiosk tokens, failed inserts).
+      await addAudit({
+        action: "LOGIN_SUCCESS",
+        userId: user.id,
+        userName: user.name || user.email,
+        role: user.role as Role,
+        details: {
+          identifier,
+          ip: extractClientIp(req),
+          userAgent: req.headers.get("user-agent") || "unknown",
+          endpoint: "/api/auth/login",
+          request_id: getRequestId(req),
+          mfaRequired: false,
+        },
       });
     } catch (err) {
       // Failing to persist the session row must NOT block a successful
