@@ -48,9 +48,11 @@ function useSakugaTheme() {
       .then((data) => {
         if (cancelled || !data || data.ui_theme !== "sakuga") return;
         document.documentElement.setAttribute("data-theme", "sakuga");
-        // Load sakuga-vfx components in order (button → checkbox → radio → toggle).
-        // Each registers its own custom element; the first sets window.SakugaFX.
-        for (const name of ["button", "checkbox", "radio", "toggle"]) {
+        // Load all sakuga-vfx component scripts. Each registers its own
+        // custom element; the first loaded sets window.SakugaFX. The progress
+        // component powers the sakuga loading splash; the rest are interactive
+        // controls available to any sakuga-themed surface.
+        for (const name of ["button", "checkbox", "radio", "toggle", "progress", "tabs", "toast", "slider", "input", "rating", "tooltip"]) {
           const s = document.createElement("script");
           s.src = `/sakuga-vfx/${name}.js`;
           s.async = false;

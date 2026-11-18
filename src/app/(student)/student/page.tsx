@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { SakugaLoadingSplash } from "@/components/SakugaLoadingSplash";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { TodayStatus } from "@/components/student/home/TodayStatus";
 import { ActivePassCard } from "@/components/student/home/ActivePassCard";
@@ -59,15 +60,33 @@ function OfflineBanner({ onRetry, retrying }: { onRetry: () => void; retrying: b
 function StudentHomeInner() {
   const [resetKey, setResetKey] = useState(0);
   const [retrying, setRetrying] = useState(false);
+  // Track whether the sakuga theme is active so we can swap the loading
+  // fallback. The theme is set by ClientProviders after auth; we poll
+  // briefly on mount (same approach as SakugaLoadingSplash).
+  const [isSakuga, setIsSakuga] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let tries = 0;
+    const check = () => {
+      if (cancelled) return;
+      if (document.documentElement.dataset.theme === "sakuga") {
+        setIsSakuga(true);
+        return;
+      }
+      if (tries++ < 8) setTimeout(check, 250);
+    };
+    check();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleRetry = () => {
     setRetrying(true);
     setResetKey((k) => k + 1);
-    // WidgetBoundary componentDidUpdate resets on resetKey change
     setTimeout(() => setRetrying(false), 3000);
   };
 
-  return (
+  const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
@@ -92,6 +111,18 @@ function StudentHomeInner() {
       </WidgetBoundary>
     </div>
   );
+
+  // Sakuga theme: wrap in the anime VFX loading splash (only for sakuga users).
+  // Graphite/default theme: standard PageLoading skeleton.
+  if (isSakuga) {
+    return (
+      <SakugaLoadingSplash>
+        {dashboardContent}
+      </SakugaLoadingSplash>
+    );
+  }
+
+  return dashboardContent;
 }
 
 export default function StudentHome() {
