@@ -8,6 +8,7 @@ import {
 import { COLLEGE } from "@/lib/college-config";
 import { HomeRoot } from "./components/HomeRoot";
 import { Hero } from "./components/sections/Hero";
+import { StoryBand } from "./components/sections/StoryBand";
 import { LiveCountsStrip } from "./components/sections/LiveCountsStrip";
 import { RoleMap } from "./components/sections/RoleMap";
 import { AccessFlow } from "./components/sections/AccessFlow";
@@ -52,6 +53,7 @@ export default function HomePage() {
         <LiveCountsStrip />
       </WidgetBoundary>
 
+      <StoryBand />
       <RoleMap />
       <AccessFlow />
       <Modules />

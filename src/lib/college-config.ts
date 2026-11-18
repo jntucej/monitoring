@@ -53,7 +53,10 @@ export const COLLEGE: CollegeConfig = {
   affiliation:
     "Autonomous constituent college of Jawaharlal Nehru Technological University Hyderabad (JNTUH)",
   portalPurpose:
-    "Official campus access, movement records, permissions and role-based services for students, parents, faculty, staff, wardens and administrators of JNTUH University College of Engineering Jagtial.",
+    "JNTUH UCEJ runs on a single system: one database, one permission model, one audit trail. " +
+    "Students see their own attendance, fees and gate passes. Parents see their child's. " +
+    "Wardens see the hostel block without leaving the desk. Operators see the gate without leaving the post. " +
+    "Every scan is logged, immutable and searchable. No paper. No phone chains. No guesswork.",
   primaryCTA: "Sign in to campus portal",
   secondaryCTA: "Help & FAQ",
 };
