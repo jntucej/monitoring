@@ -37,10 +37,13 @@ done
 #    legitimately reference shared chrome until they've been migrated.
 if [ -d "$COPY_DIR" ]; then
   # 2a. No imports from @/components/shared/LoadingStates, EmptyState, etc.
+  #     Exclude the re-export shims in components/principal/shared/ — those are
+  #     the intentional bridge layer that decouples pages from shared chrome.
   BANNED='LoadingStates|EmptyState|ConfirmDialog|StatusBadge|NotificationCenter|UserProfileTab|PageHeader|Sidebar|ChangePasswordCard|GlassThemeToggle'
   VIOLATIONS=$(grep -rln "@/components/shared/\($BANNED\)" \
     "src/app/(approver)/principal" \
-    "src/components/principal" 2>/dev/null || true)
+    "src/components/principal" 2>/dev/null \
+    | grep -v 'src/components/principal/shared/' || true)
   if [ -n "$VIOLATIONS" ]; then
     echo -e "${RED}❌ Principal imports banned shared chrome:${NC}"
     echo "$VIOLATIONS" | sed 's/^/     /'
@@ -49,10 +52,20 @@ if [ -d "$COPY_DIR" ]; then
 
   # 2b. No imports from @/components/shared/ for the individual module names,
   #     so the report is actionable even when the parens regex isn't supported.
-  SHARED_EXPORTS=$(grep -rhoE "@/components/shared/($BANNED)" \
+  #     Exclude the re-export shims in components/principal/shared/ — same
+  #     reasoning as 2a. Use -rl (list files) to find which files import,
+  #     filter out the shim dir, then re-extract the module names from the
+  #     remaining files only.
+  SHARED_FILES=$(grep -rl "@/components/shared/($BANNED)" \
     "src/app/(approver)/principal" \
     "src/components/principal" 2>/dev/null \
-    | sed 's|@/components/shared/||' | sort -u || true)
+    | grep -v 'src/components/principal/shared/' || true)
+  if [ -n "$SHARED_FILES" ]; then
+    SHARED_EXPORTS=$(echo "$SHARED_FILES" | xargs grep -hoE "@/components/shared/($BANNED)" 2>/dev/null \
+      | sed 's|@/components/shared/||' | sort -u || true)
+  else
+    SHARED_EXPORTS=""
+  fi
   if [ -n "$SHARED_EXPORTS" ]; then
     echo -e "${RED}❌ Principal imports these banned shared modules:${NC}"
     echo "$SHARED_EXPORTS" | sed 's/^/     /'

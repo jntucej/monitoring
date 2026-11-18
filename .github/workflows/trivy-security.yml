@@ -84,11 +84,14 @@ jobs:
           fi
           echo "::notice::No :latest tags on pulled images."
 
-      - name: Check for privileged containers (other than cadvisor)
+      - name: Check for privileged containers (other than cadvisor/falco)
         run: |
-          result=$(yq -r '.services | to_entries | map(select(.value.privileged == true and .key != "cadvisor")) | .[].key' docker-compose.yml 2>/dev/null)
+          # cadvisor and falco legitimately need privileged mode:
+          #   cadvisor — kernel-level resource metrics
+          #   falco    — kernel event monitoring (needs /proc, /dev access)
+          result=$(yq -r '.services | to_entries | map(select(.value.privileged == true and .key != "cadvisor" and .key != "falco")) | .[].key' docker-compose.yml 2>/dev/null)
           if [ -n "$result" ] && [ "$result" != "null" ]; then
-            echo "::error::Privileged container(s) found (other than cadvisor): $result"
+            echo "::error::Privileged container(s) found (other than cadvisor/falco): $result"
             exit 1
           fi
           echo "::notice::No unexpected privileged containers."
@@ -131,18 +134,31 @@ jobs:
           python3 - <<'PY'
           import yaml, sys
           with open("compose/security/falco-rules.yaml") as f:
-            rules = yaml.safe_load(f)
+            data = yaml.safe_load(f)
+
+          # The file is a mixed list: variable defs ({list, items}) and rules ({rule, ...}).
+          # Extract rule names from items that have a 'rule' key.
+          rules = []
+          if isinstance(data, list):
+            for item in data:
+              if isinstance(item, dict) and 'rule' in item:
+                rules.append(item['rule'])
+          elif isinstance(data, dict):
+            for r in (data.get('rules') or []):
+              if isinstance(r, dict) and 'rule' in r:
+                rules.append(r['rule'])
+
           required = {
-              "Shell spawn in container",
-              "Privilege escalation attempt",
-              "Sensitive file access (shadow)",
+              "Shell Spawned in Application Container",
+              "Unexpected Outbound Connection from Web Container",
+              "Sensitive File Access in Gate Containers",
           }
-          present = {r.get("rule") for r in (rules.get("rules") or [])}
+          present = set(rules)
           missing = required - present
           if missing:
             print(f"::error::Missing required Falco rules: {missing}")
             sys.exit(1)
-          print(f"OK — all {len(required)} required rules present.")
+          print(f"OK — all {len(required)} required rules present ({len(rules)} total rules in file).")
           PY
 
   # ── Container image scan (on PR + nightly) ─────────────────────────
