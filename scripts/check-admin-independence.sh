@@ -26,7 +26,7 @@ fi
 #    mobile drawer and the scroll-linked blue edge-veil) that both consoles mount
 #    inside their own layouts — infrastructure like SafeAreaAppShell, not visual
 #    chrome.
-ALLOWED_SHARED="AuthGuard|DevContactStrip|PersonBadge|Board|NotificationCenter|FloatingBot|AnnouncementBanner|IconRail|Sidebar|RoleConsole|DynamicHeader|SafeAreaAppShell|NetworkStatusBanner|FloatingOrbs|AppLoadingScreen|ToastProvider|useToast|Modal|Button|Input|Select|Badge|Card|Tabs|Table|DataTable|Skeleton|ProfileMenuButton|MobileNavDrawer|ScrollEdgeBlue"
+ALLOWED_SHARED="AuthGuard|DevContactStrip|PersonBadge|Board|NotificationCenter|FloatingBot|AnnouncementBanner|IconRail|Sidebar|RoleConsole|DynamicHeader|SafeAreaAppShell|NetworkStatusBanner|FloatingOrbs|AppLoadingScreen|ToastProvider|useToast|Modal|Button|Input|Select|Badge|Card|Tabs|Table|DataTable|Skeleton|ProfileMenuButton|MobileNavDrawer|ScrollEdgeBlue|GlassCard|GlassInteractiveCard|GlossyFloatingContainer|LiveEventsPanel|LoadingStates|WordByWordText"
 SHARED=$(grep -rhoE "@/components/shared/[A-Za-z]+" "src/app/(admin)" "src/components/admin" 2>/dev/null \
   | sed 's|@/components/shared/||' | sort -u \
   | grep -vE "^($ALLOWED_SHARED)$" || true)

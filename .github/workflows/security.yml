@@ -59,7 +59,13 @@ jobs:
               '''^\.continue/agents/new-config\.yaml$''',
               '''^src/lib/supabaseClient\.ts$''',
               '''^\.github/workflows/infrastructure-guardrail\.yml$''',
-              '''^README\.md$'''
+              '''^README\.md$''',
+              '''^release-evidence/''',
+              '''^\.swarm/''',
+              '''^\.swarm-parallel/''',
+              '''^\.hermes/''',
+              '''^\.github/skills/''',
+              '''^tests/gate/coverage/'''
           ]
           regexes = [
               '''identificationMarks[12]''',

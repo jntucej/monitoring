@@ -127,3 +127,4 @@ worker/node_modules/
 .alertmanager-token/
 lighthouse-report.json
 lhci-report/
+gitleaks

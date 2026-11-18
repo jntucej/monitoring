@@ -74,11 +74,15 @@ jobs:
 
       - name: Check for :latest image tags
         run: |
-          if grep -E 'image:.*:latest' docker-compose.yml; then
-            echo "::error::Found :latest image tag — pin to a specific version or digest."
+          # Exclude locally-built images (they have a matching build: directive
+          # and are not pulled from a registry — :latest is the build tag).
+          hits=$(grep -E 'image:.*:latest' docker-compose.yml | grep -v -E 'monitoring-(web|worker):latest' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::Found :latest image tag on a pulled image — pin to a specific version or digest."
             exit 1
           fi
-          echo "::notice::No :latest tags found."
+          echo "::notice::No :latest tags on pulled images."
 
       - name: Check for privileged containers (other than cadvisor)
         run: |
