@@ -26,6 +26,8 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { QuickActions } from "@/components/principal/shared/PrincipalQuickActions";
 import { NotificationCenter } from "@/components/principal/shared/PrincipalNotificationCenter";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 interface PrincipalOverview {
   success?: boolean;
@@ -108,6 +110,9 @@ export default function PrincipalTodayPage() {
       : [];
 
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
@@ -216,5 +221,6 @@ export default function PrincipalTodayPage() {
 
       </div>
     </>
-  );
+</>
+    );
 }

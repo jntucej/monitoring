@@ -6,6 +6,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface Dept {
   id: string;
@@ -52,7 +53,7 @@ function AdminClassesInner() {
   const [rows, setRows] = useState<ClassRow[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-classes-query");
   const [draft, setDraft] = useState<NewClass>({
     departmentId: "", year: "", section: "", name: "", roomNumber: "", capacity: "",
   });

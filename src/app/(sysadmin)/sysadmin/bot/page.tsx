@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {
   Bot,
   Users,

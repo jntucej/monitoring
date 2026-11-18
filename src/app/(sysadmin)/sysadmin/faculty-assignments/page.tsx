@@ -7,6 +7,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface FacultyAssignment {
   id: string;
@@ -66,7 +67,7 @@ function AdminFacultyAssignmentsInner() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-sysadmin-faculty-query");
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState({
     facultyId: "", classId: "", subjectCode: "", role: "subject_faculty",

@@ -17,9 +17,14 @@ import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { GridBoard } from "@/components/shared/GridBoard";
 import { CampusFeedbackDesk } from "@/components/retention/CampusFeedbackDesk";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function CaretakerPage() {
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
         <div className="space-y-6">
           <PageHeader title="Caretaker" subtitle="Facilities & maintenance" />
@@ -81,5 +86,6 @@ export default function CaretakerPage() {
 
         </div>
     </Suspense>
-  );
+</>
+    );
 }

@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ function AcademicStatusInner() {
   const [roster, setRoster] = useState<Roster | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-sysadmin-academic-query");
   const [editing, setEditing] = useState<StudentEntry | null>(null);
   const [draftStatus, setDraftStatus] = useState<FlagValue | "">("");
   const [draftYear, setDraftYear] = useState("");

@@ -2,20 +2,28 @@
 //
 // Role-aware welcome copy for the bot. The subtitle line under the
 // header and the suggestion chips change per role, because a student's
-// "what can I ask" is a wardens' "what can I ask" — surfacing the
+// "what can I ask" is a warden's "what can I ask" — surfacing the
 // right examples is what makes the welcome screen actually useful
 // instead of decorative.
 //
-// Falls back to the student set for any role without an explicit entry,
-// since students are the highest-volume user group.
+// Now reads from the role config (src/config/roles/) when available,
+// falling back to the hardcoded sets below for roles without a config.
+//
+// The subtitle is time-of-day aware: "Good morning, {firstName} —"
+// prefix is handled by the Greeting component; this file provides the
+// role-specific subtitle, chips, and example questions.
 
 import type { Role } from "@/lib/types";
+import { getRoleConfig } from "@/config/roles";
+import { useAdaptiveContext } from "@/hooks/useAdaptiveContext";
 
 export interface RoleWelcome {
   subtitle: string;
   chips: string[];
   questions: string[];
 }
+
+// ── Hardcoded fallbacks (used when no RoleConfig exists) ────────────────
 
 const STUDENT: RoleWelcome = {
   subtitle: "Policies · Schedules · Services",
@@ -68,22 +76,32 @@ const OPERATOR: RoleWelcome = {
   ],
 };
 
-export function roleWelcome(role: Role | null): RoleWelcome {
-  switch (role) {
-    case "faculty":
-      return FACULTY;
-    case "deputy_warden":
-    case "hostel_manager":
-    case "principal":
-    case "vice_principal":
-      return WARDEN;
-    case "admin":
-    case "sysadmin":
-      return ADMIN;
-    case "operator":
-      return OPERATOR;
-    case "student":
-    default:
-      return STUDENT;
+// ── Role-to-fallback mapping ────────────────────────────────────────────
+
+const FALLBACK: Record<string, RoleWelcome> = {
+  student: STUDENT,
+  faculty: FACULTY,
+  deputy_warden: WARDEN,
+  hostel_manager: WARDEN,
+  principal: WARDEN,
+  vice_principal: WARDEN,
+  hod: WARDEN,
+  admin: ADMIN,
+  sysadmin: ADMIN,
+  operator: OPERATOR,
+};
+
+/**
+ * Returns the RoleWelcome for a given role.
+ * Prefers the RoleConfig's botPersona when available;
+ * falls back to the hardcoded sets.
+ */
+export function roleWelcome(role: Role | string | null): RoleWelcome {
+  if (!role) return STUDENT;
+  // Try the role config first
+  const cfg = getRoleConfig(role);
+  if (cfg?.botPersona) {
+    return cfg.botPersona;
   }
+  return FALLBACK[role] ?? STUDENT;
 }

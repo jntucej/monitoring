@@ -23,6 +23,8 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { PageHeader } from "@/components/shared/PageHeader";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 interface VPOverview {
   success?: boolean;
@@ -105,6 +107,9 @@ export default function VPTodayPage() {
   const queueEmpty = pending === 0;
 
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={queueEmpty && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
@@ -193,5 +198,6 @@ export default function VPTodayPage() {
 
       </div>
     </>
-  );
+</>
+    );
 }

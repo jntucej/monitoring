@@ -7,6 +7,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface Subject {
   code: string;
@@ -43,7 +44,7 @@ function AdminSubjectsInner() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-sysadmin-subjects-query");
 
   const load = useCallback(async () => {
     setLoading(true);

@@ -16,9 +16,14 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function DeputyWardenPage() {
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["deputy_warden", "principal"]}>
         <div className="space-y-6">
@@ -57,5 +62,6 @@ export default function DeputyWardenPage() {
         </div>
       </AuthGuard>
     </Suspense>
-  );
+</>
+    );
 }

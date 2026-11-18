@@ -11,6 +11,7 @@ import {
 } from "@/components/admin/kit";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 
 /**
@@ -149,7 +150,7 @@ function AdminStaffInner() {
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-staff-query");
   const [roleFilter, setRoleFilter] = useState<StaffRole[]>([]);
   const [active, setActive] = useState<StaffRow | null>(null);
 

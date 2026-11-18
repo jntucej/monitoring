@@ -6,6 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import {Users, Plus, Search, Link as LinkIcon, Unlink, Check, Copy, KeyRound, X, Loader2, UserCheck}  from "lucide-react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface ParentRow {
   id: string;
@@ -107,7 +108,7 @@ export default function SysAdminParentsPage() {
   const [parents, setParents] = useState<ParentRow[]>([]);
   const [unlinkedStudents, setUnlinkedStudents] = useState<StudentOption[]>([]);
   const [_loading, setLoading] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-sysadmin-parents-query");
 
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ name: "", email: "", phone: "", studentRoll: "" });

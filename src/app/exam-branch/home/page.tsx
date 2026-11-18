@@ -15,9 +15,14 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function ExamBranchPage() {
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_branch"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
@@ -46,5 +51,6 @@ export default function ExamBranchPage() {
         </div>
       </AuthGuard>
     </Suspense>
-  );
+</>
+    );
 }

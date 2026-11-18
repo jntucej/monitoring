@@ -6,6 +6,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface VisitorRow {
   id: string;
@@ -51,7 +52,7 @@ function statusBadge(s: string) {
 function AdminVisitorsInner() {
   const [rows, setRows] = useState<VisitorRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-visitors-query");
 
   const load = useCallback(async () => {
     setLoading(true);

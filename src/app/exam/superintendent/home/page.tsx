@@ -14,9 +14,14 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function ExamSuperintendentPage() {
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_superintendent"]}>
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
@@ -47,5 +52,6 @@ export default function ExamSuperintendentPage() {
         </div>
       </AuthGuard>
     </Suspense>
-  );
+</>
+    );
 }

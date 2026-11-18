@@ -25,6 +25,8 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" | "neutral" }) {
   const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : tone === "neutral" ? "text-text-muted" : "text-text-primary";
@@ -130,6 +132,9 @@ export default function SupervisorTodayPage() {
   ];
 
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <>
       <CelebrateOverlay queueEmpty={pending === 0 && sessionDecisions > 0} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
@@ -226,5 +231,6 @@ export default function SupervisorTodayPage() {
 
       </div>
     </>
-  );
+</>
+    );
 }

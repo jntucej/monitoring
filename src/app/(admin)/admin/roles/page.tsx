@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 /**
  * Admin Roles & Hierarchy — re-skin of the role tree + access matrix.
@@ -143,7 +144,7 @@ function AdminRolesInner() {
   const [data, setData] = useState<RolesGraphPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-roles-query");
 
   const load = useCallback(async () => {
     try {

@@ -17,9 +17,14 @@ import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Greeting } from "@/components/Greeting";
+import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function HostelManagerPage() {
   return (
+<>
+<Greeting />
+<RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["hostel_manager", "principal"]}>
         <div className="space-y-6">
@@ -59,5 +64,6 @@ export default function HostelManagerPage() {
         </div>
       </AuthGuard>
     </Suspense>
-  );
+</>
+    );
 }
