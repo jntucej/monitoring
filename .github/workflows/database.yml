@@ -1,0 +1,68 @@
+name: Database
+
+# Migration replay, RLS enforcement, audit constraint, role scoping.
+# All checks run on an isolated postgres:17-alpine service container.
+# Advisory: schema drift (weekly, via maintenance.yml).
+# Owned by: database team. See docs/WORKFLOW-ARCHITECTURE.md.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: database-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  migration-and-rls:
+    name: Migration Replay, RLS, Audit, Role Scoping
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install psql client
+        run: sudo apt-get install -y postgresql-client
+
+      # Blocking: full migration replay chain
+      - name: Check Migration Replay
+        run: bash scripts/check-migrations.sh
+
+      # Blocking: audit_logs constraint integrity
+      - name: Check Audit Constraint
+        run: bash scripts/check-audit-constraint.sh
+
+      # Blocking: RLS cross-role enforcement
+      - name: Check RLS Cross-Role Enforcement
+        run: bash scripts/check-rls-enforcement.sh
+
+      # Blocking: RLS FORCE (owner bypass closed)
+      - name: Check RLS FORCE
+        run: bash scripts/check-rls-force.sh
+
+      # Blocking: role scoping strict
+      - name: Check Role Scoping Strict
+        run: bash scripts/check-role-scoping-strict.sh
+
+

@@ -1,0 +1,207 @@
+name: Maintenance
+
+# Scheduled and manual maintenance tasks:
+#   - Schema drift detection (weekly, advisory - opens issue on drift)
+#   - Schema.sql regeneration (manual dispatch)
+#   - Artifact cleanup (weekly)
+#   - Workflow self-verification (weekly)
+# Owned by: platform team. See docs/WORKFLOW-ARCHITECTURE.md.
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Monday 06:00 UTC - drift + cleanup
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Which maintenance task to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - drift
+          - regenerate
+          - cleanup
+          - verify
+
+permissions:
+  contents: read
+
+jobs:
+  schema-drift:
+    name: Weekly Schema Drift Detection
+    if: github.event_name != 'workflow_dispatch' || inputs.task == 'all' || inputs.task == 'drift'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    services:
+      scratch-postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install psql client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Check Schema Drift
+        id: drift_check
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_SCHEMA_READER_URL }}
+          SCRATCH_DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: |
+          if [ -z "$PROD_DATABASE_URL" ]; then
+            echo "Skipping drift check: PROD_SCHEMA_READER_URL secret is not set."
+            exit 0
+          fi
+          output=$(bash scripts/check-schema-drift.sh 2>&1) || exit_code=$?
+          echo "drift_output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          if [ "${exit_code:-0}" -ne 0 ]; then
+            echo "DRIFT_DETECTED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Create Issue on Drift
+        if: env.DRIFT_DETECTED == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `### Schema Drift Detected\n\nThe weekly schema drift job detected discrepancies between production and repository migrations:\n\n\`\`\`text\n${process.env.drift_output}\n\`\`\`\n\nPlease investigate drifted database objects.`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Schema drift detected between production and migrations',
+              body: body
+            });
+
+  regenerate-schema:
+    name: Regenerate schema.sql
+    if: github.event_name == 'workflow_dispatch' && (inputs.task == 'all' || inputs.task == 'regenerate')
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install psql + pg_dump client
+        run: sudo apt-get install -y postgresql-client
+      - name: Regenerate schema.sql
+        env:
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: bash scripts/regenerate-schema.sh
+      - name: Show diff
+        run: git diff --stat database/schema.sql || true
+      - name: Upload for review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: schema-sql-regen
+          path: database/schema.sql
+          retention-days: 30
+
+  artifact-cleanup:
+    name: Clean Old Artifacts
+    if: github.event_name != 'workflow_dispatch' || inputs.task == 'all' || inputs.task == 'cleanup'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            let page = 1;
+            let deleted = 0;
+            while (page <= 10) {
+              const { data } = await github.rest.actions.listArtifactsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+                page
+              });
+              const old = data.artifacts.filter(a => new Date(a.created_at).getTime() < cutoff);
+              for (const a of old) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: a.id
+                });
+                deleted++;
+              }
+              if (data.artifacts.length < 100) break;
+              page++;
+            }
+            core.info(`Deleted ${deleted} artifacts older than 30 days.`);
+
+  workflow-verify:
+    name: Scheduled Workflow Verification
+    if: github.event_name != 'workflow_dispatch' || inputs.task == 'all' || inputs.task == 'verify'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: supabase/postgres:17.6.1.136
+        env:
+          POSTGRES_USER: supabase_admin
+          POSTGRES_PASSWORD: ci_dummy_postgres_password_123
+          POSTGRES_DB: gate_monitor
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Bootstrap DB
+        env:
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT CREATE, USAGE ON SCHEMA public TO supabase_admin;" || true
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
+            -c "GRANT ALL ON DATABASE gate_monitor TO supabase_admin;" || true
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/schema.sql
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgres://supabase_admin:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: bash scripts/check-migrations.sh
+      - name: Role to workflow consistency
+        run: npx tsx scripts/check-role-workflow.ts
+      - name: Permission workflow unit tests
+        run: npx tsx scripts/verify-permission-workflow.ts
+      - name: Admin independence
+        run: bash scripts/check-admin-independence.sh
+      - name: Principal independence
+        run: bash scripts/check-principal-independence.sh
+      - name: TypeScript
+        run: npm run typecheck

@@ -1,11 +1,32 @@
-# Infra + env files need an owner sign-off before merging to main.
-# Requires the `require_code_owner_review` flag on the main ruleset.
-docker-compose.yml @jntucej
-Dockerfile @jntucej
-Caddyfile @jntucej
-scripts/03-deploy.sh @jntucej
-scripts/verify-deploy.sh @jntucej
-scripts/verify-prep.sh @jntucej
-scripts/verify-base.sh @jntucej
-.env.example @jntucej
-.github/workflows/ @jntucej
+# CODEOWNERS - infrastructure, database, security, deployment ownership.
+# Platform team is the primary owner of CI/CD workflows and infrastructure.
+# Database team owns migration and schema changes.
+# Security team owns scanning configuration and allowlists.
+# Release engineering owns the release pipeline.
+
+# CI/CD workflows
+/.github/workflows/            @jntucej/platform
+/.github/CODEOWNERS            @jntucej/platform
+
+# Infrastructure
+/docker-compose.yml            @jntucej/platform
+/Dockerfile                    @jntucej/platform
+/Caddyfile                     @jntucej/platform
+
+# Database
+/database/                     @jntucej/database
+/scripts/check-migrations.sh   @jntucej/database
+/scripts/check-rls*.sh         @jntucej/database
+/scripts/check-audit*.sh       @jntucej/database
+
+# Security scanning config
+/.gitleaks.toml               @jntucej/security
+/.gitleaks-allowlist.toml     @jntucej/security
+/compose/security/            @jntucej/security
+
+# Deployment
+/scripts/03-deploy.sh          @jntucej/platform
+/scripts/verify-deploy.sh      @jntucej/platform
+
+# Documentation
+/docs/                        @jntucej/platform

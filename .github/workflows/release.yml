@@ -1,0 +1,79 @@
+name: Release
+
+# Build, SBOM, sign, attest. Runs on release publish or push to main.
+# Immutable artifacts: images tagged by commit SHA, signed with cosign
+# keyless OIDC, SBOM attached.
+# Owned by: release engineering. See docs/WORKFLOW-ARCHITECTURE.md.
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build-sign-attest:
+    name: Build, Sign, Attest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Generate SBOM
+        run: npx --yes @cyclonedx/cyclonedx-npm --output-file sbom.cdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sbom
+          path: sbom.cdx.json
+          retention-days: 90
+
+      - name: Audit dependencies
+        run: npx --yes audit-ci
+
+      - name: Docker login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: runner
+          push: true
+          tags: ghcr.io/${{ github.repository }}/web:${{ github.sha }}
+          provenance: true
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image
+        run: cosign sign --yes ghcr.io/${{ github.repository }}/web:${{ github.sha }}
+
+      - name: Attach SBOM to image
+        run: |
+          cosign attach sbom --sbom sbom.cdx.json ghcr.io/${{ github.repository }}/web:${{ github.sha }}
+          cosign attest --yes --predicate sbom.cdx.json --type cyclonedx \
+            ghcr.io/${{ github.repository }}/web:${{ github.sha }}

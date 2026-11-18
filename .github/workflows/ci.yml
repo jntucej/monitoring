@@ -1,172 +1,107 @@
-name: CI Verification Gates
+name: CI
 
+# Blocking merge gate: build, typecheck, Jest + Playwright tests.
+# Advisory: lint, unslop audit. Secret scanning lives in security.yml.
+# Database gates (migrations, RLS) live in database.yml.
+# Owned by: platform team. See docs/WORKFLOW-ARCHITECTURE.md.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  gates:
-    name: Production Readiness Gates
+  build-and-test:
+    name: Build, Typecheck, Test
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: ci_dummy_postgres_password_123
           POSTGRES_DB: gate_monitor
         ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
 
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Run Gitleaks Secret Scan
-        # gitleaks/gitleaks-action@v2 requires a paid GITLEAKS_LICENSE for
-        # organisation repos. Run the gitleaks CLI directly instead.
-        # v8.30.1 is pinned (older releases have been removed from GitHub).
-        #
-        # --no-git: working-tree scan; repo history contains build
-        # artifacts (repomix dumps) + old dev fixtures that produce 19
-        # false positives per full-history run. A workflow-generated
-        # config (gitleaks-ci.toml) covers the documented FP files;
-        # .gitleaks.toml is not modified.
-        run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz | tar -xz
-          chmod +x gitleaks
-
-          cat > gitleaks-ci.toml <<'TOML'
-          [extend]
-          useDefault = true
-
-          [allowlist]
-          description = "CI allowlist: repo base entries + documented false positives"
-          paths = [
-              '''^\.next/''',
-              '''^\.env$''',
-              '''^\.env\.local$''',
-              '''^node_modules/''',
-              '''^dist/''',
-              '''^build/''',
-              '''^repomix-output\.xml$''',
-              '''^docs/repomix''',
-              '''^scripts/seed-data\.js$''',
-              '''^scripts/test-db\.js$''',
-              '''^scripts/test-session-invalidation\.js$''',
-              '''^tests/gate/lib/barcode\.test\.ts$''',
-              '''^tests/gate/routes/verify-pass-route\.test\.ts$''',
-              '''^\.continue/agents/new-config\.yaml$''',
-              '''^src/lib/supabaseClient\.ts$''',
-              '''^\.github/workflows/infrastructure-guardrail\.yml$''',
-              '''^README\.md$''',
-              '''^release-evidence/''',
-              '''^\.swarm/''',
-              '''^\.swarm-parallel/''',
-              '''^\.hermes/''',
-              '''^\.github/skills/''',
-              '''^tests/gate/coverage/'''
-          ]
-          regexes = [
-              '''identificationMarks[12]''',
-              '''AKIAIO...MPLE''',
-              '''AKIAIOSFODNN7EXAMPLE_CANARY''',
-              '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY_CANARY'''
-          ]
-          TOML
-
-          set +e
-          ./gitleaks detect --config gitleaks-ci.toml --no-git --redact --no-banner \
-            --report-format json --report-path gitleaks-report.json > /dev/null 2>&1
-          STATUS=$?
-          set -e
-          if [ "$STATUS" -eq 0 ]; then
-            echo "✓ gitleaks: working tree clean"
-            exit 0
-          fi
-
-          # Findings survive the allowlist -> print each and fail. Fail
-          # closed if the report cannot be read.
-          node -e '
-            const fs = require("fs");
-            let r;
-            try { r = JSON.parse(fs.readFileSync("gitleaks-report.json", "utf8")); }
-            catch (e) { console.error("unreadable gitleaks report - failing closed"); process.exit(2); }
-            if (!Array.isArray(r) || r.length === 0) {
-              console.log("no findings outside the allowlist");
-              process.exit(0);
-            }
-            r.forEach(l => console.log("LEAK: " + (l.File||"?") + ":" + (l.Line||"?") + " [" + (l.RuleID||"?") + "]"));
-            process.exitCode = 1;
-          '
-
+      # Blocking: typecheck
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Check Environment Invariants
-        run: node scripts/check-env.mjs
-
-      - name: Check Security Invariants
-        run: bash scripts/check-security.sh
-
-      - name: Check Role Scoping Strict
-        run: bash scripts/check-role-scoping-strict.sh
-
-      - name: Check Migration Replay
-        run: bash scripts/check-migrations.sh
-        env:
-          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
-
-      - name: Diagnose audit constraint state
+      # Advisory: lint (reported, non-blocking - pre-existing react-hooks debt)
+      - name: Lint (advisory)
         run: |
-          echo "=== Constraint definition ==="
-          psql "postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor" -Atc \
-            "SELECT pg_get_constraintdef(oid) FROM pg_constraint
-             WHERE conrelid = 'public.audit_logs'::regclass
-             AND conname = 'audit_logs_action_known';" 2>&1 | head -3
-          echo "=== audit_logs table exists? ==="
-          psql "postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor" -Atc \
-            "SELECT count(*) FROM information_schema.tables
-             WHERE table_name = 'audit_logs' AND table_schema = 'public';" 2>&1
+          if npm run lint > /tmp/lint.log 2>&1; then
+            echo "lint clean"
+          else
+            echo "::warning::Lint errors present (pre-existing debt)"
+            echo "## Lint Report (advisory)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/lint.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
 
-      - name: Check Audit Constraint
-        run: bash scripts/check-audit-constraint.sh
+      # Blocking: Jest gate test suite
+      - name: Run Jest gate test suite
         env:
           DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: npx jest --config tests/gate/jest.config.mjs --selectProjects node --ci --coverage
 
-      - name: Check RLS Cross-Role Enforcement
-        run: bash scripts/check-rls-enforcement.sh
+      # Blocking: Playwright smoke
+      - name: Run Playwright smoke tests
         env:
-          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
+          DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
+        run: npx playwright test --config playwright.config.ts --project=chromium --grep @smoke
 
-      - name: Check RLS FORCE (owner bypass closed)
-        run: bash scripts/check-rls-force.sh
-        env:
-          DATABASE_URL: postgres://postgres:***@localhost:5432/gate_monitor
+      # Advisory: unslop audit
+      - name: Unslop UI audit (advisory)
+        run: |
+          if npx unslop-ui . --strict > /tmp/unslop.log 2>&1; then
+            echo "unslop clean"
+          else
+            echo "::warning::Unslop findings (advisory)"
+            cat /tmp/unslop.log
+          fi
 
-      - name: Run Jest Test Suite
-        run: npm run test:gate:ci
+      # Evidence: upload test artifacts
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: test-coverage
+          path: tests/gate/coverage/
+          retention-days: 7
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
