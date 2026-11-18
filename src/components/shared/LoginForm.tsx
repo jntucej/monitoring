@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -53,6 +53,11 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const [showResetFlow, setShowResetFlow] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
+  // Guard: prevents a second POST while the first is in-flight.
+  // The `submitting` state disables the button visually, but a rapid
+  // double-click can still fire before React re-renders. This ref
+  // is synchronous and blocks the second call immediately.
+  const inFlightRef = useRef(false);
 
   // Store selectors — read `authenticated` and `role`, NOT `loading`.
   const login = useAuthStore((s) => s.login);
@@ -106,6 +111,8 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      // Synchronous guard: block double-clicks before React re-renders.
+      if (inFlightRef.current) return;
       setError(null);
 
       // Client-side validation
@@ -119,6 +126,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         return;
       }
 
+      inFlightRef.current = true;
       setSubmitting(true);
       try {
         const result = await login(id, password);
@@ -131,6 +139,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
       } catch {
         setError(formatLoginError("NETWORK_ERROR"));
       } finally {
+        inFlightRef.current = false;
         setSubmitting(false);
       }
     },

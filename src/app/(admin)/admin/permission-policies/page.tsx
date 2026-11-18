@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, Suspense } from "react";
+import { useMemo, useState, Suspense, useEffect } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 
@@ -45,7 +46,7 @@ function SkeletonCard() {
 }
 
 function AdminPermissionPoliciesInner() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-permission-policies-query");
 
   const res = useApiResource<{ success: boolean; data: PermissionPoliciesData }>("/api/admin/permission-policies", {
     ttlMs: 30_000,

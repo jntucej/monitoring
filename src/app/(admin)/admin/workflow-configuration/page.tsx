@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 
@@ -50,7 +51,7 @@ interface WorkflowConfigData {
 }
 
 function AdminWorkflowConfigurationInner() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-workflow-query");
 
   const res = useApiResource<{ success: boolean; data: WorkflowConfigData }>("/api/admin/workflow-configuration", { ttlMs: 30_000 });
 

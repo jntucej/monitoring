@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {BookOpen, Search, Building2}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -42,7 +43,7 @@ function AdminSubjectsInner() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-subjects-query");
 
   const load = useCallback(async () => {
     setLoading(true);

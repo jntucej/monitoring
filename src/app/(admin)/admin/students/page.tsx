@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {Search, X, Home, Building2, ChevronRight, Mail, Phone}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -160,7 +161,7 @@ async function fetchStudents(): Promise<StudentsData> {
 function AdminStudentsInner() {
   const [data, setData] = useState<StudentsData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-students-query");
   const [deptFilter, setDeptFilter] = useState<string[]>([]);
   const [yearFilter, setYearFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<"all" | "hosteller" | "day_scholar">("all");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import {Search, CheckCircle2, XCircle, Clock, QrCode}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -51,7 +52,7 @@ function statusBadge(s: string) {
 function AdminPassesInner() {
   const [rows, setRows] = useState<PassRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-passes-query");
 
   const load = useCallback(async () => {
     setLoading(true);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { GraduationCap, Search, RefreshCw } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -26,12 +27,15 @@ interface AlumniRow {
 function AdminAlumniInner() {
   const [rows, setRows] = useState<AlumniRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-alumni-query");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/students?${q ? `q=${encodeURIComponent(q)}` : ""}`, { headers: getAuthHeaders() });
+      const res = await fetch(
+        `/api/students?${query ? `q=${encodeURIComponent(query)}` : ""}`,
+        { headers: getAuthHeaders() },
+      );
       const body = await res.json();
       const raw = body?.data ?? body ?? [];
       const all = (Array.isArray(raw) ? raw : []) as AlumniRow[];
@@ -41,12 +45,12 @@ function AdminAlumniInner() {
     } finally {
       setLoading(false);
     }
-  }, [q]);
+  }, [query]);
 
   useEffect(() => {
-    const t = setTimeout(load, q ? 250 : 0);
+    const t = setTimeout(load, query ? 250 : 0);
     return () => clearTimeout(t);
-  }, [load, q]);
+  }, [load, query]);
 
   if (loading) {
     return (
@@ -71,13 +75,15 @@ function AdminAlumniInner() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search alumni by name / roll / email…"
-                className="surface-card w-full pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:"
+                className="surface-card w-full pl-9 pr-3 py-2.5 bg-bg-elevated text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/30"
               />
             </div>
-            <button onClick={load} className="text-text-muted hover:text-text-primary"><RefreshCw className="w-4 h-4" /></button>
+            <button onClick={load} className="text-text-muted hover:text-text-primary">
+              <RefreshCw className="w-4 h-4" />
+            </button>
           </div>
 
           {rows.length === 0 ? (
@@ -106,7 +112,13 @@ function AdminAlumniInner() {
                       <td className="p-3 text-xs text-text-muted">{r.department ?? "—"}</td>
                       <td className="p-3 font-mono text-xs text-text-muted">{r.email ?? "—"}</td>
                       <td className="p-3 text-xs text-text-muted">
-                        {r.checkedOutAt ? new Date(r.checkedOutAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                        {r.checkedOutAt
+                          ? new Date(r.checkedOutAt).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -122,10 +134,6 @@ function AdminAlumniInner() {
 
 export default function AdminAlumniPage() {
   return (
-    
-      <AdminAlumniInner />
-    
-    
-
+    <AdminAlumniInner />
   );
 }

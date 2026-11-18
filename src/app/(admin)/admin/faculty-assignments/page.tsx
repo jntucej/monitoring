@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 import { Link2, Plus, Trash2, Search, Loader2 } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -65,7 +66,7 @@ function AdminFacultyAssignmentsInner() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = usePersistentQuery("gate-admin-faculty-query");
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState({
     facultyId: "", classId: "", subjectCode: "", role: "subject_faculty",
