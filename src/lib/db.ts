@@ -1958,7 +1958,7 @@ export async function addNotification(
     message,
     recipient_id: recipientId || 'all',
     recipient_type: validRecipientType,
-    channels: ['in_app'],
+    channels: '{in_app}',
     data: gateId ? { gate_id: gateId } : {},
     read_at: null,
     created_at: timestamp,
