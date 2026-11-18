@@ -1,0 +1,26 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 1,
+      "startServerCommand": "npx next start -p 3000",
+      "startServerReadyPattern": "ready on",
+      "url": ["http://localhost:3000/"],
+      "settings": {
+        "chromeFlags": "--no-sandbox --headless",
+        "preset": "mobile"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", {"minimumScore": 0.5}],
+        "categories:accessibility": ["error", {"minimumScore": 0.9}],
+        "categories:best-practices": ["warn", {"minimumScore": 0.8}],
+        "categories:seo": ["warn", {"minimumScore": 0.8}]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "lhci-report"
+    }
+  }
+}

@@ -269,14 +269,22 @@ test.describe("sakuga theme", () => {
     );
     await page.fill("input[name='password']", "Test1234!");
     await page.click("button[type='submit']");
-    await page.waitForURL("**/student", { timeout: 15_000 });
-    // The theme is applied via useEffect after auth — give it a moment
-    await page.waitForTimeout(2000);
+    await page.waitForURL((url) => url.pathname === "/student", {
+      timeout: 15_000,
+    });
+    // The theme is applied via useEffect after auth + token in sessionStorage.
+    // Wait for the API response to land and the DOM mutation to fire.
+    await page.waitForFunction(
+      () => document.documentElement.getAttribute("data-theme") === "sakuga",
+      { timeout: 10_000 },
+    ).catch(() => undefined);
+
     const theme = await page.evaluate(() =>
       document.documentElement.getAttribute("data-theme"),
     );
-    expect(theme, "data-theme should be 'sakuga' for female student").toBe(
-      "sakuga",
-    );
+    expect(
+      theme,
+      `data-theme should be 'sakuga' for female student, got '${theme}'`,
+    ).toBe("sakuga");
   });
 });

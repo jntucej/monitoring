@@ -125,3 +125,5 @@ scripts/smoke-report.json
 .swarm/
 worker/node_modules/
 .alertmanager-token/
+lighthouse-report.json
+lhci-report/

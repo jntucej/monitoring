@@ -46,6 +46,9 @@
     "test:roles": "npx tsx scripts/verify-all-roles.ts",
     "test:features": "npx tsx scripts/verify-feature-actions.ts",
     "test:a11y": "playwright test tests/a11y.spec.ts",
+    "test:ux": "playwright test tests/ux-preflight.spec.ts tests/network-throttling.spec.ts tests/offline-recovery.spec.ts",
+    "test:perf": "npx lighthouse http://localhost:3000 --preset=mobile --output=json --output-path=./lighthouse-report.json --chrome-flags=--no-sandbox --headless",
+    "test:perf:ci": "npm run test:perf && node scripts/check-lighthouse.mjs",
     "verify:ops": "bash scripts/verify-ops-batch.sh"
   },
   "dependencies": {
