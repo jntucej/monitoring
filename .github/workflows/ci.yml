@@ -141,6 +141,18 @@ jobs:
         env:
           DATABASE_URL: postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor
 
+      - name: Diagnose audit constraint state
+        run: |
+          echo "=== Constraint definition ==="
+          psql "postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor" -Atc \
+            "SELECT pg_get_constraintdef(oid) FROM pg_constraint
+             WHERE conrelid = 'public.audit_logs'::regclass
+             AND conname = 'audit_logs_action_known';" 2>&1 | head -3
+          echo "=== audit_logs table exists? ==="
+          psql "postgres://postgres:ci_dummy_postgres_password_123@localhost:5432/gate_monitor" -Atc \
+            "SELECT count(*) FROM information_schema.tables
+             WHERE table_name = 'audit_logs' AND table_schema = 'public';" 2>&1
+
       - name: Check Audit Constraint
         run: bash scripts/check-audit-constraint.sh
         env:
