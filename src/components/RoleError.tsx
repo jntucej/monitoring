@@ -15,8 +15,6 @@ interface Props {
 
 export function RoleError({ surface, message, onRetry }: Props) {
   const cfg = useRoleConfig();
-  // Role configs don't have an errorCopy field yet — fall back to a
-  // reasonable default that references the surface name.
   const copy =
     message ??
     `We couldn't load ${cfg?.emptyCopy[surface] ? "that data" : surface}. Retry, or check your connection.`;
@@ -33,7 +31,7 @@ export function RoleError({ surface, message, onRetry }: Props) {
         className="rounded-lg px-4 py-2 text-xs font-semibold"
         style={{
           background: "var(--role-accent, var(--action-primary))",
-          color: "white",
+          color: "var(--bg-base)",
         }}
       >
         Try again
