@@ -8,27 +8,20 @@
 --
 -- 2. LOGIN_SUCCESS AUDIT GAP
 --    Successful password logins produce no LOGIN_SUCCESS audit row.
---    The only audit trail for a login is SESSION_FAMILY_CREATED (which
---    fires after the session is minted, not at credential verification).
---    This makes it impossible to answer "when did user X last log in?"
---    from audit_logs alone. Add LOGIN_SUCCESS to the allowed-action
---    constraint so the login route can emit it.
+--    Add LOGIN_SUCCESS to the allowed-action constraint.
 --
 -- 3. CONSTRAINT COMPLETENESS
 --    The previous version of this migration replaced the full canonical
 --    constraint with a 65-action subset, breaking check-audit-constraint.
---    This rewrite restores the FULL list: 169 owner actions + actions
---    added by later migrations (round3, operator_complete, session_family,
---    telegram_deep_links, automation_controls, announcement, audit_rotation)
---    + LOGIN_SUCCESS. The constraint must accept every action that exists
---    in the database.
+--    This rewrite restores the FULL list using the ARRAY syntax that the
+--    check-audit-constraint.sh gate requires.
 
 ALTER TABLE public.audit_logs
   DROP CONSTRAINT IF EXISTS audit_logs_action_known;
 
 ALTER TABLE public.audit_logs
   ADD CONSTRAINT audit_logs_action_known CHECK (
-    action IN (
+    action = ANY (ARRAY[
       '20261231000001', '2FA_SETUP_INITIATED', 'ACCOUNT_LOCKED_BY_USER', 'ACCOUNT_STATUS_CHANGED', 'ADMIN_EXPORT',
       'ADMIN_STREAM_OTHER_USER', 'ALERT_RESOLVED', 'ALERT_RESOLVE_DENIED', 'ANNOUNCEMENT_CREATED', 'ANTI_RAGGING_CASE_FILED',
       'ANTI_RAGGING_INVESTIGATED', 'ANTI_RAGGING_REPORTED', 'ANTI_RAGGING_RESOLVED', 'AUDIT_LOG_ROTATION_COMPLETED', 'BACKUP_CREATED',
@@ -66,5 +59,5 @@ ALTER TABLE public.audit_logs
       'THUMBPRINT_CLEARED', 'THUMBPRINT_REGISTERED', 'TRUETEST', 'UNAUTHORIZED_EXIT', 'USER_CREATED',
       'USER_DEACTIVATED', 'USER_DELETED', 'USER_ONBOARDED', 'USER_ROLE_UPDATED', 'USER_UPDATED',
       'VISITOR_CHECK_IN', 'VISITOR_CHECK_OUT', 'WORKER_HEARTBEAT', 'X'
-    )
+    ]::text[])
   );
