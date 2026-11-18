@@ -652,16 +652,16 @@ async function cmdBot(ctx: BotContext): Promise<string> {
 
 async function cmdAudit(ctx: BotContext): Promise<string> {
   const { rows } = await ctx.client.query<{
-    action: string; actor: string; created_at: string;
+    action: string; actor: string; timestamp: string;
   }>(
-    `SELECT action, actor, created_at FROM public.audit_logs
-      ORDER BY created_at DESC LIMIT 5`,
+    `SELECT action, actor, timestamp FROM public.audit_logs
+      ORDER BY timestamp DESC LIMIT 5`,
     [],
   );
   if (!rows.length) return "No audit log entries.";
   return (
     "📋 *Recent Audit Log*\n\n" +
-    rows.map((r) => `• ${new Date(r.created_at).toLocaleString()} — ${r.actor}: ${r.action}`).join("\n")
+    rows.map((r) => `• ${new Date(r.timestamp).toLocaleString()} — ${r.actor}: ${r.action}`).join("\n")
   );
 }
 
