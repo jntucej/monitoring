@@ -250,7 +250,58 @@ export async function POST(req: NextRequest): Promise<Response> {
   }
   await claimUpdateId(update.update_id);
 
-  // ── Step 1: /start TOKEN ───────────────────────────────────────────────────
+  // ── /start — the welcome bot ─────────────────────────────────────────────
+  // First message from a new user (or the deep-link /start TOKEN).
+  // Fact-first: lead with what they can do, not a greeting.
+  const startText = (message?.text ?? "").trim();
+  if (startText === "/start" || startText.startsWith("/start@")) {
+    // Look up the user by telegram_chat_id
+    const { rows: startRows } = await query<{
+      id: string; name: string; role: string;
+    }>(
+      `SELECT id, name, role FROM public.users WHERE telegram_chat_id = $1 LIMIT 1`,
+      [telegramChatId],
+    );
+
+    if (startRows.length > 0) {
+      const user = startRows[0];
+      const roleLabel = user.role.replace(/_/g, " ");
+      const firstLine = user.name
+        ? user.name.split(" ")[0]
+        : "there";
+
+      const byRole: Record<string, string> = {
+        student:
+          `Hi ${firstLine}.\n\nYour portal is live: /now shows your next class, attendance and fees. /settings changes your theme, quiet hours and density. /register is for CR/ICR takers. /message sends a note to your class.`,
+        parent:
+          `Hi ${firstLine}.\n\nYou're linked to your child's account. /now shows their attendance, next exam and mess bill. /child gives the full child view. /settings sets your quiet hours and digest time.`,
+        faculty:
+          `Hi ${firstLine}.\n\nYour tools: /now shows today's schedule. /review is your daily duty-off card. /classes-add adds extra or rescheduled classes. /message relays a note to your students. /register opens the attendance keyboard.`,
+        operator:
+          `Hi ${firstLine}.\n\nYour shift tools: /now shows gate status. /shifts lists your handover. /gates shows live IN/OUT. /overstay flags students past their window. /menu opens the full command list.`,
+        admin:
+          `Hi ${firstLine}.\n\nYour approval queue: /audit shows recent events. /users lists accounts. /delegation grants temporary role access. /menu opens the full command list.`,
+      };
+
+      const body = byRole[user.role] ??
+        `Hi ${firstLine}.\n\nWelcome to the ${roleLabel} bot. /menu shows every command you can use. /settings controls your theme and quiet hours.`;
+
+      await replyToChat(
+        telegramChatId,
+        body + "\n\nThis bot is scoped to your role. You will never see data you shouldn't.",
+      );
+    } else {
+      await replyToChat(
+        telegramChatId,
+        "Welcome to the JNTUH UCEJ bot.\n\n" +
+        "You're not linked to an account yet. An admin can issue you a deep link, or you can use /link <id> if you already have one.\n\n" +
+        "Once linked, /menu shows every command for your role.",
+      );
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // ── Step 1: /start TOKEN (deep-link claim) ────────────────────────────────
   if (message?.text?.startsWith("/start ")) {
     const token = message.text.slice(7).trim();
     if (!token) return NextResponse.json({ ok: true, ignored: true });
