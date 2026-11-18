@@ -239,7 +239,7 @@ export async function sendNotification(
         message,
         recipient_id: recipientId,
         recipient_type: recipientType,
-        channels: finalChannels,
+        channels: finalChannels.length ? '{' + finalChannels.join(',') + '}' : '{}',
         data: data,
         read_at: null,
         created_at: newNotifObj.createdAt,
