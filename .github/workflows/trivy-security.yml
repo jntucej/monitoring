@@ -173,7 +173,7 @@ jobs:
 
       - name: Install Trivy
         run: |
-          sudo wget -qO /usr/local/bin/trivy https://ghcr.io/v2/aquasecurity/trivy/latest/layer/sha256             || curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
           trivy --version
 
       - name: Scan external images
