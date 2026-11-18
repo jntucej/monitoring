@@ -231,6 +231,8 @@ services:
       # Batch J5: read-only mount of the host-side drill evidence dir so
       # /api/sysadmin/drills can enumerate the latest run per drill.
       - ${DRILL_EVIDENCE_DIR:-/opt/monitoring/drills/evidence}:/opt/monitoring/drills/evidence:ro
+      # Autonomous monitoring data (error hunter findings, gate jobs, deployment state)
+      - /root/.hermes/skills/production-error-hunter/data:/opt/hermes-data:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000/api/health > /dev/null || exit 1"]
       interval: 10s

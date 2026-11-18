@@ -364,6 +364,13 @@
           "title": "Mess Analytics",
           "kind": "table",
           "pollMs": 60000
+        },
+        {
+          "id": "autonomous",
+          "route": "autonomous",
+          "title": "Autonomous Monitoring",
+          "kind": "cards",
+          "pollMs": 30000
         }
       ],
       "icon": "DoorOpen"
