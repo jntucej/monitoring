@@ -9,22 +9,26 @@ import { Select, type SelectOption } from "@/components/ui/select";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { requiresStepup } from "@/lib/permission-workflow-pure";
+import { PASS_TYPE_SEED, type PassTypeConfig } from "@/lib/pass-types";
 
-type DirectGenReason = "home_out" | "day_pass" | "emergency" | "special_leave";
+// The old DirectGenReason union is replaced by a config-driven list.
+// Only configs marked `isDirectGen` appear in the direct-generate modal.
+const DIRECT_GEN_CODES: string[] = PASS_TYPE_SEED
+  .filter((c: PassTypeConfig) => c.code !== "outpass_home" || c.persona === "hosteller")
+  .map((c: PassTypeConfig) => c.code);
 
-const DIRECT_GEN_REASONS: readonly DirectGenReason[] = [
-  "home_out",
-  "day_pass",
-  "emergency",
-  "special_leave",
-];
-
-const REASON_LABELS: Record<DirectGenReason, string> = {
-  home_out: "Home Out",
-  day_pass: "Day Pass",
-  emergency: "Emergency",
-  special_leave: "Special Leave",
+// Back-compat: map legacy reason codes to their config equivalent
+const LEGACY_CODE_MAP: Record<string, string> = {
+  home_out: "outpass_home",
+  day_pass: "day_out",
+  emergency: "emergency_leave",
+  special_leave: "medical_leave",
 };
+
+// Resolve a legacy code to a config (or fall back to the first config).
+function getConfig(code: string): PassTypeConfig {
+  return PASS_TYPE_SEED.find((c) => c.code === code) ?? PASS_TYPE_SEED[0];
+}
 
 export interface DirectGenerateModalProps {
   isOpen: boolean;
@@ -70,7 +74,7 @@ export function DirectGenerateModal({
   const [studentEntryType, setStudentEntryType] = useState<"hosteller" | "day_scholar" | null>(
     defaultStudentEntryType ?? null,
   );
-  const [reason, setReason] = useState<DirectGenReason>("home_out");
+  const [reason, setReason] = useState<string>("outpass_home");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [note, setNote] = useState("");
@@ -83,18 +87,15 @@ export function DirectGenerateModal({
   const [pendingRoomNumber, setPendingRoomNumber] = useState("");
   const [pendingWardenId, setPendingWardenId] = useState("");
 
-  const reasonOptions: SelectOption[] = DIRECT_GEN_REASONS.map((r) => ({
-    value: r,
-    label: REASON_LABELS[r],
+  // Config-driven: only show codes whose config allows direct generation.
+  const reasonOptions: SelectOption[] = DIRECT_GEN_CODES.map((code) => ({
+    value: code,
+    label: getConfig(code).label,
   }));
 
-  // home_out needs no `to`; the server enforces this too.
-  const toRequired = reason !== "home_out";
-
-  // The three room-assignment fields are required only for a day_scholar
-  // student requesting a home_out pass (the direct-generate route enforces the
-  // same rule and rejects with HOSTEL_ROOM_REQUIRED when any is missing).
-  const roomFieldsRequired = reason === "home_out" && studentEntryType === "day_scholar";
+  const activeConfig = getConfig(reason);
+  const toRequired = activeConfig.code !== "outpass_home";
+  const roomFieldsRequired = activeConfig.code === "outpass_home" && studentEntryType === "day_scholar";
 
   const stepupRequired = useMemo(
     () => requiresStepup({ actorRole, action: "direct_generate", reason }),
@@ -215,7 +216,7 @@ export function DirectGenerateModal({
       }
       if (json.success) {
         addToast({
-          message: `Direct ${REASON_LABELS[reason]} pass generated for ${studentName || studentUserId}${ticketNumber ? ` (${ticketNumber})` : ""}`,
+          message: `Direct ${getConfig(reason).label} pass generated for ${studentName || studentUserId}${ticketNumber ? ` (${ticketNumber})` : ""}`,
           variant: "success",
         });
         onClose();
@@ -315,7 +316,7 @@ export function DirectGenerateModal({
             <Select
               options={reasonOptions}
               value={reason}
-              onChange={(v) => setReason(v as DirectGenReason)}
+              onChange={(v) => setReason(v)}
             />
           </div>
           <div>
