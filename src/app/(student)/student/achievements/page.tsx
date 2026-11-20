@@ -1,9 +1,14 @@
 "use client";
 
+import { Suspense, lazy } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { Achievements } from "@/components/engagement/Achievements";
 import { PersonalGoals } from "@/components/engagement/PersonalGoals";
 import { ContributionPortfolio } from "@/components/retention/ContributionPortfolio";
+
+const AchievementsReviewPanel = lazy(
+  () => import("@/components/engagement/AchievementsReviewPanel")
+);
 
 // Relocated progress widgets (moved off the home screen).
 export default function AchievementsPage() {
@@ -15,6 +20,9 @@ export default function AchievementsPage() {
       <WidgetBoundary name="achievements">
         <Achievements />
       </WidgetBoundary>
+      <Suspense fallback={null}>
+        <AchievementsReviewPanel />
+      </Suspense>
       <WidgetBoundary name="personal-goals">
         <PersonalGoals />
       </WidgetBoundary>

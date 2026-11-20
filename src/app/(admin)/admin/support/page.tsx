@@ -1,7 +1,12 @@
 "use client";
+import { Suspense, lazy } from "react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { SupportDashboard } from "@/components/admin/SupportDashboard";
+
+const ComplaintMonthlyReviewPanel = lazy(
+  () => import("@/components/complaints/ComplaintMonthlyReviewPanel")
+);
 
 export default function AdminSupportPage() {
   return (
@@ -14,6 +19,9 @@ export default function AdminSupportPage() {
         <WidgetBoundary title="Support Tickets">
           <SupportDashboard />
         </WidgetBoundary>
+        <Suspense fallback={null}>
+          <ComplaintMonthlyReviewPanel />
+        </Suspense>
       </div>
     
     
