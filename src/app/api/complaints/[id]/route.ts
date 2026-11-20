@@ -153,6 +153,25 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
     return ok({ updated: true });
   }
 
+  // ── Raiser-only: cancel within 24h of creation ──
+  if (action === "cancel" && isRaiser) {
+    const createdMs = new Date(c.created_at).getTime();
+    if (Date.now() - createdMs > 24 * 3_600_000) {
+      return fail("WINDOW_EXPIRED", "Cannot cancel after 24h", 409);
+    }
+    await query(
+      `UPDATE public.complaints SET status = 'closed', closed_at = NOW(), updated_at = NOW() WHERE id = $1`,
+      [complaintId]
+    );
+    await addAudit({
+      action: "COMPLAINT_CANCELLED",
+      userId: auth.userId,
+      role: auth.role as Role,
+      details: { complaintId },
+    });
+    return ok({ updated: true });
+  }
+
   if (!isAuthority) return fail("FORBIDDEN", "Only authorities can perform workflow actions", 403);
 
   let newStatus = c.status;

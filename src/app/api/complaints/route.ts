@@ -164,6 +164,8 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const category = url.searchParams.get("category");
   const mine = url.searchParams.get("mine") === "true";
   const limit = Math.min(500, Math.max(1, Number(url.searchParams.get("limit") ?? 100)));
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
 
   const isAuthority = AUTHORITIES.has(auth.role);
   const params: unknown[] = [];
@@ -185,6 +187,14 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (category) {
     params.push(category);
     where.push(`c.category_code = $${params.length}`);
+  }
+  if (from) {
+    params.push(from);
+    where.push(`c.created_at::date >= $${params.length}::date`);
+  }
+  if (to) {
+    params.push(to);
+    where.push(`c.created_at::date <= $${params.length}::date`);
   }
 
   params.push(limit);

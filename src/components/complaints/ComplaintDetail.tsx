@@ -147,6 +147,26 @@ export function ComplaintDetail({ role }: { role: string }) {
         </div>
       )}
 
+      {/* Student action buttons: cancel (within 24h) */}
+      {role === "student" && !["resolved", "closed", "rejected"].includes(c.status) && (
+        <div className="surface-card flex gap-2 p-4 bg-bg-elevated">
+          <button
+            onClick={() => patchAction("cancel")}
+            className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-600 text-xs font-medium hover:bg-rose-500/20"
+          >
+            Cancel complaint (within 24h)
+          </button>
+          {c.slaDeadline && new Date(c.slaDeadline).getTime() < Date.now() && (
+            <button
+              onClick={() => patchAction("escalate")}
+              className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 text-xs font-medium hover:bg-amber-500/20"
+            >
+              Escalate (SLA breached)
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Feedback section for student when resolved */}
       {role === "student" && ["resolved", "awaiting_verification"].includes(c.status) && !data.feedback && (
         <form onSubmit={submitFeedback} className="surface-card p-4 bg-action-success/10 space-y-3">
