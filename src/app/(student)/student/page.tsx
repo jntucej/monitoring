@@ -10,6 +10,8 @@ import { ContextCard } from "@/components/student/home/ContextCard";
 import { QuickLinksRow } from "@/components/student/home/QuickLinksRow";
 import { GuardianCallButton } from "@/components/student/home/GuardianCallButton";
 import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
+import { MyDayStrip } from "@/components/student/home/MyDayStrip";
+import { MyStatsCard } from "@/components/student/home/MyStatsCard";
 import { SakugaConsole } from "@/components/student/SakugaConsole";
 import { WifiOff, RotateCw } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
@@ -93,6 +95,12 @@ function StudentHomeInner() {
       <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
+      <WidgetBoundary name="my-day-strip" resetKey={resetKey}>
+        <MyDayStrip />
+      </WidgetBoundary>
+      <WidgetBoundary name="my-stats" resetKey={resetKey}>
+        <MyStatsCard />
+      </WidgetBoundary>
       <WidgetBoundary name="today-status" resetKey={resetKey}>
         <TodayStatus />
       </WidgetBoundary>
