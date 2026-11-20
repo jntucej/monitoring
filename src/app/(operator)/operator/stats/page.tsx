@@ -185,12 +185,20 @@ function OperatorStatsInner() {
         <OperatorWeeklyStats />
       </Suspense>
 
+      {/* Recent scans shift summary — entries/exits per hour & gate */}
+      <Suspense fallback={null}>
+        <RecentScansShiftSummary />
+      </Suspense>
+
     </div>
   );
 }
 
 const OperatorWeeklyStats = lazy(
   () => import("@/components/operator/OperatorWeeklyStats")
+);
+const RecentScansShiftSummary = lazy(
+  () => import("@/components/operator/RecentScansShiftSummary")
 );
 
 export default function OperatorStatsPage() {

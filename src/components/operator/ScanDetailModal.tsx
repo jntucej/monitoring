@@ -1,13 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, ArrowDownLeft, ArrowUpRight, ShieldCheck, History, Loader2 } from "lucide-react";
+import {
+  X,
+  ArrowDownLeft,
+  ArrowUpRight,
+  ShieldCheck,
+  History,
+  Loader2,
+  Pencil,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
 import type { Scan, Person } from "@/lib/types";
 import { useAuthStore } from "@/stores/authStore";
+import { EditableField } from "@/components/shared/EditableField";
+import { DurationBar } from "@/components/shared/DurationBar";
+import { getAuthHeaders } from "@/lib/utils";
 
 interface ScanDetailModalProps {
   scan: Scan | null;
   onClose: () => void;
+  /** Called after a scan category edit succeeds. Triggers refresh. */
+  onEditComplete?: () => void;
+}
+
+interface ScanCategoryEdit {
+  scanId: string;
+  category: string;
+  reason: string;
+  editedBy: string;
+  editedAt: string;
+}
+
+/** Fetch scan category edits from the audit trail. */
+async function fetchScanEdits(scanId: string): Promise<ScanCategoryEdit[]> {
+  try {
+    const res = await fetch(`/api/operator/scans/${encodeURIComponent(scanId)}/edits`, {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok || !body?.data) return [];
+    return body.data as ScanCategoryEdit[];
+  } catch {
+    return [];
+  }
 }
 
 interface PersonPayload {
@@ -17,15 +55,20 @@ interface PersonPayload {
   history?: Scan[];
 }
 
-export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
+export function ScanDetailModal({ scan, onClose, onEditComplete }: ScanDetailModalProps) {
   const [payload, setPayload] = useState<PersonPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [edits, setEdits] = useState<ScanCategoryEdit[]>([]);
+  const [editsLoading, setEditsLoading] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(false);
 
+  // Load the person overview + prior category edits
   useEffect(() => {
     if (!scan) {
       setPayload(null);
       setError(null);
+      setEdits([]);
       return;
     }
     let cancelled = false;
@@ -54,6 +97,44 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
       cancelled = true;
     };
   }, [scan]);
+
+  // Load edit trail when a scan with an id is open
+  useEffect(() => {
+    if (!scan?.id) return;
+    let cancelled = false;
+    setEditsLoading(true);
+    fetchScanEdits(scan.id).then((list) => {
+      if (!cancelled) {
+        setEdits(list);
+        setEditsLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [scan?.id]);
+
+  const handleCategoryEdit = async (newCategory: string, reason: string) => {
+    if (!scan?.id) return;
+    await fetch(`/api/operator/scans/${scan.id}/category`, {
+      method: "PATCH",
+      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ category: newCategory, reason }),
+    });
+    setEditingCategory(false);
+    // Refresh the edit trail
+    setEditsLoading(true);
+    fetchScanEdits(scan.id).then((list) => {
+      setEdits(list);
+      setEditsLoading(false);
+    });
+    onEditComplete?.();
+  };
+
+  // Time-range of validity: entry→exit if both present, else just the scan moment
+  const scanStart = scan?.timestamp ?? new Date().toISOString();
+  const scanEnd = payload?.lastScan?.timestamp ?? scanStart;
+  const durationMs = Math.max(0, new Date(scanEnd).getTime() - new Date(scanStart).getTime());
 
   if (!scan) return null;
 
@@ -109,6 +190,31 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
               </p>
             </div>
           </div>
+
+          {/* Scan category — editable with audit reason */}
+          <div className="pt-1">
+            {editingCategory ? (
+              <EditableField
+                value={scan.reason ?? "No category"}
+                onSave={handleCategoryEdit}
+                fieldLabel="scan category"
+              />
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-text-muted">Category</span>
+                <span className="text-xs font-bold text-text-primary">{scan.reason ?? "—"}</span>
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(true)}
+                  className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary"
+                  title="Edit scan category (with reason)"
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+
           <p className="text-xs text-text-secondary inline-flex items-center gap-1.5 pt-1 flex-wrap">
             <ShieldCheck className="w-3.5 h-3.5 textfocus-ring" />
             Processed by operator: <span className="font-bold text-text-primary">{scan.operatorName || "—"}</span>
@@ -116,6 +222,38 @@ export function ScanDetailModal({ scan, onClose }: ScanDetailModalProps) {
             {scan.isCorrection ? <span className="surface-card px-1.5 py-0.5 bg-sky-400/15 text-action-info text-xs font-bold">CORRECTION</span> : null}
           </p>
         </div>
+
+        {/* Time-range of validity */}
+        {durationMs > 0 && (
+          <div className="rounded-xl border border-border bg-bg-elevated p-3 space-y-2">
+            <p className="text-xs uppercase font-bold tracking-wider text-text-muted inline-flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" /> Time range
+            </p>
+            <DurationBar elapsedMs={durationMs} totalMs={durationMs} tone="info" />
+            <div className="flex items-center justify-between text-xs text-text-muted">
+              <span>{new Date(scanStart).toLocaleString()}</span>
+              <span>{new Date(scanEnd).toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Dispute / edit trail */}
+        {edits.length > 0 && (
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 space-y-2">
+            <p className="text-xs uppercase font-bold tracking-wider text-text-muted inline-flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> Category edit trail
+            </p>
+            <div className="space-y-1.5">
+              {edits.map((e, i) => (
+                <div key={i} className="text-xs text-text-secondary flex items-start gap-1.5">
+                  <span className="font-medium text-text-primary shrink-0">{e.category}</span>
+                  <span className="flex-1 truncate">{e.reason}</span>
+                  <span className="text-text-muted shrink-0 tabular-nums">{e.editedAt.slice(0, 10)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Person details from API */}
         {payload?.person ? (
