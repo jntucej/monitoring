@@ -66,6 +66,17 @@ export interface ClassOverview {
   todayPresent: number;
   todayAbsent: number;
   totalStudents: number;
+  /** This-week attendance counts (last 7 days). */
+  weekPresent?: number;
+  weekAbsent?: number;
+  /** Open disputes raised this week. */
+  disputesThisWeek?: Array<{
+    studentId: string;
+    studentName: string;
+    date: string;
+    reason: string;
+    status: string;
+  }>;
 }
 
 // ─── Input schemas (validated in handlers) ──────────────────────────────

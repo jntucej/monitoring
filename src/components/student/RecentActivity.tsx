@@ -1,9 +1,12 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowRight, ArrowLeft, Loader2, FileDown, EyeOff, Eye, SlidersHorizontal } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
+import { useExport } from "@/hooks/useExport";
+
+type DirFilter = "all" | "IN" | "OUT";
 
 /**
  * Self-service gate activity feed. Works for every account type with a
@@ -12,6 +15,9 @@ import { usePolling } from "@/hooks/usePolling";
 export function RecentActivity() {
   const [activities, setActivities] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dirFilter, setDirFilter] = useState<DirFilter>("all");
+  const [hideSensitive, setHideSensitive] = useState(false);
+  const { exportCSV } = useExport();
 
   const load = useCallback(async () => {
     try {
@@ -35,11 +41,37 @@ export function RecentActivity() {
     }
   }, []);
 
-  // Initial load + visibility-aware polling (no raw setInterval)
-  useEffect(() => {
-    load().catch(() => {});
-  }, [load]);
+  useEffect(() => { load().catch(() => {}); }, [load]);
   usePolling(load, { intervalMs: 30_000 });
+
+  const filtered = useMemo(
+    () => activities
+      .filter((a) => dirFilter === "all" || a.direction === dirFilter)
+      .map((a) =>
+        hideSensitive
+          ? { ...a, gateName: "—", operatorName: "—", name: "—", student_photo: undefined }
+          : a
+      ),
+    [activities, dirFilter, hideSensitive]
+  );
+
+  const handleExport = () => {
+    exportCSV(
+      filtered.map((a) => ({
+        direction: a.direction,
+        gate: a.gateName,
+        timestamp: a.timestamp,
+        isManual: a.isManual ? "yes" : "no",
+      })),
+      [
+        { key: "direction", header: "Direction" },
+        { key: "gate", header: "Gate" },
+        { key: "timestamp", header: "Time" },
+        { key: "isManual", header: "Manual?" },
+      ],
+      "recent_activity.csv"
+    );
+  };
 
   return (
     <div className="surface-card bg-bg-surface p-6">

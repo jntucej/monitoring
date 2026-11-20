@@ -173,12 +173,74 @@ async function handleGet(req: NextRequest, { auth }: { auth: { userId: string } 
       }
     }
 
+    // ── This-week attendance (last 7 days) ──
+    let weekPresent = 0;
+    let weekAbsent = 0;
+    if (totalStudents > 0) {
+      try {
+        const weekRes = await query<{ status: string | null }>(
+          `SELECT status
+             FROM public.attendance_records
+            WHERE person_id = ANY($1::uuid[])
+              AND date >= ($2::date - interval '6 days')
+              AND date <= $2::date`,
+          [rosterRes.rows.map((r) => r.id), todayYmd()]
+        );
+        for (const r of weekRes.rows) {
+          const s = r.status;
+          if (s == null) continue;
+          const up = s.toUpperCase();
+          if (["PRESENT", "IN", "present"].includes(up) || s === "present") weekPresent++;
+          else if (["ABSENT", "OUT", "absent"].includes(up) || s === "absent") weekAbsent++;
+        }
+      } catch {
+        weekPresent = 0;
+        weekAbsent = 0;
+      }
+    }
+
+    // ── Disputes raised this week (attendance_disputes) ──
+    let disputesThisWeek: Array<{ studentId: string; studentName: string; date: string; reason: string; status: string }> = [];
+    if (totalStudents > 0) {
+      try {
+        const dispRes = await query<{
+          student_id: string; student_name: string; date: string; reason: string; status: string;
+        }>(
+          `SELECT ad.person_id::text AS student_id,
+                  u.name AS student_name,
+                  to_char(ad.date, 'YYYY-MM-DD') AS date,
+                  ad.reason,
+                  ad.status
+             FROM public.attendance_disputes ad
+             JOIN public.users u ON u.id = ad.person_id
+            WHERE ad.person_id = ANY($1::uuid[])
+              AND ad.date >= ($2::date - interval '6 days')
+              AND ad.status NOT IN ('RESOLVED','DISMISSED')
+            ORDER BY ad.date DESC
+            LIMIT 5`,
+          [rosterRes.rows.map((r) => r.id), todayYmd()]
+        );
+        disputesThisWeek = dispRes.rows.map((r) => ({
+          studentId: r.student_id,
+          studentName: r.student_name ?? "Unknown",
+          date: r.date,
+          reason: r.reason,
+          status: r.status,
+        }));
+      } catch {
+        disputesThisWeek = [];
+      }
+    }
+
     const overview: ClassOverview = {
       classRow: toClassRow(classRowRaw),
       students,
       todayPresent,
       todayAbsent,
       totalStudents,
+      weekPresent,
+      weekAbsent,
+      disputesThisWeek,
     };
     return ok(overview);
   } catch {
