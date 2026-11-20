@@ -2,12 +2,16 @@
 import { POLL_INTERVALS } from "@/config/app-constants";
 
 
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { AlertCircle } from "lucide-react";
 import { WorkerShiftTracker, WorkerShift } from "@/components/admin/WorkerShiftTracker";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+
+const WorkerMonthlyReviewPanel = lazy(
+  () => import("@/components/admin/WorkerMonthlyReviewPanel")
+);
 export default function AdminWorkersPage() {
 const api = useApi();
 
@@ -76,7 +80,12 @@ const api = useApi();
           <div className="size-6 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <WorkerShiftTracker shifts={shifts} summary={summary} />
+        <>
+          <WorkerShiftTracker shifts={shifts} summary={summary} />
+          <Suspense fallback={null}>
+            <WorkerMonthlyReviewPanel />
+          </Suspense>
+        </>
       )}
     </div>
       </div>
