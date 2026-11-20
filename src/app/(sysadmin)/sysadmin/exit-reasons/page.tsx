@@ -2,10 +2,15 @@
 
 
 import { useEffect, useState } from "react";
+import { Suspense, lazy } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DoorOpen, Plus, Trash2, Edit3, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
+
+const ExitReasonsPanel = lazy(
+  () => import("@/components/operator/ExitReasonsPanel")
+);
 
 interface ExitReason {
   code: string;
@@ -317,6 +322,9 @@ export default function ExitReasonsPage() {
           variant="destructive"
           onConfirm={confirmDeleteReason}
         />
+        <Suspense fallback={null}>
+          <ExitReasonsPanel />
+        </Suspense>
       </div>
     </AuthGuard>
   );

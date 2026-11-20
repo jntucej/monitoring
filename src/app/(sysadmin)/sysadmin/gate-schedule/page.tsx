@@ -1,15 +1,43 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Clock, CalendarX,
+  Clock, CalendarX, FileDown, RefreshCw,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useExport } from "@/hooks/useExport";
 import { getAuthHeaders } from "@/lib/utils";
+
+type PeriodKey = "today" | "this-week" | "this-month" | "all";
+const PERIODS: Array<{ key: PeriodKey; label: string }> = [
+  { key: "today", label: "Today" },
+  { key: "this-week", label: "This week" },
+  { key: "this-month", label: "This month" },
+  { key: "all", label: "All" },
+];
+
+function periodWindow(key: PeriodKey): { from: string; to: string } {
+  const now = new Date();
+  const d = (x: Date) => x.toISOString().slice(0, 10);
+  const today = new Date(now).toISOString().slice(0, 10);
+  switch (key) {
+    case "this-week": {
+      const start = new Date(now);
+      start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      return { from: d(start), to: today };
+    }
+    case "this-month": {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      return { from: d(start), to: today };
+    }
+    default:
+      return { from: today, to: today };
+  }
+}
 
 interface RuleRow {
   id: string;
@@ -36,20 +64,63 @@ function SysadminGateScheduleInner() {
   const [rules, setRules] = useState<RuleRow[]>([]);
   const [holidays, setHolidays] = useState<HolidayRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<PeriodKey>("today");
+  const { exportCSV } = useExport();
+
+  const { from, to } = useMemo(() => periodWindow(period), [period]);
+  const [rangeKey, setRangeKey] = useState(0);
+
+  const handleExport = () => {
+    exportCSV(
+      rules.map((r) => ({
+        name: r.name,
+        gate: r.gate_id ?? "all",
+        day: r.day_of_week != null ? ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][r.day_of_week] : "every",
+        window: r.start_time ? `${r.start_time}–${r.end_time ?? ""}` : "—",
+        policy: r.policy ?? "—",
+        priority: r.priority ?? "—",
+      })),
+      [
+        { key: "name", header: "Rule" },
+        { key: "gate", header: "Gate" },
+        { key: "day", header: "Day" },
+        { key: "window", header: "Window" },
+        { key: "policy", header: "Policy" },
+        { key: "priority", header: "Priority" },
+      ],
+      `gate_schedule_${from}_${to}.csv`
+    );
+  };
+
+  const handleExportHolidays = () => {
+    exportCSV(
+      holidays.map((h) => ({
+        date: h.date,
+        name: h.name,
+      })),
+      [
+        { key: "date", header: "Date" },
+        { key: "name", header: "Holiday" },
+      ],
+      `gate_holidays_${from}_${to}.csv`
+    );
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/gates/schedule", { headers: getAuthHeaders() });
+      const params = period !== "all" ? `?from=${from}&to=${to}` : "";
+      const res = await fetch(`/api/gates/schedule${params}`, { headers: getAuthHeaders() });
       const body = await res.json();
       setRules((body?.data?.rules ?? []) as RuleRow[]);
       setHolidays((body?.data?.holidays ?? []) as HolidayRow[]);
+      if (body?.data?.rules?.length) setRangeKey((k) => k + 1);
     } catch (e) {
       console.error("gate-schedule", e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [from, to, period]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -69,6 +140,53 @@ function SysadminGateScheduleInner() {
         subtitle="Access rules and the gate holiday calendar"
         onRefresh={load}
       />
+
+      {/* Period picker + CSV export */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="inline-flex rounded-lg p-0.5 gap-0.5 bg-bg-elevated border border-border">
+          {PERIODS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setPeriod(key)}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                period === key
+                  ? "bg-action-primary text-white"
+                  : "text-text-secondary hover:bg-bg-elevated"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={rules.length === 0}
+            className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary disabled:opacity-40"
+            title="Export rules CSV"
+          >
+            <FileDown className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleExportHolidays}
+            disabled={holidays.length === 0}
+            className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary disabled:opacity-40"
+            title="Export holidays CSV"
+          >
+            <FileDown className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={load}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-secondary rounded-lg bg-bg-elevated border border-border hover:bg-bg-surface"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
 
       <WidgetBoundary title="Access rules">
         <div className="glass-card">
