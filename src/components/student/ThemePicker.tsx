@@ -8,6 +8,11 @@
 // The loader in ClientProviders re-applies on the next mount, so this also
 // survives navigation. Rendered inside the student Account/Profile section.
 //
+// Taste-layer integration: theme is the `appearance.theme` preference key.
+// If a future policy pins the theme (rank "required"), the picker shows the
+// 🔒 LockedByPolicy chip and disables the buttons — the shell still renders,
+// but the choice is governed by the resolver, not hardcoded.
+//
 // It is theme-agnostic: it shows in BOTH themes so the user can switch away
 // from sakuga back to graphite (a sakuga-only control would be impossible
 // to reverse from).
@@ -15,7 +20,9 @@
 import { useEffect, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { Palette, Check, Loader2 } from "lucide-react";
+import { Palette, Check, Loader2, Lock } from "lucide-react";
+import { LockedByPolicy } from "@/components/shared/LockedByPolicy";
+import { useEffectivePref } from "@/hooks/useEffectivePref";
 
 type ThemeName = "graphite" | "sakuga";
 
@@ -43,6 +50,9 @@ export function ThemePicker() {
   const [saving, setSaving] = useState<ThemeName | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Taste layer: is the theme pinned by policy? (rank "required")
+  const themePref = useEffectivePref<ThemeName>("appearance.theme");
+
   useEffect(() => {
     let cancelled = false;
     fetch("/api/preferences/theme", { headers: getAuthHeaders() })
@@ -56,7 +66,15 @@ export function ThemePicker() {
     };
   }, []);
 
+  // Effective theme: policy-pinned value when locked, else the user's choice.
+  const effectiveTheme: ThemeName | null = themePref.locked ? themePref.value : current;
+
   const apply = async (name: ThemeName) => {
+    if (themePref.locked) {
+      // Required rank: the choice is governed by policy. Stored for audit only.
+      setError("Theme is set by institute and cannot be changed.");
+      return;
+    }
     setSaving(name);
     setError(null);
     try {
@@ -89,17 +107,18 @@ export function ThemePicker() {
         <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
           Appearance
         </p>
+        {themePref.locked && <LockedByPolicy compact reason="Theme set by institute" />}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {THEMES.map((t) => {
-          const active = current === t.id;
+          const active = (themePref.locked ? effectiveTheme : current) === t.id;
           return (
             <button
               key={t.id}
               type="button"
               onClick={() => apply(t.id)}
-              disabled={saving !== null}
+              disabled={saving !== null || themePref.locked}
               aria-pressed={active}
               className={cn(
                 "group relative flex items-center gap-3 rounded-xl border p-3 text-left transition-all",

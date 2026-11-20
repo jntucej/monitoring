@@ -14,9 +14,11 @@ import { useMemo } from "react";
 import {
   useEngagementStore,
   resolveWidgetOrder,
+  ENGAGEMENT_WIDGET_IDS,
   type EngagementWidgetId,
 } from "@/stores/engagementStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { MyCampusProfile } from "./MyCampusProfile";
 import { CampusFeed } from "./CampusFeed";
 import { EventsPanel } from "./EventsPanel";
@@ -93,8 +95,15 @@ function NotificationPrefsSummary() {
 }
 
 export function EngagementWidgets() {
-  const widgetOrder = useEngagementStore((s) => s.widgetOrder);
+  const storeOrder = useEngagementStore((s) => s.widgetOrder);
   const pinnedWidgets = useEngagementStore((s) => s.pinnedWidgets);
+
+  // Taste layer: the effective widget order is the 4-layer cascade —
+  //   policy > user (store) > persona > role > system.
+  // The store holds the user's saved order; when the user hasn't saved one,
+  // the persona default (day_scholar vs hosteller) supplies it.
+  const prefOrder = useEffectivePref<EngagementWidgetId[]>("dashboard.widgetOrder");
+  const widgetOrder = storeOrder.length > 0 ? storeOrder : prefOrder.value ?? [];
 
   const order = useMemo(
     () => resolveWidgetOrder({ widgetOrder, pinnedWidgets }),
