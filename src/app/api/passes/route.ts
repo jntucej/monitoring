@@ -222,9 +222,14 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
+// Read-only list. Kept generous: this is a cheap GET that every student page
+// load re-fires, and on the shared-IP server the per-IP bucket is burned
+// quickly by normal traffic + tooling. A tight 100/min cap caused real users
+// to see the list 429 ("glitching / stuck at login"). Raise the read budget
+// high; the POST mutation limiter (passes_create, 10/min) stays strict.
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ['admin', 'sysadmin', 'operator', 'parent', 'guardian', 'student', 'supervisor', 'principal', 'visitor'] }),
-  { keyPrefix: 'passes_list', maxRequests: 100 }
+  { keyPrefix: 'passes_list', maxRequests: 1000, windowMs: 60_000 }
 );
 
 export const POST = withMutationGuard(handlePost, {requiredRole: ['student', 'parent', 'guardian', 'admin', 'sysadmin', 'operator'], rateLimit: { keyPrefix: 'passes_create', maxRequests: 10 }});

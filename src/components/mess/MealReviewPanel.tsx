@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Clock, Loader2, Lock, RefreshCw, UtensilsCrossed } from "lucide-react";
+import { Clock, Loader2, Lock, RefreshCw, UtensilsCrossed, Pencil, Check } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +15,16 @@ import {
   type MealType,
   type Satisfaction,
 } from "@/lib/mess-reviews";
+
+/** Coerce a review_date that the API may return as a full timestamp
+ *  ("2026-11-20T00:00:00.000Z") to a bare "YYYY-MM-DD" string. The panel's
+ *  filters compare review_date === today (a bare date), so a timestamp form
+ *  used to silently drop every review from the list — the root cause of
+ *  "my review is not showing." */
+function toBareDate(v: unknown): string {
+  const s = typeof v === "string" ? v : String(v ?? "");
+  return s.slice(0, 10);
+}
 
 interface ReviewRow {
   id: string;
@@ -65,6 +75,12 @@ export function MealReviewPanel() {
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
+  // Inline edit of an already-saved review (satisfaction + comment). Editing is
+  // allowed even after the meal window closes — only the first rating is
+  // window-gated. Submissions reuse the existing POST upsert (bumps edit_count).
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSat, setEditSat] = useState<Satisfaction | null>(null);
+  const [editComment, setEditComment] = useState<string>("");
   // 30s tick keeps the countdown current.
   const [now, setNow] = useState<[number, number]>(istNow());
 
@@ -84,7 +100,12 @@ export function MealReviewPanel() {
       if (!res.ok || body?.data == null) {
         throw new Error(body?.message ?? "Failed to load reviews");
       }
-      setReviews(body.data.reviews ?? []);
+      setReviews(
+        (body.data.reviews ?? []).map((r: ReviewRow) => ({
+          ...r,
+          review_date: toBareDate(r.review_date),
+        })),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load reviews");
     } finally {
@@ -131,7 +152,7 @@ export function MealReviewPanel() {
         if (!res.ok || body?.data == null) {
           throw new Error(body?.message ?? "Save failed");
         }
-        const saved = body.data.review as ReviewRow;
+        const saved = { ...(body.data.review as ReviewRow), review_date: toBareDate((body.data.review as ReviewRow).review_date) };
         setReviews((prev) => {
           const next = prev.filter((r) => !(r.review_date === date && r.meal_type === meal));
           next.push(saved);
@@ -145,6 +166,49 @@ export function MealReviewPanel() {
       }
     },
     [addToast, commentDraft],
+  );
+
+  // Open inline edit for a saved review. Prefill satisfaction + comment.
+  const beginEdit = useCallback((r: ReviewRow) => {
+    setEditingId(r.id);
+    setEditSat(r.satisfaction as Satisfaction);
+    setEditComment(r.comment ?? "");
+    setCommentDraft((prev) => ({ ...prev, [`${r.review_date}|${r.meal_type}`]: r.comment ?? "" }));
+  }, []);
+
+  // Persist an edited review (satisfaction/comment) via the existing upsert.
+  const saveEdit = useCallback(
+    async (r: ReviewRow) => {
+      const key = `${r.review_date}|${r.meal_type}`;
+      setSavingKey(key);
+      try {
+        const res = await fetch("/api/mess/reviews", {
+          method: "POST",
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reviewDate: r.review_date,
+            mealType: r.meal_type,
+            satisfaction: editSat ?? r.satisfaction,
+            comment: editComment || null,
+          }),
+        });
+        const body = await res.json().catch(() => null);
+        if (!res.ok || body?.data == null) {
+          throw new Error(body?.message ?? "Save failed");
+        }
+        const saved = { ...(body.data.review as ReviewRow), review_date: toBareDate((body.data.review as ReviewRow).review_date) };
+        setReviews((prev) =>
+          prev.map((x) => (x.id === r.id ? { ...saved, edit_count: (x.edit_count ?? 0) + 1 } : x)),
+        );
+        setEditingId(null);
+        addToast({ message: "Review updated", variant: "success" });
+      } catch (e) {
+        addToast({ message: e instanceof Error ? e.message : "Save failed", variant: "error" });
+      } finally {
+        setSavingKey(null);
+      }
+    },
+    [addToast, editSat, editComment],
   );
 
   if (loading) {
@@ -203,7 +267,7 @@ export function MealReviewPanel() {
             </div>
           </div>
           {error && (
-            <div className="surface-card mt-3 bg-rose-500/10 p-3 text-sm text-action-danger">
+            <div className="mt-3 rounded-lg bg-rose-500/10 p-3 text-sm text-action-danger">
               {error}{" "}
               <button type="button" onClick={() => void load()} className="underline">Retry</button>
             </div>
@@ -303,26 +367,90 @@ export function MealReviewPanel() {
         {!error && reviews.length > 0 && (
           <div>
             <h3 className="mb-2 text-sm font-semibold text-text-secondary">Your reviews today</h3>
-            <div className="space-y-2">
+            <div className="divide-y divide-border/60 rounded-xl border border-border bg-bg-surface/40">
               {reviews
                 .filter((r) => r.review_date === today)
-                .map((r) => (
-                  <div
-                    key={r.id}
-                    className="surface-card flex items-center justify-between gap-2 bg-bg-surface/60 px-3 py-2"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-text-primary">
-                        {MEAL_LABEL[r.meal_type]}
-                        {r.comment ? <span className="ml-2 font-normal text-text-muted">{r.comment}</span> : null}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        Rated {SATISFACTION_LEVELS.find((s) => s.value === r.satisfaction)?.label ?? r.satisfaction}
-                        {r.edit_count ? ` · edited ${r.edit_count}×` : ""}
-                      </p>
+                .map((r) => {
+                  const isEditing = editingId === r.id;
+                  return (
+                    <div
+                      key={r.id}
+                      className="px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-text-primary">
+                            {MEAL_LABEL[r.meal_type]}
+                            {r.comment ? <span className="ml-2 font-normal text-text-muted">“{r.comment}”</span> : null}
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            Rated {SATISFACTION_LEVELS.find((s) => s.value === r.satisfaction)?.label ?? r.satisfaction}
+                            {r.edit_count ? ` · edited ${r.edit_count}×` : ""}
+                          </p>
+                        </div>
+                        {!isEditing && (
+                          <button
+                            type="button"
+                            onClick={() => beginEdit(r)}
+                            className="shrink-0 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs text-text-secondary hover:bg-bg-elevated"
+                          >
+                            <Pencil className="h-3 w-3" /> Edit
+                          </button>
+                        )}
+                      </div>
+
+                      {isEditing && (
+                        <div className="mt-3 space-y-2">
+                          <div className="flex flex-wrap gap-1.5">
+                            {SATISFACTION_LEVELS.map((opt) => {
+                              const active = editSat === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  disabled={savingKey !== null}
+                                  onClick={() => setEditSat(opt.value as Satisfaction)}
+                                  className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs transition ${
+                                    active ? opt.tone : "border-border text-text-muted hover:bg-bg-elevated"
+                                  }`}
+                                >
+                                  <span aria-hidden>{opt.emoji}</span>
+                                  <span className="hidden sm:inline">{opt.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <input
+                            type="text"
+                            maxLength={280}
+                            value={editComment}
+                            onChange={(e) => setEditComment(e.target.value)}
+                            placeholder="Optional comment (280 chars)"
+                            className="w-full border border-border rounded-md bg-bg-surface px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-action-primary"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              disabled={savingKey !== null}
+                              onClick={() => void saveEdit(r)}
+                              className="inline-flex items-center gap-1 rounded-md bg-action-primary px-2.5 py-1.5 text-xs font-semibold text-white hover:opacity-95 disabled:opacity-60"
+                            >
+                              {savingKey !== null ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingId(null)}
+                              className="rounded-md border border-border px-2.5 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
         )}

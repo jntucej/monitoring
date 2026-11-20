@@ -3,6 +3,8 @@
 import { Suspense } from "react";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { AcademicPersonalSection } from "@/components/student/AcademicPersonalSection";
+import { ThemePicker } from "@/components/student/ThemePicker";
+import { SakugaControls } from "@/components/student/SakugaControls";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { User } from "lucide-react";
@@ -15,6 +17,8 @@ function StudentProfileInner() {
         <p className="text-sm font-semibold text-primary">Your Student Profile</p>
       </div>
       <UserProfileTab />
+      <ThemePicker />
+      <SakugaControls />
       <AcademicPersonalSection />
 
     </div>

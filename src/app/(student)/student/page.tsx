@@ -10,6 +10,7 @@ import { ContextCard } from "@/components/student/home/ContextCard";
 import { QuickLinksRow } from "@/components/student/home/QuickLinksRow";
 import { GuardianCallButton } from "@/components/student/home/GuardianCallButton";
 import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
+import { SakugaConsole } from "@/components/student/SakugaConsole";
 import { WifiOff, RotateCw } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
@@ -89,6 +90,7 @@ function StudentHomeInner() {
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
+      <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
       <WidgetBoundary name="today-status" resetKey={resetKey}>

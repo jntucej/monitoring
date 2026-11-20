@@ -250,7 +250,7 @@ export function NotificationCenter({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-full sm:w-5 max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="absolute right-0 mt-2 w-[320px] sm:w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]">
           {/* Header */}
           <div className="surface-card flex items-center justify-between gap-2 p-3">
             <div className="flex items-center gap-2 min-w-3">

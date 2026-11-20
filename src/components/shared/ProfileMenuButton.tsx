@@ -167,7 +167,7 @@ export function ProfileMenuButton({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-6 max-w-xs rounded-2xl border border-border bg-bg-surface shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
+        <div className="absolute right-0 bottom-full sm:bottom-11 z-50 mb-2 w-[calc(100vw-2rem)] sm:w-72 max-w-xs rounded-2xl border border-border bg-bg-surface shadow-2xl overflow-hidden max-h-[85dvh] overflow-y-auto">
           {/* Identity */}
           <div className="surface-card px-4 py-3">
             <p className="text-sm font-bold text-text-primary truncate">

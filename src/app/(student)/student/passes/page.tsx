@@ -11,14 +11,17 @@ import Link from "next/link";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { useHasHydrated } from "@/stores/authStore";
 import { PassQrModal } from "@/components/student/PassQrModal";
 import { PassCreateForm } from "@/components/student/PassCreateForm";
 
 export default function StudentPassesPage() {
   const api = useApi();
+  const hasHydrated = useHasHydrated();
   const [passes, setPasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [selectedQrPass, setSelectedQrPass] = useState<{
     ticket: string;
     title: string;
@@ -38,14 +41,32 @@ export default function StudentPassesPage() {
       const roll = getStudentRoll();
       if (!roll) {
         setPasses([]);
+        setRateLimited(false);
         return;
       }
-      const res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, {
-        headers: api.getHeaders(),
-        cache: "no-store",
-      });
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
+      // Fetch the list; on a 429 (per-IP passes_list limiter) back off and
+      // retry a few times instead of rendering an empty list forever.
+      let res: Response | null = null;
+      let json: any = null;
+      let attempts = 0;
+      while (attempts < 3) {
+        res = await fetch(`/api/passes?roll=${encodeURIComponent(roll)}`, {
+          headers: api.getHeaders(),
+          cache: "no-store",
+        });
+        json = await res.json();
+        if (!res.status || res.status < 400 || res.status !== 429) break;
+        // 429 — wait the server's retryAfter (default ~60s, cap to a few seconds
+        // of user-perceived wait here) with backoff, then retry.
+        const retryAfter =
+          json?.error?.retryAfter ?? json?.error?.resetSeconds ?? 60;
+        const waitMs = Math.min(15_000, Math.max(3_000, retryAfter * 1000)) * (attempts + 1);
+        setRateLimited(true);
+        await new Promise((r) => setTimeout(r, waitMs));
+        attempts += 1;
+      }
+      setRateLimited(false);
+      if (json && json.success && Array.isArray(json.data)) {
         setPasses(json.data);
       } else {
         setPasses([]);
@@ -117,6 +138,15 @@ export default function StudentPassesPage() {
           <strong>Daily Outing:</strong> Standard local outings do not require a gate pass. Apply for a pass only when requesting <strong>Day Pass</strong> or <strong>Home Out</strong> leave.
         </span>
       </div>
+
+      {/* Rate-limited notice: the list limiter throttled us; we retry with
+          backoff. Surface it so a blank list is never a mystery. */}
+      {rateLimited && (
+        <div className="surface-card p-3.5 bg-action-warning/10 text-xs text-action-warning flex items-center gap-2">
+          <Clock className="w-4 h-4 shrink-0 text-action-warning" />
+          <span>Too many requests — waiting for the rate limiter to reset. The list will refresh automatically.</span>
+        </div>
+      )}
 
       {/* Pass list */}
       {loading ? (
