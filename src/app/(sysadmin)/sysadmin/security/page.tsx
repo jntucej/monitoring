@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, lazy } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -12,6 +12,10 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { SecurityManagement } from "@/components/sysadmin/SecurityManagement";
+
+const SysadminMonthlyReviewPanel = lazy(
+  () => import("@/components/sysadmin/SysadminMonthlyReviewPanel")
+);
 import {
   ShieldCheck,
   KeyRound,
@@ -192,6 +196,10 @@ function SecurityReinforcedInner() {
       <WidgetBoundary title="Security operations">
         <SecurityManagement />
       </WidgetBoundary>
+
+      <Suspense fallback={null}>
+        <SysadminMonthlyReviewPanel />
+      </Suspense>
 
     </div>
   );
