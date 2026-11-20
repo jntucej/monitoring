@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   Check,
@@ -13,6 +13,9 @@ import {
   RefreshCw,
   Save,
   UtensilsCrossed,
+  Star,
+  FileDown,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import { QRCodeCanvas } from "qrcode.react";
@@ -23,6 +26,8 @@ import { useAuthStore, useHasHydrated } from "@/stores/authStore";
 import { usePolling } from "@/hooks/usePolling";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
+import { useExport } from "@/hooks/useExport";
+import { SATISFACTION_LEVELS, satisfactionScore, type Satisfaction } from "@/lib/mess-reviews";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -454,6 +459,240 @@ function MessFoodPreferenceInner() {
           <Copy className="size-3.5" /> Set your default meal →
         </Link>
       </div>
+
+      <MealRatingsSection />
+    </div>
+  );
+}
+
+/**
+ * MealRatingsSection — today's meal ratings + last-month comparison + export.
+ */
+function MealRatingsSection() {
+  const { addToast } = useUIStore();
+  const { exportCSV } = useExport();
+  const authUser = useAuthStore((s) => s.user);
+  const [myReviews, setMyReviews] = useState<Array<{
+    id: string; reviewDate: string; mealType: string; satisfaction: string; comment: string | null;
+    editCount: number; user_id: string;
+  }>>([]);
+  const [lastMonth, setLastMonth] = useState<{
+    overall: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [ratingMeal, setRatingMeal] = useState<string | null>(null);
+  const [ratingSat, setRatingSat] = useState<Satisfaction>("GOOD");
+  const [ratingComment, setRatingComment] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editingSat, setEditingSat] = useState<Satisfaction>("GOOD");
+  const [editingComment, setEditingComment] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/mess/reviews", { headers: getAuthHeaders(), cache: "no-store" });
+      const body = await res.json().catch(() => null);
+      if (res.ok && body?.data?.reviews) {
+        setMyReviews(body.data.reviews.filter((r: { user_id: string }) => r.user_id === authUser?.id));
+      }
+    } catch {}
+    try {
+      const lm = new Date();
+      lm.setMonth(lm.getMonth() - 1);
+      const from = new Date(lm.getFullYear(), lm.getMonth(), 1).toISOString().slice(0, 10);
+      const to = new Date(lm.getFullYear(), lm.getMonth() + 1, 0).toISOString().slice(0, 10);
+      const res2 = await fetch(`/api/mess/reviews/aggregate?from=${from}&to=${to}`, {
+        headers: getAuthHeaders(), cache: "no-store",
+      });
+      const body2 = await res2.json().catch(() => null);
+      if (res2.ok && body2?.data?.overall) setLastMonth({ overall: body2.data.overall });
+    } catch {}
+    setLoading(false);
+  }, [authUser?.id]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const myToday = myReviews.filter((r) => r.reviewDate === todayStr);
+  const todayAvg = myToday.length > 0
+    ? myToday.reduce((s, r) => s + satisfactionScore(r.satisfaction as Satisfaction), 0) / myToday.length
+    : null;
+
+  const handleRate = async () => {
+    if (!ratingMeal) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/mess/reviews", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ mealType: ratingMeal, satisfaction: ratingSat, comment: ratingComment || null }),
+      });
+      if (res.ok) {
+        addToast({ variant: "success", title: "Saved", message: "Rating saved" });
+        setRatingMeal(null); setRatingComment(""); setRatingSat("GOOD");
+        load();
+      } else {
+        const b = await res.json().catch(() => ({}));
+        addToast({ variant: "error", title: "Save failed", message: b?.error?.message ?? "Failed to save rating" });
+      }
+    } catch { addToast({ variant: "error", title: "Save failed", message: "Failed to save rating" }); }
+    finally { setBusy(false); }
+  };
+
+  const handleEdit = async () => {
+    if (!editing) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/mess/reviews/${editing}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ satisfaction: editingSat, comment: editingComment || null }),
+      });
+      if (res.ok) {
+        addToast({ variant: "success", title: "Updated", message: "Rating updated" });
+        setEditing(null); setEditingComment("");
+        load();
+      } else {
+        const b = await res.json().catch(() => ({}));
+        addToast({ variant: "error", title: "Update failed", message: b?.error?.message ?? "Failed to update" });
+      }
+    } catch { addToast({ variant: "error", title: "Update failed", message: "Failed to update rating" }); }
+    finally { setBusy(false); }
+  };
+
+  const handleExport = () => {
+    exportCSV(
+      myReviews.map((r) => ({ date: r.reviewDate, meal: r.mealType, rating: r.satisfaction, comment: r.comment ?? "" })),
+      [
+        { key: "date", header: "Date" },
+        { key: "meal", header: "Meal" },
+        { key: "rating", header: "Rating" },
+        { key: "comment", header: "Comment" },
+      ],
+      "mess_reviews.csv"
+    );
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-border space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-muted flex items-center gap-1.5">
+          <Star className="h-3.5 w-3.5" /> Meal Ratings
+        </p>
+        <button type="button" onClick={handleExport} disabled={myReviews.length === 0}
+          className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary disabled:opacity-40">
+          <FileDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {todayAvg != null && (
+        <div className="rounded-lg bg-bg-elevated border border-border px-3 py-2 text-xs flex items-center justify-between">
+          <span className="text-text-secondary">Today&apos;s avg</span>
+          <span className="font-bold text-text-primary tabular-nums">{todayAvg.toFixed(1)} / 5</span>
+        </div>
+      )}
+      {lastMonth && (
+        <div className="rounded-lg bg-bg-elevated border border-border px-3 py-2 text-xs flex items-center justify-between">
+          <span className="text-text-secondary">Last month avg</span>
+          <span className="font-bold text-text-primary tabular-nums">{lastMonth.overall.toFixed(1)} / 5</span>
+        </div>
+      )}
+
+      {!ratingMeal && (
+        <div className="flex flex-wrap gap-1.5">
+          {["BREAKFAST", "LUNCH", "DINNER"].map((meal) => {
+            const myReview = myReviews.find((r) => r.mealType === meal && r.reviewDate === todayStr);
+            if (myReview && editing !== myReview.id) {
+              const level = SATISFACTION_LEVELS.find((l) => l.value === myReview.satisfaction);
+              return (
+                <button key={meal} type="button"
+                  onClick={() => { setEditing(myReview.id); setEditingSat(myReview.satisfaction as Satisfaction); setEditingComment(myReview.comment ?? ""); }}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs ${level?.tone ?? "border-border"}`}>
+                  <span>{meal.toLowerCase()}</span>
+                  <span>{level?.emoji}</span>
+                  <Pencil className="h-3 w-3 opacity-50" />
+                </button>
+              );
+            }
+            return (
+              <button key={meal} type="button"
+                onClick={() => { setRatingMeal(meal); setRatingSat("GOOD"); setRatingComment(""); }}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-elevated px-2.5 py-0.5 text-xs text-text-secondary hover:bg-bg-surface">
+                + {meal.toLowerCase()}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {ratingMeal && (
+        <div className="rounded-lg border border-border bg-bg-elevated p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-text-primary capitalize">{ratingMeal}</p>
+            <button type="button" onClick={() => setRatingMeal(null)} className="text-xs text-text-muted hover:text-text-primary">Cancel</button>
+          </div>
+          <div className="flex gap-1">
+            {SATISFACTION_LEVELS.map((l) => (
+              <button key={l.value} type="button" onClick={() => setRatingSat(l.value)}
+                className={`flex-1 rounded-lg border px-2 py-1 text-center transition ${ratingSat === l.value ? l.tone : "border-border bg-bg-surface text-text-muted"}`}>
+                <span className="text-sm">{l.emoji}</span>
+                <span className="text-[10px] block mt-0.5">{l.label}</span>
+              </button>
+            ))}
+          </div>
+          <input type="text" value={ratingComment} onChange={(e) => setRatingComment(e.target.value.slice(0, 280))}
+            placeholder="Comment (optional)"
+            className="w-full rounded-md border border-border bg-bg-base px-2 py-1.5 text-xs text-text-primary focus:border-action-info focus:outline-none" />
+          <button type="button" onClick={() => void handleRate()} disabled={busy}
+            className="w-full rounded-md bg-action-success px-3 py-1.5 text-xs font-semibold text-emerald-950 hover:opacity-90 disabled:opacity-50">
+            {busy ? "Saving…" : "Save rating"}
+          </button>
+        </div>
+      )}
+
+      {editing && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-text-primary">Edit rating</p>
+            <button type="button" onClick={() => { setEditing(null); setEditingComment(""); }} className="text-xs text-text-muted hover:text-text-primary">Cancel</button>
+          </div>
+          <div className="flex gap-1">
+            {SATISFACTION_LEVELS.map((l) => (
+              <button key={l.value} type="button" onClick={() => setEditingSat(l.value)}
+                className={`flex-1 rounded-lg border px-2 py-1 text-center transition ${editingSat === l.value ? l.tone : "border-border bg-bg-surface text-text-muted"}`}>
+                <span className="text-sm">{l.emoji}</span>
+              </button>
+            ))}
+          </div>
+          <input type="text" value={editingComment} onChange={(e) => setEditingComment(e.target.value.slice(0, 280))}
+            placeholder="Updated comment"
+            className="w-full rounded-md border border-border bg-bg-base px-2 py-1.5 text-xs text-text-primary focus:border-action-info focus:outline-none" />
+          <button type="button" onClick={() => void handleEdit()} disabled={busy}
+            className="w-full rounded-md bg-action-warning px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 disabled:opacity-50">
+            {busy ? "Updating…" : "Update rating"}
+          </button>
+        </div>
+      )}
+
+      {myReviews.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] uppercase tracking-wide text-text-muted">Recent reviews</p>
+          {myReviews.slice(0, 5).map((r) => {
+            const level = SATISFACTION_LEVELS.find((l) => l.value === r.satisfaction);
+            return (
+              <div key={r.id} className={`rounded-lg border px-3 py-1.5 text-xs ${level?.tone ?? "border-border"}`}>
+                <span className="font-medium">{r.reviewDate}</span>
+                <span className="ml-2">{r.mealType.toLowerCase()}</span>
+                <span className="ml-1">{level?.emoji}</span>
+                {r.comment && <span className="ml-2 text-text-muted italic block truncate">{r.comment}</span>}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
