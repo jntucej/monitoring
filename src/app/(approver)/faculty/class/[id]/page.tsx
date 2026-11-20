@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, lazy } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -8,6 +8,8 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useApiResource } from "@/hooks/useApiResource";
 import { Loader2, GraduationCap, User } from "lucide-react";
+
+const FacultyRosterPanel = lazy(() => import("@/components/faculty/FacultyRosterPanel"));
 
 /* /api/classes/[id]/students response */
 interface StudentRow {
@@ -99,6 +101,11 @@ function ClassRosterInner() {
 
   return (
     <div className="space-y-4 p-2 min-w-0">
+      {/* Attendance analytics panel */}
+      <Suspense fallback={<PageLoading />}>
+        <FacultyRosterPanel classId={classId} />
+      </Suspense>
+
       {details ? (
         <div className="surface-card bg-bg-surface p-3 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
