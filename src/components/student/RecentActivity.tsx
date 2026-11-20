@@ -86,8 +86,16 @@ export function RecentActivity() {
         ) : (
           activities.map((a) => {
             const isIn = a.direction === "IN";
+            // Tap-to-act: a gate exit links to the live pass tracker; an
+            // entry links to today's status. The action is the deep-link.
+            const actionHref = isIn ? "/student" : "/student/passes";
+            const actionLabel = isIn ? "Today's status" : "Track pass";
             return (
-              <div key={a.id} className="flex items-center justify-between">
+              <a
+                key={a.id}
+                href={actionHref}
+                className="flex items-center justify-between rounded-lg p-2 -mx-2 hover:bg-bg-elevated transition-colors"
+              >
                 <div className={`flex items-center gap-2 font-medium ${isIn ? "text-action-success" : "text-action-danger"}`}>
                   {isIn ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
                   <span className="capitalize">{isIn ? "Entry" : "Exit"}</span>
@@ -96,9 +104,11 @@ export function RecentActivity() {
                   <p className="text-sm">
                     {new Date(a.timestamp).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </p>
-                  <p className="text-xs text-text-muted">{a.gateName}</p>
+                  <p className="text-xs text-text-muted">
+                    {a.gateName} · <span className="text-action-primary/70">{actionLabel}</span>
+                  </p>
                 </div>
-              </div>
+              </a>
             );
           })
         )}

@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { ProgressCard } from "@/components/shared/achievements/ProgressCard";
+import { useMyAchievements } from "@/hooks/useMyAchievements";
 
 interface EarnedItem {
   code: string;
@@ -70,6 +72,7 @@ export function Achievements() {
   const [available, setAvailable] = useState<AvailableItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { inProgress } = useMyAchievements();
 
   const load = useCallback(async () => {
     try {
@@ -115,6 +118,25 @@ export function Achievements() {
             </span>
           )}
         </div>
+
+        {/* In-progress achievements: progress bars + proof cross-links */}
+        {inProgress.length > 0 && (
+          <div className="mt-5">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+              In progress
+            </h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {inProgress.map((a) => (
+                <ProgressCard
+                  key={a.code}
+                  title={a.title}
+                  progress={a.progress}
+                  proof={a.proof}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {error && !loading ? (
           <div className="surface-card mt-5 bg-rose-500/10 p-3 text-sm text-rose-600">{error}</div>

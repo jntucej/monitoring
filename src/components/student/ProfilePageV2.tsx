@@ -28,6 +28,7 @@ import {
   GuardianSection,
   OutpassDefaultsSection,
 } from "@/components/shared/profile/sections";
+import { RecordsSection } from "@/components/shared/profile/RecordsSection";
 
 const TAB_META: Record<ProfileTabKey, { label: string; icon: React.ElementType; personas?: Persona[] }> = {
   overview:    { label: "Overview",  icon: User },
@@ -36,6 +37,7 @@ const TAB_META: Record<ProfileTabKey, { label: string; icon: React.ElementType; 
   guardian:    { label: "Guardian",  icon: Shield },
   outpass:     { label: "Outpass Defaults", icon: Ticket, personas: ["hosteller"] },
   documents:   { label: "Documents", icon: FileText },
+  records:     { label: "My Records", icon: FileText },
   privacy:     { label: "Privacy",   icon: Shield },
   security:    { label: "Security",  icon: Lock },
 };
@@ -63,6 +65,7 @@ export function ProfilePageV2() {
       case "guardian":   return <GuardianSection />;
       case "outpass":    return <OutpassDefaultsSection />;
       case "documents":  return <DocumentsSection />;
+      case "records":    return <RecordsSection />;
       case "privacy":    return <PrivacySection />;
       case "security":   return <SecuritySection />;
       default:           return null;

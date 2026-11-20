@@ -16,6 +16,8 @@ export type NotificationUrgency = "urgent" | "approval" | "info" | "overdue";
 export interface NotificationItem {
   id: string;
   urgency: NotificationUrgency;
+  /** The notification type (drives the inline action buttons from the registry). */
+  type?: string;
   title: string;
   message?: string;
   createdAt?: string;

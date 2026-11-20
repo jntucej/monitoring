@@ -12,7 +12,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, FileText, LogOut, Car, Building, Shield, Ticket, Lock } from "lucide-react";
+import { User, FileText, LogOut, Car, Building, Shield, Ticket, Lock, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePersona } from "@/hooks/usePersona";
 import { PersonaBadge } from "@/components/shared/PersonaBadge";
@@ -25,6 +25,7 @@ export type ProfileTabKey =
   | "guardian"
   | "outpass"
   | "documents"
+  | "records"
   | "privacy"
   | "security";
 
@@ -47,6 +48,7 @@ const TAB_META: Record<ProfileTabKey, { label: string; icon: React.ElementType; 
   guardian: { label: "Guardian", icon: Shield },
   outpass: { label: "Outpass Defaults", icon: Ticket, personas: ["hosteller"] },
   documents: { label: "Documents", icon: FileText },
+  records: { label: "My Records", icon: BarChart3 },
   privacy: { label: "Privacy & Access", icon: Shield },
   security: { label: "Security", icon: Lock },
 };

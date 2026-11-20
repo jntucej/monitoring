@@ -23,6 +23,8 @@ import { usePolling } from "@/hooks/usePolling";
 import { getTimeAgo } from "@/lib/utils";
 import { useNotificationStore, deriveNotifications, type NotificationItem, type NotificationUrgency } from "@/stores/notificationStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { getNotificationActions } from "@/lib/notifications/actions";
+import { NotificationActionButtons } from "@/components/shared/notifications/NotificationActionButtons";
 
 /**
  * NotificationCenter — a notification dropdown / inbox that groups alerts
@@ -164,6 +166,7 @@ export function NotificationCenter({
       return {
         id: `notif-${String(row.id ?? Math.random())}`,
         urgency,
+        type, // the registry type — drives the inline action buttons
         title: String(row.title ?? row.type ?? "Notification"),
         message: row.message ? String(row.message) : undefined,
         createdAt: row.created_at ? String(row.created_at) : undefined,
@@ -306,36 +309,48 @@ export function NotificationCenter({
                     <div className="space-y-2">
                       {group.map((item) => {
                         const isRead = readIds.includes(item.id);
+                        const hasActions = item.type ? (getNotificationActions(item.type)?.actions?.length ?? 0) > 0 : false;
                         return (
-                          <button
+                          <div
                             key={item.id}
-                            type="button"
-                            onClick={() => handleMarkRead(item.id)}
-                            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
+                            className={`rounded-xl border p-3 ${
                               isRead
                                 ? "border-border bg-bg-surface opacity-60"
-                                : "border-border bg-bg-elevated hover:bg-bg-surface"
+                                : "border-border bg-bg-elevated"
                             }`}
                           >
-                            <div className="min-w-3 flex-1">
-                              <p className="text-xs font-medium text-text-primary truncate">
-                                {item.title}
-                              </p>
-                              {item.message ? (
-                                <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
-                                  {item.message}
+                            <button
+                              type="button"
+                              onClick={() => handleMarkRead(item.id)}
+                              className="flex w-full items-start gap-3 text-left"
+                            >
+                              <div className="min-w-3 flex-1">
+                                <p className="text-xs font-medium text-text-primary truncate">
+                                  {item.title}
                                 </p>
-                              ) : null}
-                              {item.createdAt ? (
-                                <p className="mt-1 text-xs text-text-muted">
-                                  {getTimeAgo(item.createdAt)}
-                                </p>
-                              ) : null}
-                            </div>
-                            {!isRead && (
-                              <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-action-primary" />
+                                {item.message ? (
+                                  <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
+                                    {item.message}
+                                  </p>
+                                ) : null}
+                                {item.createdAt ? (
+                                  <p className="mt-1 text-xs text-text-muted">
+                                    {getTimeAgo(item.createdAt)}
+                                  </p>
+                                ) : null}
+                              </div>
+                              {!isRead && (
+                                <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-action-primary" />
+                              )}
+                            </button>
+                            {hasActions && (
+                              <NotificationActionButtons
+                                notificationId={item.id}
+                                type={item.type ?? ""}
+                                className="mt-2"
+                              />
                             )}
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
