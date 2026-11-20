@@ -29,6 +29,9 @@ import {
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
+import { LADDER, nextActor, isValidForward } from "@/lib/escalation-ladder";
+import type { Domain } from "@/lib/permission-model";
 
 /* ── response shapes (mirror the API route) ───────────────────────── */
 
@@ -97,6 +100,8 @@ interface MergedRow {
   alertId: string | null;
   ticketNumber: string | null;
   isOverdue: boolean;
+  /** The ticket's domain (for escalation ladder routing). */
+  domain?: Domain;
 }
 
 const FILTER_CATEGORIES: Array<{ id: FilterCategory; label: string }> = [
@@ -129,6 +134,8 @@ export interface EscalationPanelProps {
 }
 
 export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
+  const currentUserRole = useAuthStore((s) => s.role) ?? "";
+  const currentUserId = useAuthStore((s) => s.user?.id) ?? "";
   const addToast = useUIStore((s) => s.addToast);
 
   const { data: escData, loading: escLoading, refresh: refreshEsc } =
@@ -315,19 +322,48 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
       if (!row.ticketNumber) return;
       setBusyKey(row.key);
       try {
+        // Determine the ticket's domain from the workflow_type.
+        const workflowType = escalated.find((x) => x.ticket_number === row.ticketNumber)?.workflow_type;
+        const workflowToDomain: Record<string, Domain> = {
+          hostel: "hostel",
+          exam: "exam",
+          memo: "academics",
+          staff_leave: "governance",
+          lab_access: "infrastructure",
+        };
+        const domain: Domain = workflowToDomain[workflowType ?? ""] ?? "hostel";
+
+        // Use the escalation ladder to find the next role.
+        const blocked = {
+          allowed: false as const,
+          reason: "tier_too_low" as const,
+          message: "Manual escalation from EscalationPanel",
+        };
+        const escalation = nextActor(currentUserRole || "staff", domain, blocked);
+        const targetRole = escalation?.targetRole;
+
+        const body: Record<string, unknown> = { action: "ESCALATE" };
+        if (targetRole) {
+          body.targetRole = targetRole;
+          body.reason = "tier_too_low";
+          body.escalationExplanation = escalation.explanation;
+        }
+
         const res = await fetch(
           `/api/permissions/${encodeURIComponent(row.ticketNumber)}`,
           {
             method: "PATCH",
             headers: getAuthHeaders(),
-            body: JSON.stringify({ action: "ESCALATE" }),
+            body: JSON.stringify(body),
           }
         );
         const json = await res.json().catch(() => null);
         if (res.ok && json?.success) {
           addToast({
             variant: "success",
-            message: `Ticket ${row.ticketNumber} escalated`,
+            message: targetRole
+              ? `Ticket ${row.ticketNumber} escalated to ${targetRole}`
+              : `Ticket ${row.ticketNumber} escalated`,
           });
           void refreshEsc();
           onRefresh?.();
@@ -343,7 +379,7 @@ export function EscalationPanel({ onRefresh }: EscalationPanelProps) {
         setBusyKey(null);
       }
     },
-    [addToast, refreshEsc, onRefresh]
+    [addToast, refreshEsc, onRefresh, currentUserRole]
   );
 
   const handleRefresh = useCallback(() => {
