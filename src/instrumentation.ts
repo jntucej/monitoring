@@ -13,7 +13,11 @@
  */
 
 export async function register() {
-  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  // Guard: this hook is Node-only (schema-drift guard, RLS posture, pool
+  // budget). In the edge runtime it's a no-op — the edge bundle must not
+  // pull in Node APIs (crypto, process.exit, pg). The schema-drift guard
+  // still runs in the Node web server via the Next.js instrumentation API.
+  if (process.env.NEXT_RUNTIME === "edge") return;
 
   // Fail closed in production if kiosk is left in open mode without PIN or trusted IP restriction
   if (

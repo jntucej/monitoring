@@ -908,9 +908,13 @@ export const authAdmin = {
       user_metadata: attributes.user_metadata ?? {},
       app_metadata: attributes.app_metadata ?? {},
     };
-    const crypto = await import("crypto");
+    // Node's crypto.randomUUID is available as a global in modern runtimes;
+    // the dynamic import is the fallback for older Node versions.
+    const id: string =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : (await import("crypto")).randomUUID();
     const bcrypt = await import("bcryptjs");
-    const id = crypto.randomUUID();
     const email = safeAttributes.email.toLowerCase().replace(/,\s*$/, "")
       .trim();
     const name = safeAttributes.user_metadata?.name || safeAttributes.user_metadata?.full_name || email.split("@")[0];

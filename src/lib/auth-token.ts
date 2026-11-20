@@ -1,6 +1,26 @@
 import { SignJWT, jwtVerify, JWTPayload } from "jose";
 
-import { randomUUID, createHash } from "crypto";
+// Node-only: crypto is a Node built-in. Guarded so this module can be
+// pulled into the edge bundle (via middleware/authorization.ts) without
+// crashing at import time. All JWT functions are Node-only; the edge
+// runtime gets a no-op stub.
+import { createRequire } from "module";
+const require_ = typeof process !== "undefined" && process.versions?.node
+  ? createRequire(import.meta.url)
+  : (_mod: string) => {
+      throw new Error(`auth-token: Node module '${_mod}' unavailable in edge runtime`);
+    };
+const { randomUUID, createHash } = (() => {
+  try {
+    const c = require_("crypto");
+    return { randomUUID: c.randomUUID, createHash: c.createHash };
+  } catch {
+    return {
+      randomUUID: () => crypto.randomUUID(),
+      createHash: (_: string) => { throw new Error("createHash unavailable in edge runtime"); },
+    };
+  }
+})();
 import { requireSecret } from "@/lib/env";
 
 interface SigningKey {
