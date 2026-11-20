@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CountUp } from "@/components/admin/shared/CountUp";
 import {
   Briefcase,
@@ -15,8 +15,10 @@ import {
   User,
   Mail,
   Phone,
+  FileDown,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
+import { useExport } from "@/hooks/useExport";
 
 export interface StaffLogEntry {
   id: string;
@@ -58,6 +60,8 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
   const [selectedDept, setSelectedDept] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "heatmap">("table");
+  const { exportCSV } = useExport();
 
   const departments = Array.from(new Set(records.map((r) => r.department).filter(Boolean)));
 
@@ -73,6 +77,55 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
       (selectedStatus === "WRN" && !!r.flagStatus);
     return matchesSearch && matchesDept && matchesStatus;
   });
+
+  // Heatmap: day × time-slot occupancy (last 7 days)
+  const heatmap = useMemo(() => {
+    const days: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    const slots = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+    const grid: Array<Array<number>> = days.map(() => Array(slots.length).fill(0));
+    const now = new Date();
+    const nowH = String(now.getHours()).padStart(2, "0");
+    for (const r of filteredRecords) {
+      if (!r.lastOutTime) continue;
+      for (let di = 0; di < days.length; di++) {
+        for (let si = 0; si < slots.length; si++) {
+          if (r.status === "INSIDE" && now.toISOString().slice(0, 10) === days[di]) {
+            grid[di][si] += 1;
+          }
+        }
+      }
+    }
+    return { days, slots, grid, nowDay: now.toISOString().slice(0, 10), nowSlot: nowH };
+  }, [filteredRecords]);
+
+  const handleExport = () => {
+    exportCSV(
+      filteredRecords.map((r) => ({
+        name: r.fullName,
+        roll: r.uniqueId,
+        department: r.department,
+        role: r.designation,
+        status: r.status,
+        firstIn: r.firstInTime ?? "—",
+        punctuality: r.punctualityStatus ?? "—",
+      })),
+      [
+        { key: "name", header: "Name" },
+        { key: "roll", header: "Roll" },
+        { key: "department", header: "Dept" },
+        { key: "role", header: "Role" },
+        { key: "status", header: "Status" },
+        { key: "firstIn", header: "First In" },
+        { key: "punctuality", header: "Punctuality" },
+      ],
+      "staff_tracking.csv"
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -134,43 +187,120 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
         </div>
       </div>
       {/* Filter & Search Bar */}
-      <div className="surface-card flex flex-col sm:flex-row gap-3 items-center justify-between bg-bg-surface p-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, ID, designation..."
-            className="surface-card w-full pl-9 pr-4 py-2 bg-bg-base text-xs focus:outline-none focus:"
-          />
+      <div className="surface-card bg-bg-surface p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search staff by name, roll, or designation…"
+              className="surface-card w-full bg-bg-elevated pl-10 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="surface-card bg-bg-elevated border-border text-text-primary text-xs py-2 px-3"
+            >
+              <option value="ALL">All Departments</option>
+              {departments.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="surface-card bg-bg-elevated border-border text-text-primary text-xs py-2 px-3"
+            >
+              <option value="ALL">All Status</option>
+              <option value="INSIDE">Inside</option>
+              <option value="OUTSIDE">Outside</option>
+              <option value="ABSENT">Absent</option>
+              <option value="WRN">Warnings</option>
+            </select>
+            {/* View mode + export */}
+            <div className="inline-flex rounded-lg p-0.5 gap-0.5 bg-bg-elevated border border-border">
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium ${viewMode === "table" ? "bg-action-primary text-white" : "text-text-secondary hover:bg-bg-surface"}`}
+              >
+                Table
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("heatmap")}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium ${viewMode === "heatmap" ? "bg-action-primary text-white" : "text-text-secondary hover:bg-bg-surface"}`}
+              >
+                Heatmap
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={filteredRecords.length === 0}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-text-secondary rounded-lg bg-bg-elevated border border-border hover:bg-bg-surface disabled:opacity-40"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="surface-card px-3 py-2 bg-bg-base text-xs focus:outline-none"
-          >
-            <option value="ALL">All Departments</option>
-            {departments.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="surface-card px-3 py-2 bg-bg-base text-xs focus:outline-none"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="INSIDE">Currently Inside</option>
-            <option value="OUTSIDE">Currently Outside</option>
-            <option value="ABSENT">Absent Today</option>
-            <option value="WRN">Warning Flagged (WRN)</option>
-          </select>
+        <div className="text-xs text-text-muted">
+          <span className="font-semibold text-text-primary">{filteredRecords.length}</span> staff members ·
+          <span className="ml-1 font-mono">{heatmap.days.length}</span> days × <span className="font-mono">{heatmap.slots.length}</span> slots
         </div>
       </div>
+
+      {/* Heatmap view */}
+      {viewMode === "heatmap" && (
+        <div className="surface-card bg-bg-surface p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-muted mb-3">
+            7-day × time-slot occupancy
+          </p>
+          <div className="overflow-x-auto">
+            <div className="min-w-80 grid gap-px bgborder rounded-lg overflow-hidden"
+              style={{ gridTemplateColumns: `80px repeat(${heatmap.slots.length}, 1fr)` }}>
+              {/* Header */}
+              <div className="bg-bg-base" />
+              {heatmap.slots.map((s) => (
+                <div key={s} className="bg-bg-base text-[10px] text-text-muted text-center py-1">{s}</div>
+              ))}
+              {heatmap.days.map((day, di) => (
+                <React.Fragment key={day}>
+                  <div className="bg-bg-base text-xs text-text-primary px-2 py-1.5 font-mono flex items-center">
+                    {day.slice(5)}
+                  </div>
+                  {heatmap.slots.map((slot, si) => {
+                    const count = heatmap.grid[di][si];
+                    const intensity = Math.min(1, count / Math.max(1, filteredRecords.length / 2));
+                    const isNow = day === heatmap.nowDay && parseInt(slot) === parseInt(heatmap.nowSlot);
+                    return (
+                      <div
+                        key={slot}
+                        className={`h-7 flex items-center justify-center text-[10px] tabular-nums ${
+                          isNow ? "ring-2 ring-inset ring-sky-400" : ""
+                        } ${count > 0 ? "text-white font-semibold" : "text-text-muted"}`}
+                        style={{
+                          backgroundColor: count > 0
+                            ? `rgba(168, 85, 247, ${0.2 + intensity * 0.8})`
+                            : "transparent",
+                        }}
+                      >
+                        {count > 0 ? count : ""}
+                      </div>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+          <p className="text-[10px] text-text-muted mt-2">
+            Darker purple = more staff present · Highlighted cell = current time slot
+          </p>
+        </div>
+      )}
       {/* Staff Roster & Logs Table */}
       <div className="bg-bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="surface-card p-4 flex justify-between items-center">
