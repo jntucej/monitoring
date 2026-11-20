@@ -39,18 +39,19 @@ export function ApprovalsView({
   return (
     <div className="space-y-4">
       <WeekBar />
-      <header>
-        <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
-        <p className="text-xs text-text-muted">
-          {rows.length} request{rows.length === 1 ? "" : "s"}
-        </p>
-      </header>
+      <section className="surface-card p-4 md:p-5">
+        <header className="mb-4">
+          <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
+          <p className="text-xs text-text-muted">
+            {rows.length} request{rows.length === 1 ? "" : "s"}
+          </p>
+        </header>
 
-      {loading && rows.length === 0 ? (
-        <ListSkeleton rows={6} />
-      ) : rows.length === 0 ? (
-        <EmptyState title="Nothing here" description="No requests in this view." />
-      ) : (
+        {loading && rows.length === 0 ? (
+          <ListSkeleton rows={6} />
+        ) : rows.length === 0 ? (
+          <EmptyState title="Nothing here" description="No requests in this view." />
+        ) : (
         <>
           <ul className="space-y-2 md:hidden">
             {rows.map((item) => (
@@ -97,7 +98,8 @@ export function ApprovalsView({
             />
           </div>
         </>
-      )}
+        )}
+      </section>
 
       <ApprovalDetailSheet
         item={selected}
