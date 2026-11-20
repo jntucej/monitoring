@@ -19,12 +19,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { FlagBadge } from "@/components/shared/FlagBadge";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { friendlyApiError, readApiError } from "@/lib/apiErrors";
 import { getAuthHeaders } from "@/lib/utils";
 import { POLL_INTERVALS } from "@/config/app-constants";
 import { Check, Eye, Loader2, RefreshCw, X } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import type { FlagLevel } from "@/lib/permission-model";
 import {
   LevelBadge,
   ForwardedFromChip,
@@ -45,6 +47,8 @@ export interface StageQueueRow {
     id?: string;
     name?: string | null;
     student_details?: { roll?: string | null; hostel_block?: string | null } | null;
+    conductFlag?: string | null;
+    conductFlagReason?: string | null;
   } | null;
   /** Current hostel level the ticket is routed to (forward target / stage). */
   routed_to_role?: string | null;
@@ -222,6 +226,14 @@ export function StageQueuePanel({
                       {row.student?.student_details?.roll
                         ? ` · ${row.student.student_details.roll}`
                         : ""}
+                      {row.student?.conductFlag &&
+                        row.student.conductFlag !== "clear" && (
+                          <FlagBadge
+                            flag={row.student.conductFlag as FlagLevel}
+                            reason={row.student.conductFlagReason ?? undefined}
+                            className="ml-1.5"
+                          />
+                        )}
                     </div>
                     <div className="text-xs text-text-muted">
                       Stage: {row.current_stage}

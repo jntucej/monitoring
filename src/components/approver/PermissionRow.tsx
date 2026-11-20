@@ -4,7 +4,9 @@ import React from "react";
 import { Check, Eye, Clock, Shield, User, Building, FileText } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { SlaBadge } from "./SlaBadge";
+import { FlagBadge } from "@/components/shared/FlagBadge";
 import type { PermissionStatus, WorkflowType } from "@/lib/types";
+import type { FlagLevel } from "@/lib/permission-model";
 
 export interface PermissionItem {
   id: string;
@@ -145,6 +147,12 @@ export function PermissionRow({
               <span className="text-xs text-text-muted font-mono">
                 ({details.roll})
               </span>
+            )}
+            {/* Conduct flag indicator */}
+            {(student as unknown as { conductFlag?: FlagLevel })?.conductFlag && (
+              <FlagBadge
+                flag={(student as unknown as { conductFlag: FlagLevel }).conductFlag!}
+              />
             )}
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${

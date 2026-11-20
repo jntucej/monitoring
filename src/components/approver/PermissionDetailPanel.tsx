@@ -37,7 +37,9 @@ import { ParentConsentStage } from "./ParentConsentStage";
 import { QuotaOverrideModal } from "./QuotaOverrideModal";
 import { LateReturnFlag } from "./LateReturnFlag";
 import { PersonaBadge } from "@/components/shared/PersonaBadge";
+import { FlagBadge } from "@/components/shared/FlagBadge";
 import { PASS_TYPE_SEED } from "@/lib/pass-types";
+import type { FlagLevel } from "@/lib/permission-model";
 
 export interface PermissionDetailPanelProps {
   ticket: string | null;
@@ -346,6 +348,26 @@ export function PermissionDetailPanel({
           )}
           {passTypeConfig && passTypeConfig.requiresParentConsent && data.status === "PENDING" && (
             <ParentConsentStage request={data} />
+          )}
+
+          {/* Conduct flag banner — shows when the student has an active flag */}
+          {(data.student as unknown as { conductFlag?: FlagLevel })?.conductFlag &&
+            (data.student as unknown as { conductFlag: FlagLevel }).conductFlag !== "clear" && (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-amber-600">
+                  Subject is on {(data.student as unknown as { conductFlag: FlagLevel }).conductFlag}
+                </p>
+                <p className="text-[10px] text-text-muted">
+                  {(data.student as unknown as { conductFlagReason?: string }).conductFlagReason ??
+                    "Review the conduct ledger before approving."}
+                </p>
+              </div>
+              <FlagBadge
+                flag={(data.student as unknown as { conductFlag: FlagLevel }).conductFlag}
+              />
+            </div>
           )}
 
           {passTypeConfig && (passTypeConfig.quotaKey ?? null) && data.status === "PENDING" && (
