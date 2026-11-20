@@ -2,13 +2,17 @@
 
 import { POLL_INTERVALS } from "@/config/app-constants";
 
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { AlertCircle } from "lucide-react";
 import { FacultyTracking } from "@/components/admin/FacultyTracking";
 import { FacultyMemberAttendance, DepartmentAttendanceSummary } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh"
 import { CampusStatusBar } from "@/components/admin/CampusStatusBar";
+
+const FacultyMonthlyReviewPanel = lazy(
+  () => import("@/components/admin/FacultyMonthlyReviewPanel")
+);
 export default function AdminFacultyPage() {
 const api = useApi();
 
@@ -81,11 +85,16 @@ const api = useApi();
           <div className="size-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <FacultyTracking
-          records={records}
-          summary={summary}
-          departmentSummaries={departmentSummaries}
-        />
+        <>
+          <FacultyTracking
+            records={records}
+            summary={summary}
+            departmentSummaries={departmentSummaries}
+          />
+          <Suspense fallback={null}>
+            <FacultyMonthlyReviewPanel />
+          </Suspense>
+        </>
       )}
     </div>
       </div>
