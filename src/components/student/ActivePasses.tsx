@@ -1,11 +1,15 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { Loader2, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Loader2, Clock, CheckCircle2, XCircle, FileDown, History } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
+import { useExport } from "@/hooks/useExport";
+import { PeriodPicker } from "@/components/shared/PeriodPicker";
+import type { Period } from "@/lib/period";
+import { getPeriod } from "@/lib/period";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -27,9 +31,13 @@ function statusStyle(s: string) {
 
 export function ActivePasses() {
   const [passes, setPasses] = useState<GatePass[]>([]);
+  const [history, setHistory] = useState<GatePass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState<Period>(getPeriod("this-month"));
+  const [showHistory, setShowHistory] = useState(false);
   const user = useAuthStore((s) => s.user);
+  const { exportCSV } = useExport();
 
   const load = useCallback(async () => {
     const roll = user?.uniqueId ?? user?.studentDetails?.roll ?? null;
@@ -46,7 +54,8 @@ export function ActivePasses() {
         setError(`HTTP ${res.status}`);
       }
       const json = await res.json().catch(() => ({}));
-      setPasses(Array.isArray(json.data) ? json.data : []);
+      const all: GatePass[] = Array.isArray(json.data) ? json.data : [];
+      setPasses(all);
       setError(null);
       setLoading(false);
     } catch {
@@ -54,6 +63,35 @@ export function ActivePasses() {
       setLoading(false);
     }
   }, [user?.uniqueId, user?.studentDetails?.roll]);
+
+  // Period-filtered history
+  const periodFrom = useMemo(() => period.from.slice(0, 10), [period]);
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const filtered = useMemo(
+    () => passes.filter((p) => p.from >= periodFrom && p.to <= todayStr || p.finalStatus === "PENDING" || p.finalStatus === "COMPLETED"),
+    [passes, periodFrom, todayStr]
+  );
+
+  const handleExportHistory = () => {
+    exportCSV(
+      filtered.map((p) => ({
+        type: getPassTypeName(p.reason),
+        from: p.from,
+        to: p.to,
+        status: p.finalStatus,
+        requestedAt: p.requestedAt,
+      })),
+      [
+        { key: "type", header: "Pass Type" },
+        { key: "from", header: "From" },
+        { key: "to", header: "To" },
+        { key: "status", header: "Status" },
+        { key: "requestedAt", header: "Requested" },
+      ],
+      `pass_history_${period.key}.csv`
+    );
+  };
 
   // Initial load + visibility-aware polling (no raw setInterval)
   useEffect(() => {
@@ -109,6 +147,50 @@ export function ActivePasses() {
           })}
         </div>
       )}
+
+      {/* History toggle + period + export */}
+      <div className="mt-5 border-t border-border pt-4">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-action-primary"
+          >
+            <History className="h-3.5 w-3.5" />
+            {showHistory ? "Hide history" : "View history"}
+          </button>
+          <div className="flex items-center gap-2">
+            <PeriodPicker value={period} onChange={setPeriod} />
+            <button
+              type="button"
+              onClick={handleExportHistory}
+              disabled={filtered.length === 0}
+              className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary disabled:opacity-40"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {showHistory && filtered.length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            {filtered.slice(0, 15).map((p) => (
+              <div key={p.id} className="rounded-lg bg-bg-elevated border border-border px-3 py-2 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-medium text-text-primary">{getPassTypeName(p.reason)}</span>
+                  <span className="ml-2 text-text-muted tabular-nums">{p.from.slice(0, 10)} → {p.to.slice(0, 10)}</span>
+                </div>
+                <span className={`uppercase font-medium ${
+                  p.finalStatus === "COMPLETED" ? "text-emerald-500" :
+                  p.finalStatus === "PENDING" ? "text-amber-500" : "text-rose-500"
+                }`}>
+                  {p.finalStatus}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
