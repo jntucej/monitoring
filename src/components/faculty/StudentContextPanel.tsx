@@ -10,10 +10,12 @@
  */
 
 import { useMemo, useState } from "react";
-import { X, Clock, User, CalendarDays, Loader2 } from "lucide-react";
+import { X, Clock, User, CalendarDays, Loader2, TrendingUp, AlertTriangle } from "lucide-react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useApiResource } from "@/hooks/useApiResource";
+import { DeltaBadge } from "@/components/shared/DeltaBadge";
+import { MiniSparkline } from "@/components/shared/MiniSparkline";
 
 interface AttendanceRow {
   id?: string;
@@ -86,6 +88,58 @@ export function StudentContextPanel({
   const present = rows.filter((r) => ["PRESENT", "IN", "present"].includes(r.status ?? "")).length;
   const absent = rows.length - present;
 
+  // Weekly attendance trend (last 7 calendar weeks, present-day counts)
+  const weeklyTrend = useMemo(() => {
+    const all = data?.data ?? [];
+    const buckets: number[] = Array.from({ length: 7 }, () => 0);
+    const now = new Date();
+    for (const r of all) {
+      if (!r.date) continue;
+      const d = new Date(r.date);
+      const weeksAgo = Math.floor((now.getTime() - d.getTime()) / (7 * 86_400_000));
+      if (weeksAgo >= 0 && weeksAgo < 7 && ["PRESENT", "IN", "present"].includes(r.status ?? "")) {
+        buckets[6 - weeksAgo] += 1;
+      }
+    }
+    return buckets;
+  }, [data]);
+
+  // Time spent in class: sum of (out_time - in_time) where both present
+  const hoursInClass = useMemo(() => {
+    const all = data?.data ?? [];
+    let totalMs = 0;
+    for (const r of all) {
+      if (r.in_time && r.out_time) {
+        const ms = new Date(r.out_time).getTime() - new Date(r.in_time).getTime();
+        if (ms > 0) totalMs += ms;
+      }
+    }
+    return Math.round((totalMs / 3_600_000) * 10) / 10;
+  }, [data]);
+
+  // Disputes raised by this student (from attendance_disputes)
+  const [disputes, setDisputes] = useState<Array<{ date: string; reason: string; status: string }> | null>(null);
+  const loadDisputes = () => {
+    if (!studentId) return;
+    fetch(`/api/faculty/attendance/student-disputes?studentId=${studentId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("accessToken") ?? ""}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => {
+        const d = (b?.data?.disputes ?? []) as Array<{ date: string; reason: string; status: string }>;
+        setDisputes(d);
+      })
+      .catch(() => setDisputes([]));
+  };
+
+  // Lazy-load disputes once the student is resolved
+  useMemo(() => {
+    if (student && !disputes) loadDisputes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student]);
+
+  const weeklyAvg = weeklyTrend.length > 0 ? weeklyTrend.reduce((s, n) => s + n, 0) / 7 : 0;
+
   if (loading && !student) {
     return (
       <aside className="surface-card min-w-0 w-full bg-bg-surface p-4">
@@ -132,6 +186,40 @@ export function StudentContextPanel({
           </div>
           <p className="mt-1 text-xl font-bold text-action-danger tabular-nums">{absent}</p>
         </div>
+      </div>
+
+      {/* Weekly trend + time-in-class + disputes */}
+      <div className="space-y-3 mb-4">
+        <div className="rounded-xl border border-border bg-bg-elevated p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">7-week trend</p>
+            <span className="text-xs text-text-muted tabular-nums">~{Math.round(weeklyAvg * 10) / 10}/wk</span>
+          </div>
+          <MiniSparkline data={weeklyTrend} width={220} height={36} />
+        </div>
+
+        {hoursInClass > 0 && (
+          <div className="rounded-xl border border-border bg-bg-elevated p-3 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Time in class</p>
+            <p className="text-lg font-bold text-text-primary tabular-nums">{hoursInClass}h</p>
+          </div>
+        )}
+
+        {disputes && disputes.length > 0 && (
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-600 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" /> Open disputes
+            </p>
+            <div className="space-y-1">
+              {disputes.map((d, i) => (
+                <div key={i} className="text-xs text-text-secondary">
+                  <span className="font-medium text-text-primary">{d.date}</span> — {d.reason}
+                  <span className="ml-1 text-text-muted">({d.status})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Attendance history */}
