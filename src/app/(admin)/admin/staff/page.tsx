@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
@@ -12,6 +12,10 @@ import {
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+
+const StaffMonthlyReviewPanel = lazy(
+  () => import("@/components/admin/StaffMonthlyReviewPanel")
+);
 
 
 /**
@@ -486,6 +490,11 @@ function AdminStaffInner() {
           </aside>
         </div>
       )}
+
+      {/* Monthly review panel */}
+      <Suspense fallback={null}>
+        <StaffMonthlyReviewPanel />
+      </Suspense>
     </div>
   );
 }
