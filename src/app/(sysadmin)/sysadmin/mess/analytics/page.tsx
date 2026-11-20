@@ -1,11 +1,15 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 
 import { AnalyticsTab } from "@/components/mess/MessOperations";
+
+const MessMonthlyReviewPanel = lazy(
+  () => import("@/components/mess/MessMonthlyReviewPanel")
+);
 
 export default function SysadminMessAnalyticsPage() {
   return (
@@ -17,6 +21,11 @@ export default function SysadminMessAnalyticsPage() {
         </WidgetBoundary>
       </Suspense>
 
+      <Suspense fallback={<PageLoading />}>
+        <WidgetBoundary title="Meal Review Aggregates">
+          <MessMonthlyReviewPanel />
+        </WidgetBoundary>
+      </Suspense>
     </div>
   );
 }
