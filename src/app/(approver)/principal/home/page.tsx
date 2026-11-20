@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { usePrincipalRetention } from "@/stores/principalRetentionStore";
@@ -64,6 +64,8 @@ function KpiTile({ label, value, tone = "ok" }: { label: string; value: string |
     </div>
   );
 }
+
+const InboxReviewPanel = lazy(() => import("@/components/principal/InboxReviewPanel"));
 
 export default function PrincipalTodayPage() {
   const [focusOpen, setFocusOpen] = useState(false);
@@ -164,7 +166,14 @@ export default function PrincipalTodayPage() {
           </div>
         </WidgetBoundary>
 
-        {/* 5. Scorecard — personal bests */}
+        {/* 5. Decision Review — monthly stats + last-month delta */}
+        <Suspense fallback={null}>
+          <WidgetBoundary name="InboxReview" title="Decision Review">
+            <InboxReviewPanel />
+          </WidgetBoundary>
+        </Suspense>
+
+        {/* 6. Scorecard — personal bests */}
         <WidgetBoundary name="StrategicScorecard" title="Strategic Scorecard">
           <StrategicScorecard
             thisWeek={d?.counts.todayDecisions ?? 0}
