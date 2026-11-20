@@ -35,7 +35,13 @@ import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { getConsoleConfig } from "@/config/consoles";
+import {
+  parseCommand,
+  HOSTEL_MANAGER_COMMANDS,
+  type ParsedCommand,
+} from "@/lib/commands/parse";
 
+// ── Shell's command defs (icon-bound; the parser + grammar live in the kernel) ──
 interface CommandDef {
   id: string;
   label: string;
@@ -43,7 +49,7 @@ interface CommandDef {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-/** All available hostel-manager command definitions. */
+/** All available hostel-manager command definitions (shell-local: owns icons + layout). */
 const COMMAND_DEFS: CommandDef[] = [
   {
     id: "assign",
@@ -77,82 +83,29 @@ const COMMAND_DEFS: CommandDef[] = [
   },
 ];
 
-type Action =
-  | "FORWARD"
-  | "APPROVE"
-  | "ESCALATE"
-  | "ALLOCATE"
-  | "VIEW_RESIDENTS"
-  | "UNKNOWN";
-
-interface ParsedCommand {
-  action: Action;
-  ticket: string;
-  comment: string;
-  /** Allocate: the student's roll. */
-  roll: string;
-  /** Allocate: the target room block (e.g. "CSE"). */
-  roomBlock: string;
-  /** Allocate: the target bed (e.g. "12" or "3-B"). */
-  bedNumber: string;
-}
-
 /**
- * Parse a hostel-manager free-text command.
- *
- *   assign <ticket> to <staff>        → FORWARD, comment "to <staff>"
- *   resolve <ticket> [note]           → APPROVE, comment <note>
- *   allocate <roll> to <room>-<bed>  → ALLOCATE, roll + roomBlock + bedNumber
- *   escalate <ticket>                → ESCALATE
- *   residents                        → VIEW_RESIDENTS
+ * Role-specific parser for the hostel-manager's `allocate <roll> to <room>-<bed>`
+ * verb, which the shared kernel grammar can't fully express (the room-bed split).
+ * Everything else (assign / resolve / escalate / residents) uses the kernel parser.
  */
-function parseCommand(input: string): ParsedCommand {
+function hmParse(input: string, base: ParsedCommand): ParsedCommand {
   const tokens = input.trim().split(/\s+/);
-  const first = (tokens[0] || "").toLowerCase();
-  const empty: ParsedCommand = {
-    action: "UNKNOWN",
-    ticket: "",
-    comment: "",
-    roll: "",
-    roomBlock: "",
-    bedNumber: "",
-  };
-
-  if (first === "residents" || first === "view-residents") {
-    return { ...empty, action: "VIEW_RESIDENTS" };
-  }
-  if (first === "assign" || first === "forward") {
-    const ticket = tokens[1] ?? "";
-    const rest = tokens.slice(2).join(" ").trim();
-    const target = rest.replace(/^to\s+/i, "").trim();
-    return {
-      ...empty,
-      action: "FORWARD",
-      ticket,
-      comment: target ? `to ${target}` : rest,
-    };
-  }
-  if (first === "resolve") {
-    const ticket = tokens[1] ?? "";
-    const note = tokens.slice(2).join(" ").trim();
-    return { ...empty, action: "APPROVE", ticket, comment: note };
-  }
-  if (first === "escalate") {
-    return { ...empty, action: "ESCALATE", ticket: tokens[1] ?? "" };
-  }
+  const first = (tokens[0] ?? "").toLowerCase();
   if (first === "allocate") {
-    // allocate <roll> to <room>-<bed>
     const roll = tokens[1] ?? "";
     const toIdx = tokens.findIndex((t) => t.toLowerCase() === "to");
     const target = toIdx > 0 ? (tokens[toIdx + 1] ?? "") : "";
-    // Split "<room>-<bed>" on the first "-"; room block is the part before,
-    // bed is the part after. A bare "room" with no "-" means room only.
     const dashIdx = target.indexOf("-");
     const roomBlock = dashIdx >= 0 ? target.slice(0, dashIdx) : target;
     const bedNumber = dashIdx >= 0 ? target.slice(dashIdx + 1) : "";
-    return { ...empty, action: "ALLOCATE", roll, roomBlock, bedNumber };
+    return {
+      ...base,
+      action: "ALLOCATE",
+      id: "allocate",
+      args: { roll, roomBlock, bedNumber, ticket: roll },
+    };
   }
-  return { ...empty, action: "UNKNOWN", ticket: input.trim() };
+  return base;
 }
 
 export interface HostelManagerCommandBarProps {
@@ -195,6 +148,8 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
 
   const executeCommand = useCallback(
     async (parsed: ParsedCommand) => {
+      const a = parsed.args;
+
       // ── residents: navigate to resident service requests ──
       if (parsed.action === "VIEW_RESIDENTS") {
         router.push("/hostel-manager/housekeeping-tasks");
@@ -205,7 +160,7 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
 
       // ── allocate: PATCH /api/students/<roll> ──
       if (parsed.action === "ALLOCATE") {
-        if (!parsed.roll || !parsed.roomBlock) {
+        if (!a.roll || !a.roomBlock) {
           addToast({
             variant: "error",
             message: "Usage: allocate <roll> to <room>-<bed>",
@@ -214,14 +169,14 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
         }
         setBusy(true);
         try {
-          const hostelRoom = parsed.bedNumber
-            ? `${parsed.roomBlock}-${parsed.bedNumber}`
-            : parsed.roomBlock;
-          const res = await fetch(`/api/students/${encodeURIComponent(parsed.roll)}`, {
+          const hostelRoom = a.bedNumber
+            ? `${a.roomBlock}-${a.bedNumber}`
+            : a.roomBlock;
+          const res = await fetch(`/api/students/${encodeURIComponent(a.roll)}`, {
             method: "PATCH",
             headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
             body: JSON.stringify({
-              hostelBlock: parsed.roomBlock,
+              hostelBlock: a.roomBlock,
               hostelRoom,
             }),
           });
@@ -229,14 +184,14 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
           if (res.ok && json?.success) {
             addToast({
               variant: "success",
-              message: `Allocated ${parsed.roll} → ${hostelRoom}`,
+              message: `Allocated ${a.roll} → ${hostelRoom}`,
             });
             onClose();
           } else {
             addToast({
               variant: "error",
               message:
-                json?.error?.message || `Failed to allocate ${parsed.roll} to ${hostelRoom}`,
+                json?.error?.message || `Failed to allocate ${a.roll} to ${hostelRoom}`,
             });
           }
         } catch {
@@ -247,7 +202,7 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
         return;
       }
 
-      if (parsed.action === "UNKNOWN" || !parsed.ticket) {
+      if (parsed.action === "UNKNOWN" || !a.ticket) {
         addToast({
           variant: "error",
           message: "Usage: <action> <ticket> [note]",
@@ -256,11 +211,11 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
       }
 
       const body: Record<string, string> = { action: parsed.action };
-      if (parsed.comment) body.comment = parsed.comment;
+      if (a.comment) body.comment = a.comment;
 
       setBusy(true);
       try {
-        const res = await fetch(`/api/permissions/${encodeURIComponent(parsed.ticket)}`, {
+        const res = await fetch(`/api/permissions/${encodeURIComponent(a.ticket)}`, {
           method: "PATCH",
           headers: getAuthHeaders(),
           body: JSON.stringify(body),
@@ -269,13 +224,13 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
         if (res.ok && json?.success) {
           addToast({
             variant: "success",
-            message: `${parsed.action} processed for ${parsed.ticket}`,
+            message: `${parsed.action} processed for ${a.ticket}`,
           });
           onClose();
         } else {
           addToast({
             variant: "error",
-            message: json?.error?.message || `Failed to ${parsed.action} ${parsed.ticket}`,
+            message: json?.error?.message || `Failed to ${parsed.action} ${a.ticket}`,
           });
         }
       } catch {
@@ -296,20 +251,20 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
   );
 
   const handleEnter = useCallback(() => {
-    const parsed = parseCommand(query);
+    const parsed = parseCommand(query, HOSTEL_MANAGER_COMMANDS, hmParse);
+    const a = parsed.args;
     const first = query.trim().toLowerCase();
     // Bare keyword: keep focus so the user can type the remaining tokens.
     if (["assign", "forward", "resolve", "escalate", "allocate"].includes(first)) {
-      // allocate / assign / resolve need more than a bare keyword.
-      if (parsed.action === "UNKNOWN" || (parsed.action !== "ESCALATE" && !parsed.ticket)) {
+      if (parsed.action === "UNKNOWN" || (parsed.action !== "ESCALATE" && !a.ticket)) {
         inputRef.current?.focus();
         return;
       }
-      if (parsed.action === "ALLOCATE" && !parsed.roll) {
+      if (parsed.action === "ALLOCATE" && !a.roll) {
         inputRef.current?.focus();
         return;
       }
-      if (parsed.action === "ESCALATE" && !parsed.ticket) {
+      if (parsed.action === "ESCALATE" && !a.ticket) {
         inputRef.current?.focus();
         return;
       }
@@ -339,7 +294,7 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
 
   if (!open) return null;
 
-  const parsedPreview = query.trim() ? parseCommand(query) : null;
+  const parsedPreview = query.trim() ? parseCommand(query, HOSTEL_MANAGER_COMMANDS, hmParse) : null;
 
   return (
     <div
@@ -381,15 +336,15 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
             </span>
             {parsedPreview.action === "ALLOCATE" ? (
               <>
-                {parsedPreview.roll ? (
-                  <span className="ml-1.5 font-mono">{parsedPreview.roll}</span>
+                {parsedPreview.args.roll ? (
+                  <span className="ml-1.5 font-mono">{parsedPreview.args.roll}</span>
                 ) : (
                   <span className="ml-1.5 text-text-muted italic">[roll required]</span>
                 )}
-                {parsedPreview.roomBlock ? (
+                {parsedPreview.args.roomBlock ? (
                   <span className="ml-1.5 text-text-muted italic">
-                    to {parsedPreview.roomBlock}
-                    {parsedPreview.bedNumber ? `-${parsedPreview.bedNumber}` : ""}
+                    to {parsedPreview.args.roomBlock}
+                    {parsedPreview.args.bedNumber ? `-${parsedPreview.args.bedNumber}` : ""}
                   </span>
                 ) : (
                   <span className="ml-1.5 text-text-muted italic">[room required]</span>
@@ -397,14 +352,14 @@ export function HostelManagerCommandBar({ role, open, onClose }: HostelManagerCo
               </>
             ) : (
               <>
-                {parsedPreview.ticket ? (
-                  <span className="ml-1.5 font-mono">{parsedPreview.ticket}</span>
+                {parsedPreview.args.ticket ? (
+                  <span className="ml-1.5 font-mono">{parsedPreview.args.ticket}</span>
                 ) : parsedPreview.action === "VIEW_RESIDENTS" ? null : (
                   <span className="ml-1.5 text-text-muted italic">[ticket required]</span>
                 )}
-                {parsedPreview.comment ? (
+                {parsedPreview.args.comment ? (
                   <span className="ml-1.5 text-text-muted italic">
-                    note: {parsedPreview.comment}
+                    note: {parsedPreview.args.comment}
                   </span>
                 ) : null}
               </>

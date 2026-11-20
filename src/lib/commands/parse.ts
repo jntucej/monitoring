@@ -33,6 +33,7 @@ export type CommandAction =
   | "APPROVE" | "REJECT" | "ESCALATE"
   | "FORWARD" | "DELEGATE"
   | "DEPT_STATS"
+  | "RESOLVE" | "ALLOCATE" | "VIEW_RESIDENTS"
   | "UNKNOWN";
 
 export interface ParsedCommand {
@@ -45,6 +46,14 @@ export interface ParsedCommand {
   raw: string;
 }
 
+/**
+ * A role-specific parser for verbs the shared grammar can't fully express
+ * (e.g. hostel-manager's `allocate <roll> to <room>-<bed>`). The kernel
+ * parser checks the custom parser first; if it returns a known action it
+ * wins, otherwise the shared grammar applies.
+ */
+export type CustomParser = (input: string, base: ParsedCommand) => ParsedCommand;
+
 // ── parseCommand ───────────────────────────────────────────────────────────
 
 /**
@@ -53,8 +62,16 @@ export interface ParsedCommand {
  *   forward P-1042 to deputy_warden   → { action:"FORWARD", args:{ticket:"P-1042", targetRole:"deputy_warden"} }
  *   reject P-1042 too early           → { action:"REJECT", args:{ticket:"P-1042", reason:"too early"} }
  *   approve P-1042                   → { action:"APPROVE", args:{ticket:"P-1042"} }
+ *
+ * @param input  The raw command text.
+ * @param defs    The command set to parse against.
+ * @param custom  Optional role-specific parser for exotic verbs.
  */
-export function parseCommand(input: string, defs: CommandDef[]): ParsedCommand {
+export function parseCommand(
+  input: string,
+  defs: CommandDef[],
+  custom?: CustomParser,
+): ParsedCommand {
   const raw = input.trim();
   const tokens = raw.split(/\s+/).filter(Boolean);
   const empty: ParsedCommand = { action: "UNKNOWN", id: "unknown", args: {}, raw };
@@ -62,6 +79,13 @@ export function parseCommand(input: string, defs: CommandDef[]): ParsedCommand {
   if (tokens.length === 0) return empty;
 
   const first = (tokens[0] ?? "").toLowerCase();
+
+  // Role-specific parser gets first crack (for verbs the shared grammar
+  // can't fully express, e.g. allocate <roll> to <room>-<bed>).
+  if (custom) {
+    const result = custom(raw, empty);
+    if (result.action !== "UNKNOWN") return result;
+  }
 
   // Find the matching command def.
   const def = defs.find((d) => d.verb === first);
@@ -75,10 +99,12 @@ export function parseCommand(input: string, defs: CommandDef[]): ParsedCommand {
   }
 
   // Special two-verb forms.
-  if (def.id === "forward" || spec.includes("targetRole")) {
+  if (def.id === "forward" || def.id === "assign" || spec.includes("targetRole")) {
     const toIdx = tokens.findIndex((t) => t.toLowerCase() === "to");
     args.ticket = tokens[1] ?? "";
     args.targetRole = toIdx > 0 ? (tokens[toIdx + 1] ?? "") : "";
+    // For "assign" the comment is "to <target>"; for "forward" same.
+    args.comment = args.targetRole ? `to ${args.targetRole}` : tokens.slice(2).join(" ").trim();
   }
 
   if (def.id === "delegate" || spec.includes("delegateRole")) {
@@ -87,9 +113,10 @@ export function parseCommand(input: string, defs: CommandDef[]): ParsedCommand {
     args.validUntil = tillIdx > 0 ? (tokens[tillIdx + 1] ?? "") : "";
   }
 
-  // Greedy reason: everything after the ticket token.
-  if (spec.includes("reason")) {
+  // Greedy reason/comment: everything after the ticket token.
+  if (spec.includes("reason") || def.id === "resolve") {
     args.reason = tokens.slice(2).join(" ");
+    if (def.id === "resolve") args.comment = args.reason;
   }
 
   return {
@@ -111,6 +138,11 @@ function mapAction(defId: string): CommandAction {
     case "delegate": return "DELEGATE";
     case "dept-stats":
     case "dept": return "DEPT_STATS";
+    case "assign": return "FORWARD";
+    case "resolve": return "APPROVE";
+    case "residents":
+    case "view-residents": return "VIEW_RESIDENTS";
+    case "allocate": return "ALLOCATE";
     default: return "UNKNOWN";
   }
 }
@@ -135,6 +167,15 @@ export const DEPUTY_COMMANDS: CommandDef[] = [
 export const CARETAKER_COMMANDS: CommandDef[] = [
   ...BASE_COMMANDS,
   { id: "assign", verb: "assign", label: "Assign a ticket to staff", hint: "assign <ticket> to <staff>", args: ["ticket", "targetRole"] },
+];
+
+/** Hostel manager: assign + resolve + allocate + escalate + residents. */
+export const HOSTEL_MANAGER_COMMANDS: CommandDef[] = [
+  { id: "assign", verb: "assign", label: "Assign a ticket to staff", hint: "assign <ticket> to <staff>", args: ["ticket", "targetRole"] },
+  { id: "resolve", verb: "resolve", label: "Resolve a ticket", hint: "resolve <ticket> [note]", args: ["ticket", "reason"] },
+  { id: "escalate", verb: "escalate", label: "Escalate to next stage", hint: "escalate <ticket>", args: ["ticket"] },
+  { id: "residents", verb: "residents", label: "View resident service requests", hint: "residents — Open resident service requests" },
+  { id: "view-residents", verb: "view-residents", label: "View resident service requests", hint: "residents — Open resident service requests" },
 ];
 
 export default parseCommand;
