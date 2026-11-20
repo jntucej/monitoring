@@ -72,7 +72,7 @@ export function DataTable<T>({
       <div className="overflow-x-auto overscroll-contain -webkit-overflow-scrolling-touch rounded-xl border border-border bg-bg-surface">
         <table className="w-full min-w-full text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-text-muted">
+            <tr className="border-b border-border text-left text-text-secondary uppercase tracking-wide text-xs">
               {columns.map((col, idx) => (
                 <th
                   key={idx}
@@ -198,7 +198,7 @@ export function DataTable<T>({
     <div className="overflow-x-auto rounded-xl border border-border bg-bg-surface">
       <table className="w-full text-sm min-w-full">
         <thead>
-          <tr className="border-b border-border text-left text-text-muted">
+          <tr className="border-b border-border text-left text-text-secondary uppercase tracking-wide text-xs">
             {columns.map((col, idx) => (
               <th
                 key={idx}

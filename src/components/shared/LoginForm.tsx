@@ -219,7 +219,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
               type="button"
               onClick={handlePasswordReset}
               disabled={submitting || !resetEmail.trim()}
-              className="surface-card w-full bg-action-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+              className="w-full rounded-xl bg-action-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:opacity-40"
             >
               {submitting ? "Sending…" : "Send reset link"}
             </button>
@@ -324,7 +324,7 @@ export function LoginForm({ title, subtitle }: LoginFormProps) {
         <button
           type="submit"
           disabled={disabled}
-          className="surface-card flex w-full items-center justify-center gap-2 bg-action-primary px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-action-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Signing in…" : "Sign In"}
           {!submitting && <ArrowRight className="h-4 w-4" />}
