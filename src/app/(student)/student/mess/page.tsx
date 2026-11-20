@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MyMealHistory } from "@/components/shared/meals/MyMealHistory";
 
 /* S7: mess landing — 4-card grid instead of a blind redirect to /reviews.
    Each card is a plain link; the destination pages already exist. */
@@ -26,6 +27,13 @@ export default function StudentMessLanding() {
             <p className="text-xs text-text-muted mt-0.5">{c.sub}</p>
           </Link>
         ))}
+      </div>
+
+      {/* The meal loop (S4): my meal history — what I ate, rate it,
+          one-tap complaint. */}
+      <div className="mt-6">
+        <h2 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">My meal history</h2>
+        <MyMealHistory limit={14} />
       </div>
     </div>
   );

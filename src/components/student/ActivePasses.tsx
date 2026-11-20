@@ -10,6 +10,7 @@ import { useExport } from "@/hooks/useExport";
 import { PeriodPicker } from "@/components/shared/PeriodPicker";
 import type { Period } from "@/lib/period";
 import { getPeriod } from "@/lib/period";
+import { PassLiveTracker } from "@/components/shared/pass/PassLiveTracker";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -36,6 +37,7 @@ export function ActivePasses() {
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>(getPeriod("this-month"));
   const [showHistory, setShowHistory] = useState(false);
+  const [trackId, setTrackId] = useState<string | null>(null);
   const user = useAuthStore((s) => s.user);
   const { exportCSV } = useExport();
 
@@ -134,26 +136,44 @@ export function ActivePasses() {
         <div className="space-y-4">
           {passes.map((pass) => {
             const s = statusStyle(pass.finalStatus);
+            const active = pass.finalStatus !== "REJECTED" && pass.finalStatus !== "COMPLETED";
             return (
-              <div key={pass.id} className={`flex items-center gap-4 p-3 rounded-lg ${s.bg}`}>
-                {s.icon}
-                <div className="flex-1">
-                  <p className={`font-medium ${s.text}`}>{getPassTypeName(pass.reason)}</p>
-                  <p className={`text-sm ${s.text} opacity-80`}>
-                    {expiryLabel(pass.to, pass.finalStatus)}
-                  </p>
+              <div key={pass.id} className={`p-3 rounded-lg ${s.bg}`}>
+                <div className="flex items-center gap-4">
+                  {s.icon}
+                  <div className="flex-1">
+                    <p className={`font-medium ${s.text}`}>{getPassTypeName(pass.reason)}</p>
+                    <p className={`text-sm ${s.text} opacity-80`}>
+                      {expiryLabel(pass.to, pass.finalStatus)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="surface-card text-xs font-semibold uppercase tracking-wider bg-black/20 px-2 py-1">
+                      {pass.finalStatus}
+                    </span>
+                    {pass.parentStatus !== 'APPROVED' && (
+                      <span className="text-xs opacity-60">Parent: {pass.parentStatus}</span>
+                    )}
+                    {pass.adminStatus !== 'APPROVED' && (
+                      <span className="text-xs opacity-60">Admin: {pass.adminStatus}</span>
+                    )}
+                    {active && (
+                      <button
+                        type="button"
+                        onClick={() => setTrackId(trackId === pass.id ? null : pass.id)}
+                        className="text-[11px] font-medium text-action-primary hover:underline mt-0.5"
+                      >
+                        {trackId === pass.id ? "Hide tracker" : "Live tracker"}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="surface-card text-xs font-semibold uppercase tracking-wider bg-black/20 px-2 py-1">
-                    {pass.finalStatus}
-                  </span>
-                  {pass.parentStatus !== 'APPROVED' && (
-                    <span className="text-xs opacity-60">Parent: {pass.parentStatus}</span>
-                  )}
-                  {pass.adminStatus !== 'APPROVED' && (
-                    <span className="text-xs opacity-60">Admin: {pass.adminStatus}</span>
-                  )}
-                </div>
+                {/* The pass loop (S4): live "where is it" tracker */}
+                {active && trackId === pass.id && (
+                  <div className="mt-3 pl-10">
+                    <PassLiveTracker passId={pass.id} expectedReturnAt={pass.to} />
+                  </div>
+                )}
               </div>
             );
           })}

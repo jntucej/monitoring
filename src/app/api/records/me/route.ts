@@ -70,11 +70,12 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
         [uid],
       ).catch(() => null),
 
-      // Documents.
-      query<{ verified: number; pending: number }>(
-        `SELECT COALESCE(COUNT(*) FILTER (WHERE status = 'verified'), 0) AS verified,
-                COALESCE(COUNT(*) FILTER (WHERE status = 'pending'), 0) AS pending
-         FROM public.student_documents WHERE user_id = $1`,
+      // Documents (per-permission uploads; count verified vs pending).
+      query<{ verified: string; pending: string }>(
+        `SELECT COALESCE(SUM(CASE WHEN pr.status IN ('APPROVED','ACTIVE','RETURNED') THEN 1 ELSE 0 END), 0) AS verified,
+                COALESCE(SUM(CASE WHEN pr.status = 'PENDING' THEN 1 ELSE 0 END), 0) AS pending
+         FROM public.permission_requests pr
+         WHERE pr.student_user_id = $1 AND pr.document_url IS NOT NULL`,
         [uid],
       ).catch(() => null),
     ]);

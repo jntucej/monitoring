@@ -17,6 +17,7 @@ import { PassHistory } from "@/components/shared/pass/PassHistory";
 import { ExtendPassModal } from "@/components/shared/pass/ExtendPassModal";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { MyDocuments } from "@/components/shared/documents/MyDocuments";
 
 export default function StudentPassesPage() {
   const hasHydrated = useHasHydrated();
@@ -53,6 +54,19 @@ export default function StudentPassesPage() {
       <WidgetBoundary name="pass-history">
         <Suspense fallback={<PageLoading />}>
           <PassHistory />
+        </Suspense>
+      </WidgetBoundary>
+
+      {/* The document loop (S5): which passes need proof, their
+          verified/pending/rejected status, re-upload. */}
+      <WidgetBoundary name="my-documents">
+        <Suspense fallback={<PageLoading />}>
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+              My documents
+            </h3>
+            <MyDocuments />
+          </div>
         </Suspense>
       </WidgetBoundary>
     </div>

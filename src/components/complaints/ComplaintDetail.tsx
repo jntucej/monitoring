@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
+import { ComplaintTimeline } from "@/components/shared/complaints/ComplaintTimeline";
 
 export function ComplaintDetail({ role }: { role: string }) {
   const params = useParams();
@@ -104,8 +105,21 @@ export function ComplaintDetail({ role }: { role: string }) {
       <div className="surface-card bg-bg-elevated p-4 space-y-2">
         <h2 className="font-medium text-text-primary">Description</h2>
         <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
+      </div>
+
+      {/* Lifecycle timeline (the TRACK step) */}
+      <div className="surface-card bg-bg-elevated p-4">
+        <h2 className="font-medium text-text-primary mb-3">Status timeline</h2>
+        <ComplaintTimeline
+          events={(data.timeline ?? []).map((t: { status: string; at: string; note?: string }) => ({
+            status: t.status,
+            at: t.at,
+            note: t.note,
+          }))}
+          currentStatus={c.status}
+        />
         {c.resolutionSummary && (
-          <div className="surface-card mt-3 pt-3">
+          <div className="mt-3 pt-3">
             <h3 className="font-medium text-action-success">Resolution Summary</h3>
             <p className="text-sm text-action-success">{c.resolutionSummary}</p>
           </div>
