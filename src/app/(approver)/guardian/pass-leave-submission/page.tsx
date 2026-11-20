@@ -16,8 +16,10 @@ import {
   Loader2,
   CheckCircle2,
   Send,
-  Info
+  Info,
+  Clock
 } from "lucide-react";
+import { formatDuration } from "@/components/shared/DurationBar";
 
 /* ── shapes ── */
 
@@ -117,6 +119,17 @@ function PassLeaveSubmissionInner() {
   const pendingRows = rows.filter(
     (r) => (r.status ?? "PENDING").toUpperCase() === "PENDING"
   );
+
+  // Duration preview: from → to, or from + default type duration
+  const durationPreview = useMemo(() => {
+    const typeMeta = passTypes.find((t) => t.code === passType);
+    if (from && to) {
+      const ms = new Date(to).getTime() - new Date(from).getTime();
+      return ms > 0 ? formatDuration(ms) : null;
+    }
+    if (from) return formatDuration((typeMeta?.defaultDurationHours ?? 4) * 3_600_000);
+    return null;
+  }, [from, to, passType, passTypes]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,6 +308,14 @@ function PassLeaveSubmissionInner() {
                 </div>
               </div>
 
+              {/* Duration preview */}
+              {durationPreview && (
+                <div className="rounded-lg border border-border bg-bg-elevated px-3 py-2 flex items-center justify-between text-xs">
+                  <span className="inline-flex items-center gap-1 text-text-muted"><Clock className="w-3.5 h-3.5" /> Requested duration</span>
+                  <span className="font-semibold text-text-primary tabular-nums">{durationPreview}</span>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="reason" className="block text-xs font-medium text-text-secondary mb-1">
                   Reason / notes
@@ -339,7 +360,7 @@ function PassLeaveSubmissionInner() {
         <div className="surface-card bg-bg-surface p-4 space-y-3 min-w-0">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
-              Ward request status
+              Ward request timeline
             </h2>
             <span className="text-xs text-text-muted">
               {pendingRows.length} pending

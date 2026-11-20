@@ -1,13 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Ticket, Loader2, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Ticket, Loader2, CheckCircle2, Clock } from "lucide-react";
 import type { Student } from "@/lib/types";
 import { usePassTypes } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { DurationBar, formatDuration } from "@/components/shared/DurationBar";
+
+/** Compute a human duration string from two datetime-local values. */
+function durationLabel(fromVal: string, toVal: string): string | null {
+  if (!fromVal || !toVal) return null;
+  const ms = new Date(toVal).getTime() - new Date(fromVal).getTime();
+  if (ms <= 0) return null;
+  return formatDuration(ms);
+}
 
 export function RequestPassForm() {
-const api = useApi();
+  const api = useApi();
 
   const { passTypes, loading: loadingPassTypes } = usePassTypes();
   const [passType, setPassType] = useState("");
@@ -22,6 +31,19 @@ const api = useApi();
       setPassType(passTypes[0].code);
     }
   }, [passTypes, passType]);
+
+  // Duration preview (auto-calc from → to, or from + default duration)
+  const durationPreview = useMemo(() => {
+    const selectedType = passTypes.find((pt) => pt.code === (passType || passTypes[0]?.code));
+    const defaultHrs = selectedType?.defaultDurationHours ?? 4;
+    if (from && to) return durationLabel(from, to);
+    if (from) {
+      const end = new Date(from);
+      end.setHours(end.getHours() + defaultHrs);
+      return formatDuration(defaultHrs * 3_600_000);
+    }
+    return null;
+  }, [from, to, passType, passTypes]);
 
   const submit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -138,10 +160,30 @@ const api = useApi();
               type="datetime-local"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="surface-card mt-1 block w-full text-text-primary sm:text-sm p-2 bg-bg-elevated"
+              className="surface-card mt-1 block w-full bg-bg-elevated text-text-primary sm:text-sm p-2"
             />
           </div>
         </div>
+
+        {/* Duration preview bar */}
+        {durationPreview && (
+          <div className="rounded-lg border border-border bg-bg-elevated p-3">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="inline-flex items-center gap-1 text-text-muted"><Clock className="h-3.5 w-3.5" /> Duration</span>
+              <span className="font-semibold text-text-primary tabular-nums">{durationPreview}</span>
+            </div>
+            {from && to ? (
+              <DurationBar
+                elapsedMs={new Date(to).getTime() - new Date(from).getTime()}
+                totalMs={new Date(to).getTime() - new Date(from).getTime()}
+                tone="ok"
+              />
+            ) : (
+              <p className="text-xs text-text-muted">Full duration will be shown once both times are set.</p>
+            )}
+          </div>
+        )}
+
         <div>
           <label htmlFor="reason" className="block text-sm font-medium text-text-secondary">
             Reason

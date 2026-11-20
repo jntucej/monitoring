@@ -14,8 +14,82 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  MapPin
+  MapPin,
+  GitBranch
 } from "lucide-react";
+
+/* ── pass-request timeline ── */
+
+interface PassTimelineItem {
+  id: string;
+  passType: string;
+  status: string;
+  requestedAt: string;
+  reason: string | null;
+}
+
+function PassTimeline({ wardRoll }: { wardRoll: string }) {
+  const [items, setItems] = useState<PassTimelineItem[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!wardRoll) return;
+    setLoading(true);
+    fetch(`/api/pass-requests?wardRoll=${encodeURIComponent(wardRoll)}&limit=5`, {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setItems((b?.data?.requests ?? []) as PassTimelineItem[]))
+      .catch(() => setItems([]))
+      .finally(() => setLoading(false));
+  }, [wardRoll]);
+
+  if (!wardRoll) return null;
+
+  const tone = (status: string) => {
+    const s = status.toUpperCase();
+    if (["APPROVED"].includes(s)) return "ok";
+    if (["REJECTED", "CANCELLED", "DISMISSED"].includes(s)) return "danger";
+    if (["IN_PROGRESS"].includes(s)) return "warn";
+    return "info";
+  };
+
+  return (
+    <div className="surface-card bg-bg-surface p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted flex items-center gap-1.5 mb-3">
+        <GitBranch className="w-3.5 h-3.5" /> Pass requests
+      </p>
+      {loading ? (
+        <p className="text-xs text-text-muted">Loading…</p>
+      ) : items && items.length === 0 ? (
+        <p className="text-xs text-text-muted">No pass requests yet.</p>
+      ) : items && items.length > 0 ? (
+        <ol className="relative border-l border-border ml-2 space-y-3">
+          {items.map((it) => (
+            <li key={it.id} className="ml-4">
+              <span
+                className={`absolute -left-1.5 size-3 rounded-full ring-4 ring-bg-surface ${
+                  tone(it.status) === "ok" ? "bg-emerald-500" :
+                  tone(it.status) === "danger" ? "bg-rose-500" :
+                  tone(it.status) === "warn" ? "bg-amber-500" : "bg-sky-500"
+                }`}
+              />
+              <p className="text-sm text-text-primary">
+                <span className="font-medium">{it.passType}</span>
+                <span className="ml-2 text-xs uppercase text-text-muted">{it.status}</span>
+              </p>
+              {it.reason && <p className="text-xs text-text-muted mt-0.5">{it.reason}</p>}
+              <p className="text-[11px] text-text-muted mt-0.5">
+                {new Date(it.requestedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+              </p>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+    </div>
+  );
+}
 
 /* ── shapes ── */
 
