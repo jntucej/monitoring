@@ -140,7 +140,7 @@
   },
   {
    "role": "faculty",
-   "login": "FACULTY",
+   "login": "faculty@college.edu",
    "root": "/faculty/permissions",
    "leaves": [
     "/faculty/permissions",

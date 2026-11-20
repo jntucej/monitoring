@@ -110,12 +110,12 @@ function StatCard({
 }) {
   const toneClasses: Record<string, string> = {
     default: "border-border text-text-primary",
-    ok: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
-    warn: "border-amber-500/30 text-amber-600 dark:text-amber-400",
-    error: "border-red-500/30 text-red-600 dark:text-red-400",
+    ok: "border-action-success/30 text-action-success",
+    warn: "border-action-warning/30 text-action-warning",
+    error: "border-action-danger/30 text-action-danger",
   };
   return (
-    <div className={cn("surface-card rounded-lg border p-4", toneClasses[tone])}>
+    <div className={cn("surface-card p-4", toneClasses[tone])}>
       <div className="flex items-center gap-3">
         <Icon className="h-4 w-4 opacity-60" />
         <div>
@@ -133,8 +133,8 @@ function StatusDot({ ok: okState, label }: { ok: boolean; label: string }) {
     <div className="flex items-center gap-2">
       <span
         className={cn(
-          "h-2 w-2 rounded-full",
-          okState ? "bg-emerald-500" : "bg-red-500"
+          "h-2.5 w-2.5 rounded-full",
+          okState ? "bg-action-success" : "bg-action-danger"
         )}
       />
       <span className="text-sm">{label}</span>
@@ -144,11 +144,11 @@ function StatusDot({ ok: okState, label }: { ok: boolean; label: string }) {
 
 function sevClass(sev: string): string {
   switch (sev) {
-    case "P0": return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-    case "P1": return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
-    case "P2": return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
-    case "P3": return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-    default:   return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400";
+    case "P0": return "bg-action-danger/15 text-action-danger";
+    case "P1": return "bg-action-warning/15 text-action-warning";
+    case "P2": return "bg-action-warning/15 text-action-warning";
+    case "P3": return "bg-action-info/15 text-action-info";
+    default:   return "bg-surface-raised text-text-muted";
   }
 }
 
@@ -184,7 +184,7 @@ function AutonomousInner() {
   if (loading && !data) {
     return (
       <div className="space-y-4 p-4">
-        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-6 w-48" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full" />
@@ -264,7 +264,7 @@ function AutonomousInner() {
 
       {/* Container list */}
       {containers?.list && containers.list.length > 0 && (
-        <div className="surface-card rounded-lg p-4">
+        <div className="surface-card p-4">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Server className="h-4 w-4" />
             Containers ({containers.running}/{containers.total} running)
@@ -279,7 +279,7 @@ function AutonomousInner() {
 
       {/* Gate jobs detail */}
       {gateJobs?.results && gateJobs.results.length > 0 && (
-        <div className="surface-card rounded-lg p-4">
+        <div className="surface-card p-4">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Gate Job Endpoints
@@ -288,11 +288,11 @@ function AutonomousInner() {
             {gateJobs.results.map((r) => (
               <div key={r.name} className="flex items-center gap-2 text-sm">
                 {r.ok ? (
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                  <CheckCircle className="h-4 w-4 text-action-success" />
                 ) : (
-                  <XCircle className="h-4 w-4 text-red-500" />
+                  <XCircle className="h-4 w-4 text-action-danger" />
                 )}
-                <span className={cn(r.ok ? "text-text-primary" : "text-red-500")}>
+                <span className={cn(r.ok ? "text-text-primary" : "text-action-danger")}>
                   {r.name}
                 </span>
                 <span className="ml-auto text-xs text-text-muted">{r.status}</span>
@@ -304,7 +304,7 @@ function AutonomousInner() {
 
       {/* Findings */}
       {findings && (
-        <div className="surface-card rounded-lg p-4">
+        <div className="surface-card p-4">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <FileWarning className="h-4 w-4" />
             Findings ({findings.total} total, {findingsActive} active)
@@ -343,7 +343,7 @@ function AutonomousInner() {
 
       {/* Deployment + Gate Mode */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="surface-card rounded-lg p-4">
+        <div className="surface-card p-4">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <GitBranch className="h-4 w-4" />
             Deployment
@@ -370,7 +370,7 @@ function AutonomousInner() {
           )}
         </div>
 
-        <div className="surface-card rounded-lg p-4">
+        <div className="surface-card p-4">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Moon className="h-4 w-4" />
             Gate Mode

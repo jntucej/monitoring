@@ -53,6 +53,12 @@ function endpointForRole(role: string | null): { list: string; stream: string | 
 }
 
 const POLL_INTERVAL_MS = 15_000;
+// A fresh page mount shouldn't instantly re-fire a poll (the sweep remounts
+// the toaster on every leaf). Delay the first poll so bursts cool down.
+const FIRST_POLL_DELAY_MS = 4_000;
+// Backoff multiplier after a 429 (rate-limited) poll — so a burst of rapid
+// page mounts backs off instead of hammering the limit. Reset on success.
+const BACKOFF_MAX_MS = 90_000;
 
 function severityToVariant(sev: LiveEvent["severity"]): ToastVariant {
   switch (sev) {
@@ -104,6 +110,12 @@ export function LiveEventToaster() {
   useEffect(() => {
     if (!hydrateState) return;
     if (!userId) return;
+    // ui-audit mode (the role-sweep harness) loads pages with ?ui-audit=1 so a
+    // deterministic audit can run without the ambient toaster's poll/stream
+    // traffic tripping the rate limiters (the sweep's rapid remounts would
+    // otherwise 429 the very leaves under test). In that mode the toaster is
+    // inert — it's an ambient niceness, not part of the page being audited.
+    if (typeof window !== "undefined" && /[?&]ui-audit=1/.test(window.location.search)) return;
     const ep = endpointForRole(role);
     // operator (and any role not mapped) gets no stream — mount is inert,
     // no doomed 403 request.
@@ -138,8 +150,12 @@ export function LiveEventToaster() {
           }
         };
         es.onerror = () => {
-          // SSE failed — the poll fallback below keeps working. We do not
-          // re-open the EventSource (the browser auto-reconnects).
+          // SSE failed (e.g. a 429 from the reconnect storm, or a dropped
+          // connection). Do NOT let the browser auto-reconnect in a tight
+          // loop — that re-trips the 120/60s limit. Close it and let the
+          // backoff-protected poll fallback keep the toaster alive.
+          es.close();
+          eventSourceRef.current = null;
         };
       } catch {
         /* EventSource constructor threw — polling only. */
@@ -147,6 +163,10 @@ export function LiveEventToaster() {
     }
 
     // ── Fallback path: polling (all mapped roles) ─────
+    // Burst-safe: delay the first poll, and back off (exponential, capped)
+    // when a poll is rate-limited (429) so rapid remounts during a sweep
+    // cool down instead of tripping the 60/60s limit. Reset on success.
+    let backoffMs = FIRST_POLL_DELAY_MS;
     const poll = async () => {
       if (stopped) return;
       try {
@@ -155,12 +175,16 @@ export function LiveEventToaster() {
           const json = await res.json();
           const rows = Array.isArray(json?.data) ? json.data : [];
           for (const row of rows) ingest(rowToEvent(row));
+          backoffMs = POLL_INTERVAL_MS; // success — back to normal cadence
+        } else if (res.status === 429) {
+          // rate-limited — back off so the next poll is further out.
+          backoffMs = Math.min(backoffMs * 2, BACKOFF_MAX_MS);
         }
       } catch {
         /* network blip — the next poll retries */
       } finally {
         if (!stopped) {
-          pollTimerRef.current = setTimeout(poll, POLL_INTERVAL_MS);
+          pollTimerRef.current = setTimeout(poll, backoffMs);
         }
       }
     };

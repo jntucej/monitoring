@@ -10,6 +10,7 @@
 
 import { NextRequest } from "next/server";
 import { verifyAccessToken, AuthTokenClaims } from "@/lib/auth-token";
+import { assertCsrf } from "@/lib/csrf";
 import { query } from "@/lib/postgres";
 
 function extractToken(req: NextRequest): string | null {
@@ -40,6 +41,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+
   const token = extractToken(req);
   if (!token) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });

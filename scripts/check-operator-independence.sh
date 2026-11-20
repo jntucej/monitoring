@@ -33,9 +33,13 @@ if [ -n "$SHARED" ]; then
   fail=1
 fi
 
-# 2. Verify the operator-owned copies actually exist
+# 2. Verify the operator-owned copies actually exist.
+#    NOTE: OperatorThemeToggle was removed in the Graphite-Canvas single-theme
+#    performance pass (2fbb7555) — theme is now a build-time token, not a
+#    runtime component, and 0 operator files reference it. It is intentionally
+#    NOT in this list; re-adding it would resurrect dead code.
 for f in OperatorWidgetBoundary OperatorLoading OperatorEmptyState OperatorConfirm \
-         OperatorStatusBadge OperatorNotifications OperatorThemeToggle; do
+         OperatorStatusBadge OperatorNotifications; do
   if [ ! -f "src/components/operator/shared/$f.tsx" ]; then
     echo -e "${RED}❌ Missing operator-owned: src/components/operator/shared/$f.tsx${NC}"
     fail=1

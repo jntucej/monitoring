@@ -26,6 +26,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { logAuditEvent } from "@/middleware/authorization";
@@ -119,6 +120,9 @@ async function implGet(req: NextRequest, ctx: { auth: AuthContext }) {
 
 async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
   const { auth } = ctx;
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+
   const body = (await req.json().catch(() => null)) as {
     userId?: string;
     academicStatus?: string | null;

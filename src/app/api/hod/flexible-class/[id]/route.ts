@@ -5,6 +5,7 @@
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
 import { withRateLimit } from "@/lib/rate-limit";
+import { assertCsrf } from "@/lib/csrf";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import type { AuthContext } from "@/lib/authContext";
@@ -15,6 +16,9 @@ function getId(req: NextRequest): string {
 }
 
 async function implPatch(req: NextRequest, { auth }: { auth: AuthContext }) {
+  const csrf = assertCsrf(req);
+  if (csrf) return csrf;
+
   const id = getId(req);
   if (!id) return fail("VALIDATION_ERROR", "ID required", 400);
 

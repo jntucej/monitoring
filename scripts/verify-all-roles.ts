@@ -337,7 +337,12 @@ async function verifyLeaf(ctx: BrowserContext, role: string, leaf: string): Prom
   });
 
   try {
-    await page.goto(`${BASE}${leaf}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    // ?ui-audit=1 tells the ambient LiveEventToaster to stay inert during the
+    // sweep (its rapid remounts would otherwise trip the 60/60s rate limiter
+    // and 429 the very leaves under test). It's an audit-mode flag, not a
+    // page feature — the audited page's own data fetches still run.
+    const sep = leaf.includes("?") ? "&" : "?";
+    await page.goto(`${BASE}${leaf}${sep}ui-audit=1`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   } catch {
     errors.push("page-load-timeout");
   }

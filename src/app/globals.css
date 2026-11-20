@@ -57,29 +57,37 @@
      The codebase (and the unslop codemod) reference a set of
      legacy token names. Mapping them here keeps every existing
      `bg-bg-base` / `text-action-primary` / `border-border` utility
-     resolving to the graphite values without touching 500+ files. */
+     resolving to the graphite values without touching 500+ files.
+
+     ⚠ These must NOT self-reference (e.g. `--color-border:
+     var(--color-border)`). In Tailwind v4 `@theme inline` the value is
+     written into :root, so a self-reference is a cyclic var() that
+     browsers resolve to *empty* — which is exactly the "invisible
+     borders / flat cards / no text contrast" defect. Point each alias
+     at its concrete graphite hex (mirroring the base palette above) or
+     at a *different* token, never at itself. */
   --color-bg-base:        var(--color-canvas);
   --color-bg-surface:     var(--color-surface);
-  --color-bg-elevated:   var(--color-surface-muted);
-  --color-text-primary:   var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-muted:     var(--color-text-muted);
-  --color-border:         var(--color-border);
-  --color-border-strong:  var(--color-border-strong);
-  --color-border-subtle:  var(--color-border);
-  --color-action-primary: var(--color-action-primary);
-  --color-action-danger:  var(--color-action-danger);
-  --color-action-warning: var(--color-action-warning);
-  --color-action-info:    var(--color-action-info);
-  --color-action-success: var(--color-action-success);
-  --color-alert-critical: var(--color-action-danger);
-  --color-alert-warning:  var(--color-action-warning);
-  --color-alert-success:  var(--color-action-success);
-  --color-unit-a:         var(--color-action-primary);
-  --color-unit-b:         var(--color-action-info);
-  --color-unit-c:         var(--color-action-warning);
-  --color-canvas:         var(--color-canvas);
-  --color-focus-ring:     var(--color-action-primary);
+  --color-bg-elevated:    var(--color-surface-muted);
+  --color-text-primary:   #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted:     #687280;
+  --color-border:         #D1D5DB;
+  --color-border-strong:  #9CA3AF;
+  --color-border-subtle:  #D1D5DB;
+  --color-action-primary: #111827;
+  --color-action-danger:  #B91C1C;
+  --color-action-warning: #B45309;
+  --color-action-info:    #1D4ED8;
+  --color-action-success: #15803D;
+  --color-alert-critical: #B91C1C;
+  --color-alert-warning:  #B45309;
+  --color-alert-success:  #15803D;
+  --color-unit-a:         #111827;
+  --color-unit-b:         #1D4ED8;
+  --color-unit-c:         #B45309;
+  --color-canvas:         #F3F4F6;
+  --color-focus-ring:     #111827;
 }
 
 /* Legacy CSS-variable bridge — raw `var(--bg-base)` / `var(--action-primary)`
@@ -108,6 +116,36 @@
   --unit-c:              var(--color-action-warning);
   --canvas:              var(--color-canvas);
   --focus-ring:          var(--color-action-primary);
+
+  /* ── MISSING-TOKEN BRIDGE ─────────────────────────────────────
+     21 legacy token names referenced in components but never
+     defined. Mapped onto the graphite palette so cards, table
+     rows, KPI panels, and decision cards get their intended
+     background / border / hover contrast. Without these the
+     utilities resolve to `var(--undefined)` → no background,
+     which is the "invisible component" defect class.
+     All values are the graphite single-theme equivalents. */
+  --bg:                  var(--color-canvas);
+  --background:          var(--color-canvas);
+  --primary:             var(--color-action-primary);
+  --text:                var(--color-text-primary);
+  --color-ink:           var(--color-text-primary);
+  --radius-lg:           1rem;
+  --bg-active:           var(--color-surface-muted);   /* table row hover */
+  --bg-card:             var(--color-surface);          /* card surface */
+  --bg-raised:           var(--color-surface);
+  --bg-sunken:           var(--color-canvas);
+  --bg-subtle:           var(--color-surface-muted);
+  --bg-subtle-hover:     var(--color-surface-muted);
+  --bg-elev-1:           var(--color-surface-muted);
+  --bg-surface-elevated: var(--color-surface);
+  --bg-surface-hover:    var(--color-surface-muted);
+  --surface-raised:      var(--color-surface);
+  --surface-sunken:      var(--color-canvas);
+  --accent-text:         var(--color-action-info);
+  --text-info:           var(--color-action-info);
+  --action-accent:       var(--color-action-info);
+  --action-ok:           var(--color-action-success);
 }
 
 /* ── PERF GLOBAL RESET ──────────────────────────────────────────── */
