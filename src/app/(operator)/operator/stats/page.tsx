@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo, lazy } from "react";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 
@@ -180,9 +180,18 @@ function OperatorStatsInner() {
         </div>
       </OperatorWidgetBoundary>
 
+      {/* Weekly shift stats */}
+      <Suspense fallback={null}>
+        <OperatorWeeklyStats />
+      </Suspense>
+
     </div>
   );
 }
+
+const OperatorWeeklyStats = lazy(
+  () => import("@/components/operator/OperatorWeeklyStats")
+);
 
 export default function OperatorStatsPage() {
   return (
