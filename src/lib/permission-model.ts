@@ -9,6 +9,7 @@
  */
 
 import { getRoleTier } from "@/lib/alert-hierarchy";
+import { findBlockingPolicy, type CoCPolicy } from "@/lib/conduct";
 
 // ── Domain ─────────────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ export interface TicketRequirements {
 // ── CanAct ─────────────────────────────────────────────────────────────────
 
 export type CanAct =
-  | { allowed: true }
+  | { allowed: true; coSignPolicy?: CoCPolicy }
   | {
       allowed: false;
       reason:
@@ -95,6 +96,8 @@ export type CanAct =
         | "step_up_required"
         | "actor_suspended"
         | "actor_banned";
+      /** The CoC policy that blocked the action (if flag_blocked). */
+      cocPolicy?: CoCPolicy;
       /** Human-readable explanation for UI display. */
       message: string;
     };
@@ -115,6 +118,17 @@ export function canAct(actor: Actor, req: TicketRequirements): CanAct {
       allowed: false,
       reason: "actor_suspended",
       message: "Actor is suspended and cannot take any action.",
+    };
+  }
+
+  // CoC policy check: does the actor's flag block this domain?
+  const blockingPolicy = findBlockingPolicy(actor.flag, req.requiredDomain);
+  if (blockingPolicy && blockingPolicy.action === "block") {
+    return {
+      allowed: false,
+      reason: "flag_blocked",
+      cocPolicy: blockingPolicy,
+      message: `CoC "${blockingPolicy.id}": ${blockingPolicy.rule}`,
     };
   }
 
@@ -146,16 +160,25 @@ export function canAct(actor: Actor, req: TicketRequirements): CanAct {
     };
   }
 
-  // Step-up check.
-  if (req.requiresStepUp && !actor.stepUpVerified) {
+  // Step-up check (CoC may also require step-up for watch-flagged actors).
+  const needsStepUp =
+    req.requiresStepUp ||
+    (blockingPolicy !== null && blockingPolicy.action === "require_stepup");
+  if (needsStepUp && !actor.stepUpVerified) {
     return {
       allowed: false,
       reason: "step_up_required",
-      message: "Step-up authentication is required for this action.",
+      message: needsStepUp
+        ? "Step-up authentication is required for this action."
+        : "Watch flag requires re-authentication before approving.",
     };
   }
 
-  return { allowed: true };
+  // Determine if co-sign is required (dual approval for probation).
+  const coSignPolicy =
+    blockingPolicy && blockingPolicy.action === "require_dual" ? blockingPolicy : undefined;
+
+  return { allowed: true, coSignPolicy };
 }
 
 // ── Actor factory helpers ──────────────────────────────────────────────────

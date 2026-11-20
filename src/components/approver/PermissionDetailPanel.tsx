@@ -23,7 +23,7 @@ import {
 import { PassQrModal } from "@/components/student/PassQrModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, getAuthHeaders } from "@/lib/utils";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -36,6 +36,7 @@ import { DigitalSignPanel } from "@/components/approver/DigitalSignPanel";
 import { ParentConsentStage } from "./ParentConsentStage";
 import { QuotaOverrideModal } from "./QuotaOverrideModal";
 import { LateReturnFlag } from "./LateReturnFlag";
+import { CoSignModal } from "./CoSignModal";
 import { PersonaBadge } from "@/components/shared/PersonaBadge";
 import { FlagBadge } from "@/components/shared/FlagBadge";
 import { PASS_TYPE_SEED } from "@/lib/pass-types";
@@ -84,9 +85,27 @@ export function PermissionDetailPanel({
   const [directGenOpen, setDirectGenOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [quotaOverrideOpen, setQuotaOverrideOpen] = useState(false);
+  const [coSignOpen, setCoSignOpen] = useState(false);
 
   // Config lookup for the current pass type (data-driven, not a union)
   const passTypeConfig = PASS_TYPE_SEED.find((c) => c.code === data?.reason);
+
+  // Co-sign required when the subject is on probation and the CoC policy
+  // mandates dual approval. Fetch co-signers when the ticket loads.
+  const subjectFlag = (data?.student as unknown as { conductFlag?: FlagLevel })?.conductFlag;
+  const coSignRequired = subjectFlag === "probation";
+  const [coSigners, setCoSigners] = useState<Array<{ userId: string; name: string; role: string }>>([]);
+
+  useEffect(() => {
+    if (!coSignRequired || !ticket) return;
+    fetch("/api/permissions/co-signers", {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setCoSigners((b?.data ?? []) as Array<{ userId: string; name: string; role: string }>))
+      .catch(() => {});
+  }, [coSignRequired, ticket]);
 
   // Room-assignment fields for the day_scholar home_out approval flow.
   const [pendingHostelBlock, setPendingHostelBlock] = useState("");
@@ -612,12 +631,24 @@ export function PermissionDetailPanel({
                   <Button
                     size="sm"
                     variant="primary"
-                    onClick={() => setActiveAction("APPROVE")}
+                    onClick={() => {
+                      if (coSignRequired && coSigners.length > 0) {
+                        setCoSignOpen(true);
+                      } else {
+                        setActiveAction("APPROVE");
+                      }
+                    }}
                     className="bg-action-success hover:bg-emerald-700 text-white"
                   >
                     <CheckCircle className="w-3.5 h-3.5 mr-1" />
-                    Approve
+                    {coSignRequired ? "Approve (co-sign)" : "Approve"}
                   </Button>
+
+                  {coSignRequired && coSigners.length === 0 && (
+                    <span className="text-[10px] text-amber-500 flex items-center gap-1">
+                      <Shield className="h-3 w-3" /> Co-sign required — no co-signers available
+                    </span>
+                  )}
 
                   <Button
                     size="sm"
@@ -796,6 +827,23 @@ export function PermissionDetailPanel({
               request={data}
               config={passTypeConfig}
               onApproved={() => { void fetchDetail(); }}
+            />
+          )}
+
+          {coSignOpen && data && coSignRequired && (
+            <CoSignModal
+              isOpen={coSignOpen}
+              onClose={() => setCoSignOpen(false)}
+              request={data}
+              policy={{
+                id: "dual-probation",
+                domain: "hostel",
+                rule: "Probation-flagged requests need co-sign from tier+1",
+                appliesTo: ["probation"],
+                action: "require_dual",
+              }}
+              coSigners={coSigners}
+              onCoSigned={() => { void fetchDetail(); }}
             />
           )}
         </div>
