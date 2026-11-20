@@ -39,7 +39,7 @@ export const TRAIT_DEFINITIONS: TraitDef[] = [
       "onboarding.hints.show": true,
       "ui.menuDepth": 5,
       "dashboard.widgetOrder": ["goals", "feed", "events", "recap", "notifications"],
-      "quick_actions.selected": ["ask_help", "request_early_leave", "view_attendance", "view_meals"],
+      "quick_actions.selected": ["requests", "attendance", "mess", "campus"],
       "notifications.weekly_digest": { channels: ["email"], day: "friday", time: "18:00" },
     },
   },
@@ -54,7 +54,7 @@ export const TRAIT_DEFINITIONS: TraitDef[] = [
       "profile.transitionCard": true,
       "onboarding.tour.show": "off",
       "onboarding.hints.show": false,
-      "quick_actions.selected": ["placement_calendar", "view_records", "raise_issue"],
+      "quick_actions.selected": ["passes", "requests", "campus"],
     },
   },
 
@@ -83,7 +83,7 @@ export const TRAIT_DEFINITIONS: TraitDef[] = [
       "pass.defaultType": "day_out",
       "pass.template": "day_local",
       "notifications.curfew_approaching": { channels: ["in_app"], timing: "T-30m" },
-      "quick_actions.selected": ["request_early_leave", "view_attendance", "raise_issue", "mess_menu"],
+      "quick_actions.selected": ["requests", "attendance", "mess"],
     },
   },
 
@@ -283,7 +283,7 @@ export const TRAIT_DEFINITIONS: TraitDef[] = [
     overrides: {
       "parent.layout": "children_grid",
       "parent.digestGrouping": "unified",
-      "quick_actions.selected": ["switch_child", "view_attendance", "raise_issue"],
+      "quick_actions.selected": ["requests", "attendance"],
     },
   },
   {

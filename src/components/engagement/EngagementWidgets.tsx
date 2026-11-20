@@ -98,11 +98,12 @@ export function EngagementWidgets() {
   const storeOrder = useEngagementStore((s) => s.widgetOrder);
   const pinnedWidgets = useEngagementStore((s) => s.pinnedWidgets);
 
-  // Taste layer: the effective widget order is the 4-layer cascade —
-  //   policy > user (store) > persona > role > system.
+  // Taste layer: the effective widget order is the 5-layer cascade —
+  //   policy > user (store) > trait > persona > role > system.
   // The store holds the user's saved order; when the user hasn't saved one,
-  // the persona default (day_scholar vs hosteller) supplies it.
-  const prefOrder = useEffectivePref<EngagementWidgetId[]>("dashboard.widgetOrder");
+  // the trait + persona defaults supply it. Engagement widget ids are:
+  // profile, feed, events, achievements, goals, assistant, recap, notifications.
+  const prefOrder = useEffectivePref<EngagementWidgetId[]>("dashboard.engagementWidgetOrder");
   const widgetOrder = storeOrder.length > 0 ? storeOrder : prefOrder.value ?? [];
 
   const order = useMemo(

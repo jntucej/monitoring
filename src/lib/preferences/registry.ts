@@ -95,6 +95,7 @@ export const PREF_REGISTRY: PrefKeyDef[] = [
     { key: "dashboard.widgetOrder", category: "dashboard", rank: "cosmetic", roles: [], default: [], label: "Widget order", hint: "array of widget ids" , scopedBy: ["oversight_analytics", "year_1"]},
   { key: "dashboard.widgetVisibility", category: "dashboard", rank: "cosmetic", roles: [], default: {}, label: "Widget visibility", hint: "id → bool" },
     { key: "dashboard.defaultPeriod", category: "dashboard", rank: "cosmetic", roles: [], default: "week", label: "Default period", hint: "today | week | month" , scopedBy: ["faculty_hod", "medical_acute", "oversight_compliance", "shift_evening", "shift_morning"]},
+  { key: "dashboard.engagementWidgetOrder", category: "dashboard", rank: "cosmetic", roles: [], default: [], label: "Engagement widget order", hint: "engagement page widget ids" },
 
   // 5. NOTIFICATIONS (the compliance-critical category)
   { key: "notifications.class_reminder", category: "notifications", rank: "recommended", roles: ["student", "faculty"], default: { channels: ["in_app", "push"], timing: "T-15m" }, label: "Class-in-15-min reminder" },

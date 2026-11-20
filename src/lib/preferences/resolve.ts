@@ -137,8 +137,10 @@ export function resolveAll(ctx: CascadeContext): Array<ResolvedPref<unknown>> {
 export const PERSONA_DEFAULTS: Record<Persona, PersonaDefaults> = {
   day_scholar: {
     "nav.landingTab": "home",
-    "dashboard.widgetOrder": ["goals", "feed", "events", "recap", "notifications"],
-    "quick_actions.selected": ["request_early_leave", "view_records", "raise_issue", "mess_menu"],
+    "dashboard.widgetOrder": ["my-day-strip", "today-status", "context", "quick-links", "my-stats", "guardian-call", "campus-pulse"],
+    "dashboard.firstWidget": "my-day-strip",
+    "dashboard.engagementWidgetOrder": ["goals", "feed", "events", "recap", "notifications"],
+    "quick_actions.selected": ["requests", "attendance", "mess", "campus"],
     "notifications.curfew_approaching": { channels: ["in_app"], timing: "off" },
     "notifications.weekly_digest": { channels: ["email"], day: "friday", time: "18:00" },
     "privacy.parentVisibility": ["attendance"],
@@ -147,8 +149,10 @@ export const PERSONA_DEFAULTS: Record<Persona, PersonaDefaults> = {
   },
   hosteller: {
     "nav.landingTab": "home",
-    "dashboard.widgetOrder": ["notifications", "goals", "events", "recap", "feed"],
-    "quick_actions.selected": ["request_outpass", "curfew_status", "mess_menu", "raise_issue"],
+    "dashboard.widgetOrder": ["my-day-strip", "active-pass", "context", "quick-links", "my-stats", "guardian-call", "campus-pulse"],
+    "dashboard.firstWidget": "active-pass",
+    "dashboard.engagementWidgetOrder": ["notifications", "goals", "events", "recap", "feed"],
+    "quick_actions.selected": ["passes", "requests", "mess", "campus"],
     "notifications.curfew_approaching": { channels: ["in_app", "push", "sms"], timing: "T-60m,T-30m" },
     "notifications.weekly_digest": { channels: ["email"], day: "sunday", time: "18:00" },
     "privacy.parentVisibility": ["passes", "curfew", "meals", "complaints"],

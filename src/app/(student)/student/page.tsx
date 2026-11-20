@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useMemo } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { SakugaLoadingSplash } from "@/components/SakugaLoadingSplash";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -16,6 +16,31 @@ import { SakugaConsole } from "@/components/student/SakugaConsole";
 import { WifiOff, RotateCw } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { useEffectivePref } from "@/hooks/useEffectivePref";
+
+// Widget ids for the student home (the trait-aware order).
+const STUDENT_WIDGET_IDS = [
+  "my-day-strip",
+  "my-stats",
+  "today-status",
+  "active-pass",
+  "context",
+  "quick-links",
+  "guardian-call",
+  "campus-pulse",
+] as const;
+type StudentWidgetId = (typeof STUDENT_WIDGET_IDS)[number];
+
+const WIDGET_COMPONENTS: Record<StudentWidgetId, React.ComponentType> = {
+  "my-day-strip": MyDayStrip,
+  "my-stats": MyStatsCard,
+  "today-status": TodayStatus,
+  "active-pass": ActivePassCard,
+  "context": ContextCard,
+  "quick-links": QuickLinksRow,
+  "guardian-call": GuardianCallButton,
+  "campus-pulse": CampusPulseStrip,
+};
 
 // Offline banner: visible when the browser loses connectivity.
 // Shows cached/SSR content + a banner, not a blank screen.
@@ -89,36 +114,36 @@ function StudentHomeInner() {
     setTimeout(() => setRetrying(false), 3000);
   };
 
+  // Trait-aware widget order: the 5-layer cascade (policy > user > trait >
+  // persona > role > system) determines which widget renders first.
+  // A hosteller sees curfew/pass widgets first; a day scholar sees
+  // attendance/class widgets first. A year-1 student sees the onboarding
+  // tour prominent. The shell just renders in the resolved order.
+  const widgetOrderPref = useEffectivePref<StudentWidgetId[]>("dashboard.widgetOrder");
+  const widgetOrder: StudentWidgetId[] = useMemo(() => {
+    const order = widgetOrderPref.value ?? STUDENT_WIDGET_IDS;
+    // Validate: keep only known ids, append missing ones.
+    const known = new Set(STUDENT_WIDGET_IDS);
+    const valid = order.filter((w) => known.has(w as StudentWidgetId));
+    const missing = STUDENT_WIDGET_IDS.filter((w) => !valid.includes(w));
+    return [...valid, ...missing];
+  }, [widgetOrderPref.value]);
+
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
       <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
-      <WidgetBoundary name="my-day-strip" resetKey={resetKey}>
-        <MyDayStrip />
-      </WidgetBoundary>
-      <WidgetBoundary name="my-stats" resetKey={resetKey}>
-        <MyStatsCard />
-      </WidgetBoundary>
-      <WidgetBoundary name="today-status" resetKey={resetKey}>
-        <TodayStatus />
-      </WidgetBoundary>
-      <WidgetBoundary name="active-pass" resetKey={resetKey}>
-        <ActivePassCard />
-      </WidgetBoundary>
-      <WidgetBoundary name="context" resetKey={resetKey}>
-        <ContextCard />
-      </WidgetBoundary>
-      <WidgetBoundary name="quick-links" resetKey={resetKey}>
-        <QuickLinksRow />
-      </WidgetBoundary>
-      <WidgetBoundary name="guardian-call" resetKey={resetKey}>
-        <GuardianCallButton />
-      </WidgetBoundary>
-      <WidgetBoundary name="campus-pulse" resetKey={resetKey}>
-        <CampusPulseStrip />
-      </WidgetBoundary>
+      {widgetOrder.map((id) => {
+        const Render = WIDGET_COMPONENTS[id];
+        if (!Render) return null;
+        return (
+          <WidgetBoundary key={id} name={id} resetKey={resetKey}>
+            <Render />
+          </WidgetBoundary>
+        );
+      })}
     </div>
   );
 

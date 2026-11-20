@@ -1,10 +1,11 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { Settings, Eye } from "lucide-react";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { CollegeInfoForm } from "@/components/admin/CollegeInfoForm";
 import { PassTypesForm } from "@/components/admin/PassTypesForm";
+import { PreviewAsPanel } from "@/components/shared/PreviewAsPanel";
 
 export default function AdminSettingsPage() {
   return (
@@ -21,6 +22,10 @@ export default function AdminSettingsPage() {
 
           <WidgetBoundary title="Pass Types">
             <PassTypesForm />
+          </WidgetBoundary>
+
+          <WidgetBoundary title="Preview as Segment">
+            <PreviewAsPanel />
           </WidgetBoundary>
 
           <WidgetBoundary title="More Config">
