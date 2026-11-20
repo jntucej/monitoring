@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -9,6 +9,10 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
 import { DetailSheet } from "./DetailSheet";
 import { WeekBar } from "./WeekBar";
+
+const DecisionHistoryPanel = lazy(
+  () => import("@/components/approver/DecisionHistoryPanel")
+);
 
 interface PermissionsResponse {
   success: boolean;
@@ -128,6 +132,11 @@ export function ApprovalsView({
           refresh();
         }}
       />
+
+      {/* Decision history — monthly review of this approver's own decisions */}
+      <Suspense fallback={null}>
+        <DecisionHistoryPanel />
+      </Suspense>
     </div>
   );
 }

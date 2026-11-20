@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 
 export interface BulkActionsBarProps {
   selectedCount: number;
-  onApprove: () => Promise<void> | void;
+  onApprove: (reason?: string) => Promise<void> | void;
   onReject: (comment?: string) => Promise<void> | void;
   onForward?: (comment?: string) => Promise<void> | void;
   onClear: () => void;
   isLoading?: boolean;
+  /** Optional label for the batch action (e.g. "3 approvals"). */
+  label?: string;
 }
 
 export function BulkActionsBar({
@@ -20,14 +22,17 @@ export function BulkActionsBar({
   onForward,
   onClear,
   isLoading = false,
+  label,
 }: BulkActionsBarProps) {
-  const [promptAction, setPromptAction] = useState<"reject" | "forward" | null>(null);
+  const [promptAction, setPromptAction] = useState<"approve" | "reject" | "forward" | null>(null);
   const [comment, setComment] = useState("");
 
   if (selectedCount === 0) return null;
 
   const handleConfirmPrompt = async () => {
-    if (promptAction === "reject") {
+    if (promptAction === "approve") {
+      await onApprove(comment.trim() || undefined);
+    } else if (promptAction === "reject") {
       await onReject(comment.trim() || undefined);
     } else if (promptAction === "forward" && onForward) {
       await onForward(comment.trim() || undefined);
@@ -48,7 +53,7 @@ export function BulkActionsBar({
           {selectedCount}
         </span>
         <span className="text-sm font-medium text-text-primary">
-          {selectedCount === 1 ? "item selected" : "items selected"}
+          {label ?? (selectedCount === 1 ? "item selected" : "items selected")}
         </span>
       </div>
 
@@ -86,8 +91,7 @@ export function BulkActionsBar({
           <Button
             size="sm"
             variant="primary"
-            onClick={() => onApprove()}
-            loading={isLoading}
+            onClick={() => setPromptAction("approve")}
             disabled={isLoading}
             className="bg-emerald-600 hover:bg-emerald-700 text-white"
           >

@@ -12,13 +12,27 @@ export function getSlaStatus(slaDeadline: string | null | undefined, status?: st
   return "ok";
 }
 
+/** Human-readable "time left" / "overdue by" relative to now. */
+export function getSlaRemaining(slaDeadline: string, now = Date.now()): string {
+  const deadline = new Date(slaDeadline).getTime();
+  const diff = deadline - now; // positive = still has time
+  const abs = Math.abs(diff);
+  const totalMin = Math.floor(abs / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  const label = h > 0 ? `${h}h ${m}m` : `${m}m`;
+  return diff < 0 ? `${label} overdue` : `${label} left`;
+}
+
 interface SlaBadgeProps {
   slaDeadline: string | null | undefined;
   status?: string;
   className?: string;
+  /** Show a relative "time left / overdue by" label. Default true. */
+  showRemaining?: boolean;
 }
 
-export function SlaBadge({ slaDeadline, status, className = "" }: SlaBadgeProps) {
+export function SlaBadge({ slaDeadline, status, className = "", showRemaining = true }: SlaBadgeProps) {
   const slsStatus = getSlaStatus(slaDeadline, status);
   if (slsStatus === "none") return null;
 
@@ -29,13 +43,15 @@ export function SlaBadge({ slaDeadline, status, className = "" }: SlaBadgeProps)
   };
 
   const { label, cls } = config[slsStatus];
+  const remaining = showRemaining && slaDeadline ? getSlaRemaining(slaDeadline) : undefined;
+
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${cls} ${className}`}
       title={slaDeadline ? `SLA: ${formatDateTime(slaDeadline)}` : undefined}
     >
       {label}
-      {slaDeadline && <span className="font-mono text-xs opacity-70">{formatDateTime(slaDeadline)}</span>}
+      {remaining && <span className="font-mono text-xs font-normal opacity-80">{remaining}</span>}
     </span>
   );
 }
