@@ -17,6 +17,7 @@ const CARDS: Record<string, React.LazyExoticComponent<React.ComponentType<Studen
   "passes": lazy(() => import("./passes")),
   "monthly": lazy(() => import("./monthly")),
   "curfew": lazy(() => import("./curfew")),
+  "attendance": lazy(() => import("./attendance")),
   // SCAFFOLD:CARDS — cards are injected above this line
 };
 

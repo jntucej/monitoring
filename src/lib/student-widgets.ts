@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { ShieldCheck, Footprints, Ticket, DoorOpen } from "lucide-react";
+import { ShieldCheck, Footprints, Ticket, DoorOpen, CalendarDays } from "lucide-react";
 
 export interface StudentWidget {
   id: string;
@@ -12,8 +12,9 @@ export interface StudentWidget {
 }
 
 export const STUDENT_WIDGETS: StudentWidget[] = [
-  { id: "curfew",   title: "Curfew Score",   icon: ShieldCheck, apiField: "curfew",       ttlMs: 20_000, order: 1 },
-  { id: "monthly",  title: "Monthly Outing", icon: Footprints,  apiField: "monthly",      ttlMs: 20_000, order: 2 },
-  { id: "passes",   title: "Active Passes",  icon: Ticket,      apiField: "activePasses", ttlMs: 20_000, order: 3 },
-  { id: "lastscan", title: "Last Gate Scan", icon: DoorOpen,    apiField: "lastScan",     ttlMs: 20_000, order: 4 },
+  { id: "curfew",   title: "Curfew Score",   icon: ShieldCheck,    apiField: "curfew",       ttlMs: 20_000, order: 1 },
+  { id: "attendance", title: "Attendance",    icon: CalendarDays,  apiField: "attendance",   ttlMs: 30_000, order: 2 },
+  { id: "monthly",  title: "Monthly Outing", icon: Footprints,     apiField: "monthly",      ttlMs: 20_000, order: 3 },
+  { id: "passes",   title: "Active Passes",  icon: Ticket,         apiField: "activePasses", ttlMs: 20_000, order: 4 },
+  { id: "lastscan", title: "Last Gate Scan", icon: DoorOpen,       apiField: "lastScan",     ttlMs: 20_000, order: 5 },
 ];

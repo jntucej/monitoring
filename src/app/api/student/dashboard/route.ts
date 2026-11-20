@@ -138,17 +138,87 @@ async function loadLastScan(userId: string) {
   }
 }
 
+async function loadAttendance(userId: string) {
+  try {
+    const now = new Date();
+    const from = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    const r = await query<{ total: string; present: string; absent: string; unmarked: string }>(
+      `SELECT COUNT(*)::text AS total,
+              COALESCE(SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END), 0)::text AS present,
+              COALESCE(SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END), 0)::text AS absent,
+              COALESCE(SUM(CASE WHEN status IS NULL OR status = 'UNMARKED' THEN 1 ELSE 0 END), 0)::text AS unmarked
+         FROM attendance_records
+        WHERE person_id = $1 AND date >= $2`,
+      [userId, from]
+    );
+    const row = r.rows[0];
+    const total = Number(row?.total ?? 0);
+    const present = Number(row?.present ?? 0);
+    const absent = Number(row?.absent ?? 0);
+    const unmarked = Number(row?.unmarked ?? 0);
+    const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+
+    // Last month for delta
+    const lmStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+    const lmR = await query<{ total: string; present: string }>(
+      `SELECT COUNT(*)::text AS total,
+              COALESCE(SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END), 0)::text AS present
+         FROM attendance_records
+        WHERE person_id = $1 AND date >= $2 AND date <= $3`,
+      [userId, `${lmStart.getFullYear()}-${String(lmStart.getMonth() + 1).padStart(2, "0")}-01`, lmEnd.toISOString().slice(0, 10)]
+    );
+    const lmTotal = Number(lmR.rows[0]?.total ?? 0);
+    const lmPresent = Number(lmR.rows[0]?.present ?? 0);
+    const lmPct = lmTotal > 0 ? Math.round((lmPresent / lmTotal) * 100) : null;
+
+    // Upcoming
+    const upR = await query<{ date: string; subject: string | null; faculty: string | null; time_in: string | null; time_out: string | null }>(
+      `SELECT to_char(ar.date, 'YYYY-MM-DD') AS date,
+              c.name AS subject,
+              COALESCE(f.name, 'TBA') AS faculty,
+              ar.time_in::text AS time_in,
+              ar.time_out::text AS time_out
+         FROM attendance_records ar
+         LEFT JOIN classes c ON c.id = ar.class_id
+         LEFT JOIN faculty_assignments fa ON fa.class_id = c.id
+         LEFT JOIN users f ON f.id = fa.faculty_id
+        WHERE ar.person_id = $1 AND ar.date > $2
+        ORDER BY ar.date ASC
+        LIMIT 5`,
+      [userId, getIstDateString()]
+    );
+
+    return {
+      pct, total, present, absent, unmarked,
+      lastMonthPct: lmPct,
+      delta: lmPct !== null ? pct - lmPct : null,
+      upcoming: upR.rows.map((u) => ({
+        date: u.date, subject: u.subject ?? "General",
+        faculty: u.faculty ?? "TBA",
+        timeIn: u.time_in, timeOut: u.time_out,
+      })),
+    };
+  } catch {
+    return {
+      pct: 0, total: 0, present: 0, absent: 0, unmarked: 0,
+      lastMonthPct: null, delta: null, upcoming: [],
+    };
+  }
+}
+
 // ── Aggregator ──────────────────────────────────────────────────────────
 async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
-    const [curfew, monthly, activePasses, lastScan] = await Promise.all([
+    const [curfew, monthly, activePasses, lastScan, attendance] = await Promise.all([
       loadCurfew(auth.userId),
       loadMonthly(auth.userId),
       loadActivePasses(auth.userId),
       loadLastScan(auth.userId),
+      loadAttendance(auth.userId),
       // SCAFFOLD:LOADS — new loads are injected above this line
     ]);
-    return NextResponse.json({ success: true, data: { curfew, monthly, activePasses, lastScan } });
+    return NextResponse.json({ success: true, data: { curfew, monthly, activePasses, lastScan, attendance } });
   } catch (err) {
     // Defense in depth: even a total aggregator failure returns success with
     // neutral payloads so the widget grid degrades gracefully instead of 500.
@@ -160,6 +230,7 @@ async function handleGet(_req: NextRequest, { auth }: { auth: AuthContext }) {
         monthly: { yearMonth: getIstDateString().slice(0, 7), total: 0, daily: 0, home: 0, daypass: 0, night: 0, minutesOut: 0 },
         activePasses: [],
         lastScan: null,
+        attendance: { pct: 0, total: 0, present: 0, absent: 0, unmarked: 0, lastMonthPct: null, delta: null, upcoming: [] },
       },
     });
   }
