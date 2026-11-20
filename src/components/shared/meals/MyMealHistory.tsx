@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Star, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAuthHeaders } from "@/lib/utils";
+import { MealDetailSheet } from "@/components/shared/meals/MealDetailSheet";
 
 interface MealRow {
   id: string;
@@ -32,6 +33,7 @@ export function MyMealHistory({ limit = 14, onRated, className }: MyMealHistoryP
   const [rows, setRows] = useState<MealRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [ratingFor, setRatingFor] = useState<string | null>(null);
+  const [detail, setDetail] = useState<MealRow | null>(null);
 
   const load = async () => {
     try {
@@ -79,7 +81,14 @@ export function MyMealHistory({ limit = 14, onRated, className }: MyMealHistoryP
         <p className="py-4 text-center text-xs text-text-muted">No meals recorded yet.</p>
       )}
       {rows.map((row) => (
-        <div key={row.id} className="surface-card flex items-center justify-between gap-2 p-3">
+        <div
+          key={row.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => setDetail(row)}
+          onKeyDown={(e) => e.key === "Enter" && setDetail(row)}
+          className="surface-card flex cursor-pointer items-center justify-between gap-2 p-3 hover:bg-bg-elevated"
+        >
           <div>
             <p className="text-xs font-medium text-text capitalize">{row.meal_type}</p>
             <p className="text-[11px] text-text-muted">
@@ -133,6 +142,21 @@ export function MyMealHistory({ limit = 14, onRated, className }: MyMealHistoryP
           Something was wrong with a meal — raise a complaint
         </button>
       )}
+      {/* Tap-to-detail sheet (menu, allergens, rating, complaint link) */}
+      <MealDetailSheet
+        meal={
+          detail
+            ? {
+                id: detail.id,
+                meal_type: detail.meal_type,
+                review_date: detail.review_date,
+                rating: detail.rating ?? null,
+                served: detail.served,
+              }
+            : null
+        }
+        onClose={() => setDetail(null)}
+      />
     </div>
   );
 }

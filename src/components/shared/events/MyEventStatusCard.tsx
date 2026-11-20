@@ -13,6 +13,7 @@ import { Clock, MapPin, Star, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAuthHeaders } from "@/lib/utils";
 import { useState } from "react";
+import { EventFeedbackSheet } from "@/components/shared/events/EventFeedbackSheet";
 
 export interface MyEventStatusCardProps {
   event: {
@@ -39,6 +40,7 @@ export function MyEventStatusCard({
   className,
 }: MyEventStatusCardProps) {
   const [checkingIn, setCheckingIn] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const now = Date.now();
   const start = new Date(event.starts_at).getTime();
@@ -122,14 +124,23 @@ export function MyEventStatusCard({
       )}
 
       {isOver && (
-        <a
-          href={`/student/campus?event=${event.id}`}
+        <button
+          type="button"
+          onClick={() => setShowFeedback(true)}
           className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text"
         >
           <Star className="h-3.5 w-3.5" />
-          Leave feedback
-        </a>
+          {showFeedback ? "Rating saved" : "Leave feedback"}
+        </button>
       )}
+      <EventFeedbackSheet
+        event={
+          isOver
+            ? { id: event.id, title: event.title, attendedAt: event.ends_at }
+            : null
+        }
+        onClose={() => setShowFeedback(false)}
+      />
     </div>
   );
 }

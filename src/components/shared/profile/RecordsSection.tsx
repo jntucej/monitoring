@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { Download, Share2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAuthHeaders } from "@/lib/utils";
+import { MyDisputesPanel } from "@/components/shared/profile/MyDisputesPanel";
 
 interface Records {
   attendance?: { pct: number; period: string };
@@ -131,6 +132,12 @@ export function RecordsSection({ records: recordsProp, periodLabel = "this month
           ))}
         </div>
       )}
+
+      {/* The ESCALATE step of the profile loop: my open disputes,
+          across every feature. */}
+      <div className="pt-1">
+        <MyDisputesPanel openOnly limit={5} />
+      </div>
     </div>
   );
 }
