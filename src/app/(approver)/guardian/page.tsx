@@ -26,6 +26,9 @@ import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 const ParentWeeklyDigest = lazy(
   () => import("@/components/parent/ParentWeeklyDigest")
 );
+const ParentConsentInbox = lazy(
+  () => import("@/components/parent/ParentConsentInbox").then((m) => ({ default: m.ParentConsentInbox }))
+);
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
@@ -290,6 +293,7 @@ function GuardianOverviewInner() {
 
       <Suspense fallback={null}>
         <ParentWeeklyDigest />
+        <ParentConsentInbox />
       </Suspense>
     </div>
   );

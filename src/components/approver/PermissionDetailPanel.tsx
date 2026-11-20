@@ -33,6 +33,11 @@ import { DirectGenerateModal } from "./DirectGenerateModal";
 import type { PermissionItem } from "./PermissionRow";
 import { DocumentUploadPanel } from "@/components/student/DocumentUploadPanel";
 import { DigitalSignPanel } from "@/components/approver/DigitalSignPanel";
+import { ParentConsentStage } from "./ParentConsentStage";
+import { QuotaOverrideModal } from "./QuotaOverrideModal";
+import { LateReturnFlag } from "./LateReturnFlag";
+import { PersonaBadge } from "@/components/shared/PersonaBadge";
+import { PASS_TYPE_SEED } from "@/lib/pass-types";
 
 export interface PermissionDetailPanelProps {
   ticket: string | null;
@@ -76,6 +81,10 @@ export function PermissionDetailPanel({
   const [forwardOpen, setForwardOpen] = useState(false);
   const [directGenOpen, setDirectGenOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const [quotaOverrideOpen, setQuotaOverrideOpen] = useState(false);
+
+  // Config lookup for the current pass type (data-driven, not a union)
+  const passTypeConfig = PASS_TYPE_SEED.find((c) => c.code === data?.reason);
 
   // Room-assignment fields for the day_scholar home_out approval flow.
   const [pendingHostelBlock, setPendingHostelBlock] = useState("");
@@ -335,11 +344,46 @@ export function PermissionDetailPanel({
               </Button>
             </div>
           )}
+          {passTypeConfig && passTypeConfig.requiresParentConsent && data.status === "PENDING" && (
+            <ParentConsentStage request={data} />
+          )}
+
+          {passTypeConfig && (passTypeConfig.quotaKey ?? null) && data.status === "PENDING" && (
+            <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+              <div className="text-xs">
+                <p className="font-semibold text-amber-600">Quota check</p>
+                <p className="text-text-muted">
+                  {passTypeConfig.quotaKey} · limit {passTypeConfig.quotaLimit}/{passTypeConfig.quotaWindow}
+                  {" — "}
+                  warden may override with a documented reason.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuotaOverrideOpen(true)}
+                className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 shrink-0"
+              >
+                Override
+              </button>
+            </div>
+          )}
+
+          {data && (
+            <LateReturnFlag request={data} />
+          )}
+
           <div className="surface-card bg-bg-elevated p-4 space-y-3">
-            <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5" />
-              Student Profile
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5" />
+                Student Profile
+              </h3>
+              {studentEntryType && (
+                <PersonaBadge
+                  persona={studentEntryType === "hosteller" ? "hosteller" : "day_scholar"}
+                />
+              )}
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               <div>
                 <span className="text-text-muted block">Name</span>
@@ -720,6 +764,16 @@ export function PermissionDetailPanel({
               fromDate={data.from_date ?? data.fromDate ?? undefined}
               toDate={data.to_date ?? data.toDate ?? undefined}
               onClose={() => setQrOpen(false)}
+            />
+          )}
+
+          {quotaOverrideOpen && data && passTypeConfig && (
+            <QuotaOverrideModal
+              isOpen={quotaOverrideOpen}
+              onClose={() => setQuotaOverrideOpen(false)}
+              request={data}
+              config={passTypeConfig}
+              onApproved={() => { void fetchDetail(); }}
             />
           )}
         </div>
