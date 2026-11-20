@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo, lazy } from "react";
 import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -23,6 +23,10 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
+const ParentWeeklyDigest = lazy(
+  () => import("@/components/parent/ParentWeeklyDigest")
+);
+
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { useAuthStore } from "@/stores/authStore";
@@ -284,6 +288,9 @@ function GuardianOverviewInner() {
         <UnifiedCampusCalendar />
       </div>
 
+      <Suspense fallback={null}>
+        <ParentWeeklyDigest />
+      </Suspense>
     </div>
   );
 }
