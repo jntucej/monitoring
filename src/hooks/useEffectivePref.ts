@@ -19,6 +19,7 @@
 import { useMemo } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { usePersona } from "@/hooks/usePersona";
+import { useActiveTraits } from "@/hooks/useActiveTraits";
 import {
   resolvePref,
   PERSONA_DEFAULTS,
@@ -32,7 +33,9 @@ export interface EffectivePrefResult<T> {
   /** The effective value after the cascade. */
   value: T;
   /** Which layer won. */
-  source: "policy" | "user" | "persona" | "role" | "system";
+  source: "policy" | "user" | "trait" | "persona" | "role" | "system";
+  /** The trait id when the trait layer won. */
+  traitId?: string;
   /** The key's rank. */
   rank: "required" | "recommended" | "cosmetic";
   /** True when a "required"-rank policy value is in effect (show the lock). */
@@ -42,12 +45,19 @@ export interface EffectivePrefResult<T> {
 }
 
 /**
- * Read one preference key through the cascade.
+ * Read one preference key through the 5-layer cascade:
+ *   policy > user > trait > persona > role > system
  *
- * @param key        A registered preference key (from lib/preferences/registry).
- * @param userPrefs  The user's stored overrides. Pass the auth store's
- *                   `user.preferences` or a fetched map. When omitted, the
- *                   hook reads it from the auth store.
+ * The hook owns the cascade: it reads the user's stored prefs, the current
+ * persona (usePersona), the active traits (useActiveTraits), and the role
+ * (auth store), then calls resolvePref().
+ *
+ * Shells call `const { value, locked, source } = useEffectivePref("appearance.density")`
+ * instead of hardcoding a default. `locked` is true when a "required"-rank
+ * key is in effect — the UI shows 🔒 "Set by institute". `source` is the
+ * layer that won (used by the PreviewAs tool + the lock indicator).
+ *
+ * Tier 1 (hooks) — never forks.
  */
 export function useEffectivePref<T>(
   key: string,
@@ -56,6 +66,7 @@ export function useEffectivePref<T>(
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
   const personaKey = usePersona();
+  const traits = useActiveTraits().traits;
 
   return useMemo(() => {
     // The user layer: explicit arg, else the auth store's stored prefs.
@@ -67,22 +78,23 @@ export function useEffectivePref<T>(
     const roleLayer = (ROLE_DEFAULTS[role ?? "student"] ?? ROLE_DEFAULTS.student) as Record<string, unknown>;
     const ctx: CascadeContext = {
       user: userLayer,
+      traits,
       persona,
       role: roleLayer,
       policy: POLICY_DEFAULTS,
     };
 
     const resolved = resolvePref<T>(key, ctx);
-    const def = getPrefDef(key);
 
     return {
       value: resolved.value,
       source: resolved.source,
+      traitId: resolved.traitId,
       rank: resolved.rank,
       locked: resolved.rank === "required" && resolved.source === "policy",
       userValue: resolved.userValue,
     };
-  }, [key, userPrefs, user, role, personaKey]);
+  }, [key, userPrefs, user, role, personaKey, traits]);
 }
 
 export default useEffectivePref;

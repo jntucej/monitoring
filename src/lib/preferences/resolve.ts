@@ -21,6 +21,7 @@ import {
   type Role,
   type Persona,
 } from "@/lib/preferences/registry";
+import type { ActiveTrait } from "@/lib/traits/types";
 
 // ── Inputs to the cascade ──────────────────────────────────────────────────
 
@@ -39,6 +40,9 @@ export interface UserPrefs {
 
 export interface CascadeContext {
   user: UserPrefs;
+  /** Active traits, sorted by priority (highest first). The resolver
+   *  consults these between the user and persona layers. */
+  traits?: ActiveTrait[];
   persona: PersonaDefaults;
   role: RoleDefaults;
   policy: PolicyOverrides;
@@ -49,7 +53,9 @@ export interface CascadeContext {
 export interface ResolvedPref<T> {
   value: T;
   /** Which layer supplied the value. */
-  source: "policy" | "user" | "persona" | "role" | "system";
+  source: "policy" | "user" | "trait" | "persona" | "role" | "system";
+  /** The trait id when the trait layer won. */
+  traitId?: string;
   /** The key's rank — "required" values cannot be user-overridden. */
   rank: "required" | "recommended" | "cosmetic";
   /** The user's stored value, even when policy overrode it (audit). */
@@ -57,44 +63,58 @@ export interface ResolvedPref<T> {
 }
 
 /**
- * Resolve a single preference key through the 4-layer cascade.
+ * Resolve a single preference key through the 5-layer cascade:
+ *   policy > user > trait > persona > role > system
  *
- * @param key      A registered preference key.
- * @param ctx      The four layers, bottom-to-top.
- * @returns        The effective value + which layer won + the rank.
+ * The trait layer consults each active trait's scoped overrides, in
+ * priority order. A trait only influences a key when the registry's
+ * `scopedBy` for that key includes the trait's id — that's the guardrail.
  */
 export function resolvePref<T>(key: string, ctx: CascadeContext): ResolvedPref<T> {
   const def = getPrefDef(key);
   const rank = def?.rank ?? "cosmetic";
 
-  // Unknown key: fall back to the system default (or undefined). No layer
-  // applies. This is the drift guard — a key not in the registry is never
-  // honored from user/persona/role layers.
+  // Unknown key: fall back to the system default. No layer applies — the
+  // drift guard. A key not in the registry is never honored from any layer.
   if (!def) {
     return { value: undefined as T, source: "system", rank, userValue: ctx.user[key] };
   }
 
-  // System default is the floor.
-  let value: unknown = def.default;
-  let source: ResolvedPref<T>["source"] = "system";
-
-  if (key in ctx.role) { value = ctx.role[key]; source = "role"; }
-  if (key in ctx.persona) { value = ctx.persona[key]; source = "persona"; }
-  if (key in ctx.user) { value = ctx.user[key]; source = "user"; }
-
   // Layer 0: policy. A "required" rank means the policy value (or the
-  // system default when policy is silent) beats the user's stored value.
-  // The user's value is still returned in `userValue` for audit, but the
-  // effective value is the policy/default.
+  // system default when policy is silent) beats everything below it,
+  // including traits and the user's stored value.
   if (rank === "required") {
     const policyValue = key in ctx.policy ? ctx.policy[key] : def.default;
     return { value: policyValue as T, source: "policy", rank, userValue: ctx.user[key] };
   }
 
-  if (key in ctx.policy) {
-    value = ctx.policy[key];
-    source = "policy";
+  // Layer 3: user taste.
+  if (key in ctx.user) {
+    return { value: ctx.user[key] as T, source: "user", rank, userValue: ctx.user[key] };
   }
+
+  // Trait layer: walk active traits in priority order; the first one that
+  // owns this key (per the registry's scopedBy) and has a value wins.
+  if (ctx.traits && ctx.traits.length > 0) {
+    const scoped = def.scopedBy ?? [];
+    for (const trait of ctx.traits) {
+      if (scoped.length > 0 && !scoped.includes(trait.id)) continue; // not this trait's key
+      if (key in trait.overrides) {
+        return { value: trait.overrides[key] as T, source: "trait", traitId: trait.id, rank, userValue: ctx.user[key] };
+      }
+    }
+  }
+
+  // Non-required policy override: an admin-set value beats persona/role/system
+  // but not user taste or the trait layer (user's choice wins for non-required).
+  if (key in ctx.policy) {
+    return { value: ctx.policy[key] as T, source: "policy", rank, userValue: ctx.user[key] };
+  }
+
+  // Layer 2: persona / role / system defaults.
+  let value: unknown = key in ctx.persona ? ctx.persona[key] : key in ctx.role ? ctx.role[key] : def.default;
+  let source: ResolvedPref<T>["source"] =
+    key in ctx.persona ? "persona" : key in ctx.role ? "role" : "system";
 
   return { value: value as T, source, rank, userValue: ctx.user[key] };
 }
