@@ -1,4 +1,5 @@
 import type { Role } from "./roles";
+import type { FlagLevel } from "./permission-model";
 
 export type UUID = string & { readonly __brand: unique symbol };
 export type RollNumber = string & { readonly __brand: unique symbol };
@@ -6,6 +7,11 @@ export type RollNumber = string & { readonly __brand: unique symbol };
 export { Role };
 
 export type AccountStatus = "ACTIVE" | "LOCKED" | "SUSPENDED" | "DISABLED" | "DEPROVISIONED";
+
+/** Code-of-conduct flag level — extends AccountStatus with graduated accountability.
+ *  "clear" = no active flag. "watch" = minor violation. "probation" = dual approval.
+ *  "suspended" = cannot act. "banned" = fully blocked. */
+export type { FlagLevel };
 
 export type WorkflowType = "hostel" | "exam" | "memo" | "staff_leave" | "lab_access";
 
@@ -169,6 +175,10 @@ export interface Person {
   thumbprintVerifiedAt?: string;
   /** Administrative flag status: null | "NONE" | "FLAGGED" | "SUSPENDED" */
   flagStatus?: string | null;
+  /** Code-of-conduct flag level (from conduct_flags table). */
+  conductFlag?: FlagLevel;
+  conductFlagReason?: string;
+  conductFlagExpiresAt?: string;
   // Related details if loaded
   studentDetails?: StudentDetails;
   employeeDetails?: EmployeeDetails;
