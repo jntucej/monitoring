@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { QrCode, Loader2, AlertCircle, Download } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { QrCode, Loader2, AlertCircle, Download, RotateCw, ShieldAlert, Phone } from "lucide-react";
 import { QRCode } from "react-qrcode-logo";
 import { parseRollNumber } from "@/lib/rollNumber";
 import { useApi } from "@/hooks/useApi";
@@ -28,6 +28,17 @@ const api = useApi();
   // /api/students/qr-token returns { data: { qrToken } }; the scanner's
   // normalizeScannedPayload accepts the signed 3-segment form.
   const [qrToken, setQrToken] = useState<string | null>(null);
+  const [reissuing, setReissuing] = useState(false);
+
+  const reissueQR = useCallback(async () => {
+    setReissuing(true);
+    try {
+      const res = await fetch("/api/students/qr-token", { cache: "no-store" });
+      const json = await res.json();
+      if (json?.data?.qrToken) setQrToken(json.data.qrToken);
+    } catch {}
+    finally { setReissuing(false); }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,6 +190,28 @@ const api = useApi();
         </div>
       )}
 
+      {/* Extended info: hostel, validity, emergency */}
+      <div className="mt-3 sm:mt-4 w-full max-w-sm space-y-2">
+        {student.hostelBlock && (
+          <div className="rounded-lg bg-bg-elevated border border-border px-3 py-2 flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4 text-action-warning shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-text-primary">Hostel — Block {student.hostelBlock}</p>
+              {student.hostelCurfewTime && (
+                <p className="text-[10px] text-text-muted">Curfew {student.hostelCurfewTime}</p>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="rounded-lg bg-bg-elevated border border-border px-3 py-2 flex items-center gap-2">
+          <Phone className="h-4 w-4 text-action-info shrink-0" />
+          <div>
+            <p className="text-xs font-medium text-text-primary">Emergency Contact</p>
+            <p className="text-[10px] text-text-muted">{student.phone ?? "—"}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Roll Number Breakdown */}
       <div className="mt-4 sm:mt-6 w-full max-w-sm">
         <div className="flex items-center justify-between mb-2">
@@ -232,6 +265,14 @@ const api = useApi();
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? "Saving…" : "Save QR as PNG"}
+        </button>
+        <button
+          onClick={() => void reissueQR()}
+          disabled={reissuing}
+          className="mt-1.5 flex items-center gap-1 text-[11px] text-text-muted hover:text-action-primary disabled:opacity-50"
+        >
+          <RotateCw className="w-3 h-3" />
+          {reissuing ? "Re-issuing…" : "Re-issue QR"}
         </button>
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-text-muted flex items-center gap-1">

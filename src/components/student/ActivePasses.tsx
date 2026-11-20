@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, Clock, CheckCircle2, XCircle, FileDown, History } from "lucide-react";
+import { Loader2, Clock, CheckCircle2, XCircle, FileDown, History, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
 import type { GatePass } from "@/lib/types";
 import { getPassTypeName } from "@/hooks/usePassTypes";
 import { getAuthHeaders } from "@/lib/utils";
@@ -72,6 +72,18 @@ export function ActivePasses() {
     () => passes.filter((p) => p.from >= periodFrom && p.to <= todayStr || p.finalStatus === "PENDING" || p.finalStatus === "COMPLETED"),
     [passes, periodFrom, todayStr]
   );
+
+  // Usage delta: this period vs previous same-length window
+  const usageDelta = useMemo(() => {
+    const periodDays = Math.max(1, Math.round((new Date(period.to).getTime() - new Date(period.from).getTime()) / 86_400_000));
+    const prevFrom = new Date(period.from);
+    prevFrom.setDate(prevFrom.getDate() - periodDays);
+    const prevFromStr = prevFrom.toISOString().slice(0, 10);
+    const prevToStr = period.from.slice(0, 10);
+    const prevCount = passes.filter((p) => p.from >= prevFromStr && p.to <= prevToStr).length;
+    const curCount = filtered.length;
+    return { cur: curCount, prev: prevCount, delta: curCount - prevCount, periodDays };
+  }, [passes, filtered, period]);
 
   const handleExportHistory = () => {
     exportCSV(
@@ -147,6 +159,30 @@ export function ActivePasses() {
           })}
         </div>
       )}
+
+      {/* Usage KPI */}
+      <div className="mt-3 sm:mt-4 w-full max-w-sm rounded-xl border border-border bg-bg-elevated p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-text-muted uppercase">Usage this period</span>
+          <span className="text-xs text-text-muted tabular-nums">
+            {usageDelta.cur} this · {usageDelta.prev} prev
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-lg font-bold text-text-primary tabular-nums">{usageDelta.cur}</span>
+          {usageDelta.delta > 0 && (
+            <span className="inline-flex items-center text-xs text-emerald-500">
+              <TrendingUp className="h-3 w-3" /> +{usageDelta.delta}
+            </span>
+          )}
+          {usageDelta.delta < 0 && (
+            <span className="inline-flex items-center text-xs text-rose-500">
+              <TrendingDown className="h-3 w-3" /> {usageDelta.delta}
+            </span>
+          )}
+          {usageDelta.delta === 0 && <span className="text-xs text-text-muted">no change</span>}
+        </div>
+      </div>
 
       {/* History toggle + period + export */}
       <div className="mt-5 border-t border-border pt-4">

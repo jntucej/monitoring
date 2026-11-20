@@ -3,8 +3,8 @@
 /* S8: PassCreateForm — the "Apply Gate Pass" modal form.
    Lives in its own file so the passes page stays a thin orchestrator. */
 
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Clock } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { usePassTypes } from "@/hooks/usePassTypes";
 import { useApi } from "@/hooks/useApi";
@@ -80,6 +80,13 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
       setToTime(formatForDatetimeInput(getSameDayEveningTime(newFromDate)));
     }
   };
+
+  // Duration auto-calc preview
+  const durationMs = useMemo(() => {
+    if (!fromTime || !toTime) return null;
+    const ms = new Date(toTime).getTime() - new Date(fromTime).getTime();
+    return ms > 0 ? ms : null;
+  }, [fromTime, toTime]);
 
   const getStudentRoll = (): string | null => {
     if (typeof window === "undefined") return null;
@@ -189,6 +196,18 @@ function PassCreateFormInner({ onClose, onCreated }: { onClose: () => void; onCr
             <p className="text-xs text-action-warning font-medium">
               * Day Pass requires returning on the same calendar day (by curfew/23:59).
             </p>
+          )}
+
+          {/* Duration auto-calc preview */}
+          {durationMs && (
+            <div className="rounded-lg bg-bg-elevated border border-border px-3 py-2 flex items-center justify-between text-xs">
+              <span className="inline-flex items-center gap-1.5 text-text-muted">
+                <Clock className="h-3.5 w-3.5" /> Requested duration
+              </span>
+              <span className="font-semibold text-text-primary tabular-nums">
+                {Math.floor(durationMs / 3_600_000)}h {Math.round((durationMs % 3_600_000) / 60_000)}m
+              </span>
+            </div>
           )}
 
           <div className="space-y-1">
