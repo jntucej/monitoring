@@ -152,7 +152,8 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
 - **Academic subsystem** — `assignments`, `submissions`,
   `extension_requests` (migration `20270128000001_academic_subsystem.sql`),
   `faculty_id`-keyed (not `posted_by`), manual RLS policies on
-  `submissions`; APIs at `/api/faculty/*`, `/api/academic-status`
+  `submissions` (idempotent `DO`-block since 877feffc); APIs at
+  `/api/faculty/*`, `/api/academic-status`
   (HOD two-person rule for SUSPENDED/DEBARRED/LATERAL_JOIN).
 - Design: `docs/teaching-capability-architecture.md`; kernel contract:
   `docs/CONTRACT.md` §"Teaching Capability Addendum".

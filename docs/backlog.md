@@ -50,7 +50,7 @@ Capability-keyed teaching access + academic work subsystem, live on main:
 | Teaching binding gate | `src/app/(approver)/faculty/layout.tsx` (`TeachingBindingGate`) + `src/lib/teaching-binding.ts` + `GET /api/teaching-bindings` |
 | Action kernel | `src/lib/action-envelope.ts`, `src/lib/dispatch-action.ts`, `src/lib/useAction.ts`; single mutation boundary `POST /api/actions` (idempotency dedupe + binding/role check + audit) |
 | Academic schema | `assignments`, `submissions`, `extension_requests` — `database/migrations/20270128000001_academic_subsystem.sql`, keyed on `faculty_id` (not `posted_by`; commit 8201cd1f) |
-| Academic RLS | **manual `CREATE POLICY`** on the app role for `submissions` (student own / faculty grade) — no `ALTER TABLE … ENABLE RLS` auto-enrollment |
+| Academic RLS | **manual `CREATE POLICY`** on the app role for `submissions` (student own / faculty grade) via an idempotent `DO … IF NOT EXISTS (pg_policies …)` block (877feffc) — no `ALTER TABLE … ENABLE RLS` auto-enrollment |
 | Faculty APIs | `/api/faculty/assignments`, `/api/faculty-assignments` (+`[id]`), `/api/faculty/marks`, `/internal-exam`, `/materials`, `/mentees`, `/attendance` |
 | HOD academic status | `GET/POST /api/academic-status` + `/api/academic-status/pending` — two-person rule for SUSPENDED / DEBARRED / LATERAL_JOIN |
 | Grants | `gate_app` INSERT/SELECT on `operator_actions` for `infra_forecaster` (fbbed283); DELETE on `audit_logs` for `gate_app` (96ce200f) |

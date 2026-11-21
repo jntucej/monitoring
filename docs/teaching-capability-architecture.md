@@ -72,6 +72,12 @@ ExtensionRequest {
 }
 ```
 
+> **Note (877feffc):** the migration is idempotent — `DROP INDEX IF EXISTS`
+> guards on all indexes, and RLS policies are created inside a
+> `DO … BEGIN IF NOT EXISTS (pg_policies …)` block so replay on a fresh or
+> already-migrated database is safe. `idx_assignments_poster` now keys on
+> `faculty_id`, matching the 8201cd1f fix.
+
 ### Action Tiers
 
 | Action | Tier | Confirm |
@@ -90,6 +96,6 @@ ExtensionRequest {
 | 1 | Action kernel (3 files) — `src/lib/action-envelope.ts`, `src/lib/dispatch-action.ts`, `src/lib/useAction.ts` + `POST /api/actions` | ✅ done (f140923c) |
 | 2 | Notification panel fix (done: d1403db8) | ✅ |
 | 3 | Teaching guard swap — `TeachingBindingGate` in `src/app/(approver)/faculty/layout.tsx` via `hasTeachingBinding()` + `/api/teaching-bindings` | ✅ done |
-| 4 | Academic subsystem — `20270128000001_academic_subsystem.sql` (assignments/submissions/extensions), `/api/faculty/assignments`, RLS via manual `CREATE POLICY` on `submissions` (8201cd1f) | ✅ done |
+| 4 | Academic subsystem — `20270128000001_academic_subsystem.sql` (assignments/submissions/extensions), `/api/faculty/assignments`, RLS via `DO`-block idempotent `CREATE POLICY` on `submissions` (8201cd1f + 877feffc) | ✅ done |
 | 5 | Student surface fixes (history sheet, campus RSVP) | pending |
 | 6 | Sakuga theme (on consolidated tree) | pending |
