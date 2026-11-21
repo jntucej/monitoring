@@ -28,8 +28,8 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
   caretaker: ["caretaker"],
   deputy_warden: ["deputy_warden"],
   hostel_manager: ["hostel_manager"],
-  warden: ["hostel_manager", "warden_or_principal", "principal"],
-  principal: ["warden_or_principal", "principal"],
+  warden: ["hostel_manager", "principal"],
+  principal: ["principal"],
   faculty: ["faculty"],
   hod: ["hod"],
   oie: ["oie"],
@@ -41,7 +41,7 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
 };
 
 export const WORKFLOW_STAGES: Record<WorkflowType, readonly string[]> = {
-  hostel:      ["caretaker", "deputy_warden", "hostel_manager", "warden_or_principal", "principal"],
+  hostel:      ["caretaker", "deputy_warden", "hostel_manager", "principal"],
   exam:        ["hod", "oie", "exam_branch", "vice_principal", "principal"],
   memo:        ["hod", "principal"],
   staff_leave: ["hod", "principal"],
@@ -94,8 +94,13 @@ export function resolveNextStage(
 ): string | null {
   const chain = WORKFLOW_STAGES[workflowType];
   if (!chain) return null;
-  const normalizedCurrent = currentStage === "warden" ? "hostel_manager" : currentStage;
-  const idx = chain.indexOf(normalizedCurrent);
+  // Backward-compat: tickets parked at the legacy "warden_or_principal"
+  // stage (removed from the chain) advance straight to "principal".
+  const normalizedCurrent =
+    currentStage === "warden" || currentStage === "warden_or_principal"
+      ? "principal"
+      : currentStage;
+  const idx = chain.indexOf(normalizedCurrent as (typeof chain)[number]);
   if (idx === -1) return null;
   if (idx === chain.length - 1) return null;
   return chain[idx + 1];
@@ -108,9 +113,12 @@ export function canApproveAtStage(
 ): boolean {
   const chain = WORKFLOW_STAGES[workflowType];
   if (!chain) return false;
-  const stage = currentStage === "warden" ? "hostel_manager" : currentStage;
+  const stage =
+    currentStage === "warden" || currentStage === "warden_or_principal"
+      ? "principal"
+      : currentStage;
   const normalizedRole = normalizeRole(role);
-  return chain.includes(stage) && (normalizedRole === stage || normalizedRole === "admin" || normalizedRole === "sysadmin");
+  return chain.includes(stage as (typeof chain)[number]) && (normalizedRole === stage || normalizedRole === "admin" || normalizedRole === "sysadmin");
 }
 
 export interface BranchGateResult {
