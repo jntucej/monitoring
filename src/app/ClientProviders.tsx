@@ -14,6 +14,7 @@ import { LoadingStates } from "@/components/shared/LoadingStates";
 import { LiveEventToaster } from "@/components/shared/LiveEventToaster";
 import { ShakeDetector } from "@/components/shared/ShakeDetector";
 import { RoleThemeProvider } from "@/components/RoleThemeProvider";
+import { InspectOverlay } from "@/components/shared/InspectOverlay";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
 // canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
@@ -125,6 +126,12 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
               page so mobile users get one-shake bug reporting anywhere. */}
           {!isMarketing && <ShakeDetector />}
           {!isMarketing && !isGateKiosk && <FloatingBot />}
+          {/* InspectOverlay: dev-only click interceptor that reads .app-map.json
+              and shows a passive inspect panel. No-ops in production builds and
+              is inert unless the URL carries ?inspect — it can never appear in a
+              normal user session. Read-only: never prevents default or prints
+              secrets. */}
+          <InspectOverlay />
         </ToastProvider>
       </NavigationProvider>
       </RoleThemeProvider>

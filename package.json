@@ -49,7 +49,8 @@
     "test:ux": "playwright test tests/ux-preflight.spec.ts tests/network-throttling.spec.ts tests/offline-recovery.spec.ts",
     "test:perf": "npx lighthouse http://localhost:3000 --preset=mobile --output=json --output-path=./lighthouse-report.json --chrome-flags=--no-sandbox --headless",
     "test:perf:ci": "npm run test:perf && node scripts/check-lighthouse.mjs",
-    "verify:ops": "bash scripts/verify-ops-batch.sh"
+    "verify:ops": "bash scripts/verify-ops-batch.sh",
+    "app-map": "tsx scripts/build-app-map.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1160.0",

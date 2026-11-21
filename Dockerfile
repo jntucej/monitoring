@@ -24,7 +24,9 @@ ARG NEXT_PUBLIC_WS_URL
 ARG NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-RUN npm run build
+# Regenerate the app-map from source so /sysadmin/app-map + InspectOverlay
+# always reflect the current code (the committed .app-map.json is a fallback).
+RUN npx tsx scripts/build-app-map.ts && npm run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -40,6 +42,9 @@ RUN adduser --system --uid 1001 --home /app nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# The generated application map (read by /api/dev/app-map + /sysadmin/app-map
+# + InspectOverlay). Read-only reference data; regenerate via the build.
+COPY --from=builder --chown=nextjs:nodejs /app/.app-map.json ./.app-map.json
 # Prod-only deps for server.js (standalone output prunes node_modules;
 # bcryptjs/pg must be resolvable at runtime). Prod deps exclude devDeps
 # (jest, playwright, eslint, typescript) — ~hundreds of MB smaller.
