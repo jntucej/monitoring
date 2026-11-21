@@ -1,199 +1,300 @@
-# JNTUH CEJ Gate Monitor — Full Hierarchy & Feature Flow Map
+# JNTUH CEJ Gate Monitor — Complete Hierarchy, Feature & Flow Reference
 
-**Scope:** Every role tier, every capability layer, every operational
-flow, and the (planned) class-communication SaaS layer. This is the single
-"how everything works" reference: who can do what, what runs on its own,
-and how a request travels from a student to an outcome.
+**This is the single "how everything works" document.** It covers, with real
+code locations:
+- the layer model and the 4 rules that hold it together
+- every role and capability slot (who can act where)
+- the full API surface by domain (what each capability actually exposes)
+- every operational flow, end to end (how a request travels to an outcome)
+- the escalation ladders and the autonomous agent layer (what runs without a human)
+- the deploy / runtime topology
+- the planned class-communication SaaS layer and where it slots in
 
-**Companion docs:** `JNTUH_CEJ_ROLE_HIERARCHY.md` (entity-aligned role
-model + implementation status), `CONTRACT.md` (fork-shell/share-kernel rule
-+ capability addenda), `teaching-capability-architecture.md`, and
-`plan/class-coordinator-saas/` (the class-communication build plan).
-
-**Convention used throughout:**
-- **Role** = a `users.role` value (29 in `src/lib/roles.ts`).
-- **Capability** = a binding, not a role (e.g. teaching binding, coordinator slot).
-  Capabilities follow the *binding-beats-role* rule: authorization keys on a
-  person's active row, not on which role they happen to hold.
-- **Kernel** = the never-fork logic (`canAct`, `nextActor`, `deriveFlag`,
-  routing). Shells are the role-specific JSX that *call* the kernel.
+**Verified against:** `src/lib/roles.ts`, `src/app/api/*` (85 domains),
+`src/app/api/cron/*` (23 agents), `src/lib/escalation-ladder.ts`,
+`docker-compose.yml`. Companion docs are linked in Part 10.
 
 ---
 
-## Part 1 — The three-layer model
+## Part 1 — Three-layer model
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ LAYER 0 · KERNEL (never forks)                                │
-│  permission-model.canAct() · escalation-ladder.nextActor()    │
-│  conduct.deriveFlag() · complaint-routing.routeComplaint()    │
-│  action-envelope / dispatch-action / useAction                 │
-├──────────────────────────────────────────────────────────────┤
-│ LAYER 1 · ROLE + CAPABILITY (who can act where)               │
-│  29 roles  ·  teaching binding  ·  coordinator slot           │
-│  entity_scopes (dept / block / gate)  ·  delegations (TTL)    │
-├──────────────────────────────────────────────────────────────┤
-│ LAYER 2 · SURFACES (forked, bespoke)                          │
-│  student / faculty / hod / operator / warden / admin shells   │
-│  each calls the kernel — none re-implements policy            │
-└──────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ LAYER 0 · KERNEL  (never forks)                                 │
+│  permission-model.ts → canAct()                                │
+│  escalation-ladder.ts → LADDER, nextActor()                    │
+│  conduct.ts → FlagLevel, deriveFlag(), COC_POLICIES             │
+│  pass-types.ts → PassTypeConfig + seed                          │
+│  commands/parse.ts → parseCommand()                             │
+│  complaint-routing.ts → routeComplaint()                        │
+│  action-envelope.ts / dispatch-action.ts / useAction.ts         │
+│  (all under src/lib/)                                           │
+├────────────────────────────────────────────────────────────────┤
+│ LAYER 1 · ROLE + CAPABILITY  (who can act where)                │
+│  29 role keys (roles.ts)                                         │
+│  capability bindings: faculty_assignments (teaching),           │
+│     student_representatives (coordinator, planned), delegations │
+│  entity_scopes: dept / block / gate / mess / lib / exam desks   │
+├────────────────────────────────────────────────────────────────┤
+│ LAYER 2 · SURFACES  (forked, bespoke JSX)                       │
+│  9 route-groups: (admin) (approver) (home) (mess) (operator)    │
+│     (person) (student) (supervisor) (sysadmin)                  │
+│  each shell CALLS the kernel — none re-implements policy        │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-Rules that hold across every layer:
-1. **The shell is yours, the logic isn't.** A role console may restyle
-   freely but must call `canAct`, `nextActor`, `routeComplaint`, and
-   dispatch mutations through `POST /api/actions`.
-2. **Binding beats role.** A Principal without a CS-301 teaching binding
-   gets 403 on CS-301 grading; a student with a coordinator slot gets
-   relay power they don't have as a plain student.
-3. **One mutation boundary.** Every write funnels through
-   `/api/actions` → auth → idempotency dedupe → permission check →
-   execute + `audit_logs`. No shell issues raw fetch mutations.
-4. **Escalation is a table, not a judgment call.** `nextActor(role,
-   domain, blocked)` walks the domain ladder. Two ladders would bounce a
-   ticket forever, so it lives in exactly one file.
+### The 4 standing rules
+1. **Shell is yours, the logic isn't.** A role console may restyle freely
+   but must call `canAct`, `nextActor`, `routeComplaint`, and dispatch every
+   mutation through `POST /api/actions`. A shell that inlines a `fetch` for a
+   policy decision is a fork and is rejected in review (see `CONTRACT.md`).
+2. **Binding beats role.** Authorization keys on an active binding row, not the
+   role column. A Principal without a CS-301 teaching binding → 403 on
+   CS-301 grading. A plain student with a coordinator slot → relay power.
+3. **One mutation boundary.** Every write goes through
+   `/api/actions` → auth → idempotency dedupe (60 s, in-process) →
+   permission check → execute → `audit_logs`. No shell issues raw mutation
+   fetches.
+4. **Escalation is a table, not a judgment call.** `nextActor(role, domain,
+   blocked)` walks the domain ladder (`escalation-ladder.ts`). Two ladders
+   would bounce a ticket forever, so it lives in exactly one file.
 
 ---
 
-## Part 2 — Role hierarchy (tiers)
+## Part 2 — Roles and capabilities (complete, from `src/lib/roles.ts`)
 
-| Tier | Roles (role keys) | Authority | Scope lock |
-|---|---|---|---|
-| **T0 Governance** | `principal`, `vice_principal`, `admin`, `sysadmin` | Approve everything; override + audit reason; lockdown; constitute mess committee | campus-wide; sysadmin is the technical root, principal the institutional root |
-| **T1 Institution** | `dean`, `chief_warden`, `oie`, `controller_examinations`, `addl_controller_*` | Two-person DEBARRED/SUSPENDED approver; hostel incidents; exam desks | exam branch is split into 4 desks (SoD); chief_warden acts with `role_context` |
-| **T2 Department** | `hod` | Roster, class mgmt, academic flags (parked for two-person) | `auth.departmentId` locked — EEE HOD never sees CSE |
-| **T3 Hostels/Mess/Gate** | `warden`(principal ctx), `deputy_warden`, `hostel_manager`, `caretaker`, `mess_incharge`, `operator`, `supervisor` | Block-scoped hostel; gate scans; mess reconcile; maintenance | block or gate entity scope |
-| **T4 Teaching capability** | `faculty`, `class_teacher` *(capability, not always a separate role value)* | Marks DRAFT→LOCK, assignments, grading, materials, mentees, internal-exam proposals | teaching binding (subject+class); not result-processing |
-| **T5 Exam desks** | `exam_superintendent`, `exam_branch`, 4 controllers | Marks entry → result processing → sign-off (separated) | desk entity scope |
-| **T6 People** | `student`, `parent`, `guardian`, `visitor`, `staff`, `worker` | Self-service + gated actions | own-record; parent acts on child |
+29 active role keys + 1 legacy. `warden` was **removed 2026-11** — its
+hostel-management duties consolidated into `principal` (DB rows reassigned
+by migration `20261125000001`); `deputy_warden` / `hostel_manager` kept.
+`hostel` remains recognized as legacy for approver-surface compatibility.
 
-**Separation-of-duties invariants (enforced, not convention):**
-- Marks entry (faculty DRAFT) ≠ result processing (`addl_controller_results`)
-  ≠ sign-off (`controller_examinations`). No single role enters *and* publishes.
-- DEBARRED/SUSPENDED = HOD parks in `status_pending_approver` →
-  dean/principal approves. DB trigger blocks any direct write by a non-approver.
-- Hostel leave gate chain = student pass → deputy_warden → parent ack →
-  operator scan. Missing link = PENDING; override = supervisor + audit reason.
-- Mess cost-threshold change = mess_incharge edits, Mess Committee approves.
-
-**Capability slots (bindings):**
-- **Teaching** — active `faculty_assignments` row keyed `faculty_id = user.id`
-  unlocks `/faculty/*` via `TeachingBindingGate`.
-- **Coordinator** (planned) — active `student_representatives` row
-  `scope_type='class'` unlocks relay/collect for that class. One per class.
-- **Delegation** — `delegations` row (TTL + can_mutate + no-self); a senior
-  role can temporarily act for a subordinate role; expires automatically.
-
----
-
-## Part 3 — How the flows actually work
-
-### 3.1 A student raises a problem (individual lane)
-
-```
-student shell ──► POST /api/actions {type:'class_request.raise'}
-   └─► /api/actions kernel:
-        auth → idempotency dedupe → permission (student, own class)
-        └─► INSERT class_requests {category, priority, status='open'}
-        └─► addAudit()
-   └─► routeComplaint(category)  [reuses complaint-routing]
-        → owner role + SLA chain
-   └─► if priority='urgent' → page HOD now (bypass queue)
-
-AUTONOMOUS (no human):
-   /api/cron/complaint-triage (*/30)  — classify any un-categorized, dedupe, escalate
-   /api/cron/complaint-sla-sweep      — auto-escalate on SLA breach
-   /api/cron/class-issue-aggregation (*/15, planned) — 3 same-topic in 72h
-        → 1 class_level_issue, notify HOD + class_teacher
-```
-
-**Flow:** the student never chases anyone. The request is routed to the
-right desk automatically; if it's ignored past SLA the sweep promotes it
-up the escalation ladder; if it's *shared* by the class, the aggregation
-agent turns N rows into one class-level ticket the HOD must answer.
-
-### 3.2 Faculty publishes a class notice (collective lane)
-
-```
-faculty shell ──► POST /api/actions {type:'class_message.publish'}
-   mode = 'direct'  → fan out to all class students (receipts created)
-   mode = 'relay'   → held for the named coordinator (relay_role='cr'/'icr')
-        coordinator taps Release  → POST /api/class-messages/[id]/release
-                                    (released_by = coordinator)
-   OR auto_release_at passes → /api/cron/class-message-release (*/5)
-        (released_by = 'system', auto_released = true)
-```
-
-**Anti-bottleneck property:** relay is a *fast path*, not a gate. If the
-coordinator never taps release, the cron still ships it (4h normal / 1h
-urgent default). The coordinator accelerates delivery; they can't block it.
-
-### 3.3 Class Coordinator appointment (the human slot)
-
-```
-HOD / class_teacher shell ──► POST /api/actions {type:'coordinator.appoint'}
-   tier 2, dialog confirm
-   → INSERT student_representatives
-      {student_id, scope_type='class', scope_id=class_id,
-       appointment_type='appointed', valid_to, appointed_by, appointed_role}
-   → partial-unique index guarantees 1 active CR per class
-
-Revoke:  coordinator.revoke (tier 1, reason)   — same authority
-Extend:  coordinator.extend (self-request) → class_teacher decides
-        (maker-checker via pending_approvals, same as academic status)
-```
-
-**What the coordinator can / cannot:**
-| Can | Cannot |
+| Group | Role keys |
 |---|---|
-| release/supersede a relay notice | author a new notice, alter attendance |
-| raise a *signed* collective concern (`raised_by_rep=TRUE`) | resolve/escalate someone else's request |
+| Governance | `admin`, `sysadmin`, `principal`, `vice_principal` |
+| Institution / entity | `dean`, `chief_warden`, `oie`, `controller_examinations`, `addl_controller_academic`, `addl_controller_results`, `addl_controller_automation`, `exam_superintendent`, `exam_branch` |
+| Department | `hod` |
+| Hostels | `deputy_warden`, `hostel_manager`, `caretaker`, `chief_warden` |
+| Mess | `mess_incharge`, `emo` |
+| Gate | `operator`, `supervisor` |
+| Teaching (capability) | `faculty`, `staff`, `worker` |
+| People | `student`, `parent`, `guardian`, `visitor` |
+| Legacy | `hostel` |
+
+### Tiers (authority, high → low)
+
+| Tier | Roles | What they govern | Scope lock |
+|---|---|---|---|
+| **T0** | `principal`, `vice_principal`, `admin`, `sysadmin` | Approve all approver workflows; lockdown; constitute mess committee; delegation | campus-wide. principal = institutional root, sysadmin = technical root (two separate powers) |
+| **T1** | `dean`, `chief_warden`, `oie`, 4 exam controllers, `exam_superintendent` | Two-person DEBARRED/SUSPENDED approver; hostel incident sign-off; exam-desk separation | exam branch split into 4 desks (SoD); `chief_warden` acts under `role_context` |
+| **T2** | `hod` | Roster, class management, academic flags, exam-review | `auth.departmentId` lock — EEE HOD never sees CSE |
+| **T3** | `deputy_warden`, `hostel_manager`, `caretaker`, `mess_incharge`, `operator`, `supervisor`, `emo` | Block-scoped hostel; gate scans + handover; mess reconcile; maintenance | block / gate / mess entity scope |
+| **T4** | `faculty`, `staff`, `worker` | Teaching capability: marks DRAFT→LOCK, assignments, grading, materials, mentees, internal-exam proposals | teaching binding (subject+class) |
+| **T5** | `student`, `parent`, `guardian`, `visitor` | Self-service; parent acts on child; guardian re-verify; visitor pass lifecycle | own record |
+
+### Separation-of-duties invariants (enforced by DB trigger / rule, not convention)
+- **Exam SoD:** faculty enters marks (DRAFT) → `addl_controller_results`
+  processes → `controller_examinations` signs off. No role both enters and
+  publishes a result.
+- **Academic status two-person:** HOD parks SUSPENDED/DEBARRED in
+  `status_pending_approver` → dean/principal approves. A DB trigger blocks a
+  direct write by a non-approver.
+- **Hostel leave chain:** student pass → deputy_warden → parent ack →
+  operator scan. Missing link = PENDING; override = supervisor + audit reason.
+- **Mess cost threshold:** mess_incharge edits, Mess Committee (Principal) approves.
+
+### Capability slots (bindings, not roles)
+| Slot | Backed by | Unlocks | Scope |
+|---|---|---|---|
+| Teaching | `faculty_assignments` (subject_code + class_id, `faculty_id=user.id`, active) | `/faculty/*` via `TeachingBindingGate` | bound subjects/classes only |
+| Coordinator *(planned)* | `student_representatives` (`scope_type='class'`) | notice relay + concern collection for that class | one per class |
+| Delegation | `delegations` (TTL, `can_mutate`, no-self) | senior role temporarily acts for a subordinate role | expires automatically |
+
+---
+
+## Part 3 — The API surface, by domain
+
+`src/app/api/` = **85 top-level domains**. Grouped here by capability.
+*(Not every leaf route is listed — the domain names are the source of truth;
+open a domain's `route.ts` for the exact endpoints.)*
+
+### People & auth
+- `auth` — login, session, refresh, logout-all, reset, webauthn
+- `persons` / `users` / `students` / `visitors` / `parent(s)` / `guardian`
+- `profile` / `me` / `records` / `traits` / `preferences`
+- `onboarding` / `bootstrap` (first-boot setup)
+
+### Gate & campus movement
+- `gate` — `scan`, `verify-pass`, `verify-face`, `verify-thumbprint`, `verify-leave-chain`, `device-push`, `devices`, `logs`, `stream`
+- `gates` — gate config
+- `passes` / `occupancy` / `attendance_records`
+- `emergency` / `lockdown` / `attention` / `alerts`
+
+### Complaints & conduct
+- `complaints` — POST/GET, `[id]`, `analytics`, `audit`, `categories`, `config`, `export`, `metrics`, `monthly-review`, `notices`, `search`, `tags`, `watchlist`
+- `conduct` / `anti-ragging` / `disputes`
+
+### Teaching & academics *(capability layer, live)*
+- `faculty` — `assignments`, `attendance`, `internal-exam`, `marks`, `materials`, `mentees`, `my-class`, `my-classes`
+- `faculty-assignments` (+`[id]`) — the binding table's API
+- `teaching-bindings` — active bindings for a user
+- `academic-status` (+`pending`) — HOD academic flags, two-person rule
+- `exam` — `access`, `access-exceptions`, `candidate-attendance`, `eligibility-rules`, `hall-tickets`, `results`, `superintendent`
+- `oie` — `queue`
+- `departments` / `classes` / `hod` (dashboard, exam-review, faculty, flexible-class, pulse, retention, schedule)
+
+### Hostels & mess
+- `hostel` — `blocks`, `returns-timeline` · `hostel-manager`
+- `mess` — `analytics`, `arrivals`, `attendance`, `bills`, `consumption`, `days`, `events`, `history`, `inventory`, `issues`, `meal-counts`, `meal-tokens`, `menu`, `menu-items`, `my-token`, `operational-requests`, `preference`, `reconcile`
+- `deputy-warden` / `caretaker`
+
+### Campus life & engagement
+- `campus` — `feed`, `assistant` · `campus-extra` — `calendar`, `task-drafts`
+- `announcements` — `[id]`, `active`, `[id]/follow`, `[id]/dismiss`
+- `engagement` / `feedback` · `docs` (knowledge base)
+- `bot` — Telegram bot commands / personas (`/now`, `/settings`, `/review`, …)
+
+### Governance & operations
+- `admin` — ~60 sub-domains (access, alerts, audit, automation, backup,
+  compliance, consent, deployments, governance, lockdown, people, security,
+  ueba, worker-shifts, workflow-configuration, …)
+- `sysadmin` — `actions`, `application-health`, `approvals`, `autonomous-monitoring`, `backup-status`, `database-health`, `deployments`, `drills`, `forecasts`, `redis-worker`, `rls`, `security-posture`, `services`, `worker-jobs`
+- `principal` — `audit`, `catch-up`, `dashboard`, `delegations`, `digest`, `inbox`, `retention`, `sla-heatmap`, `week-digest`
+- `vp` — `academics`, `dashboard`, `history`, `retention`
+- `operator` — `claim-gate`, `entry-type`, `gate`, `kiosk-session`, `lookup`, `manual-entry`, `mode`, `passes`, `recent-scans`, `register-thumbprint`, `scans`, `stats`, `transactions`
+- `supervisor` / `roles-graph` / `delegations` / `approver`
+
+### Platform & telemetry
+- `analytics` / `metrics` / `deployment` / `integrations` / `health`
+- `notifications` / `attachments` / `audit` / `features` / `config`
+- `ws` (websocket) / `voice` / `mobile` / `telegram` / `webhooks`
+- `student` — self-service: `attendance`, `curfew-acknowledge`, `dashboard`, `emergency-alert`, `fees`, `guardian`, `library`, `marks`, `meal-opt-out`, `mess-bill`, `next-exam`, `scholarships`
+- `actions` — **the single mutation boundary** (see Layer 0)
+
+### The mutation contract
+```
+any shell button  →  useAction(type, targetId)
+       →  dispatchAction(envelope)  →  POST /api/actions
+              auth → idempotency dedupe (60s) → permission check
+                   → execute → INSERT audit_logs → ActionResult
+```
+`ActionEnvelope`: `{ type, targetId?, actorId, actorRole, payload?, reason?,
+idempotencyKey }`. `ActionTier` 0–4; tier ≥ 3 requires `reason`.
+`useAction` phase machine: `idle → confirming → submitting →
+done | denied | expired | conflict`.
+
+---
+
+## Part 4 — Operational flows, end to end
+
+### 4.1 Student raises a problem (individual lane)
+```
+student shell → POST /api/actions {type:'class_request.raise'}
+   /api/actions:  auth → idempotency dedupe → permission (student, own class)
+     → INSERT class_requests {category, priority, status='open'}
+     → addAudit()
+   routeComplaint(category)   [complaint-routing kernel]
+     → owner role + SLA chain
+   if priority='urgent' → page HOD immediately (bypass queue)
+
+AUTONOMOUS:
+   /api/cron/complaint-triage (*/30)   classify un-categorized, dedupe, escalate
+   /api/cron/complaint-sla-sweep       auto-escalate on SLA breach
+   /api/cron/sla-breach                breach notifications
+   /api/cron/class-issue-aggregation (*/15, planned)
+     3 same-(class,category) in 72h → 1 class_level_issue → notify HOD
+```
+**The point:** the student never chases anyone. It routes itself; the sweep
+promotes it up the ladder if ignored; if shared by the class, the
+aggregation agent collapses N rows into one class-level ticket.
+
+### 4.2 Faculty publishes a class notice (collective lane)
+```
+faculty shell → POST /api/actions {type:'class_message.publish'}
+   mode='direct'  → fan out to all class students (receipt rows created)
+   mode='relay'   → held for the named coordinator (relay_role='cr'/'icr')
+        coordinator taps release → POST /api/class-messages/[id]/release
+                                   (released_by = coordinator)
+   OR auto_release_at passes → /api/cron/class-message-release (*/5)
+        (released_by='system', auto_released=TRUE)
+```
+**Anti-bottleneck:** relay is a fast path, not a gate. If the coordinator
+never taps, cron still ships it (4h normal / 1h urgent default).
+
+### 4.3 Coordinator appointment (the human slot, planned)
+```
+HOD / class_teacher shell → POST /api/actions {type:'coordinator.appoint'}
+   tier 2, dialog confirm
+   → INSERT student_representatives {student_id, scope_type='class',
+        scope_id=class_id, appointment_type='appointed', valid_to,
+        appointed_by, appointed_role}
+   → partial-unique index: 1 active class-CR per class
+
+coordinator.revoke  (tier 1, reason)  — same authority
+coordinator.extend   (self-request) → class_teacher decides
+   (maker-checker via pending_approvals, same pattern as academic status)
+```
+
+**Coordinator powers**
+| May | May not |
+|---|---|
+| release / supersede a relay notice | author a new notice; alter attendance |
+| raise a *signed* collective concern (`raised_by_rep=TRUE`) | resolve / escalate another's request |
 | read all open requests in their class | reassign, grade, or change any record |
 
-### 3.4 Teaching / academic work (faculty capability)
-
+### 4.4 Teaching / academic work (faculty capability)
 ```
-faculty (CS-301 binding) ──► assignment.create (tier 1)
-   → scoped to bound classes only
-student ──► submission.create (tier 2)
-faculty (CS-301 binding) ──► submission.grade (tier 2)
+faculty (CS-301 binding) → assignment.create (tier 1)   scoped to bound classes
+student → submission.create (tier 2)
+faculty (CS-301 binding) → submission.grade (tier 2)
    RLS: student sees own submissions; only the posting faculty grades
-HOD ──► academic-status flag SUSPENDED/DEBARRED (two-person)
+HOD → academic-status flag SUSPENDED/DEBARRED (two-person)
    → parks PENDING → dean/principal approves
 ```
+Schema: migration `20270128000001_academic_subsystem.sql`
+(`assignments`, `submissions`, `extension_requests`, keyed on `faculty_id`),
+idempotent `DO`-block RLS on `submissions` (877feffc).
 
-### 3.5 Gate scan + hostel leave (operator + chain)
-
+### 4.5 Gate scan + hostel leave (operator + chain)
 ```
-student QR at gate ──► operator scan
+student QR at gate → operator scan
    → pass/leave status check
-   → if hostel leave: verify-leave-chain
+   → if hostel leave: /api/gate/verify-leave-chain
         student pass → deputy_warden → parent ack → operator scan
         (returns exactly which link is missing)
-   /api/cron/leave-chain (agent) — TTL reminders, 6h/12h escalation,
-        auto-expiry, gate-token issuance
+/api/cron/leave-chain (agent) — TTL reminders, 6h/12h escalation,
+     auto-expiry, gate-token issuance
 ```
 
-### 3.6 The autonomous layer (runs with no human at the keyboard)
+### 4.6 Mess operations
+```
+meal tokens:  /api/mess/meal-tokens · /my-token
+consumption + reconcile (hash-chained):  /api/mess/reconcile
+   /api/cron/mess-reconcile (05:00) · mess-no-show-check · mess-finalize
+   mess-review-digest · mess-review-retention · mess-token-cleanup
+mess cost threshold: mess_incharge edits → Mess Committee (Principal) approves
+```
 
-| Agent | Cadence | Bounded to | Does |
-|---|---|---|---|
-| gate-reconcile | */5 | operator | reconcile scan state, flag orphans |
-| mess-reconcile | 05:00 | mess | hash-chained ledger |
-| complaint-triage | */30 | supervisor | classify/route/escalate |
-| exam-eligibility-manifest | 22:00 | exam | Ed25519-signed manifest |
-| leave-chain | */30 | hostel | leave-chain TTL + tokens |
-| class-message-release | */5 | operator | auto-release relay notices |
-| class-issue-aggregation | */15 (planned) | operator | detect collective issues |
+### 4.7 Exam lifecycle (SoD)
+```
+faculty enters marks (DRAFT) → exam branch deadline locks it
+   → addl_controller_results processes
+   → controller_examinations signs off
+eligibility:  /api/cron/exam-eligibility-manifest (22:00, Ed25519-signed)
+hall tickets / candidate access:  /api/exam/hall-tickets · /access
+```
 
-All write `actor_type='agent'` audit events; none can close a complaint
-or resolve a request — they only route, flag, escalate, and release.
+### 4.8 Lockdown & emergency
+```
+principal → /api/lockdown (issue/resolve) → campus-wide alert
+   /api/emergency · /api/cron/alerts-eval (agent)
+visitor overstay:  gate scan-out past threshold → auto-flag → supervisor
+```
 
 ---
 
-## Part 4 — Escalation ladders (who acts next, per domain)
+## Part 5 — Escalation ladders (from `src/lib/escalation-ladder.ts`)
 
-From `src/lib/escalation-ladder.ts` (lowest → highest):
+Lowest → highest authority per domain:
 
 | Domain | Chain |
 |---|---|
@@ -208,33 +309,101 @@ From `src/lib/escalation-ladder.ts` (lowest → highest):
 | infrastructure | caretaker → admin → sysadmin |
 | governance / all | admin → principal → sysadmin |
 
-`nextActor(currentRole, domain, blockedReason)` returns the next role that
-can act, with a human-readable reason for the audit log. Blocked reasons:
+`nextActor(currentRole, domain, blockedReason)` → next role that can act +
+a human-readable reason for the audit log. **Blocked reasons:**
 `tier_too_low`, `domain_mismatch`, `flag_blocked`, `step_up_required`,
-`actor_suspended/banned`.
+`actor_suspended`, `actor_banned`. (Note: the ladders still reference
+`warden`; post the 2026-11 warden→principal consolidation these resolve to
+`principal` at the top of the chain.)
 
 ---
 
-## Part 5 — Class-communication SaaS (the planned layer, from the plan folder)
+## Part 6 — Autonomous agent layer (23 cron agents)
 
-The GPT "replace the CR with software" idea resolves to **two lanes + one
-optional human slot**:
+All behind `requireCronAuth` (`/api/cron/*` POST + `x-cron-secret`). All
+write `actor_type='agent'` audit events. **Bounds:** agents route/flag/
+escalate/release — they never close a complaint or resolve a request.
+
+**Core (the 7 that drive the operational loops):**
+
+| Agent | Cadence | Bounded to | Does |
+|---|---|---|---|
+| `gate-reconcile` | */5 | operator | reconcile scan state, flag orphans |
+| `class-message-release` | */5 | operator | auto-release due relay notices |
+| `complaint-triage` | */30 | supervisor | classify / route / dedupe / escalate |
+| `leave-chain` | */30 | hostel | leave-chain TTL + gate tokens |
+| `exam-eligibility-manifest` | 22:00 | exam | Ed25519-signed manifest |
+| `mess-reconcile` | 05:00 | mess | hash-chained ledger |
+| `class-issue-aggregation` *(planned)* | */15 | operator | detect collective class issues |
+
+**The other 16:** `alerts-eval`, `audit-chain`, `audit-rotate`,
+`birthday-check`, `complaint-sla-sweep`, `dispatch-notifications`,
+`expire-passes`, `faculty-review`, `mess-event-tokens`, `mess-finalize`,
+`mess-no-show-check`, `mess-reminder`, `mess-review-digest`,
+`mess-review-retention`, `mess-token-cleanup`, `register-open`, `reports`,
+`sla-breach`.
+
+Audit integrity: `audit-chain` computes a nightly SHA256 checkpoint over
+`audit_chain` / `audit_chain_checkpoints`; `audit-rotate` prunes with
+retention policy; the immutability guarantee on `audit_logs` is
+trigger-based (`trg_audit_logs_immutable` blocks UPDATE/DELETE).
+
+---
+
+## Part 7 — Runtime & deploy topology
+
+`docker-compose.yml` (self-hosted appliance, Debian 13; CloudFlared
+optional tunnel, `TUNNEL.md`):
 
 ```
-INDIVIDUAL lane            student ──► class_request ──► route ──► desk
-                                         │ urgent → page HOD now
-                                         └ autonomous triage + SLA sweep
-
-COLLECTIVE lane            N students same topic ──► aggregation agent
-                                         └──► 1 class_level_issue → HOD
-
-HUMAN SLOT                 coordinator (optional, per class)
-                                         relay notices · collect concerns
-                                         (never the bottleneck — auto-release backstop)
+INTERNET / CAMPUS (80/443)
+      │
+   gate_caddy  (caddy:2-alpine — TLS, reverse proxy, SSE buffering off)
+      │  (internal gate-net bridge — only Caddy exposes 80/443)
+   ┌──┴───────────────┐
+   │                  │
+ monitoring-web      monitoring-worker   (Next.js 16 standalone, node-cron)
+   │                  │
+ ┌─┴───────────────┐
+ │                 │
+ gate_postgres   gate_redis    (redis:7-alpine — cache + token-bucket rate limit)
+ (supabase/postgres:17.6.1.136)
+   + prometheus / cadvisor (metrics)
 ```
 
-**What already exists (do not rebuild):** complaint routing engine,
-`class_messages`+receipts+release cron, `student_representatives`,
+- **DB:** PostgreSQL 17 via the `supabase/postgres` image (plain Postgres +
+  Supabase extension stack — pgcrypto etc.); RLS + `pg_policies` drift check
+  at `/api/sysadmin/rls/drift`.
+- **Migrations:** `database/migrations/` replayed on a fresh Postgres in CI
+  ("Verify Migration Replay"). Always validate SQL with a fresh scratch
+  Postgres before pushing; `tsc --noEmit` is the type gate.
+- **Worker:** `worker/` (node-cron) runs the 23 agents; a separate
+  `gate_worker` container.
+- **Auth:** JWT access + refresh (`jose` + `bcryptjs`), WebAuthn
+  (`@simplewebauthn`); session/refresh-hash in Postgres, not Supabase.
+
+---
+
+## Part 8 — Planned class-communication SaaS layer
+
+GPT's "replace the CR with software" resolves to **two lanes + one optional
+human slot** (full build plan: `plan/class-coordinator-saas/README.md`):
+
+```
+INDIVIDUAL lane    student → class_request → route → desk
+                       └ urgent → page HOD now
+                       └ autonomous triage + SLA sweep
+
+COLLECTIVE lane    N students same topic → aggregation agent
+                       → 1 class_level_issue → HOD
+
+HUMAN SLOT         coordinator (optional, per class)
+                       relay notices · collect concerns
+                       (never the bottleneck — auto-release backstop)
+```
+
+**Already exists (do not rebuild):** complaint routing engine,
+`class_messages` + receipts + release cron, `student_representatives`,
 campus feed (official vs class-notice), the action kernel, and the
 student/faculty shells. **The gap is small:** the request lane as a
 first-class table, the coordinator appointment model, aggregation
@@ -248,18 +417,32 @@ detection, and the publish/release APIs + surfaces.
 5. class-communication surfaces (student / coordinator / faculty / HOD)
 6. docs (CONTRACT addendum + cross-links)
 
-Full detail: `plan/class-coordinator-saas/` (README + 4 stage files).
-
 ---
 
-## Part 6 — Decision log & open items (carried from the plan)
+## Part 9 — Decision log & open items
 
 | # | Decision | Default |
 |---|---|---|
 | D1 | Coordinator `appointment_type` seed | `appointed` (teacher/HOD) |
-| D2 | Aggregation threshold | N=3 same (class,category) in 72h (config, tunable) |
-| D3 | Coordinator sees all class open requests | read-only yes |
+| D2 | Aggregation threshold | N=3 same (class, category) in 72h (config-tunable) |
+| D3 | Coordinator sees all class open requests | read-only, yes |
 | D4 | Relay auto-release window | 4h normal / 1h urgent |
 | D5 | Urgent request pages HOD immediately | yes (bypasses agent) |
 | D6 | One coordinator per class | yes (partial unique index) |
 | D7 | Anonymous class requests | no in v1 (complaints stay the anonymous lane) |
+
+---
+
+## Part 10 — Cross-references
+
+| Topic | Document |
+|---|---|
+| Entity-aligned role model + implementation status | `docs/JNTUH_CEJ_ROLE_HIERARCHY.md` |
+| Fork-shell/share-kernel rule + capability addenda | `docs/CONTRACT.md` |
+| Teaching capability design (model, tiers, phases) | `docs/teaching-capability-architecture.md` |
+| Container topology detail | `docs/SERVER_ARCHITECTURE.md` |
+| Self-hosted DB layer + migration playbook | `docs/TECH_STACK.md`, `docs/MIGRATION.md` |
+| Autonomous operations playbook | `docs/AUTONOMOUS_OPERATIONS.md`, `docs/IMPLEMENTATION_BLUEPRINT.md` |
+| Per-role flows (mermaid) | `docs/flow/*.mermaid` |
+| Class-communication build plan | `docs/plan/class-coordinator-saas/` |
+| Backlog / technical debt | `docs/BACKLOG.md` |
