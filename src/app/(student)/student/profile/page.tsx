@@ -6,10 +6,14 @@ import { AcademicPersonalSection } from "@/components/student/AcademicPersonalSe
 import { ThemePicker } from "@/components/student/ThemePicker";
 import { SakugaControls } from "@/components/student/SakugaControls";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { useAuthStore } from "@/stores/authStore";
 
 import { User } from "lucide-react";
 
 function StudentProfileInner() {
+  const user = useAuthStore((s) => s.user);
+  const isFemale = user?.studentDetails?.gender === "female";
+
   return (
     <div className="space-y-6 px-4 py-6 md:px-6 min-w-0">
       <div className="flex items-center gap-2">
@@ -18,7 +22,7 @@ function StudentProfileInner() {
       </div>
       <UserProfileTab />
       <ThemePicker />
-      <SakugaControls />
+      {isFemale && <SakugaControls />}
       <AcademicPersonalSection />
 
     </div>

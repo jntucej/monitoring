@@ -172,17 +172,14 @@ async function loadAttendance(userId: string) {
     const lmPresent = Number(lmR.rows[0]?.present ?? 0);
     const lmPct = lmTotal > 0 ? Math.round((lmPresent / lmTotal) * 100) : null;
 
-    // Upcoming
+    // Upcoming — attendance_records has no class_id; join via meta or skip
     const upR = await query<{ date: string; subject: string | null; faculty: string | null; time_in: string | null; time_out: string | null }>(
       `SELECT to_char(ar.date, 'YYYY-MM-DD') AS date,
-              c.name AS subject,
-              COALESCE(f.name, 'TBA') AS faculty,
+              NULL::text AS subject,
+              NULL::text AS faculty,
               ar.time_in::text AS time_in,
               ar.time_out::text AS time_out
          FROM attendance_records ar
-         LEFT JOIN classes c ON c.id = ar.class_id
-         LEFT JOIN faculty_assignments fa ON fa.class_id = c.id
-         LEFT JOIN users f ON f.id = fa.faculty_id
         WHERE ar.person_id = $1 AND ar.date > $2
         ORDER BY ar.date ASC
         LIMIT 5`,

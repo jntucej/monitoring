@@ -96,20 +96,12 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         WHERE person_id = $1 AND date >= $2 AND date <= $3`,
       [auth.userId, from, to]
     ),
-    // Per-subject breakdown (if class_id present on records)
+    // Per-subject breakdown (class_id not available on attendance_records — return empty)
     query<SubjectBreakdownRow>(
-      `SELECT ar.class_id::text AS subject_code,
-              COALESCE(SUM(CASE WHEN ar.status = 'PRESENT' THEN 1 ELSE 0 END), 0)::text AS present,
-              COALESCE(SUM(CASE WHEN ar.status = 'ABSENT' THEN 1 ELSE 0 END), 0)::text AS absent,
-              COUNT(*)::text AS total,
-              COALESCE(AVG(EXTRACT(EPOCH FROM (ar.time_out - ar.time_in)) / 60), 0)::text AS avg_time_minutes
-         FROM attendance_records ar
-        WHERE ar.person_id = $1 AND ar.date >= $2 AND ar.date <= $3
-          AND ar.class_id IS NOT NULL
-        GROUP BY ar.class_id
-        ORDER BY total DESC
-        LIMIT 10`,
-      [auth.userId, from, to]
+      `SELECT NULL::text AS subject_code, '0' AS present, '0' AS absent, '0' AS total, '0' AS avg_time_minutes
+         WHERE FALSE
+        LIMIT 0`,
+      []
     ),
     // Open disputes
     query<DisputeRow>(
@@ -122,17 +114,14 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         LIMIT 20`,
       [auth.userId]
     ),
-    // Next 5 upcoming records
+    // Next 5 upcoming records (no class_id on attendance_records)
     query<ScheduleRow>(
       `SELECT to_char(ar.date, 'YYYY-MM-DD') AS date,
-              c.name AS subject_code,
-              COALESCE(f.name, 'TBA') AS faculty_name,
+              NULL::text AS subject_code,
+              NULL::text AS faculty_name,
               ar.time_in::text AS time_in,
               ar.time_out::text AS time_out
          FROM attendance_records ar
-         LEFT JOIN classes c ON c.id = ar.class_id
-         LEFT JOIN faculty_assignments fa ON fa.class_id = c.id
-         LEFT JOIN users f ON f.id = fa.faculty_id
         WHERE ar.person_id = $1 AND ar.date > $2
         ORDER BY ar.date ASC, ar.time_in
         LIMIT 5`,

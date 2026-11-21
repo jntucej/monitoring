@@ -23,24 +23,25 @@ import { cn } from "@/lib/utils";
 import { Palette, Check, Loader2, Lock } from "lucide-react";
 import { LockedByPolicy } from "@/components/shared/LockedByPolicy";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
+import { useAuthStore } from "@/stores/authStore";
 
 type ThemeName = "graphite" | "sakuga";
 
+// Theme availability by gender:
+//   female → graphite + sakuga (can switch)
+//   male   → graphite only (sakuga hidden, locked to graphite)
+//   null/unknown → graphite only
 const THEMES: { id: ThemeName; label: string; sub: string; swatch: string }[] = [
   {
     id: "graphite",
     label: "Graphite",
     sub: "Professional, neutral",
-    // swatch built from the graphite theme's own tokens (dark→mid text scale)
     swatch: "linear-gradient(135deg, var(--color-text-primary), var(--color-text-secondary))",
   },
   {
     id: "sakuga",
     label: "Sakuga",
     sub: "Anime, lavender",
-    // swatch built from the sakuga theme's own tokens (card→accent).
-    // No hex fallback: when sakuga vars are unset (graphite active) the stops
-    // resolve to neutral — the swatch is a preview chip, not a hard requirement.
     swatch: "linear-gradient(135deg, var(--sk-card), var(--sk-pri, var(--color-primary)) 60%, var(--sk-acc, var(--color-danger)))",
   },
 ];
@@ -49,6 +50,11 @@ export function ThemePicker() {
   const [current, setCurrent] = useState<ThemeName | null>(null);
   const [saving, setSaving] = useState<ThemeName | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((s) => s.user);
+
+  // Gender-gated theme availability
+  const isFemale = user?.studentDetails?.gender === "female";
+  const availableThemes = isFemale ? THEMES : THEMES.filter((t) => t.id === "graphite");
 
   // Taste layer: is the theme pinned by policy? (rank "required")
   const themePref = useEffectivePref<ThemeName>("appearance.theme");
@@ -111,7 +117,7 @@ export function ThemePicker() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {THEMES.map((t) => {
+        {availableThemes.map((t) => {
           const active = (themePref.locked ? effectiveTheme : current) === t.id;
           return (
             <button

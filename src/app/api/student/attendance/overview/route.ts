@@ -96,15 +96,18 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const { from, to, label } = periodRange(period);
   const prev = prevPeriodOf(period);
 
-  // Resolve the student's class(es)
+  // Resolve the student's class(es) — class_id may not exist on attendance_records
   const classR = await query<{ class_id: string }>(
-    `SELECT DISTINCT student_details.class_id::text
-       FROM public.student_details
-       JOIN public.users u ON u.id = student_details.student_id
+    `SELECT DISTINCT c.id::text AS class_id
+       FROM public.student_details sd
+       JOIN public.users u ON u.id = sd.user_id
+       LEFT JOIN public.classes c ON c.department = sd.department
+         AND c.year = sd.year::int
+         AND c.section = sd.section
       WHERE u.id = $1::uuid`,
     [auth.userId]
   );
-  const classIds = classR.rows.map((r) => r.class_id);
+  const classIds = classR.rows.map((r) => r.class_id).filter(Boolean);
 
   if (classIds.length === 0) {
     return ok({
