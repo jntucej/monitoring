@@ -897,7 +897,13 @@ export async function getNotifications(recipientType: string, recipientId: strin
     return [];
   }
 
-  return data || [];
+  // Map DB column read_at → client field readAt so the bell's
+  // !n.readAt check works. The notifications table has no boolean
+  // "read" column — read_at IS the read state.
+  return (data || []).map((n: Record<string, unknown>) => ({
+    ...n,
+    readAt: n.read_at as string | null,
+  }));
 }
 
 // NOTE: Session lifecycle is fully owned by Supabase Auth (GoTrue).

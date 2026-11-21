@@ -27,11 +27,11 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }): P
 
   const sql = isPrivileged
     ? `UPDATE public.notifications
-         SET read = TRUE, read_at = COALESCE(read_at, NOW())
+         SET read_at = COALESCE(read_at, NOW())
        WHERE id = $1
        RETURNING id, recipient_id, read_at`
     : `UPDATE public.notifications
-         SET read = TRUE, read_at = COALESCE(read_at, NOW())
+         SET read_at = COALESCE(read_at, NOW())
        WHERE id = $1
          AND (recipient_type = 'all' OR recipient_id = $2)
        RETURNING id, recipient_id, read_at`;
