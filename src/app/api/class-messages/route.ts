@@ -56,16 +56,17 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
     await releaseClassMessage(id, auth.userId, "human");
   }
 
-  return ok({ success: true, id, mode, released: mode === "direct", autoReleaseAt: mode === "direct" ? null : autoReleaseAt });
+  return ok({ id, mode, released: mode === "direct", autoReleaseAt: mode === "direct" ? null : autoReleaseAt });
 }
 
 async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (auth.role === "student") {
     // Student: notices for their department's classes (released only).
-    const { rows: me } = await query<{ department_id: string | null }>(
-      `SELECT department_id FROM public.users WHERE id = $1`, [auth.userId]);
-    const dept = me[0]?.department_id;
-    if (!dept) return ok({ success: true, data: [] });
+    // Department lives on student_details (users.department_id is empty).
+    const { rows: me } = await query<{ dept: string | null }>(
+      `SELECT department AS dept FROM public.student_details WHERE user_id = $1::uuid LIMIT 1`, [auth.userId]);
+    const dept = me[0]?.dept;
+    if (!dept) return ok([]);
     const { rows } = await query(
       `SELECT m.id, m.body, m.urgency, m.mode, m.sent_at, m.released_at, m.requires_ack, m.supersede_of
          FROM public.class_messages m
@@ -74,7 +75,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         ORDER BY m.sent_at DESC LIMIT 50`,
       [dept],
     );
-    return ok({ success: true, data: rows });
+    return ok(rows);
   }
   // Faculty: their own notices.
   const { rows } = await query(
@@ -83,7 +84,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
       ORDER BY sent_at DESC LIMIT 50`,
     [auth.userId],
   );
-  return ok({ success: true, data: rows });
+  return ok(rows);
 }
 
 async function findCoordinatorForClasses(classIds: string[]) {

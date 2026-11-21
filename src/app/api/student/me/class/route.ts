@@ -13,14 +13,17 @@ import type { AuthContext } from "@/lib/authContext";
 import { query } from "@/lib/postgres";
 
 async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
-  const { rows: me } = await query<{ department_id: string | null; year: number | null; section: string | null }>(
-    `SELECT u.department_id, sd.year, sd.section
-       FROM public.users u
-       LEFT JOIN public.student_details sd ON sd.user_id = u.id
-      WHERE u.id = $1::uuid LIMIT 1`,
+  // The calling student's class identity. Department lives on
+  // student_details (TEXT codes like CSE/EEE); classes is keyed by
+  // department_id. When a classes row exists, classId is its uuid, else the
+  // department code is the class-identity token.
+  const { rows: me } = await query<{ dept: string | null }>(
+    `SELECT sd.department AS dept
+       FROM public.student_details sd
+      WHERE sd.user_id = $1::uuid LIMIT 1`,
     [auth.userId],
   );
-  const dept = me[0]?.department_id;
+  const dept = me[0]?.dept ?? null;
   if (!dept) return ok({ classId: null, department: null, classLabel: null });
 
   const { rows: cls } = await query<{ id: string; name: string | null }>(

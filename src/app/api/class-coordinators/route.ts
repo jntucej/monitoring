@@ -21,7 +21,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     `SELECT name FROM public.classes WHERE id = $1::uuid LIMIT 1`, [classId]);
   if (cls.length === 0) return fail("NOT_FOUND", "Class not found", 404);
   const coordinators = await getActiveCoordinators(cls[0].name);
-  return ok({ success: true, data: coordinators });
+  return ok(coordinators);
 }
 
 async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
@@ -64,7 +64,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
     appointedById: auth.userId,
     appointedRole: auth.role,
   });
-  return ok({ success: true, ...result });
+  return ok(result);
 }
 
 export const GET = withAuthorization(implGet, {});

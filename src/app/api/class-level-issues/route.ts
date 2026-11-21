@@ -30,7 +30,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   sql += ` ORDER BY i.created_at DESC LIMIT 100`;
 
   const { rows } = await query(sql, args);
-  return ok({ success: true, data: rows });
+  return ok(rows);
 }
 
 async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
@@ -44,7 +44,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const id = await createClassLevelIssue(body.classId, String(body.topic), [], auth.userId);
     if (!id) return fail("CONFLICT", "An open issue for this class+topic already exists", 409);
-    return ok({ success: true, id });
+    return ok({ id });
   } catch (e) {
     return fail("DOMAIN_ERROR", e instanceof Error ? e.message : "Failed to create issue", 400);
   }

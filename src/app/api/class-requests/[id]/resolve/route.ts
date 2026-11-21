@@ -34,7 +34,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
       return fail("CONFLICT", "Request is already closed", 409);
     }
     const result = await closeClassRequest(id, auth.userId);
-    return ok({ success: true, ...result });
+    return ok(result);
   }
 
   // Owner role resolves (tier 1)
@@ -48,7 +48,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 
   const result = await resolveClassRequest(id, auth.userId, note || "Resolved", auth.role);
-  return ok({ success: true, ...result });
+  return ok(result);
 }
 
 export const POST = withAuthorization(implPost, {});

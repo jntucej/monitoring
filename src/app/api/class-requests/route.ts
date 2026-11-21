@@ -34,7 +34,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
       body: body.body ? String(body.body) : undefined,
       priority: body.priority === "urgent" ? "urgent" : "normal",
     });
-    return ok({ success: true, ...result });
+    return ok(result);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Failed to raise request";
     return fail("DOMAIN_ERROR", msg, 400);
@@ -55,7 +55,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         [specific, auth.userId],
       );
       if (rows.length === 0) return fail("NOT_FOUND", "Request not found", 404);
-      return ok({ success: true, data: rows[0] });
+      return ok(rows[0]);
     }
     const { rows } = await query(
       `SELECT id, category_code, title, priority, status, assigned_role,
@@ -64,7 +64,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
         ORDER BY created_at DESC LIMIT 50`,
       [auth.userId],
     );
-    return ok({ success: true, data: rows });
+    return ok(rows);
   }
 
   // Faculty/HOD owner queue: requests routed to them. Also ?queue=class for a
@@ -81,7 +81,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
           ORDER BY cr.created_at ASC LIMIT 100`,
         [classToken],
       );
-      return ok({ success: true, data: rows });
+      return ok(rows);
     }
 
     // Faculty/HOD owner queue: requests routed to them.
@@ -108,7 +108,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
     sql += ` ORDER BY (cr.priority = 'urgent') DESC, cr.created_at ASC LIMIT 100`;
     const { rows } = await query(sql, args as never[]);
-    return ok({ success: true, data: rows });
+    return ok(rows);
   }
 
   // HOD: class-scoped (already covered above). Admin: everything.
@@ -122,7 +122,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
          LEFT JOIN public.classes c ON c.id = cr.class_id
         ORDER BY cr.created_at DESC LIMIT 200`,
     );
-    return ok({ success: true, data: rows });
+    return ok(rows);
   }
 
   return fail("FORBIDDEN", "Not permitted to view class requests", 403);

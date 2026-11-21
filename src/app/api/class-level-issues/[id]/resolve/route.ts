@@ -23,7 +23,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
 
   try {
     const result = await resolveClassLevelIssue(id, auth.userId, resolution);
-    return ok({ success: true, ...result });
+    return ok(result);
   } catch (e) {
     return fail("DOMAIN_ERROR", e instanceof Error ? e.message : "Failed to resolve issue", 400);
   }

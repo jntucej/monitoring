@@ -44,7 +44,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (!authorized) return fail("FORBIDDEN", "Not the author or an active coordinator of a target class", 403);
 
   const result = await releaseClassMessage(id, auth.userId, "human");
-  return ok({ success: true, ...result });
+  return ok(result);
 }
 
 export const POST = withAuthorization(implPost, {});
