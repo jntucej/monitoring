@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.assignments (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   subject_code  VARCHAR(50)  NOT NULL,           -- matches faculty_assignments.subject_code
   class_id      UUID         NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
-  posted_by     UUID         NOT NULL REFERENCES public.users(id)    ON DELETE CASCADE,
+  faculty_id    UUID         NOT NULL REFERENCES public.users(id)    ON DELETE CASCADE,
   title         VARCHAR(255) NOT NULL,
   description   TEXT,
   due_at        TIMESTAMPTZ  NOT NULL,
@@ -14,11 +14,7 @@ CREATE TABLE IF NOT EXISTS public.assignments (
   status        VARCHAR(10)  NOT NULL DEFAULT 'open'
                 CHECK (status IN ('open','closed')),
   closed_at     TIMESTAMPTZ,
-  created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-
-  -- Enforce: only bound faculty can post (trigger checks faculty_assignments)
-  CONSTRAINT fk_assignments_class  FOREIGN KEY (class_id) REFERENCES public.classes(id),
-  CONSTRAINT fk_assignments_poster FOREIGN KEY (posted_by)  REFERENCES public.users(id)
+  created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 -- Index for the "my pending assignments" student query (by class + due date)
@@ -84,7 +80,7 @@ CREATE POLICY submissions_faculty_grade ON public.submissions
     EXISTS (
       SELECT 1 FROM public.assignments a
       WHERE a.id = assignment_id
-        AND a.posted_by = current_setting('app.current_user_id', true)::uuid
+        AND a.faculty_id = current_setting('app.current_user_id', true)::uuid
     )
     OR current_setting('app.current_user_role', true) IN ('admin','sysadmin')
   );
