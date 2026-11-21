@@ -81,10 +81,13 @@ export async function raiseClassRequest(input: RaiseInput) {
     classRow = byDept[0];
   }
   if (!classRow) {
-    // No class row at all — verify the student's department matches the token.
-    const { rows: stud } = await query<{ department_id: string | null }>(
-      `SELECT department_id FROM public.users WHERE id = $1::uuid LIMIT 1`, [studentId]);
-    if (stud.length === 0 || stud[0].department_id !== classId) {
+    // No class row at all — verify the student's department (student_details)
+    // matches the class token (department code when classes is empty).
+    const { rows: stud } = await query<{ dept: string | null }>(
+      `SELECT sd.department AS dept FROM public.student_details sd WHERE sd.user_id = $1::uuid LIMIT 1`,
+      [studentId],
+    );
+    if (stud.length === 0 || stud[0].dept !== classId) {
       throw new Error("Student is not in this class");
     }
     classRow = { name: classId, department_id: classId, class_teacher_id: null };
