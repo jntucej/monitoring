@@ -77,20 +77,19 @@ export async function canModifyAcademicRecords(userId: string, scopeId: string):
 // dataset), so resolve the coordinator's scope against either, then gate on the
 // active student_representatives row.
 export async function canReadClassRequests(userId: string, classId: string): Promise<boolean> {
-  // Try as a class uuid first; if no class row, treat classId as a dept code.
+  // Regex-guard the uuid cast: 'EEE' is a dept code, not a uuid — a bare
+  // `$1::uuid` would throw "invalid input syntax". Match the uuid-or-dept
+  // pattern used across the owner-queue joins.
   const { rows: cls } = await query<{ name: string }>(
-    `SELECT name FROM public.classes WHERE id = $1::uuid LIMIT 1`,
+    `SELECT name FROM public.classes
+       WHERE ($1 ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid)
+          OR department_id = $1
+       LIMIT 1`,
     [classId],
   );
   if (cls.length > 0) return canRelay(userId, cls[0].name);
-  // No class row: the token is a department code — find the dept's class name(s).
-  const { rows: byDept } = await query<{ name: string }>(
-    `SELECT name FROM public.classes WHERE department_id = $1 LIMIT 1`,
-    [classId],
-  );
-  if (byDept.length > 0) return canRelay(userId, byDept[0].name);
-  // Still no class row (empty classes table): a coordinator row scoped to the
-  // raw token (dept code stored as scope_id) counts.
+  // No class row (empty classes table): a coordinator row scoped to the raw
+  // token (dept code stored as scope_id) counts.
   return canRelay(userId, classId);
 }
 
