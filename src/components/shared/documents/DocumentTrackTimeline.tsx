@@ -11,7 +11,9 @@ import { CheckCircle2, XCircle, Clock, FileQuestion } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface DocTimelineEvent {
-  status: "submitted" | "reviewed" | "verified" | "rejected";
+  /** The action/stage label — free-form from the permission workflow
+      (e.g. "submitted", "approved", "forwarded", "escalated"). */
+  status: string;
   at: string;
   by?: string;
 }
@@ -22,19 +24,26 @@ export interface DocumentTrackTimelineProps {
   className?: string;
 }
 
-const ICONS: Record<DocTimelineEvent["status"], React.ComponentType<{ className?: string }>> = {
+const KNOWN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   submitted: Clock,
   reviewed: FileQuestion,
   verified: CheckCircle2,
   rejected: XCircle,
 };
 
-const ACCENT: Record<DocTimelineEvent["status"], string> = {
+const KNOWN_ACCENT: Record<string, string> = {
   submitted: "text-text-muted",
   reviewed: "text-blue-400",
   verified: "text-green-400",
   rejected: "text-red-400",
 };
+
+function iconFor(status: string): React.ComponentType<{ className?: string }> {
+  return KNOWN_ICONS[status] ?? Clock;
+}
+function accentFor(status: string): string {
+  return KNOWN_ACCENT[status] ?? "text-text-muted";
+}
 
 export function DocumentTrackTimeline({ events, className }: DocumentTrackTimelineProps) {
   if (events.length === 0) {
@@ -46,7 +55,7 @@ export function DocumentTrackTimeline({ events, className }: DocumentTrackTimeli
   return (
     <div className={cn("space-y-0", className)}>
       {events.map((ev, i) => {
-        const Icon = ICONS[ev.status] ?? Clock;
+        const Icon = iconFor(ev.status);
         const isLast = i === events.length - 1;
         return (
           <div key={`${ev.status}-${i}`} className="relative flex gap-3">
@@ -56,13 +65,13 @@ export function DocumentTrackTimeline({ events, className }: DocumentTrackTimeli
             <div
               className={cn(
                 "relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-bg",
-                ACCENT[ev.status],
+                accentFor(ev.status),
               )}
             >
               <Icon className="h-3.5 w-3.5" />
             </div>
             <div className="flex-1 pb-5">
-              <p className={cn("text-xs font-medium capitalize", ACCENT[ev.status])}>
+              <p className={cn("text-xs font-medium capitalize", accentFor(ev.status))}>
                 {ev.status}
                 {ev.by ? <span className="ml-1.5 text-[10px] text-text-muted">by {ev.by}</span> : null}
               </p>

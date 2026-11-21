@@ -8,9 +8,11 @@
 "use client";
 
 import { useState } from "react";
-import { FileCheck, FileQuestion, Clock, RotateCw } from "lucide-react";
+import { FileCheck, FileQuestion, Clock, RotateCw, GitBranch, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getAuthHeaders } from "@/lib/utils";
 import { useDisputes } from "@/hooks/useDisputes";
+import { DocumentTrackTimeline, type DocTimelineEvent } from "@/components/shared/documents/DocumentTrackTimeline";
 
 export interface DocumentStatusCardProps {
   /** The permission/pass id the document belongs to. */
@@ -43,6 +45,34 @@ export function DocumentStatusCard({
   const { create } = useDisputes();
   const [showReupload, setShowReupload] = useState(false);
   const [disputed, setDisputed] = useState(false);
+  const [showTrack, setShowTrack] = useState(false);
+  const [track, setTrack] = useState<DocTimelineEvent[] | null>(null);
+  const [trackLoading, setTrackLoading] = useState(false);
+
+  // The TRACK step: fetch the ticket's status-change timeline on demand.
+  const loadTrack = async () => {
+    if (showTrack || trackLoading) return;
+    setShowTrack(true);
+    setTrackLoading(true);
+    try {
+      const res = await fetch(
+        `/api/permissions/${encodeURIComponent(ticketNumber ?? ticketId)}/track`,
+        { headers: getAuthHeaders() },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setTrack(
+          (data.events ?? []).map((e: Record<string, unknown>) => ({
+            status: (e.action as string) ?? "submitted",
+            at: (e.timestamp as string) ?? new Date().toISOString(),
+            by: e.actor as string | undefined,
+          })),
+        );
+      }
+    } finally {
+      setTrackLoading(false);
+    }
+  };
 
   const meta = {
     pending: { Icon: Clock, label: "Pending review", accent: "text-amber-400", bg: "bg-amber-500/10" },
@@ -131,6 +161,22 @@ export function DocumentStatusCard({
         >
           View document
         </a>
+      )}
+
+      {/* The TRACK step: expandable status-change timeline */}
+      <button
+        type="button"
+        onClick={loadTrack}
+        className="flex items-center gap-1 text-[11px] text-text-muted underline hover:text-text"
+      >
+        {trackLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <GitBranch className="h-3 w-3" />}
+        {showTrack ? "Hide timeline" : "Status timeline"}
+      </button>
+      {showTrack && track && track.length > 0 && (
+        <DocumentTrackTimeline events={track} className="pt-2" />
+      )}
+      {showTrack && track && track.length === 0 && (
+        <p className="text-[11px] text-text-muted">No status changes recorded yet.</p>
       )}
     </div>
   );
