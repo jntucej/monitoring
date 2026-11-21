@@ -9,8 +9,8 @@ async function handleGet(req: NextRequest) {
     const authRole = req.headers.get('x-user-role');
 
     const params = req.nextUrl.searchParams;
-    const recipientType = params.get("type");
-    const recipientId = params.get("id");
+    const recipientType = params.get("type") || (authRole || "user");
+    const recipientId = params.get("id") || authUserId;
 
     if (!recipientType || !recipientId) {
         return NextResponse.json(

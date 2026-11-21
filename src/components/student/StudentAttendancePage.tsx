@@ -332,9 +332,9 @@ export function StudentAttendancePage() {
                   </p>
                 )}
               </div>
-              {data.nextClasses.length > 0 ? (
+              {(data.nextClasses?.length ?? 0) > 0 ? (
                 <div className="flex gap-2 overflow-x-auto pb-1">
-                  {data.nextClasses.map((c) => (
+                  {(data.nextClasses ?? []).map((c) => (
                     <div
                       key={c.periodNo}
                       className={cn(
@@ -360,11 +360,11 @@ export function StudentAttendancePage() {
               ) : (
                 <p className="text-xs text-text-muted">No classes scheduled today.</p>
               )}
-              {data.flexibleToday.length > 0 && (
+              {(data.flexibleToday?.length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-border">
                   <p className="text-[10px] uppercase tracking-wide text-amber-600 mb-1.5">Flexible overrides</p>
                   <div className="flex flex-wrap gap-2">
-                    {data.flexibleToday.map((f, i) => (
+                    {(data.flexibleToday ?? []).map((f, i) => (
                       <span key={i} className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-xs text-amber-700">
                         {f.type} · {f.start}–{f.end} · {f.hall}
                       </span>

@@ -184,14 +184,13 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     subject_code: string;
   }>(
     `SELECT cp.period_no::text,
-            to_char(cp.start_time, 'HH24:MI') AS start_time,
-            to_char(cp.end_time, 'HH24:MI') AS end_time,
-            cp.hall,
-            COALESCE(u.name, 'TBA') AS faculty_name,
-            COALESCE(s.code, '') AS subject_code
-       FROM public.class_periods cp
-       LEFT JOIN public.users u ON u.id = cp.faculty_id
-       LEFT JOIN public.subjects s ON s.code = cp.period_no::text
+          to_char(cp.start_time, 'HH24:MI') AS start_time,
+          to_char(cp.end_time, 'HH24:MI') AS end_time,
+          cp.hall,
+          COALESCE(u.name, 'TBA') AS faculty_name,
+          ''::text AS subject_code
+     FROM public.class_periods cp
+     LEFT JOIN public.users u ON u.id = cp.faculty_id
       WHERE cp.class_id = ANY($1::uuid[])
         AND cp.day_of_week = $2
       ORDER BY cp.start_time
