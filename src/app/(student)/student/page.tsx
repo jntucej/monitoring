@@ -17,21 +17,17 @@ import { WifiOff, RotateCw } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
+import { usePersona } from "@/hooks/usePersona";
 
-// Widget ids for the student home (the trait-aware order).
-const STUDENT_WIDGET_IDS = [
-  "my-day-strip",
-  "my-stats",
-  "today-status",
-  "active-pass",
-  "context",
-  "quick-links",
-  "guardian-call",
-  "campus-pulse",
-] as const;
-type StudentWidgetId = (typeof STUDENT_WIDGET_IDS)[number];
+// Persona-aware student home. The SAME widget pool serves both personas, but each
+// persona gets a DISTINCT dashboard: a day scholar's home is attendance/class
+// centred, a hosteller's home is curfew/hostel/mess centred. Shared chrome
+// (greeting, sakuga console, offline banner, onboarding, quick links, guardian
+// call, campus pulse) renders on both; only the data-widget set differs.
+const SHARED_WIDGET_IDS = ["quick-links", "guardian-call", "campus-pulse"] as const;
 
-const WIDGET_COMPONENTS: Record<StudentWidgetId, React.ComponentType> = {
+// The full widget pool (components keyed by id) — both personas draw from this.
+const ALL_WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   "my-day-strip": MyDayStrip,
   "my-stats": MyStatsCard,
   "today-status": TodayStatus,
@@ -41,6 +37,17 @@ const WIDGET_COMPONENTS: Record<StudentWidgetId, React.ComponentType> = {
   "guardian-call": GuardianCallButton,
   "campus-pulse": CampusPulseStrip,
 };
+
+// Persona-specific DATA widgets (rendered before the shared chrome).
+// usePersona() resolves to day_scholar | hosteller (never "both" — that value
+// is only used for staff-acting-on-behalf in the pass form, not the home).
+//   day_scholar → attendance % + today's classes + today's status (no curfew focus)
+//   hosteller   → curfew status + active hostel pass + context (curfew/residence)
+const PERSONA_DATA_WIDGETS: Record<"day_scholar" | "hosteller", string[]> = {
+  day_scholar: ["my-stats", "my-day-strip", "today-status"],
+  hosteller: ["today-status", "active-pass", "context"],
+};
+
 
 // Offline banner: visible when the browser loses connectivity.
 // Shows cached/SSR content + a banner, not a blank screen.
@@ -114,20 +121,26 @@ function StudentHomeInner() {
     setTimeout(() => setRetrying(false), 3000);
   };
 
-  // Trait-aware widget order: the 5-layer cascade (policy > user > trait >
-  // persona > role > system) determines which widget renders first.
-  // A hosteller sees curfew/pass widgets first; a day scholar sees
-  // attendance/class widgets first. A year-1 student sees the onboarding
-  // tour prominent. The shell just renders in the resolved order.
-  const widgetOrderPref = useEffectivePref<StudentWidgetId[]>("dashboard.widgetOrder");
-  const widgetOrder: StudentWidgetId[] = useMemo(() => {
-    const order = widgetOrderPref.value ?? STUDENT_WIDGET_IDS;
-    // Validate: keep only known ids, append missing ones.
-    const known = new Set(STUDENT_WIDGET_IDS);
-    const valid = order.filter((w) => known.has(w as StudentWidgetId));
-    const missing = STUDENT_WIDGET_IDS.filter((w) => !valid.includes(w));
+  // Persona-aware dashboards. The same widget pool serves both personas, but the
+  // DATA-widget set differs: a day scholar's home is attendance/class centred,
+  // a hosteller's home is curfew/hostel/mess centred. The 5-layer cascade
+  // (policy > user > trait > persona > role > system) is what this implements:
+  // persona selects the set; a user-level "dashboard.widgetOrder" pref can
+  // reorder WITHIN the persona's data widgets + shared chrome.
+  const persona = usePersona();
+  const personaKey: "day_scholar" | "hosteller" =
+    persona === "hosteller" ? "hosteller" : "day_scholar";
+  const widgetOrderPref = useEffectivePref<string[]>("dashboard.widgetOrder");
+
+  // The persona's data widgets, honouring a user override pref if present.
+  const personaDataWidgets: string[] = useMemo(() => {
+    const base = PERSONA_DATA_WIDGETS[personaKey];
+    const pref = widgetOrderPref.value ?? [];
+    const allIds = [...base, ...SHARED_WIDGET_IDS];
+    const valid = pref.filter((id) => allIds.includes(id));
+    const missing = allIds.filter((id) => !valid.includes(id));
     return [...valid, ...missing];
-  }, [widgetOrderPref.value]);
+  }, [personaKey, widgetOrderPref.value]);
 
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
@@ -135,11 +148,11 @@ function StudentHomeInner() {
       <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
-      {widgetOrder.map((id) => {
-        const Render = WIDGET_COMPONENTS[id];
+      {personaDataWidgets.map((id) => {
+        const Render = ALL_WIDGET_COMPONENTS[id];
         if (!Render) return null;
         return (
-          <WidgetBoundary key={id} name={id} resetKey={resetKey}>
+          <WidgetBoundary key={`${personaKey}-${id}`} name={id} resetKey={resetKey}>
             <Render />
           </WidgetBoundary>
         );
