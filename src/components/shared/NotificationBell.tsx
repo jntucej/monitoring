@@ -108,15 +108,27 @@ export function NotificationBell() {
   }, []);
 
   const handleMarkRead = async (id: string) => {
+    // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
+    // Persist server-side so SSE re-fetch doesn't resurrect the notification
+    try {
+      await fetch(`/api/notifications/${encodeURIComponent(id)}`, { method: "PATCH" });
+    } catch {
+      // best-effort — local state already updated
+    }
   };
 
   const handleMarkAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, readAt: new Date().toISOString() })));
     setUnreadCount(0);
+    try {
+      await fetch("/api/notifications/read-all", { method: "POST" });
+    } catch {
+      // best-effort
+    }
   };
 
   const getTimeAgo = (date: string) => {

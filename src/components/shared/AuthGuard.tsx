@@ -23,9 +23,17 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const authenticated = useAuthStore((s) => s.authenticated);
   const checkSession = useAuthStore((s) => s.checkSession);
   const [isChecking, setIsChecking] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [timedOut] = useState(false);
   const redirectCountRef = useRef(0);
   const handledRef = useRef(false);
+
+  // Track actual mount to keep SSR + first client paint identical (both render
+  // the loading spinner). React #321 (hydration mismatch) fires when SSR
+  // renders one branch and the first client render renders a different one —
+  // this only happens when persisted state (localStorage) is available on the
+  // client but not on the server.
+  useEffect(() => { setMounted(true); }, []);
 
   const userId = user?.id;
   const userRole = user?.role;
@@ -122,7 +130,10 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     );
   }
 
-  if (!hasHydrated || isChecking || !authenticated || !user) {
+  // Before mount (SSR + first client paint): always show the spinner.
+  // This guarantees identical markup server-side and on first hydration,
+  // preventing React error #321.
+  if (!mounted || !hasHydrated || isChecking || !authenticated || !user) {
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary" role="status" aria-live="polite" aria-busy="true">
         <div className="size-6 border-4 border-action-success border-t-transparent rounded-full animate-spin motion-reduce:animate-none mb-4" aria-hidden />

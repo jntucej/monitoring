@@ -123,7 +123,7 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
 export const GET = withRateLimit(
   withAuthorization(handleGet, { requiredRole: ["student", "parent", "guardian"] }),
-  { keyPrefix: "student_attendance_calendar", maxRequests: 30 }
+  { keyPrefix: "student_attendance_calendar", maxRequests: 60 }
 );
 
 export const dynamic = "force-dynamic";
