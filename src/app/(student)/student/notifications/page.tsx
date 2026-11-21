@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useCallback } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -8,7 +8,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
-import { Megaphone, Bell } from "lucide-react";
+import { Megaphone, Bell, X, Check, ChevronDown, ChevronUp } from "lucide-react";
 import type { Role } from "@/lib/types";
 import {
   NotificationRow,
@@ -20,9 +20,122 @@ interface NotificationsPayload {
   data: NotificationRow[];
 }
 
+type MergedNotification = {
+  kind: "alert" | "announcement";
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+};
+
+function NotificationModal({
+  n,
+  onClose,
+}: {
+  n: MergedNotification;
+  onClose: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [marked, setMarked] = useState(false);
+
+  const handleMarkRead = useCallback(async () => {
+    setMarked(true);
+    try {
+      await fetch(`/api/notifications/${encodeURIComponent(n.id)}`, {
+        method: "PATCH",
+      });
+    } catch {
+      // best-effort
+    }
+    setTimeout(onClose, 600);
+  }, [n.id, onClose]);
+
+  const isLong = n.body.length > 140;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="surface-card w-full max-w-md p-4 space-y-3 bg-bg-surface"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            {n.kind === "alert" ? (
+              <Bell className="h-4 w-4 shrink-0 text-warning-500" />
+            ) : (
+              <Megaphone className="h-4 w-4 shrink-0 text-info-500" />
+            )}
+            <h2 className="text-sm font-semibold text-text-primary truncate">
+              {n.title}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 rounded p-1 hover:bg-bg-raised text-text-muted"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div>
+          <p
+            className={`text-sm text-text-secondary whitespace-pre-wrap ${
+              isLong && !expanded ? "line-clamp-3" : ""
+            }`}
+          >
+            {n.body}
+          </p>
+          {isLong && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="mt-1 inline-flex items-center gap-1 text-xs text-link hover:underline"
+            >
+              {expanded ? (
+                <>
+                  <ChevronUp className="h-3 w-3" /> Show less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3" /> Show more
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {n.createdAt && (
+          <p className="text-xs text-text-muted">{fmtDateTime(n.createdAt)}</p>
+        )}
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          {marked ? (
+            <span className="inline-flex items-center gap-1 text-xs text-success-500">
+              <Check className="h-3.5 w-3.5" /> Marked as read
+            </span>
+          ) : (
+            <button
+              onClick={handleMarkRead}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
+            >
+              <Check className="h-3.5 w-3.5" /> Mark as read
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Inner() {
   const isSakuga = useIsSakuga();
   const [showToast, setShowToast] = useState(false);
+  const [selected, setSelected] = useState<MergedNotification | null>(null);
   const { data: alertsData } = useApiResource<NotificationsPayload>(
     "/api/notifications",
     { ttlMs: 30_000 },
@@ -33,7 +146,7 @@ function Inner() {
     { ttlMs: 30_000 },
   );
 
-  const all = [
+  const all: MergedNotification[] = [
     ...alerts.data.map((a) => ({
       kind: "alert" as const,
       id: a.id,
@@ -52,7 +165,9 @@ function Inner() {
 
   // Flash a sakuga-toast when there are unread alerts on first load
   const latestAlert = all[0];
-  const isNewAlert = latestAlert?.createdAt && new Date(latestAlert.createdAt).getTime() > Date.now() - 60_000;
+  const isNewAlert =
+    latestAlert?.createdAt &&
+    new Date(latestAlert.createdAt).getTime() > Date.now() - 60_000;
 
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
@@ -78,10 +193,7 @@ function Inner() {
 
       {/* Sakuga-VFX toast flash for new alerts */}
       {isSakuga && isNewAlert && (
-        <sakuga-toast
-          visible={showToast}
-          onClose={() => setShowToast(false)}
-        >
+        <sakuga-toast visible={showToast} onClose={() => setShowToast(false)}>
           {latestAlert!.title}
         </sakuga-toast>
       )}
@@ -99,27 +211,36 @@ function Inner() {
               key={`${n.kind}:${n.id}`}
               className="surface-card bg-bg-surface p-3"
             >
-              <div className="flex items-center gap-2">
-                {n.kind === "alert" ? (
-                  <Bell className="h-4 w-4" />
-                ) : (
-                  <Megaphone className="h-4 w-4" />
-                )}
-                <span className="text-sm font-medium text-text-primary">
-                  {n.title}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-text-secondary">
-                {n.body}
-              </p>
-              {n.createdAt && (
-                <p className="mt-1 text-xs text-text-muted">
-                  {fmtDateTime(n.createdAt)}
+              <button
+                onClick={() => setSelected(n)}
+                className="w-full text-left"
+              >
+                <div className="flex items-center gap-2">
+                  {n.kind === "alert" ? (
+                    <Bell className="h-4 w-4" />
+                  ) : (
+                    <Megaphone className="h-4 w-4" />
+                  )}
+                  <span className="text-sm font-medium text-text-primary">
+                    {n.title}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-text-secondary line-clamp-2">
+                  {n.body}
                 </p>
-              )}
+                {n.createdAt && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    {fmtDateTime(n.createdAt)}
+                  </p>
+                )}
+              </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {selected && (
+        <NotificationModal n={selected} onClose={() => setSelected(null)} />
       )}
     </div>
   );

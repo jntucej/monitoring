@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     if (anomalies.length > 0) {
       await query(
         `INSERT INTO public.alerts (severity, resource_type, title, detail, created_by)
-         VALUES ('high', 'mess_ledger', NULL, $1, $2, NULL)`,
+         VALUES ('high', 'mess_ledger', $1, $2, NULL)`,
         [`Mess ledger anomaly ${day}: ${anomalies.join("; ")}`,
          `issued=${i} consumed=${c} boarders=${b}; service window may be blocked`],
       );
