@@ -91,7 +91,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
                        cr.created_at, cr.routed_at, cr.resolved_at
                  FROM public.class_requests cr
                  JOIN public.users u ON u.id = cr.student_id
-                 LEFT JOIN public.classes c ON c.id = cr.class_id`;
+                 LEFT JOIN public.classes c ON (c.id::text = cr.class_id
+                        OR c.department_id = cr.class_id)`;
     const args: (string | number)[] = [];
     const where: string[] = [];
     if (auth.role === "faculty" || auth.role === "oie") {
@@ -119,7 +120,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
               cr.created_at
          FROM public.class_requests cr
          JOIN public.users u ON u.id = cr.student_id
-         LEFT JOIN public.classes c ON c.id = cr.class_id
+         LEFT JOIN public.classes c ON (c.id::text = cr.class_id
+                OR c.department_id = cr.class_id)
         ORDER BY cr.created_at DESC LIMIT 200`,
     );
     return ok(rows);

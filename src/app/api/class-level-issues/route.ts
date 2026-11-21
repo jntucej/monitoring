@@ -21,7 +21,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   let sql = `SELECT i.id, i.topic, i.status, i.request_ids, i.resolution,
                     i.created_at, i.resolved_at, c.name AS class_name
                FROM public.class_level_issues i
-               LEFT JOIN public.classes c ON c.id = i.class_id`;
+               LEFT JOIN public.classes c ON (c.id::text = i.class_id
+                    OR c.department_id = i.class_id)`;
   const where: string[] = [];
   const args: string[] = [];
   if (classId) { args.push(classId); where.push(`i.class_id = $${args.length}`); }
