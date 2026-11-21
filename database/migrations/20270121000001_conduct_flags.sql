@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.conduct_events (
 
 CREATE INDEX idx_conduct_events_user ON public.conduct_events (user_id, created_at DESC);
 CREATE INDEX idx_conduct_events_type ON public.conduct_events (event_type, created_at DESC);
-CREATE INDEX idx_conduct_events_active ON public.conduct_events (user_id) WHERE reversed = FALSE AND (expires_at IS NULL OR expires_at > now());
+CREATE INDEX idx_conduct_events_active ON public.conduct_events (user_id, expires_at) WHERE reversed = FALSE;
 
 CREATE TABLE IF NOT EXISTS public.conduct_flags (
   user_id           UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public.conduct_flags (
   cleared_reason    TEXT
 );
 
-CREATE INDEX idx_conduct_flags_active ON public.conduct_flags (current_flag) WHERE current_flag != 'clear' AND (expires_at IS NULL OR expires_at > now());
+CREATE INDEX idx_conduct_flags_active ON public.conduct_flags (current_flag, expires_at) WHERE current_flag != 'clear';
 
 -- Grant access to the app role
 GRANT SELECT, INSERT, UPDATE ON public.conduct_events TO gate_app, admin, authenticated;

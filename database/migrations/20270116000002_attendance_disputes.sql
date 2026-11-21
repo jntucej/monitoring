@@ -46,15 +46,13 @@ ALTER TABLE public.attendance_disputes ENABLE ROW LEVEL SECURITY;
 -- Students: read/write own disputes
 CREATE POLICY attendance_disputes_student_own ON public.attendance_disputes
   FOR ALL TO authenticated
-  USING (person_id = auth.uid()
-         OR person_id = (SELECT person_id FROM public.student_details WHERE user_id = auth.uid() LIMIT 1))
-  WITH CHECK (person_id = auth.uid()
-         OR person_id = (SELECT person_id FROM public.student_details WHERE user_id = auth.uid() LIMIT 1));
+  USING (person_id = auth.uid())
+  WITH CHECK (person_id = auth.uid());
 
 -- Admin/sysadmin: read all, update resolution
 CREATE POLICY attendance_disputes_admin ON public.attendance_disputes
   FOR ALL TO authenticated
-  USING (auth.role() IN ('admin','sysadmin'))
-  WITH CHECK (auth.role() IN ('admin','sysadmin'));
+  USING (is_admin_self())
+  WITH CHECK (is_admin_self());
 
 COMMIT;
