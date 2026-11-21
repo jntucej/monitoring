@@ -13,12 +13,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
 import { getKnowledgeCentre, type KnowledgeDoc } from "@/lib/retention";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
 export function CampusKnowledgeCentre() {
+  const isSakuga = useIsSakuga();
   const { user, role } = useAuthStore();
   const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -111,17 +113,53 @@ export function CampusKnowledgeCentre() {
 
         {/* Search + Category Filter */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
-            <input
-              type="search"
-              placeholder="Search documents…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="surface-card w-full bg-bg-surface/50 py-2 pl-9 pr-3 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
-              aria-label="Search knowledge documents"
-            />
+          <div className="flex-1">
+            {isSakuga ? (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted z-10" />
+                <sakuga-input
+                  value={search}
+                  onValueChange={((v: unknown) => setSearch(String(v ?? ""))) as any}
+                  placeholder="Search documents…"
+                  label="search"
+                  className="w-full pl-9"
+                />
+              </div>
+            ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
+              <input
+                type="search"
+                placeholder="Search documents…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="surface-card w-full bg-bg-surface/50 py-2 pl-9 pr-3 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                aria-label="Search knowledge documents"
+              />
+            </div>
+            )}
           </div>
+          {isSakuga ? (
+            <div className="flex gap-1 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setActiveCategory("all")}
+                className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition ${activeCategory === "all" ? "bg-action-primary text-white" : "bg-bg-elevated text-text-muted hover:text-text-primary"}`}
+              >
+                All
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setActiveCategory(c)}
+                  className={`px-2.5 py-1.5 rounded-full text-xs font-medium transition ${activeCategory === c ? "bg-action-primary text-white" : "bg-bg-elevated text-text-muted hover:text-text-primary"}`}
+                >
+                  {c.charAt(0).toUpperCase() + c.slice(1)}
+                </button>
+              ))}
+            </div>
+          ) : (
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
@@ -135,6 +173,7 @@ export function CampusKnowledgeCentre() {
               </option>
             ))}
           </select>
+          )}
         </div>
 
         {/* Document List */}

@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { QrCode, X, AlertCircle, ShieldCheck, Download, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 export interface PassQrModalProps {
   ticketNumber: string;
@@ -23,6 +24,7 @@ export function PassQrModal({
   isOpen,
   onClose,
 }: PassQrModalProps) {
+  const isSakuga = useIsSakuga();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qrText, setQrText] = useState<string | null>(null);
@@ -139,10 +141,12 @@ export function PassQrModal({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* QR Canvas */}
+            {/* QR Canvas — sakuga-framed for female students */}
             <div
               ref={qrRef}
-              className="surface-card bg-white p-5 flex flex-col items-center justify-center"
+              className={isSakuga
+                ? "rounded-2xl p-5 flex flex-col items-center justify-center bg-[var(--sk-card,#fff)] border-2 border-[var(--sk-pri,#c084fc)] shadow-[0_0_24px_var(--sk-acc,#f0abfc)/30]"
+                : "surface-card bg-white p-5 flex flex-col items-center justify-center"}
             >
               <QRCodeCanvas
                 value={qrText || ""}
@@ -151,14 +155,20 @@ export function PassQrModal({
                 includeMargin
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
-              <div className="surface-card mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1">
+              <div className={isSakuga
+                ? "mt-2 text-xs font-bold text-[var(--sk-acc,#f0abfc)] font-mono flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--sk-pri,#c084fc)]/10"
+                : "surface-card mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1"}
+              >
                 <span className="w-4 h-4 rounded-full bg-action-success animate-ping" />
                 Live Gate Token • Refreshes in {expiresIn}s
               </div>
             </div>
 
             {/* Window and Instructions */}
-            <div className="surface-card bg-bg-elevated p-3 text-xs space-y-1.5">
+            <div className={isSakuga
+              ? "rounded-xl p-3 text-xs space-y-1.5 bg-[var(--sk-card,#faf5ff)] border border-[var(--sk-pri,#c084fc)]/20"
+              : "surface-card bg-bg-elevated p-3 text-xs space-y-1.5"}
+            >
               <div className="flex items-center gap-1.5 text-action-success font-semibold text-xs">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Approved Pass</span>
@@ -174,6 +184,16 @@ export function PassQrModal({
             </div>
 
             {/* Download Button */}
+            {isSakuga ? (
+              <sakuga-button
+                onClick={downloadQr}
+                label="save-qr"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold"
+              >
+                <Download className="w-4 h-4" />
+                <span>Save Pass QR Image</span>
+              </sakuga-button>
+            ) : (
             <button
               onClick={downloadQr}
               className="surface-card w-full py-2.5 bg-bg-elevated text-text-primary text-xs font-bold hover:bg-bg-base flex items-center justify-center gap-2 transition"
@@ -181,6 +201,7 @@ export function PassQrModal({
               <Download className="w-4 h-4" />
               <span>Save Pass QR Image</span>
             </button>
+            )}
           </div>
         )}
       </div>
