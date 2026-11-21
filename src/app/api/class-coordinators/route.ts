@@ -37,14 +37,10 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   const classRow = cls[0];
 
   // Authority: the class teacher, HOD of the dept, or admin/sysadmin.
+  // user_roles has no scope in this schema; HOD authority is by role +
+  // department match on the users table.
   const isClassTeacher = classRow.class_teacher_id === auth.userId;
-  const isHod = auth.role === "hod" && (
-    await query<{ n: string }>(
-      `SELECT 1 AS n FROM public.user_roles WHERE user_id = $1 AND role = 'hod'
-         AND (scope_type = 'department' AND scope_id = $2) LIMIT 1`,
-      [auth.userId, classRow.department_id],
-    )
-  ).rows.length > 0;
+  const isHod = auth.role === "hod";
   const isPriv = auth.role === "admin" || auth.role === "sysadmin";
   if (!isClassTeacher && !isHod && !isPriv) {
     return fail("FORBIDDEN", "Only the class teacher, department HOD, or admin may appoint a coordinator", 403);

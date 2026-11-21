@@ -72,8 +72,9 @@ async function notifyClassOfIssue(classId: string, topic: string, count: number,
     const { rows: hods } = await query<{ id: string }>(
       `SELECT u.id FROM public.users u
          JOIN public.user_roles ur ON ur.user_id = u.id
-        WHERE ur.role = 'hod' AND ur.scope_type = 'department' AND ur.scope_id = $1
-          AND u.status = 'ACTIVE'`,
+        WHERE ur.role = 'hod' AND u.status = 'ACTIVE'
+          AND (u.department_id = $1 OR $1 IS NULL)
+        LIMIT 5`,
       [classRow.department_id],
     );
     targets.push(...hods.map(h => h.id));

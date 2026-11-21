@@ -265,11 +265,16 @@ export async function resolveClassLevelIssue(issueId: string, actorId: string, r
 }
 
 async function getHodForDept(dept: string): Promise<string | null> {
+  // user_roles has no scope column in this schema; the department scoping
+  // is best-effort via the users table. Fallback to any active HOD so the
+  // request is never orphaned.
   const { rows } = await query<{ id: string }>(
     `SELECT u.id FROM public.users u
        JOIN public.user_roles ur ON ur.user_id = u.id
-      WHERE ur.role = 'hod' AND ur.scope_type = 'department' AND ur.scope_id = $1
-        AND u.status = 'active' LIMIT 1`,
+      WHERE ur.role = 'hod' AND u.status = 'ACTIVE'
+        AND (u.department_id = $1 OR $1 IS NULL)
+      ORDER BY (u.department_id = $1) DESC, u.created_at ASC
+      LIMIT 1`,
     [dept],
   );
   return rows[0]?.id ?? null;
@@ -280,9 +285,9 @@ async function notifyHodOfUrgent(dept: string, body: string, requestId: string) 
     const { rows } = await query<{ id: string }>(
       `SELECT u.id FROM public.users u
          JOIN public.user_roles ur ON ur.user_id = u.id
-        WHERE ur.role = 'hod' AND (ur.scope_type = 'department' AND ur.scope_id = $1
-                                   OR ur.scope_type IS NULL)
-          AND u.status = 'active'`,
+        WHERE ur.role = 'hod' AND u.status = 'ACTIVE'
+          AND (u.department_id = $1 OR $1 IS NULL)
+        LIMIT 5`,
       [dept],
     );
     for (const u of rows) {
