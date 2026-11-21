@@ -123,6 +123,12 @@ export interface ExplainWhy {
 // ── Condition evaluation (pure) ─────────────────────────────────────────────
 
 function readField(obj: Record<string, any>, field: string): any {
+  // A condition field may be written two ways:
+  //   1. a literal dotted key:  data["attendance.percent"]
+  //   2. a nested path:        data.attendance.percent
+  // Check the literal key first (that's how rules are authored compactly),
+  // then fall back to nested traversal.
+  if (field in obj) return obj[field];
   return field.split(".").reduce<any>(
     (acc, k) => (acc == null ? undefined : acc[k]),
     obj,
