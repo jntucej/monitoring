@@ -51,13 +51,13 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
 
   // Current period: total earned + per-category
   const curR = await query<{ category: string; count: string }>(
-    `SELECT COALESCE(ad.category, 'General') AS category,
+    `SELECT COALESCE(ad.tier, 'General') AS category,
             COUNT(*)::text AS count
        FROM user_achievements ua
        LEFT JOIN achievement_definitions ad ON ad.code = ua.achievement_code
       WHERE ua.user_id = $1::uuid
         AND ua.earned_at::date >= $2::date AND ua.earned_at::date <= $3::date
-      GROUP BY COALESCE(ad.category, 'General')
+      GROUP BY COALESCE(ad.tier, 'General')
       ORDER BY count DESC`,
     [auth.userId, from, to]
   );

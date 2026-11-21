@@ -28,7 +28,7 @@ const PRIORITY_COLORS = {
 // roles outside this allowlist instead of firing a doomed request.
 const BELL_SUPPORTED_ROLES = new Set([
   'admin', 'sysadmin', 'operator', 'supervisor',
-  'vice_principal', 'principal', 'hod', 'staff', 'faculty',
+  'vice_principal', 'principal', 'hod', 'staff', 'faculty', 'student',
 ]);
 
 export function NotificationBell() {

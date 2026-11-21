@@ -101,7 +101,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     `SELECT DISTINCT c.id::text AS class_id
        FROM public.student_details sd
        JOIN public.users u ON u.id = sd.user_id
-       LEFT JOIN public.classes c ON c.department = sd.department
+       LEFT JOIN public.classes c ON c.department_id = sd.department
          AND c.year = sd.year::int
          AND c.section = sd.section
       WHERE u.id = $1::uuid`,
