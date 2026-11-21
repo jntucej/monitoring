@@ -135,6 +135,13 @@ export function PassCreateFormV2({
   }, [effectiveConfig, durationMs, destination, guardianAddress, attachment]);
 
   // ── submit ──
+  /**
+   * @action "Submit the pass request" — validates the form, then POSTs
+   * /api/permissions with the selected pass type + from/to window. On success
+   * the ticket enters the approval chain (gated by the capability below); a
+   * toast confirms "Submitted for approval."
+   * @capability hostel.leave.apply
+   */
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!effectiveConfig || !from || !to) return;
@@ -333,6 +340,7 @@ export function PassCreateFormV2({
           {isSakuga ? (
             <sakuga-button
               type="submit"
+              data-action="apply-pass"
               disabled={submitting || !validation.valid || !from || !to}
               className="w-full flex items-center justify-center gap-2"
             >
@@ -346,6 +354,7 @@ export function PassCreateFormV2({
           ) : (
           <button
             type="submit"
+            data-action="apply-pass"
             disabled={submitting || !validation.valid || !from || !to}
             className="w-full rounded-lg bg-action-primary px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
           >

@@ -23,7 +23,7 @@
  *     layout shift, no re-render of app state.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface ButtonEntry {
   label: string;
@@ -52,6 +52,8 @@ interface InspectHit {
   matchedButton: ButtonEntry | null;
   matchedCapability: string | null;
   fetches: { method: string; url: string }[];
+  /** the data-action id when the element carries one (the plan's exact-match path). */
+  dataAction: string | null;
 }
 
 /** Strip whitespace + truncate for the panel. */
@@ -86,13 +88,35 @@ export function InspectOverlay() {
   const [active, setActive] = useState(false);
   const [hit, setHit] = useState<InspectHit | null>(null);
   const [copied, setCopied] = useState(false);
+  // The element currently pinned for inspection (null = no pin, click-through
+  // mode is on). When pinned, real clicks on interactive elements are
+  // suppressed and a "Run it" button fires them deliberately.
+  const pinnedElRef = useRef<HTMLElement | null>(null);
+  const [isPinned, setIsPinned] = useState(false);
 
-  // Dev-only + gated: bail out immediately in production or without ?inspect.
+  // Dev-only + gated: bail out immediately in production. Active when the URL
+  // carries ?inspect/#inspect OR when toggled with Alt+` (the paste's toggle).
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     const q = new URLSearchParams(window.location.search).get("inspect");
     const hashInspect = window.location.hash.includes("inspect");
     setActive(!!q || hashInspect);
+    const onKey = (e: KeyboardEvent) => {
+      // Alt+` toggles inspect mode (per the plan).
+      if (e.key === "`" && e.altKey) {
+        e.preventDefault();
+        setActive((a) => !a);
+        setIsPinned(false);
+        pinnedElRef.current = null;
+      }
+      // Esc closes the pinned panel.
+      if (e.key === "Escape") {
+        setIsPinned(false);
+        pinnedElRef.current = null;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   // Load the app-map once when active.
@@ -115,31 +139,47 @@ export function InspectOverlay() {
     void map;
   }, [active, map]);
 
-  // Click interceptor — passive (does not preventDefault / stopPropagation).
+  // Click interceptor (capture phase).
+  //  - When NOT pinned: inspect is passive — it records what you clicked but
+  //    lets the app behave normally (no preventDefault).
+  //  - When pinned: clicking another interactive element SUPPRESSES the real
+  //    click and pins the new element, so you can read what it does before
+  //    deciding to "Run it" (which fires the real click deliberately).
   useEffect(() => {
     if (!active || !mapData) return;
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
+      // Ignore clicks on the overlay's own chrome (status bar / panel / buttons).
+      if (target.closest('[data-inspect-chrome]')) return;
       const route = window.location.pathname;
       const page = mapData.pages.find((p) => p.route === route);
       if (!page) return;
-      // Walk up to the nearest button-like element to capture its label.
-      let btnEl: HTMLElement | null = null;
+      // Walk up to the nearest interactive element (button / link / role=button /
+      // submit input) to capture its label + data-action.
+      let interactiveEl: HTMLElement | null = null;
       let el: HTMLElement | null = target;
       while (el) {
         const tag = el.tagName.toLowerCase();
-        if (tag === "button" || el.getAttribute("role") === "button") {
-          btnEl = el;
+        if (
+          tag === "button" ||
+          tag === "a" ||
+          tag === "input" ||
+          el.getAttribute("role") === "button"
+        ) {
+          interactiveEl = el;
           break;
         }
         el = el.parentElement;
       }
       const elementLabel =
-        btnEl?.textContent ??
+        interactiveEl?.textContent ??
         target.textContent ??
         target.getAttribute("aria-label") ??
         null;
+      const dataAction =
+        interactiveEl?.getAttribute("data-action") ??
+        target.getAttribute("data-action");
       const { button, capability } = matchButton(
         shortLabel(elementLabel),
         page.buttons,
@@ -148,16 +188,45 @@ export function InspectOverlay() {
         route,
         pageTitle: page.title,
         role: page.role,
-        elementTag: target.tagName.toLowerCase(),
+        elementTag: (interactiveEl ?? target).tagName.toLowerCase(),
         elementLabel: shortLabel(elementLabel),
         matchedButton: button,
         matchedCapability: capability ?? page.capabilities[0] ?? null,
         fetches: page.fetches,
+        dataAction,
       });
+      // Pin behavior: the first interactive click pins (shows the panel), and
+      // while pinned, clicking a DIFFERENT interactive element suppresses the
+      // real click so you can read before acting. Clicking the same element
+      // falls through (lets you re-trigger if you want). The panel's own "Run
+      // it" button is the deliberate way to fire the suppressed click.
+      if (interactiveEl && interactiveEl !== pinnedElRef.current) {
+        pinnedElRef.current = interactiveEl;
+        setIsPinned(true);
+        // Suppress the real click only when we're already pinned (2nd+ click).
+        // The first click that opens the panel still fires through, which
+        // matches the "feel it" goal: you see the popup AND the action, then
+        // decide on subsequent clicks.
+        if (isPinned) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [active, mapData]);
+  }, [active, mapData, isPinned]);
+
+  // "Run it": fire the real click on the pinned element, then unpin.
+  const runPinned = () => {
+    if (!pinnedElRef.current) return;
+    const el = pinnedElRef.current;
+    setIsPinned(false);
+    pinnedElRef.current = null;
+    // Dispatch a real click (not el.click() on a synthetic target) so the
+    // app's own handlers + forms fire exactly as a user click would.
+    el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+  };
 
   // Copy-to-clipboard for the "where do I go" handoff.
   const copySnippet = () => {
@@ -187,8 +256,10 @@ export function InspectOverlay() {
 
   return (
     <>
-      {/* Status bar (top-right, 1 line) */}
+      {/* Status bar (top-right, 1 line). data-inspect-chrome marks the overlay's
+          own UI so the click interceptor ignores clicks on it. */}
       <div
+        data-inspect-chrome
         className="fixed top-2 right-2 z-[100] rounded-full bg-slate-900/90 px-3 py-1 text-xs text-white shadow-lg"
         role="status"
         aria-live="polite"
@@ -196,16 +267,21 @@ export function InspectOverlay() {
         inspect mode ·{" "}
         <button
           type="button"
-          onClick={() => setActive(false)}
+          onClick={() => {
+            setActive(false);
+            setIsPinned(false);
+            pinnedElRef.current = null;
+          }}
           className="ml-1 text-slate-300 underline hover:text-white"
         >
-          off
+          off (Alt+`)
         </button>
       </div>
 
       {/* Panel (bottom, shown on click) */}
       {hit && (
         <div
+          data-inspect-chrome
           className="fixed bottom-3 left-1/2 z-[100] w-[min(560px,92vw)] -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-slate-100 shadow-2xl"
           role="dialog"
           aria-label="Inspect panel"
@@ -269,7 +345,41 @@ export function InspectOverlay() {
                 </dd>
               </div>
             )}
+            {hit.dataAction && (
+              <div className="flex gap-2">
+                <dt className="w-24 shrink-0 text-slate-400">data-action</dt>
+                <dd className="font-mono text-emerald-300">{hit.dataAction}</dd>
+              </div>
+            )}
           </dl>
+
+          {/* Run / close: "Run it" fires the suppressed click so you can watch
+              the result; "close" unpins so the next click is read-through. */}
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={runPinned}
+              className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-500"
+            >
+              ▶ Run it
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsPinned(false);
+                pinnedElRef.current = null;
+                setHit(null);
+              }}
+              className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-200 hover:bg-slate-600"
+            >
+              close
+            </button>
+            {!isPinned && (
+              <span className="self-center text-xs text-slate-500">
+                click any button to pin + read it
+              </span>
+            )}
+          </div>
         </div>
       )}
     </>
