@@ -1,0 +1,95 @@
+# Teaching Capability & Academic Work Architecture
+
+## Decision: One Tree, Capability-Keyed Permissions, Bespoke Surfaces, Shared Kernel
+
+### Pre-flight Check Results (2026-11-21)
+
+| Check | Result | Implication |
+|-------|--------|-------------|
+| AuthGuard | Props-driven (`allowedRoles` array) | Swap = one layout file, not 13 route files |
+| Timetable | `class_periods` table exists | Today strip is free (already used by attendance API) |
+| Faculty binding | `faculty_assignments.faculty_id` (user id, uuid) | Person-keyed, not role-keyed. No migration needed |
+| Upload path | `attachment-storage.ts`, `s3-storage.ts`, `signed-url.ts` exist | Student uploads are infra-ready |
+
+### Model
+
+```
+personId: <uuid>
+roles:        ['principal']           ← governance authority
+teachings:    [                       ← teaching capability
+  { subjectId: 'CS-301', classId: 'CSE-3A' },
+  { subjectId: 'CS-302', classId: 'CSE-3B' },
+]
+```
+
+**Rule:** Teaching actions are authorized by the binding, not the role.
+A Principal without a CS-302 binding cannot grade CS-302 submissions,
+even though they hold the top institutional role.
+
+### Guard Swap
+
+`/faculty/*` layout changes:
+```
+allowedRoles: ['faculty', 'class_teacher', 'admin', 'sysadmin']
+```
+to:
+```
+allowedRoles: ['faculty', 'class_teacher']  // + teaching-binding check
+```
+
+The binding check: any user with ≥1 active row in `faculty_assignments`
+where `faculty_id = user.id` gets access. Pure faculty unchanged.
+Admins/syadmins without a binding lose access (correct — they don't teach).
+
+### Sidebar Section
+
+`RoleSidebar` appends a "Teaching" section (labeled via `useRoleVocabulary`)
+iff the user has `teachingBindings.length > 0`. Pure faculty see "Faculty";
+Principal/HOD see "Teaching".
+
+### Academic Work Data Model (5 entities)
+
+```
+Assignment {
+  id, subjectCode, postedBy (user id),
+  title, description,
+  dueAt, maxMarks?, attachments[],
+  status: 'open' | 'closed',
+  createdAt
+}
+
+Submission {
+  id, assignmentId, studentId,
+  files[], note?, submittedAt,
+  status: 'submitted' | 'graded',
+  grade?, feedback?, gradedBy?, gradedAt?
+}
+
+ExtensionRequest {
+  id, assignmentId, studentId,
+  reason, requestedUntil,
+  status, decidedBy?, decidedAt?
+}
+```
+
+### Action Tiers
+
+| Action | Tier | Confirm |
+|--------|------|---------|
+| faculty.assignment.create | 1 | inline |
+| faculty.assignment.close | 2 | dialog |
+| student.submission.create | 2 | dialog |
+| student.extension.request | 1 | inline (reuses request lifecycle) |
+| faculty.submission.grade | 2 | dialog |
+
+### Build Phases
+
+| Phase | Work | Status |
+|-------|------|--------|
+| 0 | Pre-flight checks + this doc | ✅ done |
+| 1 | Action kernel (3 files) | pending |
+| 2 | Notification panel fix (done: d1403db8) | ✅ |
+| 3 | Teaching guard swap + sidebar section | pending |
+| 4 | Academic subsystem (assignments + submissions) | pending |
+| 5 | Student surface fixes (history sheet, campus RSVP) | pending |
+| 6 | Sakuga theme (on consolidated tree) | pending |
