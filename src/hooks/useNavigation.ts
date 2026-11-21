@@ -243,6 +243,7 @@ export function getDefaultNavigation(roleCode: string = "admin", isHod?: boolean
             { href: "/admin/reports", label: "Reports", icon: "FileSpreadsheet" },
             { href: "/admin/sms/compose", label: "Send SMS", icon: "MessageSquare" },
             { href: "/admin/sms/queue", label: "SMS Delivery", icon: "ListChecks" },
+            { href: "/admin/academic-automation", label: "Automation", icon: "Zap" },
           ],
         },
       ];
