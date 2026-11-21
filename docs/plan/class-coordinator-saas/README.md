@@ -1,7 +1,11 @@
 # Plan: Class-Communication SaaS — Replace the CR Bottleneck
 
 **Date:** 2026-11-21 · **Author:** Hermes (plan) · **Owner:** Gate Monitor team
-**Status:** DRAFT — awaiting approval before any migration is written
+**Status:** SHIPPED 2026-11-21 — all stages 1–6 implemented (migration
+`20270129000001_class_comms_saas.sql`, kernels `class-requests.ts` /
+`class-coordinator.ts` / `class-message-release.ts`, 5 route files,
+`/api/cron/class-issue-aggregation`, student + coordinator + faculty
+surfaces, CONTRACT addendum + cross-link).
 
 ---
 

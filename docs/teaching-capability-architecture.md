@@ -1,5 +1,12 @@
 # Teaching Capability & Academic Work Architecture
 
+> **Twin layer:** the class-communication capability (`lib/class-requests.ts`,
+> `lib/class-coordinator.ts`, `lib/class-message-release.ts`) is the
+> student-side twin of this teaching capability — same kernel, same
+> "binding beats role" rule, same action-envelope dispatch. See
+> `docs/CONTRACT.md` → "Class-Comm Capability Addendum" and the plan at
+> `docs/plan/class-coordinator-saas/`.
+
 ## Decision: One Tree, Capability-Keyed Permissions, Bespoke Surfaces, Shared Kernel
 
 ### Pre-flight Check Results (2026-11-21)

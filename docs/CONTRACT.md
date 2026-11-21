@@ -93,3 +93,41 @@ boundary instead of ad-hoc `fetch` calls:
   (`lib/teaching-binding.ts` → `/api/teaching-bindings`).
 
 Full design: `docs/teaching-capability-architecture.md`.
+
+## Class-Comm Capability Addendum (2026-11-21)
+
+The class-communication layer is the **student-side twin** of the teaching
+capability: same kernel, same "binding beats role" rule, no new top-level
+role. A Class Coordinator is a *student* + an active
+`student_representatives` row (a capability, not a role).
+
+| Kernel file | Owns |
+|---|---|
+| `lib/class-requests.ts` | `raiseClassRequest` (route by category), `resolveClassRequest`, `escalate`, `close`, `findAggregatableIssues`, `createClassLevelIssue`, `resolveClassLevelIssue` |
+| `lib/class-coordinator.ts` | `getActiveCoordinators`, `canRelay`, `canCollect`, `canReadClassRequests`, `appointCoordinator`, `revokeCoordinator`, `requestCoordinatorExtension` |
+| `lib/class-message-release.ts` | `releaseClassMessage` — one fan-out path for both human tap-release and cron auto-release (`released_by` distinguishes) |
+
+**Action tiers (dispatched via `POST /api/actions`, authority = capability
+check, NOT role):**
+
+| Action | Tier | Confirm | Authority |
+|---|---|---|---|
+| `class_request.raise` / `.close` | 0 | — | student, own class |
+| `class_request.resolve` | 1 | — | routed owner (faculty/HOD/OIE) |
+| `class_request.escalate` | 2 | dialog | owner / SLA breach |
+| `class_issue.raise` / `.resolve` | 2 | dialog | HOD / VP / admin |
+| `coordinator.appoint` | 2 | dialog | class_teacher / HOD / admin |
+| `coordinator.revoke` / `.extend` | 1 | — | same authority |
+| `class_message.publish` | 2 | dialog | faculty (direct or via named CR) |
+| `class_message.release` | 1 | — | named coordinator, author, or cron |
+| `class_message.supersede` | 3 | dialog + reason | author / admin |
+
+**Two lanes, one coordinator slot:**
+- *Individual lane* — `class_requests`, routed by category (complaint
+  taxonomy re-skinned); urgent items page the HOD at raise-time.
+- *Collective lane* — `class_level_issues`, auto-promoted when N≥3 students
+  raise the same (class, category) within 72h (`/api/cron/class-issue-aggregation`,
+  */15; threshold + window are config in `config_class_comm`, tunable without a deploy).
+
+Schema: migration `20270129000001_class_comms_saas.sql` (2 tables + 2 ALTERs,
+all idempotent). Plan + flow map: `docs/plan/class-coordinator-saas/`.
