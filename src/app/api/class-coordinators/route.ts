@@ -37,17 +37,26 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (!body?.classId || !body?.studentId || !body?.validTo) {
     return fail("VALIDATION_ERROR", "classId, studentId, validTo are required", 400);
   }
+  // 4-rep model: type (CR|ICR) + constituency (BOYS|GIRLS|null).
+  const repType: "CR" | "ICR" | undefined =
+    body.representativeType === "ICR" ? "ICR" : body.representativeType === "CR" ? "CR" : undefined;
+  const constituency: "BOYS" | "GIRLS" | null | undefined =
+    body.constituency === "BOYS" ? "BOYS" : body.constituency === "GIRLS" ? "GIRLS" : body.constituency === "ANY" ? null : undefined;
+
+  // Resolve the class: uuid OR department code (empty classes table).
   const { rows: cls } = await query<{ name: string; department_id: string; class_teacher_id: string | null }>(
-    `SELECT name, department_id, class_teacher_id FROM public.classes WHERE id = $1::uuid LIMIT 1`,
+    `SELECT name, department_id, class_teacher_id FROM public.classes
+       WHERE ($1 ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' AND id = $1::uuid)
+          OR department_id = $1
+       LIMIT 1`,
     [body.classId],
   );
-  if (cls.length === 0) return fail("NOT_FOUND", "Class not found", 404);
-  const classRow = cls[0];
+  // When no class row exists (empty classes table), the token is the
+  // department code used as the scope identity; authority falls to HOD/admin.
+  const classRow = cls[0] ?? { name: body.classId, department_id: body.classId, class_teacher_id: null as unknown as string };
 
   // Authority: the class teacher, HOD of the dept, or admin/sysadmin.
-  // user_roles has no scope in this schema; HOD authority is by role +
-  // department match on the users table.
-  const isClassTeacher = classRow.class_teacher_id === auth.userId;
+  const isClassTeacher = classRow.class_teacher_id !== null && classRow.class_teacher_id === auth.userId;
   const isHod = auth.role === "hod";
   const isPriv = auth.role === "admin" || auth.role === "sysadmin";
   if (!isClassTeacher && !isHod && !isPriv) {
@@ -67,6 +76,8 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
     validTo: body.validTo,
     appointedById: auth.userId,
     appointedRole: auth.role,
+    representativeType: repType,
+    constituency: constituency,
   });
   return ok(result);
 }

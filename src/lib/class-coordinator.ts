@@ -13,6 +13,8 @@ export interface Coordinator {
   scopeId: string; // classes.name for scope_type='class'
   status: string;
   appointmentType: string;
+  representativeType: string; // CR | ICR
+  constituency: string | null; // BOYS | GIRLS | null(ANY)
   validFrom: string;
   validTo: string;
   name?: string;
@@ -22,13 +24,15 @@ export function getActiveCoordinators(scopeId: string): Promise<Coordinator[]> {
   return query<Coordinator>(
     `SELECT r.id, r.student_id AS "studentId", r.scope_id AS "scopeId",
             r.status, COALESCE(r.appointment_type,'appointed') AS "appointmentType",
+            COALESCE(r.representative_type,'CR') AS "representativeType",
+            r.constituency,
             r.valid_from::text AS "validFrom", r.valid_to::text AS "validTo",
             u.name
        FROM public.student_representatives r
        JOIN public.users u ON u.id = r.student_id
       WHERE r.scope_type = 'class' AND r.scope_id = $1
         AND r.status = 'active' AND r.valid_to >= CURRENT_DATE
-      ORDER BY u.name`,
+      ORDER BY r.representative_type, r.constituency NULLS FIRST, u.name`,
     [scopeId],
   ).then(r => r.rows);
 }
@@ -91,33 +95,49 @@ export async function canReadClassRequests(userId: string, classId: string): Pro
 }
 
 export async function appointCoordinator(
-  input: { studentId: string; scopeId: string; validTo: string; appointedById: string; appointedRole: string },
+  input: {
+    studentId: string;
+    scopeId: string;
+    validTo: string;
+    appointedById: string;
+    appointedRole: string;
+    representativeType?: "CR" | "ICR";
+    constituency?: "BOYS" | "GIRLS" | null;
+  },
 ): Promise<{ id: string }> {
-  // Enforce one active class-CR per class (v1, D6): demote any existing active row.
+  const repType = input.representativeType ?? "CR";
+  const constituency = input.constituency ?? null;
+  // 4-rep model: demote only the OTHER active rep in the SAME cell
+  // (same class, same type, same constituency). Other cells (the other 3 of
+  // the 4) are untouched so a class can hold up to CR/ICR × Boys/Girls.
   await query(
     `UPDATE public.student_representatives
         SET status = 'revoked'
       WHERE scope_type = 'class' AND scope_id = $1 AND status = 'active'
-        AND student_id <> $2`,
-    [input.scopeId, input.studentId],
+        AND representative_type = $2
+        AND (COALESCE(constituency,'ANY') = COALESCE($3::text,'ANY'))
+        AND student_id <> $4`,
+    [input.scopeId, repType, constituency, input.studentId],
   );
   const { rows: ins } = await query<{ id: string }>(
     `INSERT INTO public.student_representatives
        (student_id, scope_type, scope_id, appointed_by, appointed_role,
-        appointment_type, valid_from, valid_to, status)
-     VALUES ($1, 'class', $2, $3, $4, 'appointed', CURRENT_DATE, $5, 'active')
+        appointment_type, valid_from, valid_to, status,
+        representative_type, constituency)
+     VALUES ($1, 'class', $2, $3, $4, 'appointed', CURRENT_DATE, $5, 'active', $6, $7)
      ON CONFLICT (student_id, scope_type, scope_id, valid_from)
      DO UPDATE SET status = 'active', appointed_by = $3, appointed_role = $4,
-                   appointment_type = 'appointed', valid_to = $5
+                   appointment_type = 'appointed', valid_to = $5,
+                   representative_type = $6, constituency = $7
      RETURNING id`,
-    [input.studentId, input.scopeId, input.appointedById, input.appointedRole, input.validTo],
+    [input.studentId, input.scopeId, input.appointedById, input.appointedRole, input.validTo, repType, constituency],
   );
   await logAuditEvent({
     action: "coordinator.appoint",
     userId: input.appointedById,
     userName: "",
     userRole: input.appointedRole,
-    details: { targetId: ins[0].id, studentId: input.studentId, scopeId: input.scopeId, validTo: input.validTo },
+    details: { targetId: ins[0].id, studentId: input.studentId, scopeId: input.scopeId, validTo: input.validTo, representativeType: repType, constituency: constituency ?? "ANY" },
   });
   return { id: ins[0].id };
 }
