@@ -158,23 +158,23 @@ export function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-5 max-w-sm bg-bg-surface shadow-2xl backdrop-blur-xl z-50 overflow-hidden flex flex-col max-h-[80vh]"
+            className="absolute right-0 top-full mt-2 w-[min(92vw,420px)] max-w-[calc(100vw-1rem)] bg-bg-surface shadow-2xl z-50 overflow-hidden flex flex-col max-h-[min(70dvh,640px)]"
           >
             {/* Header */}
-            <div className="surface-card p-4 flex items-center justify-between bg-[var(--bg-card)]/50">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-text-primary text-sm">Notifications</h3>
+            <div className="surface-card p-4 flex items-center justify-between bg-[var(--bg-card)]/50 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <h3 className="font-semibold text-text-primary text-sm truncate">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="surface-card px-2 py-0.5 text-xs bg-rose-500/10 text-action-danger font-medium">
+                  <span className="surface-card px-2 py-0.5 text-xs bg-rose-500/10 text-action-danger font-medium shrink-0">
                     {unreadCount} new
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="text-xs text-text-muted hover:text-text-primary flex items-center gap-1 transition-colors"
+                    className="text-xs text-text-muted hover:text-text-primary flex items-center gap-1 transition-colors whitespace-nowrap"
                     title="Mark all as read"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
@@ -185,23 +185,23 @@ export function NotificationBell() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="surface-card flex bg-bg-base/50 px-4 py-2 gap-2 text-xs">
+            <div className="surface-card flex bg-bg-base/50 px-4 py-2 gap-2 text-xs shrink-0">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-2.5 py-1 transition-colors font-medium`}
+                className="px-2.5 py-1 transition-colors font-medium"
               >
                 All ({notifications.length})
               </button>
               <button
                 onClick={() => setFilter('unread')}
-                className={`px-2.5 py-1 transition-colors font-medium`}
+                className="px-2.5 py-1 transition-colors font-medium"
               >
                 Unread ({unreadCount})
               </button>
             </div>
 
             {/* Notification List */}
-            <div className="overflow-y-auto flex-1 divide-y divide-border">
+            <div className="overflow-y-auto flex-1 min-h-0 divide-y divide-border overscroll-contain">
               {loading && notifications.length === 0 ? (
                 <div className="p-8 text-center text-xs text-text-muted">
                   Loading notifications...
@@ -223,19 +223,19 @@ export function NotificationBell() {
                         !n.readAt ? 'bg-[var(--bg-card)]/30' : ''
                       }`}
                     >
-                      <div className={`p-2 bg-bg-base mt-0.5 shrink-0`}>
+                      <div className="p-2 bg-bg-base mt-0.5 shrink-0">
                         <Icon className="w-4 h-4" />
                       </div>
-                      <div className="flex-1 min-w-4">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className={`text-xs font-semibold truncate ${!n.readAt ? 'text-text-primary' : 'text-text-muted'}`}>
+                          <h4 className={`text-xs font-semibold truncate min-w-0 ${!n.readAt ? 'text-text-primary' : 'text-text-muted'}`}>
                             {n.title}
                           </h4>
                           <span className="text-xs text-text-muted shrink-0">
                             {getTimeAgo(n.createdAt || (n as any).created_at)}
                           </span>
                         </div>
-                        <p className="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed break-words">
                           {n.message}
                         </p>
                         {(n as any).action_url && (
