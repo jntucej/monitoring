@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 
 import { CalendarDays, CheckCircle2, XCircle, Clock, Loader2, ArrowRight } from "lucide-react";
@@ -35,6 +36,8 @@ const MONTH_NAMES = [
 
 
 function StudentAttendanceCalendarInner() {
+  const isSakuga = useIsSakuga();
+  const [weekView, setWeekView] = useState(false);
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth()); // 0-indexed
@@ -58,6 +61,16 @@ function StudentAttendanceCalendarInner() {
 
   const selected = selectedDate ? days.find((d) => d.date === selectedDate) : null;
 
+  // For week view: show only the week containing today (or the selected date)
+  const anchorDate = selectedDate ? new Date(selectedDate) : now;
+  const weekStart = new Date(anchorDate);
+  weekStart.setDate(anchorDate.getDate() - anchorDate.getDay());
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+
   const prevMonth = () => {
     if (month === 0) { setMonth(11); setYear((y) => y - 1); }
     else setMonth((m) => m - 1);
@@ -76,6 +89,41 @@ function StudentAttendanceCalendarInner() {
         <p className="text-sm font-semibold text-text-primary">Attendance Calendar</p>
       </div>
 
+      {/* View toggle — sakuga-VFX toggle when the theme is active */}
+      {isSakuga ? (
+        <div className="surface-card bg-bg-surface p-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold text-text-primary">{weekView ? "Week view" : "Month view"}</p>
+            <p className="text-xs text-text-muted">{weekView ? "Last 7 days" : "Full calendar"}</p>
+          </div>
+          <sakuga-toggle
+            checked={weekView}
+            label="week view"
+            onChange={((e: unknown) => setWeekView(Boolean((e as any).target?.checked ?? (e as any)))) as any}
+          >
+            week
+          </sakuga-toggle>
+        </div>
+      ) : (
+        <div className="surface-card bg-bg-surface p-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold text-text-primary">{weekView ? "Week view" : "Month view"}</p>
+            <p className="text-xs text-text-muted">{weekView ? "Last 7 days" : "Full calendar"}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setWeekView((v) => !v)}
+            className={`surface-card px-3 py-1.5 text-xs font-bold rounded-full transition-colors ${
+              weekView
+                ? "bg-action-primary text-white"
+                : "bg-bg-elevated text-text-muted hover:text-text-primary"
+            }`}
+          >
+            {weekView ? "Month" : "Week"}
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
           Attendance data unavailable: {error}. Check your connection or retry later.
@@ -83,26 +131,28 @@ function StudentAttendanceCalendarInner() {
       )}
 
       <div className="surface-card bg-bg-surface p-4 min-w-0">
-        {/* Month navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <button
-            type="button"
-            onClick={prevMonth}
-            className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
-          >
-            ← Prev
-          </button>
-          <p className="text-sm font-bold text-text-primary">
-            {MONTH_NAMES[month]} {year}
-          </p>
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
-          >
-            Next →
-          </button>
-        </div>
+        {/* Month navigation — hidden in week view */}
+        {!weekView && (
+          <div className="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            >
+              ← Prev
+            </button>
+            <p className="text-sm font-bold text-text-primary">
+              {MONTH_NAMES[month]} {year}
+            </p>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="surface-card min-h11 inline-flex items-center justify-center bg-bg-elevated px-2.5 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary"
+            >
+              Next →
+            </button>
+          </div>
+        )}
 
         {/* Weekday header */}
         <div className="grid grid-cols-7 text-center text-xs font-bold uppercase tracking-wider text-text-muted mb-1">
@@ -114,6 +164,41 @@ function StudentAttendanceCalendarInner() {
         {loading && !data ? (
           <div className="flex items-center justify-center py-8 text-xs text-text-muted">
             <Loader2 className="w-4 h-4 animate-spin mr-2" /> Loading calendar…
+          </div>
+        ) : weekView ? (
+          /* Week view: 7 day cells */
+          <div className="grid grid-cols-7 gap-1">
+            {weekDays.map((dayKey) => {
+              const dayNum = new Date(dayKey).getDate();
+              const day = days.find((d) => d.date === dayKey);
+              const state: "present" | "absent" | "unmarked" | "today" | "future" =
+                dayKey === now.toISOString().slice(0, 10)
+                  ? "today"
+                  : day
+                  ? (day.time_in ? "present" : day.status ? (["absent", "out"].includes(day.status.toLowerCase()) ? "absent" : "present") : "unmarked")
+                  : "unmarked";
+
+              const isSelected = selectedDate === dayKey;
+              return (
+                <button
+                  key={dayKey}
+                  type="button"
+                  onClick={() => setSelectedDate(isSelected ? null : dayKey)}
+                  className={`h-14 rounded-xl text-sm font-bold flex flex-col items-center justify-center transition-colors ${
+                    state === "present"
+                      ? "bg-emerald-500/15 text-action-success border border-emerald-500/30"
+                      : state === "absent"
+                      ? "bg-rose-500/15 text-action-danger border border-rose-500/30"
+                      : state === "today"
+                      ? "bg-sky-500/15 text-action-info border border-sky-500/40"
+                      : "text-text-muted border border-transparent hover:bg-bg-elevated"
+                  } ${isSelected ? "ring-2 ring-action-primary" : ""}`}
+                >
+                  <span className="text-xs text-text-muted">{new Date(dayKey).toLocaleDateString([], { weekday: "short" })}</span>
+                  <span>{dayNum}</span>
+                </button>
+              );
+            })}
           </div>
         ) : (
           <div className="grid grid-cols-7 gap-1">

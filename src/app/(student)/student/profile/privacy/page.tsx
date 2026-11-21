@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { getAuthHeaders } from "@/lib/utils";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 interface ConsentRow {
   scope: string;
@@ -49,6 +50,7 @@ const SCOPES: Record<string, { label: string; description: string; required: boo
 };
 
 export default function PrivacyPage() {
+  const isSakuga = useIsSakuga();
   const [consents, setConsents] = useState<ConsentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -139,23 +141,36 @@ export default function PrivacyPage() {
                     </p>
                   )}
                 </div>
-                <Button
-                  variant={isGranted ? "secondary" : "primary"}
-                  size="sm"
-                  disabled={(meta.required && isGranted) || loading}
-                  onClick={() => toggle(scope, isGranted)}
-                  aria-label={`${isGranted ? "Withdraw" : "Grant"} ${meta.label} consent`}
-                >
-                  {isGranted ? (
-                    <>
-                      <X className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Withdraw
-                    </>
+                <div>
+                  {isSakuga ? (
+                    <sakuga-checkbox
+                      checked={isGranted}
+                      disabled={(meta.required && isGranted) || loading}
+                      onChange={() => toggle(scope, isGranted)}
+                      label={meta.label}
+                    >
+                      {isGranted ? "Granted" : "Withdraw"}
+                    </sakuga-checkbox>
                   ) : (
-                    <>
-                      <Check className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Grant
-                    </>
+                    <Button
+                      variant={isGranted ? "secondary" : "primary"}
+                      size="sm"
+                      disabled={(meta.required && isGranted) || loading}
+                      onClick={() => toggle(scope, isGranted)}
+                      aria-label={`${isGranted ? "Withdraw" : "Grant"} ${meta.label} consent`}
+                    >
+                      {isGranted ? (
+                        <>
+                          <X className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Withdraw
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5 mr-1" aria-hidden="true" /> Grant
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               </div>
             );
           })}

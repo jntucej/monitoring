@@ -4,9 +4,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 export function ComplaintForm() {
   const router = useRouter();
+  const isSakuga = useIsSakuga();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCode, setSelectedCode] = useState("");
   const [form, setForm] = useState({
@@ -70,13 +72,25 @@ export function ComplaintForm() {
 
       <div>
         <label className="block text-sm font-medium text-text-muted mb-1" htmlFor="title">Title</label>
-        <input id="title"
-          required
-          placeholder="Brief summary of the issue"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="surface-card w-full p-2 text-sm"
-        />
+        {isSakuga ? (
+          <sakuga-input
+            id="title"
+            required
+            placeholder="Brief summary of the issue"
+            value={form.title}
+            onChange={((e: unknown) => setForm({ ...form, title: (e as any).target?.value ?? '' })) as any}
+            label="complaint title"
+            className="w-full"
+          />
+        ) : (
+          <input id="title"
+            required
+            placeholder="Brief summary of the issue"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className="surface-card w-full p-2 text-sm"
+          />
+        )}
       </div>
 
       <div>
@@ -103,34 +117,71 @@ export function ComplaintForm() {
 
       <div className="surface-card space-y-2 pt-2">
         {selected?.anonymousAllowed && (
-          <label className="flex gap-2 items-center text-sm">
-            <input
-              type="checkbox"
-              checked={form.isAnonymous}
-              onChange={(e) => setForm({ ...form, isAnonymous: e.target.checked })}
-            />
-            <span>Submit anonymously</span>
-          </label>
+          isSakuga ? (
+            <div className="flex gap-2 items-center text-sm">
+              <sakuga-checkbox
+                checked={form.isAnonymous}
+                onChange={((e: unknown) => setForm({ ...form, isAnonymous: Boolean((e as any).target?.checked ?? (e as any)) })) as any}
+                label="anonymous"
+              >
+                Submit anonymously
+              </sakuga-checkbox>
+            </div>
+          ) : (
+            <label className="flex gap-2 items-center text-sm">
+              <input
+                type="checkbox"
+                checked={form.isAnonymous}
+                onChange={(e) => setForm({ ...form, isAnonymous: e.target.checked })}
+              />
+              <span>Submit anonymously</span>
+            </label>
+          )
         )}
         {selected?.girlsCellEligible && (
-          <label className="flex gap-2 items-center text-sm">
-            <input
-              type="checkbox"
-              checked={form.girlsCell}
-              onChange={(e) => setForm({ ...form, girlsCell: e.target.checked })}
-            />
-            <span>Route to Girls Grievance Cell</span>
-          </label>
+          isSakuga ? (
+            <div className="flex gap-2 items-center text-sm">
+              <sakuga-checkbox
+                checked={form.girlsCell}
+                onChange={((e: unknown) => setForm({ ...form, girlsCell: Boolean((e as any).target?.checked ?? (e as any)) })) as any}
+                label="girls-cell"
+              >
+                Route to Girls Grievance Cell
+              </sakuga-checkbox>
+            </div>
+          ) : (
+            <label className="flex gap-2 items-center text-sm">
+              <input
+                type="checkbox"
+                checked={form.girlsCell}
+                onChange={(e) => setForm({ ...form, girlsCell: e.target.checked })}
+              />
+              <span>Route to Girls Grievance Cell</span>
+            </label>
+          )
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={busy || !selectedCode}
-        className="surface-card px-4 py-2 bg-bg-surface text-white text-sm font-medium disabled:opacity-50"
-      >
-        {busy ? "Submitting…" : "Submit complaint"}
-      </button>
+      {isSakuga ? (
+        <div className="flex justify-center">
+          <sakuga-button
+            type="submit"
+            disabled={busy || !selectedCode}
+            variant="primary"
+            label={busy ? "Submitting…" : "Submit complaint"}
+          >
+            {busy ? "Submitting…" : "Submit complaint"}
+          </sakuga-button>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          disabled={busy || !selectedCode}
+          className="surface-card px-4 py-2 bg-bg-surface text-white text-sm font-medium disabled:opacity-50"
+        >
+          {busy ? "Submitting…" : "Submit complaint"}
+        </button>
+      )}
     </form>
   );
 }

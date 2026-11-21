@@ -27,6 +27,7 @@ import {
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { usePassTypesV2 } from "@/hooks/usePassTypes";
 import { usePersona } from "@/hooks/usePersona";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 import type { PassTypeConfig } from "@/lib/pass-types";
 import { ApprovalChainPreview } from "@/components/shared/pass/ApprovalChainPreview";
 import { useUIStore } from "@/stores/uiStore";
@@ -67,6 +68,7 @@ export function PassCreateFormV2({
   className,
 }: PassCreateFormV2Props) {
   const persona = usePersona();
+  const isSakuga = useIsSakuga();
   const { addToast } = useUIStore();
   const { configs, loading: loadingTypes } = usePassTypesV2({
     persona: personaOverride ?? persona,
@@ -328,6 +330,20 @@ export function PassCreateFormV2({
           )}
 
           {/* Submit */}
+          {isSakuga ? (
+            <sakuga-button
+              type="submit"
+              disabled={submitting || !validation.valid || !from || !to}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Ticket className="h-4 w-4" />
+              )}
+              Submit {effectiveConfig.requiresApproval ? "for approval" : "pass"}
+            </sakuga-button>
+          ) : (
           <button
             type="submit"
             disabled={submitting || !validation.valid || !from || !to}
@@ -340,6 +356,7 @@ export function PassCreateFormV2({
             )}
             Submit {effectiveConfig.requiresApproval ? "for approval" : "pass"}
           </button>
+          )}
         </form>
       )}
     </div>
