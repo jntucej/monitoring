@@ -32,6 +32,23 @@ export type ApprovalRole =
 
 // ── PassTypeConfig ────────────────────────────────────────────────────────
 
+// P1: authorization kind — distinguishes what the pass ACTUALLY IS, not
+// just what the UI calls it. Stops "leave" and "credential" and "visitor
+// token" pretending to be the same object.
+//   identity   → a credential / ID (who you are)
+//   standing   → a standing authorization (you're always allowed to do X)
+//   movement   → a movement authorization (go OUT / come IN now)
+//   assignment → a duty / exam / official assignment
+//   emergency  → an emergency override (evacuation, medical, …)
+//
+// Existing pass records default to "movement" (no data migration needed).
+export type PassKind =
+  | "identity"
+  | "standing"
+  | "movement"
+  | "assignment"
+  | "emergency";
+
 export interface PassTypeConfig {
   code: string;
   label: string;
@@ -40,6 +57,8 @@ export interface PassTypeConfig {
   // persona & category
   persona: Persona;
   category: PassCategory;
+  /** P1: the authorization kind. Defaults to "movement" for existing passes. */
+  kind?: PassKind;
 
   // duration
   durationUnit: DurationUnit;
@@ -88,6 +107,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Student arriving after the morning gate close.",
     persona: "day_scholar",
     category: "entry",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 0,
     maxDuration: 2,
@@ -116,6 +136,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Day scholar leaving campus before dismissal time.",
     persona: "day_scholar",
     category: "exit",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 0,
     maxDuration: 4,
@@ -144,6 +165,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Day scholar absent for a full school day.",
     persona: "day_scholar",
     category: "exit",
+    kind: "movement",
     durationUnit: "days",
     minDuration: 1,
     maxDuration: 3,
@@ -172,6 +194,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Short outing for a campus-organised event (sports, cultural).",
     persona: "day_scholar",
     category: "exit",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 1,
     maxDuration: 6,
@@ -200,6 +223,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Day scholar staying at hostel for the night (exam week, sports camp).",
     persona: "day_scholar",
     category: "residence",
+    kind: "standing",
     durationUnit: "days",
     minDuration: 1,
     maxDuration: 14,
@@ -230,6 +254,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Hosteller leaving campus for home or guardian address.",
     persona: "hosteller",
     category: "exit",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 2,
     maxDuration: 72,
@@ -258,6 +283,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Hosteller out overnight (family function, medical).",
     persona: "hosteller",
     category: "exit",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 12,
     maxDuration: 48,
@@ -286,6 +312,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Short trip within campus town; no overnight stay.",
     persona: "hosteller",
     category: "exit",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 0.5,
     maxDuration: 2,
@@ -314,6 +341,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Skip one or more meals; auto-coupled to an active pass or standalone.",
     persona: "hosteller",
     category: "mess",
+    kind: "movement",
     durationUnit: "days",
     minDuration: 1,
     maxDuration: 7,
@@ -342,6 +370,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Hosteller off campus for medical treatment (hospital / doctor).",
     persona: "hosteller",
     category: "leave",
+    kind: "emergency",
     durationUnit: "days",
     minDuration: 1,
     maxDuration: 30,
@@ -370,6 +399,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Immediate departure due to emergency; warden overrides all other checks.",
     persona: "hosteller",
     category: "leave",
+    kind: "emergency",
     durationUnit: "hours",
     minDuration: 0,
     maxDuration: 72,
@@ -398,6 +428,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     description: "Hosteller entering campus after the evening curfew scan window.",
     persona: "hosteller",
     category: "entry",
+    kind: "movement",
     durationUnit: "hours",
     minDuration: 0,
     maxDuration: 4,

@@ -1,7 +1,22 @@
 // src/config/roles/caretaker.ts
 // Caretaker — earth · composed
 
-import type { RoleConfig } from "./types";
+import type { RoleConfig, WorkspaceContext } from "./types";
+
+// P1: the hostel approval chain as config data. The pure workflow module
+// reads this instead of a hardcoded HOSTEL_CHAIN. Adding/removing/reordering
+// a stage is a config edit, not a code edit.
+//
+// The 4-stage chain: caretaker → deputy_warden → hostel_manager → principal.
+// `when()` is always true (all hostel movements go through the full chain);
+// a conditional variant (e.g. emergency = 2-stage) would use a `when(ctx)`
+// predicate to skip intermediate stages.
+const HOSTEL_APPROVAL_STAGES = [
+  { role: "caretaker", label: "Caretaker review", domain: "hostel", substitute: "deputy_warden" },
+  { role: "deputy_warden", label: "Deputy Warden review", domain: "hostel", substitute: "hostel_manager" },
+  { role: "hostel_manager", label: "Hostel Manager sign-off", domain: "hostel", substitute: "principal" },
+  { role: "principal", label: "Principal final approval", domain: "hostel", when: () => true },
+];
 
 export const CARETAKER_CONFIG: RoleConfig = {
   id: "caretaker",
@@ -41,4 +56,8 @@ export const CARETAKER_CONFIG: RoleConfig = {
     ],
   },
   greetingTemplate: "{ticketCount} open tickets — {urgentCount} within SLA window",
+
+  // P1: the hostel approval chain as config data. The pure workflow module
+  // reads `caretaker.stages` instead of the hardcoded HOSTEL_CHAIN.
+  stages: HOSTEL_APPROVAL_STAGES,
 };

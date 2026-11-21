@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldAlert, Clock } from "lucide-react";
+import { X, ShieldAlert, Clock, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Student } from "@/lib/types";
 import type { ExitReason } from "@/lib/types";
@@ -133,6 +133,26 @@ export function ConfirmSheet({
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
               {/* Flag banner */}
               {flagBanner}
+
+              {/* P0: reconciliation banner — direction was inferred from
+                  unreliable state (no scan history or stale > 2h). The operator
+                  MUST verify before recording; the scan is routed to the
+                  supervisor exception queue, not recorded as-is. */}
+              {recommendation?.reconciliationRequired && (
+                <div className="surface-card flex items-start gap-3 px-4 py-3 bg-amber-500/10 border-l-2 border-action-warning">
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-action-warning" />
+                  <div className="min-w-0 flex-1">
+                    <span className="font-extrabold text-xs uppercase tracking-wider text-action-warning">
+                      Needs Review
+                    </span>
+                    <p className="text-xs opacity-90 mt-0.5">
+                      Direction is inferred from stale or missing scan history.
+                      Confirm the correct entry/exit before recording. This scan
+                      will be routed to the supervisor exception queue.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Student info */}
               <div className="flex items-center gap-3">

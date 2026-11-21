@@ -200,9 +200,28 @@ export interface Person {
   roomNumber?: string;
   hostelCurfewTime?: string;
   /**
+   * P0: split residential status from campus presence.
+   *
+   * `residentialProfile` — WHERE this person lives (hostel or day scholar).
+   *   This drives hostel-specific features (curfew, leave, mess, occupancy).
+   *   It is a STABLE attribute that changes only on a residential-status edit.
+   *
+   * `campusPresence` — WHERE this person is RIGHT NOW (in/out/unknown).
+   *   This is a LIVE state that changes on every gate scan.
+   *   It is NEVER used as a proxy for residential status.
+   *
+   * Before this split, `currentEntryType` (residential) and `campusStatus`
+   * (presence) were conflated: a day scholar who was OUT campus was
+   * incorrectly treated as "not on campus" in hostel-leave logic. Now the
+   * two are separate fields with distinct consumers.
+   */
+  residentialProfile?: ResidentialProfile;
+  campusPresence?: CampusPresence;
+  /**
    * Live entry-type selection for the hostel-permission flow. Mirrors
    * `studentDetails.currentEntryType`; sourced from
    * student_details.current_entry_type on the persons lookup.
+   * (Retained for backwards compat alongside the new residentialProfile.)
    */
   currentEntryType?: "hosteller" | "day_scholar" | null;
   /** Graduation flag — true when the student has completed the programme. */
@@ -211,6 +230,28 @@ export interface Person {
   completedAt?: string;
   wardenId?: string;
 }
+
+/**
+ * P0: where the person lives. Derived from student_details.student_type
+ * (HM/HF = hosteller, DM/DF = day_scholar). Stable; changes on edit.
+ */
+export interface ResidentialProfile {
+  type: "hosteller" | "day_scholar" | "n_a";
+  /** hostel block, when type === "hosteller". */
+  hostelBlock?: string | null;
+  /** hostel room, when type === "hosteller". */
+  roomNumber?: string | null;
+  /** when the residential status became effective (ISO). */
+  effectiveFrom?: string | null;
+  /** when it will end (e.g. end of semester). null = indefinite. */
+  effectiveUntil?: string | null;
+}
+
+/**
+ * P0: where the person is RIGHT NOW. Live state; changes on every gate scan.
+ * NEVER used as a proxy for residential status.
+ */
+export type CampusPresence = "in_campus" | "out_campus" | "unknown";
 
 // Keep Student interface for backwards compatibility (extends/aliases Person)
 export type Student = Person;
@@ -309,6 +350,23 @@ export interface OutingEntry {
 export type StudentType = "HM" | "HF" | "DM" | "DF";
 
 export type ScanDirection = "IN" | "OUT";
+
+/**
+ * P0: the direction the system *infers* for a person at the gate.
+ *
+ * "RECONCILIATION_REQUIRED" is emitted instead of guessing when the
+ * last-known state is unreliable:
+ *   - no scan history exists for this person (stale profile / first scan)
+ *   - the most recent scan is older than the reconciliation threshold
+ *     (simultaneous scans at two gates, or a stale/corrupt state)
+ *
+ * The gate scan handler routes this to the existing operator exception
+ * queue (Supervisor review) rather than blindly choosing IN or OUT.
+ */
+export type InferredDirection = "IN" | "OUT" | "RECONCILIATION_REQUIRED";
+
+/** If the last scan is older than this, the direction is unreliable. */
+export const RECONCILIATION_STALE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 export interface Scan {
   id: string;

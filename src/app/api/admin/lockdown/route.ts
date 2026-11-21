@@ -17,6 +17,8 @@ async function handlePost(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const scopes: string[] = body?.scopes ?? [];
   const message: string | null = body?.message ?? null;
+  // P0: evacuation mode — permits OUT (egress) while blocking IN (ingress).
+  const evacuation: boolean = body?.evacuation === true;
 
   if (!scopes.length) {
     return NextResponse.json(
@@ -25,7 +27,7 @@ async function handlePost(req: NextRequest) {
     );
   }
 
-  const lockdown = await createLockdown(scopes, message, actorId);
+  const lockdown = await createLockdown(scopes, message, actorId, evacuation);
   if (!lockdown) {
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to broadcast lockdown" } },

@@ -60,5 +60,60 @@ export function getRoleConfig(role: Role | string | undefined | null): RoleConfi
   return ROLE_CONFIGS[role as Role];
 }
 
+// ── P1: config-driven resolver — iterate `when(ctx)` over the config,
+//    not switch on role names in components. The config IS the source of
+//    truth; adding/hiding a screen or capability is a config edit.
+//
+// Fail-closed for security caps, fail-open for ux caps (guardrail #2):
+// a throwing `when()` denies a security cap but grants a ux cap.
+import type { WorkspaceContext, NavEntry, CapabilityEntry } from "./types";
+
+export interface ConfigProjection {
+  /** nav entries whose `when(ctx)` passed (or ux caps that fail-open). */
+  visibleNav: NavEntry[];
+  /** capability ids whose `when(ctx)` passed (or ux caps that fail-open). */
+  capabilities: string[];
+}
+
+export function resolveRoleConfig(
+  role: Role | string | undefined | null,
+  ctx: WorkspaceContext,
+): ConfigProjection {
+  const config = getRoleConfig(role);
+  if (!config) return { visibleNav: [], capabilities: [] };
+
+  const visibleNav: NavEntry[] = [];
+  for (const entry of config.nav ?? []) {
+    let matched = true; // no when() → always show (fail open for nav)
+    let threw = false;
+    if (entry.when) {
+      try {
+        matched = entry.when(ctx);
+      } catch {
+        threw = true;
+      }
+    }
+    // security nav items fail closed on error; ux items fail open.
+    const show = threw ? (entry.kind !== "security") : matched;
+    if (show) visibleNav.push(entry);
+  }
+
+  const capabilities: string[] = [];
+  for (const cap of config.capabilities ?? []) {
+    let matched = false;
+    let threw = false;
+    try {
+      matched = cap.when(ctx);
+    } catch {
+      threw = true;
+    }
+    const allow = threw ? (cap.kind !== "security") : matched;
+    if (allow) capabilities.push(cap.id);
+  }
+
+  return { visibleNav, capabilities };
+}
+
 export type { RoleConfig, RoleRegistry, IdentityConfig, HomeWidget, BotPersona,
-  OnboardingScript, OnboardingStep, MotionPreset } from "./types";
+  OnboardingScript, OnboardingStep, MotionPreset, WorkspaceContext, NavEntry,
+  CapabilityEntry, ApprovalStageConfig } from "./types";

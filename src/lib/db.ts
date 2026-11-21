@@ -28,8 +28,10 @@ export function getDbClient(): SupabaseClient {
 import type {
   Department, DepartmentCode, Gate, Person, Student, PersonType, StudentDetails, EmployeeDetails, VisitorLog,
   Scan, ScanDirection, ExitReason, GatePass, GatePassStatus, Alert, AlertSeverity, AuditEntry,
-  User, DashboardData, Role, AccountStatus, PersonTypeStats, DailyGateStats
+  User, DashboardData, Role, AccountStatus, PersonTypeStats, DailyGateStats,
+  InferredDirection,
 } from "./types";
+import { RECONCILIATION_STALE_MS } from "./types";
 
 export function sanitizePostgrestParam(val: string | null | undefined): string {
   if (!val || typeof val !== "string") return "";
@@ -1818,9 +1820,11 @@ export async function isDuplicate(uniqueId: string, direction: ScanDirection, wi
   return data.length > 0;
 }
 
-export async function inferDirection(uniqueId: string): Promise<ScanDirection> {
+export async function inferDirection(uniqueId: string): Promise<InferredDirection> {
   const l = await lastScanFor(uniqueId);
-  if (!l) return "IN";
+  if (!l) return "RECONCILIATION_REQUIRED"; // no scan history — can't guess
+  const ageMs = Date.now() - new Date(l.timestamp).getTime();
+  if (ageMs > RECONCILIATION_STALE_MS) return "RECONCILIATION_REQUIRED"; // stale state
   return l.direction === "IN" ? "OUT" : "IN";
 }
 
@@ -2735,6 +2739,12 @@ export interface Lockdown {
   issuedBy: string | null;
   issuedAt: string;
   liftedAt: string | null;
+  /**
+   * P0: when true, the lockdown permits OUT (egress) movement while blocking
+   * IN (ingress). This is the evacuation case: everyone leaves, no one enters.
+   * When false (default), the lockdown blocks both directions.
+   */
+  evacuation: boolean;
 }
 
 function mLockdown(r: any): Lockdown {
@@ -2750,6 +2760,7 @@ function mLockdown(r: any): Lockdown {
     issuedBy: d.issued_by ?? null,
     issuedAt: d.issued_at ?? r.created_at,
     liftedAt: d.lifted_at ?? null,
+    evacuation: d.evacuation === true, // default false (block both directions)
   };
 }
 
@@ -2770,7 +2781,7 @@ export async function getActiveLockdown(): Promise<Lockdown | null> {
 }
 
 /** Broadcasts a new lockdown. */
-export async function createLockdown(scopes: string[], message: string | null, issuedBy: string): Promise<Lockdown | null> {
+export async function createLockdown(scopes: string[], message: string | null, issuedBy: string, evacuation: boolean = false): Promise<Lockdown | null> {
   const { getSupabaseServiceClient } = await import('./dbClient');
   const service = getSupabaseServiceClient();
   // CEJ-96 fix: write the lockdown payload into the `data` JSONB column that
@@ -2786,6 +2797,7 @@ export async function createLockdown(scopes: string[], message: string | null, i
         issued_at: issuedAt,
         lifted_at: null,
         lifted_by: null,
+        evacuation,
       },
     })
     .select()
@@ -2796,7 +2808,7 @@ export async function createLockdown(scopes: string[], message: string | null, i
     userId: issuedBy,
     userName: 'Admin',
     role: 'admin',
-    details: `Lockdown issued for scopes: ${scopes.join(', ')}`,
+    details: `Lockdown issued for scopes: ${scopes.join(', ')}${evacuation ? ' (evacuation: OUT allowed, IN blocked)' : ''}`,
   });
   return mLockdown(data);
 }
@@ -2830,6 +2842,31 @@ export async function liftLockdown(lockdownId: string, liftedBy: string): Promis
     details: `Lockdown ${lockdownId} lifted`,
   });
   return true;
+}
+
+/**
+ * P0: movement check against the active lockdown.
+ *
+ * Returns:
+ *   - "ALLOW"   → no active lockdown, or evacuation mode allows this direction
+ *   - "DENY"    → lockdown blocks this direction
+ *
+ * Evacuation mode (lockdown.evacuation === true):
+ *   - OUT (egress) → ALLOW
+ *   - IN  (ingress) → DENY
+ *
+ * Normal lockdown (lockdown.evacuation === false):
+ *   - both IN and OUT → DENY
+ */
+export async function checkLockdownForMovement(direction: "IN" | "OUT"): Promise<"ALLOW" | "DENY"> {
+  const lockdown = await getActiveLockdown();
+  if (!lockdown) return "ALLOW";
+  if (lockdown.evacuation) {
+    // Evacuation: egress allowed, ingress blocked.
+    return direction === "OUT" ? "ALLOW" : "DENY";
+  }
+  // Normal lockdown: both directions blocked.
+  return "DENY";
 }
 
 export const provisionProfile = createUser;

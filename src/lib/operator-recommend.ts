@@ -53,6 +53,13 @@ export interface Recommendation {
   confidence: number;
   /** 0..2 alternatives rendered under the recommended button. */
   alternatives: RecommendationAlternative[];
+  /**
+   * P0: true when the direction was inferred from unreliable state
+   * (no scan history or stale last scan > 2h). The operator UI routes this
+   * to the existing exception drawer / supervisor review rather than
+   * recording the scan as-is.
+   */
+  reconciliationRequired?: boolean;
 }
 
 /** IN-movement button metadata (icon token via operator-icons.ts). */
@@ -198,5 +205,8 @@ export function recommend(input: RecommendationInput): Recommendation {
     entryButton,
     confidence,
     alternatives: cappedAlts,
+    // P0: when campusStatus is null (no scan history or stale > 2h), the
+    // direction was guessed. Flag it so the operator UI routes to review.
+    reconciliationRequired: campusStatus === null,
   };
 }

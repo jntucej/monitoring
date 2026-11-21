@@ -14,6 +14,28 @@ export const L3_ROLE = "hostel_manager";
 export const L4_ROLE = "principal";
 const HOSTEL_CHAIN = [L1_ROLE, L2_ROLE, L3_ROLE, L4_ROLE] as const;
 
+// P1: config-driven override. The hostel approval chain is now data in
+// config/roles/caretaker.ts (stages[]). This function reads it; if absent,
+// falls back to the hardcoded chain (backwards compat).
+function getHostelChainFromConfig(): string[] {
+  try {
+    // Lazy import to avoid a circular dependency (config → types → roles → …).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { CARETAKER_CONFIG } = require("@/config/roles/caretaker") as typeof import("@/config/roles/caretaker");
+    if (CARETAKER_CONFIG?.stages?.length) {
+      return CARETAKER_CONFIG.stages.map(s => s.role);
+    }
+  } catch {
+    // config not loaded → fall through to hardcoded
+  }
+  return [...HOSTEL_CHAIN];
+}
+
+/** P1: resolve the hostel chain from config, falling back to the hardcoded default. */
+export function resolveHostelChain(): string[] {
+  return getHostelChainFromConfig();
+}
+
 function normalize(role: string | null | undefined): string | null {
   if (!role) return null;
   return role === "warden" ? L3_ROLE : role;
@@ -24,15 +46,17 @@ export function resolveInitialHostelStage(): string {
 }
 
 export function nextHostelLevel(current: string): string | null {
-  const idx = HOSTEL_CHAIN.indexOf(current as (typeof HOSTEL_CHAIN)[number]);
-  if (idx === -1 || idx === HOSTEL_CHAIN.length - 1) return null;
-  return HOSTEL_CHAIN[idx + 1];
+  const chain = resolveHostelChain();
+  const idx = chain.indexOf(current);
+  if (idx === -1 || idx === chain.length - 1) return null;
+  return chain[idx + 1];
 }
 
 export function levelsAbove(current: string): string[] {
-  const idx = HOSTEL_CHAIN.indexOf(current as (typeof HOSTEL_CHAIN)[number]);
+  const chain = resolveHostelChain();
+  const idx = chain.indexOf(current);
   if (idx === -1) return [];
-  return HOSTEL_CHAIN.slice(idx + 1);
+  return chain.slice(idx + 1);
 }
 
 export interface StepupInput {

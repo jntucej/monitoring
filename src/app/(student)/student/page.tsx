@@ -18,7 +18,8 @@ import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { usePersona } from "@/hooks/usePersona";
-import { useWorkspace } from "@/hooks/useWorkspace";
+import { resolveRoleConfig } from "@/config/roles";
+import type { WorkspaceContext } from "@/config/roles/types";
 
 // Persona-aware student home. The SAME widget pool serves both personas, but each
 // persona gets a DISTINCT dashboard: a day scholar's home is attendance/class
@@ -132,22 +133,50 @@ function StudentHomeInner() {
   const personaKey: "day_scholar" | "hosteller" =
     persona === "hosteller" ? "hosteller" : "day_scholar";
   const widgetOrderPref = useEffectivePref<string[]>("dashboard.widgetOrder");
-  // Capability projection (server-truth, guardrail #1). The hostel widgets are
-  // gated on these so a day scholar's home never renders hostel/curfew surfaces
-  // even if persona resolution is off. Fail-open: if !ready we fall back to the
-  // legacy persona-only set so the home never blanks.
-  const ws = useWorkspace();
 
-  // Map each hostel-family widget to the capability that must be present for it
-  // to render. (guardrail #6: view caps, not act caps, drive surface display.)
+  // P1: config-driven capability gate. The student home reads capabilities
+  // from config/roles/student.ts (the when(ctx) conditions) instead of a
+  // separate engine. A day scholar's home provably renders no hostel
+  // surface even if persona resolution is off.
+  //
+  // Build a minimal WorkspaceContext from the existing persona + traits.
+  // (campusStatus defaults to "unknown" — the gate is fail-open for ux
+  //  widgets, so unknown doesn't blank the home.)
+  // The trusted, admin-verified user record (same source useActiveTraits reads).
+  // We only need the residential signal here, which `personaKey` already carries.
+  const wsCtx: WorkspaceContext = useMemo(() => {
+    const isHosteller = personaKey === "hosteller";
+    return {
+      roles: ["student"],
+      personType: "student",
+      residentialStatus: isHosteller ? "hosteller" : "day_scholar",
+      campusStatus: "unknown" as const,
+      // The block/room detail is not needed for the capability gate — the gate
+      // keys off residentialStatus, not the specific block. Leave undefined
+      // so the hostel widget's internal data fetch fills it in.
+      hostel: undefined,
+      activeAuthorizations: [],
+      activeApprovals: [],
+    };
+  }, [personaKey]);
+
+  // The capability set the student config grants for this context.
+  const studentCaps: Set<string> = useMemo(() => {
+    const { capabilities } = resolveRoleConfig("student", wsCtx);
+    return new Set(capabilities);
+  }, [wsCtx]);
+
+  // Map hostel-family widgets to the capability that must be present.
+  // (guardrail #6: view caps drive surface display.)
   const HOSTEL_WIDGET_CAP: Record<string, string> = {
     "active-pass": "hostel.leave.view",
     context: "curfew.view",
   };
 
-  // The persona's data widgets, honouring a user override pref if present, then
-  // filtered by capability. A widget is kept when: the capability is present
-  // (server-truth), OR we haven't resolved yet (fail-open, keep legacy set).
+  // The persona's data widgets, honouring a user override pref, then
+  // filtered by capability. A hostel widget renders only if the config's
+  // when(ctx) condition granted the corresponding capability. Fail-open:
+  // a non-hostel widget always renders.
   const personaDataWidgets: string[] = useMemo(() => {
     const base = PERSONA_DATA_WIDGETS[personaKey];
     const pref = widgetOrderPref.value ?? [];
@@ -155,13 +184,12 @@ function StudentHomeInner() {
     const valid = pref.filter((id) => allIds.includes(id));
     const missing = allIds.filter((id) => !valid.includes(id));
     const ordered = [...valid, ...missing];
-    if (!ws.ready) return ordered; // fail-open: show legacy persona set
     return ordered.filter((id) => {
       const cap = HOSTEL_WIDGET_CAP[id];
       if (!cap) return true; // non-hostel widgets always render
-      return ws.has(cap); // hostel widgets only when the view cap is present
+      return studentCaps.has(cap); // hostel widgets only when the view cap is granted
     });
-  }, [personaKey, widgetOrderPref.value, ws.ready, ws.has, ws]);
+  }, [personaKey, widgetOrderPref.value, studentCaps]);
 
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
