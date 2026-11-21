@@ -19,7 +19,6 @@ export type QuotaWindow = "month" | "semester" | "year";
 export type ApprovalRole =
   | "teacher"
   | "hod"
-  | "warden"
   | "deputy_warden"
   | "principal"
   | "vice_principal"
@@ -27,6 +26,8 @@ export type ApprovalRole =
   | "medical"
   | "faculty_incharge"
   | "exam_branch"
+  | "caretaker"
+  | "hostel_manager"
   | "self";
 
 // ── PassTypeConfig ────────────────────────────────────────────────────────
@@ -203,7 +204,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 1,
     maxDuration: 14,
     requiresApproval: true,
-    approvalChain: ["warden", "principal"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal"],
     requiresParentConsent: true,
     parentConsentExpiryHours: 48,
     requiresGateScan: true,
@@ -233,7 +234,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 2,
     maxDuration: 72,
     requiresApproval: true,
-    approvalChain: ["warden", "parent", "deputy_warden"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal"],
     requiresParentConsent: true,
     parentConsentExpiryHours: 24,
     requiresGateScan: true,
@@ -261,7 +262,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 12,
     maxDuration: 48,
     requiresApproval: true,
-    approvalChain: ["warden", "parent", "principal"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal"],
     requiresParentConsent: true,
     parentConsentExpiryHours: 24,
     requiresGateScan: true,
@@ -289,7 +290,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 0.5,
     maxDuration: 2,
     requiresApproval: true,
-    approvalChain: ["warden"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal"],
     requiresParentConsent: false,
     parentConsentExpiryHours: 0,
     requiresGateScan: true,
@@ -345,7 +346,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 1,
     maxDuration: 30,
     requiresApproval: true,
-    approvalChain: ["warden", "medical", "principal"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal", "medical"],
     requiresParentConsent: true,
     parentConsentExpiryHours: 72,
     requiresGateScan: true,
@@ -373,7 +374,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 0,
     maxDuration: 72,
     requiresApproval: true,
-    approvalChain: ["warden"],
+    approvalChain: ["caretaker", "principal"],
     requiresParentConsent: false,
     parentConsentExpiryHours: 0,
     requiresGateScan: true,
@@ -401,7 +402,7 @@ export const PASS_TYPE_SEED: PassTypeConfig[] = [
     minDuration: 0,
     maxDuration: 4,
     requiresApproval: true,
-    approvalChain: ["warden"],
+    approvalChain: ["caretaker", "deputy_warden", "hostel_manager", "principal"],
     requiresParentConsent: false,
     parentConsentExpiryHours: 0,
     requiresGateScan: true,
@@ -441,7 +442,6 @@ export function passTypeByCode(code: string): PassTypeConfig | undefined {
 const ROLE_LABELS: Record<ApprovalRole, string> = {
   teacher: "Teacher",
   hod: "HOD",
-  warden: "Warden",
   deputy_warden: "Deputy Warden",
   principal: "Principal",
   vice_principal: "Vice Principal",
@@ -449,6 +449,8 @@ const ROLE_LABELS: Record<ApprovalRole, string> = {
   medical: "Medical Officer",
   faculty_incharge: "Faculty In-charge",
   exam_branch: "Exam Branch",
+  caretaker: "Hostel In-charge",
+  hostel_manager: "Hostel Manager",
   self: "Self",
 };
 
