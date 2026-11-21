@@ -397,6 +397,29 @@ p, li, .text-body { color: var(--color-text-secondary); }
   color: var(--color-text-primary);
 }
 
+/* ── SAKUGA-VFX button overrides ────────────────────────────────
+   sakuga-button uses :host{...} inside its shadow root. The vars
+   are already overridden at [data-theme="sakuga"] level, so the
+   button inherits --sk-card, --sk-pri, --sk-acc, --sk-ink etc.
+   This block adds size/padding tweaks so the VFX button matches
+   the app's compact CTA density (the default .btn is 14px 30px
+   which is too large for inline CTAs on mobile). */
+[data-theme="sakuga"] sakuga-button {
+  /* let the component's shadow-root vars inherit from the page */
+  --sk-r: 10px;
+  --sk-bw: 2.4px;
+  --sk-sh: 4px 5px 0 var(--sk-soft);
+  --sk-btn-sh: var(--sk-sh);
+  --sk-btn-line: var(--sk-ink);
+}
+
+[data-theme="sakuga"] sakuga-button::part(button) {
+  padding: 10px 18px;
+  font-size: 14px;
+  line-height: 1.2;
+  border-radius: var(--sk-r);
+}
+
 /* ── PERF: skip offscreen section render ──────────────────────── */
 .section-offscreen {
   content-visibility: auto;

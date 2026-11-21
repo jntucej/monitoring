@@ -8,11 +8,22 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 import {
   SPECIAL_CATEGORIES, MEAL_LABEL,
   effectiveEventStatus, canIssueToken, countdownLabel,
   type SpecialEvent, type SpecialItemCategory,
 } from "@/lib/mess-reviews";
+
+// JSX declaration for sakuga-button
+type SakugaButtonProps = Record<string, unknown> & { children?: React.ReactNode };
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "sakuga-button": SakugaButtonProps;
+    }
+  }
+}
 
 const CAT_TONE = Object.fromEntries(
   SPECIAL_CATEGORIES.map((c) => [c.value, c.tone]),
@@ -23,6 +34,7 @@ const CAT_LABEL = Object.fromEntries(
 
 export function SpecialItemSelector() {
   const addToast = useUIStore((s) => s.addToast);
+  const isSakuga = useIsSakuga();
   const [events, setEvents] = useState<SpecialEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -192,15 +204,26 @@ export function SpecialItemSelector() {
               {open && (
                 <div className="mt-2 flex items-center justify-between">
                   <span className="text-xs text-text-muted">{selected.size} selected</span>
-                  <button
-                    type="button"
-                    disabled={savingEventId === ev.id}
-                    onClick={() => void save(ev)}
-                    className="surface-card inline-flex items-center gap-2 bg-action-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
-                  >
-                    {savingEventId === ev.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                    Save selection
-                  </button>
+                  {isSakuga ? (
+                    <sakuga-button
+                      variant="primary"
+                      disabled={savingEventId === ev.id}
+                      onClick={() => void save(ev)}
+                      label="Save selection"
+                    >
+                      Save selection
+                    </sakuga-button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={savingEventId === ev.id}
+                      onClick={() => void save(ev)}
+                      className="surface-card inline-flex items-center gap-2 bg-action-primary px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                    >
+                      {savingEventId === ev.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                      Save selection
+                    </button>
+                  )}
                 </div>
               )}
 

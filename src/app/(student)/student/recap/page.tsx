@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 import { Share2 } from "lucide-react";
 
 interface RecapPayload {
@@ -19,6 +21,9 @@ interface RecapPayload {
 
 // Shareable, non-surveillance recap.
 export default function RecapPage() {
+  const isSakuga = useIsSakuga();
+  const [mood, setMood] = useState(3);
+
   const { data, loading } = useApiResource<RecapPayload>("/api/campus/recap", {
     ttlMs: 60_000,
   });
@@ -58,6 +63,21 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
             </dd>
           </div>
         </dl>
+        {isSakuga && (
+          <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+            <div>
+              <p className="text-xs font-semibold text-text-muted">How&apos;s your semester?</p>
+              <p className="text-xs text-text-muted">{mood}/5</p>
+            </div>
+            <sakuga-rating
+              value={mood}
+              label="semester mood"
+              onChange={(e: Event) => setMood((e.target as unknown as { value: string }).value ? +(e.target as unknown as { value: string }).value : 0)}
+            >
+              ★
+            </sakuga-rating>
+          </div>
+        )}
       </div>
       <button
         onClick={share}

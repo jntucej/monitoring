@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 import { Megaphone, Bell } from "lucide-react";
 import type { Role } from "@/lib/types";
 import {
@@ -20,6 +21,8 @@ interface NotificationsPayload {
 }
 
 function Inner() {
+  const isSakuga = useIsSakuga();
+  const [showToast, setShowToast] = useState(false);
   const { data: alertsData } = useApiResource<NotificationsPayload>(
     "/api/notifications",
     { ttlMs: 30_000 },
@@ -47,6 +50,10 @@ function Inner() {
     })),
   ].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 
+  // Flash a sakuga-toast when there are unread alerts on first load
+  const latestAlert = all[0];
+  const isNewAlert = latestAlert?.createdAt && new Date(latestAlert.createdAt).getTime() > Date.now() - 60_000;
+
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-3">
       <div className="flex items-center justify-between">
@@ -68,6 +75,17 @@ function Inner() {
           </Link>
         </nav>
       </div>
+
+      {/* Sakuga-VFX toast flash for new alerts */}
+      {isSakuga && isNewAlert && (
+        <sakuga-toast
+          visible={showToast}
+          onClose={() => setShowToast(false)}
+        >
+          {latestAlert!.title}
+        </sakuga-toast>
+      )}
+
       {all.length === 0 ? (
         <EmptyState
           title="Nothing here"
