@@ -5,6 +5,10 @@
 
 import React from "react";
 import { AlertTriangle } from "lucide-react";
+import { hasCapability } from "@/config/roles";
+import type { WorkspaceContext } from "@/config/roles/types";
+import { useAuthStore } from "@/stores/authStore";
+import type { Role } from "@/lib/types";
 
 interface Props {
   children: React.ReactNode;
@@ -15,7 +19,36 @@ interface Props {
   fallback?: React.ReactNode;
   /** When this value changes, an errored boundary resets and re-renders. */
   resetKey?: unknown;
+  /**
+   * P1: gate the widget on a capability id. When present, the widget renders
+   * nothing (or the fallback) unless `hasCapability(role, context, capability)`
+   * passes. This is the single change that makes every existing widget
+   * conditional without editing the widget itself.
+   */
+  capability?: string;
+  /** The workspace context to evaluate the capability against. */
+  context?: WorkspaceContext;
 }
+
+// The capability check lives in a small child so the error boundary still
+// wraps the gated widget. Returns null when the cap isn't granted.
+function CapabilityGate({
+  capability,
+  context,
+  fallback,
+  children,
+}: {
+  capability: string;
+  context: WorkspaceContext;
+  fallback?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const role = useAuthStore((s) => s.role) as Role | undefined;
+  const granted = role ? hasCapability(role, context, capability) : false;
+  if (!granted) return <>{fallback ?? null}</>;
+  return <>{children}</>;
+}
+
 interface State {
   hasError: boolean;
   error: Error | null;
@@ -49,6 +82,14 @@ export class WidgetBoundary extends React.Component<Props, State> {
         )
       );
     }
-    return this.props.children;
+    const { capability, context, children, fallback } = this.props;
+    if (capability && context) {
+      return (
+        <CapabilityGate capability={capability} context={context} fallback={fallback}>
+          {children}
+        </CapabilityGate>
+      );
+    }
+    return children;
   }
 }

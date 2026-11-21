@@ -19,6 +19,8 @@ import {
   type FlagLevel,
   type Domain,
 } from "@/lib/permission-model";
+import { hasCapability } from "@/config/roles";
+import type { WorkspaceContext } from "@/config/roles/types";
 
 export interface UseCanActOptions {
   /** The ticket's requirements. */
@@ -27,6 +29,16 @@ export interface UseCanActOptions {
   flag?: FlagLevel;
   /** Whether the actor has completed step-up auth this session. */
   stepUpVerified?: boolean;
+  /**
+   * P1 / §1 Touch 4: when present, ALSO gate on a capability id from the
+   * config-driven resolver. The button is enabled only when BOTH the
+   * ticket `canAct` AND the capability pass. This keeps the same call
+   * site server-consistent with the API route (which checks the same
+   * capability id).
+   */
+  capability?: string;
+  /** The workspace context to evaluate the capability against. */
+  context?: WorkspaceContext;
 }
 
 export interface UseCanActResult {
@@ -41,7 +53,7 @@ export interface UseCanActResult {
 }
 
 export function useCanAct(options: UseCanActOptions): UseCanActResult {
-  const { requirements, flag, stepUpVerified } = options;
+  const { requirements, flag, stepUpVerified, capability, context } = options;
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
 
@@ -65,15 +77,27 @@ export function useCanAct(options: UseCanActOptions): UseCanActResult {
     });
 
     const decision = canAct(actor, requirements);
-    const allowed = decision.allowed;
+    let allowed = decision.allowed;
+    let blockMessage = allowed ? "" : (decision as { message: string }).message;
+
+    // P1 / §1 Touch 4: when a capability id is present, the button is
+    // enabled only when BOTH the ticket canAct AND the config capability
+    // pass. Same resolver the API route uses → client/server agree.
+    if (capability && context && allowed) {
+      const capGranted = hasCapability(role, context, capability);
+      if (!capGranted) {
+        allowed = false;
+        blockMessage = `Capability '${capability}' not granted for this context.`;
+      }
+    }
 
     return {
       decision,
       actor,
       canAct: allowed,
-      blockMessage: allowed ? "" : (decision as { message: string }).message,
+      blockMessage,
     };
-  }, [user, role, requirements, flag, stepUpVerified]);
+  }, [user, role, requirements, flag, stepUpVerified, capability, context]);
 }
 
 export default useCanAct;

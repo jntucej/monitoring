@@ -68,11 +68,133 @@ export function getRoleConfig(role: Role | string | undefined | null): RoleConfi
 // a throwing `when()` denies a security cap but grants a ux cap.
 import type { WorkspaceContext, NavEntry, CapabilityEntry } from "./types";
 
+/**
+ * Config version. Bump on any `when()` / stage / capability edit. The
+ * workspace context payload + audit events carry it so "which config made
+ * this call" is answerable from the audit trail alone. Rollback is
+ * `git revert` — config is code, not a DB policy editor.
+ */
+export const CONFIG_VERSION = 1;
+
 export interface ConfigProjection {
   /** nav entries whose `when(ctx)` passed (or ux caps that fail-open). */
   visibleNav: NavEntry[];
   /** capability ids whose `when(ctx)` passed (or ux caps that fail-open). */
   capabilities: string[];
+}
+
+/**
+ * The single call site for "can this context do X?" in the UI.
+ * UI never branches on role/context directly — it calls this.
+ *
+ * Guardrail #2: security caps fail closed on a throwing `when()`, ux caps
+ * fail open. A clean `false` is not granted regardless of kind.
+ */
+export function hasCapability(
+  role: Role | string | undefined | null,
+  ctx: WorkspaceContext,
+  capId: string,
+): boolean {
+  const config = getRoleConfig(role);
+  if (!config) return false;
+  const cap = (config.capabilities ?? []).find((c) => c.id === capId);
+  if (!cap) return false; // unknown cap → fail closed
+  try {
+    return cap.when(ctx);
+  } catch {
+    return cap.kind !== "security"; // security fails closed, ux fails open
+  }
+}
+
+/**
+ * The single call site for "should this nav item show?" in the UI.
+ */
+export function isNavVisible(
+  role: Role | string | undefined | null,
+  ctx: WorkspaceContext,
+  key: string,
+): boolean {
+  const config = getRoleConfig(role);
+  if (!config) return false;
+  const entry = (config.nav ?? []).find((n) => n.key === key);
+  if (!entry) return false;
+  if (!entry.when) return true; // no condition → always show
+  try {
+    return entry.when(ctx);
+  } catch {
+    return entry.kind !== "security"; // security nav fails closed
+  }
+}
+
+/**
+ * Explain-why for a capability decision (guardrail #9 + §3 debuggability).
+ * Returns the decision, the reason, the config version, and the source file
+ * + line that produced it. This replaces "send a screenshot" support flows.
+ */
+export interface CapExplanation {
+  decision: "granted" | "denied";
+  reason: string;
+  contextHash: string;
+  configVersion: number;
+  source: string;
+}
+
+export function explainCapability(
+  role: Role | string | undefined | null,
+  ctx: WorkspaceContext,
+  capId: string,
+): CapExplanation {
+  const config = getRoleConfig(role);
+  const source = config ? `config/roles/${config.id}.ts` : "no config";
+  const cap = config ? (config.capabilities ?? []).find((c) => c.id === capId) : undefined;
+
+  let matched = false;
+  let threw = false;
+  let reason = "";
+  if (!cap) {
+    reason = `capability '${capId}' is not declared for role '${role ?? "?"}'`;
+  } else {
+    try {
+      matched = cap.when(ctx);
+      reason = matched
+        ? `condition matched (${cap.label})`
+        : `condition not matched (${cap.label})`;
+    } catch {
+      threw = true;
+      reason = cap.kind !== "security"
+        ? "fail-open (ux cap threw in condition)"
+        : "fail-closed (security cap threw in condition)";
+    }
+  }
+
+  const granted = cap
+    ? threw
+      ? cap.kind !== "security"
+      : matched
+    : false;
+
+  return {
+    decision: granted ? "granted" : "denied",
+    reason,
+    contextHash: contextHash(ctx),
+    configVersion: CONFIG_VERSION,
+    source,
+  };
+}
+
+/** Cheap context fingerprint (stable ordering, no secrets). */
+export function contextHash(ctx: WorkspaceContext): string {
+  const seed = [
+    ctx.personType,
+    ctx.residentialStatus,
+    ctx.campusStatus,
+    [...ctx.roles].sort().join(","),
+    ctx.activeAuthorizations.length,
+    CONFIG_VERSION,
+  ].join("|");
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(8, "0");
 }
 
 export function resolveRoleConfig(

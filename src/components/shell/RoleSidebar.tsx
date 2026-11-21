@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { NavGroup, NavLink, RoleManifest } from "./types";
+import type { NavGroup, NavLink, NavEntry, NavContext, NavChild, RoleManifest } from "./types";
 
 function isActive(pathname: string | null, href: string, rootHref: string) {
   if (!pathname) return false;
@@ -17,6 +17,26 @@ function groupActive(pathname: string | null, group: NavGroup, rootHref: string)
   return group.children.some((c) => isActive(pathname, c.href, rootHref));
 }
 
+/** P1: filter a nav entry by its `when(ctx)` predicate. Omit → always keep. */
+function entryVisible(entry: NavEntry, ctx?: NavContext): boolean {
+  if (!entry.when || !ctx) return true;
+  try {
+    return entry.when(ctx);
+  } catch {
+    return true; // fail-open for nav (cosmetic)
+  }
+}
+
+/** P1: filter a group child by its `when(ctx)` predicate. Omit → always keep. */
+function childVisible(child: NavChild, ctx?: NavContext): boolean {
+  if (!child.when || !ctx) return true;
+  try {
+    return child.when(ctx);
+  } catch {
+    return true; // fail-open for nav (cosmetic)
+  }
+}
+
 export function RoleSidebar({
   manifest,
   onNavigate,
@@ -26,6 +46,8 @@ export function RoleSidebar({
 }) {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  // P1: the live context the `when(ctx)` predicates evaluate against.
+  const navCtx = manifest.navContext;
 
   useEffect(() => {
     try {
@@ -87,27 +109,30 @@ export function RoleSidebar({
         className="flex-1 overflow-y-auto p-2"
         aria-label={`${manifest.role} navigation`}
       >
-        {manifest.nav.map((entry) =>
-          entry.kind === "link" ? (
-            <LinkRow
-              key={entry.href}
-              entry={entry}
-              active={isActive(pathname, entry.href, manifest.rootHref)}
-              onNavigate={close}
-            />
-          ) : (
-            <GroupRow
-              key={entry.id}
-              group={entry}
-              expanded={!!expanded[entry.id]}
-              active={groupActive(pathname, entry, manifest.rootHref)}
-              pathname={pathname}
-              rootHref={manifest.rootHref}
-              onToggle={() => toggle(entry.id)}
-              onNavigate={close}
-            />
-          )
-        )}
+        {manifest.nav
+          .filter((entry) => entryVisible(entry, navCtx))
+          .map((entry) =>
+            entry.kind === "link" ? (
+              <LinkRow
+                key={entry.href}
+                entry={entry}
+                active={isActive(pathname, entry.href, manifest.rootHref)}
+                onNavigate={close}
+              />
+            ) : (
+              <GroupRow
+                key={entry.id}
+                group={entry}
+                ctx={navCtx}
+                expanded={!!expanded[entry.id]}
+                active={groupActive(pathname, entry, manifest.rootHref)}
+                pathname={pathname}
+                rootHref={manifest.rootHref}
+                onToggle={() => toggle(entry.id)}
+                onNavigate={close}
+              />
+            )
+          )}
       </nav>
 
       <footer className="surface-card shrink-0 p-2 space-y-1">
@@ -156,6 +181,7 @@ function LinkRow({
 
 function GroupRow({
   group,
+  ctx,
   expanded,
   active,
   pathname,
@@ -164,6 +190,7 @@ function GroupRow({
   onNavigate,
 }: {
   group: NavGroup;
+  ctx?: NavContext;
   expanded: boolean;
   active: boolean;
   pathname: string | null;
@@ -173,6 +200,8 @@ function GroupRow({
 }) {
   const Icon = group.icon;
   const Chevron = expanded ? ChevronDown : ChevronRight;
+  // P1: filter children by their `when(ctx)` predicate.
+  const visibleChildren = (ctx ? group.children.filter((c) => childVisible(c, ctx)) : group.children);
 
   return (
     <div className="mb-0.5">
@@ -194,7 +223,7 @@ function GroupRow({
 
       {expanded && (
         <ul className="mt-0.5 space-y-0.5 pl-7">
-          {group.children.map((child) => {
+          {visibleChildren.map((child) => {
             const childActive = isActive(pathname, child.href, rootHref);
             return (
               <li key={child.href}>

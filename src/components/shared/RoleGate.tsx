@@ -3,6 +3,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import { FEATURE_RULES, GLOBAL_HIDDEN_FEATURES, type FeatureRule } from "@/lib/ui-gates";
 import type { Role } from "@/lib/types";
+import { hasCapability } from "@/config/roles";
+import type { WorkspaceContext } from "@/config/roles/types";
 
 export interface RoleGateProps {
   feature: string;
@@ -10,11 +12,28 @@ export interface RoleGateProps {
   rule?: FeatureRule;
   /** What to render when blocked. Default: nothing. */
   fallback?: React.ReactNode;
+  /**
+   * P1: gate on a capability id instead of the feature registry. When
+   * present, the gate uses `hasCapability(role, context, capability)` —
+   * the config-driven resolver — instead of the role-based FEATURE_RULES.
+   * `feature` + `rule` stay as the alias path for one release cycle.
+   */
+  capability?: string;
+  /** The workspace context to evaluate the capability against. */
+  context?: WorkspaceContext;
   children: React.ReactNode;
 }
 
-export function RoleGate({ feature, rule, fallback = null, children }: RoleGateProps) {
+export function RoleGate({ feature, rule, fallback = null, capability, context, children }: RoleGateProps) {
   const role = (useAuthStore((s) => s.user?.role) ?? "") as Role | "";
+
+  // P1: capability path (config-driven). Same resolver the API uses.
+  if (capability && context) {
+    const ok = role ? hasCapability(role, context, capability) : false;
+    return ok ? <>{children}</> : <>{fallback}</>;
+  }
+
+  // Legacy role/feature path (kept as an alias for one release cycle).
   if (GLOBAL_HIDDEN_FEATURES.includes(feature)) return <>{fallback}</>;
   if (!role) return <>{fallback}</>; // unauthenticated → hidden
   const r = rule ?? FEATURE_RULES[feature];

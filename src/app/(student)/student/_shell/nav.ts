@@ -1,9 +1,15 @@
-import type { NavEntry, NavGroup } from "@/components/shell/types";
+import type { NavEntry, NavGroup, NavContext } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
   Home, CheckSquare, UtensilsCrossed,
   UserCog, AlertCircle, BookOpen,
 } from "lucide-react";
+
+// P1: the hostel-relevant nav items are gated on residentialStatus.
+// A day scholar's sidebar never shows "Passes" / "New request" / "My tickets"
+// for hostel leave — the conditions live HERE (in the nav array), not in a
+// component's `if (role === ...)`. This is the single source of truth.
+const isHosteller = (ctx: NavContext) => ctx.residentialStatus === "hosteller";
 
 // 5 groups, 22 routes reachable — the home screen now only shows
 // 5 cards; everything else is one tap away here.
@@ -11,10 +17,11 @@ export const STUDENT_NAV: NavEntry[] = [
   { kind: "link", href: "/student", label: "Home", icon: Home },
   {
     kind: "group", id: "permissions", label: "Permissions", icon: CheckSquare,
+    when: isHosteller, // hostel-leave surfaces: hostellers only
     children: [
-      { href: "/student/permissions", label: "My tickets" },
-      { href: "/student/permissions/new", label: "New request" },
-      { href: "/student/passes", label: "Passes" },
+      { href: "/student/permissions", label: "My tickets", when: isHosteller },
+      { href: "/student/permissions/new", label: "New request", when: isHosteller },
+      { href: "/student/passes", label: "Passes", when: isHosteller },
     ],
   },
   {
