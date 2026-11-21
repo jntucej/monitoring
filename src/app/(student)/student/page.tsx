@@ -18,6 +18,7 @@ import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { usePersona } from "@/hooks/usePersona";
+import { useWorkspace } from "@/hooks/useWorkspace";
 
 // Persona-aware student home. The SAME widget pool serves both personas, but each
 // persona gets a DISTINCT dashboard: a day scholar's home is attendance/class
@@ -131,16 +132,36 @@ function StudentHomeInner() {
   const personaKey: "day_scholar" | "hosteller" =
     persona === "hosteller" ? "hosteller" : "day_scholar";
   const widgetOrderPref = useEffectivePref<string[]>("dashboard.widgetOrder");
+  // Capability projection (server-truth, guardrail #1). The hostel widgets are
+  // gated on these so a day scholar's home never renders hostel/curfew surfaces
+  // even if persona resolution is off. Fail-open: if !ready we fall back to the
+  // legacy persona-only set so the home never blanks.
+  const ws = useWorkspace();
 
-  // The persona's data widgets, honouring a user override pref if present.
+  // Map each hostel-family widget to the capability that must be present for it
+  // to render. (guardrail #6: view caps, not act caps, drive surface display.)
+  const HOSTEL_WIDGET_CAP: Record<string, string> = {
+    "active-pass": "hostel.leave.view",
+    context: "curfew.view",
+  };
+
+  // The persona's data widgets, honouring a user override pref if present, then
+  // filtered by capability. A widget is kept when: the capability is present
+  // (server-truth), OR we haven't resolved yet (fail-open, keep legacy set).
   const personaDataWidgets: string[] = useMemo(() => {
     const base = PERSONA_DATA_WIDGETS[personaKey];
     const pref = widgetOrderPref.value ?? [];
     const allIds = [...base, ...SHARED_WIDGET_IDS];
     const valid = pref.filter((id) => allIds.includes(id));
     const missing = allIds.filter((id) => !valid.includes(id));
-    return [...valid, ...missing];
-  }, [personaKey, widgetOrderPref.value]);
+    const ordered = [...valid, ...missing];
+    if (!ws.ready) return ordered; // fail-open: show legacy persona set
+    return ordered.filter((id) => {
+      const cap = HOSTEL_WIDGET_CAP[id];
+      if (!cap) return true; // non-hostel widgets always render
+      return ws.has(cap); // hostel widgets only when the view cap is present
+    });
+  }, [personaKey, widgetOrderPref.value, ws.ready, ws.has, ws]);
 
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
