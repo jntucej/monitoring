@@ -17,10 +17,18 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
   const classId = req.nextUrl.searchParams.get("classId");
   if (!classId) return fail("VALIDATION_ERROR", "classId required", 400);
+  // classId may be a class uuid OR a department code (empty classes table).
   const { rows: cls } = await query<{ name: string }>(
-    `SELECT name FROM public.classes WHERE id = $1::uuid LIMIT 1`, [classId]);
-  if (cls.length === 0) return fail("NOT_FOUND", "Class not found", 404);
-  const coordinators = await getActiveCoordinators(cls[0].name);
+    `SELECT name FROM public.classes
+       WHERE ($1 ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+              AND id = $1::uuid)
+          OR department_id = $1
+       LIMIT 1`,
+    [classId],
+  );
+  // Fallback: treat classId as a class-identity token directly (no class row).
+  const scopeToken = cls[0]?.name ?? classId;
+  const coordinators = await getActiveCoordinators(scopeToken);
   return ok(coordinators);
 }
 

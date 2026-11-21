@@ -34,10 +34,14 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   let authorized = auth.userId === msg.author_id || auth.role === "admin" || auth.role === "sysadmin";
   if (!authorized && Array.isArray(msg.class_ids)) {
     for (const raw of msg.class_ids) {
+      // raw may be a class uuid or a department code.
       const { rows: cls } = await query<{ name: string }>(
-        `SELECT name FROM public.classes WHERE id = $1::uuid LIMIT 1`, [raw]);
-      if (cls.length === 0) continue;
-      const coords = await getActiveCoordinators(cls[0].name);
+        `SELECT name FROM public.classes
+           WHERE ($1 ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+                  AND id = $1::uuid) OR department_id = $1
+           LIMIT 1`, [raw]);
+      const scopeToken = cls[0]?.name ?? raw;
+      const coords = await getActiveCoordinators(scopeToken);
       if (coords.some(c => c.studentId === auth.userId)) { authorized = true; break; }
     }
   }
