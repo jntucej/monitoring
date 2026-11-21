@@ -18,13 +18,15 @@ CREATE TABLE IF NOT EXISTS public.assignments (
 );
 
 -- Index for the "my pending assignments" student query (by class + due date)
+DROP INDEX IF EXISTS idx_assignments_class_due;
 CREATE INDEX idx_assignments_class_due
   ON public.assignments (class_id, due_at)
   WHERE status = 'open';
 
 -- Index for the faculty review inbox (by poster + status)
+DROP INDEX IF EXISTS idx_assignments_poster;
 CREATE INDEX idx_assignments_poster
-  ON public.assignments (posted_by, status);
+  ON public.assignments (faculty_id, status);
 
 CREATE TABLE IF NOT EXISTS public.submissions (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,7 +46,9 @@ CREATE TABLE IF NOT EXISTS public.submissions (
   UNIQUE (assignment_id, student_id)
 );
 
+DROP INDEX IF EXISTS idx_submissions_assignment;
 CREATE INDEX idx_submissions_assignment ON public.submissions (assignment_id, status);
+DROP INDEX IF EXISTS idx_submissions_student;
 CREATE INDEX idx_submissions_student    ON public.submissions (student_id, status);
 
 CREATE TABLE IF NOT EXISTS public.extension_requests (
@@ -62,25 +66,30 @@ CREATE TABLE IF NOT EXISTS public.extension_requests (
   UNIQUE (assignment_id, student_id)
 );
 
+DROP INDEX IF EXISTS idx_extension_assignment;
 CREATE INDEX idx_extension_assignment ON public.extension_requests (assignment_id, status);
 
 -- RLS: students see only their own submissions (or privileged roles see all)
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY submissions_student_own ON public.submissions
-  FOR SELECT TO public
-  USING (
-    student_id = current_setting('app.current_user_id', true)::uuid
-    OR current_setting('app.current_user_role', true) IN ('admin','sysadmin','hod','principal')
-  );
-
--- RLS: only the posting faculty (or admin/sysadmin) can grade
-CREATE POLICY submissions_faculty_grade ON public.submissions
-  FOR UPDATE TO public
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.assignments a
-      WHERE a.id = assignment_id
-        AND a.faculty_id = current_setting('app.current_user_id', true)::uuid
-    )
-    OR current_setting('app.current_user_role', true) IN ('admin','sysadmin')
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='submissions' AND policyname='submissions_student_own') THEN
+    CREATE POLICY submissions_student_own ON public.submissions
+      FOR SELECT TO public
+      USING (
+        student_id = current_setting('app.current_user_id', true)::uuid
+        OR current_setting('app.current_user_role', true) IN ('admin','sysadmin','hod','principal')
+      );
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='submissions' AND policyname='submissions_faculty_grade') THEN
+    CREATE POLICY submissions_faculty_grade ON public.submissions
+      FOR UPDATE TO public
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.assignments a
+          WHERE a.id = assignment_id
+            AND a.faculty_id = current_setting('app.current_user_id', true)::uuid
+        )
+        OR current_setting('app.current_user_role', true) IN ('admin','sysadmin')
+      );
+  END IF;
+END $$;
