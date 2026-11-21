@@ -25,7 +25,7 @@ export default function StudentMessReviewsPage() {
           <sakuga-rating
             value={quickMood}
             label="quick meal mood"
-            onChange={(e: Event) => setQuickMood((e.target as unknown as { value: string }).value ? +(e.target as unknown as { value: string }).value : 0)}
+            onChange={((e: unknown) => setQuickMood((e as any).target?.value ? +(e as any).target.value : 0)) as any}
           >
             ★
           </sakuga-rating>

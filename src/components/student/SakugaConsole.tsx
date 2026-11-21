@@ -81,10 +81,10 @@ export function SakugaConsole() {
           <p className="mb-1.5 text-xs text-text-muted">Focus</p>
           <sakuga-tabs
             activeTab={tab}
-            onChange={(e: Event) => {
-              const v = (e.target as HTMLElement).getAttribute("value");
+            onChange={((e: unknown) => {
+              const v = (e as any).target?.getAttribute?.("value");
               setTab(v === "passes" || v === "mess" ? v : "today");
-            }}
+            }) as any}
           >
             <button type="button" value="today" className="text-xs">Today</button>
             <button type="button" value="passes" className="text-xs">Passes</button>

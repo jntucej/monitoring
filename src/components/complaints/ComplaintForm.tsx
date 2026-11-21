@@ -78,7 +78,7 @@ export function ComplaintForm() {
             required
             placeholder="Brief summary of the issue"
             value={form.title}
-            onChange={(e: Event) => setForm({ ...form, title: (e.target as unknown as { value: string }).value })}
+            onChange={((e: unknown) => setForm({ ...form, title: (e as any).target?.value ?? '' })) as any}
             label="complaint title"
             className="w-full"
           />
@@ -121,7 +121,7 @@ export function ComplaintForm() {
             <div className="flex gap-2 items-center text-sm">
               <sakuga-checkbox
                 checked={form.isAnonymous}
-                onChange={(e: Event) => setForm({ ...form, isAnonymous: (e.target as unknown as { checked: boolean }).checked })}
+                onChange={((e: unknown) => setForm({ ...form, isAnonymous: Boolean((e as any).target?.checked ?? (e as any)) })) as any}
                 label="anonymous"
               >
                 Submit anonymously
@@ -143,7 +143,7 @@ export function ComplaintForm() {
             <div className="flex gap-2 items-center text-sm">
               <sakuga-checkbox
                 checked={form.girlsCell}
-                onChange={(e: Event) => setForm({ ...form, girlsCell: (e.target as unknown as { checked: boolean }).checked })}
+                onChange={((e: unknown) => setForm({ ...form, girlsCell: Boolean((e as any).target?.checked ?? (e as any)) })) as any}
                 label="girls-cell"
               >
                 Route to Girls Grievance Cell

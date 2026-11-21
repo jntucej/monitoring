@@ -11,6 +11,7 @@ import { PeriodPicker } from "@/components/shared/PeriodPicker";
 import type { Period } from "@/lib/period";
 import { getPeriod } from "@/lib/period";
 import { PassLiveTracker } from "@/components/shared/pass/PassLiveTracker";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 function expiryLabel(to: string, status: string): string {
   if (status === "REJECTED") return "Rejected";
@@ -38,6 +39,7 @@ export function ActivePasses() {
   const [period, setPeriod] = useState<Period>(getPeriod("this-month"));
   const [showHistory, setShowHistory] = useState(false);
   const [trackId, setTrackId] = useState<string | null>(null);
+  const isSakuga = useIsSakuga();
   const user = useAuthStore((s) => s.user);
   const { exportCSV } = useExport();
 
@@ -123,12 +125,21 @@ export function ActivePasses() {
       ) : error ? (
         <div className="surface-card flex flex-col sm:flex-row items-center justify-between gap-2 p-3 bg-rose-500/10">
           <p className="text-sm text-action-danger">Could not load passes: {error}</p>
+          {isSakuga ? (
+            <sakuga-button
+              onClick={load}
+              className="shrink-0"
+            >
+              Retry
+            </sakuga-button>
+          ) : (
           <button
             onClick={load}
             className="surface-card px-3 py-1 bg-rose-500/20 text-action-danger text-xs font-bold hover:bg-rose-500/30 transition shrink-0"
           >
             Retry
           </button>
+          )}
         </div>
       ) : passes.length === 0 ? (
         <p className="text-sm text-text-muted text-center py-4">No passes yet.</p>
@@ -158,6 +169,14 @@ export function ActivePasses() {
                       <span className="text-xs opacity-60">Admin: {pass.adminStatus}</span>
                     )}
                     {active && (
+                      isSakuga ? (
+                        <sakuga-button
+                          onClick={() => setTrackId(trackId === pass.id ? null : pass.id)}
+                          className="text-[11px] font-medium mt-0.5"
+                        >
+                          {trackId === pass.id ? "Hide tracker" : "Live tracker"}
+                        </sakuga-button>
+                      ) : (
                       <button
                         type="button"
                         onClick={() => setTrackId(trackId === pass.id ? null : pass.id)}
@@ -165,6 +184,7 @@ export function ActivePasses() {
                       >
                         {trackId === pass.id ? "Hide tracker" : "Live tracker"}
                       </button>
+                      )
                     )}
                   </div>
                 </div>
@@ -207,6 +227,12 @@ export function ActivePasses() {
       {/* History toggle + period + export */}
       <div className="mt-5 border-t border-border pt-4">
         <div className="flex items-center justify-between gap-2 flex-wrap">
+          {isSakuga ? (
+            <sakuga-toggle
+              checked={showHistory}
+              onChange={((v: unknown) => setShowHistory(Boolean(v))) as any}
+            />
+          ) : (
           <button
             type="button"
             onClick={() => setShowHistory((v) => !v)}
@@ -215,6 +241,7 @@ export function ActivePasses() {
             <History className="h-3.5 w-3.5" />
             {showHistory ? "Hide history" : "View history"}
           </button>
+          )}
           <div className="flex items-center gap-2">
             <PeriodPicker value={period} onChange={setPeriod} />
             <button

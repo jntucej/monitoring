@@ -72,7 +72,7 @@ ${r.completedGoals}/${r.totalGoals} goals completed`;
             <sakuga-rating
               value={mood}
               label="semester mood"
-              onChange={(e: Event) => setMood((e.target as unknown as { value: string }).value ? +(e.target as unknown as { value: string }).value : 0)}
+              onChange={((e: unknown) => setMood((e as any).target?.value ? +(e as any).target.value : 0)) as any}
             >
               ★
             </sakuga-rating>

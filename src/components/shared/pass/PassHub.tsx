@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePassTypesV2 } from "@/hooks/usePassTypes";
 import { usePersona } from "@/hooks/usePersona";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 import type { PassTypeConfig } from "@/lib/pass-types";
 import { PassCreateFormV2 } from "@/components/shared/pass/PassCreateFormV2";
 import { QuotaCard } from "@/components/shared/pass/QuotaCard";
@@ -36,6 +37,7 @@ export interface PassHubProps {
 
 export function PassHub({ initialCode, hideCreate, className }: PassHubProps) {
   const persona = usePersona();
+  const isSakuga = useIsSakuga();
   const { configs } = usePassTypesV2({ persona });
   const [showHistory, setShowHistory] = useState(false);
 
@@ -94,6 +96,12 @@ export function PassHub({ initialCode, hideCreate, className }: PassHubProps) {
 
       {/* History toggle */}
       <div className="flex items-center justify-between">
+        {isSakuga ? (
+          <sakuga-toggle
+            checked={showHistory}
+            onChange={((v: unknown) => setShowHistory(Boolean(v))) as any}
+          />
+        ) : (
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
@@ -102,6 +110,7 @@ export function PassHub({ initialCode, hideCreate, className }: PassHubProps) {
           <History className="h-3.5 w-3.5" />
           {showHistory ? "Hide history" : "View history"}
         </button>
+        )}
         <span className="text-xs text-text-muted">
           {configs.length} pass types available
         </span>

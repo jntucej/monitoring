@@ -12,6 +12,28 @@
 
 import { useEffect, useState } from "react";
 
+// ── TSX declarations for sakuga custom elements ─────────────────────────
+// Generic props — matches the pattern used in SakugaConsole/SakugaControls.
+// The VFX scripts handle all attributes via web-component properties.
+type SakugaProps = Record<string, unknown> & { children?: React.ReactNode };
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "sakuga-button": SakugaProps;
+      "sakuga-toggle": SakugaProps;
+      "sakuga-input": SakugaProps;
+      "sakuga-rating": SakugaProps;
+      "sakuga-tabs": SakugaProps;
+      "sakuga-toast": SakugaProps;
+      "sakuga-slider": SakugaProps;
+      "sakuga-checkbox": SakugaProps;
+      "sakuga-radio": SakugaProps;
+      "sakuga-tooltip": SakugaProps;
+    }
+  }
+}
+
 export function useIsSakuga(): boolean {
   const [on, setOn] = useState(false);
 

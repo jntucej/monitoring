@@ -99,7 +99,7 @@ function StudentAttendanceCalendarInner() {
           <sakuga-toggle
             checked={weekView}
             label="week view"
-            onChange={(e: Event) => setWeekView((e.target as unknown as { checked: boolean }).checked)}
+            onChange={((e: unknown) => setWeekView(Boolean((e as any).target?.checked ?? (e as any)))) as any}
           >
             week
           </sakuga-toggle>

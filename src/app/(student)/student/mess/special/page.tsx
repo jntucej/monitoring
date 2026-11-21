@@ -21,15 +21,15 @@ export default function StudentMessSpecialPage() {
           <p className="text-sm font-semibold text-text-primary mb-2">Dietary preference</p>
           <div className="flex flex-wrap gap-3">
             <sakuga-radio name="diet" value="veg" checked={dietPref === "veg"} label="veg"
-              onChange={(e: Event) => setDietPref((e.target as unknown as { value: string }).value)}>
+              onChange={((e: unknown) => setDietPref((e as any).target?.value ?? "")) as any} >
               Vegetarian
             </sakuga-radio>
             <sakuga-radio name="diet" value="non-veg" checked={dietPref === "non-veg"} label="non-veg"
-              onChange={(e: Event) => setDietPref((e.target as unknown as { value: string }).value)}>
+              onChange={((e: unknown) => setDietPref((e as any).target?.value ?? "")) as any} >
               Non-veg
             </sakuga-radio>
             <sakuga-radio name="diet" value="sweet" checked={dietPref === "sweet"} label="sweet"
-              onChange={(e: Event) => setDietPref((e.target as unknown as { value: string }).value)}>
+              onChange={((e: unknown) => setDietPref((e as any).target?.value ?? "")) as any} >
               Sweet
             </sakuga-radio>
           </div>
