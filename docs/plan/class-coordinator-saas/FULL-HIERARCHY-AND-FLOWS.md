@@ -110,8 +110,134 @@ by migration `20261125000001`); `deputy_warden` / `hostel_manager` kept.
 | Slot | Backed by | Unlocks | Scope |
 |---|---|---|---|
 | Teaching | `faculty_assignments` (subject_code + class_id, `faculty_id=user.id`, active) | `/faculty/*` via `TeachingBindingGate` | bound subjects/classes only |
-| Coordinator *(planned)* | `student_representatives` (`scope_type='class'`) | notice relay + concern collection for that class | one per class |
+| Coordinator | `student_representatives` (`scope_type='class'`, live) | notice relay + concern collection for that class | one per class |
 | Delegation | `delegations` (TTL, `can_mutate`, no-self) | senior role temporarily acts for a subordinate role | expires automatically |
+
+### 2.1 — Every role, its full functionality
+
+> Surface = the role's console (route-group). "Functions" = the concrete
+> things that role can do inside it, with the API/kernel it calls. Authority
+> notes mark the scope lock that bounds each role.
+
+**Principal** (`(principal)` console · T0, institutional root)
+- Campus-wide dashboard: KPIs, gate state, occupancy, incident feed
+  (`/api/principal/dashboard`).
+- Approve **all** approver workflows: delegation inbox (`/api/principal/inbox`),
+  two-person DEBARRED/SUSPENDED sign-off, academic-exception decisions.
+- **Lockdown** issue/resolve (`/api/lockdown`) — campus-wide alert + gate closure.
+- **Delegation** of duties to VP/HOD with TTL + no-self rule
+  (`/api/principal/delegations`).
+- Weekly digest + SLA heatmap (`week-digest`, `sla-heatmap`).
+- Catch-up queue for overdue approvals (`/api/principal/catch-up`).
+- Constitutes the **Mess Committee** (cost-threshold approvals, see mess_incharge).
+
+**Vice Principal** (`(vp)` · T0)
+- Acts for the Principal during leave; exam-office queue (`/api/vp/…`);
+  OIE duties; academic exceptions; department-level academic review
+  (`/api/vp/academics`).
+
+**Admin / Sysadmin** (`(admin)` / `(sysadmin)` · T0, technical root)
+- Admin: people & access management, announcements, anti-ragging,
+  compliance/consent, digital twin, gate/device config, lockdown, mess
+  finalization, retention, ueba, workflow-configuration,
+  notification-settings, worker-shifts.
+- Sysadmin: application/database/redis health, deployments, autonomous
+  monitoring, backup status, drill runs, RLS drift check
+  (`/api/sysadmin/rls/drift`), security posture, worker jobs, forecasts.
+- **Guardrail:** admin is the institutional admin; sysadmin is the
+  technical platform operator. Separated so neither can silently
+  reconfigure the other's domain.
+
+**HOD** (`(hod)` · T2, department-locked by `auth.departmentId`)
+- Department roster + class management (`/api/hod/faculty`, `/classes`).
+- Academic flags: parks SUSPENDED/DEBARRED/LATERAL_JOIN for two-person
+  approval (`/api/academic-status`).
+- Exam review (dept-scoped) `/api/hod/exam-review`; schedule & flexible class.
+- Pulse, retention analytics; **department-scoped** class-communication
+  queue + class-level issues.
+
+**Exam branch — split desks (T1, SoD)**
+- `exam_superintendent` — desk-wide oversight.
+- `controller_examinations` — **signs off** results (only role that can).
+- `addl_controller_academic` — academic corrections + exam proposals.
+- `addl_controller_results` — **processes** results (enters → publishes).
+- `addl_controller_automation` — automates eligibility manifests.
+- `exam_branch` — general exam-desk operations.
+- **No single role both enters and publishes a result** (SoD invariant).
+
+**Dean** (T1) — dean_academics / dean_student_affairs; two-person approver
+for DEBARRED; student-affairs decisions.
+
+**OIE** (`(oie)` · T1) — examinations office queue: hall tickets, candidate
+attendance, eligibility, exam access exceptions (`/api/oie/queue`).
+
+**Faculty** (`(approver)/faculty` · T4, capability-gated by teaching binding)
+- Marks entry DRAFT → LOCK (`/api/faculty/marks`).
+- Assignments: create/list/grade (`/api/faculty/assignments`,
+  `class_request` lanes); internal-exam proposals; study-material uploads;
+  mentee list (scoped); attendance for bound classes.
+- **Teaching console** (`/faculty/*`): today's class periods, materials,
+  marks, mentees, subject view.
+- **Class-communication surface**: the routed class-requests queue for their
+  class (resolve-with-note); publish class notices (direct or via CR).
+- **Guardrail:** grading is binding-keyed — a faculty with a CS-301 binding
+  can't grade CS-302.
+
+**Student** (`(student)` · T5)
+- Self-service dashboard: attendance + calendar, next exam, fees/receipts,
+  library, marks/grade-card, scholarship status, mess bill, conduct record.
+- Raise **class requests** (8 categories, auto-routed; urgent pages HOD)
+  + see their own status.
+- Raise **complaints** (individual lane, anonymous option available) and
+  track them.
+- Gate passes: apply / view / scan lifecycle.
+- Curfew acknowledgement; emergency-alert trigger.
+- Campus feed + events; knowledge search; bot: `/fees /library /marks /now
+  /review /settings /register /attendance /assignments /exam /complaint …`
+  (full list in Part 3 "bot").
+- **If a coordinator** (capability slot): relay inbox + collect concerns
+  (see Part 8.2).
+
+**Parent** (`(parent)` · T5) — child's fees, academic progress (marks +
+attendance %), leave request on behalf of child; **required ack step** in
+the hostel gate-pass chain.
+
+**Guardian** (T5) — ward's curfew compliance; re-verify guardian link
+(OTP/biometric); complaint filing.
+
+**Visitor** (T5) — pass lifecycle: check-in/out, overstay auto-flag.
+
+**Operator** (`(operator)` · T3) — gate scan (QR / face / thumbprint),
+entry-type selection, manual entry, kiosk sessions, transactions, gate
+claim/switch, device health + push, shift handover. Bounded to gate entity.
+
+**Supervisor** (T3) — oversees operators: override a PENDING hostel-leave
+link (audit reason required), device issues, escalation of gate alerts.
+
+**Deputy Warden / Hostel Manager / Caretaker / Chief Warden** (T3, block-scoped)
+- Block occupancy + returns timeline; hostel leave chain (student pass →
+  deputy_warden → parent ack → operator); housekeeping/maintenance queue
+  (caretaker); incident sign-off (chief_warden under `role_context`).
+
+**Mess Incharge / EMO** (T3, mess-scoped)
+- Meal tokens, menu + menu items, consumption tracking, bills, attendance,
+  preference + opt-out, operational requests; **reconcile** the ledger
+  (hash-chained); cost-threshold edits require Mess-Committee approval.
+
+### 2.2 — How a permission actually gets enforced (the chain)
+
+```
+route.ts → withAuthorization(handler, { requiredRole, entityScope })
+   1. verify JWT (auth.ts)
+   2. resolve effective role (delegations TTL fallback)
+   3. canAct(role, domain, action)            [permission-model]
+   4. entity-scope check (department / block / gate)
+   5. run handler → mutation-guard (CSRF + rate-limit + mutation audit)
+   6. RLS backstop at the DB layer (manual CREATE POLICY for new subsystems)
+```
+So "who can do what" is answered in **four** places that must agree:
+the route's `requiredRole`, `canAct`, the entity scope, and the RLS policy.
+The RLS drift check (`/api/sysadmin/rls/drift`) exists to catch disagreement.
 
 ---
 
@@ -185,6 +311,44 @@ any shell button  →  useAction(type, targetId)
 idempotencyKey }`. `ActionTier` 0–4; tier ≥ 3 requires `reason`.
 `useAction` phase machine: `idle → confirming → submitting →
 done | denied | expired | conflict`.
+
+### 3.1 The Telegram bot — command inventory
+
+Every role also has a bot surface (`/api/bot` + `src/lib/bot-commands.ts`).
+A user pings the campus bot with a slash command; the command is routed by
+the user's role + entity scope. The full command set:
+
+```
+/now  /settings  /register  /review     — personalization + one-tap duty review
+/attendance  /assignments  /exam  /marks  /mentees  /classes  /schedule
+/complaint  /complaints  /curfew  /fees  /library  /mess  /menu  /child
+/gates  /gates  /occupancy  /passes  /shifts  /handover  /blocks  /dept
+/maintenance  /events  /campus  /alerts  /announce  /message  /faculty
+/delegation  /audit  /health  /backup  /exam  /help
+```
+
+Personas (`bot-personas.ts`) adapt the bot's voice to the user's role
+(faculty "review" persona, student "now" persona, etc.). The bot is the
+**mobile/offline-first** entry point — it calls the same kernel the web
+shells do, so a bot action and a button click have identical audit trails.
+
+### 3.2 How the major features actually work (mechanics)
+
+| Feature | How it works |
+|---|---|
+| **Gate scan** | QR/face/thumbprint → `/api/gate/scan` → verifies pass/leave status; overstay auto-flags visitors; every scan writes `audit_events` + `movement_logs`. Face/thumbprint verify are device-anchored (anti-spoof). |
+| **Hostel leave chain** | student pass → deputy_warden → parent ack → operator scan. `/api/gate/verify-leave-chain` returns exactly which link is missing. A PENDING link can be overridden only by a supervisor + audit reason. |
+| **Attendance disputes** | student disputes a mark → `/api/attendance_records` dispute → routed to faculty/HOD per the ladder; resolution recorded + audited. |
+| **Complaint routing** | `routeComplaint(category)` picks the owner role + SLA chain from `complaint_categories`; autonomous agents classify un-tagged ones and auto-escalate on SLA breach. |
+| **Conduct flags** | `conduct.deriveFlag()` maps a conduct event to a `FlagLevel` (COG/COC policies); a flagged user is skipped on the escalation ladder (can't escalate their own case). |
+| **Two-person academic status** | HOD parks SUSPENDED/DEBARRED in `status_pending_approver` → dean/principal approves. A DB trigger blocks any direct write by a non-approver. |
+| **Exam SoD** | faculty DRAFTs marks → results desk processes → Controller signs off. Eligibility manifests are Ed25519-signed by the `exam-eligibility-manifest` agent. |
+| **Class communication** | two lanes: individual (class_requests, auto-routed) + collective (aggregation agent collapses N same-topic into 1 class-level issue). Coordinator is an optional relay, never a gate (auto-release backstop). |
+| **Lockdown** | principal → `/api/lockdown` → campus-wide alert + gate closure; the alerting engine + `alerts-eval` agent propagate to all consoles. |
+| **Delegation** | a senior role grants a time-boxed delegation of a subordinate role (no-self, can_mutate flag); `withAuthorization` resolves the effective role with TTL fallback; the delegation graph is exposed at `/api/delegations/graph`. |
+| **Audit chain** | every mutation → `audit_events`; nightly SHA256 checkpoint over `audit_chain`; `audit-rotate` prunes per retention; immutability via `trg_audit_logs_immutable`. |
+| **Feature flags** | `/api/features` reads `system_settings.feature_flags` (a JSON blob of on/off per capability); surfaces hide/enable features without a deploy. |
+| **Notifications** | in-app `notifications` + Telegram fan-out; read-state is `read_at` (not a boolean); a `dispatch-notifications` agent handles queued delivery. |
 
 ---
 
