@@ -59,7 +59,8 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     }
     const { rows } = await query(
       `SELECT id, category_code, title, priority, status, assigned_role,
-              class_id AS "class", routed_at, resolved_at, created_at
+              class_id AS "class", routed_at, resolved_at, created_at,
+              sla_due_at, decision_required, decision_recommendation
          FROM public.class_requests WHERE student_id = $1
         ORDER BY created_at DESC LIMIT 50`,
       [auth.userId],
@@ -74,14 +75,55 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     if (params.get("queue") === "class") {
       const classToken = params.get("classId");
       if (!classToken) return fail("VALIDATION_ERROR", "classId required for queue=class", 400);
-      const { rows } = await query(
-        `SELECT cr.id, cr.category_code, cr.title, cr.priority, cr.status, cr.created_at
+
+      // P5 — privacy: the coordinator may see the *class's* aggregate picture,
+      // not every student's private complaint. Resolve the coordinator's
+      // capability and return only class-level visibility:
+      //   • the class's open class_level_issues (the collective lane),
+      //   • requests that are themselves collective (raised_by_rep = TRUE),
+      //   • a per-category open count for aggregate awareness.
+      const { canReadClassRequests } = await import("@/lib/class-coordinator");
+      if (!(await canReadClassRequests(auth.userId, classToken))) {
+        return fail("FORBIDDEN", "Not an active coordinator of this class", 403);
+      }
+
+      // class_level_issues keyed by class uuid OR department code (uuid/text
+      // mismatch in this dataset) — match the same way the owner-queue joins do.
+      const { rows: issues } = await query<{ id: string; topic: string; status: string; request_count: number; created_at: string }>(
+        `SELECT i.id, i.topic, i.status,
+                COALESCE(cardinalities.n, 0) AS request_count,
+                i.created_at
+           FROM public.class_level_issues i
+           LEFT JOIN LATERAL (SELECT cardinality(i.request_ids) AS n) cardinalities ON TRUE
+          WHERE i.status IN ('open','in_progress')
+            AND (i.class_id = $1 OR $2 = $1)
+          ORDER BY i.created_at DESC LIMIT 50`,
+        [classToken, classToken],
+      );
+      const { rows: collectiveReqs } = await query<{ id: string; category_code: string; title: string; status: string; created_at: string }>(
+        `SELECT cr.id, cr.category_code, cr.title, cr.status, cr.created_at
            FROM public.class_requests cr
-          WHERE cr.class_id = $1 AND cr.status IN ('open','in_progress','escalated')
-          ORDER BY cr.created_at ASC LIMIT 100`,
+          WHERE cr.class_id = $1 AND cr.raised_by_rep = TRUE
+            AND cr.status IN ('open','in_progress','escalated')
+          ORDER BY cr.created_at DESC LIMIT 100`,
         [classToken],
       );
-      return ok(rows);
+      const { rows: openCounts } = await query<{ category_code: string; n: number }>(
+        `SELECT category_code, count(*)::int AS n
+           FROM public.class_requests
+          WHERE class_id = $1 AND status IN ('open','in_progress','escalated')
+          GROUP BY category_code`,
+        [classToken],
+      );
+      return ok({
+        classId: classToken,
+        // Aggregate: how many open requests per category (no bodies, no student names)
+        openByCategory: openCounts,
+        // Collective lane: the class's own level issues (the "collect concerns" view)
+        levelIssues: issues,
+        // Only requests explicitly raised as collective (by a rep) — not private ones
+        collectiveRequests: collectiveReqs,
+      });
     }
 
     // Faculty/HOD owner queue: requests routed to them.

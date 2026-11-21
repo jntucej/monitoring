@@ -28,6 +28,9 @@ interface MyRequest {
   class: string;
   created_at: string;
   resolved_at: string | null;
+  sla_due_at: string | null;
+  decision_required: string | null;
+  decision_recommendation: string | null;
 }
 
 export default function StudentClassRequestsPage() {
@@ -168,6 +171,13 @@ export default function StudentClassRequestsPage() {
                   {r.assigned_role && <span>→ {r.assigned_role}</span>}
                   <span className="ml-auto">{new Date(r.created_at).toLocaleDateString("en-IN")}</span>
                 </div>
+                <Lifecycle status={r} />
+                {r.decision_required && (
+                  <div className="rounded-md bg-action-primary/5 border border-action-primary/20 p-2 text-[11px]">
+                    <p className="text-text-secondary"><span className="font-semibold">Decision requested:</span> {r.decision_required}</p>
+                    {r.decision_recommendation && <p className="text-text-muted mt-0.5">Recommendation: {r.decision_recommendation}</p>}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -181,16 +191,58 @@ function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     open: "bg-sky-500/10 text-sky-600 border-sky-500/30",
     in_progress: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+    waiting_for_student: "bg-violet-500/10 text-violet-600 border-violet-500/30",
     escalated: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+    rejected: "bg-orange-500/10 text-orange-600 border-orange-500/30",
     resolved: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
     closed: "bg-text-muted/10 text-text-muted border-border",
   };
   const label: Record<string, string> = {
-    open: "Open", in_progress: "In progress", escalated: "Escalated", resolved: "Resolved", closed: "Closed",
+    open: "Open", in_progress: "In progress", waiting_for_student: "Waiting on you",
+    escalated: "Escalated", rejected: "Rejected", resolved: "Resolved", closed: "Closed",
   };
   return (
     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${map[status] ?? map.open}`}>
       {label[status] ?? status}
     </span>
+  );
+}
+
+// P11 — escalation visibility: a compact lifecycle stepper + the response-SLA
+// countdown, so a student never has to ask "did you see my message?".
+function Lifecycle({ status: r }: { status: MyRequest }) {
+  const steps = [
+    { key: "open", label: "Submitted" },
+    { key: "in_progress", label: "In progress" },
+    { key: "resolved", label: "Resolved" },
+  ];
+  const activeIdx =
+    r.status === "open" ? 0 :
+    r.status === "in_progress" || r.status === "waiting_for_student" ? 1 :
+    ["resolved", "closed", "rejected"].includes(r.status) ? 2 :
+    r.status === "escalated" ? 2 : 0;
+  const terminal = ["resolved", "closed", "rejected"].includes(r.status);
+  const slaMs = r.sla_due_at ? new Date(r.sla_due_at).getTime() - Date.now() : null;
+  const slaLabel =
+    slaMs == null ? "" :
+    slaMs > 0 ? `${Math.max(1, Math.round(slaMs / 3600000))}h SLA left` : "SLA breached — escalated";
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1">
+        {steps.map((s, i) => (
+          <div key={s.key} className="flex items-center gap-1 flex-1 min-w-0">
+            <span className={`h-1.5 w-1.5 rounded-full ${i <= activeIdx ? "bg-action-primary" : "bg-border"}`} />
+            <span className={`text-[9px] truncate ${i <= activeIdx ? "text-text-secondary" : "text-text-muted"}`}>{s.label}</span>
+            {i < steps.length - 1 && <span className={`h-px flex-1 ${i < activeIdx ? "bg-action-primary/40" : "bg-border"}`} />}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 text-[10px] text-text-muted">
+        {r.assigned_role && <span>Owner: <span className="text-text-secondary">{r.assigned_role}</span></span>}
+        {slaLabel && !terminal && <span className={slaMs! < 0 ? "text-action-danger font-semibold" : ""}>{slaLabel}</span>}
+        {r.status === "escalated" && <span className="text-action-danger font-medium">↑ escalated for a decision</span>}
+        {r.status === "waiting_for_student" && <span className="text-violet-500 font-medium">Action needed from you</span>}
+      </div>
+    </div>
   );
 }

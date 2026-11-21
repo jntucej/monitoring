@@ -62,6 +62,19 @@ export interface RaiseInput {
 export async function raiseClassRequest(input: RaiseInput) {
   const { studentId, classId, category, title, body, priority = "normal", raisedByRep = false, actorId } = input;
 
+  // Per-category response SLA (institutional service standard). Set sla_due_at
+  // so the SLA-breach sweep can auto-escalate an ignored request.
+  let slaHours = 24;
+  try {
+    const { rows: sla } = await query<{ response_hours: number }>(
+      `SELECT response_hours FROM public.class_request_sla WHERE category_code = $1 LIMIT 1`,
+      [category],
+    );
+    if (sla.length > 0) slaHours = sla[0].response_hours;
+  } catch {
+    // table not yet migrated — fall back to default
+  }
+
   // 1. verify student belongs to class (class_id is the class uuid when the
   // classes table is populated, else the department code).
   const { rows: cls } = await query<{ name: string; department_id: string; class_teacher_id: string | null }>(
@@ -121,11 +134,13 @@ export async function raiseClassRequest(input: RaiseInput) {
   const { rows: ins } = await query<{ id: string }>(
     `INSERT INTO public.class_requests
        (student_id, class_id, category_code, title, body, priority, status,
-        assigned_role, assigned_user_id, raised_by_rep, dedupe_key, routed_at)
-     VALUES ($1,$2,$3,$4,$5,$6,'open',$7,$8,$9,$10,NOW())
+        assigned_role, assigned_user_id, raised_by_rep, dedupe_key, routed_at,
+        sla_due_at)
+     VALUES ($1,$2,$3,$4,$5,$6,'open',$7,$8,$9,$10,NOW(),
+        NOW() + make_interval(hours => $11))
      RETURNING id`,
     [studentId, classId, category, title, body ?? null, priority,
-     assignedRole, assignedUserId, raisedByRep, dedupeKey],
+     assignedRole, assignedUserId, raisedByRep, dedupeKey, slaHours],
   );
   const id = ins[0].id;
 
@@ -134,10 +149,10 @@ export async function raiseClassRequest(input: RaiseInput) {
   }
 
   await audit("class_request.raise", actorId ?? studentId, {
-    targetId: id, category, classId, priority, raisedByRep,
+    targetId: id, category, classId, priority, raisedByRep, slaHours,
   });
 
-  return { id, status: "open", assignedRole, assignedUserId, classId };
+  return { id, status: "open", assignedRole, assignedUserId, classId, slaHours };
 }
 
 export async function resolveClassRequest(requestId: string, actorId: string, note: string, targetRole: string) {
@@ -169,6 +184,80 @@ export async function escalateClassRequest(requestId: string, actorId: string, r
   return { id: requestId, status: "escalated" };
 }
 
+// P3 — waiting-for-student: the owner needs the student to act (more detail,
+// documents, etc.). Pauses the SLA clock implicitly; student can re-raise.
+export async function waitClassRequest(requestId: string, actorId: string, ask: string, targetRole: string) {
+  await query(
+    `UPDATE public.class_requests
+        SET status = 'waiting_for_student', resolution_note = $1
+      WHERE id = $2`,
+    [ask, requestId],
+  );
+  await audit("class_request.wait", actorId, { targetId: requestId, ask, targetRole });
+  return { id: requestId, status: "waiting_for_student" };
+}
+
+// P3 — reject: owner closes with an explicit reason (not a silent drop).
+export async function rejectClassRequest(requestId: string, actorId: string, reason: string, targetRole: string) {
+  await query(
+    `UPDATE public.class_requests
+        SET status = 'rejected', resolved_at = NOW(), resolution_note = $1
+      WHERE id = $2`,
+    [reason, requestId],
+  );
+  await audit("class_request.reject", actorId, { targetId: requestId, reason, targetRole });
+  return { id: requestId, status: "rejected" };
+}
+
+// P12 — decision package: faculty can't solve it, so they escalate to a higher
+// rung (per escalation-ladder) with a recommendation + evidence, so the next
+// actor gets a *decision*, not a vague complaint.
+export async function decisionEscalate(
+  requestId: string,
+  actorId: string,
+  input: { decisionRequired: string; recommendation: string; evidence?: string; targetRole: string },
+) {
+  await query(
+    `UPDATE public.class_requests
+        SET status = 'escalated',
+            decision_required = $1,
+            decision_recommendation = $2,
+            decision_evidence = $3
+      WHERE id = $4`,
+    [input.decisionRequired, input.recommendation, input.evidence ?? null, requestId],
+  );
+  await audit("class_request.decision_escalate", actorId, {
+    targetId: requestId,
+    targetRole: input.targetRole,
+    decisionRequired: input.decisionRequired,
+    recommendation: input.recommendation,
+  });
+  return { id: requestId, status: "escalated", targetRole: input.targetRole };
+}
+
+// P10 — SLA-breach check: a request whose response SLA has lapsed and is still
+// open/in_progress escalates to the category's escalate_role.
+export async function breachSlaClassRequest(requestId: string, actorId: string, targetRole: string) {
+  const { rows } = await query<{ category_code: string; assigned_role: string | null }>(
+    `SELECT category_code, assigned_role FROM public.class_requests WHERE id = $1`,
+    [requestId],
+  );
+  if (rows.length === 0) throw new Error("Request not found");
+  await query(
+    `UPDATE public.class_requests
+        SET status = 'escalated'
+      WHERE id = $1 AND status IN ('open','in_progress')`,
+    [requestId],
+  );
+  await audit("class_request.sla_breach", actorId, {
+    targetId: requestId,
+    category: rows[0].category_code,
+    escalatedTo: targetRole,
+    wasOwnerRole: rows[0].assigned_role,
+  });
+  return { id: requestId, status: "escalated", escalatedTo: targetRole };
+}
+
 export async function closeClassRequest(requestId: string, actorId: string) {
   await query(
     `UPDATE public.class_requests SET status = 'closed', resolved_at = NOW() WHERE id = $1`,
@@ -183,19 +272,27 @@ export interface AggGroup {
   class_id: string;
   category_code: string;
   count: number;
+  urgent_count: number;
   request_ids: string[];
 }
 
+// P6 — smarter than a bare count: a group qualifies when
+//   (a) it has N≥ same-topic reports in the window  OR
+//   (b) it contains at least one URGENT request (severity bypass) — a single
+//       serious report should not be drowned by the threshold.
 export async function findAggregatableIssues(hours: number, n: number): Promise<AggGroup[]> {
   const { rows } = await query<AggGroup>(
-    `SELECT class_id, category_code, count(*)::int AS count,
+    `SELECT class_id, category_code,
+            count(*)::int AS count,
+            count(*) FILTER (WHERE priority = 'urgent')::int AS urgent_count,
             array_agg(id::text) AS request_ids
        FROM public.class_requests
-      WHERE status IN ('open','in_progress','escalated')
+      WHERE status IN ('open','in_progress','escalated','waiting_for_student')
         AND created_at >= NOW() - make_interval(hours => $1)
       GROUP BY class_id, category_code
       HAVING count(*) >= $2
-      ORDER BY class_id, category_code`,
+          OR count(*) FILTER (WHERE priority = 'urgent') >= 1
+      ORDER BY urgent_count DESC, count DESC, class_id, category_code`,
     [hours, n],
   );
   return rows;

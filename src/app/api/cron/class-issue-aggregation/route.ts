@@ -18,7 +18,7 @@ import { errMsg } from "@/lib/err-msg";
 import { NextRequest } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { query } from "@/lib/postgres";
-import { findAggregatableIssues, createClassLevelIssue } from "@/lib/class-requests";
+import { findAggregatableIssues, createClassLevelIssue, breachSlaClassRequest } from "@/lib/class-requests";
 
 export async function POST(req: NextRequest) {
   const unauthorized = requireCronAuth(req);
@@ -35,9 +35,12 @@ export async function POST(req: NextRequest) {
     const groups = await findAggregatableIssues(hours, n);
     let created = 0;
     for (const g of groups) {
+      // P6 — a group qualified via the urgent bypass even below N: label it.
+      const viaUrgent = g.urgent_count > 0 && g.count < n;
+      const topic = viaUrgent ? `${g.category_code} (urgent)` : g.category_code;
       const issueId = await createClassLevelIssue(
         g.class_id,
-        g.category_code,
+        topic,
         g.request_ids,
         "system-cron",
       );
@@ -48,10 +51,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // P10 — sweep class-request response SLAs: any open/in_progress request past
+    // its sla_due_at escalates to the category's escalate_role.
+    const { rows: due } = await query<{ id: string; category_code: string }>(
+      `SELECT id, category_code FROM public.class_requests
+        WHERE status IN ('open','in_progress')
+          AND sla_due_at IS NOT NULL AND sla_due_at < NOW()`,
+    );
+    let breached = 0;
+    for (const d of due) {
+      let escalateRole = "hod";
+      try {
+        const { rows: slaRow } = await query<{ escalate_role: string }>(
+          `SELECT escalate_role FROM public.class_request_sla WHERE category_code = $1 LIMIT 1`,
+          [d.category_code],
+        );
+        if (slaRow.length > 0) escalateRole = slaRow[0].escalate_role;
+      } catch { /* table not migrated */ }
+      try {
+        await breachSlaClassRequest(d.id, "system-cron", escalateRole);
+        breached += 1;
+      } catch { /* individual failure is non-fatal */ }
+    }
+
     return Response.json({
       success: true,
       scanned: groups.length,
       created,
+      slaBreached: breached,
       threshold: { n, hours },
     });
   } catch (err) {

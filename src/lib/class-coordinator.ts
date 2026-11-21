@@ -49,15 +49,45 @@ export async function canCollect(userId: string, scopeId: string): Promise<boole
   return canRelay(userId, scopeId); // same capability for v1
 }
 
-// Read-all-requests permission for a class (D3). Bounded to the class scope.
+// P2 — "communication ≠ authority". A coordinator may relay notices and
+// represent the class, but NEVER gain academic authority: no grading, no
+// modifying records, no resolving another student's request. This capability
+// is deliberately false for coordinators so the boundary is explicit and
+// auditable — the binding grants *communication* power, not *decision* power.
+export async function canModifyAcademicRecords(userId: string, scopeId: string): Promise<boolean> {
+  // A coordinator row existing proves representation power only. Authority to
+  // modify records / grade / resolve others' requests is held by faculty,
+  // HOD, VP, Principal (per escalation-ladder) — never by a student rep.
+  const { rows: isRep } = await query<{ n: number }>(
+    `SELECT 1 AS n FROM public.student_representatives
+      WHERE student_id = $1 AND scope_type = 'class' AND scope_id = $2
+        AND status = 'active' AND valid_to >= CURRENT_DATE LIMIT 1`,
+    [userId, scopeId],
+  );
+  if (isRep.length > 0) return false; // coordinator: communication only
+  return false; // v1: no one else claims record-modify power from this kernel
+}
+
+// Read-class-level-visibility permission for a class (P5). The class token may
+// be a classes.uuid OR a department code (classes table is empty in this
+// dataset), so resolve the coordinator's scope against either, then gate on the
+// active student_representatives row.
 export async function canReadClassRequests(userId: string, classId: string): Promise<boolean> {
-  // classId is uuid; coordinator rows key on classes.name — resolve.
+  // Try as a class uuid first; if no class row, treat classId as a dept code.
   const { rows: cls } = await query<{ name: string }>(
     `SELECT name FROM public.classes WHERE id = $1::uuid LIMIT 1`,
     [classId],
   );
-  if (cls.length === 0) return false;
-  return canRelay(userId, cls[0].name);
+  if (cls.length > 0) return canRelay(userId, cls[0].name);
+  // No class row: the token is a department code — find the dept's class name(s).
+  const { rows: byDept } = await query<{ name: string }>(
+    `SELECT name FROM public.classes WHERE department_id = $1 LIMIT 1`,
+    [classId],
+  );
+  if (byDept.length > 0) return canRelay(userId, byDept[0].name);
+  // Still no class row (empty classes table): a coordinator row scoped to the
+  // raw token (dept code stored as scope_id) counts.
+  return canRelay(userId, classId);
 }
 
 export async function appointCoordinator(
