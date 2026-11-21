@@ -1,7 +1,16 @@
 # Gate Monitor - Server Architecture & Container Topology
 
 ## 1. Overview
-Gate Monitor is deployed as an autonomous, self-hosted containerized appliance on Debian 13 (Trixie). All cloud dependencies (Supabase, Vercel, Upstash) have been eliminated in favor of containerized native PostgreSQL 16, Redis 7, Caddy 2, Next.js Standalone Runner, and a Node.js Background Worker.
+Gate Monitor is deployed as an autonomous, self-hosted containerized
+appliance on Debian 13 (Trixie). All cloud dependencies (Supabase, Vercel,
+Upstash) have been eliminated in favor of containerized native PostgreSQL
+(supabase/postgres 17.6.1.136), Redis 7, Caddy 2, Next.js Standalone
+Runner, and a Node.js Background Worker.
+
+> 2026-11: Postgres moved to the `supabase/postgres:17.6.1.136` image —
+> plain `postgres:*` + the Supabase extension stack (pgcrypto etc.).
+> Container/image names now follow `docker-compose.yml`:
+> `monitoring-web`, `monitoring-worker`, caddy 2-alpine.
 
 ## 2. Container Topology & Network Isolation
 
@@ -28,7 +37,7 @@ INTERNET / CAMPUS CLIENTS (Port 80 / 443)
        ▼                     ▼
 ┌──────────────┐      ┌──────────────┐
 │gate_postgres │      │  gate_redis  │ (Cache & Distributed Rate Limit)
-│(Postgres 16) │      └──────────────┘
+│(Postgres 17) │      └──────────────┘
 └──────────────┘
 ```
 
@@ -37,9 +46,9 @@ INTERNET / CAMPUS CLIENTS (Port 80 / 443)
 | Service | Container Name | Image | Function | Internal Port |
 |---|---|---|---|---|
 | **Caddy** | `gate_caddy` | `caddy:2-alpine` | TLS termination, reverse proxy, SSE buffering disable | 80, 443 (Host) |
-| **Web** | `gate_web` | `gate-web:latest` | Next.js 16 standalone SSR and API engine | 3000 |
-| **Worker** | `gate_worker` | `gate-worker:latest` | Scheduled cron jobs (backfill, pass cleanup, log rotation) | N/A |
-| **Postgres** | `gate_postgres` | `postgres:15-alpine` | Primary transactional relational database | 5432 (Internal) |
+| **Web** | `gate_web` | `monitoring-web:latest` | Next.js 16 standalone SSR and API engine | 3000 |
+| **Worker** | `gate_worker` | `monitoring-worker:latest` | Scheduled cron jobs (backfill, pass cleanup, log rotation) | N/A |
+| **Postgres** | `gate_postgres` | `supabase/postgres:17.6.1.136` | Primary transactional relational database | 5432 (Internal) |
 | **Redis** | `gate_redis` | `redis:7-alpine` | In-memory cache, token bucket rate limiting | 6379 (Internal) |
 
 ## 4. Host Directory Layout (`/opt/monitoring`)

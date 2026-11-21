@@ -23,7 +23,7 @@
          |                 |                 |
          v                 v                 v
 +-----------------+ +-------------+ +-----------------+
-|  PostgreSQL 15  | |   Redis 7   | |  Worker Service |
+|  PostgreSQL 17  | |   Redis 7   | |  Worker Service |
 |  (Data & Auth)  | | (Rate Limit)| | (Cron / Bridge) |
 +-----------------+ +-------------+ +-----------------+
 ```

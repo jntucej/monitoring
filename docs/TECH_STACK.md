@@ -2,10 +2,12 @@
 
 ## ⚡ GATE MONITOR: Core Tech Stack & Infrastructure Guide
 
-**Document Version:** 2.0.0  
+**Document Version:** 2.1.0  
 **Target Organization:** JNTUH College of Engineering Jagtial (JNTUH CEJ)  
 **Status:** Production Stack Specification  
 **Classification:** Technical Infrastructure & Dependency Mapping  
+**Updated:** 2026-11-21 — self-hosted DB layer (PostgreSQL 17, Supabase-compatible
+image) replaces hosted Supabase; teaching/academic capability layer added
 
 ---
 
@@ -92,11 +94,20 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
 
 ## 5. Database, Backend & Infrastructure Architecture
 
-### 5.1 Supabase PostgreSQL Database
-* **Database Engine:** PostgreSQL 15+ hosted on Supabase Cloud.
-* **Row Level Security (RLS):** Table-level isolation policies ensuring students only read their own passes, wardens access hostel wards, and operators write gate logs.
-* **Database Driver:** `@supabase/supabase-js` (`^2.112.3`) for unified REST and Realtime WebSocket subscriptions.
-* **Connection Pooling:** PgBouncer connection pooler optimized for serverless Next.js API routes.
+### 5.1 PostgreSQL Database (self-hosted, Supabase-compatible image)
+* **Database Engine:** PostgreSQL 17 — `supabase/postgres:17.6.1.136` container
+  (the `supabase/postgres` image is plain Postgres + Supabase extension stack;
+  all cloud Supabase/Vercel dependencies were eliminated).
+* **Row Level Security (RLS):** Table-level isolation policies ensuring students
+  only read their own passes/submissions, wardens access hostel wards, and
+  operators write gate logs. Newer subsystems (e.g. academic `submissions`,
+  commit 8201cd1f) use **manual `CREATE POLICY`** on the app role instead of
+  `ALTER TABLE … ENABLE RLS` auto-enrollment.
+* **Database Driver:** `pg` (node-postgres) via `src/lib/postgres.ts`
+  (`query<T>(sql, params)`), `@supabase/supabase-js` retained only for the
+  remaining browser-side client.
+* **Connection Pooling:** Postgres built-in pooler behind the container;
+  the web + worker replicas share one `gate_postgres`.
 
 ### 5.2 Server & Middleware Architecture
 * **Edge Middleware (`src/middleware/`):** Route guards (`auth.ts`), role authorization (`authorization.ts`), CSRF protection (`csrf.ts`), and metrics collectors (`metrics.ts`).
@@ -125,3 +136,23 @@ The **Gate Monitor** technology stack is engineered for low-latency responsivene
 - **Entity scoping** — `entity_scopes`, `delegations` (TTL),
   `pending_approvals` (maker-checker), `leave_requests` (state
   machine) are the schema behind the 29-role model.
+
+## Teaching / Academic capability (added 2026-11-21)
+- **Capability-keyed access** — teaching authorization is by binding, not
+  role: any user with an active `faculty_assignments` row keyed on
+  `faculty_id = user.id` gets `/faculty/*` via `TeachingBindingGate`
+  (`src/lib/teaching-binding.ts` → `GET /api/teaching-bindings`). A
+  Principal with a CS-301 binding is scoped to CS-301; without a
+  binding they get 403 even with the top institutional role.
+- **Action kernel** — `src/lib/action-envelope.ts` (`ActionEnvelope`,
+  tiers 0–4), `src/lib/dispatch-action.ts`, `src/lib/useAction.ts`;
+  all mutations funnel through `POST /api/actions`
+  (auth → idempotency dedupe → binding/role permission check →
+  execute + `audit_logs`).
+- **Academic subsystem** — `assignments`, `submissions`,
+  `extension_requests` (migration `20270128000001_academic_subsystem.sql`),
+  `faculty_id`-keyed (not `posted_by`), manual RLS policies on
+  `submissions`; APIs at `/api/faculty/*`, `/api/academic-status`
+  (HOD two-person rule for SUSPENDED/DEBARRED/LATERAL_JOIN).
+- Design: `docs/teaching-capability-architecture.md`; kernel contract:
+  `docs/CONTRACT.md` §"Teaching Capability Addendum".

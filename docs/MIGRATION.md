@@ -1,5 +1,22 @@
 # Migration Playbook: Supabase & Vercel to Self-Hosted (`docs/MIGRATION.md`)
 
+> **Status (2026-11-21):** completed. The self-hosted stack is live:
+> `supabase/postgres:17.6.1.136` container (Supabase-compatible Postgres
+> image) + `redis:7-alpine` + `caddy:2-alpine` + `monitoring-web` /
+> `monitoring-worker` (see `docker-compose.yml`). The codebase now talks to
+> Postgres through `src/lib/postgres.ts` (`query<T>(sql, params)` over
+> `pg`), not the Supabase client. This document is retained as the
+> historical playbook.
+>
+> Follow-on work that postdates this playbook:
+> - **Teaching / academic capability** (2026-11-21) — new subsystem, not a
+>   migration concern, but RLS note: the academic tables use **manual
+>   `CREATE POLICY`** statements on the app role (see
+>   `database/migrations/20270128000001_academic_subsystem.sql`) rather than
+>   relying on `ALTER TABLE … ENABLE ROW LEVEL SECURITY` auto-enrollment.
+> - **Notification read-state** — `read_at` is the state, not a boolean
+>   column (commit c6cf509a).
+
 ## §1 Inventory & Codebase Analysis
 
 Verify all Supabase and Vercel patterns across the repository:

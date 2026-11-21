@@ -746,3 +746,24 @@ alerts-eval, retention, audit-rotate, mess finalize/no-show) —
 | Streaming DB replica / PITR | Second host required |
 | Aadhaar-device-anchored bot enrollment | Needs the biometric device vendor API |
 | Mess Committee cost-threshold hook | Business decision (threshold value) pending from management |
+
+### Post-blueprint capability layer (2026-11-21)
+
+After the blueprint closed, a teaching capability landed on main
+(f140923c → c6cf509a) — capability-keyed access instead of role-keyed:
+
+- **Binding beats role** — `/faculty/*` is gated by `TeachingBindingGate`
+  (`src/app/(approver)/faculty/layout.tsx`): any user with ≥1 active
+  `faculty_assignments` row keyed on `faculty_id = user.id` gets in,
+  scoped to their subjects; a Principal without a binding is 403.
+- **Action kernel** — `action-envelope.ts` / `dispatch-action.ts` /
+  `useAction.ts` + `POST /api/actions` as the single mutation boundary
+  (auth → idempotency dedupe → binding/role check → execute + audit).
+- **Academic subsystem** — `assignments` / `submissions` /
+  `extension_requests` (migration `20270128000001_academic_subsystem.sql`,
+  keyed on `faculty_id`), manual RLS `CREATE POLICY` on `submissions`
+  (8201cd1f), plus `/api/academic-status` two-person HOD rule.
+
+Design: `docs/teaching-capability-architecture.md`; contract:
+`docs/CONTRACT.md` §"Teaching Capability Addendum"; backlog entry:
+`docs/BACKLOG.md` §"Completed — Teaching / Academic capability".

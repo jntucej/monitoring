@@ -34,6 +34,29 @@ acceptance, not at deploy.**
    row-hash chain; the matching drill is J1.6
    (`drill-audit-tamper-detect`).
 
+## Schema note (added 2026-11-21, post-cutover-set)
+
+The cutover document set above was signed against the schema at go-live.
+Since then main has gained the **teaching / academic capability layer**
+(`assignments`, `submissions`, `extension_requests`, `faculty_assignments`
+gating, HOD `/api/academic-status` two-person rule — migration
+`20270128000001_academic_subsystem.sql`, commits f140923c → c6cf509a).
+Two of the notes above still hold and matter for the academic tables:
+
+- **K3 deviation #1** stands: drill results are still in
+  `DRILL_EVIDENCE_DIR` via `/api/sysadmin/drills` — the academic tables add
+  no drill evidence.
+- **K1 #5 "audit immutability"** note still applies: the academic
+  subsystem writes `audit_logs` rows through `POST /api/actions` and
+  relies on the same trigger-based immutability, **plus** manual
+  `CREATE POLICY` RLS on `submissions` (the only place in the new layer
+  using policy-level RLS instead of trigger-level guarantees).
+
+If the watch list (K7) is re-baselined, add a check that
+`submissions` policies exist (`SELECT policyname FROM pg_policies
+WHERE schemaname='public' AND tablename='submissions'`) — a missing
+policy there means student/faculty grading scope is wide open.
+
 ## The two calendar dates that decide whether this is operated or just deployed
 
 - **Next quarterly restore drill** (`drill-restore-to-separate-host.sh`,

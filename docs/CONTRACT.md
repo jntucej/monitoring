@@ -71,3 +71,25 @@ Forking without guardrails rots. Three files stop that:
 
 The reference role (Phase 2) is the most important commit: if the Warden
 shells hollow cleanly, every other role is mechanical.
+
+## Teaching Capability Addendum (2026-11-21)
+
+The teaching/academic capability extends the kernel with an **action
+envelope** contract so role surfaces dispatch mutations through one
+boundary instead of ad-hoc `fetch` calls:
+
+- `lib/action-envelope.ts` — `ActionEnvelope` (`type`, `targetId`,
+  `actorId`, `actorRole`, `payload`, `reason`, `idempotencyKey`) +
+  `ActionDef` table with `ActionTier` 0–4 (tier ≥ 3 requires `reason`).
+- `lib/dispatch-action.ts` — POSTs envelopes to `POST /api/actions`,
+  the single mutation boundary: auth → idempotency dedupe (60 s TTL,
+  in-process) → permission check → execute + audit log.
+- `lib/useAction.ts` — per-surface state machine
+  (`idle → confirming → submitting → done | denied | expired | conflict`).
+- Binding rule: `assignment.*` / `submission.*` actions re-verify the
+  actor has an active `faculty_assignments` row keyed on
+  `faculty_id = user.id` — the same "binding beats role" rule that
+  gates `/faculty/*` via `TeachingBindingGate`
+  (`lib/teaching-binding.ts` → `/api/teaching-bindings`).
+
+Full design: `docs/teaching-capability-architecture.md`.

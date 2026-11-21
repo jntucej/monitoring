@@ -51,7 +51,7 @@ Principal/HOD see "Teaching".
 
 ```
 Assignment {
-  id, subjectCode, postedBy (user id),
+  id, subjectCode, facultyId (user id — NOT posted_by; migrated 8201cd1f),
   title, description,
   dueAt, maxMarks?, attachments[],
   status: 'open' | 'closed',
@@ -87,9 +87,9 @@ ExtensionRequest {
 | Phase | Work | Status |
 |-------|------|--------|
 | 0 | Pre-flight checks + this doc | ✅ done |
-| 1 | Action kernel (3 files) | pending |
+| 1 | Action kernel (3 files) — `src/lib/action-envelope.ts`, `src/lib/dispatch-action.ts`, `src/lib/useAction.ts` + `POST /api/actions` | ✅ done (f140923c) |
 | 2 | Notification panel fix (done: d1403db8) | ✅ |
-| 3 | Teaching guard swap + sidebar section | pending |
-| 4 | Academic subsystem (assignments + submissions) | pending |
+| 3 | Teaching guard swap — `TeachingBindingGate` in `src/app/(approver)/faculty/layout.tsx` via `hasTeachingBinding()` + `/api/teaching-bindings` | ✅ done |
+| 4 | Academic subsystem — `20270128000001_academic_subsystem.sql` (assignments/submissions/extensions), `/api/faculty/assignments`, RLS via manual `CREATE POLICY` on `submissions` (8201cd1f) | ✅ done |
 | 5 | Student surface fixes (history sheet, campus RSVP) | pending |
 | 6 | Sakuga theme (on consolidated tree) | pending |
