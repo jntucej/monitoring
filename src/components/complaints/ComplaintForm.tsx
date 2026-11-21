@@ -18,6 +18,7 @@ export function ComplaintForm() {
     priority: "medium",
     isAnonymous: false,
     girlsCell: false,
+    respondentDetails: "",
   });
   const [busy, setBusy] = useState(false);
 
@@ -113,6 +114,22 @@ export function ComplaintForm() {
           onChange={(e) => setForm({ ...form, location: e.target.value })}
           className="surface-card w-full p-2 text-sm"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-text-muted mb-1" htmlFor="respondent-optional">
+          This complaint is about (optional)
+        </label>
+        <input id="respondent-optional"
+          placeholder="Who it concerns — a roll / employee ID, or details identifying the person (e.g. 'Physics faculty, Dr. X, office 204')"
+          value={form.respondentDetails}
+          onChange={(e) => setForm({ ...form, respondentDetails: e.target.value })}
+          className="surface-card w-full p-2 text-sm"
+        />
+        <p className="mt-1 text-xs text-text-muted">
+          Leave blank if the complaint is not about a specific person. Details you provide are
+          shared with the reviewing authority only.
+        </p>
       </div>
 
       <div className="surface-card space-y-2 pt-2">

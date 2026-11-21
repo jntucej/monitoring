@@ -11,6 +11,7 @@ import { QuickLinksRow } from "@/components/student/home/QuickLinksRow";
 import { GuardianCallButton } from "@/components/student/home/GuardianCallButton";
 import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
 import { MyDayStrip } from "@/components/student/home/MyDayStrip";
+import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
 import { SakugaConsole } from "@/components/student/SakugaConsole";
 import { WifiOff, RotateCw } from "lucide-react";
@@ -32,6 +33,7 @@ const SHARED_WIDGET_IDS = ["quick-links", "guardian-call", "campus-pulse"] as co
 const ALL_WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
   "my-day-strip": MyDayStrip,
   "my-stats": MyStatsCard,
+  "action-items": ActionItemsStrip,
   "today-status": TodayStatus,
   "active-pass": ActivePassCard,
   "context": ContextCard,
@@ -46,8 +48,8 @@ const ALL_WIDGET_COMPONENTS: Record<string, React.ComponentType> = {
 //   day_scholar → attendance % + today's classes + today's status (no curfew focus)
 //   hosteller   → curfew status + active hostel pass + context (curfew/residence)
 const PERSONA_DATA_WIDGETS: Record<"day_scholar" | "hosteller", string[]> = {
-  day_scholar: ["my-stats", "my-day-strip", "today-status"],
-  hosteller: ["today-status", "active-pass", "context"],
+  day_scholar: ["my-stats", "my-day-strip", "action-items", "today-status"],
+  hosteller: ["today-status", "active-pass", "context", "action-items"],
 };
 
 

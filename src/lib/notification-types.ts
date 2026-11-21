@@ -14,7 +14,16 @@ export type NotificationType =
   | 'pass_rejected'
   | 'entry_recorded'
   | 'exit_recorded'
-  | 'birthday';
+  | 'birthday'
+  | 'class.next'
+  | 'class.review.prompt'
+  | 'class.confirmation.requested'
+  | 'class.confirmation.confirmed'
+  | 'class.confirmation.no_show'
+  | 'assignment.created'
+  | 'assignment.due.soon'
+  | 'assignment.pending'
+  | 'assignment.reply';
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'critical';
 

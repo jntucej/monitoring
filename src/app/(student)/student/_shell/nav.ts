@@ -2,7 +2,7 @@ import type { NavEntry, NavGroup, NavContext } from "@/components/shell/types";
 import type { IconRailGroup } from "@/components/shared/IconRail";
 import {
   Home, CheckSquare, UtensilsCrossed,
-  UserCog, AlertCircle, BookOpen,
+  UserCog, AlertCircle, BookOpen, ClipboardList,
 } from "lucide-react";
 
 // P1: the hostel-relevant nav items are gated on residentialStatus.
@@ -31,6 +31,17 @@ export const STUDENT_NAV: NavEntry[] = [
       { href: "/student/mess/reviews", label: "Reviews" },
       { href: "/student/mess/special", label: "Special" },
       { href: "/student/mess-bill", label: "Bill" },
+    ],
+  },
+  {
+    kind: "group", id: "academic", label: "Academics", icon: ClipboardList,
+    children: [
+      { href: "/student/marks", label: "Marks" },
+      { href: "/student/exams", label: "Exams" },
+      { href: "/student/assignments", label: "Assignments" },
+      { href: "/student/fees", label: "Fees" },
+      { href: "/student/scholarships", label: "Scholarships" },
+      { href: "/student/library", label: "Library" },
     ],
   },
   {

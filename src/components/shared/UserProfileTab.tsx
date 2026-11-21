@@ -52,7 +52,15 @@ const { addToast } = useUIStore();
     );
   }
 
-  const userIdentifier = user.employeeId || user.id;
+  // ID / Roll Number: show the human identifier, not the internal UUID.
+  // Precedence: student roll (studentDetails.roll) → lookup handle (uniqueId)
+  // → friendly identifier → employee id → (last resort) internal id.
+  const userIdentifier =
+    user.studentDetails?.roll ||
+    user.uniqueId ||
+    user.identifier ||
+    user.employeeId ||
+    user.id;
 
   return (
     <div className="max-w-md mx-auto space-y-6">

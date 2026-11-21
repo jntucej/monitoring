@@ -108,5 +108,12 @@ export const STUDENT_CONFIG: RoleConfig = {
     { id: "overstay.view", label: "See overstay/late state", kind: "security", when: overstay },
     { id: "return-gate.view", label: "See which gate to return at", kind: "ux", when: hostellerOutWithLeave },
     { id: "mess.off.request", label: "Request mess off", kind: "security", when: (c) => isHosteller(c) && isInCampus(c) },
+    { id: "assignment.view", label: "See my assignments", kind: "ux", when: () => true },
+    { id: "mess.view", label: "See my mess token", kind: "ux", when: () => true },
+    { id: "marks.view", label: "See my marks", kind: "ux", when: () => true },
+    { id: "exams.view", label: "See my exam schedule", kind: "ux", when: () => true },
+    { id: "fees.view", label: "See my fees", kind: "ux", when: () => true },
+    { id: "scholarships.view", label: "See my scholarships", kind: "ux", when: () => true },
+    { id: "library.view", label: "See my library issues", kind: "ux", when: () => true },
   ],
 };

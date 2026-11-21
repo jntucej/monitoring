@@ -35,6 +35,37 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
     );
 
     const r: any = res.rows[0];
+
+    // ── Eligibility reconciliation (PR3): expected / issued / excluded-by-reason.
+    // The decision was stored at finalize time in mess_eligibility; read it here
+    // so the dashboard shows "how sure are we the right people got tokens"
+    // without recomputing leave/presence/opt-out.
+    const elig = await query(
+      `SELECT
+         count(*) FILTER (WHERE eligible = TRUE)::int AS expected,
+         count(*) FILTER (WHERE eligible = FALSE)::int AS excluded
+        FROM mess_eligibility
+       WHERE mess_day_id::text = $1`,
+      [day.id]
+    );
+    const issued = await query(
+      `SELECT count(*)::int AS n FROM mess_tokens WHERE mess_day_id::text = $1`,
+      [day.id]
+    );
+    const byReason = await query<{ reason: string; n: string }>(
+      `SELECT reason, count(*)::text AS n
+         FROM mess_eligibility
+        WHERE mess_day_id::text = $1 AND eligible = FALSE
+        GROUP BY reason ORDER BY n DESC`,
+      [day.id]
+    );
+    const excludedByReason: Record<string, number> = {};
+    for (const row of byReason.rows) excludedByReason[row.reason] = Number(row.n);
+
+    const expected = Number(elig.rows[0]?.expected ?? 0);
+    const excludedTotal = Number(elig.rows[0]?.excluded ?? 0);
+    const issuedCount = Number(issued.rows[0]?.n ?? 0);
+
     return ok({
       messDayId: day.id,
       mealDate: day.meal_date,
@@ -44,6 +75,11 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
       nonVeg: r?.nonVeg ?? 0,
       confirmed: r?.confirmed ?? 0,
       noShows: r?.noShows ?? 0,
+      // Eligibility reconciliation (the "how sure are we" numbers):
+      expected,
+      issued: issuedCount,
+      excluded: excludedTotal,
+      excludedByReason,
     });
   } catch (err) {
     console.error("[mess/meal-counts GET]", err);

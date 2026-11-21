@@ -77,6 +77,36 @@ async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext 
 
     const byPrimary = { VEG: totalVeg, NON_VEG: totalNonVeg };
 
+    // PR7: exclusion-reason trend across the last N mess days. This reveals
+    // institutional patterns (e.g. a spike in "on leave" every weekend) from
+    // the stored finalize-time decisions in mess_eligibility.
+    const trendRes = await query<{
+      day: string;
+      reason: string;
+      n: number;
+    }>(
+      `SELECT d.meal_date::text AS day, e.reason, count(*)::int AS n
+         FROM public.mess_eligibility e
+         JOIN public.mess_days d ON d.id = e.mess_day_id
+        WHERE e.eligible = FALSE
+          AND d.meal_date >= CURRENT_DATE - INTERVAL '21 days'
+        GROUP BY d.meal_date, e.reason
+        ORDER BY d.meal_date DESC, n DESC`,
+    );
+    // Aggregate: totals by reason + per-day breakdown.
+    const excludedByReasonTrend: Record<string, number> = {};
+    const byDay: Array<{ day: string; byReason: Record<string, number>; total: number }> = [];
+    for (const row of trendRes.rows as Array<{ day: string; reason: string; n: number }>) {
+      excludedByReasonTrend[row.reason] = (excludedByReasonTrend[row.reason] ?? 0) + row.n;
+      let dayEntry = byDay.find((d) => d.day === row.day);
+      if (!dayEntry) {
+        dayEntry = { day: row.day, byReason: {}, total: 0 };
+        byDay.push(dayEntry);
+      }
+      dayEntry.byReason[row.reason] = (dayEntry.byReason[row.reason] ?? 0) + row.n;
+      dayEntry.total += row.n;
+    }
+
     return ok({
       messDayId: day.id,
       mealDate: day.meal_date,
@@ -87,6 +117,9 @@ async function handleGet(req: NextRequest, { auth: _auth }: { auth: AuthContext 
       confirmedPresent: totalConfirmed,
       byPrimary,
       byHostelBlock,
+      // PR7 additions:
+      excludedByReasonTrend,
+      excludedByDay: byDay,
     });
   } catch (err) {
     console.error("[mess/analytics GET]", err);

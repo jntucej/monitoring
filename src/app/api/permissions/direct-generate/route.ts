@@ -6,6 +6,7 @@ import { addAudit, addNotification } from "@/lib/db";
 import { assertCsrf } from "@/lib/csrf";
 import {generateTicketNumber, requiresStepup, maxDurationForReason}  from "@/lib/permission-workflow";
 import { checkStepupPassword, DIRECT_GENERATE_ROLES } from "@/lib/permission-forward";
+import { canGenerate } from "@/config/pass-ranks";
 import { normalizeExitReason } from "@/lib/student-exit-flow";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { query } from "@/lib/postgres";
@@ -51,8 +52,15 @@ async function handlePost(
   if (!body.from) {
     return fail("MISSING_FROM", "from datetime required", 400);
   }
-  if (!DIRECT_GENERATE_ROLES.includes(auth.role)) {
-    return fail("FORBIDDEN", "Role cannot direct-generate", 403);
+  // Role gate: the caller must be in the generation allow-list AND their
+  // rank tier must cover this reason (Deputy Warden can't issue emergency;
+  // Caretaker / hostel_manager are not on the allow-list at all).
+  if (!DIRECT_GENERATE_ROLES.includes(auth.role) || !canGenerate(auth.role, body.reason)) {
+    return fail(
+      "FORBIDDEN",
+      `Role ${auth.role} may not generate a ${body.reason} pass (rank tier insufficient)`,
+      403,
+    );
   }
 
   const entryType = await requesterEntryType(body.studentUserId);

@@ -6,6 +6,7 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 
 import { AnalyticsTab } from "@/components/mess/MessOperations";
+import { MessExclusionTrend } from "@/components/mess/MessExclusionTrend";
 
 export default function AdminMessAnalyticsPage() {
   return (
@@ -15,6 +16,7 @@ export default function AdminMessAnalyticsPage() {
         <WidgetBoundary title="Mess Analytics">
           <AnalyticsTab />
         </WidgetBoundary>
+        <MessExclusionTrend />
       </Suspense>
 
     </div>

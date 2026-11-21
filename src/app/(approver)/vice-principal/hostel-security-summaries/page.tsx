@@ -1,68 +1,113 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
-import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
-import { useProbe } from "../_probe";
-import { Loader2, Inbox, Building2, Siren, ShieldCheck, Users } from "lucide-react";
+import { Loader2, Inbox, Siren, ShieldCheck, Users } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 
+/**
+ * VP hostel-security rollup — aggregate only, no per-student rows.
+ *
+ * All counts come from the single /api/vp/hostel-summary endpoint, which is
+ * auth-gated to VP/Principal/Admin/Sysadmin and returns only numbers. The
+ * alerts feed is a severity-bucketed summary (counts, not the raw list) —
+ * the VP sees posture, not individual records. This replaces the page's
+ * previous direct fetches of /api/occupancy/presence-matrix + /api/alerts,
+ * which would have exposed a gate × role count matrix + raw alert rows.
+ */
 
-interface PresenceMatrixData {
-  gates: Array<{ id: string; name: string; code: string }>;
-  roles: string[];
-  matrix: Record<string, Record<string, number>>;
-  lastUpdated: string;
+interface HostelSummary {
+  hostellersTotal: number;
+  hostellersOnCampus: number;
+  hostellersOutToday: number;
+  activeAlerts: number;
+  criticalAlerts7d: number;
+  hostelLeaveActive: number;
+  generatedAt: string;
 }
 
-interface AlertRow {
-  id: string;
-  severity: string;
-  title: string;
-  message?: string;
-  timestamp: string;
-  gateId?: string;
-  studentRoll?: string;
+interface AlertSummary {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
 }
 
 function VpHostelSecurityInner() {
-  const {
-    data: matrix,
-    loading: matrixLoading,
-    refresh: refreshMatrix,
-  } = useApiResource<{ success: boolean; data: PresenceMatrixData }>(
-    "/api/occupancy/presence-matrix",
-    { ttlMs: 30_000 }
+  const [summary, setSummary] = useState<HostelSummary | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [alerts, setAlerts] = useState<AlertSummary | null>(null);
+  const [alertsRestricted, setAlertsRestricted] = useState(false);
+
+  const loadSummary = async () => {
+    try {
+      const res = await fetch("/api/vp/hostel-summary", {
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setSummary(json.data as HostelSummary);
+        setSummaryError(null);
+      } else {
+        setSummaryError(json.error?.message ?? "Failed to load hostel summary");
+      }
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : "Failed to load hostel summary");
+    }
+  };
+
+  const loadAlertSummary = async () => {
+    // Count-only buckets from the same alerts endpoint, filtered by severity.
+    // We do NOT render the raw alert rows — only the per-severity counts.
+    const buckets: AlertSummary = { critical: 0, high: 0, medium: 0, low: 0 };
+    const severities = ["critical", "high", "medium", "low"] as const;
+    const results = await Promise.all(
+      severities.map(async (sev) => {
+        try {
+          const res = await fetch(`/api/alerts?resolved=false&severity=${sev}`, {
+            credentials: "include",
+          });
+          if (res.status === 403 || res.status === 401) {
+            setAlertsRestricted(true);
+            return 0;
+          }
+          const json = await res.json();
+          const total =
+            typeof json?.total === "number"
+              ? json.total
+              : Array.isArray(json?.data)
+                ? json.data.length
+                : 0;
+          return total;
+        } catch {
+          return 0;
+        }
+      })
+    );
+    severities.forEach((s, i) => {
+      buckets[s] = results[i];
+    });
+    setAlerts(buckets);
+  };
+
+  useEffect(() => {
+    loadSummary();
+    loadAlertSummary();
+  }, []);
+  usePolling(loadSummary, { intervalMs: 30_000, enabled: true });
+  usePolling(loadAlertSummary, { intervalMs: 60_000, enabled: true });
+
+  const kpis = useMemo(
+    () => [
+      { label: "Hostellers on campus", value: summary?.hostellersOnCampus ?? 0, icon: Users, tone: "text-action-success" },
+      { label: "Hostellers out today", value: summary?.hostellersOutToday ?? 0, icon: Siren, tone: "text-action-warning" },
+      { label: "Hostel leave active", value: summary?.hostelLeaveActive ?? 0, icon: Inbox, tone: "text-action-info" },
+      { label: "Critical alerts (7d)", value: summary?.criticalAlerts7d ?? 0, icon: Siren, tone: "text-action-danger" },
+    ],
+    [summary]
   );
-
-  const alertsProbe = useProbe<{ data?: AlertRow[]; total?: number }>(
-    "/api/alerts?resolved=false",
-    30_000
-  );
-
-  usePolling(refreshMatrix, { intervalMs: 30_000, enabled: true });
-
-  const gateTotals = useMemo(() => {
-    const gates = matrix?.data?.gates ?? [];
-    const m = matrix?.data?.matrix ?? {};
-    const roles = matrix?.data?.roles ?? [];
-    return gates.map((g) => ({
-      ...g,
-      total: roles.reduce((sum, r) => sum + (m[g.id]?.[r] ?? 0), 0),
-    }));
-  }, [matrix]);
-
-  const onCampus = gateTotals.reduce((sum, g) => sum + g.total, 0);
-
-  const alertRows: AlertRow[] = useMemo(() => {
-    if (!alertsProbe.data) return [];
-    if (Array.isArray(alertsProbe.data.data)) return alertsProbe.data.data as AlertRow[];
-    return [];
-  }, [alertsProbe]);
-
-  const activeAlerts = alertRows.filter((a) => !("resolved" in a) || !(a as AlertRow & { resolved?: boolean }).resolved);
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 md:px-6 min-w-0">
@@ -71,149 +116,88 @@ function VpHostelSecurityInner() {
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
-              Live Campus Presence & Security Posture
+              Hostel aggregate — counts only
             </span>
           </div>
 
-          {/* KPI row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 min-w-0">
-            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-text-muted">
-                <Users className="w-4 h-4 text-action-success" />
-                <span className="text-xs uppercase tracking-wide">On Campus Now</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 min-w-0">
+            {kpis.map((k) => (
+              <div key={k.label} className="surface-card bg-bg-elevated/40 p-3 min-w-0">
+                <div className="flex items-center gap-2 text-text-muted">
+                  <k.icon className="w-4 h-4" />
+                  <span className="text-xs uppercase tracking-wide">{k.label}</span>
+                </div>
+                <p className={`text-xl font-bold ${k.tone}`}>
+                  {summary ? k.value : <Loader2 className="w-5 h-5 animate-spin inline text-text-muted" />}
+                </p>
               </div>
-              <p className="text-xl font-bold text-action-success">
-                {matrixLoading ? <Loader2 className="w-5 h-5 animate-spin inline text-text-muted" /> : onCampus}
-              </p>
-            </div>
-            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-text-muted">
-                <Building2 className="w-4 h-4 text-action-info" />
-                <span className="text-xs uppercase tracking-wide">Active Gates</span>
-              </div>
-              <p className="text-xl font-bold text-action-info">
-                {matrixLoading && !matrix ? "…" : gateTotals.filter((g) => g.total > 0).length}
-              </p>
-            </div>
-            <div className="surface-card bg-bg-elevated/40 p-3 min-w-0">
-              <div className="flex items-center gap-2 text-text-muted">
-                <Siren className="w-4 h-4 text-action-danger" />
-                <span className="text-xs uppercase tracking-wide">Unresolved Alerts</span>
-              </div>
-              <p className="text-xl font-bold text-action-danger">
-                {alertsProbe.loading ? <Loader2 className="w-5 h-5 animate-spin inline text-text-muted" /> : activeAlerts.length}
-              </p>
-            </div>
+            ))}
           </div>
 
-          {/* Gate table */}
-          {!matrix ? (
-            <div className="flex items-center gap-2 text-sm text-text-muted min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading presence data…
-            </div>
-          ) : gateTotals.length === 0 ? (
-            <div className="p-4 text-center">
-              <Inbox className="w-5 h-5 text-text-muted mx-auto mb-2" />
-              <p className="text-sm text-text-muted">No active gates configured.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto min-w-0">
-              <table className="w-full text-sm min-w105">
-                <thead>
-                  <tr className="text-text-muted text-xs uppercase tracking-wide border-b border-border">
-                    <th className="text-left px-3 py-2">Gate</th>
-                    <th className="text-left px-3 py-2">Code</th>
-                    <th className="text-right px-3 py-2">On Campus</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {gateTotals.map((g) => (
-                    <tr key={g.id} className="hover:bg-bg-elevated/30">
-                      <td className="px-3 py-2 text-text-secondary">{g.name}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-text-muted">{g.code}</td>
-                      <td className="px-3 py-2 text-right">
-                        <span className={`font-bold ${g.total > 0 ? "text-action-success" : "text-text-muted"}`}>
-                          {g.total}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {summaryError && (
+            <div className="surface-card bg-amber-500/10 p-3 text-xs text-action-warning min-w-0">
+              Hostel summary unavailable: {summaryError}
             </div>
           )}
+
+          <div className="text-xs text-text-muted">
+            {summary
+              ? `Hostellers on campus: ${summary.hostellersOnCampus} of ${summary.hostellersTotal} total · last refreshed ${new Date(summary.generatedAt).toLocaleTimeString()}`
+              : "Loading hostel aggregate…"}
+          </div>
         </div>
       </WidgetBoundary>
 
-      <WidgetBoundary title="Security Alerts">
+      <WidgetBoundary title="Alert posture (severity buckets)">
         <div className="surface-card bg-bg-base p-4 min-w-0">
           <div className="flex items-center gap-2 text-text-muted mb-3 min-w-0">
             <Siren className="w-4 h-4 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wide">
-              Unresolved Campus Alerts
+              Unresolved campus alerts — by severity
             </span>
           </div>
-          {alertsProbe.loading ? (
-            <div className="flex items-center gap-2 text-sm text-text-muted min-w-0">
-              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Checking access…
-            </div>
-          ) : alertsProbe.restricted ? (
+
+          {alertsRestricted ? (
             <div className="surface-card bg-bg-elevated/20 p-5 text-center text-sm text-text-muted min-w-0">
               <Siren className="w-5 h-5 text-text-muted mx-auto mb-2" />
               <p className="max-w-md mx-auto">
-                Campus alert detail is restricted at the Vice Principal tier. The Principal and
-                Administrator desks carry the live alert feed. Presence rollups above remain
-                available.
+                Alert detail is restricted at the Vice Principal tier. The Principal and
+                Administrator desks carry the live alert feed. The aggregate above remains available.
               </p>
             </div>
-          ) : alertsProbe.error ? (
-            <div className="surface-card bg-amber-500/10 p-3 text-xs text-action-warning min-w-0">
-              Alerts unavailable right now: {alertsProbe.error}
-            </div>
-          ) : activeAlerts.length === 0 ? (
-            <div className="p-4 text-center">
-              <ShieldCheck className="w-5 h-5 text-emerald-500/50 mx-auto mb-2" />
-              <p className="text-sm text-text-muted">No unresolved alerts. Security posture is nominal.</p>
+          ) : !alerts ? (
+            <div className="flex items-center gap-2 text-sm text-text-muted min-w-0">
+              <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading alert posture…
             </div>
           ) : (
-            <ul className="space-y-2 min-w-0 max-h-64 overflow-y-auto">
-              {activeAlerts.slice(0, 10).map((a) => (
-                <li
-                  key={a.id}
-                  className="surface-card bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
-                >
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
-                      a.severity === "critical"
-                        ? "bg-rose-500/15 text-action-danger border border-rose-500/30"
-                        : a.severity === "high"
-                          ? "bg-amber-500/15 text-action-warning border border-amber-500/30"
-                          : "bg-bg-elevated text-text-secondary border border-border"
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(["critical", "high", "medium", "low"] as const).map((sev) => (
+                <div key={sev} className="surface-card bg-bg-elevated/30 p-3 min-w-0">
+                  <p className="text-xs uppercase tracking-wide text-text-muted">{sev}</p>
+                  <p
+                    className={`text-2xl font-bold tabular-nums ${
+                      sev === "critical"
+                        ? "text-action-danger"
+                        : sev === "high"
+                          ? "text-action-warning"
+                          : "text-text-secondary"
                     }`}
                   >
-                    {a.severity?.toUpperCase() || "INFO"}
-                  </span>
-                  <span className="text-sm text-text-secondary truncate min-w-0 flex-1">{a.title}</span>
-                  <span className="text-xs text-text-muted shrink-0">
-                    {new Date(a.timestamp).toLocaleString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </li>
+                    {alerts[sev]}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </WidgetBoundary>
     </div>
   );
 }
+
 export default function VpHostelSecurityPage() {
   return (
-    <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>
+    <AuthGuard allowedRoles={["vice_principal", "exam_branch", "oie", "admin", "sysadmin"]}>
       <Suspense fallback={<PageLoading />}>
         <VpHostelSecurityInner />
       </Suspense>

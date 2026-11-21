@@ -10,13 +10,16 @@ import { FocusZone, type FocusItem } from "../_retention/FocusZone";
 import { FocusMode } from "../_retention/FocusMode";
 import { ChainImpact } from "../_retention/ChainImpact";
 import { DelegationHealth } from "../_retention/DelegationHealth";
+import { VpInboundCard } from "@/components/principal/VpInboundCard";
 import { StrategicScorecard } from "../_retention/StrategicScorecard";
 import { WinFeed } from "../_retention/WinFeed";
 import { InsightCard } from "../_retention/InsightCard";
+import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { EmergencyPulse } from "../_retention/EmergencyPulse";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
+import { OverallClassSatisfactionCard } from "@/components/principal/OverallClassSatisfactionCard";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
@@ -145,6 +148,9 @@ export default function PrincipalTodayPage() {
           />
         </WidgetBoundary>
 
+        {/* Live classes — campus-wide academic surface */}
+        <LiveClassCard title="Campus Live" scope="campus" />
+
         {/* 3. Focus zone — the one item that matters right now */}
         <div className="section-offscreen">
         <WidgetBoundary name="FocusZone" title="Focus Zone">
@@ -173,6 +179,9 @@ export default function PrincipalTodayPage() {
           </WidgetBoundary>
         </Suspense>
 
+        {/* VP bridge — items the Vice Principal flagged upward */}
+        <VpInboundCard />
+
         {/* 6. Scorecard — personal bests */}
         <WidgetBoundary name="StrategicScorecard" title="Strategic Scorecard">
           <StrategicScorecard
@@ -194,6 +203,10 @@ export default function PrincipalTodayPage() {
             />
           </div>
         </WidgetBoundary>
+
+        {/* 6b. Overall class satisfaction (campus-wide class-review roll-up).
+              The card carries its own Principal-gated boundary. */}
+        <OverallClassSatisfactionCard />
 
         {/* 7. Upcoming — SLA deadlines within 24h */}
         <WidgetBoundary name="UpcomingPreview" title="Upcoming Preview">

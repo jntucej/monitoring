@@ -26,6 +26,11 @@ export const MESS_INCHARGE_CONFIG: RoleConfig = {
     { widget: "MenuOfDay", size: "sm" },
   ],
   signature: "MealDayBoard",
+  // Mess-eligibility dashboard gate (PR4): the in-charge sees the
+  // expected/issued/served/excluded reconciliation on /mess/meal-attendance.
+  capabilities: [
+    { id: "mess.eligibility.view", label: "View mess eligibility reconciliation", kind: "ux", when: () => true },
+  ],
   emptyCopy: {
     no_tokens: "No tokens scanned yet — service hasn't started.",
   },

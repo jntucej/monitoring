@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-21T18:06:56.721Z",
-  "pageCount": 428,
+  "generatedAt": "2026-11-21T20:46:42.462Z",
+  "pageCount": 435,
   "pages": [
     {
       "route": "/admin/academic-automation",
@@ -1883,7 +1883,7 @@
     {
       "route": "/faculty/my-classes",
       "file": "src/app/(approver)/faculty/my-classes/page.tsx",
-      "title": "My Classes",
+      "title": "My Classes Live",
       "subtitle": null,
       "role": "approver",
       "fetches": [],
@@ -2981,6 +2981,33 @@
       "navEntry": null
     },
     {
+      "route": "/principal/passes",
+      "file": "src/app/(approver)/principal/passes/page.tsx",
+      "title": "Generate Pass",
+      "subtitle": null,
+      "role": "approver",
+      "fetches": [
+        {
+          "method": "GET",
+          "url": "/api/permissions?workflow=hostel&status=APPROVED&limit=50"
+        },
+        {
+          "method": "POST",
+          "url": "/api/permissions/direct-generate"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "{busy ? \"Generating…\" : \"Generate\"}",
+          "handler": "generate",
+          "action": null,
+          "capability": null
+        }
+      ],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
       "route": "/principal/people/attendance",
       "file": "src/app/(approver)/principal/people/attendance/page.tsx",
       "title": null,
@@ -3437,7 +3464,16 @@
       "title": "Hostel & Security Rollup",
       "subtitle": null,
       "role": "approver",
-      "fetches": [],
+      "fetches": [
+        {
+          "method": "GET",
+          "url": "/api/vp/hostel-summary"
+        },
+        {
+          "method": "GET",
+          "url": "/api/alerts?resolved=false&severity=${sev}"
+        }
+      ],
       "buttons": [],
       "capabilities": [],
       "navEntry": null
@@ -4376,6 +4412,35 @@
       "navEntry": null
     },
     {
+      "route": "/student/assignments",
+      "file": "src/app/(student)/student/assignments/page.tsx",
+      "title": "My assignments",
+      "subtitle": null,
+      "role": "student",
+      "fetches": [
+        {
+          "method": "GET",
+          "url": "/api/student/assignments"
+        },
+        {
+          "method": "POST",
+          "url": "/api/assignments/${id}/submit"
+        }
+      ],
+      "buttons": [
+        {
+          "label": "submit(a.id)} disabled={submittingId === a.id} className=\"in",
+          "handler": "()",
+          "action": null,
+          "capability": null
+        }
+      ],
+      "capabilities": [
+        "assignment.view"
+      ],
+      "navEntry": null
+    },
+    {
       "route": "/student/attendance",
       "file": "src/app/(student)/student/attendance/page.tsx",
       "title": null,
@@ -4566,6 +4631,28 @@
       "navEntry": null
     },
     {
+      "route": "/student/exams",
+      "file": "src/app/(student)/student/exams/page.tsx",
+      "title": null,
+      "subtitle": null,
+      "role": "student",
+      "fetches": [],
+      "buttons": [],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
+      "route": "/student/fees",
+      "file": "src/app/(student)/student/fees/page.tsx",
+      "title": null,
+      "subtitle": null,
+      "role": "student",
+      "fetches": [],
+      "buttons": [],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
       "route": "/student/gate-pass",
       "file": "src/app/(student)/student/gate-pass/page.tsx",
       "title": null,
@@ -4633,6 +4720,28 @@
       "navEntry": null
     },
     {
+      "route": "/student/library",
+      "file": "src/app/(student)/student/library/page.tsx",
+      "title": null,
+      "subtitle": null,
+      "role": "student",
+      "fetches": [],
+      "buttons": [],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
+      "route": "/student/marks",
+      "file": "src/app/(student)/student/marks/page.tsx",
+      "title": null,
+      "subtitle": null,
+      "role": "student",
+      "fetches": [],
+      "buttons": [],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
       "route": "/student/mess",
       "file": "src/app/(student)/student/mess/page.tsx",
       "title": null,
@@ -4683,8 +4792,17 @@
       "subtitle": null,
       "role": "student",
       "fetches": [],
-      "buttons": [],
-      "capabilities": [],
+      "buttons": [
+        {
+          "label": "refresh?.()} className=\"ml-2 text-action-primary underline\">",
+          "handler": "()",
+          "action": null,
+          "capability": null
+        }
+      ],
+      "capabilities": [
+        "mess.view"
+      ],
       "navEntry": null
     },
     {
@@ -4976,6 +5094,17 @@
     {
       "route": "/student/request-tracking",
       "file": "src/app/(student)/student/request-tracking/page.tsx",
+      "title": null,
+      "subtitle": null,
+      "role": "student",
+      "fetches": [],
+      "buttons": [],
+      "capabilities": [],
+      "navEntry": null
+    },
+    {
+      "route": "/student/scholarships",
+      "file": "src/app/(student)/student/scholarships/page.tsx",
       "title": null,
       "subtitle": null,
       "role": "student",

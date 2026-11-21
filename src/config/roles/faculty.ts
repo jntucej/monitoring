@@ -24,8 +24,19 @@ export const FACULTY_CONFIG: RoleConfig = {
     { widget: "TodayTimetable", size: "lg" },
     { widget: "AttendanceQuickTake", size: "md" },
     { widget: "NextClassCard", size: "sm" },
+    { widget: "ClassReviewsWidget", size: "md" },
   ],
   signature: "NextClassCard",
+  // Class-review capability gate: faculty can view their own class-session
+  // reviews (the "My class reviews" card). Universally true for the role —
+  // going through the config keeps it gated the same way as everything else.
+  capabilities: [
+    { id: "class.review.view", label: "View my class reviews", kind: "ux", when: () => true },
+    { id: "class.review.reply", label: "Reply to a class review", kind: "ux", when: () => true },
+    { id: "class.confirm", label: "Confirm my class sessions", kind: "ux", when: () => true },
+    { id: "assignment.view", label: "View my assignments", kind: "ux", when: () => true },
+    { id: "dashboard.live-classes.view", label: "View live class state (self)", kind: "ux", when: () => true },
+  ],
   emptyCopy: {
     no_classes: "No classes scheduled today.",
     no_submissions: "No pending submissions.",

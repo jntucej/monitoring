@@ -11,9 +11,11 @@ import { FocusMode } from "../_retention/FocusMode";
 import { Scorecard } from "../_retention/Scorecard";
 import { WinFeed } from "../_retention/WinFeed";
 import { InsightCard } from "../_retention/InsightCard";
+import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { HotSpots, type HotSpot } from "../_retention/HotSpots";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { PrincipalBridge } from "../_retention/PrincipalBridge";
+import { VpBridgeFlagCard } from "@/components/vp/VpBridgeFlagCard";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -148,6 +150,9 @@ export default function VPTodayPage() {
           />
         </WidgetBoundary>
 
+        {/* Live classes — academic surface */}
+        <LiveClassCard title="Academic Live" scope="academic" />
+
         {/* 4. Two-up: Wins + Insight */}
         <WidgetBoundary name="WinsAndInsights" title="Wins & Insights">
           <div className="grid gap-4 md:grid-cols-2">
@@ -168,13 +173,14 @@ export default function VPTodayPage() {
           </div>
         </WidgetBoundary>
 
-        {/* 6. Principal Bridge — social proof */}
+        {/* 6. Principal Bridge — social proof + the actionable flag */}
         <WidgetBoundary name="PrincipalBridge" title="Principal Bridge">
           <PrincipalBridge
             myPending={d?.principalBridge.myPending ?? 0}
             principalPending={d?.principalBridge.principalPending ?? 0}
           />
         </WidgetBoundary>
+        <VpBridgeFlagCard />
 
         {/* 7. Retention & Analytics Widgets */}
         <WidgetBoundary name="RoleAnalytics" title="Role Analytics">

@@ -21,6 +21,10 @@ interface DayStripPayload {
     hall: string;
     start: string;
     end: string;
+    /** live-class state (S.5): derived from confirmation + attendance. */
+    state: "LIVE" | "UPCOMING" | "MISSED" | "SUBSTITUTED" | "ENDED" | null;
+    /** the actual faculty if a substitute is in (else same as faculty). */
+    actualFaculty: string | null;
   } | null;
   nextMealCutoff: string | null; // "14:30"
   curfewIn: string | null; // "3h 15m"
@@ -70,6 +74,30 @@ export function MyDayStrip() {
       // next class from attendance.upcoming (first entry)
       const upcoming = d.attendance?.upcoming ?? [];
       const next = upcoming[0] ?? null;
+      // S.5: fetch live-class state + substitute for the next session.
+      let liveState: "LIVE" | "UPCOMING" | "MISSED" | "SUBSTITUTED" | "ENDED" | null = null;
+      let actualFaculty: string | null = null;
+      if (next) {
+        try {
+          const lr = await fetch("/api/class-sessions/live?scope=self", {
+            headers: getAuthHeaders(),
+            cache: "no-store",
+          });
+          const lj = await lr.json().catch(() => null);
+          const sessions = lj?.data?.sessions ?? [];
+          // Match the next session by period + start time (best-effort).
+          const match = sessions.find(
+            (s: any) => s.startAt === next.timeIn || s.periodNo === next.periodNo
+          );
+          if (match) {
+            liveState = match.state ?? null;
+            actualFaculty =
+              match.state === "SUBSTITUTED" && match.facultyName
+                ? match.facultyName
+                : next.faculty ?? null;
+          }
+        } catch {}
+      }
       const nextClass = next
         ? {
             subject: next.subject ?? "Class",
@@ -77,6 +105,8 @@ export function MyDayStrip() {
             hall: "",
             start: next.timeIn ?? "",
             end: next.timeOut ?? "",
+            state: liveState,
+            actualFaculty,
           }
         : null;
 
@@ -142,7 +172,23 @@ export function MyDayStrip() {
               </p>
               {data.nextClass.faculty && (
                 <p className="text-[10px] text-text-muted flex items-center gap-1">
-                  <User className="h-2.5 w-2.5" /> {data.nextClass.faculty}
+                  <User className="h-2.5 w-2.5" /> {data.nextClass.actualFaculty ?? data.nextClass.faculty}
+                  {data.nextClass.state === "SUBSTITUTED" && data.nextClass.actualFaculty && (
+                    <span className="ml-1 px-1 rounded bg-amber-500/15 text-amber-600 text-[9px] font-semibold">sub</span>
+                  )}
+                </p>
+              )}
+              {data.nextClass.state && data.nextClass.state !== "UPCOMING" && (
+                <p className={`text-[10px] font-semibold ${
+                  data.nextClass.state === "LIVE" ? "text-action-success"
+                    : data.nextClass.state === "SUBSTITUTED" ? "text-amber-500"
+                    : data.nextClass.state === "MISSED" ? "text-action-danger"
+                    : "text-text-muted"
+                }`}>
+                  {data.nextClass.state === "LIVE" ? "In session"
+                    : data.nextClass.state === "SUBSTITUTED" ? "Substitute teaching"
+                    : data.nextClass.state === "MISSED" ? "Missed"
+                    : "Confirming"}
                 </p>
               )}
               <p className="text-[10px] text-text-muted flex items-center justify-between">

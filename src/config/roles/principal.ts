@@ -26,6 +26,13 @@ export const PRINCIPAL_CONFIG: RoleConfig = {
     { widget: "ChainImpact", size: "md" },
   ],
   signature: "ChainImpact",
+  // Class-review capability gate (Principal sees the campus-wide roll-up).
+  capabilities: [
+    { id: "class.review.view", label: "View overall class satisfaction", kind: "ux", when: () => true },
+    { id: "vp.inbound.view", label: "View items flagged by the VP", kind: "ux", when: () => true },
+    { id: "vp.inbound.respond", label: "Respond to a VP flag", kind: "ux", when: () => true },
+    { id: "dashboard.live-classes.view", label: "View live class state (campus)", kind: "ux", when: () => true },
+  ],
   emptyCopy: {
     no_incidents: "No active incidents — campus is running normally.",
   },

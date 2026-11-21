@@ -136,8 +136,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         });
         if (token) {
           try {
+            // credentials: "include" is REQUIRED: the session JWT lives in the
+            // HttpOnly access_token cookie; the route clears it via
+            // Set-Cookie maxAge:0, but the browser applies that clearing only
+            // when the fetch carries credentials. Without it the cookie
+            // survives and checkSession() re-authenticates on next navigation.
             await fetch("/api/auth/logout", {
               method: "POST",
+              credentials: "include",
               headers: { Authorization: `Bearer ${token}` },
             });
           } catch {

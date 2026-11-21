@@ -9,6 +9,9 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { ClassConfirmCard } from "@/components/faculty/ClassConfirmCard";
+import { LiveClassCard } from "@/components/shared/LiveClassCard";
+import { AssignmentsCard } from "@/components/faculty/AssignmentsCard";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
@@ -78,6 +81,18 @@ function FacultyMyclassesInner() {
           </p>
         </div>
       </div>
+
+      {/* Pre-class confirmation (Flow A): confirm today's sessions, single or
+          bulk. Gated by the class.confirm capability. */}
+      <ClassConfirmCard />
+
+      {/* Live classes — my own sessions, right now. Gated by the
+          dashboard.live-classes.view capability. */}
+      <LiveClassCard title="My Classes Live" scope="self" />
+
+      {/* Assignments (Flow B): the "are all done?" summary. Gated by the
+          assignment.view capability. */}
+      <AssignmentsCard />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning flex flex-wrap items-center justify-between gap-2 min-w-0">

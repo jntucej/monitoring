@@ -23,8 +23,15 @@ export const HOD_CONFIG: RoleConfig = {
     { widget: "MorningBrief", size: "lg" },
     { widget: "DepartmentPulse", size: "md" },
     { widget: "ApprovalsInbox", size: "md" },
+    { widget: "DeptClassReviewsCard", size: "md" },
   ],
   signature: "DepartmentPulse",
+  // Class-review capability gate (HOD sees the dept roll-up + faculty list).
+  capabilities: [
+    { id: "class.review.view", label: "View dept class reviews", kind: "ux", when: () => true },
+    { id: "class.confirm.on_behalf", label: "Confirm a faculty's class on their behalf", kind: "ux", when: () => true },
+    { id: "dashboard.live-classes.view", label: "View live class state (dept)", kind: "ux", when: () => true },
+  ],
   emptyCopy: {
     no_approvals: "No pending approvals — your team is ahead of schedule.",
   },

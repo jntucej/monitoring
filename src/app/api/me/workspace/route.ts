@@ -40,8 +40,9 @@ async function loadWorkspaceContext(auth: AuthContext): Promise<WorkspaceContext
     current_entry_type: string | null;
     hostel_block: string | null;
     room_number: string | null;
+    roll: string | null;
   }>(
-    `SELECT sd.student_type, sd.current_entry_type, sd.hostel_block, sd.room_number
+    `SELECT sd.student_type, sd.current_entry_type, sd.hostel_block, sd.room_number, sd.roll
        FROM public.student_details sd WHERE sd.user_id = $1 LIMIT 1`,
     [auth.userId],
   );
@@ -105,6 +106,7 @@ async function loadWorkspaceContext(auth: AuthContext): Promise<WorkspaceContext
     personType,
     residentialStatus,
     campusStatus,
+    roll: p?.roll ?? null,
     hostel:
       residentialStatus === "hosteller"
         ? { blockId: p?.hostel_block ?? null, roomId: p?.room_number ?? null }

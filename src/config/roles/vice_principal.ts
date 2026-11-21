@@ -25,6 +25,17 @@ export const VICE_PRINCIPAL_CONFIG: RoleConfig = {
     { widget: "PrincipalBridge", size: "sm" },
   ],
   signature: "PrincipalBridge",
+  // VP capability gate — what the VP can SEE / DO, data-driven.
+  capabilities: [
+    { id: "vp.bridge.flag", label: "Flag an item to the Principal", kind: "ux", when: () => true },
+    { id: "vp.bridge.view", label: "View the Principal bridge", kind: "ux", when: () => true },
+    { id: "vp.notes.create", label: "Annotate a department or decision", kind: "ux", when: () => true },
+    { id: "delegation.vp.view", label: "View my delegations (out + in)", kind: "ux", when: () => true },
+    { id: "dashboard.live-classes.view", label: "View live class state", kind: "ux", when: () => true },
+    { id: "class.confirm.on_behalf", label: "Confirm a faculty's class on their behalf", kind: "ux", when: () => true },
+    { id: "exam.coordination.view", label: "View exam coordination", kind: "ux", when: () => true },
+    { id: "hostel.aggregate.view", label: "View hostel aggregate (no PII)", kind: "ux", when: () => true },
+  ],
   emptyCopy: {
     no_approvals: "No pending approvals.",
   },

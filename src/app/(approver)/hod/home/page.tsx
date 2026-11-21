@@ -12,9 +12,11 @@ import { FocusMode } from "../_retention/FocusMode";
 import { DepartmentPulse } from "../_retention/DepartmentPulse";
 import { FacultyCare } from "../_retention/FacultyCare";
 import { ImpactCard } from "../_retention/ImpactCard";
+import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { Scorecard } from "../_retention/Scorecard";
 import { WinFeed } from "../_retention/WinFeed";
 import { InsightCard } from "../_retention/InsightCard";
+import { DeptClassReviewsCard } from "@/components/hod/DeptClassReviewsCard";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
@@ -163,6 +165,9 @@ export default function HodTodayPage() {
           />
         </WidgetBoundary>
 
+        {/* Live classes — department academic surface */}
+        <LiveClassCard title="Department Live" scope="department" />
+
         {/* 3. Focus zone — the one thing to clear right now */}
         <WidgetBoundary name="FocusZone" title="Focus Zone">
           <FocusZone item={focusItem} onEnterFocus={() => setFocusOpen(true)} />
@@ -194,6 +199,9 @@ export default function HodTodayPage() {
             decisionsToday={d?.counts.todayDecisions ?? 0}
           />
         </WidgetBoundary>
+
+        {/* 5b. Dept class reviews (the new class-review pipeline roll-up) */}
+        <DeptClassReviewsCard />
 
         {/* 6. Scorecard */}
         <WidgetBoundary name="Scorecard" title="Scorecard">

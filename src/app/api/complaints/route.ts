@@ -33,6 +33,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     onBehalfOfScope?: string;
     onBehalfOfId?: string;
     girlsCell?: boolean;
+    /** who the complaint is about (roll/ID or details identifying the person). */
+    respondentDetails?: string;
   };
 
   const categoryCode = (body.categoryCode ?? "").trim();
@@ -44,6 +46,11 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     : "medium";
   const isAnonymous = Boolean(body.isAnonymous);
   const girlsCell = Boolean(body.girlsCell);
+  // Who the complaint is about: a roll/ID or free-text details identifying the
+  // person (faculty, student, staff). Optional; null when not about a person.
+  const respondentDetails = body.respondentDetails
+    ? String(body.respondentDetails).trim().slice(0, 500) || null
+    : null;
 
   if (!categoryCode || !title || !description) {
     return fail("VALIDATION_ERROR", "categoryCode, title, and description are required", 400);
@@ -80,8 +87,8 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
     `INSERT INTO public.complaints (
        complaint_number, category_code, title, description, location, priority,
        raised_by, is_anonymous, on_behalf_of_scope, on_behalf_of_id, girls_cell,
-       current_owner_role, sla_deadline, visible_to_roles
-     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       current_owner_role, sla_deadline, visible_to_roles, respondent_details
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
      RETURNING id`,
     [
       complaintNumber,
@@ -98,6 +105,7 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       currentOwnerRole,
       slaDeadline,
       visibleToRoles,
+      respondentDetails,
     ],
   );
   const complaintId = inserted[0].id;

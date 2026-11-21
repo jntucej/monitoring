@@ -107,6 +107,20 @@ export function ComplaintDetail({ role }: { role: string }) {
         <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
       </div>
 
+      {c.respondent_details && (
+        <div className="surface-card bg-bg-elevated p-4 space-y-2">
+          <h2 className="font-medium text-text-primary">About</h2>
+          <p className="text-sm text-text-muted">
+            <span className="font-medium text-text-primary">
+              {c.respondent_details}
+            </span>
+            <p className="mt-1 text-xs text-text-muted">
+              The person this complaint concerns, as identified by the filer.
+            </p>
+          </p>
+        </div>
+      )}
+
       {/* Lifecycle timeline (the TRACK step) */}
       <div className="surface-card bg-bg-elevated p-4">
         <h2 className="font-medium text-text-primary mb-3">Status timeline</h2>

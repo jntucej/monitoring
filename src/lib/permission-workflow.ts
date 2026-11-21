@@ -43,8 +43,10 @@ export const ROLE_STAGE_PERMISSIONS: Record<string, readonly string[]> = {
 export const WORKFLOW_STAGES: Record<WorkflowType, readonly string[]> = {
   hostel:      ["caretaker", "deputy_warden", "hostel_manager", "principal"],
   exam:        ["hod", "oie", "exam_branch", "vice_principal", "principal"],
-  memo:        ["hod", "principal"],
-  staff_leave: ["hod", "principal"],
+  // memo + staff_leave: VP sits between HOD and Principal, so HOD can
+  // escalate an academic item to the VP (not just straight to the Principal).
+  memo:        ["hod", "vice_principal", "principal"],
+  staff_leave: ["hod", "vice_principal", "principal"],
   lab_access:  ["faculty", "hod", "principal"],
 } as const;
 

@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireCronAuth } from "@/server/http/cron-auth";
 import { createHash, randomBytes } from "crypto";
 import { query, addAudit } from "@/lib/db";
+import {
+  resolveMessEligibility,
+  isOnApprovedLeave,
+  campusPresence,
+  type MessEligibility,
+} from "@/lib/mess-eligibility";
 
 /**
  * POST /api/cron/mess-finalize
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
   try {
     // Days past their close window that have not been locked yet.
     const daysRes = await query(
-      `SELECT id, meal_date, window_closes_at
+      `SELECT id, meal_date, window_opens_at, window_closes_at
          FROM mess_days
         WHERE is_active = TRUE
           AND tokens_locked_at IS NULL
@@ -41,7 +47,7 @@ export async function POST(req: NextRequest) {
         ORDER BY meal_date ASC`
     );
 
-    const finalized: Array<{ dayId: string; mealDate: string; defaulted: number; tokensIssued: number }> = [];
+    const finalized: Array<{ dayId: string; mealDate: string; defaulted: number; tokensIssued: number; excluded: number }> = [];
 
     for (const day of daysRes.rows as any[]) {
       // 1. Lock the day.
@@ -49,6 +55,7 @@ export async function POST(req: NextRequest) {
         `UPDATE mess_days SET tokens_locked_at = NOW() WHERE id::text = $1`,
         [day.id]
       );
+      let excluded = 0;
 
       // 2. Apply defaults for eligible hostellers without a selection.
       const defaultedRes = await query(
@@ -94,13 +101,66 @@ export async function POST(req: NextRequest) {
       for (const tr of tokenRows.rows as any[]) {
         const subLabels: string[] = tr.sub_labels ?? [];
         const subItemIds: string[] = tr.sub_item_ids ?? [];
+        const userId: string = tr.user_id;
+
+        // ── Eligibility gate: reconcile leave + presence + opt-out + status ──
+        // Only the two non-trivial signals are queried per student; opt-out is
+        // already on the row (will_be_present) and hasPreference is true here
+        // (this loop only runs for students with a mess_preferences row).
+        const onApprovedLeave = await isOnApprovedLeave(
+          userId,
+          day.window_opens_at,
+          day.window_closes_at,
+        ).catch(() => false);
+        const presence = (await campusPresence(userId, day.meal_date).catch(() => "unknown")) as
+          | "in"
+          | "out"
+          | "returned_today"
+          | "unknown";
+        const { rows: [u] } = await query<{ status: string; hostel_block: string | null }>(
+          `SELECT u.status, sd.hostel_block
+             FROM users u
+             LEFT JOIN student_details sd ON sd.user_id::text = u.id::text
+            WHERE u.id = $1::uuid`,
+          [userId],
+        );
+        const status = u?.status ?? "ACTIVE";
+        const isHosteller = (u?.hostel_block ?? tr.hostel_block ?? null) != null;
+        const optedOut = tr.will_be_present === false || tr.will_be_present === "false" || tr.will_be_present === 0;
+
+        const elig: MessEligibility = resolveMessEligibility({
+          isHosteller,
+          userStatus: status,
+          optedOut,
+          onApprovedLeave,
+          presence,
+          hasPreference: true,
+        });
+
+        // Store the decision (the dashboard + verifier + student empty-state
+        // all read this row instead of recomputing).
+        await query(
+          `INSERT INTO mess_eligibility (user_id, mess_day_id, eligible, reason, explanation)
+           VALUES ($1::uuid, $2::uuid, $3, $4, $5)
+           ON CONFLICT (user_id, mess_day_id) DO UPDATE
+             SET eligible = EXCLUDED.eligible,
+                 reason = EXCLUDED.reason,
+                 explanation = EXCLUDED.explanation,
+                 decided_at = NOW()`,
+          [userId, day.id, elig.eligible, elig.reason, elig.explanation],
+        );
+
+        if (!elig.eligible) {
+          excluded += 1;
+          continue; // no token for an ineligible student
+        }
 
         const tokenCode = `MESS-${randomCode()}`;
         const qrPayload = JSON.stringify({
           type: "MESS_TOKEN",
           messDayId: day.id,
           mealDate: day.meal_date,
-          userId: tr.user_id,
+          userId,
           primaryItem: tr.primary_item,
           subItemIds,
           tokenCode,
@@ -113,7 +173,7 @@ export async function POST(req: NextRequest) {
              (user_id, mess_day_id, token_code, qr_payload_hash,
               primary_item, sub_item_labels, expires_at)
            VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6::text[], $7::timestamptz)`,
-          [tr.user_id, day.id, tokenCode, qrPayloadHash, tr.primary_item, subLabels, expiresAt]
+          [userId, day.id, tokenCode, qrPayloadHash, tr.primary_item, subLabels, expiresAt]
         );
         tokensIssued += 1;
       }
@@ -125,10 +185,11 @@ export async function POST(req: NextRequest) {
                 jsonb_build_object(
                   'defaulted', $2::int,
                   'tokensIssued', $3::int,
-                  'mealDate', $4::text
+                  'excluded', $4::int,
+                  'mealDate', $5::text
                 ),
                 NOW()`,
-        [day.id, defaultedRes.rows.length, tokensIssued, day.meal_date]
+        [day.id, defaultedRes.rows.length, tokensIssued, excluded, day.meal_date]
       );
 
       finalized.push({
@@ -136,6 +197,7 @@ export async function POST(req: NextRequest) {
         mealDate: day.meal_date,
         defaulted: defaultedRes.rows.length,
         tokensIssued,
+        excluded,
       });
     }
 

@@ -59,6 +59,8 @@ export interface WorkspaceContext {
   campusStatus: "in_campus" | "out_campus" | "unknown";
   /** hostel block/room, when residentialStatus === hosteller. */
   hostel?: { blockId: string | null; roomId: string | null };
+  /** the person's roll / admission number (student_details.roll), when present. */
+  roll?: string | null;
   /** gender (affects applicable hostel policy, not just labels). */
   gender?: string | null;
   /** active gate passes / approvals this person holds right now. */

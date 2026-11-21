@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { AntiRaggingProgress } from "@/components/student/AntiRaggingProgress";
 
 export default function AntiRaggingPage() {
   const [form, setForm] = useState({
@@ -41,22 +42,27 @@ export default function AntiRaggingPage() {
 
   if (caseNumber) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-6">
-        <h1 className="text-2xl font-semibold text-emerald-700">Case filed successfully</h1>
-        <p className="text-sm">
-          Your confidential case number is <strong className="font-mono">{caseNumber}</strong>.
-        </p>
-        <p className="text-sm text-text-muted">
-          Only the Principal&apos;s office will see this report. You may be contacted via the secure channels you provided.
-        </p>
-        <div className="surface-card pt-4 space-y-2">
-          <p className="text-sm font-medium">Helpline references:</p>
-          <ul className="text-sm list-disc pl-5 text-text-muted space-y-1">
-            <li>UGC Anti-Ragging Helpline: 1800-180-5522</li>
-            <li>AICTE Anti-Ragging: 1800-425-2248</li>
-            <li>Campus Security Desk: 24/7 Helpline</li>
-          </ul>
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6">
+        <div className="space-y-4">
+          <h1 className="text-2xl font-semibold text-emerald-700">Case filed successfully</h1>
+          <p className="text-sm">
+            Your confidential case number is <strong className="font-mono">{caseNumber}</strong>.
+          </p>
+          <p className="text-sm text-text-muted">
+            Only the Principal&apos;s office will see this report. You may be contacted via the secure channels you provided.
+          </p>
+          <div className="surface-card pt-4 space-y-2">
+            <p className="text-sm font-medium">Helpline references:</p>
+            <ul className="text-sm list-disc pl-5 text-text-muted space-y-1">
+              <li>UGC Anti-Ragging Helpline: 1800-180-5522</li>
+              <li>AICTE Anti-Ragging: 1800-425-2248</li>
+              <li>Campus Security Desk: 24/7 Helpline</li>
+            </ul>
+          </div>
         </div>
+        {/* Show the live progress of this + your other cases (who it was
+            assigned to, which stage, committee notes). */}
+        <AntiRaggingProgress />
       </div>
     );
   }
@@ -110,6 +116,9 @@ export default function AntiRaggingPage() {
       <button type="submit" disabled={busy} className="surface-card inline-flex min-h11 items-center justify-center px-4 py-2 bg-action-danger text-white text-sm font-medium disabled:opacity-50">
         {busy ? "Filing confidential report..." : "Submit Confidential Report"}
       </button>
+
+      {/* Existing cases + their progress (who it's with, which stage). */}
+      <AntiRaggingProgress />
     </form>
   );
 }

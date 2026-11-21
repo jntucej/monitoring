@@ -60,6 +60,7 @@ export const PRINCIPAL_NAV: PrincipalEntry[] = [
       { href: "/principal/operations/gates", label: "Gates" },
       { href: "/principal/operations/hostel", label: "Hostel" },
       { href: "/principal/operations/incidents", label: "Incidents" },
+      { href: "/principal/passes", label: "Passes" },
     ],
   },
   {

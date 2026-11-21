@@ -5,6 +5,7 @@ import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { AcademicPersonalSection } from "@/components/student/AcademicPersonalSection";
 import { ThemePicker } from "@/components/student/ThemePicker";
 import { SakugaControls } from "@/components/student/SakugaControls";
+import { StudentPositionCard } from "@/components/student/StudentPositionCard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -20,6 +21,9 @@ function StudentProfileInner() {
         <User className="w-5 h-5 text-action-primary" />
         <p className="text-sm font-semibold text-primary">Your Student Profile</p>
       </div>
+      {/* Position-aware card: varies by where you live (hosteller vs day
+          scholar) and where you are now (in/out of campus). */}
+      <StudentPositionCard />
       <UserProfileTab />
       <ThemePicker />
       {isFemale && <SakugaControls />}

@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { MessEligibilityCard } from "@/components/mess/MessEligibilityCard";
 import Link from "next/link";
 import {Users, AlertTriangle, Loader2, Inbox, Building2}  from "lucide-react";
 
@@ -119,6 +120,10 @@ function MessMealAttendanceInner() {
       {error && (
         <WidgetError message={`Meal attendance unavailable: ${error}`} onRetry={() => void refreshAll()} />
       )}
+
+      {/* Mess eligibility reconciliation (PR4): expected/issued/served/no-show
+          + excluded-by-reason. Gated by mess.eligibility.view. */}
+      <MessEligibilityCard />
 
       <WidgetBoundary title="Meal Attendance">
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">

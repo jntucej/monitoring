@@ -62,10 +62,27 @@ async function handleGet(
     [auth.userId],
   );
 
+  // PR6: when the student has no meal token today, surface the eligibility
+  // reason (the stored decision from finalize) so the empty state explains
+  // *why* instead of showing a blank page.
+  let eligibility: { reason: string; explanation: string | null } | null = null;
+  if (mealTokens.length === 0) {
+    const { rows: elig } = await query<{ reason: string; explanation: string | null }>(
+      `SELECT e.reason, e.explanation
+         FROM public.mess_eligibility e
+        WHERE e.user_id = $1::uuid AND e.eligible = FALSE
+        ORDER BY e.decided_at DESC
+        LIMIT 1`,
+      [auth.userId],
+    );
+    if (elig[0]) eligibility = { reason: elig[0].reason, explanation: elig[0].explanation };
+  }
+
   return ok({
     mealTokens,
     eventTokens,
     tokens: [...mealTokens, ...eventTokens],
+    eligibility,
   });
 }
 

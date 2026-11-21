@@ -9,6 +9,7 @@ import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { ClassReviewsWidget } from "@/components/faculty/ClassReviewsWidget";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import {
@@ -174,6 +175,10 @@ function FacultyReportsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      {/* My class-session reviews (the new class-review pipeline). Gated by the
+          class.review.view capability; renders nothing unless faculty grants it. */}
+      <ClassReviewsWidget />
 
     </div>
   );
