@@ -238,3 +238,7 @@ locally, validate SQL with a fresh scratch Postgres replay before pushing,
 - `coordinator-model.md` — appointment model + powers (stage 2)
 - `class-message-relay.md` — relay/direct modes + release paths (stage 3)
 - `aggregation-agent.md` — detection algorithm + bounds (stage 4)
+- `FULL-HIERARCHY-AND-FLOWS.md` — the "how everything works" reference: full
+  role hierarchy (T0–T6 + capability slots), every operational flow,
+  escalation ladders, the autonomous agent layer, and how the class-communication
+  SaaS layer slots in
