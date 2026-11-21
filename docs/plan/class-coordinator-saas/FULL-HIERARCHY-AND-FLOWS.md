@@ -8,11 +8,15 @@ code locations:
 - every operational flow, end to end (how a request travels to an outcome)
 - the escalation ladders and the autonomous agent layer (what runs without a human)
 - the deploy / runtime topology
-- the planned class-communication SaaS layer and where it slots in
+- the **shipped** class-communication SaaS layer — live endpoints, request/response
+  contracts, and exactly how each dashboard opens and works
 
 **Verified against:** `src/lib/roles.ts`, `src/app/api/*` (85 domains),
 `src/app/api/cron/*` (23 agents), `src/lib/escalation-ladder.ts`,
-`docker-compose.yml`. Companion docs are linked in Part 10.
+`src/lib/class-requests.ts`, `src/lib/class-coordinator.ts`,
+`database/migrations/20270129000001_class_comms_saas.sql`, and the three
+class-comm surfaces. The class-communication layer is **SHIPPED on main
+(commit 2e038c90)** — not planned. Companion docs are linked in Part 10.
 
 ---
 
@@ -384,38 +388,116 @@ INTERNET / CAMPUS (80/443)
 
 ---
 
-## Part 8 — Planned class-communication SaaS layer
+## Part 8 — Class-communication SaaS layer (SHIPPED, commit 2e038c90)
 
-GPT's "replace the CR with software" resolves to **two lanes + one optional
-human slot** (full build plan: `plan/class-coordinator-saas/README.md`):
+GPT's "replace the CR with software" resolved to **two lanes + one optional
+human slot**, and it is now live on main. Migration
+`20270129000001_class_comms_saas.sql` adds `class_requests`,
+`class_level_issues`, `config_class_comm`, `student_representatives.
+appointment_type`, and `class_messages.relay_role`. Kernels:
+`src/lib/class-requests.ts` (raise/route/aggregate) and
+`src/lib/class-coordinator.ts` (capability checks + appoint/revoke/extend).
 
 ```
-INDIVIDUAL lane    student → class_request → route → desk
-                       └ urgent → page HOD now
+INDIVIDUAL lane    student → POST /api/class-requests → routed to desk
+                       └ urgent → pages HOD now
                        └ autonomous triage + SLA sweep
-
-COLLECTIVE lane    N students same topic → aggregation agent
+COLLECTIVE lane    N students same topic → /api/cron/class-issue-aggregation
                        → 1 class_level_issue → HOD
-
-HUMAN SLOT         coordinator (optional, per class)
-                       relay notices · collect concerns
+HUMAN SLOT         coordinator (per class)  → relay notices · collect concerns
                        (never the bottleneck — auto-release backstop)
 ```
 
-**Already exists (do not rebuild):** complaint routing engine,
-`class_messages` + receipts + release cron, `student_representatives`,
-campus feed (official vs class-notice), the action kernel, and the
-student/faculty shells. **The gap is small:** the request lane as a
-first-class table, the coordinator appointment model, aggregation
-detection, and the publish/release APIs + surfaces.
+### 8.1 Live endpoints (request → response contracts)
 
-**Build order (6 PRs, each green before the next):**
-1. `class-requests` schema + kernel + routes
-2. `coordinator` model (ALTERs + capability + actions)
-3. `class-message` publish + release
-4. `class-issue-aggregation` cron agent
-5. class-communication surfaces (student / coordinator / faculty / HOD)
-6. docs (CONTRACT addendum + cross-links)
+**`POST /api/class-requests`** — raise a request. Student (or a coordinator
+on their class's behalf).
+- **Body:** `{ classId, category, title, body?, priority?: "normal"|"urgent",
+  raisedByRep?, actorId? }`
+- **`category`** must be one of: `ACADEMIC`, `ATTENDANCE`, `EXAM`,
+  `TIMETABLE`, `ROOM`, `FACULTY`, `SUGGESTION`, `URGENT`
+  (`REQUEST_CATEGORIES` in `class-requests.ts`).
+- **Routing table** (`CATEGORY_ROUTE`) — what each category routes to:
+  | category | owner role |
+  |---|---|
+  | ACADEMIC, ATTENDANCE, ROOM, SUGGESTION | `class_teacher` of that class |
+  | EXAM | `oie` |
+  | TIMETABLE, FACULTY, URGENT | `hod` (FACULTY never goes to the named faculty; URGENT pages HOD now) |
+- **Response:** `{ success, id, assignedRole, ... }`. `urgent` priority also
+  fires an immediate HOD notification.
+
+**`GET /api/class-requests`** — three views, chosen by role:
+- student → their own open/active requests (with status)
+- routed owner role (e.g. `class_teacher`) → their queue
+- HOD / VP / admin → class-scoped queue (`?classId=&status=`)
+
+**`POST /api/class-requests/[id]/resolve`** — owner resolves.
+- **Body:** `{ note }` → status → `resolved`, stamps `resolved_at` +
+  `resolution_note`, audit event.
+
+**`GET /api/class-level-issues`** — HOD/VP/admin/faculty only
+(`?classId=&status=open`). Returns open issues with `request_ids[]`,
+`topic`, `class_name`.
+
+**`POST /api/class-level-issues`** — HOD/VP/admin raise a class-level issue
+by hand (`{ classId, topic }`). Returns 409 if one is already open for the
+same class+topic (the partial-unique index enforces it).
+
+**`POST /api/class-level-issues/[id]/resolve`** — `{ resolution }` → closes
+the issue **and** flips every linked `class_request` to `resolved` with the
+same note (one HOD action clears the whole cluster).
+
+**`GET /api/class-messages`** · **`POST /api/class-messages`** — publish a
+class notice. `mode='direct'` fans out now; `mode='relay'` holds it for the
+named coordinator (`relay_role='cr'/'icr'`) with an `auto_release_at`.
+
+**`POST /api/class-messages/[id]/release`** — tap-release. Authorizes the
+author, admin/sysadmin, or an **active coordinator of a target class**
+(`getActiveCoordinators`). Sets `released_by`, shares the same
+`releaseClassMessage` kernel as the cron auto-release path (two paths, one
+table — `released_by` distinguishes human vs `system`). Already released → 409.
+
+**`GET /api/class-coordinators?classId=`** — the active coordinator roster
+for a class.
+
+**`GET /api/student/me/class`** — the calling student's class identity:
+`{ classId, department, classLabel }`. Because this dataset ships with an
+**empty `classes` table**, `classId` falls back to the department code; that
+is the `class_id` TEXT token the request/coordinator tables key on.
+
+**`POST /api/cron/class-issue-aggregation`** (*/15, `requireCronAuth`) —
+scans open `class_requests` by `(class_id, category_code)`; N≥3 in 72h
+(`config_class_comm`) → creates one `class_level_issue`, links
+`parent_issue_id`, notifies HOD + class teacher. Bounded to operator scope;
+never resolves anything.
+
+### 8.2 The three surfaces — how each opens and works
+
+| Surface | Route | Who opens it | What it shows / does |
+|---|---|---|---|
+| **Student · Class requests** | `(student)/student/class-requests/page.tsx` | student | On mount: fetches `/api/students/me/class` (their class identity) + `/api/class-requests` (their own). Top: "Raise a request" — a **category picker of 8 icon-tiles** (📚 Academic, 🕐 Attendance, 📝 Examination, 📅 Timetable, 🏫 Room/Lab, 👨‍🏫 Faculty concern, 💡 Suggestion, 🚨 Urgent) + title/body + submit → `POST /api/class-requests`. Bottom: "My requests" list with live status badges. |
+| **Coordinator** | `(student)/student/coordinator/page.tsx` | student who holds a class-coordinator slot | Only active for a student with an active `student_representatives` class row. Shows: relay inbox (held `class_messages` where they are `relay_role`, each with a **Release** button → `POST /api/class-messages/[id]/release`), a collect-concern form (raises `class_request` with `raised_by_rep=TRUE`), and a read-only "my class's open requests" view. |
+| **Faculty · Class requests** | `(approver)/faculty/class-requests/page.tsx` | faculty / class-teacher | The routed **queue** for their class: open requests assigned to them, resolve-with-note button → `POST /api/class-requests/[id]/resolve`. HOD variant surfaces class-level issues + resolution. |
+
+### 8.3 Coordinator lifecycle (planned → shipped)
+
+```
+HOD / class_teacher → appointCoordinator(studentId, classId, validTo)
+   → INSERT student_representatives {appointment_type:'appointed', …}
+   → partial-unique index: 1 active class-CR per class
+revokeCoordinator(repId, reason)   — same authority, tier 1
+requestCoordinatorExtension()       — self-request → class_teacher decides
+   (maker-checker via pending_approvals, same as academic status)
+```
+`class-coordinator.ts` exposes the capability checks: `canRelay`, `canCollect`,
+`canReadClassRequests` — each verifies the active rep row for that class.
+
+### 8.4 What already existed (reused, not rebuilt)
+Complaint routing engine, `class_messages` + receipts + release cron,
+`student_representatives`, the campus feed (official vs class-notice), the
+action kernel, and the student/faculty shells. This layer adds the request
+table, the coordinator appointment model, aggregation detection, and the
+publish/release APIs + the three surfaces above.
 
 ---
 
