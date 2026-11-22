@@ -23,6 +23,11 @@ import {
   auditLogsToEvents,
   type AuditLogRow,
 } from "@/lib/principal/auditTimeline";
+import {
+  permissionRelationships,
+  alertRelationships,
+  refOrUnavailable,
+} from "@/lib/principal/relationshipResolver";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -169,6 +174,59 @@ describe("PR-04 composable inspector sections (pure logic)", () => {
     expect(section.title).toBe("Timeline");
     expect(section.collapsible).toBe(true);
     expect(section.content).toBeTruthy();
+  });
+});
+
+describe("PR-07 relationship resolver (real refs, honest unavailability)", () => {
+  it("permission → requester + workflow stage, from real ids", () => {
+    const rels = permissionRelationships({
+      id: "p-1",
+      ticket_number: "T-9",
+      requester_user_id: "u-7",
+      student_name: "K. Rao",
+      current_stage: "principal",
+    });
+    const requested = rels.find((r) => r.relation === "requested by");
+    expect(requested?.available).toBe(true);
+    expect(requested?.target).toEqual({ type: "student", id: "u-7", label: "K. Rao" });
+    const stage = rels.find((r) => r.relation === "in workflow stage");
+    expect(stage?.target?.id).toBe("p-1"); // the permission record, not a guessed user
+  });
+
+  it("permission with no recorded requester → honest unavailable (no invented student)", () => {
+    const rels = permissionRelationships({ id: "p-2", requester_user_id: null });
+    const requested = rels.find((r) => r.relation === "requested by");
+    expect(requested?.available).toBe(false);
+    expect(requested?.unavailableReason).toBeTruthy();
+  });
+
+  it("alert → gate + department, missing gate is marked unavailable", () => {
+    const withGate = alertRelationships({
+      id: "al-1",
+      gate_id: "g-3",
+      gate_name: "Main Gate",
+      dept_code: "CSE",
+    });
+    expect(withGate.find((r) => r.relation === "at gate")?.target).toEqual({
+      type: "gate",
+      id: "g-3",
+      label: "Main Gate",
+    });
+    expect(withGate.find((r) => r.relation === "concerns department")?.target?.id).toBe("CSE");
+
+    const noGate = alertRelationships({ id: "al-2" });
+    const gateRel = noGate.find((r) => r.relation === "at gate");
+    expect(gateRel?.available).toBe(false);
+    expect(gateRel?.unavailableReason).toBeTruthy();
+  });
+
+  it("refOrUnavailable marks a null id unavailable with a reason", () => {
+    const present = refOrUnavailable("assigned to", "faculty", "f-9", "Prof. Me");
+    expect(present.available).toBe(true);
+    expect(present.target.id).toBe("f-9");
+    const missing = refOrUnavailable("assigned to", "faculty", null);
+    expect(missing.available).toBe(false);
+    expect(missing.unavailableReason).toBeTruthy();
   });
 });
 
