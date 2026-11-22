@@ -45,12 +45,17 @@ function OperatorShellInner({ children }: { children: React.ReactNode }) {
         <OperatorDrawer open={true} onClose={() => {}} isRail={true} />
       )}
 
-      {/* Main content */}
-      <main className={isDesktop ? "md:ml-56 lg:ml-64" : ""}>
+      {/* Main content — the responsive offset is pure CSS (md:/lg: media
+          queries), NOT gated on the JS `isDesktop` flag. Gating it on the
+          flag desynced with the rail's `hidden md:flex` (also pure CSS): on
+          hydration the rail is 224px (CSS shows it) but main had no offset
+          (JS isDesktop was still false) → the rail overlapped the content.
+          Keep the offset in CSS so it and the rail can never desync. */}
+      <main className="md:ml-56 lg:ml-64">
         <div ref={profileRef}>{children}</div>
       </main>
 
-      {/* Floating buttons on mobile/tablet */}
+      {/* Floating buttons on mobile only */}
       {!isDesktop && (
         <>
           <FloatingMenuButton onClick={() => setDrawerOpen(true)} />
