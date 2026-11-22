@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import React from "react";
 import { useAuthStore } from "@/stores/authStore";
+import { isSuperAdmin } from "@/lib/roles";
 import { useUIStore } from "@/stores/uiStore";
 import { User, Mail, Shield, CheckCircle, Tag, LogOut, Smartphone, ShieldCheck } from "lucide-react";
 import Link from "next/link";
@@ -52,15 +53,25 @@ const { addToast } = useUIStore();
     );
   }
 
-  // ID / Roll Number: show the human identifier, not the internal UUID.
-  // Precedence: student roll (studentDetails.roll) → lookup handle (uniqueId)
-  // → friendly identifier → employee id → (last resort) internal id.
+  // ID / Roll Number: show the human identifier, never the internal UUID.
+  // Precedence: student roll → lookup handle (uniqueId) → friendly identifier
+  // → employee id → email (the one field that's always present + human).
+  //
+  // The internal UUID (`user.id`) is a server identifier that must NOT leak to
+  // ordinary roles. Only the sysadmin (the server manager) is cleared to see
+  // internal details, so the UUID is shown ONLY when the current role is
+  // sysadmin — for everyone else the chain deliberately never reaches user.id.
+  const showInternalId = isSuperAdmin(role);
   const userIdentifier =
     user.studentDetails?.roll ||
     user.uniqueId ||
     user.identifier ||
     user.employeeId ||
-    user.id;
+    (showInternalId ? user.id : user.email) ||
+    "Account";
+  // The label also adapts: sysadmin sees the internal id; everyone else sees
+  // their human identifier / roll.
+  const idLabel = showInternalId ? "Internal ID" : "ID / Roll Number";
 
   return (
     <div className="max-w-md mx-auto space-y-6">
@@ -90,7 +101,7 @@ const { addToast } = useUIStore();
           <div className="surface-card flex items-center justify-between py-2">
             <div className="flex items-center gap-2.5 text-xs text-text-secondary font-medium">
               <Smartphone className="w-4 h-4 text-text-muted" />
-              <span>ID / Roll Number</span>
+              <span>{idLabel}</span>
             </div>
             <span className="font-mono text-sm font-bold text-text-primary">{userIdentifier}</span>
           </div>

@@ -1,0 +1,49 @@
+# Guardian — how it works
+
+## Overview
+The guardian role represents authorized non-parent custodians and local guardians of enrolled students at JNTUH CEJ. Guardians use the portal to monitor ward campus presence, review attendance records, schedule campus visits, and grant digital consent for student gate passes and leave requests.
+
+## Pages & workflows
+The guardian interface is organized into 14 routes across student supervision, pass approvals, and campus visits:
+
+### 1. Ward Monitoring & Attendance
+- `/guardian`: Landing dashboard displaying the linked ward's current status card, today's gate check-in/out status, pending permission consent requests, and campus emergency announcements.
+- `/guardian/child`, `/guardian/child-status`: Comprehensive ward overview showing hostel room assignment, academic program, student photo ID, and emergency contact details.
+- `/guardian/child-attendance`: Detailed breakdown of student attendance percentages across subjects, day-wise presence logs, and class absent notices.
+
+### 2. Movements & Visit Scheduling
+- `/guardian/child-movement`, `/guardian/movement-info`: Real-time and historical gate movement records showing turnstile/boom-barrier timestamps, direction (IN / OUT), and verified gate location.
+- `/guardian/visit-schedule`: Schedule an upcoming campus visit to meet the student or campus authorities, register vehicle details, and track visit permit authorization.
+
+### 3. Pass Approval & Leave Management
+- `/guardian/passes`, `/guardian/request-status`, `/guardian/child-requests`: Real-time queue of gate pass and outpass applications submitted by the ward requiring guardian sign-off.
+- `/guardian/pass-leave-submission`: Direct submission workflow where a guardian applies for an outpass or leave on behalf of the student.
+  - *Consent Workflow*: Guardian opens `/guardian` or `/guardian/passes` -> clicks on pending pass -> reviews destination, departure time, and expected return timestamp -> clicks **Approve** or **Reject** with optional remarks -> triggers `POST /parent/leave/acknowledge` or `POST /parents/me/consent` -> status changes to `GUARDIAN_APPROVED`, releasing the ticket to the next staff approver in the chain.
+
+### 4. Communications & Account Settings
+- `/guardian/notifications`: Inbound SMS and push alert history regarding gate exits, curfew breaches, and institutional circulars.
+- `/guardian/contact-info`, `/guardian/settings`: Update guardian contact telephone/address details, verify student linkage integrity, and configure notification preferences.
+
+## Key API endpoints
+
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/parents/me` | GET | Fetches authenticated guardian profile details and verified contact info. |
+| `/parents/me/children` | GET | Returns array of linked students (wards) assigned to this guardian. |
+| `/parents/me/children/[childId]/passes` | GET | Retrieves active and historical gate passes for a specific ward. |
+| `/parents/me/children/[childId]/movements` | GET | Lists turnstile gate entry and exit event logs for the selected ward. |
+| `/parent/now` | GET | Fetches live status snapshot of the ward (campus presence, hostel curfew status). |
+| `/parent/child-activity` | GET | Returns chronological timeline of recent ward activities, passes, and alerts. |
+| `/parent/weekly-digest` | GET | Provides a weekly attendance and movement compliance summary for the ward. |
+| `/parent/leave/acknowledge` | POST | Approves or acknowledges a student-requested outpass or hostel leave. |
+| `/parents/me/consent` | POST | Records digital consent decisions on pending pass tickets. |
+| `/guardian/links/reverify` | POST | Self-service reverification of guardian-ward relationship mapping against active records. |
+| `/guardian/verify` | POST | Completes OTP/identity verification during guardian onboarding or phone change. |
+| `/parents/link` | POST | Initiates linkage between guardian account and ward via student enrollment ID. |
+| `/complaints` | GET, POST | Views or submits parental/guardian grievances to campus administration. |
+
+## Data flow
+When the guardian lands on `/guardian`, the page invokes `/api/parents/me` to identify authenticated credentials, followed by `/api/parents/me/children` and `/api/parent/now` to load ward metrics. Pass consent actions POST directly to `/api/parent/leave/acknowledge` or `/api/parents/me/consent`. Data refreshes via periodic client polling (`usePolling` hook on a 30s interval) to capture instant gate departure and entry scans. Sessions are secured with an HttpOnly cookie containing a signed JWT token paired with Bearer authentication; the session identity is continuously validated against the server via `/api/auth/session`.
+
+## Security notes
+Guardians are strictly confined by Postgres RLS to view data exclusively for students mapped via `student_details.guardian_id` or `parents_students` linking tables. A guardian cannot view other students' passes, override campus disciplinary flags, or issue gate passes directly bypassing faculty/hostel approvers. Guardian link verification uses fail-close security: if the ward's profile transitions to `INACTIVE` or `SUSPENDED`, or if the guardian link fails reverification (`/api/guardian/links/reverify`), consent actions and pass visibility are immediately restricted.

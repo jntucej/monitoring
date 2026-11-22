@@ -136,15 +136,28 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         });
         if (token) {
           try {
-            // credentials: "include" is REQUIRED: the session JWT lives in the
-            // HttpOnly access_token cookie; the route clears it via
-            // Set-Cookie maxAge:0, but the browser applies that clearing only
-            // when the fetch carries credentials. Without it the cookie
-            // survives and checkSession() re-authenticates on next navigation.
+            // credentials: "include" is REQUIRED: the session JWT also lives
+            // in the HttpOnly access_token / refresh_token cookies (set by the
+            // login route); /api/auth/logout revokes the session DB rows but
+            // CANNOT clear those cookies — HttpOnly cookies are invisible to
+            // JS, so the server can't Set-Cookie:clear them on a POST it can't
+            // reach from the client store. Clear them here, the only place the
+            // client can. Without this, the post-logout checkSession() "no
+            // token" branch fetches /api/auth/session, the server reads the
+            // surviving refresh_token cookie, mints a NEW access token, and the
+            // user is silently re-authenticated — "Sign Out" appears to do
+            // nothing.
+            if (typeof document !== "undefined") {
+              const now = new Date(0).toUTCString();
+              for (const name of ["access_token", "refresh_token", "refresh-token"]) {
+                document.cookie = `${name}=; expires=${now}; path=/`;
+                document.cookie = `${name}=; expires=${now}; path=/; Secure`;
+              }
+            }
             await fetch("/api/auth/logout", {
               method: "POST",
               credentials: "include",
-              headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
             });
           } catch {
             /* server-side logout is best-effort */

@@ -35,27 +35,36 @@ import {
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import type { WorkspaceContext } from "@/config/roles/types";
 
-interface WorkspaceCtx {
-  residentialStatus: "hosteller" | "day_scholar" | "n_a";
-  campusStatus: "in_campus" | "out_campus" | "unknown";
-  hostel: { blockId: string | null; roomId: string | null } | null;
+/**
+ * The shape /api/me/workspace returns — a summary context, not the full
+ * WorkspaceContext. The server deliberately strips the per-pass detail:
+ * `activeAuthorizations` is a COUNT here, so the card must not read
+ * `activeAuthorizations` as an array. (A previous version of this card did,
+ * and crashed with `undefined is not an object` because `.find` was called
+ * on a number.)
+ */
+interface WorkspaceSummary {
+  residentialStatus: WorkspaceContext["residentialStatus"];
+  campusStatus: WorkspaceContext["campusStatus"];
+  roles: string[];
+  /** number of active authorizations — NOT the array itself. */
+  activeAuthorizations: number;
   /** the person's roll / admission number (student_details.roll). */
   roll?: string | null;
-  activeAuthorizations: Array<{
-    kind: string;
-    passType?: string;
-    from?: string;
-    to?: string;
-    status?: string;
-  }>;
+  hostel?: { blockId: string | null; roomId: string | null } | null;
 }
 
 interface WorkspaceResponse {
-  data: WorkspaceCtx & { personId?: string };
+  data: {
+    context: WorkspaceSummary;
+    capabilities: string[];
+    configVersion: number;
+  };
 }
 
-function positionCopy(ctx: WorkspaceCtx): {
+function positionCopy(ctx: WorkspaceSummary): {
   icon: React.ReactNode;
   headline: string;
   sub: string;
@@ -90,7 +99,7 @@ function positionCopy(ctx: WorkspaceCtx): {
     return {
       icon: <OutIcon className="h-5 w-5" />,
       headline: "You're out on a pass",
-      sub: "You're away from the hostel. Your return deadline and pass status are below.",
+      sub: "You're away from the hostel. Your active pass is below.",
       accent: "sky",
     };
   }
@@ -116,7 +125,9 @@ function StudentPositionCardInner() {
     "/api/me/workspace",
     { ttlMs: 60_000, enabled: true },
   );
-  const ctx = data?.data;
+  // The server returns a summary context (data.data.context), NOT the full
+  // WorkspaceContext. activeAuthorizations here is a number.
+  const ctx = data?.data?.context;
 
   const [showRetry, setShowRetry] = useState(false);
   useEffect(() => {
@@ -160,10 +171,11 @@ function StudentPositionCardInner() {
   };
   const accent = accentClasses[copy.accent] ?? accentClasses.emerald;
 
-  const hostelLeave = ctx.activeAuthorizations.find(
-    (a) => a.kind === "hostel_leave" || a.passType === "hostel_leave" || a.passType === "outpass",
-  );
-  const returnDeadline = hostelLeave?.to;
+  // The summary context carries only a COUNT of active authorizations — not
+  // the per-pass array (the server deliberately strips it). So we surface the
+  // count, not pass detail. Full pass detail lives in the student home's
+  // ActivePassCard, which fetches the passes endpoint directly.
+  const passCount = ctx.activeAuthorizations;
 
   return (
     <WidgetBoundary name="StudentPositionCard" title="Your Position">
@@ -232,14 +244,11 @@ function StudentPositionCardInner() {
 
             {ctx.campusStatus === "out_campus" && (
               <div className="space-y-1.5">
-                {hostelLeave ? (
+                {passCount > 0 ? (
                   <div className="flex items-center justify-between">
-                    <span className="text-text-muted">Active pass · {hostelLeave.passType ?? hostelLeave.kind}</span>
-                    {returnDeadline && (
-                      <span className="font-medium text-text-primary">
-                        Return by {new Date(returnDeadline).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                    )}
+                    <span className="text-text-muted">
+                      {passCount} active pass{passCount > 1 ? "es" : ""} · view in Passes
+                    </span>
                   </div>
                 ) : (
                   <p className="text-amber-600">
