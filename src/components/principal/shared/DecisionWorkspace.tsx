@@ -113,9 +113,11 @@ export function DecisionWorkspace<TInput, TOut>(
         ) : null}
       </div>
 
-      {/* 5: available actions (server-permitted only) */}
+      {/* 5: available actions (server-permitted only). Flat text affordances —
+          no per-button card treatment, which avoids nested-card (lasagna)
+          inside the workspace's outer card. */}
       {availableActions.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
           {availableActions.map((a) => (
             <button
               key={a.id}
@@ -124,7 +126,7 @@ export function DecisionWorkspace<TInput, TOut>(
               onClick={() =>
                 confirmNeeded(a) ? setPending(a) : void runAction(a)
               }
-              className="rounded-md border border-border bg-bg-surface px-3 py-1.5 text-sm font-medium text-action-primary hover:bg-surface-1 disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+              className="text-sm font-medium text-action-primary underline-offset-2 hover:underline disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-action-primary rounded-sm"
             >
               {a.label}
             </button>
@@ -136,12 +138,13 @@ export function DecisionWorkspace<TInput, TOut>(
         </p>
       )}
 
-      {/* 6: confirmation gate (only for consequential actions) */}
+      {/* 6: confirmation gate (only for consequential actions). Divider-based
+          block, not a nested card — the gate is a state, not a surface. */}
       {pending ? (
         <div
           role="alertdialog"
           aria-label={`Confirm ${pending.label}`}
-          className="mt-3 rounded-md border border-border bg-surface-1 p-3"
+          className="mt-3 border-t border-border pt-3"
         >
           <p className="text-sm font-medium text-text-primary">
             Confirm “{pending.label}”?
@@ -177,17 +180,18 @@ export function DecisionWorkspace<TInput, TOut>(
         </div>
       ) : null}
 
-      {/* 7: authoritative result (from the execution monitor) */}
+      {/* 7: authoritative result (from the execution monitor). Left-accent
+          status line, not a nested card — it's a state, not a surface. */}
       {outcome ? (
         <div
           role="status"
           className={
-            "mt-3 rounded-md border p-3 text-sm " +
+            "mt-3 border-l-2 pl-3 text-sm " +
             (outcome.state === "completed"
-              ? "border-action-success bg-surface-1 text-text-primary"
+              ? "border-action-success text-text-primary"
               : showUnknown
-                ? "border-action-warning bg-surface-1 text-text-primary"
-                : "border-action-danger bg-surface-1 text-text-primary")
+                ? "border-action-warning text-text-primary"
+                : "border-action-danger text-text-primary")
           }
         >
           {outcome.state === "completed" ? (
