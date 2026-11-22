@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { FileSpreadsheet } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -15,17 +15,21 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import type { BoardRow } from "@/components/shared/Board";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function ExamBranchPage() {
+  const [active, setActive] = useState<BoardRow | null>(null);
   return (
 <>
 <Greeting />
 <RoleOnboarding />
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["exam_branch"]}>
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 pb-20">
 
           <WidgetBoundary name="RoleDashboardPanel" title="Exam Branch Dashboard">
             <RoleDashboardPanel
@@ -38,7 +42,7 @@ export default function ExamBranchPage() {
             source="/api/permissions?workflow_type=exam"
             itemKey="permission"
             columns={["PENDING", "VERIFYING", "APPROVED", "REJECTED"]}
-            onSelect={() => {}}
+            onSelect={(row) => setActive(row)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
@@ -48,6 +52,10 @@ export default function ExamBranchPage() {
           <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
           <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+        <EntityInspector
+          inspection={active ? scanInspection(active) : null}
+          onClose={() => setActive(null)}
+        />
         </div>
       </AuthGuard>
     </Suspense>

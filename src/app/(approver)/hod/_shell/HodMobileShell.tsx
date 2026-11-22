@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { RoleChrome } from "@/components/shared/RoleChrome";
 import { HodSidebar } from "./HodSidebar";
 import { HodNotificationBell } from "./HodNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
@@ -39,10 +40,12 @@ export function HodMobileShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 overflow-y-auto">
         <ScrollEdgeBlue className="h-full">
           <ScrollEdgeBlue className="h-full">
-                      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4">{children}</div>
+                      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 pb-16">{children}</div>
           </ScrollEdgeBlue>
         </ScrollEdgeBlue>
       </main>
+
+      <RoleChrome role="hod" variant="mobile" />
 
       {/* Left-anchored drawer */}
       {open && (

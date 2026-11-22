@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { RoleChrome } from "@/components/shared/RoleChrome";
 import { HodSidebar } from "./HodSidebar";
 import { HodNotificationBell } from "./HodNotificationBell";
 import { FocusMode } from "../_retention/FocusMode";
@@ -21,13 +22,14 @@ export function HodDesktopShell({ children }: { children: React.ReactNode }) {
         <HodSidebar mode="expanded" />
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
+      <div className="relative flex-1 overflow-y-auto">
         <ScrollEdgeBlue className="h-full">
           <ScrollEdgeBlue className="h-full">
-                      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">{children}</div>
+                      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24">{children}</div>
           </ScrollEdgeBlue>
         </ScrollEdgeBlue>
-      </main>
+        <RoleChrome role="hod" variant="footer" />
+      </div>
 
       <HodNotificationBell className="fixed right-6 top-6 z-20" />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
