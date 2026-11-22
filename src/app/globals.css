@@ -460,6 +460,52 @@ p, li, .text-body { color: var(--color-text-secondary); }
   --home-border-gold: rgba(251, 191, 36, 0.35);
 }
 
+/* ── Theme immunity for the home page ────────────────────────────────
+   The marketing home keeps its static Archway dark palette via the
+   --home-* vars above. But some home elements still read the GLOBAL
+   token vars — either through bare Tailwind token classes (text-primary,
+   bg-surface, bg-bg-base, text-text-muted) or through the var() fallback
+   chain var(--home-x, var(--global-y)) when a --home-x var is out of
+   scope. A per-user theme (html[data-theme="sakuga"]) re-declares those
+   global vars, which bled into the home and re-sketched it in the user's
+   theme ("the home was influenced by a global variable / their UI theme").
+   Shield: re-declare the global token vars the home depends on with the
+   home's static Archway values, scoped to [data-home], so a themed user's
+   home stays in its own palette. Cascade wins because [data-home] is a
+   descendant of html[data-theme] — the more-specific selector overrides the
+   theme's html-level var declarations. */
+[data-home] {
+  --color-canvas:      #0A1128;
+  --color-surface:     #0F172A;
+  --color-surface-muted: #111A2E;
+  --color-border:      rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+  --color-text-primary:      #FFFFFF;
+  --color-text-secondary:    #CBD5E1;
+  --color-text-muted:        #94A3B8;
+  --color-text-muted-strong: #CBD5E1;
+  --color-action-primary:       #FBBF24;
+  --color-action-primary-hover: #FBBF24;
+  --color-action-danger:        #F43F5E;
+  --color-action-warning:       #FBBF24;
+  --color-action-success:       #10B981;
+  --color-action-info:          #FBBF24;
+  /* legacy bridge vars that the bare Tailwind token classes + var() fallbacks read */
+  --bg-base:     var(--home-bg-base, #0A1128);
+  --bg-surface:  var(--home-bg-elev-1, #0F172A);
+  --bg-elevated: var(--home-bg-elev-2, #111A2E);
+  --text-primary:     var(--home-text-primary, #FFFFFF);
+  --text-secondary:   var(--home-text-secondary, #CBD5E1);
+  --text-muted:       var(--home-text-muted, #94A3B8);
+  --border:         var(--home-border-soft, rgba(255,255,255,0.08));
+  --border-strong:  var(--home-border-hard, rgba(255,255,255,0.18));
+  --action-primary: var(--home-accent-gold, #FBBF24);
+  --action-danger:  var(--home-accent-rose, #F43F5E);
+  --action-warning: var(--home-accent-amber, #FBBF24);
+  --action-success: var(--home-accent-mint, #10B981);
+  --action-info:    var(--home-accent-indigo, #FBBF24);
+}
+
 /* Home section surfaces (flat, no backdrop-filter) */
 [data-home] .home-glass-pane {
   background: rgba(15, 23, 42, 0.72);
