@@ -200,7 +200,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col w-6 lg:w-6 h-full bg-bg-surface border-r border-border",
+        "hidden md:flex flex-col w-56 lg:w-64 h-full bg-bg-surface border-r border-border",
         "fixed left-0 top-0 z-40"
       )}
       role="navigation"
