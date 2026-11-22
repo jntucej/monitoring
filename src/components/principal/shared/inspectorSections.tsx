@@ -16,8 +16,9 @@
  */
 
 import type { ReactNode } from "react";
-import type { InspectionSection } from "@/components/shared/EntityInspector";
 import { KVPairs } from "@/components/shared/EntityInspector";
+import type { InspectionSection } from "@/components/shared/EntityInspector";
+import { EntityTimeline } from "@/components/principal/shared/EntityTimeline";
 import type {
   PrincipalRelationship,
   PrincipalTimelineEvent,
@@ -66,6 +67,16 @@ export interface InspectorSections {
   actions: (
     actions: PrincipalActionDefinition[],
     renderAction: (a: PrincipalActionDefinition) => ReactNode,
+  ) => InspectionSection;
+  /**
+   * PR-06: a timeline section rendered by the shared EntityTimeline — carries
+   * honest loading / empty / error states + pagination for long histories.
+   * Use this (not the custom `timeline` renderer) when the events are real
+   * recorded data (e.g. audit logs) and you want the standard presentation.
+   */
+  timelineSection: (
+    events: PrincipalTimelineEvent[],
+    opts?: { loading?: boolean; error?: string | null; pageSize?: number },
   ) => InspectionSection;
 }
 
@@ -118,6 +129,18 @@ export function createInspectorSections(): InspectorSections {
         ) : (
           <div className="flex flex-col gap-2">{actions.map(renderAction)}</div>
         ),
+    }),
+    timelineSection: (events, opts = {}) => ({
+      title: INSPECTOR_SECTION_TITLES.timeline,
+      collapsible: true,
+      content: (
+        <EntityTimeline
+          events={events}
+          loading={opts.loading}
+          error={opts.error}
+          pageSize={opts.pageSize}
+        />
+      ),
     }),
   };
 }

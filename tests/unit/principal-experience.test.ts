@@ -19,6 +19,10 @@ import {
   applyWorkspacePatch,
 } from "@/hooks/usePrincipalWorkspace";
 import { createInspectorSections } from "@/components/principal/shared/inspectorSections";
+import {
+  auditLogsToEvents,
+  type AuditLogRow,
+} from "@/lib/principal/auditTimeline";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -158,5 +162,62 @@ describe("PR-04 composable inspector sections (pure logic)", () => {
     const some = s.actions(acts, (a: PrincipalActionDefinition) => a.label);
     expect(some.title).toBe("Actions");
     expect(some.content).toBeTruthy();
+  });
+
+  it("timelineSection: renders via the shared EntityTimeline (honest empty)", () => {
+    const section = s.timelineSection([], { loading: false, error: null });
+    expect(section.title).toBe("Timeline");
+    expect(section.collapsible).toBe(true);
+    expect(section.content).toBeTruthy();
+  });
+});
+
+describe("PR-06 audit timeline mapper (real recorded events only)", () => {
+  const rows: AuditLogRow[] = [
+    {
+      id: "a1",
+      action: "ESCALATION",
+      user_name: "Warden",
+      user_role: "warden",
+      details: { reason: "SLA breach" },
+      timestamp: "2026-11-02T09:00:00Z",
+    },
+    {
+      id: "a2",
+      action: "APPROVAL",
+      user_name: "Principal",
+      details: "approved out-pass",
+      timestamp: "2026-11-01T08:00:00Z",
+    },
+    { id: "a3", action: "RESOLVE", timestamp: "2026-11-01T07:00:00Z" },
+  ];
+
+  it("maps real rows to events, preserving only stored fields", () => {
+    const events = auditLogsToEvents(rows);
+    expect(events).toHaveLength(3);
+    // newest-first order preserved
+    expect(events[0].type).toBe("ESCALATION");
+    expect(events[0].actor).toEqual({ label: "Warden", role: "warden" });
+    expect(events[0].reason).toBe("SLA breach");
+    expect(events[0].auditRef).toBe("a1");
+    // string details → reason
+    expect(events[1].reason).toBe("approved out-pass");
+    // no actor / reason when the backend didn't store them (not invented)
+    expect(events[2].actor).toBeUndefined();
+    expect(events[2].reason).toBeUndefined();
+  });
+
+  it("dedupes by audit id (a refetch can't double a row)", () => {
+    const dup = [...rows, { ...rows[0] }];
+    expect(auditLogsToEvents(dup)).toHaveLength(3);
+  });
+
+  it("drops unusable rows (no action AND no timestamp) rather than faking them", () => {
+    const events = auditLogsToEvents([
+      { id: "x", action: "", timestamp: "" },
+      { id: "ok", action: "OPEN", timestamp: "2026-11-01T00:00:00Z" },
+    ]);
+    expect(events).toHaveLength(1);
+    expect(events[0].id).toBe("ok");
   });
 });
