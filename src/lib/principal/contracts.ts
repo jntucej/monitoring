@@ -14,7 +14,7 @@
  *    types describe presentation + client execution state only.
  */
 
-import type { EntityInspection, InspectionSection } from "@/components/shared/EntityInspector";
+import type { EntityInspection } from "@/components/shared/EntityInspector";
 export type { EntityInspection, InspectionSection } from "@/components/shared/EntityInspector";
 
 /* ── Entity identity (verified, closed set) ─────────────────────────────── */

@@ -53,6 +53,51 @@ export interface PrincipalWorkspaceState {
     | null;
 }
 
+/**
+ * Pure URL<->workspace-context mapping (exported for unit tests; the hook
+ * wraps these over useSearchParams). `sp` is any URLSearchParams.
+ */
+export function parseWorkspaceUrl(sp: URLSearchParams): PrincipalWorkspaceState {
+  const filter = sp.get("filter");
+  const kind = sp.get("entity");
+  const id = sp.get("entityId");
+  const label = sp.get("entityLabel");
+  const returnTo = sp.get("returnTo");
+  const workspace = sp.get("workspace") ?? "";
+  const inspect =
+    !isKnownKind(kind) || !id
+      ? null
+      : { entity: { type: kind, id, label: label ?? id }, returnTo };
+  return { workspace, filter, inspect };
+}
+
+export interface WorkspaceUrlPatch {
+  entity?: string | null;
+  id?: string | null;
+  label?: string | null;
+  returnTo?: string | null;
+  filter?: string | null;
+  workspace?: string | null;
+}
+/** Pure: next URLSearchParams from a patch (used by the hook's replace). */
+export function applyWorkspacePatch(
+  sp: URLSearchParams,
+  patch: WorkspaceUrlPatch,
+): URLSearchParams {
+  const next = new URLSearchParams(sp);
+  const set = (k: string, v: string | null) => {
+    if (v == null || v === "") next.delete(k);
+    else next.set(k, v);
+  };
+  if ("entity" in patch) set("entity", patch.entity ?? null);
+  if ("id" in patch) set("entityId", patch.id ?? null);
+  if ("label" in patch) set("entityLabel", patch.label ?? null);
+  if ("returnTo" in patch) set("returnTo", patch.returnTo ?? null);
+  if ("filter" in patch) set("filter", patch.filter ?? null);
+  if ("workspace" in patch) set("workspace", patch.workspace ?? null);
+  return next;
+}
+
 export interface UsePrincipalWorkspaceOptions {
   /**
    * Whether to write the inspected entity into the URL. Default true. When
@@ -84,33 +129,14 @@ export function usePrincipalWorkspace(
     return idx >= 0 && seg[idx + 1] ? seg[idx + 1] : "";
   }, [pathname]);
 
-  const filter = sp.get("filter");
-
-  const inspect = useMemo(() => {
-    const kind = sp.get("entity");
-    const id = sp.get("entityId");
-    const label = sp.get("entityLabel");
-    const returnTo = sp.get("returnTo");
-    if (!isKnownKind(kind) || !id) return null;
-    return {
-      entity: { type: kind, id, label: label ?? id },
-      returnTo,
-    };
-  }, [sp]);
+  const parsed = useMemo(() => parseWorkspaceUrl(sp), [sp]);
+  const filter = parsed.filter;
+  const inspect = parsed.inspect;
 
   // ── write the shareable context back to the URL ──
   const replace = useCallback(
-    (patch: { entity?: string | null; id?: string | null; label?: string | null; returnTo?: string | null; filter?: string | null }) => {
-      const next = new URLSearchParams(sp);
-      const set = (k: string, v: string | null) => {
-        if (v == null || v === "") next.delete(k);
-        else next.set(k, v);
-      };
-      if ("entity" in patch) set("entity", patch.entity ?? null);
-      if ("id" in patch) set("entityId", patch.id ?? null);
-      if ("label" in patch) set("entityLabel", patch.label ?? null);
-      if ("returnTo" in patch) set("returnTo", patch.returnTo ?? null);
-      if ("filter" in patch) set("filter", patch.filter ?? null);
+    (patch: WorkspaceUrlPatch) => {
+      const next = applyWorkspacePatch(sp, patch);
       router.replace(`${pathname}?${next.toString()}`, { scroll: false });
     },
     [router, pathname, sp],
