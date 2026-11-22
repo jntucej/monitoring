@@ -168,7 +168,10 @@ export type StandardOperation =
   | "override"
   | "escalate"
   | "delegate"
-  | "lockdown";
+  | "lockdown"
+  | "route_manager"
+  | "route_deputy"
+  | "route_principal";
 
 export const STANDARD_OPERATIONS: StandardOperation[] = [
   "approve",
@@ -180,6 +183,9 @@ export const STANDARD_OPERATIONS: StandardOperation[] = [
   "escalate",
   "delegate",
   "lockdown",
+  "route_manager",
+  "route_deputy",
+  "route_principal",
 ];
 
 /**
@@ -287,7 +293,10 @@ export type DecisionType =
   | "override"
   | "escalate"
   | "delegate"
-  | "lockdown";
+  | "lockdown"
+  | "route_manager"
+  | "route_deputy"
+  | "route_principal";
 
 export const DECISION_TYPES: DecisionType[] = [...STANDARD_OPERATIONS];
 

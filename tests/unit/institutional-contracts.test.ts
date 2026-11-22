@@ -137,7 +137,8 @@ describe("decision records carry the full provenance", () => {
 
   it("standard operations are the only decision verbs", () => {
     expect(STANDARD_OPERATIONS).toEqual(
-      ["approve", "reject", "revoke", "suspend", "debar", "override", "escalate", "delegate", "lockdown"],
+      ["approve", "reject", "revoke", "suspend", "debar", "override", "escalate", "delegate", "lockdown",
+       "route_manager", "route_deputy", "route_principal"],
     );
   });
 });

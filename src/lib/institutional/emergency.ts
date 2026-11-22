@@ -86,7 +86,7 @@ export async function issueEmergencyCommand(
     `INSERT INTO public.emergency_commands
        (state, authority_source, lockdown_id, actor_id, actor_role, role_context,
         reason, scopes, duration_hours, review_status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,
+     VALUES ($1::text,$2::text,$3::uuid,$4::uuid,$5::text,$6::text,$7::text,$8::jsonb,$9::int,
             CASE WHEN $1 IN ('LOCKDOWN','EMERGENCY') THEN 'PENDING' ELSE 'WAIVED' END)
      RETURNING *`,
     [
@@ -152,7 +152,8 @@ export async function reviewEmergencyCommand(
 ): Promise<EmergencyCommandRow> {
   const { rows } = await query<EmergencyCommandRow>(
     `UPDATE public.emergency_commands
-      SET review_status = $3, reviewed_by = $4, reviewed_at = now(), review_notes = $5
+      SET review_status = $3, reviewed_by = $4, reviewed_at = now(), review_notes = $5,
+          actor_id = $2::uuid
       WHERE id = $1 AND review_status = 'PENDING'
      RETURNING *`,
     [input.commandId, input.reviewer.id, input.status, input.reviewer.id, input.notes ?? null],

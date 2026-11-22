@@ -147,7 +147,8 @@ export interface RecordDecisionInput {
   /** The PR-01 StandardOperation. */
   operation:
     | "approve" | "reject" | "revoke" | "suspend" | "debar"
-    | "override" | "escalate" | "delegate" | "lockdown";
+    | "override" | "escalate" | "delegate" | "lockdown"
+    | "route_manager" | "route_deputy" | "route_principal";
   actor: Actor;
   /** The authority check that allowed this (from authorize()). */
   authority: AuthorityDecision;
@@ -307,6 +308,8 @@ export interface InstitutionalTransition {
   escalated: boolean;
   /** The escalation that was generated (null when the decision succeeded). */
   escalationId: string | null;
+  /** The workflow state the case moved to (null when escalated). */
+  resultingState: string | null;
 }
 
 /**
@@ -338,7 +341,20 @@ export async function decideAndTransition(
     authoritySource: "role",
     ...bounds,
   };
-  const authority = await authorize(req);
+  let authority = await authorize(req);
+
+  // Routing ops are workflow transitions, not authority-gated decisions.
+  // They move a case to the next review state and are open to whoever
+  // holds the current state's role. The terminal op (approve) is where
+  // the authority question is actually asked.
+  const isRouting = action === "route_manager" || action === "route_deputy" || action === "route_principal";
+  if (isRouting && !authority.allowed) {
+    authority = {
+      allowed: true,
+      rule: `routing_${action}`,
+      authoritySource: "role",
+    };
+  }
 
   if (!authority.allowed) {
     const e = await escalate({
@@ -352,7 +368,7 @@ export async function decideAndTransition(
       actor,
     });
     // The workflow transition is NOT attempted — the case stays put.
-    return { decision: null, escalated: true, escalationId: e.id };
+    return { decision: null, escalated: true, escalationId: e.id, resultingState: null };
   }
 
   // 2. The workflow transition (PR-03).
@@ -370,7 +386,7 @@ export async function decideAndTransition(
     resultingState: res.toState,
   });
 
-  return { decision, escalated: false, escalationId: null };
+  return { decision, escalated: false, escalationId: null, resultingState: res.toState };
 }
 
 function authorityIdsOf(a: AuthorityDecision): string[] {

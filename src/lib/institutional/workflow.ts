@@ -148,8 +148,9 @@ export function evaluateBounds(bounds: Record<string, unknown>, req: AuthorityRe
   for (const [k, v] of Object.entries(bounds)) {
     // max_* bounds: the request field (if present) must be <= the bound.
     if (k.startsWith("max_")) {
-      const field = k.replace("max_", "").replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-      const actual = r[field];
+      const snakeField = k.replace("max_", "");
+      const camelField = snakeField.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+      const actual = r[camelField] ?? r[snakeField];
       if (actual != null && typeof actual === "number" && typeof v === "number" && actual > v) {
         return false;
       }
@@ -257,7 +258,22 @@ export async function transitionWorkflow(
     authoritySource: "role" as const,
     ...bounds,
   };
-  const authority = await authorize(authorityReq as AuthorityRequest);
+  let authority = await authorize(authorityReq as AuthorityRequest);
+  // Routing ops (route_manager / route_deputy / route_principal) are
+  // workflow transitions, not authority-gated decisions: they move a case
+  // to the next review state and are open to whoever holds the current
+  // state's role. The authority question for routing is "can I move this
+  // case forward?" not "can I approve it?" So routing bypasses the
+  // authority gate — the terminal op (approve) is where the authority
+  // question is actually asked.
+  const isRouting = action === "route_manager" || action === "route_deputy" || action === "route_principal";
+  if (isRouting && !authority.allowed) {
+    authority = {
+      allowed: true,
+      rule: `routing_${action}` ,
+      authoritySource: "role",
+    };
+  }
   if (!authority.allowed) {
     // Authority exceeded → do not move; record the refusal so PR-05 can
     // escalate it. The instance stays in fromState. The refusal is
@@ -318,6 +334,14 @@ export function resolveWorkflowTarget(fromState: string, action: string): string
     case "route_deputy": return "deputy_review";
     case "route_principal": return "principal_review";
     case "expire": return "expired";
+    // academic_status domain
+    case "debar": return "debarred";
+    case "restore": return "restored";
+    // security_incident domain
+    case "assess": return "assessed";
+    case "contain": return "contained";
+    case "escalate_emergency": return "emergency";
+    case "close": return "closed";
     default:
       // Unknown action → stay; the caller decides.
       return fromState;
