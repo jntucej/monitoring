@@ -22,6 +22,7 @@
 
 import { query } from "@/lib/postgres";
 import { logAuditEvent } from "@/lib/audit";
+import { checkSoD } from "@/lib/institutional/sod";
 import type {
   Actor,
   AuthorityDecision,
@@ -199,6 +200,20 @@ export async function recordDecision(input: RecordDecisionInput): Promise<Decisi
   const authorityIds: string[] = input.authority.rule
     ? [input.authority.rule]
     : [];
+
+  // PR-14 SoD gate: a decision that acts under a delegation must pass the
+  // combined SoD check before it is recorded. The check is fail-closed:
+  // an expired / out-of-scope / revoked grant blocks the decision.
+  if (input.authority.authoritySource === "delegation") {
+    const sod = checkSoD({
+      actor: input.actor,
+      requestOriginatorId: input.authority.delegationId ?? undefined,
+      now: new Date(),
+    });
+    if (!sod.ok) {
+      throw new Error(`SoD gate: ${sod.blockedBy.join("; ")}`);
+    }
+  }
 
   const { rows } = await query<DecisionRow>(
     `INSERT INTO public.decisions
