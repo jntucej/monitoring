@@ -366,12 +366,13 @@ export function OperatorCamera({
           });
         }
       }
-      if (!streamRef.current) {
-        if (gateId) gateStreamCache[gateId] = stream;
-        else stream.getTracks().forEach((t) => t.stop());
-        return;
-      }
+
+      // Cold start: always adopt the stream we just opened. (The previous
+      // `if (!streamRef.current)` guard was true on every first visit, so the
+      // operator got parked + returned early and was stuck on
+      // "Initializing camera..." — only cached re-visits ever started scanning.)
       streamRef.current = stream;
+      if (gateId) gateStreamCache[gateId] = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
