@@ -28,6 +28,7 @@ import {
   alertRelationships,
   refOrUnavailable,
 } from "@/lib/principal/relationshipResolver";
+import { buildInvestigationWorkspace } from "@/components/principal/shared/InvestigationWorkspace";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -227,6 +228,42 @@ describe("PR-07 relationship resolver (real refs, honest unavailability)", () =>
     const missing = refOrUnavailable("assigned to", "faculty", null);
     expect(missing.available).toBe(false);
     expect(missing.unavailableReason).toBeTruthy();
+  });
+});
+
+describe("PR-08 investigation workspace (composer over verified blocks)", () => {
+  it("assembles the 4 progressive-disclosure sections in order", () => {
+    const insp = buildInvestigationWorkspace({
+      entity: { type: "incident", id: "i-1", label: "Gate breach" },
+      status: "ESCALATED",
+      overview: [{ label: "Severity", value: "high" }],
+      relationships: [
+        { relation: "at gate", target: { type: "gate", id: "g-3", label: "Main Gate" } },
+      ],
+      timeline: [{ id: "e1", type: "escalated", at: "2026-11-02T00:00:00Z" }],
+      actions: [{ id: "resolve", label: "Resolve", entityType: "incident", confirmationRequired: true }],
+    });
+    expect(insp.kind).toBe("incident");
+    expect(insp.title).toBe("Gate breach");
+    expect(insp.status).toBe("ESCALATED");
+    // progressive order: overview → relationships → timeline (collapsible) → actions
+    expect(insp.sections).toHaveLength(4);
+    expect(insp.sections.map((s) => s.title)).toEqual([
+      "Overview",
+      "Connected records",
+      "Timeline",
+      "Actions",
+    ]);
+    expect(insp.sections[2].collapsible).toBe(true);
+  });
+
+  it("renders honest empty sections when a source has no data (not fabricated)", () => {
+    const insp = buildInvestigationWorkspace({
+      entity: { type: "student", id: "s-9", label: "Unknown" },
+    });
+    expect(insp.sections).toHaveLength(4); // all four still present, each honest-empty
+    // timeline section carries a real (empty) EntityTimeline, not a fake entry
+    expect(insp.sections[2].content).toBeTruthy();
   });
 });
 
