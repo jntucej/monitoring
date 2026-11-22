@@ -2,15 +2,13 @@
 //
 // PR-02 — Case Engine API surface. The universal capability routes:
 //
-//   POST /api/cases          create a case (creator role required, or a
-//                            system actor with a named origin)
+//   POST /api/cases          create a case (creator role required)
 //   GET  /api/cases          list (type / state / scope filters; 100 cap)
-//   GET  /api/cases?subject=student:ID  list by subject
 //
-// Reads require the actor to be a human role (any authenticated role) —
-// the case layer is institutional, not domain-scoped, so every role sees
-// cases but the principal (and higher) see the whole institutional view
-// while lower roles see only the types they can act on.
+// Reads require the actor to be any authenticated role — the case layer
+// is institutional, not domain-scoped, so every role sees cases but the
+// principal (and higher) see the whole institutional view while lower
+// roles see only the types they can act on.
 //
 // The reference workflow this PR wires is the gate-pass case:
 // a fired gate event opens a gate_pass case and it moves through the
@@ -19,9 +17,8 @@
 // PR adds to it, none of them replace it.
 
 import { NextRequest } from "next/server";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
-import { RATE_LIMITS } from "@/config/app-constants";
 import { ok, fail } from "@/server/http/response";
 import { listCases, createCase } from "@/lib/institutional/cases";
 import type { Actor, CaseType } from "@/lib/institutional/contracts";
@@ -48,11 +45,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   const subjectId = body.subject_id ?? body.subjectId;
 
   if (!type || !subjectType || !subjectId) {
-    return fail(
-      "BAD_REQUEST",
-      "Required: type (CaseType), subject_type, subject_id",
-      400,
-    );
+    return fail("BAD_REQUEST", "Required: type (CaseType), subject_type, subject_id", 400);
   }
 
   const auth: AuthContext = ctx.auth;
@@ -93,7 +86,7 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   const entityScope = sp.get("scope") ?? undefined;
   const limit = Math.min(Number(sp.get("limit") ?? 100) || 100, 100);
 
-  // Subject filter: `?subject=student:ABC123`
+  // Subject filter: `?subject=student:ID`
   let subjectType: string | undefined;
   let subjectId: string | undefined;
   const subject = sp.get("subject");
@@ -106,9 +99,6 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   }
 
   try {
-    // A simple type+state+scope filter is enough for the reference workflow.
-    // The full subject filter joins cases with the subject entity in
-    // PR-13 (domain migration); this PR exposes the filter shape.
     const cases = await listCases({ type, state, entityScope, limit });
     const filtered = subjectType && subjectId
       ? cases.filter((c) => c.subject_type === subjectType && c.subject_id === subjectId)
@@ -120,15 +110,9 @@ async function handleGet(req: NextRequest, _ctx: { auth: AuthContext }) {
   }
 }
 
-const postLimit: RateLimitConfig = { ...RATE_LIMITS.mutation, keyPrefix: "cases_write" };
-const getLimit: RateLimitConfig = { ...RATE_LIMITS.read, keyPrefix: "cases_read" };
+export const POST = withMutationGuard(handlePost, {
+  requiredRole: WRITE_ROLES,
+  rateLimit: { keyPrefix: "cases_write", maxRequests: 30 },
+});
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: WRITE_ROLES }),
-  postLimit,
-);
-
-export const GET = withRateLimit(
-  withAuthorization(handleGet, { requiredRole: undefined }),
-  getLimit,
-);
+export const GET = withAuthorization(handleGet, {});

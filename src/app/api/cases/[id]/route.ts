@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/middleware/authorization";
 import { withRateLimit, type RateLimitConfig } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { RATE_LIMITS } from "@/config/app-constants";
 import { ok, fail } from "@/server/http/response";
 import { getCase, addCaseEvent } from "@/lib/institutional/cases";
@@ -78,19 +79,11 @@ async function implGet(req: NextRequest) {
 }
 
 // ── POST /api/cases/:id/events ────────────────────────────────────────────
-
-async function implPost(req: NextRequest) {
-  const auth = await getAuthenticatedUser(req);
-  if (!auth) {
-    return NextResponse.json(
-      { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required" } },
-      { status: 401 },
-    );
-  }
-  if (!WRITE_ROLES.includes(auth.role)) {
-    return fail("FORBIDDEN", "Role may not append case events", 403);
-  }
-
+// withMutationGuard gives us: auth + role gate + rate-limit + CSRF +
+// trusted-headers. The handler gets ctx.auth (verified), not a raw
+// request — no manual auth re-check needed.
+async function implPost(req: NextRequest, ctx: { auth: AuthContext }) {
+  const auth = ctx.auth;
   const url = new URL(req.url);
   const segments = url.pathname.split("/").filter(Boolean);
   // /api/cases/:id/events → segments [ 'api', 'cases', ':id', 'events' ]
@@ -120,4 +113,7 @@ async function implPost(req: NextRequest) {
 }
 
 export const GET = withRateLimit(implGet, getLimit);
-export const POST = withRateLimit(implPost, postLimit);
+export const POST = withMutationGuard(implPost, {
+  requiredRole: WRITE_ROLES,
+  rateLimit: { keyPrefix: "cases_events", maxRequests: 60 },
+});
