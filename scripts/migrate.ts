@@ -166,7 +166,15 @@ async function main() {
       const fullDir = join(rootDir, dir);
       const entries = await readdir(fullDir).catch(() => []);
       for (const name of entries) {
-        if (name.endsWith(".sql") && !name.startsWith("_") && /^\d{14}_/.test(name)) {
+        // Skip rollback (*.down.sql) files — the runner only applies forward
+        // migrations. A down file whose basename matches ^\d{14}_ is not a
+        // forward migration and must never be executed here.
+        if (
+          name.endsWith(".sql") &&
+          !name.endsWith(".down.sql") &&
+          !name.startsWith("_") &&
+          /^\d{14}_/.test(name)
+        ) {
           if (!fileMap.has(name)) {
             fileMap.set(name, { dir, name, path: join(fullDir, name) });
           }
