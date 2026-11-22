@@ -13,7 +13,7 @@ not a claim of what *would* pass.
 | Unit tests | `vitest run` | **200/200 pass** (26 files), incl. the 39 `principal-experience` tests covering PR-02/03/04/06/07/08/10/11/13/14 |
 | Gate tests (node) | `jest --selectProjects node` | **143 pass** (3 suites fail-to-run — see §3, pre-existing tooling limitation, not a code failure) |
 | RBAC regression | `tsx scripts/verify-all-roles.ts` | **387/387 pairs OK, 0 regressions** (live app, all demo roles × leaf routes) |
-| E2E principal workflows (production) | `playwright test principal-delegation principal-inbox approval-forward` with `SMOKE_USER=PRINCIPAL` | **12/12 passed** (live production build) |
+| E2E principal workflows (production) | `playwright test principal-delegation principal-inbox approval-forward` with `SMOKE_USER=PRINCIPAL` | **6/12 passed, 6/12 skipped** (the 6 skips are `approval-forward.spec.ts` tests that need `CARETAKER_USER`/`DW_USER`/`ADMIN_USER` env vars not set in this run; the principal-delegation + principal-inbox specs all passed) |
 | E2E PR-16 branch spec (production) | `playwright test pr16-branch-ui.spec.ts` with `SMOKE_USER=PRINCIPAL` | **1 passed** (Command Centre renders + auth works), **1 skipped** (palette not in production build — branch-only code, as expected) |
 
 The RBAC gate + E2E ran against the **deployed baseline** (the 22:00 image),
