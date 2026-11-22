@@ -15,6 +15,7 @@
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { usePrincipalWorkspace } from "@/hooks/usePrincipalWorkspace";
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/utils";
 import { PrincipalShell } from "@/components/principal/shared/PrincipalShell";
@@ -61,6 +62,7 @@ interface DigestResponse {
 
 export default function PrincipalCommandCenter() {
   const router = useRouter();
+  const workspace = usePrincipalWorkspace();
   const dash = useApiResource<DashboardResponse>("/api/principal/dashboard");
   const digestRes = useApiResource<DigestResponse>("/api/principal/digest?range=week");
   // Keep the "now" figures fresh without hammering the API.
@@ -173,7 +175,17 @@ export default function PrincipalCommandCenter() {
                 }
                 slaDeadline={it.sla_deadline ? formatDateTime(it.sla_deadline) : null}
                 onOpen={() => {
-                  router.push(`/principal/attention?ticket=${it.ticket_number}`);
+                  workspace.setInspect(
+                    {
+                      type: "permission",
+                      id: it.id,
+                      label: it.ticket_number,
+                    },
+                    "/principal",
+                  );
+                  router.push(
+                    `/principal/attention?ticket=${it.ticket_number}&returnTo=${encodeURIComponent("/principal")}`,
+                  );
                 }}
                 onDelegate={() => {
                   router.push("/principal/governance/delegations");
