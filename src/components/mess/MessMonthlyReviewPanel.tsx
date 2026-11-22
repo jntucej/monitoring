@@ -54,7 +54,7 @@ function StarScale({ avg, className }: { avg: number; className?: string }) {
           key={i}
           className={cn(
             "h-4 w-4",
-            i <= rounded ? "fill-amber-400 text-amber-400" : "text-text-muted/20"
+            i <= rounded ? "fill-action-warning text-action-warning" : "text-text-muted/20"
           )}
         />
       ))}
@@ -65,8 +65,8 @@ function StarScale({ avg, className }: { avg: number; className?: string }) {
 function MealRow({ meal }: { meal: PerMeal }) {
   const trendIcon =
     meal.delta == null ? <Minus className="h-3.5 w-3.5 text-text-muted" />
-    : meal.delta > 0 ? <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-    : meal.delta < 0 ? <TrendingDown className="h-3.5 w-3.5 text-rose-500" />
+    : meal.delta > 0 ? <TrendingUp className="h-3.5 w-3.5 text-action-success" />
+    : meal.delta < 0 ? <TrendingDown className="h-3.5 w-3.5 text-action-danger" />
     : <Minus className="h-3.5 w-3.5 text-text-muted" />;
 
   return (
@@ -87,7 +87,7 @@ function MealRow({ meal }: { meal: PerMeal }) {
         <div className="text-right">
           <p className="text-text-muted">{meal.count} reviews</p>
           {meal.complaints > 0 && (
-            <p className="text-rose-500">{meal.complaints} complaints</p>
+            <p className="text-action-danger">{meal.complaints} complaints</p>
           )}
         </div>
         <div
@@ -96,9 +96,9 @@ function MealRow({ meal }: { meal: PerMeal }) {
             meal.delta == null
               ? "text-text-muted bg-bg-surface"
               : meal.delta > 0
-                ? "text-emerald-500 bg-emerald-500/10"
+                ? "text-action-success bg-action-success/10"
                 : meal.delta < 0
-                  ? "text-rose-500 bg-rose-500/10"
+                  ? "text-action-danger bg-action-danger/10"
                   : "text-text-muted bg-bg-surface"
           )}
         >
@@ -173,7 +173,7 @@ export function MessMonthlyReviewPanel() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+            <div className="p-2 rounded-xl bg-action-warning/10 text-action-warning">
               <UtensilsCrossed className="h-4 w-4" />
             </div>
             <div>
@@ -215,7 +215,7 @@ export function MessMonthlyReviewPanel() {
 
         {/* Error */}
         {error && !loading && (
-          <div className="rounded-xl bg-rose-500/10 p-4 text-sm text-rose-600">
+          <div className="rounded-xl bg-action-danger/10 p-4 text-sm text-action-danger">
             <AlertTriangle className="h-4 w-4 inline mr-1" />
             {error}
             <button type="button" onClick={() => void load()} className="ml-2 underline">

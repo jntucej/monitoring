@@ -296,7 +296,7 @@ export default function ExitReasonsPage() {
                   <button
                     type="button"
                     onClick={() => setEditingReason(null)}
-                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 min-h11 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
                   >
                     Cancel
                   </button>

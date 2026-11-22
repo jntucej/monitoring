@@ -141,7 +141,7 @@ function AppMapInner() {
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 text-sm">
-            <label className="text-muted-foreground">Role:</label>
+            <label className="text-text-primary font-medium">Role:</label>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
@@ -164,7 +164,7 @@ function AppMapInner() {
             <button
               type="button"
               onClick={handleRegen}
-              className="ml-auto rounded-md border border-border bg-background px-3 py-1 text-sm text-muted-foreground hover:text-foreground"
+              className="ml-auto rounded-md border border-border bg-action-primary px-3 py-1 text-sm text-white hover:bg-action-primary-hover"
             >
               Re-read map
             </button>
@@ -172,9 +172,9 @@ function AppMapInner() {
 
           {[...grouped.entries()].map(([role, pages]) => (
             <section key={role} className="space-y-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-action-primary">
                 {roleLabel(role)}{" "}
-                <span className="font-normal text-muted-foreground/60">
+                <span className="font-normal text-text-muted">
                   ({pages.length})
                 </span>
               </h2>
@@ -195,13 +195,13 @@ function AppMapInner() {
                     )}
                     <div className="mt-2 space-y-1 text-xs">
                       <div>
-                        <span className="text-muted-foreground">file: </span>
-                        <code className="text-muted-foreground">{p.file}</code>
+                        <span className="text-text-secondary">file: </span>
+                        <code className="text-text-muted">{p.file}</code>
                       </div>
                       {p.fetches.length > 0 && (
                         <div>
-                          <span className="text-muted-foreground">loads: </span>
-                          <span className="text-muted-foreground">
+                          <span className="text-text-secondary">loads: </span>
+                          <span className="text-text-muted">
                             {p.fetches
                               .map((f) => `${f.method} ${f.url}`)
                               .join(" · ")}
@@ -210,16 +210,16 @@ function AppMapInner() {
                       )}
                       {p.capabilities.length > 0 && (
                         <div>
-                          <span className="text-muted-foreground">gates: </span>
-                          <span className="text-muted-foreground">
+                          <span className="text-text-secondary">gates: </span>
+                          <span className="text-text-muted">
                             {p.capabilities.join(", ")}
                           </span>
                         </div>
                       )}
                       {p.buttons.length > 0 && (
                         <div>
-                          <span className="text-muted-foreground">actions: </span>
-                          <span className="text-muted-foreground">
+                          <span className="text-text-secondary">actions: </span>
+                          <span className="text-text-muted">
                             {p.buttons
                               .map((b) =>
                                 b.action

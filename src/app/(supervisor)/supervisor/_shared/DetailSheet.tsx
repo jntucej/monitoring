@@ -22,7 +22,7 @@ export function DetailSheet({
       <div className="fixed inset-x-0 bottom-0 z-50 md:hidden">
         <div className="surface-card max-h-[85vh] overflow-y-auto bg-bg-surface p-4 space-y-3">
           <div className="flex justify-center">
-            <div className="h-1.5 w-10 rounded-full bgborder" />
+            <div className="h-1.5 w-10 rounded-full bg-bg-elevated" />
           </div>
           <PermissionDetailPanel
             ticket={item.ticket_number}

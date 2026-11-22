@@ -57,7 +57,7 @@ export function IdentitySection() {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-bg-elevated p-4 space-y-3">
+    <div className="p-4 space-y-3">
       <p className="text-xs font-semibold text-text-muted flex items-center gap-1.5">
         <User className="h-3.5 w-3.5" /> Identity
       </p>

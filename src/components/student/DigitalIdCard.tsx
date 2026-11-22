@@ -133,7 +133,7 @@ const api = useApi();
   if (loading) {
     return (
       <div className="surface-card bg-bg-surface p-8 flex items-center gap-2 text-text-muted text-sm">
-        <Loader2 className="w-6 h-6 animate-spin" /> Loading ID…
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading ID…
       </div>
     );
   }
@@ -141,7 +141,7 @@ const api = useApi();
   if (error || !student) {
     return (
       <div className="surface-card bg-bg-surface p-8 text-center space-y-2">
-        <AlertCircle className="size-6 text-action-danger mx-auto opacity-60" />
+        <AlertCircle className="size-4 text-action-danger mx-auto opacity-60" />
         <p className="text-sm font-semibold text-text-primary">Unable to Load ID Card</p>
         <p className="text-xs text-text-muted">{error || "Student record not found."}</p>
       </div>
@@ -171,7 +171,7 @@ const api = useApi();
   return (
     <div className="surface-card bg-bg-surface p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
       {/* Student Photo */}
-      <div className="relative w-6 sm:w-28 md:w-28 lg:w-6 h-6 sm:h-28 md:h-28 lg:h-6 rounded-full mb-3 sm:mb-4 border-4 border-action-info overflow-hidden">
+      <div className="relative w-[112px] h-[112px] rounded-full mb-3 sm:mb-4 border-4 border-action-info overflow-hidden">
         <img src={photoSrc} alt={student.name} className="rounded-full w-full h-full object-cover" />
       </div>
 
@@ -251,11 +251,11 @@ const api = useApi();
           />
         ) : (
           <div className="h35 w35 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
+            <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
           </div>
         )}
         <div className="surface-card mt-1.5 sm:mt-2 text-xs sm:text-xs font-bold text-text-muted font-mono flex items-center gap-1 sm:gap-1.5 bg-bg-elevated px-2 sm:px-2.5 py-0.5 sm:py-1">
-          <span className="size-6 sm:w-6 sm:h-6 rounded-full bg-action-success" />
+          <span className="size-4 rounded-full bg-action-success" />
           Gate Verification QR
         </div>
         <button
@@ -271,12 +271,12 @@ const api = useApi();
           disabled={reissuing}
           className="mt-1.5 flex items-center gap-1 text-[11px] text-text-muted hover:text-action-primary disabled:opacity-50"
         >
-          <RotateCw className="w-3 h-3" />
+          <RotateCw className="w-4 h-4" />
           {reissuing ? "Re-issuing…" : "Re-issue QR"}
         </button>
       </div>
       <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-text-muted flex items-center gap-1">
-        <QrCode className="w-6 sm:w-3.5 h-6 sm:h-3.5 text-action-primary" />
+        <QrCode className="w-4 h-4 text-action-primary" />
         Signed token — refreshes automatically
       </p>
 

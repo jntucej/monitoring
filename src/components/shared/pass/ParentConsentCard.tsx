@@ -55,9 +55,9 @@ export function ParentConsentCard({
     <div
       className={cn(
         "rounded-xl border p-4 space-y-2.5",
-        consent.status === "approved" && "border-emerald-500/30 bg-emerald-500/5",
-        consent.status === "declined" && "border-rose-500/30 bg-rose-500/5",
-        consent.status === "pending" && "border-amber-500/30 bg-amber-500/5",
+        consent.status === "approved" && "border-action-success/30 bg-action-success/5",
+        consent.status === "declined" && "border-action-danger/30 bg-action-danger/5",
+        consent.status === "pending" && "border-action-warning/30 bg-action-warning/5",
         className
       )}
     >
@@ -65,9 +65,9 @@ export function ParentConsentCard({
         <ShieldCheck
           className={cn(
             "h-5 w-5",
-            consent.status === "approved" ? "text-emerald-500"
-              : consent.status === "declined" ? "text-rose-500"
-              : "text-amber-500"
+            consent.status === "approved" ? "text-action-success"
+              : consent.status === "declined" ? "text-action-danger"
+              : "text-action-warning"
           )}
         />
         <div>
@@ -79,17 +79,17 @@ export function ParentConsentCard({
             <p
               className={cn(
                 "text-xs font-semibold uppercase",
-                consent.status === "approved" ? "text-emerald-500" : "text-rose-500"
+                consent.status === "approved" ? "text-action-success" : "text-action-danger"
               )}
             >
               {consent.status}
             </p>
           ) : expired ? (
-            <p className="text-xs font-semibold text-rose-500 flex items-center gap-1">
+            <p className="text-xs font-semibold text-action-danger flex items-center gap-1">
               <XCircle className="h-3 w-3" /> Expired
             </p>
           ) : (
-            <p className="text-xs text-amber-600 flex items-center gap-1">
+            <p className="text-xs text-action-warning flex items-center gap-1">
               <Clock className="h-3 w-3" />
               expires {new Date(consent.expiresAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
             </p>
@@ -106,7 +106,7 @@ export function ParentConsentCard({
               onAction?.(consent.id, "approved");
               addToast({ variant: "success", title: "Approved", message: "Parent consent granted." });
             }}
-            className="inline-flex items-center gap-1.5 flex-1 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white hover:opacity-90"
+            className="inline-flex items-center gap-1.5 flex-1 rounded-lg bg-action-success px-3 py-2 text-xs font-semibold text-white hover:opacity-90"
           >
             <CheckCircle2 className="h-3.5 w-3.5" /> Approve
           </button>
@@ -116,7 +116,7 @@ export function ParentConsentCard({
               onAction?.(consent.id, "declined");
               addToast({ variant: "warning", title: "Declined", message: "Parent consent declined." });
             }}
-            className="inline-flex items-center gap-1.5 flex-1 rounded-lg bg-rose-500/10 border border-rose-500/30 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/20"
+            className="inline-flex items-center gap-1.5 flex-1 rounded-lg bg-action-danger/10 border border-action-danger/30 px-3 py-2 text-xs font-semibold text-action-danger hover:bg-action-danger/20"
           >
             <XCircle className="h-3.5 w-3.5" /> Decline
           </button>

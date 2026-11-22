@@ -128,11 +128,11 @@ export default function AttendanceCard({ payload }: StudentWidgetProps) {
 
   return (
     <WidgetBoundary name="AttendanceCard" resetKey={period.key}>
-      <div className="surface-card bg-bg-surface rounded-2xl p-5 space-y-5">
+      <div className="surface-card p-5 space-y-5">
         {/* Header row */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-action-primary/10 text-action-primary">
+            <div className="p-2 bg-action-primary/10 text-action-primary">
               <CalendarDays className="h-4 w-4" />
             </div>
             <div>
@@ -225,7 +225,7 @@ export default function AttendanceCard({ payload }: StudentWidgetProps) {
                 <p className="text-xs font-medium text-text-muted mb-2">Open disputes</p>
                 <div className="space-y-1.5">
                   {d.disputes.slice(0, 3).map((dsp) => (
-                    <div key={dsp.id} className="flex items-center gap-2 text-xs rounded-lg bg-rose-500/5 border border-rose-500/15 px-3 py-2">
+                    <div key={dsp.id} className="flex items-center gap-2 text-xs bg-rose-500/5 px-3 py-2">
                       <AlertCircle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
                       <span className="text-text-secondary truncate flex-1">{dsp.reason}</span>
                       <span className="text-text-muted shrink-0 tabular-nums">{dsp.date}</span>

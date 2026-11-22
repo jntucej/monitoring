@@ -86,9 +86,7 @@ export function OperatorWeeklyStats() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-action-primary/10 text-action-primary">
-              <Timer className="h-4 w-4" />
-            </div>
+            <Timer className="h-4 w-4 text-action-primary shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">
                 {week === "this" ? "This week" : "Last week"}

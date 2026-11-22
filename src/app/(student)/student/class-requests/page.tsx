@@ -93,7 +93,7 @@ export default function StudentClassRequestsPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-3xl mx-auto">
+    <div className="space-y-6 p-2.5 sm:p-4 max-w-3xl mx-auto">
       <header>
         <h1 className="text-lg font-bold text-text-primary">Class requests</h1>
         <p className="text-xs text-text-muted mt-1">
@@ -102,7 +102,7 @@ export default function StudentClassRequestsPage() {
       </header>
 
       {/* Raise a request */}
-      <section className="surface-card rounded-xl p-4 space-y-3">
+      <section className="surface-card p-2.5 space-y-3">
         <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Raise a request</h2>
         <div className="grid grid-cols-4 gap-1.5">
           {CATEGORIES.map(c => (
@@ -110,7 +110,7 @@ export default function StudentClassRequestsPage() {
               key={c.code}
               type="button"
               onClick={() => setCategory(c.code)}
-              className={`flex flex-col items-center gap-1 rounded-lg border p-2 text-center transition ${
+              className={`flex flex-col items-center gap-1 p-2 text-center transition ${
                 category === c.code
                   ? "border-action-primary bg-action-primary/10"
                   : "border-border bg-bg-base hover:border-text-muted"
@@ -128,14 +128,14 @@ export default function StudentClassRequestsPage() {
             maxLength={120}
             required
             placeholder="Short title (max 120 chars)"
-            className="surface-card w-full p-2.5 bg-bg-base text-sm text-text-primary rounded-lg focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="surface-card w-full p-2 bg-bg-base text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
           <textarea
             value={body}
             onChange={e => setBody(e.target.value)}
             rows={2}
             placeholder="Details (optional)"
-            className="surface-card w-full p-2.5 bg-bg-base text-sm text-text-primary rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="surface-card w-full p-2 bg-bg-base text-sm text-text-primary resize-none focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
           <button
             type="submit"
@@ -160,7 +160,7 @@ export default function StudentClassRequestsPage() {
         ) : (
           <ul className="space-y-2">
             {requests.map(r => (
-              <li key={r.id} className="surface-card rounded-lg p-3 space-y-1">
+              <li key={r.id} className="surface-card p-2.5 space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-text-primary truncate">{r.title}</span>
                   <StatusPill status={r.status} />
@@ -189,12 +189,12 @@ export default function StudentClassRequestsPage() {
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
-    open: "bg-sky-500/10 text-sky-600 border-sky-500/30",
-    in_progress: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-    waiting_for_student: "bg-violet-500/10 text-violet-600 border-violet-500/30",
-    escalated: "bg-rose-500/10 text-rose-600 border-rose-500/30",
-    rejected: "bg-orange-500/10 text-orange-600 border-orange-500/30",
-    resolved: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+    open: "bg-action-info/10 text-action-info border-action-info/30",
+    in_progress: "bg-action-warning/10 text-action-warning border-action-warning/30",
+    waiting_for_student: "bg-action-primary/10 text-action-primary border-action-primary/30",
+    escalated: "bg-action-danger/10 text-action-danger border-action-danger/30",
+    rejected: "bg-action-danger/10 text-action-danger border-action-danger/30",
+    resolved: "bg-action-success/10 text-action-success border-action-success/30",
     closed: "bg-text-muted/10 text-text-muted border-border",
   };
   const label: Record<string, string> = {
@@ -227,7 +227,7 @@ function Lifecycle({ status: r }: { status: MyRequest }) {
     slaMs == null ? "" :
     slaMs > 0 ? `${Math.max(1, Math.round(slaMs / 3600000))}h SLA left` : "SLA breached — escalated";
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-4">
       <div className="flex items-center gap-1">
         {steps.map((s, i) => (
           <div key={s.key} className="flex items-center gap-1 flex-1 min-w-0">
@@ -241,7 +241,7 @@ function Lifecycle({ status: r }: { status: MyRequest }) {
         {r.assigned_role && <span>Owner: <span className="text-text-secondary">{r.assigned_role}</span></span>}
         {slaLabel && !terminal && <span className={slaMs! < 0 ? "text-action-danger font-semibold" : ""}>{slaLabel}</span>}
         {r.status === "escalated" && <span className="text-action-danger font-medium">↑ escalated for a decision</span>}
-        {r.status === "waiting_for_student" && <span className="text-violet-500 font-medium">Action needed from you</span>}
+        {r.status === "waiting_for_student" && <span className="text-action-primary font-medium">Action needed from you</span>}
       </div>
     </div>
   );

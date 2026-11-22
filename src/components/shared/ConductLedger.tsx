@@ -120,7 +120,7 @@ export function ConductLedger({ userId, showFlag = true, onDisputeFlag, classNam
           <p className="text-xs text-text-muted">Loading ledger…</p>
         ) : events.length === 0 ? (
           <div className="text-center py-3">
-            <CheckCircle2 className="h-6 w-6 text-emerald-500/40 mx-auto mb-1.5" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500/40 mx-auto mb-1.5" />
             <p className="text-xs text-text-muted">No conduct events on record.</p>
           </div>
         ) : (

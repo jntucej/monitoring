@@ -180,9 +180,7 @@ export function StudentAttendancePage() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-action-primary/10 text-action-primary">
-              <CalendarDays className="h-5 w-5" />
-            </div>
+            <CalendarDays className="h-4 w-4 text-action-primary shrink-0" />
             <div>
               <h1 className="text-lg font-bold text-text-primary">My Attendance</h1>
               <p className="text-xs text-text-muted">See · Edit · Dispute · Compare · Export · Remind</p>
@@ -234,7 +232,7 @@ export function StudentAttendancePage() {
 
         {/* Error */}
         {error && !loading && (
-          <div className="rounded-xl bg-rose-500/10 p-4 text-sm text-rose-600">
+          <div className="rounded-xl bg-action-danger/10 p-4 text-sm text-action-danger">
             <AlertTriangle className="h-4 w-4 inline mr-1" /> {error}
             <button type="button" onClick={() => void load()} className="ml-2 underline">Retry</button>
           </div>
@@ -263,12 +261,12 @@ export function StudentAttendancePage() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-3xl font-bold text-text-secondary tabular-nums">{data.prev.pct}%</span>
                   {data.delta > 0 && (
-                    <span className="inline-flex items-center text-xs text-emerald-500">
+                    <span className="inline-flex items-center text-xs text-action-success">
                       <TrendingUp className="h-3.5 w-3.5" /> +{data.delta}
                     </span>
                   )}
                   {data.delta < 0 && (
-                    <span className="inline-flex items-center text-xs text-rose-500">
+                    <span className="inline-flex items-center text-xs text-action-danger">
                       <TrendingDown className="h-3.5 w-3.5" /> {data.delta}
                     </span>
                   )}
@@ -301,8 +299,8 @@ export function StudentAttendancePage() {
                       key={i}
                       className={cn(
                         "aspect-square rounded-full text-[10px] flex items-center justify-center font-mono",
-                        isPresent && "bg-emerald-500/30 text-emerald-700 ring-1 ring-emerald-500/40",
-                        isAbsent && "bg-rose-500/30 text-rose-700 ring-1 ring-rose-500/40",
+                        isPresent && "bg-action-success/20 text-action-success ring-1 ring-action-success/40",
+                        isAbsent && "bg-action-danger/20 text-action-danger ring-1 ring-action-danger/40",
                         !status && "bg-bg-surface text-text-muted ring-1 ring-border"
                       )}
                       title={`${d.date}: ${status ?? "Unmarked"}`}
@@ -313,8 +311,8 @@ export function StudentAttendancePage() {
                 })}
               </div>
               <div className="flex items-center gap-3 mt-3 text-xs">
-                <span className="inline-flex items-center gap-1 text-emerald-600"><span className="size-2 rounded-full bg-emerald-500/50" /> Present</span>
-                <span className="inline-flex items-center gap-1 text-rose-600"><span className="size-2 rounded-full bg-rose-500/50" /> Absent</span>
+                <span className="inline-flex items-center gap-1 text-action-success"><span className="size-2 rounded-full bg-action-success/50" /> Present</span>
+                <span className="inline-flex items-center gap-1 text-action-danger"><span className="size-2 rounded-full bg-action-danger/50" /> Absent</span>
                 <span className="inline-flex items-center gap-1 text-text-muted"><span className="size-2 rounded-full bg-bg-surface ring-1 ring-border" /> Unmarked</span>
               </div>
             </div>
@@ -349,10 +347,10 @@ export function StudentAttendancePage() {
                         <span className="text-text-muted tabular-nums">{c.start}–{c.end}</span>
                       </div>
                       <p className="text-text-secondary mt-1 flex items-center gap-1">
-                        <User className="h-3 w-3" /> {c.faculty}
+                        <User className="h-4 w-4" /> {c.faculty}
                       </p>
                       <p className="text-text-muted flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {c.hall || "TBA"}
+                        <MapPin className="h-4 w-4" /> {c.hall || "TBA"}
                       </p>
                     </div>
                   ))}
@@ -362,10 +360,10 @@ export function StudentAttendancePage() {
               )}
               {(data.flexibleToday?.length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-[10px] uppercase tracking-wide text-amber-600 mb-1.5">Flexible overrides</p>
+                  <p className="text-[10px] uppercase tracking-wide text-action-warning mb-1.5">Flexible overrides</p>
                   <div className="flex flex-wrap gap-2">
                     {(data.flexibleToday ?? []).map((f, i) => (
-                      <span key={i} className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-xs text-amber-700">
+                      <span key={i} className="inline-flex items-center gap-1 rounded-full bg-action-warning/10 border border-action-warning/30 px-2 py-0.5 text-xs text-action-warning">
                         {f.type} · {f.start}–{f.end} · {f.hall}
                       </span>
                     ))}

@@ -145,7 +145,7 @@ export function PassQrModal({
             <div
               ref={qrRef}
               className={isSakuga
-                ? "rounded-2xl p-5 flex flex-col items-center justify-center bg-[var(--sk-card,#fff)] border-2 border-[var(--sk-pri,#c084fc)] shadow-[0_0_24px_var(--sk-acc,#f0abfc)/30]"
+                ? "rounded-2xl p-5 flex flex-col items-center justify-center bg-[var(--sk-card)] border-2 border-[var(--sk-pri)] shadow-[0_0_24px_var(--sk-acc)/30]"
                 : "surface-card bg-white p-5 flex flex-col items-center justify-center"}
             >
               <QRCodeCanvas
@@ -156,7 +156,7 @@ export function PassQrModal({
                 style={{ width: "100%", maxWidth: 210, height: "auto" }}
               />
               <div className={isSakuga
-                ? "mt-2 text-xs font-bold text-[var(--sk-acc,#f0abfc)] font-mono flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--sk-pri,#c084fc)]/10"
+                ? "mt-2 text-xs font-bold text-[var(--sk-acc)] font-mono flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--sk-pri)]/10"
                 : "surface-card mt-2 text-xs font-bold text-text-muted font-mono flex items-center gap-1.5 bg-bg-elevated px-3 py-1"}
               >
                 <span className="w-4 h-4 rounded-full bg-action-success animate-ping" />
@@ -164,9 +164,9 @@ export function PassQrModal({
               </div>
             </div>
 
-            {/* Window and Instructions */}
+            {/* Quick security notice */}
             <div className={isSakuga
-              ? "rounded-xl p-3 text-xs space-y-1.5 bg-[var(--sk-card,#faf5ff)] border border-[var(--sk-pri,#c084fc)]/20"
+              ? "rounded-xl p-3 text-xs space-y-1.5 bg-[var(--sk-card)] border border-[var(--sk-pri)]/20"
               : "surface-card bg-bg-elevated p-3 text-xs space-y-1.5"}
             >
               <div className="flex items-center gap-1.5 text-action-success font-semibold text-xs">

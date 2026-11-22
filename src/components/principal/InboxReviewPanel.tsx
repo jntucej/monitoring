@@ -105,9 +105,7 @@ export function PrincipalInboxReviewPanel() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
-              <Inbox className="h-4 w-4" />
-            </div>
+            <Inbox className="h-4 w-4 text-action-primary shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Decision Review</h2>
               <p className="text-xs text-text-muted">Monthly decision stats & last-month compare</p>
@@ -145,7 +143,7 @@ export function PrincipalInboxReviewPanel() {
 
         {/* Error */}
         {error && !loading && (
-          <div className="rounded-xl bg-rose-500/10 p-4 text-sm text-rose-600">
+          <div className="rounded-xl bg-action-danger/10 p-4 text-sm text-action-danger">
             <AlertTriangle className="h-4 w-4 inline mr-1" /> {error}
             <button type="button" onClick={() => void load()} className="ml-2 underline">Retry</button>
           </div>
@@ -197,13 +195,13 @@ export function PrincipalInboxReviewPanel() {
             <div className="rounded-xl border border-border bg-bg-elevated p-4">
               <p className="text-xs text-text-muted">Breakdown</p>
               <div className="mt-1 flex items-center gap-2 text-xs">
-                <span className="flex items-center gap-0.5 text-emerald-500">
+                <span className="flex items-center gap-0.5 text-action-success">
                   <CheckCircle className="h-3 w-3" />{s.approved}
                 </span>
-                <span className="flex items-center gap-0.5 text-rose-500">
+                <span className="flex items-center gap-0.5 text-action-danger">
                   <XCircle className="h-3 w-3" />{s.rejected}
                 </span>
-                <span className="flex items-center gap-0.5 text-amber-500">
+                <span className="flex items-center gap-0.5 text-action-warning">
                   <Forward className="h-3 w-3" />{s.forwarded}
                 </span>
               </div>

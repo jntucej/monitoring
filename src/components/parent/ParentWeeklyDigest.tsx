@@ -129,9 +129,7 @@ export function ParentWeeklyDigest() {
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-action-info/10 text-action-info">
-              <Send className="h-4 w-4" />
-            </div>
+            <Send className="h-4 w-4 text-action-info shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Weekly Digest</h2>
               <p className="text-xs text-text-muted">Attendance · passes · complaints · meals</p>

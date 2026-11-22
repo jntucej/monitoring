@@ -465,7 +465,7 @@ export default function RolesManagementPage() {
             onClick={() => hasChildren && toggleExpand(node.code)}
             disabled={!hasChildren}
             className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-text-muted ${
-              hasChildren ? "hover:bgborder cursor-pointer" : "opacity-0 cursor-default"
+              hasChildren ? "hover:bg-bg-elevated cursor-pointer" : "opacity-0 cursor-default"
             }`}
             aria-label={hasChildren ? (isExpanded ? "Collapse" : "Expand") : undefined}
           >

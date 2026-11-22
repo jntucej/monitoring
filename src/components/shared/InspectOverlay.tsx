@@ -260,7 +260,7 @@ export function InspectOverlay() {
           own UI so the click interceptor ignores clicks on it. */}
       <div
         data-inspect-chrome
-        className="fixed top-2 right-2 z-[100] rounded-full bg-slate-900/90 px-3 py-1 text-xs text-white shadow-lg"
+        className="fixed top-2 right-2 z-[100] rounded-full bg-text-primary/90 px-3 py-1 text-xs text-white shadow-lg"
         role="status"
         aria-live="polite"
       >
@@ -272,7 +272,7 @@ export function InspectOverlay() {
             setIsPinned(false);
             pinnedElRef.current = null;
           }}
-          className="ml-1 text-slate-300 underline hover:text-white"
+          className="ml-1 text-text-muted underline hover:text-white"
         >
           off (Alt+`)
         </button>
@@ -282,16 +282,16 @@ export function InspectOverlay() {
       {hit && (
         <div
           data-inspect-chrome
-          className="fixed bottom-3 left-1/2 z-[100] w-[min(560px,92vw)] -translate-x-1/2 rounded-lg border border-slate-700 bg-slate-900 p-3 text-sm text-slate-100 shadow-2xl"
+          className="fixed bottom-3 left-1/2 z-[100] w-[min(560px,92vw)] -translate-x-1/2 rounded-lg border border-border-strong bg-text-primary p-3 text-sm text-bg-surface shadow-2xl"
           role="dialog"
           aria-label="Inspect panel"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="font-mono text-xs text-slate-400">{hit.route}</div>
-              <div className="font-medium">
+              <div className="font-mono text-xs text-action-info">{hit.route}</div>
+              <div className="font-medium text-white">
                 {hit.pageTitle ?? "(no title)"}{" "}
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-text-muted">
                   · role: {hit.role ?? "unassigned"}
                 </span>
               </div>
@@ -299,7 +299,7 @@ export function InspectOverlay() {
             <button
               type="button"
               onClick={copySnippet}
-              className="shrink-0 rounded border border-slate-600 px-2 py-0.5 text-xs text-slate-300 hover:bg-slate-800"
+              className="shrink-0 rounded border border-border px-2 py-0.5 text-xs text-bg-surface hover:bg-text-secondary"
             >
               {copied ? "copied ✓" : "copy"}
             </button>
@@ -307,7 +307,7 @@ export function InspectOverlay() {
 
           <dl className="mt-2 space-y-1 text-xs">
             <div className="flex gap-2">
-              <dt className="w-24 shrink-0 text-slate-400">clicked</dt>
+              <dt className="w-24 shrink-0 text-text-muted">clicked</dt>
               <dd className="font-mono">
                 {"<"}
                 {hit.elementTag}
@@ -316,22 +316,22 @@ export function InspectOverlay() {
               </dd>
             </div>
             <div className="flex gap-2">
-              <dt className="w-24 shrink-0 text-slate-400">capability</dt>
+              <dt className="w-24 shrink-0 text-text-muted">capability</dt>
               <dd>
                 {hit.matchedCapability ? (
-                  <code className="text-amber-300">{hit.matchedCapability}</code>
+                  <code className="text-action-warning">{hit.matchedCapability}</code>
                 ) : (
-                  <span className="text-slate-500">none</span>
+                  <span className="text-text-muted">none</span>
                 )}
               </dd>
             </div>
             <div className="flex gap-2">
-              <dt className="w-24 shrink-0 text-slate-400">action</dt>
+              <dt className="w-24 shrink-0 text-text-muted">action</dt>
               <dd>
                 {hit.matchedButton?.action ? (
                   <span>{hit.matchedButton.action}</span>
                 ) : (
-                  <span className="italic text-slate-500">
+                  <span className="italic text-text-muted">
                     (describe me — add @action “...” above the handler)
                   </span>
                 )}
@@ -339,16 +339,16 @@ export function InspectOverlay() {
             </div>
             {hit.fetches.length > 0 && (
               <div className="flex gap-2">
-                <dt className="w-24 shrink-0 text-slate-400">data</dt>
-                <dd className="font-mono text-slate-300">
+                <dt className="w-24 shrink-0 text-text-muted">data</dt>
+                <dd className="font-mono text-text-muted">
                   {hit.fetches.map((f) => `${f.method} ${f.url}`).join(" · ")}
                 </dd>
               </div>
             )}
             {hit.dataAction && (
               <div className="flex gap-2">
-                <dt className="w-24 shrink-0 text-slate-400">data-action</dt>
-                <dd className="font-mono text-emerald-300">{hit.dataAction}</dd>
+                <dt className="w-24 shrink-0 text-text-muted">data-action</dt>
+                <dd className="font-mono text-action-success">{hit.dataAction}</dd>
               </div>
             )}
           </dl>
@@ -359,7 +359,7 @@ export function InspectOverlay() {
             <button
               type="button"
               onClick={runPinned}
-              className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-500"
+              className="rounded bg-action-success px-3 py-1 text-xs font-medium text-white hover:bg-action-success"
             >
               ▶ Run it
             </button>
@@ -370,12 +370,12 @@ export function InspectOverlay() {
                 pinnedElRef.current = null;
                 setHit(null);
               }}
-              className="rounded bg-slate-700 px-3 py-1 text-xs text-slate-200 hover:bg-slate-600"
+              className="rounded bg-text-secondary px-3 py-1 text-xs text-white hover:bg-text-primary"
             >
               close
             </button>
             {!isPinned && (
-              <span className="self-center text-xs text-slate-500">
+              <span className="self-center text-xs text-text-muted">
                 click any button to pin + read it
               </span>
             )}

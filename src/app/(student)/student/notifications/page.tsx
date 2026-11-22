@@ -98,11 +98,11 @@ function NotificationModal({
             >
               {expanded ? (
                 <>
-                  <ChevronUp className="h-3 w-3" /> Show less
+                  <ChevronUp className="h-4 w-4" /> Show less
                 </>
               ) : (
                 <>
-                  <ChevronDown className="h-3 w-3" /> Show more
+                  <ChevronDown className="h-4 w-4" /> Show more
                 </>
               )}
             </button>
@@ -202,7 +202,7 @@ function Inner() {
         <EmptyState
           title="Nothing here"
           description="You're all caught up."
-          icon={<Bell className="h-5 w-5" />}
+          icon={<Bell className="h-4 w-4" />}
         />
       ) : (
         <ul className="space-y-2">

@@ -96,12 +96,12 @@ function StudentRow({
       {/* Stats */}
       <div className="flex items-center gap-4 shrink-0">
         <div className="text-right">
-          <p className="text-xs text-emerald-500 tabular-nums">
-            <CheckCircle2 className="h-3 w-3 inline mr-0.5" />
+          <p className="text-xs text-action-success tabular-nums">
+            <CheckCircle2 className="h-4 w-4 inline mr-0.5" />
             {student.present}
           </p>
-          <p className="text-xs text-rose-500 tabular-nums">
-            <XCircle className="h-3 w-3 inline mr-0.5" />
+          <p className="text-xs text-action-danger tabular-nums">
+            <XCircle className="h-4 w-4 inline mr-0.5" />
             {student.absent}
           </p>
         </div>

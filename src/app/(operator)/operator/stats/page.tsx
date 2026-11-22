@@ -126,7 +126,7 @@ function OperatorStatsInner() {
                 <span>Entries</span>
                 <span>{counts.entries} ({Math.round((counts.entries / counts.total) * 100)}%)</span>
               </div>
-              <div className="h-2 rounded-full bgborder overflow-hidden">
+              <div className="h-2 rounded-full bg-bg-elevated overflow-hidden">
                 <div
                   className="h-full bg-action-success rounded-full transition-all"
                   style={{ width: `${(counts.entries / counts.total) * 100}%` }}
@@ -136,7 +136,7 @@ function OperatorStatsInner() {
                 <span>Exits</span>
                 <span>{counts.exits} ({Math.round((counts.exits / counts.total) * 100)}%)</span>
               </div>
-              <div className="h-2 rounded-full bgborder overflow-hidden">
+              <div className="h-2 rounded-full bg-bg-elevated overflow-hidden">
                 <div
                   className="h-full bg-action-danger rounded-full transition-all"
                   style={{ width: `${(counts.exits / counts.total) * 100}%` }}

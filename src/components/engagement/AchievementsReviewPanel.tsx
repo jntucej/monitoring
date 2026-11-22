@@ -85,9 +85,7 @@ export function AchievementsReviewPanel() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-              <Trophy className="h-4 w-4" />
-            </div>
+            <Trophy className="h-4 w-4 text-action-warning shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Achievements Review</h2>
               <p className="text-xs text-text-muted">Monthly earned count & category breakdown</p>

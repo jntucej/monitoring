@@ -263,7 +263,7 @@ const api = useApi();
                   <button
                     type="button"
                     onClick={() => setEditingDept(null)}
-                    className="surface-card px-4 py-2 bg-bg-elevated text-text-muted text-xs font-semibold hover:bgborder transition"
+                    className="surface-card px-4 py-2 bg-bg-elevated text-text-muted text-xs font-semibold hover:bg-bg-elevated transition"
                   >
                     Cancel
                   </button>

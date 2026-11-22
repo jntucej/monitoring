@@ -145,7 +145,7 @@ export function OperatorDrawer({ open, onClose, isRail = false }: OperatorDrawer
             >
               {/* Handle bar */}
               <div className="flex justify-center pt-3 pb-2">
-                <div className="w-6 h-1.5 rounded-full bgborder" />
+                <div className="w-6 h-1.5 rounded-full bg-bg-elevated" />
               </div>
 
               {/* Header */}

@@ -74,9 +74,9 @@ export default function CoordinatorPage() {
 
   useEffect(() => { void loadInbox(); void loadReqs(); }, [loadInbox, loadReqs]);
 
-  if (isCoord === null) return <p className="text-xs text-text-muted p-6">Checking coordinator status…</p>;
+  if (isCoord === null) return <p className="text-xs text-text-muted p-2.5">Checking coordinator status…</p>;
   if (!isCoord) return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-2.5 max-w-2xl mx-auto">
       <h1 className="text-lg font-bold text-text-primary">Coordinator</h1>
       <p className="text-sm text-text-muted mt-2">
         You are not the active class coordinator. This surface is for students appointed
@@ -114,7 +114,7 @@ export default function CoordinatorPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <header>
         <h1 className="text-lg font-bold text-text-primary">Coordinator</h1>
         <p className="text-xs text-text-muted mt-1">Class {scopeId} · appointed</p>
@@ -123,14 +123,14 @@ export default function CoordinatorPage() {
       {msg && <p className={`text-xs font-medium ${msg.ok ? "text-action-success" : "text-action-danger"}`}>{msg.text}</p>}
 
       {/* Relay inbox */}
-      <section className="surface-card rounded-xl p-4 space-y-3">
+      <section className="space-y-3">
         <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Relay inbox</h2>
         {relayInbox.length === 0 ? (
           <p className="text-xs text-text-muted italic">No notices awaiting your release.</p>
         ) : (
           <ul className="space-y-2">
             {relayInbox.map(m => (
-              <li key={m.id} className="border border-border rounded-lg p-3 space-y-2">
+              <li key={m.id} className="space-y-2">
                 <p className="text-sm text-text-primary whitespace-pre-wrap">{m.body}</p>
                 <div className="flex items-center gap-2">
                   {m.urgency === "urgent" && <span className="text-[10px] font-semibold text-action-warning">URGENT</span>}
@@ -150,24 +150,24 @@ export default function CoordinatorPage() {
       </section>
 
       {/* Collect a concern */}
-      <section className="surface-card rounded-xl p-4 space-y-3">
+      <section className="space-y-3">
         <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Collect a concern</h2>
-        <p className="text-xs text-text-muted">Raise a signed concern on behalf of the class — routed to faculty/HOD.</p>
-        <form onSubmit={collect} className="space-y-2.5">
+        <p className="text-xs text-text-muted">Raise a signed collective issue on behalf of the batch.</p>
+        <form onSubmit={collect} className="space-y-2">
           <input
             value={collectTitle}
             onChange={e => setCollectTitle(e.target.value)}
             maxLength={120}
             required
             placeholder="Short title"
-            className="surface-card w-full p-2.5 bg-bg-base text-sm text-text-primary rounded-lg focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="w-full p-2.5 bg-bg-base border border-border text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
           <textarea
             value={collectBody}
             onChange={e => setCollectBody(e.target.value)}
             rows={2}
             placeholder="What is the class's concern?"
-            className="surface-card w-full p-2.5 bg-bg-base text-sm text-text-primary rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-action-primary"
+            className="w-full p-2.5 bg-bg-base border border-border text-sm text-text-primary resize-none focus:outline-none focus:ring-1 focus:ring-action-primary"
           />
           <button type="submit" disabled={busy || !collectTitle.trim()}
             className="rounded-lg bg-action-primary text-white text-sm font-semibold px-4 py-2 disabled:opacity-40">
@@ -184,7 +184,7 @@ export default function CoordinatorPage() {
         ) : (
           <ul className="space-y-1.5">
             {openReqs.map(r => (
-              <li key={r.id} className="border border-border rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+              <li key={r.id} className="flex items-center justify-between gap-2">
                 <span className="text-xs text-text-primary truncate">{r.title}</span>
                 <span className="text-[10px] text-text-muted shrink-0">{r.status}</span>
               </li>

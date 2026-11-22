@@ -646,7 +646,7 @@ export function PermissionDetailPanel({
 
                   {coSignRequired && coSigners.length === 0 && (
                     <span className="text-[10px] text-amber-500 flex items-center gap-1">
-                      <Shield className="h-3 w-3" /> Co-sign required — no co-signers available
+                      <Shield className="h-4 w-4" /> Co-sign required — no co-signers available
                     </span>
                   )}
 

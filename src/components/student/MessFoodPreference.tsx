@@ -386,10 +386,8 @@ function MessFoodPreferenceInner() {
                         onClick={() => toggleSub(s.id)}
                         className={` flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition "text-action-success" "text-text-muted "text-action-success" "text-text-muted" `}
                       >
-                        <span
-                          className={` inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm "bg-action-success border-action-success text-emerald-950" "" `}
-                        >
-                          {on && <Check className="size-4" />}
+                        <span className="inline-flex items-center justify-center text-action-success">
+                          {on && <Check className="size-3.5" />}
                         </span>
                         {s.label}
                       </button>

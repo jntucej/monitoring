@@ -140,7 +140,7 @@ export function ComplaintConsole({
   ];
 
   return (
-    <div className="p-6 space-y-4 max-w-6xl mx-auto">
+    <div className="space-y-4 max-w-6xl mx-auto">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <h1 className="text-2xl font-semibold">{title}</h1>
         <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export function ComplaintConsole({
 
       {/* Period + status filter */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="inline-flex rounded-lg p-0.5 gap-0.5 bg-bg-elevated border border-border">
+        <div className="inline-flex gap-0.5 bg-bg-elevated p-1">
           {PERIODS.map(({ key, label }) => (
             <button
               key={key}
@@ -196,27 +196,27 @@ export function ComplaintConsole({
       {/* Stats strip */}
       {complaints.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-border bg-bg-elevated p-3">
+          <div className="bg-bg-elevated p-2.5">
             <p className="text-xs text-text-muted">Resolution rate</p>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="text-xl font-bold text-text-primary tabular-nums">{stats.resolutionRate}%</span>
               {stats.resolutionRate >= 50 ? (
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
+                <TrendingUp className="h-4 w-4 text-action-success" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-rose-500" />
+                <TrendingDown className="h-4 w-4 text-action-danger" />
               )}
             </div>
             <p className="text-xs text-text-muted">{stats.resolved}/{stats.total} resolved</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-elevated p-3">
+          <div className="bg-bg-elevated p-2.5">
             <p className="text-xs text-text-muted">Overdue SLA</p>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-xl font-bold text-rose-500 tabular-nums">{stats.overdue}</span>
-              {stats.overdue > 0 && <AlertTriangle className="h-4 w-4 text-rose-500" />}
+              <span className="text-xl font-bold text-action-danger tabular-nums">{stats.overdue}</span>
+              {stats.overdue > 0 && <AlertTriangle className="h-4 w-4 text-action-danger" />}
             </div>
             <p className="text-xs text-text-muted">past deadline, unresolved</p>
           </div>
-          <div className="rounded-xl border border-border bg-bg-elevated p-3">
+          <div className="bg-bg-elevated p-2.5">
             <p className="text-xs text-text-muted">Total (period)</p>
             <span className="text-xl font-bold text-text-primary tabular-nums block mt-1">{stats.total}</span>
             <p className="text-xs text-text-muted">{period === "all" ? "all time" : period}</p>
@@ -235,7 +235,7 @@ export function ComplaintConsole({
             const isOverdue = slaLeft !== null && slaLeft < 0 && c.status !== "resolved" && c.status !== "closed";
             const slaHours = slaLeft !== null ? Math.abs(Math.round(slaLeft / 3600)) : null;
             return (
-              <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-4 hover:bg-bg-elevated transition">
+              <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-2.5 hover:bg-bg-elevated transition">
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
@@ -249,10 +249,10 @@ export function ComplaintConsole({
                       className={cn(
                         "inline-block px-2 py-0.5 rounded-full text-xs font-medium uppercase",
                         c.status === "resolved" || c.status === "closed"
-                          ? "bg-emerald-500/10 text-emerald-600"
+                          ? "bg-action-success/10 text-action-success"
                           : isOverdue
-                            ? "bg-rose-500/10 text-rose-600"
-                            : "bg-amber-500/10 text-amber-600"
+                            ? "bg-action-danger/10 text-action-danger"
+                            : "bg-action-warning/10 text-action-warning"
                       )}
                     >
                       {c.status}
@@ -264,9 +264,9 @@ export function ComplaintConsole({
                     )}
                     {isOverdue && (
                       <div className="flex items-center gap-1 justify-end">
-                        <AlertTriangle className="h-3 w-3 text-rose-500" />
-                        <span className="text-xs font-medium text-rose-500">SLA breached — escalate</span>
-                        <GitBranch className="h-3 w-3 text-rose-400" />
+                        <AlertTriangle className="h-3 w-3 text-action-danger" />
+                        <span className="text-xs font-medium text-action-danger">SLA breached — escalate</span>
+                        <GitBranch className="h-3 w-3 text-action-danger/80" />
                       </div>
                     )}
                     <p className="text-xs text-text-muted">{new Date(c.createdAt).toLocaleDateString()}</p>

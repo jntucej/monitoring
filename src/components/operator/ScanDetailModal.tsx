@@ -209,7 +209,7 @@ export function ScanDetailModal({ scan, onClose, onEditComplete }: ScanDetailMod
                   className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-action-primary"
                   title="Edit scan category (with reason)"
                 >
-                  <Pencil className="h-3 w-3" />
+                  <Pencil className="h-4 w-4" />
                 </button>
               </div>
             )}

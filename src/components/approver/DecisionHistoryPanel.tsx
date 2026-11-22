@@ -106,9 +106,7 @@ export function DecisionHistoryPanel() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-action-primary/10 text-action-primary">
-              <History className="h-4 w-4" />
-            </div>
+            <History className="h-4 w-4 text-action-primary shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Decision History</h2>
               <p className="text-xs text-text-muted">Your recent decisions & monthly aggregate</p>

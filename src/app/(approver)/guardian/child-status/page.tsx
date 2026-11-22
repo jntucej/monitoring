@@ -69,10 +69,10 @@ function PassTimeline({ wardRoll }: { wardRoll: string }) {
           {items.map((it) => (
             <li key={it.id} className="ml-4">
               <span
-                className={`absolute -left-1.5 size-3 rounded-full ring-4 ring-bg-surface ${
-                  tone(it.status) === "ok" ? "bg-emerald-500" :
-                  tone(it.status) === "danger" ? "bg-rose-500" :
-                  tone(it.status) === "warn" ? "bg-amber-500" : "bg-sky-500"
+                className={`absolute -left-1.5 size-4 rounded-full ring-4 ring-bg-surface ${
+                  tone(it.status) === "ok" ? "bg-action-success" :
+                  tone(it.status) === "danger" ? "bg-action-danger" :
+                  tone(it.status) === "warn" ? "bg-action-warning" : "bg-action-info"
                 }`}
               />
               <p className="text-sm text-text-primary">
@@ -125,12 +125,12 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
   return (
     <div className="surface-card bg-bg-surface p-4 flex items-center justify-between gap-3 flex-wrap min-w-0">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="relative size-6 rounded-full border-2 border-border overflow-hidden shrink-0">
+        <div className="relative size-8 rounded-full border-2 border-border overflow-hidden shrink-0">
           {ward.photoUrl ? (
              
             <img src={ward.photoUrl} alt={name} className="rounded-full w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-emerald-500/20 text-action-success flex items-center justify-center text-lg font-semibold">
+            <div className="w-full h-full bg-action-success/20 text-action-success flex items-center justify-center text-lg font-semibold">
               {name?.[0] ?? "?"}
             </div>
           )}
@@ -146,7 +146,7 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
       </div>
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 ${
-          isIn ? "bg-emerald-500/15 text-action-success" : "bg-rose-500/15 text-action-danger"
+          isIn ? "bg-action-success/15 text-action-success" : "bg-action-danger/15 text-action-danger"
         }`}
       >
         {isIn ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
@@ -283,7 +283,7 @@ function ChildStatusInner() {
     <div className="min-w-0 space-y-6">
       <div>
         <p className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
-          <MapPin className="w-6 h-6 text-action-success" />
+          <MapPin className="w-4 h-4 text-action-success" />
           Child Status
         </p>
         <p className="mt-1 text-sm text-text-muted">
@@ -292,7 +292,7 @@ function ChildStatusInner() {
       </div>
 
       {personsError && (
-        <div className="surface-card bg-rose-500/10 p-3 text-sm text-rose-600 flex items-center justify-between gap-3">
+        <div className="surface-card bg-action-danger/10 p-3 text-sm text-action-danger flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             Could not load wards.
@@ -300,7 +300,7 @@ function ChildStatusInner() {
           <button
             type="button"
             onClick={() => void refreshPersons()}
-            className="surface-card inline-flex items-center gap-1.5 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 hover:bg-rose-500/30"
+            className="surface-card inline-flex items-center gap-1.5 bg-action-danger/20 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-action-danger/30"
           >
             Retry
           </button>

@@ -132,10 +132,10 @@ export function PassHistory({ className }: { className?: string }) {
                     className={cn(
                       "uppercase font-semibold",
                       p.status === "APPROVED" || p.status === "COMPLETED"
-                        ? "text-emerald-500"
+                        ? "text-action-success"
                         : p.status === "REJECTED"
-                          ? "text-rose-500"
-                          : "text-amber-500"
+                          ? "text-action-danger"
+                          : "text-action-warning"
                     )}
                   >
                     {p.status}
@@ -156,7 +156,7 @@ export function PassHistory({ className }: { className?: string }) {
                         <Star
                           className={cn(
                             "h-3 w-3",
-                            (rates[p.id] ?? 0) >= n ? "fill-amber-400 text-amber-400" : "text-text-muted"
+                            (rates[p.id] ?? 0) >= n ? "fill-action-warning text-action-warning" : "text-text-muted"
                           )}
                         />
                       </button>

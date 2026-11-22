@@ -144,9 +144,7 @@ export function ChildActivityReviewPanel({ childId }: { childId: string }) {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
-              <User className="h-4 w-4" />
-            </div>
+            <User className="h-4 w-4 text-action-success shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">
                 {data?.child.name ?? "Child Activity"}

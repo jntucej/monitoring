@@ -38,10 +38,10 @@ export interface ChildPassStatusCardProps {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  APPROVED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  REJECTED: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-  COMPLETED: "bg-sky-500/10 text-sky-600 border-sky-500/20",
+  PENDING: "bg-action-warning/10 text-action-warning border-action-warning/20",
+  APPROVED: "bg-action-success/10 text-action-success border-action-success/20",
+  REJECTED: "bg-action-danger/10 text-action-danger border-action-danger/20",
+  COMPLETED: "bg-action-info/10 text-action-info border-action-info/20",
 };
 
 export function ChildPassStatusCard({ passes, onTrackPass, className }: ChildPassStatusCardProps) {
@@ -66,7 +66,7 @@ export function ChildPassStatusCard({ passes, onTrackPass, className }: ChildPas
 
   return (
     <WidgetBoundary name="child-pass-status">
-      <div className={cn("rounded-xl border border-border bg-bg-elevated p-4 space-y-3", className)}>
+      <div className={cn("surface-card p-3 space-y-3", className)}>
         <div className="flex items-center gap-2">
           <Ticket className="h-4 w-4 text-action-primary" />
           <h2 className="text-sm font-bold text-text-primary">Pass status</h2>
@@ -93,7 +93,7 @@ export function ChildPassStatusCard({ passes, onTrackPass, className }: ChildPas
                     return (
                       <div
                         key={p.id}
-                        className="rounded-lg border border-border bg-bg-base px-3 py-2 flex items-center gap-2.5"
+                        className="bg-bg-base px-3 py-2 flex items-center gap-2.5"
                       >
                         {/* Status pill */}
                         <span
@@ -127,19 +127,19 @@ export function ChildPassStatusCard({ passes, onTrackPass, className }: ChildPas
 
                         {/* Scan / curfew indicators */}
                         <div className="flex items-center gap-2 shrink-0">
-                          {p.gateInAt && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />}
+                          {p.gateInAt && <CheckCircle2 className="h-3.5 w-3.5 text-action-success" />}
                           {p.gateOutAt ? (
-                            <XCircle
+                            <Clock
                               className={cn(
                                 "h-3.5 w-3.5",
-                                breached ? "text-rose-500" : "text-sky-500"
+                                breached ? "text-action-danger" : "text-action-info"
                               )}
                             />
                           ) : (
                             <Clock className="h-3.5 w-3.5 text-text-muted" />
                           )}
                           {breached && (
-                            <span className="text-[10px] font-semibold text-rose-500">Late</span>
+                            <span className="text-[10px] font-semibold text-action-danger">Late</span>
                           )}
 
                           {onTrackPass && (

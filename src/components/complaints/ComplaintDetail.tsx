@@ -84,15 +84,15 @@ export function ComplaintDetail({ role }: { role: string }) {
     } else alert(j.error?.message ?? "Upload failed");
   };
 
-  if (loading) return <p className="p-6 text-text-muted">Loading…</p>;
-  if (!data?.complaint) return <p className="p-6 text-text-muted">Complaint not found.</p>;
+  if (loading) return <p className="text-text-muted">Loading…</p>;
+  if (!data?.complaint) return <p className="text-text-muted">Complaint not found.</p>;
 
   const c = data.complaint;
 
   const isAuthority = role !== "student";
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div className="surface-card pb-4">
         <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
         <h1 className="text-2xl font-semibold text-text-primary mt-1">{c.title}</h1>
@@ -102,13 +102,13 @@ export function ComplaintDetail({ role }: { role: string }) {
         </p>
       </div>
 
-      <div className="surface-card bg-bg-elevated p-4 space-y-2">
+      <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
         <h2 className="font-medium text-text-primary">Description</h2>
         <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
       </div>
 
       {c.respondent_details && (
-        <div className="surface-card bg-bg-elevated p-4 space-y-2">
+        <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
           <h2 className="font-medium text-text-primary">About</h2>
           <p className="text-sm text-text-muted">
             <span className="font-medium text-text-primary">
@@ -122,7 +122,7 @@ export function ComplaintDetail({ role }: { role: string }) {
       )}
 
       {/* Lifecycle timeline (the TRACK step) */}
-      <div className="surface-card bg-bg-elevated p-4">
+      <div className="surface-card bg-bg-elevated p-2.5">
         <h2 className="font-medium text-text-primary mb-3">Status timeline</h2>
         <ComplaintTimeline
           events={(data.timeline ?? []).map((t: { status: string; at: string; note?: string }) => ({
@@ -142,34 +142,34 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Authority Action Buttons */}
       {isAuthority && (
-        <div className="surface-card flex gap-2 flex-wrap p-4 bg-white">
+        <div className="flex gap-2 flex-wrap">
           {c.status === "submitted" && (
-            <button onClick={() => patchAction("acknowledge")} className="surface-card px-3 py-1.5 bg-action-info text-white text-sm">
+            <button onClick={() => patchAction("acknowledge")} className="px-3 py-1.5 bg-action-info text-white text-sm">
               Acknowledge
             </button>
           )}
           {["submitted", "acknowledged"].includes(c.status) && (
-            <button onClick={() => patchAction("start")} className="surface-card px-3 py-1.5 bg-action-warning text-white text-sm">
+            <button onClick={() => patchAction("start")} className="px-3 py-1.5 bg-action-warning text-white text-sm">
               Start work
             </button>
           )}
           {["submitted", "acknowledged", "in_progress"].includes(c.status) && (
-            <div className="surface-card w-full mt-2 pt-2 flex gap-2 items-center">
+            <div className="w-full mt-2 pt-2 flex gap-2 items-center">
               <input
                 placeholder="Resolution summary…"
                 value={resolutionSummary}
                 onChange={(e) => setResolutionSummary(e.target.value)}
-                className="surface-card p-1.5 text-sm flex-1"
+                className="p-1.5 text-sm flex-1 border border-border"
               />
-              <button onClick={resolveComplaint} className="surface-card px-3 py-1.5 bg-action-success text-white text-sm">
+              <button onClick={resolveComplaint} className="px-3 py-1.5 bg-action-success text-white text-sm">
                 Resolve
               </button>
             </div>
           )}
-          <button onClick={() => patchAction("escalate")} className="surface-card px-3 py-1.5 bg-bg-elevated text-white text-sm">
+          <button onClick={() => patchAction("escalate")} className="px-3 py-1.5 bg-bg-elevated text-white text-sm">
             Forward / Escalate
           </button>
-          <button onClick={() => patchAction("reject")} className="surface-card px-3 py-1.5 bg-action-danger text-white text-sm">
+          <button onClick={() => patchAction("reject")} className="px-3 py-1.5 bg-action-danger text-white text-sm">
             Reject
           </button>
         </div>
@@ -177,7 +177,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Student action buttons: cancel (within 24h) */}
       {role === "student" && !["resolved", "closed", "rejected"].includes(c.status) && (
-        <div className="surface-card flex gap-2 p-4 bg-bg-elevated">
+        <div className="surface-card flex gap-2 p-2.5 bg-bg-elevated">
           <button
             onClick={() => patchAction("cancel")}
             className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-600 text-xs font-medium hover:bg-rose-500/20"
@@ -197,7 +197,7 @@ export function ComplaintDetail({ role }: { role: string }) {
 
       {/* Feedback section for student when resolved */}
       {role === "student" && ["resolved", "awaiting_verification"].includes(c.status) && !data.feedback && (
-        <form onSubmit={submitFeedback} className="surface-card p-4 bg-action-success/10 space-y-3">
+        <form onSubmit={submitFeedback} className="surface-card p-2.5 bg-action-success/10 space-y-3">
           <h2 className="font-medium text-text-primary">Leave resolution feedback</h2>
           <div className="flex gap-2 items-center">
             <label className="text-sm">Rating (1-5):</label>

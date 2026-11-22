@@ -29,7 +29,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
   const handledRef = useRef(false);
 
   // Track actual mount to keep SSR + first client paint identical (both render
-  // the loading spinner). React #321 (hydration mismatch) fires when SSR
+  // the loading spinner). React error 321 (hydration mismatch) fires when SSR
   // renders one branch and the first client render renders a different one —
   // this only happens when persisted state (localStorage) is available on the
   // client but not on the server.
@@ -132,7 +132,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
 
   // Before mount (SSR + first client paint): always show the spinner.
   // This guarantees identical markup server-side and on first hydration,
-  // preventing React error #321.
+  // preventing React error 321.
   if (!mounted || !hasHydrated || isChecking || !authenticated || !user) {
     return (
       <div className="min-h-dvh w-full flex flex-col items-center justify-center bg-bg-base text-text-primary" role="status" aria-live="polite" aria-busy="true">

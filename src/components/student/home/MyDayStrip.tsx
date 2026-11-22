@@ -156,14 +156,14 @@ export function MyDayStrip() {
 
   return (
     <WidgetBoundary name="my-day-strip">
-      <div className="rounded-xl border border-border bg-bg-elevated p-3">
+      <div className="surface-card p-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted mb-2 flex items-center gap-1">
           <Bell className="h-3 w-3" /> My day
         </p>
         <div className="grid grid-cols-2 gap-2">
           {/* Next class */}
           {data?.nextClass && (
-            <div className="rounded-lg bg-bg-base border border-border p-2.5 space-y-1">
+            <div className="bg-bg-base p-2.5 space-y-1">
               <p className="text-[10px] uppercase tracking-wide text-action-primary font-semibold">
                 Next class
               </p>
@@ -209,7 +209,7 @@ export function MyDayStrip() {
 
           {/* Meal cutoff */}
           {data?.nextMealCutoff && (
-            <div className="rounded-lg bg-bg-base border border-border p-2.5 space-y-1">
+            <div className="bg-bg-base p-2.5 space-y-1">
               <p className="text-[10px] uppercase tracking-wide text-amber-500 font-semibold flex items-center gap-1">
                 <UtensilsCrossed className="h-3 w-3" /> Meal cutoff
               </p>
@@ -226,7 +226,7 @@ export function MyDayStrip() {
 
           {/* Curfew */}
           {data?.curfewIn && (
-            <div className="rounded-lg bg-bg-base border border-border p-2.5 space-y-1">
+            <div className="bg-bg-base p-2.5 space-y-1">
               <p className="text-[10px] uppercase tracking-wide text-rose-500 font-semibold flex items-center gap-1">
                 <Moon className="h-3 w-3" /> Curfew
               </p>
@@ -236,7 +236,7 @@ export function MyDayStrip() {
 
           {/* Next event */}
           {data?.nextEvent && (
-            <div className="rounded-lg bg-bg-base border border-border p-2.5 space-y-1">
+            <div className="bg-bg-base p-2.5 space-y-1">
               <p className="text-[10px] uppercase tracking-wide text-sky-500 font-semibold flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Next event
               </p>

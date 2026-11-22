@@ -99,9 +99,7 @@ export function ComplaintMonthlyReviewPanel() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500">
-              <MessageSquare className="h-4 w-4" />
-            </div>
+            <MessageSquare className="h-4 w-4 text-action-danger shrink-0" />
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Complaints Monthly Review</h2>
               <p className="text-xs text-text-muted">Trend, resolution time & top categories</p>

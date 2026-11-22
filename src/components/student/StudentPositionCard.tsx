@@ -135,7 +135,7 @@ function StudentPositionCardInner() {
     return (
       <WidgetBoundary name="StudentPositionCard" title="Your Position">
         <div className="surface-card bg-bg-surface p-5 text-center space-y-3">
-          <ShieldQuestion className="mx-auto h-6 w-6 text-text-muted" />
+          <ShieldQuestion className="mx-auto h-5 w-5 text-text-muted" />
           <p className="text-sm text-text-secondary">
             Position unavailable{error ? `: ${String(error)}` : ""}
           </p>
@@ -193,7 +193,7 @@ function StudentPositionCardInner() {
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${accent}`}
           >
-            <Clock className="h-3 w-3" />
+            <Clock className="h-4 w-4" />
             {ctx.campusStatus === "in_campus"
               ? "On campus"
               : ctx.campusStatus === "out_campus"
@@ -201,7 +201,7 @@ function StudentPositionCardInner() {
                 : "Position unknown"}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-bg-elevated px-2.5 py-1 text-xs font-medium text-text-secondary">
-            <KeyRound className="h-3 w-3" />
+            <KeyRound className="h-4 w-4" />
             {ctx.residentialStatus === "hosteller"
               ? "Hosteller"
               : ctx.residentialStatus === "day_scholar"

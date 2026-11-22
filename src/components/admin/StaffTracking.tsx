@@ -202,7 +202,7 @@ export function StaffTracking({ records, summary }: StaffTrackingProps) {
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="surface-card bg-bg-elevated border-border text-text-primary text-xs py-2 px-3"
+              className="rounded-lg border border-border bg-bg-elevated text-text-primary text-xs py-2 px-3"
             >
               <option value="ALL">All Departments</option>
               {departments.map((d) => (

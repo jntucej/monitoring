@@ -146,7 +146,7 @@ export function PreviewAsPanel({ userId, persona: personaOverride, className }: 
       </div>
 
       {/* Mode tabs */}
-      <div className="mb-3 flex gap-1 rounded-lg bg-bg-elevated p-1">
+      <div className="mb-3 flex gap-1 p-0.5">
         {([
           ["user", "User", User],
           ["segment", "Segment", Users],
@@ -239,12 +239,12 @@ export function PreviewAsPanel({ userId, persona: personaOverride, className }: 
             <span
               className={cn(
                 "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                r.source === "policy" && "bg-red-500/10 text-red-400",
-                r.source === "user" && "bg-green-500/10 text-green-400",
-                r.source === "trait" && "bg-purple-500/10 text-purple-400",
-                r.source === "persona" && "bg-blue-500/10 text-blue-400",
-                r.source === "role" && "bg-amber-500/10 text-amber-400",
-                r.source === "system" && "bg-gray-500/10 text-gray-400",
+                r.source === "policy" && "bg-action-danger/10 text-action-danger",
+                r.source === "user" && "bg-action-success/10 text-action-success",
+                r.source === "trait" && "bg-action-info/10 text-action-info",
+                r.source === "persona" && "bg-action-primary/10 text-action-primary",
+                r.source === "role" && "bg-action-warning/10 text-action-warning",
+                r.source === "system" && "bg-text-muted/10 text-text-muted",
               )}
             >
               {r.source}

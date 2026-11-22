@@ -63,7 +63,7 @@ interface MonthlyPayload {
 
 function ContractorCard({ c }: { c: ContractorRow }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-elevated p-4">
+    <div className="surface-card p-3">
       <p className="text-sm font-semibold text-text-primary">{c.contractor}</p>
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className="text-text-muted">{c.workers} workers</span>
@@ -90,8 +90,8 @@ function WorkerRowView({
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-bg-elevated px-4 py-3">
       {/* Name + contractor */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="p-2 rounded-lg bg-action-primary/10 text-action-primary shrink-0">
+      <div className="flex items-center gap-2">
+        <div className="p-2 bg-action-primary/10 text-action-primary">
           <HardHat className="h-4 w-4" />
         </div>
         <div className="min-w-0">
@@ -242,7 +242,7 @@ export function WorkerMonthlyReviewPanel() {
           <>
             {/* Summary KPI row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-border bg-bg-elevated p-4">
+              <div className="surface-card p-3">
                 <p className="text-xs text-text-muted">Total hours</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xl font-bold text-text-primary tabular-nums">{data.summary.totalHours}</span>
@@ -255,7 +255,7 @@ export function WorkerMonthlyReviewPanel() {
                   )}
                 </div>
               </div>
-              <div className="rounded-xl border border-border bg-bg-elevated p-4">
+              <div className="surface-card p-3">
                 <p className="text-xs text-text-muted">Late arrivals</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={cn("text-xl font-bold tabular-nums", data.summary.lateCount > 0 ? "text-rose-500" : "text-emerald-500")}>
@@ -271,11 +271,11 @@ export function WorkerMonthlyReviewPanel() {
                   )}
                 </div>
               </div>
-              <div className="rounded-xl border border-border bg-bg-elevated p-4">
+              <div className="surface-card p-3">
                 <p className="text-xs text-text-muted">Workers</p>
                 <p className="text-xl font-bold text-text-primary tabular-nums mt-1">{data.summary.workerCount}</p>
               </div>
-              <div className="rounded-xl border border-border bg-bg-elevated p-4">
+              <div className="surface-card p-3">
                 <p className="text-xs text-text-muted">Period</p>
                 <p className="text-sm font-semibold text-text-primary mt-1">{data.period}</p>
                 <p className="text-xs text-text-muted">{data.range.from} → {data.range.to}</p>

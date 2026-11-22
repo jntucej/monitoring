@@ -28,18 +28,18 @@ export interface FlagBadgeProps {
 
 const RING_STYLES: Record<FlagLevel, string> = {
   clear: "ring-0",
-  watch: "ring-2 ring-amber-400",
-  probation: "ring-2 ring-orange-500",
-  suspended: "ring-2 ring-rose-500",
-  banned: "ring-2 ring-zinc-900",
+  watch: "ring-2 ring-action-warning",
+  probation: "ring-2 ring-action-warning",
+  suspended: "ring-2 ring-action-danger",
+  banned: "ring-2 ring-action-primary",
 };
 
 const PILL_STYLES: Record<FlagLevel, string> = {
   clear: "bg-bg-elevated text-text-muted border-border",
-  watch: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  probation: "bg-orange-500/10 text-orange-600 border-orange-500/20",
-  suspended: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-  banned: "bg-zinc-900/10 text-zinc-700 border-zinc-900/20",
+  watch: "bg-action-warning/10 text-action-warning border-action-warning/20",
+  probation: "bg-action-warning/10 text-action-warning border-action-warning/20",
+  suspended: "bg-action-danger/10 text-action-danger border-action-danger/20",
+  banned: "bg-action-primary/10 text-action-primary border-action-primary/20",
 };
 
 const DEFAULT_TIPS: Record<FlagLevel, string> = {

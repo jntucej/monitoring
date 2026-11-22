@@ -26,9 +26,9 @@ function expiryLabel(to: string, status: string): string {
 }
 
 function statusStyle(s: string) {
-  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-action-success", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="size-6 text-action-success" /> };
-  if (s === "REJECTED") return { text: "text-action-danger", bg: "bg-rose-500/10", icon: <XCircle className="size-6 text-action-danger" /> };
-  return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="size-6 text-action-warning" /> };
+  if (s === "APPROVED" || s === "COMPLETED") return { text: "text-action-success", bg: "bg-emerald-500/10", icon: <CheckCircle2 className="size-4 text-action-success" /> };
+  if (s === "REJECTED") return { text: "text-action-danger", bg: "bg-rose-500/10", icon: <XCircle className="size-4 text-action-danger" /> };
+  return { text: "text-action-warning", bg: "bg-amber-500/10", icon: <Clock className="size-4 text-action-warning" /> };
 }
 
 export function ActivePasses() {
