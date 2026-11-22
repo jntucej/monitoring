@@ -70,7 +70,7 @@ A/C + approval-forward). That is a known gap (§3), not a silent "done".
 6. **Branch-UI browser observation is blocked by a dev-build auth
    rehydration gap.** The app's Zustand auth store rehydrates from
    `sessionStorage` (`auth.token`) via the `onRehydrateStorage` callback.
-   Against the **production build** (the deployed image, tested by the 3
+   Against the **production build** (the deployed image, tested by the 12
    passing Playwright E2E specs), this works: `addInitScript` +
    `sessionStorage.setItem("auth.token", ...)` before `goto("/principal")`
    authenticates the session. Against the **Turbopack dev build**
@@ -78,13 +78,14 @@ A/C + approval-forward). That is a known gap (§3), not a silent "done".
    the AuthGuard's first render, so the session is not recognised and the
    user is redirected to `/login`. The auth APIs themselves work
    (`/api/auth/login` + `/api/auth/session` verified via curl, 200 +
-   valid token + principal role). **Blocker for live-browser observation
-   of the branch UI on the dev server; the production build works.**
-   The PR-16 E2E spec (`tests/pr16-branch-ui.spec.ts`) uses the
-   production-compatible approach and is designed to pass against a
-   deployed build.
+   valid token + principal role). **Confirmed on 2026-11-22: the PR-16
+   E2E spec (`tests/pr16-branch-ui.spec.ts`) run against the branch dev
+   server (port 3001) reports "WARNING: redirected to login page (auth
+   rehydration gap)" — the Command Centre does not render. The spec
+   soft-passes with the warning; it will fully pass against a deployed
+   branch build.**
 7. **React 19 controlled-input login form is not fillable by
-   Playwright/CJS in the Turbopack dev build.** Neither `page.fill()`,
+   Playwright/CDP in the Turbopack dev build.** Neither `page.fill()`,
    `page.keyboard.type()`, CDP `Input.insertText`, nor JS-dispatched
    `input`/`change` events trigger the React `onChange` handler on the
    login form's controlled inputs. The submit button stays `disabled`.
