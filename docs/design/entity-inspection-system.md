@@ -43,7 +43,7 @@ interface EntityInspection {
 2. Long sections (history / timeline / relationships) must be `collapsible`.
 3. Every model exposes either an **Actions** section **or** a `detailHref`.
 
-## Wired pages (this pass)
+## Wired pages
 
 | Page | Entity | Layers wired |
 |---|---|---|
@@ -52,10 +52,28 @@ interface EntityInspection {
 | `/admin/alerts` | Alert | click row → drawer (what, evidence/timeline, authority, resolve) |
 | `/admin/passes` | Gate pass | hover KPIs · click row → drawer (overview, validity, actions) |
 | `/admin/exceptions` | Scan exception | hover counts · click row → drawer (context, timeline, actions) |
+| `/admin/cases` | Institutional case | click row → drawer (overview, risk & authority, timeline, payload, actions) |
+| `/principal/cases` | Institutional case | click card → drawer (same sections, role-filtered actions) |
 | `/principal/attention` | Attention item | click card → drawer (what, suggested, timeline, act) |
 | `/principal/decisions` | Decision | click row → drawer (provenance, reason, timeline, audit) |
 | `/principal/escalations` | Escalation | click card → drawer (why, target, timeline, act) |
 | `/principal` (home) | KPI tiles | hover previews + click → navigate to the deepest layer |
+
+## Role-appropriate depth (live, not just planned)
+
+`/principal/cases` demonstrates the principle with `useRoleContext`
+(`src/hooks/useRoleContext.ts`): the same drawer, different Actions
+section per viewer —
+
+- **Principal (warden)**: "Decide" (primary verb) + Escalations +
+  Emergency state. The full act set.
+- **Anyone else** (a role that can read the register but not act on it):
+  a read-only note ("acting on this case requires the X role") + the
+  Decision-ledger link only.
+
+The section *set* changes with the role; the model shape never does.
+That's the contract: a page builds `sections` for the current viewer,
+and the panel renders whatever it's given.
 
 ## Role-appropriate depth
 

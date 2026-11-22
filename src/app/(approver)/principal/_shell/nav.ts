@@ -76,6 +76,7 @@ export const PRINCIPAL_NAV: PrincipalEntry[] = [
     icon: Scale,
     children: [
       { href: "/principal/governance/audit", label: "Audit" },
+      { href: "/principal/cases", label: "Cases" },
       { href: "/principal/attention", label: "Attention" },
       { href: "/principal/decisions", label: "Decisions" },
       { href: "/principal/escalations", label: "Escalations" },

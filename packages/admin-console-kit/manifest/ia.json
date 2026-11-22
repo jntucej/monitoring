@@ -153,6 +153,11 @@
           "icon": "FileSpreadsheet"
         },
         {
+          "label": "Institutional Cases",
+          "href": "/admin/cases",
+          "icon": "Folder"
+        },
+        {
           "label": "Emergency Lockdown",
           "href": "/admin/lockdown",
           "icon": "Shield"
