@@ -178,4 +178,21 @@ export const HOSTEL_MANAGER_COMMANDS: CommandDef[] = [
   { id: "view-residents", verb: "view-residents", label: "View resident service requests", hint: "residents — Open resident service requests" },
 ];
 
+/** Principal: top-authority oversight verbs — all pure navigations to the
+ *  principal sub-pages under /principal/ (the principal is scoped to all
+ *  workflows, so no hostel/branch filter). No consequential write verbs run
+ *  through the palette; those stay on the dedicated decision surfaces. */
+export const PRINCIPAL_COMMANDS: CommandDef[] = [
+  { id: "dashboard", verb: "dashboard", label: "Open the principal dashboard", hint: "dashboard — Go to the command centre" },
+  { id: "delegations", verb: "delegations", label: "Open the delegation register", hint: "delegations — Go to the delegations page" },
+  { id: "audit", verb: "audit", label: "Open the audit trail", hint: "audit — Go to the audit page" },
+  { id: "reports", verb: "reports", label: "Open reports", hint: "reports — Go to the reports page" },
+  { id: "approvals", verb: "approvals", label: "Open pending approvals", hint: "approvals — Go to the approvals queue" },
+  { id: "attention", verb: "attention", label: "Open the attention queue", hint: "attention — Go to the attention queue" },
+  { id: "escalations", verb: "escalations", label: "Open escalations", hint: "escalations — Go to the escalations page" },
+  { id: "emergency", verb: "emergency", label: "Open the emergency command plane", hint: "emergency — Go to the emergency page" },
+  { id: "examinations", verb: "examinations", label: "Open examinations", hint: "examinations — Go to the examinations page" },
+  { id: "cases", verb: "cases", label: "Open institutional cases", hint: "cases — Go to the cases page" },
+];
+
 export default parseCommand;

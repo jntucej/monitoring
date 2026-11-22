@@ -31,6 +31,11 @@ import {
 import { buildInvestigationWorkspace } from "@/components/principal/shared/InvestigationWorkspace";
 import { classifyOutcome } from "@/hooks/usePrincipalAction";
 import { buildExecutionFeedback } from "@/lib/principal/executionFeedback";
+import {
+  resolvePaletteCommands,
+  searchResultsToCommands,
+  CONSEQUENTIAL_QUICK_ACTIONS,
+} from "@/lib/principal/commandPaletteData";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -385,5 +390,47 @@ describe("PR-11 execution feedback: four distinct facts, not one 'success'", () 
     expect(fb.kind).toBe("failed");
     expect(fb.headline).toContain("not completed");
     expect(fb.auditConfirmed).toBe(false);
+  });
+});
+
+describe("PR-13 command palette data (deterministic + honest)", () => {
+  it("empty query returns the navigation + workflow commands (originals preserved)", () => {
+    const cmds = resolvePaletteCommands("");
+    const ids = cmds.map((c) => c.id);
+    for (const need of [
+      "nav-dashboard",
+      "nav-delegations",
+      "nav-audit",
+      "nav-reports",
+      "nav-approvals",
+    ]) {
+      expect(ids).toContain(need);
+    }
+  });
+
+  it("a command keyword resolves deterministically (no NL guessing)", () => {
+    const approvals = resolvePaletteCommands("approvals");
+    expect(approvals.map((c) => c.id)).toContain("nav-approvals");
+  });
+
+  it("unknown free text returns [] (the UI falls back to real search, not a guess)", () => {
+    expect(resolvePaletteCommands("some random student name here")).toEqual([]);
+  });
+
+  it("consequential actions are marked kind=consequential + routed to a surface", () => {
+    const delegate = CONSEQUENTIAL_QUICK_ACTIONS.find((a) => a.id === "qa-delegate");
+    expect(delegate?.kind).toBe("consequential");
+    expect(delegate?.needsSurface).toBeTruthy();
+  });
+
+  it("search results become open-record commands with a real href (read-only)", () => {
+    const cmds = searchResultsToCommands(
+      [{ id: "s-1", label: "K. Rao", kind: "student", href: "/principal/people?student=s-1" }],
+      "student",
+      (r) => r.href,
+    );
+    expect(cmds[0].kind).toBe("open-record");
+    expect(cmds[0].entityId).toBe("s-1");
+    expect(cmds[0].href).toBe("/principal/people?student=s-1");
   });
 });

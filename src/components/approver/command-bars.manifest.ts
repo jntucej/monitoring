@@ -45,7 +45,7 @@ export const COMMAND_BARS_MANIFEST: CommandBarManifestEntry[] = [
   { file: "ExamSuperintendentCommandBar.tsx", exportName: "ExamSuperintendentCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "as-is" },
   { file: "OieCommandBar.tsx", exportName: "OieCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "as-is" },
   { file: "AdminCommandBar.tsx", exportName: "AdminCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "as-is" },
-  { file: "PrincipalCommandBar.tsx", exportName: "PrincipalCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "as-is" },
+  { file: "PrincipalCommandBar.tsx", exportName: "PrincipalCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "hollowed" },
   { file: "SysadminCommandBar.tsx", exportName: "SysadminCommandBar", commandSet: "ROLE_SPECIFIC", conformed: "as-is" },
 
   // Inherited (thin wrappers over the base bar; no parser of their own — conform by absence):
