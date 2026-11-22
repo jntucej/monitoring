@@ -6,6 +6,8 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
+import { ChevronRight } from "lucide-react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface VisitorRow {
@@ -53,6 +55,81 @@ function AdminVisitorsInner() {
   const [rows, setRows] = useState<VisitorRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = usePersistentQuery("gate-admin-visitors-query");
+
+  const [activeVisitor, setActiveVisitor] = useState<VisitorRow | null>(null);
+
+  /** Standardized inspection model for a visitor (context → check-in timeline → actions). */
+  const visitorInspection = activeVisitor
+    ? {
+        kind: "visitor",
+        title: activeVisitor.name ?? "Unknown visitor",
+        subtitle: activeVisitor.purpose ?? undefined,
+        status: (
+          <span
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadge(activeVisitor.status)}`}
+          >
+            {activeVisitor.status}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Context",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Purpose", value: activeVisitor.purpose ?? "—" },
+                  { label: "Host", value: activeVisitor.host ?? "—" },
+                  {
+                    label: "Gate",
+                    value: activeVisitor.gate ? (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="size-3.5" />
+                        {activeVisitor.gate}
+                      </span>
+                    ) : "—",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Visit timeline",
+            collapsible: true,
+            content: (
+              <KVPairs
+                items={[
+                  {
+                    label: "Checked in",
+                    value: activeVisitor.checkInAt
+                      ? new Date(activeVisitor.checkInAt).toLocaleString("en-IN")
+                      : "—",
+                  },
+                  {
+                    label: "Checked out",
+                    value: activeVisitor.checkOutAt
+                      ? new Date(activeVisitor.checkOutAt).toLocaleString("en-IN")
+                      : "Still on campus",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: activeVisitor.gate ? (
+              <a
+                href={`/admin/gates/${encodeURIComponent(activeVisitor.gate)}`}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
+              >
+                <ChevronRight className="size-3.5" /> Gate detail
+              </a>
+            ) : (
+              <span className="text-xs text-text-muted">No gate link recorded.</span>
+            ),
+          },
+        ],
+      }
+    : null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -135,7 +212,11 @@ function AdminVisitorsInner() {
                   <tr><td colSpan={6} className="p-6 text-center text-text-muted">No visitors found.</td></tr>
                 )}
                 {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-bg-elevated/40">
+                  <tr
+                    key={r.id}
+                    className="hover:bg-bg-elevated/40 cursor-pointer"
+                    onClick={() => setActiveVisitor(r)}
+                  >
                     <td className="p-3 text-text-primary">{r.name ?? "—"}</td>
                     <td className="p-3 text-text-muted">{r.purpose ?? "—"}</td>
                     <td className="p-3 text-text-muted">{r.host ?? "—"}</td>
@@ -153,6 +234,8 @@ function AdminVisitorsInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={visitorInspection} onClose={() => setActiveVisitor(null)} />
     </div>
   );
 }
