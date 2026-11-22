@@ -31,7 +31,7 @@ import { AdminStatusBar, type AdminCounts } from "@/components/approver/AdminSta
 import { PrincipalStatusBar, type PrincipalCounts } from "@/components/approver/PrincipalStatusBar";
 import { VpStatusBar, type VpCounts } from "@/components/approver/VpStatusBar";
 import { SysadminStatusBar, type SysadminCounts } from "@/components/approver/SysadminStatusBar";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, RefreshCw } from "lucide-react";
 
 interface RoleChromeProps {
   /** The manifest role (e.g. "oie", "staff", "guardian"). */
@@ -155,7 +155,7 @@ export function RoleChrome({ role, variant = "footer", className }: RoleChromePr
         // live system.
         <div className="flex items-center justify-between px-4 py-2 text-xs text-text-muted">
           <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-action-primary" />
+            <span className={`size-2 rounded-full ${chrome.refreshing ? "bg-action-info animate-pulse" : "bg-action-primary"}`} />
             <span>Live console</span>
           </span>
           <span className="inline-flex items-center gap-1.5 font-mono tabular-nums">
