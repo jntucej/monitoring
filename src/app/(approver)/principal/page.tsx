@@ -223,6 +223,16 @@ export default function PrincipalCommandCenter() {
         </PrincipalWidgetBoundary>
       </section>
 
+      {/* ── G. Upcoming obligations (PR-12): real deadlines — exam
+            clearances due + candidates today + SLA-due decisions ── */}
+      <PrincipalWidgetBoundary>
+        <UpcomingObligations
+          exams={d?.exams}
+          items={items}
+          overdue={counts.overdue}
+        />
+      </PrincipalWidgetBoundary>
+
       {/* ── The "story": weekly decision pace behind the numbers ── */}
       <PrincipalWidgetBoundary>
         <DecisionPaceDigest digest={digest} />
@@ -297,6 +307,86 @@ function PlaybookTile({
       >
         Open the command plane →
       </a>
+    </div>
+  );
+}
+
+/* G. Upcoming obligations — PR-12. Real deadlines only: exam clearances due +
+ * candidates today (from the dashboard's exams payload) + decisions whose SLA
+ * has come due (from priorityItems). No invented dates. Honest empty state. */
+function UpcomingObligations({
+  exams,
+  items,
+  overdue,
+}: {
+  exams?: { pendingClearances: number; todayCandidates: number };
+  items: Array<{
+    id: string;
+    ticket_number: string;
+    workflow_type: string;
+    sla_deadline?: string | null;
+    student_name?: string | null;
+  }>;
+  /** Server-computed count of decisions already past SLA (no client "now"). */
+  overdue: number;
+}) {
+  // Pure: no client-side Date.now(). The "past SLA" fact is the server's
+  // `overdue` count; we show items carrying an SLA deadline as "due" items
+  // (the backend already ordered priorityItems by urgency + deadline).
+  const dueItems = items.filter((it) => it.sla_deadline);
+  const hasExam =
+    (exams?.pendingClearances ?? 0) > 0 || (exams?.todayCandidates ?? 0) > 0;
+
+  return (
+    <div className="surface-card bg-bg-surface p-5 flex flex-col gap-3">
+      <SectionHeader
+        label="Upcoming obligations"
+        hint="Exam clearances due + decisions past SLA"
+      />
+      {!hasExam && overdue === 0 ? (
+        <PrincipalEmptyState
+          title="Nothing due"
+          description="No exam clearances or SLA-due decisions right now."
+        />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {hasExam ? (
+            <div className="grid grid-cols-2 gap-3">
+              <PulseTile
+                label="Exam clearances due"
+                value={exams?.pendingClearances ?? 0}
+                higherIsBetter={false}
+                drillTo="/principal/examinations"
+                drillHint="Open exams"
+              />
+              <PulseTile
+                label="Candidates today"
+                value={exams?.todayCandidates ?? 0}
+                drillTo="/principal/examinations"
+                drillHint="Open exams"
+              />
+            </div>
+          ) : null}
+          {overdue > 0 ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                {overdue} decision{overdue > 1 ? "s" : ""} past SLA
+              </p>
+              <ul className="flex flex-col gap-1">
+                {dueItems.slice(0, 4).map((it) => (
+                  <li key={it.id} className="text-sm text-text-primary">
+                    <span className="font-mono text-xs text-text-muted">
+                      {it.ticket_number}
+                    </span>{" "}
+                    {it.student_name ? `${it.student_name} · ` : ""}
+                    {it.workflow_type}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
