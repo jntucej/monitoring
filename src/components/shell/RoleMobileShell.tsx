@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { RoleSidebar } from "./RoleSidebar";
 import { RoleNotificationBell } from "./RoleNotificationBell";
+import { RoleChrome } from "@/components/shared/RoleChrome";
 import type { RoleManifest } from "./types";
 
 export function RoleMobileShell({
@@ -35,8 +36,10 @@ export function RoleMobileShell({
       </header>
 
       <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full px-4 py-4">{children}</div>
+        <div className="mx-auto w-full px-4 py-4 pb-16">{children}</div>
       </main>
+
+      <RoleChrome role={manifest.role} variant="mobile" />
 
       {open && (
         <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
