@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Building2 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -16,12 +16,16 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import type { BoardRow } from "@/components/shared/Board";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function HostelManagerPage() {
-  return (
+    const [active, setActive] = useState<BoardRow | null>(null);
+return (
 <>
 <Greeting />
 <RoleOnboarding />
@@ -47,7 +51,11 @@ export default function HostelManagerPage() {
             source="/api/hostel-manager/summary"
             itemKey="pendingTickets"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
-            onSelect={() => {}}
+            onSelect={(row) => setActive(row)}
+          />
+          <EntityInspector
+            inspection={active ? scanInspection(active) : null}
+            onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AllocationPanel" title="Room Allocation">
             <AllocationPanel />

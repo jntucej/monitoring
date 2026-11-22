@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { useExport } from "@/hooks/useExport";
 import {
@@ -236,6 +237,19 @@ export function ComplaintConsole({
             const slaHours = slaLeft !== null ? Math.abs(Math.round(slaLeft / 3600)) : null;
             return (
               <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-2.5 hover:bg-bg-elevated transition">
+                <HoverPreview
+                  preview={
+                    <MetricPreview
+                      label={c.categoryLabel}
+                      value={c.title}
+                      hint={`Owner ${c.currentOwnerRole} · ${
+                        c.slaDeadline && new Date(c.slaDeadline).getTime() < Date.now() && c.status !== "resolved" && c.status !== "closed"
+                          ? "SLA breached"
+                          : "within SLA"
+                      }`}
+                    />
+                  }
+                >
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
@@ -272,6 +286,7 @@ export function ComplaintConsole({
                     <p className="text-xs text-text-muted">{new Date(c.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
+                </HoverPreview>
               </Link>
             );
           })}

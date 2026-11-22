@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -15,12 +15,16 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import type { BoardRow } from "@/components/shared/Board";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function DeputyWardenPage() {
-  return (
+    const [active, setActive] = useState<BoardRow | null>(null);
+return (
 <>
 <Greeting />
 <RoleOnboarding />
@@ -48,7 +52,11 @@ export default function DeputyWardenPage() {
             source="/api/permissions?workflow_type=hostel"
             itemKey="permission"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
-            onSelect={() => {}}
+            onSelect={(row) => setActive(row)}
+          />
+          <EntityInspector
+            inspection={active ? scanInspection(active) : null}
+            onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>

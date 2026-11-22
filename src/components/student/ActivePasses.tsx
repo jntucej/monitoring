@@ -11,6 +11,8 @@ import { PeriodPicker } from "@/components/shared/PeriodPicker";
 import type { Period } from "@/lib/period";
 import { getPeriod } from "@/lib/period";
 import { PassLiveTracker } from "@/components/shared/pass/PassLiveTracker";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { passInspection } from "@/components/shared/inspectionModels";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 function expiryLabel(to: string, status: string): string {
@@ -39,6 +41,7 @@ export function ActivePasses() {
   const [period, setPeriod] = useState<Period>(getPeriod("this-month"));
   const [showHistory, setShowHistory] = useState(false);
   const [trackId, setTrackId] = useState<string | null>(null);
+  const [activePass, setActivePass] = useState<string | null>(null);
   const isSakuga = useIsSakuga();
   const user = useAuthStore((s) => s.user);
   const { exportCSV } = useExport();
@@ -149,7 +152,11 @@ export function ActivePasses() {
             const s = statusStyle(pass.finalStatus);
             const active = pass.finalStatus !== "REJECTED" && pass.finalStatus !== "COMPLETED";
             return (
-              <div key={pass.id} className={`p-3 rounded-lg ${s.bg}`}>
+              <div
+                key={pass.id}
+                className={`p-3 rounded-lg ${s.bg} cursor-pointer hover:opacity-90 transition-opacity`}
+                onClick={() => setActivePass(pass.id)}
+              >
                 <div className="flex items-center gap-4">
                   {s.icon}
                   <div className="flex-1">
@@ -171,7 +178,7 @@ export function ActivePasses() {
                     {active && (
                       isSakuga ? (
                         <sakuga-button
-                          onClick={() => setTrackId(trackId === pass.id ? null : pass.id)}
+                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); setTrackId(trackId === pass.id ? null : pass.id); }}
                           className="text-[11px] font-medium mt-0.5"
                         >
                           {trackId === pass.id ? "Hide tracker" : "Live tracker"}
@@ -179,7 +186,7 @@ export function ActivePasses() {
                       ) : (
                       <button
                         type="button"
-                        onClick={() => setTrackId(trackId === pass.id ? null : pass.id)}
+                        onClick={(e) => { e.stopPropagation(); setTrackId(trackId === pass.id ? null : pass.id); }}
                         className="text-[11px] font-medium text-action-primary hover:underline mt-0.5"
                       >
                         {trackId === pass.id ? "Hide tracker" : "Live tracker"}
@@ -274,6 +281,15 @@ export function ActivePasses() {
           </div>
         )}
       </div>
+
+      {/* Standardized inspection model for a pass (the registry). */}
+      {(() => {
+        const sel = passes.find((p) => p.id === activePass) ?? null;
+        const model = sel ? passInspection(sel as any) : null;
+        return (
+          <EntityInspector inspection={model} onClose={() => setActivePass(null)} />
+        );
+      })()}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -319,7 +320,21 @@ function ChildStatusInner() {
         <div className="space-y-3">
           {wards.map((w) => {
             const roll = w.uniqueId || w.roll || "";
-            return <WardStatusCard key={w.id} ward={w} status={roll ? statuses[roll] : null} />;
+            const st = roll ? statuses[roll] : null;
+            return (
+              <HoverPreview
+                key={w.id}
+                preview={
+                  <MetricPreview
+                    label={w.fullName ?? w.uniqueId}
+                    value={st ? (st.campusStatus === "IN" ? "On campus" : st.campusStatus) : "—"}
+                    hint={st?.lastScan ? `Last scan ${new Date(st.lastScan.timestamp).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} at ${st.lastScan.gateName}` : "No scan recorded"}
+                  />
+                }
+              >
+                <WardStatusCard ward={w} status={st} />
+              </HoverPreview>
+            );
           })}
         </div>
       )}

@@ -1,11 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import type { BoardRow } from "@/components/shared/Board";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { useApiResource } from "@/hooks/useApiResource";
 import type { MyClass } from "@/contracts/classes";
 import { Loader2, BookOpen, PencilLine } from "lucide-react";
@@ -50,6 +53,7 @@ function FacultyInner() {
   });
 
   const classes = myClasses?.data ?? [];
+  const [active, setActive] = useState<BoardRow | null>(null);
 
   if (error) {
     return (
@@ -99,7 +103,7 @@ function FacultyInner() {
           <div className="flex flex-wrap gap-1.5 min-w-0">
             {classes.map((c) => {
               const isActive = activeClass?.id === c.id;
-              return (
+return (
                 <a
                   key={c.id}
                   href={`/faculty?class_id=${c.id}`}
@@ -134,8 +138,12 @@ function FacultyInner() {
         source={boardSource}
         itemKey="permission"
         columns={["PENDING", "APPROVED", "REJECTED"]}
-        onSelect={() => {}}
+        onSelect={(row) => setActive(row)}
       />
+          <EntityInspector
+            inspection={active ? scanInspection(active) : null}
+            onClose={() => setActive(null)}
+          />
       <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
         <PersonalizedCampusHome />
       </WidgetBoundary>

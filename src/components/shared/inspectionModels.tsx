@@ -434,3 +434,105 @@ export function richTicketInspection(
     ],
   };
 }
+
+// Re-export the pass model (kept in its own file to keep the registry
+// import surface stable).
+export { passInspection, type PassModel } from "./passInspection.model";
+
+
+// ── complaint (complaint console, all roles) ──────────────────────────
+
+export interface ComplaintModel {
+  complaintNumber: string;
+  title: string;
+  categoryLabel: string;
+  priority: string;
+  status: string;
+  currentOwnerRole: string;
+  slaDeadline: string | null;
+  createdAt: string;
+  raisedByName: string | null;
+}
+
+/** Standardized inspection for a complaint: overview → ownership → SLA timeline. */
+export function complaintInspection(
+  c: ComplaintModel,
+  onOpenDetail?: () => void,
+): EntityInspection {
+  const closed = c.status === "resolved" || c.status === "closed";
+  const isOverdue =
+    c.slaDeadline && new Date(c.slaDeadline).getTime() < Date.now() && !closed;
+  return {
+    kind: "complaint",
+    title: c.title,
+    subtitle: c.complaintNumber,
+    status: (
+      <span
+        className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+          closed
+            ? "bg-emerald-500/15 text-action-success"
+            : isOverdue
+              ? "bg-rose-500/15 text-action-danger"
+              : "bg-amber-500/15 text-action-warning"
+        }`}
+      >
+        {closed ? "Closed" : isOverdue ? "SLA breached" : c.status}
+      </span>
+    ),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <KVPairs
+            items={[
+              { label: "Category", value: c.categoryLabel },
+              { label: "Priority", value: c.priority },
+              { label: "Raised by", value: c.raisedByName ?? "—" },
+              {
+                label: "Current owner",
+                value: <span className={MONO}>{c.currentOwnerRole}</span>,
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        title: "SLA",
+        content: c.slaDeadline ? (
+          <KVPairs
+            columns={1}
+            items={[
+              {
+                label: "Deadline",
+                value: new Date(c.slaDeadline).toLocaleString("en-IN"),
+              },
+              {
+                label: isOverdue ? "State" : "Time left",
+                value: isOverdue ? (
+                  <span className="text-action-danger font-semibold">Breached</span>
+                ) : (
+                  "Within SLA"
+                ),
+              },
+            ]}
+          />
+        ) : (
+          <p className="text-xs text-text-muted">No SLA set for this complaint.</p>
+        ),
+      },
+      {
+        title: "Actions",
+        content: (
+          <div className="flex flex-wrap gap-2">
+            <InspectorButton
+              onClick={onOpenDetail ?? (() => undefined)}
+              variant="primary"
+            >
+              <ChevronRight className="size-3.5" /> Open full detail
+            </InspectorButton>
+          </div>
+        ),
+      },
+    ],
+  };
+}

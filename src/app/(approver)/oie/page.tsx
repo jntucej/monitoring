@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -14,6 +14,9 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import type { BoardRow } from "@/components/shared/Board";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 
 
@@ -35,7 +38,8 @@ export default function OiePage() {
   const pendingCount = queue.filter((i) => i.status?.toUpperCase() === "PENDING").length;
   const escalatedCount = queue.filter((i) => i.status?.toUpperCase() === "ESCALATED").length;
 
-  return (
+    const [active, setActive] = useState<BoardRow | null>(null);
+return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["oie"]}>
         <div className="space-y-6">
@@ -52,7 +56,11 @@ export default function OiePage() {
             source="/api/oie/queue"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
             itemKey="permission"
-            onSelect={() => {}}
+            onSelect={(row) => setActive(row)}
+          />
+          <EntityInspector
+            inspection={active ? scanInspection(active) : null}
+            onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
           <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
