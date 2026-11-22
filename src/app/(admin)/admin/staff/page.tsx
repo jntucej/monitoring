@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -432,64 +433,60 @@ function AdminStaffInner() {
         </div>
       </div>
 
-      {/* Drawer */}
-      {active && (
-        <div className="fixed inset-0 z-[80] flex justify-end">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setActive(null)}
-          />
-          <aside className="surface-card relative w-full max-w-md h-full p-5 overflow-y-auto">
-            <header className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="size-6 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-                  style={{ background: ROLE_COLOR[active.role] }}
+      {/* Drawer - standardized inspection model */}
+      {(() => {
+        const staffInspection = active
+          ? {
+              kind: "staff",
+              title: active.name,
+              subtitle: active.email,
+              status: (
+                <span
+                  className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                    active.status === "ACTIVE"
+                      ? "bg-emerald-500/15 text-action-success"
+                      : "bg-rose-500/15 text-action-danger"
+                  }`}
                 >
-                  {initials(active.name)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-text-primary">
-                    {active.name}
-                  </h2>
-                  <p className="text-xs text-text-muted">{active.email ?? "—"}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActive(null)}
-                className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-surface/60"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </header>
-
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div>
-                <dt className="text-text-muted">Role</dt>
-                <dd className="text-text-primary">{active.role}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Status</dt>
-                <dd className="text-action-primary">{active.status}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Department</dt>
-                <dd className="text-text-primary">{active.department ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Designation</dt>
-                <dd className="text-text-primary">{active.designation ?? "—"}</dd>
-              </div>
-              {active.phone && (
-                <div className="col-span-2">
-                  <dt className="text-text-muted">Phone</dt>
-                  <dd className="text-text-primary">{active.phone}</dd>
-                </div>
-              )}
-            </dl>
-          </aside>
-        </div>
-      )}
+                  {active.status}
+                </span>
+              ),
+              sections: [
+                {
+                  title: "Overview",
+                  content: (
+                    <KVPairs
+                      items={[
+                        { label: "Role", value: active.role },
+                        { label: "Department", value: active.department ?? "—" },
+                        { label: "Designation", value: active.designation ?? "—" },
+                        ...(active.phone ? [{ label: "Phone", value: active.phone }] : []),
+                      ]}
+                    />
+                  ),
+                },
+                {
+                  title: "Actions",
+                  content: (
+                    <div className="flex flex-wrap gap-2">
+                      <InspectorButton
+                        href={`/admin/staff/${active.id}`}
+                        variant="primary"
+                      >
+                        <ChevronRight className="size-3.5" /> Full record
+                      </InspectorButton>
+                    </div>
+                  ),
+                },
+              ],
+              detailHref: `/admin/staff/${active.id}`,
+              detailLabel: "Full record",
+            }
+          : null;
+        return (
+          <EntityInspector inspection={staffInspection} onClose={() => setActive(null)} />
+        );
+      })()}
 
       {/* Monthly review panel */}
       <Suspense fallback={null}>

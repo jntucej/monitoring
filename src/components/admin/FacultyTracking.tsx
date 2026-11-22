@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { CountUp } from "@/components/admin/shared/CountUp";
 import {Users, CheckCircle2, Building2, Clock, UserX, Search, Filter, ArrowRightLeft, MapPin, Mail, Phone, Calendar, Activity, AlertTriangle, ChevronRight}  from "lucide-react";
 import type { FacultyMemberAttendance, DepartmentAttendanceSummary, HeatmapDay } from "@/lib/types";
-import { Modal } from "@/components/ui/modal";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface FacultyTrackingProps {
   records: FacultyMemberAttendance[];
@@ -334,16 +334,46 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
       </div>
       {/* Faculty Overview Modal */}
       {selectedFaculty && (
-        <Modal
-          isOpen={!!selectedFaculty}
-          onClose={() => {
-            setSelectedFaculty(null);
-            setActiveHeatmapDay(null);
-          }}
-          title={`${selectedFaculty.fullName} — Attendance Overview`}
-          size="xl"
-        >
-          <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
+        <EntityInspector
+          inspection={{
+            kind: "faculty",
+            title: selectedFaculty.fullName,
+            subtitle: selectedFaculty.uniqueId,
+            status: (
+              <span
+                className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                  selectedFaculty.status === "INSIDE"
+                    ? "bg-emerald-500/15 text-action-success"
+                    : selectedFaculty.status === "OUTSIDE"
+                      ? "bg-amber-500/15 text-action-warning"
+                      : "bg-bg-elevated text-text-muted"
+                }`}
+              >
+                {selectedFaculty.status === "INSIDE"
+                  ? "On campus"
+                  : selectedFaculty.status === "OUTSIDE"
+                    ? "Off site"
+                    : "Absent"}
+              </span>
+            ),
+            sections: [
+              {
+                title: "Overview",
+                content: (
+                  <KVPairs
+                    items={[
+                      { label: "Department", value: selectedFaculty.department },
+                      { label: "Designation", value: selectedFaculty.designation },
+                      ...(selectedFaculty.email ? [{ label: "Email", value: selectedFaculty.email }] : []),
+                      ...(selectedFaculty.phone ? [{ label: "Phone", value: selectedFaculty.phone }] : []),
+                    ]}
+                  />
+                ),
+              },
+              {
+                title: "Attendance detail",
+                content: (
+                  <div className="space-y-4">
             {/* Top Profile Summary Header */}
             <div className="surface-card p-4 bg-bg-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -585,8 +615,29 @@ export function FacultyTracking({ records, summary, departmentSummaries }: Facul
             </div>
 
 
-          </div>
-        </Modal>
+                  </div>
+                ),
+              },
+              {
+                title: "Actions",
+                content: (
+                  <div className="flex flex-wrap gap-2">
+                    <InspectorButton
+                      href={`/admin/faculty/${selectedFaculty.uniqueId}`}
+                      variant="primary"
+                    >
+                      <ChevronRight className="size-3.5" /> Full profile
+                    </InspectorButton>
+                  </div>
+                ),
+              },
+            ],
+          }}
+          onClose={() => {
+            setSelectedFaculty(null);
+            setActiveHeatmapDay(null);
+          }}
+        />
       )}
     </div>
   );
