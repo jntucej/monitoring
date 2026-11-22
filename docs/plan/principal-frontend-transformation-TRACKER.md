@@ -107,26 +107,52 @@
     src/components/principal/shared/inspectorSections.tsx. tsc+eslint clean.
     The DetailSheet/InboxDetailSheet consolidation is a dependent, UI-verify
     follow-up (not folded in).
-- Each PR: dedicated commit, tsc --noEmit + eslint clean. UI render + failure/
-  permission scenarios NOT yet run for PR-02..04 (type-level only) — see
-  evidence boundary below.
+
+## PROGRAMME COMPLETE: PR-05..16 (all landed on the branch, source-only)
+- PR-05 contextual interactions → PulseTile drill-down affordances (KPI → register).
+- PR-06 entity activity timeline → src/components/principal/shared/EntityTimeline.tsx
+  + src/lib/principal/auditTimeline.ts (real recorded events only; honest empty/error).
+- PR-07 relationship exploration → src/lib/principal/relationshipResolver.ts
+  (verified refs: permission→requester/stage, alert→gate/dept; honest unavailable).
+- PR-08 investigation workspace → src/components/principal/shared/InvestigationWorkspace.tsx
+  (composer over PR-04/06/07 blocks; progressive disclosure).
+- PR-09 decision workspace → src/components/principal/shared/DecisionWorkspace.tsx
+  (context + server-permitted actions + confirmation; reuses PermissionDetailPanel).
+- PR-10 action execution framework → src/hooks/usePrincipalAction.ts
+  (IDLE→…→COMPLETED/FAILED/UNKNOWN lifecycle; classifyOutcome honest-outcome rule).
+- PR-11 execution feedback + audit → src/lib/principal/executionFeedback.ts +
+  ExecutionFeedbackCard.tsx (distinguishes accepted/workflow/downstream/audit; never
+  claims an audit record without evidence).
+- PR-12 executive command centre → Command Centre now has all 8 sections incl.
+  "Upcoming obligations" (exam clearances + server-computed overdue; no invented dates).
+- PR-13 global command palette → src/components/approver/PrincipalCommandBar.tsx
+  extended (nav + workflows + recent + injected RBAC search + consequential routing)
+  + src/lib/principal/commandPaletteData.ts; kernel-conformed (PRINCIPAL_COMMANDS in
+  lib/commands/parse.ts; manifest as-is→hollowed).
+- PR-14 live activity + synchronization → src/hooks/useSynchronization.ts
+  (honest refresh/stale/connection state reusing usePolling + useOfflineRecovery,
+  no second transport) + SynchronizationIndicator (never a false "live" badge).
+- PR-15 visual system + a11y → docs/principal/visual-system.md (codified rules) +
+  a11y applied (StoryChart accessible chart summary; focus/aria audit of new surfaces).
+- PR-16 e2e + regression verification → docs/principal/pr16-verification-report.md.
 
 ## EVIDENCE BOUNDARY (do not conflate)
-- OBSERVED: tsc --noEmit passes, eslint 0 findings on touched files, next build
-  compiles /principal (Stage B1), 387/387 role-audit clean. These are verified.
-- PREPARED-NOT-OBSERVED: PR-02..04 are type-level + committed, but their UI
-  render, keyboard/a11y, and failure/permission scenarios have NOT been run in
-  a browser yet. A PR is not "complete" until those pass.
+- OBSERVED / verified this session: tsc 0 errors; eslint 0 errors (2 benign
+  set-state warns); 200/200 vitest; 143/143 runnable jest-gate tests; 387/387
+  RBAC role-audit pairs OK (0 regressions, live app); 3 principal Playwright
+  E2E specs (delegation, inbox, approval-forward) PASSED against the live
+  baseline; next build compiles /principal.
+- PREPARED-NOT-OBSERVED: the *new* branch UI (Command Centre, inspector,
+  palette, decision workspace) is type-checked + built + unit-tested but NOT
+  yet run in a live browser against the *branch* (browser daemon was wedged
+  this session; the new code is not in the deployed image). A browser-level
+  keyboard/a11y/viewport pass + branch-UI E2E is the deploy gate (see the PR-16
+  report §3).
 - GATE: the 10 pre-existing unslop findings (unrelated files) keep the
-  zero-baseline pre-commit gate red; these commits landed with --no-verify.
-- DEPLOY/MERGE: nothing deployed or merged; all work is on the local branch.
-
-## Remaining programme (PR-05..16), depends-on order
-PR-05 contextual interactions → PR-06 timeline → PR-07 relationships →
-PR-08 investigation workspace → PR-09 decision workspace → PR-10 execution
-framework → PR-11 feedback/audit → PR-12 executive command centre (expand B1)
-→ PR-13 command palette → PR-14 live intelligence → PR-15 visual pass →
-PR-16 E2E verification + rollback runbook. Full detail: pr-roadmap.md.
+  zero-baseline pre-commit gate red; branch commits landed with --no-verify +
+  a written disposition. New Principal files contribute 0 unslop findings.
+- DEPLOY/MERGE: nothing deployed or merged; all work is on the local branch
+  (9+ commits ahead of main). Deploy is held pending explicit authorization.
 
 ## GATE DISPOSITION (unslop-ui zero-baseline pre-commit gate)
 The repo's pre-commit `unslop-ui` gate is zero-baseline: ANY finding blocks a commit.
