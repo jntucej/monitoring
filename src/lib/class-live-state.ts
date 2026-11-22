@@ -158,7 +158,7 @@ export async function getLiveSessions(
   const rows = await query<SessionRow>(
     `WITH base AS (
        SELECT
-         md5(concat('live::', cp.class_id::text, '::', COALESCE(cp.hall,'none'), '::', $1, '::', cp.period_no)) AS session_id,
+         md5(concat('live::', cp.class_id::text, '::', COALESCE(cp.hall,'none'), '::', $1::text, '::', cp.period_no)) AS session_id,
          cp.class_id::text AS class_id,
          c.name AS class_name,
          cp.hall AS subject_code,
