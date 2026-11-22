@@ -121,6 +121,7 @@ export async function authorize(
       allowed: true,
       rule: viaDelegation ? `${p.code} (via delegation)` : p.code,
       bounds: p.bounds,
+      authoritySource: viaDelegation ? "delegation" : "role",
       ...(viaDelegation ? { delegationId: req.delegationId } : {}),
     };
   }
