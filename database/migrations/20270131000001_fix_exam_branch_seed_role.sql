@@ -5,16 +5,17 @@
 -- 'addl_controller_academic', which has no /exam-branch console route —
 -- the login succeeded but the account could not reach its own console.
 --
--- This migration is idempotent: it pins the EXAM_BRANCH demo account to the
--- 'exam_branch' role so the exam-branch console (and its shell chrome) is
--- reachable with the standard smoke credential.
+-- Idempotent fix: restore the account's role and clear the forced PIN
+-- rotation flag so the standard smoke credential reaches the console
+-- directly (no PIN-prompt wall on first login).
 --
 -- Down: reverts the role to 'staff' (its original seeded value).
 
 BEGIN;
 
 UPDATE users
-SET role = 'exam_branch'
+SET role = 'exam_branch',
+    pin_must_change = FALSE
 WHERE unique_id = 'EXAM_BRANCH';
 
 COMMIT;
