@@ -40,9 +40,32 @@ export interface LiveScope {
   /** faculty the caller is allowed to see; null = all, [] = none */
   facultyIds: string[] | null;
   departmentId?: string;
+  /** a student's own class(es) — the student-facing scope (their MyDay). */
+  classIds?: string[];
 }
 
 const ACADEMIC_ROLES: readonly string[] = ["faculty", "hod", "vice_principal", "principal"];
+
+/**
+ * Resolve a STUDENT's live-class scope: the class(es) they're enrolled in.
+ * The enrollment key is student_details.department = classes.department_id
+ * (the same join the whole app uses: register.ts, attendance/overview,
+ * me/class). section + year narrow to the exact class. A student sees only
+ * their own timetable, never the faculty-wide view. Returns [] when the
+ * student has no enrolled class (the dashboard then shows no live classes).
+ */
+export async function resolveStudentClassIds(userId: string): Promise<string[]> {
+  const { rows } = await query<{ id: string }>(
+    `SELECT c.id
+       FROM public.student_details sd
+       JOIN public.classes c ON c.department_id::text = sd.department::text
+      WHERE sd.user_id = $1::uuid
+        AND c.section = COALESCE(sd.section, '')
+        AND c.year = COALESCE(sd.year, 0)`,
+    [userId],
+  );
+  return rows.map((r) => r.id);
+}
 
 /** Resolve the caller's live-class scope from their role. Server-authoritative. */
 export function resolveLiveScope(auth: AuthContext): LiveScope {
@@ -97,7 +120,10 @@ export async function getLiveSessions(
 ): Promise<LiveSession[]> {
   const now = opts?.now ?? new Date();
   const today = toISTDateForCron(now);
-  const dowIST = new Date(`${today}T00:00:00Z`).getUTCDay(); // 0=Sun, matches class_periods
+  // class_periods.day_of_week is 1-indexed 1=Mon..7=Sun (DB CHECK constraint).
+  // getUTCDay() is 0=Sun..6=Sat → convert: ((dow+6)%7)+1 gives 1=Mon..7=Sun.
+  const gdc = new Date(`${today}T00:00:00Z`).getUTCDay();
+  const dowIST = ((gdc + 6) % 7) + 1;
 
   const clause: string[] = ["c.is_active = TRUE", "cp.day_of_week = $2"];
   const params: unknown[] = [today, dowIST];
@@ -112,6 +138,14 @@ export async function getLiveSessions(
   if (scope.departmentId) {
     clause.push("c.department_id::text = $4");
     params.push(scope.departmentId);
+  }
+  if (scope.classIds) {
+    if (scope.classIds.length === 0) {
+      clause.push("1=0"); // student with no enrolled class → nothing to show
+    } else {
+      clause.push("cp.class_id = ANY($5::uuid[])");
+      params.push(scope.classIds);
+    }
   }
 
   const rows = await query<SessionRow>(

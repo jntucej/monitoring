@@ -64,7 +64,7 @@ export async function classSessionsForDate(
   classId: string,
   dateIST: string,
 ): Promise<ClassSession[]> {
-  const dow = dayOfWeekIST(dateIST); // 0=Sun..6=Sat
+  const dow = dayOfWeekIST(dateIST); // 1=Mon..7=Sun (matches class_periods)
   const { rows } = await query<{
     period_no: number;
     start_time: string;
@@ -181,8 +181,12 @@ function toISTDate(d: Date): string {
 export function toISTDateForCron(now: Date): string {
   return toISTDate(now);
 }
-/** JS getDay() (0=Sun) for the IST calendar day of a date. */
+/** 1-indexed day-of-week (1=Mon..7=Sun) for the IST calendar day of a date.
+ *  class_periods.day_of_week is 1-indexed 1..7 (DB CHECK constraint), so the
+ *  value must NOT be the JS 0=Sun..6=Sat form. */
 function dayOfWeekIST(dateIST: string): number {
-  // Parse the IST date as UTC so getDay() reflects that calendar day.
-  return new Date(dateIST + "T00:00:00Z").getUTCDay();
+  // Parse the IST date as UTC so getUTCDay() reflects that calendar day
+  // (0=Sun..6=Sat), then map to 1=Mon..7=Sun: ((dow+6)%7)+1.
+  const gdc = new Date(dateIST + "T00:00:00Z").getUTCDay();
+  return ((gdc + 6) % 7) + 1;
 }
