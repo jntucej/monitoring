@@ -596,16 +596,21 @@ export function Scanner({
           });
         }
       }
-      // Retry/unmount (stopCamera) can run between the getUserMedia await and
-      // here — stopCamera clears streamRef; if it fired, the start is stale.
-      // Park the new stream in the per-gate cache (don't leak the device) and
-      // return without starting a decode loop.
-      if (!streamRef.current) {
+      // A stopCamera (unmount / isOpen→false / active→false) can run between
+      // the getUserMedia await and here; it clears streamRef AND sets
+      // isScanningRef=false. If that happened, parking the freshly-opened
+      // stream would race the unmount (we'd adopt a stream on a component that
+      // is tearing down) — so cache it (don't leak the device) and return.
+      // On a normal cold start isScanningRef was just reset to false at the
+      // top of startCamera, so use videoRef (present only when mounted+open)
+      // as the liveness signal: no video element = we're stopped/unmounted.
+      if (!videoRef.current) {
         if (gateId) gateStreamCache[gateId] = stream;
         else stream.getTracks().forEach((t) => t.stop());
         return;
       }
       streamRef.current = stream;
+      if (gateId) gateStreamCache[gateId] = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
