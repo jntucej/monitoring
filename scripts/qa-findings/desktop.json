@@ -1,0 +1,244 @@
+[
+  {
+    "role": "student",
+    "leaves_tested": [
+      "/student",
+      "/student/passes",
+      "/student/permissions",
+      "/student/permissions/new",
+      "/student/profile",
+      "/student/history",
+      "/student/notifications"
+    ],
+    "leaves_skipped": [
+      "/student/request-tracking",
+      "/student/id",
+      "/student/mess/token",
+      "/student/mess/reviews",
+      "/student/mess/special",
+      "/student/mess-bill",
+      "/student/complaints",
+      "/student/anti-ragging"
+    ],
+    "api_failures": [],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Student console displays Digital ID, curfew compliance, active passes, and token quick actions. | Tested 7 leaves. Bell: Bell dropdown opened and rendered notifications/filters. Modal: Opened modal/drawer via 'Add goal', closed safely.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/student",
+    "bell_tested": true,
+    "bell_opened": true,
+    "bell_notes": "Bell dropdown opened and rendered notifications/filters",
+    "modal_tested": true,
+    "modal_opened": true,
+    "modal_notes": "Opened modal/drawer via 'Add goal', closed safely",
+    "dashboard_summary": "Student console displays Digital ID, curfew compliance, active passes, and token quick actions.",
+    "passed": true
+  },
+  {
+    "role": "parent",
+    "leaves_tested": [
+      "/parent",
+      "/parent/child-attendance",
+      "/parent/passes",
+      "/parent/settings",
+      "/parent/child",
+      "/parent/child-requests",
+      "/parent/child-movement"
+    ],
+    "leaves_skipped": [
+      "/parent/pass-leave-submission",
+      "/parent/contact-info"
+    ],
+    "api_failures": [
+      "429 /api/campus-extra/calendar?month=2026-10"
+    ],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Parent console displays guardian dashboard with child status, open requests, and campus activity. | Tested 7 leaves. Bell: Bell dropdown opened and rendered notifications/filters. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/parent",
+    "bell_tested": true,
+    "bell_opened": true,
+    "bell_notes": "Bell dropdown opened and rendered notifications/filters",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "Parent console displays guardian dashboard with child status, open requests, and campus activity.",
+    "passed": true
+  },
+  {
+    "role": "oie",
+    "leaves_tested": [
+      "/oie",
+      "/oie/queue",
+      "/oie/queue/pending",
+      "/oie/queue/escalated",
+      "/oie/queue/history",
+      "/oie/candidate-attendance",
+      "/oie/records"
+    ],
+    "leaves_skipped": [
+      "/oie/examination-day-access",
+      "/oie/access-exceptions",
+      "/oie/exam-branch-coordination",
+      "/oie/decision-history",
+      "/oie/examination-reports"
+    ],
+    "api_failures": [
+      "429 /api/campus-extra/calendar?month=2026-10"
+    ],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "OIE console displays exam management queue, student records, and exam clearances. | Tested 7 leaves. Bell: Bell dropdown opened and rendered notifications/filters. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/oie",
+    "bell_tested": true,
+    "bell_opened": true,
+    "bell_notes": "Bell dropdown opened and rendered notifications/filters",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "OIE console displays exam management queue, student records, and exam clearances.",
+    "passed": true
+  },
+  {
+    "role": "staff",
+    "leaves_tested": [
+      "/staff",
+      "/staff/my-day",
+      "/staff/duties",
+      "/staff/assigned-tasks",
+      "/admin/profile/personal",
+      "/admin/profile/security",
+      "/admin/profile/appearance"
+    ],
+    "leaves_skipped": [],
+    "api_failures": [],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Staff console displays daily duty schedule, assigned tasks, and personal shift status. | Tested 7 leaves. Bell: Bell button not found in desktop shell. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/admin/overview",
+    "bell_tested": false,
+    "bell_opened": false,
+    "bell_notes": "Bell button not found in desktop shell",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "Staff console displays daily duty schedule, assigned tasks, and personal shift status.",
+    "passed": true
+  },
+  {
+    "role": "operator",
+    "leaves_tested": [
+      "/operator",
+      "/operator/transactions",
+      "/operator/stats",
+      "/gate/main",
+      "/operator/manual-entry",
+      "/operator/pass-verification"
+    ],
+    "leaves_skipped": [],
+    "api_failures": [],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Operator console displays gate operations/desk scanner and transaction history with live status. | Tested 6 leaves. Bell: Bell button not found in desktop shell. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/gate/5f2183c9-51ae-4677-8f38-52a17bbe0538",
+    "bell_tested": false,
+    "bell_opened": false,
+    "bell_notes": "Bell button not found in desktop shell",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "Operator console displays gate operations/desk scanner and transaction history with live status.",
+    "passed": true
+  },
+  {
+    "role": "supervisor",
+    "leaves_tested": [
+      "/supervisor",
+      "/supervisor/approvals",
+      "/supervisor/gates/live",
+      "/supervisor/gates/activity",
+      "/supervisor/gates/wall",
+      "/supervisor/profile",
+      "/supervisor/response/escalations"
+    ],
+    "leaves_skipped": [
+      "/supervisor/shift/live",
+      "/supervisor/team/workers",
+      "/supervisor/reports",
+      "/supervisor/shift/handover",
+      "/supervisor/shift/history",
+      "/supervisor/team/shifts",
+      "/supervisor/team/curfew",
+      "/supervisor/response/incidents",
+      "/supervisor/response/exceptions"
+    ],
+    "api_failures": [
+      "404 /api/dev/contact"
+    ],
+    "error_boundaries": [
+      "/supervisor/approvals: Something went wrong",
+      "/supervisor/response/escalations: Something went wrong"
+    ],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Supervisor console displays shift gate monitoring, guard escalations, and approvals. | Tested 7 leaves. Bell: Defect: Bell at z-20 intercepted by sticky header. Opened after DOM click fallback.. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/supervisor",
+    "bell_tested": true,
+    "bell_opened": true,
+    "bell_notes": "Defect: Bell at z-20 intercepted by sticky header. Opened after DOM click fallback.",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "Supervisor console displays shift gate monitoring, guard escalations, and approvals.",
+    "passed": false
+  },
+  {
+    "role": "mess_incharge",
+    "leaves_tested": [
+      "/mess",
+      "/mess/meal-attendance",
+      "/mess/menu-management",
+      "/mess/daily-meal-counts",
+      "/mess/consumption-reports",
+      "/mess/inventory-stock",
+      "/mess/special-events"
+    ],
+    "leaves_skipped": [
+      "/mess/reviews",
+      "/mess/mess-issues",
+      "/mess/operational-requests",
+      "/mess/verify-token",
+      "/mess/scan"
+    ],
+    "api_failures": [
+      "429 /api/campus-extra/calendar?month=2026-10",
+      "404 /api/mess/attendance",
+      "404 /api/mess/meal-counts"
+    ],
+    "error_boundaries": [],
+    "stuck_loaders": [],
+    "dashboard_sane": true,
+    "notes": "Mess Incharge console displays meal counters, tokens, and mess operational metrics. | Tested 7 leaves. Bell: Bell dropdown opened and rendered notifications/filters. Modal: No safe modal/drawer trigger found on page.",
+    "login_ok": true,
+    "root_url": "https://monitor.ucej.in/mess",
+    "bell_tested": true,
+    "bell_opened": true,
+    "bell_notes": "Bell dropdown opened and rendered notifications/filters",
+    "modal_tested": false,
+    "modal_opened": false,
+    "modal_notes": "No safe modal/drawer trigger found on page",
+    "dashboard_summary": "Mess Incharge console displays meal counters, tokens, and mess operational metrics.",
+    "passed": true
+  }
+]
