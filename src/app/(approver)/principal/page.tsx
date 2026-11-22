@@ -91,7 +91,9 @@ export default function PrincipalCommandCenter() {
       title="Command Center"
       subtitle="What needs you now — every number is now + vs last week + what to do"
     >
-      {/* ── Headline row: the "what needs me" numbers ── */}
+      {/* ── Headline row: the "what needs me" numbers. PR-05: each tile is a
+            real drill-down to the register that owns the count (no fabricated
+            filter params — these registers don't accept URL filters today). ── */}
       <PrincipalWidgetBoundary>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <PulseTile
@@ -99,20 +101,32 @@ export default function PrincipalCommandCenter() {
             value={counts.pending}
             reference={counts.pending - (digest?.approved ?? 0)}
             referenceLabel="since last week"
+            drillTo="/principal/attention"
+            drillHint="Open queue"
+            onOpen={() => router.push("/principal/attention")}
           />
           <PulseTile
             label="Escalated to you"
             value={counts.escalated}
             higherIsBetter={false}
+            drillTo="/principal/escalations"
+            drillHint="Open escalations"
+            onOpen={() => router.push("/principal/escalations")}
           />
           <PulseTile
             label="Overdue (SLA)"
             value={counts.overdue}
             higherIsBetter={false}
+            drillTo="/principal/attention"
+            drillHint="Open queue"
+            onOpen={() => router.push("/principal/attention")}
           />
           <PulseTile
             label="People waiting"
             value={impact.total}
+            drillTo="/principal/attention"
+            drillHint="Open queue"
+            onOpen={() => router.push("/principal/attention")}
           />
         </div>
       </PrincipalWidgetBoundary>
