@@ -215,6 +215,10 @@ export interface AuthorityDecision {
   reason?: string;
   /** Bounding conditions applied (e.g. "max_duration_days": 3). */
   bounds?: Record<string, unknown>;
+  /** Set when the authority was satisfied via an active delegation. */
+  delegationId?: string;
+  /** Where the authority came from (mirrors the request's source). */
+  authoritySource?: "role" | "delegation" | "emergency_override";
 }
 
 // ── Escalation & SLA ──────────────────────────────────────────────────────
