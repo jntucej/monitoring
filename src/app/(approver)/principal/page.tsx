@@ -14,12 +14,13 @@
  */
 
 import { useApiResource } from "@/hooks/useApiResource";
-import { usePolling } from "@/hooks/usePolling";
+import { useSynchronization } from "@/hooks/useSynchronization";
 import { usePrincipalWorkspace } from "@/hooks/usePrincipalWorkspace";
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/utils";
 import { PrincipalShell } from "@/components/principal/shared/PrincipalShell";
 import { PulseTile } from "@/components/principal/shared/PulseTile";
+import { SynchronizationIndicator } from "@/components/principal/shared/SynchronizationIndicator";
 import { StoryChart } from "@/components/principal/shared/StoryChart";
 import { DecisionCard } from "@/components/principal/_components/DecisionCard";
 import { SectionHeader } from "@/components/principal/shared/SectionHeader";
@@ -65,8 +66,14 @@ export default function PrincipalCommandCenter() {
   const workspace = usePrincipalWorkspace();
   const dash = useApiResource<DashboardResponse>("/api/principal/dashboard");
   const digestRes = useApiResource<DigestResponse>("/api/principal/digest?range=week");
-  // Keep the "now" figures fresh without hammering the API.
-  usePolling(dash.refresh, { intervalMs: 60_000, enabled: !dash.loading && !dash.error });
+  // Keep the "now" figures fresh without hammering the API, and track an
+  // HONEST synchronization state (refresh cadence + stale + connection) —
+  // never a false "live" indicator (PR-14).
+  const sync = useSynchronization({
+    refresh: dash.refresh,
+    intervalMs: 60_000,
+    enabled: !dash.loading && !dash.error,
+  });
 
   if (dash.loading && !dash.data) {
     return (
@@ -90,6 +97,7 @@ export default function PrincipalCommandCenter() {
     <PrincipalShell
       title="Command Center"
       subtitle="What needs you now — every number is now + vs last week + what to do"
+      actions={<SynchronizationIndicator sync={sync} />}
     >
       {/* ── Headline row: the "what needs me" numbers. PR-05: each tile is a
             real drill-down to the register that owns the count (no fabricated

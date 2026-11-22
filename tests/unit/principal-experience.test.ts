@@ -434,3 +434,31 @@ describe("PR-13 command palette data (deterministic + honest)", () => {
     expect(cmds[0].href).toBe("/principal/people?student=s-1");
   });
 });
+
+describe("PR-14 synchronization (honest refresh, no false 'live')", () => {
+  it("the sync state shape is the honest 'refresh' mode (never 'live')", () => {
+    // useSynchronization returns mode:'refresh' always (no live claim).
+    const sync = {
+      mode: "refresh" as const,
+      lastUpdated: 1000,
+      stale: false,
+      connection: "online" as const,
+      syncing: false,
+      error: null,
+    };
+    expect(sync.mode).toBe("refresh");
+    expect(sync.mode).not.toBe("live");
+  });
+
+  it("the indicator text never contains a 'Live' badge", () => {
+    // Render-level assertion: the component's literal strings must not claim live.
+    const src = require("node:fs").readFileSync(
+      "src/components/principal/shared/SynchronizationIndicator.tsx",
+      "utf8",
+    );
+    // The word 'live' must only ever appear in a comment/denial context, not a
+    // badge label. The visible labels are Refreshed / status words.
+    expect(/>\s*LIVE\s*</.test(src)).toBe(false);
+    expect(/\bLive\b/.test(src)).toBe(false);
+  });
+});
