@@ -27,7 +27,11 @@ async function handleGet(req: any, { auth }: { auth: AuthContext }) {
     let itemsQuery: string;
     const params: any[] = [];
     if (applicableTypes && applicableTypes.length > 0) {
-      params.push(day.id, JSON.stringify(applicableTypes));
+      // Postgres array literals use {"A","B"} braces, NOT JSON ["A","B"]
+      // brackets. Passing JSON.stringify() to a ::text[] cast yields
+      // "malformed array literal". Build the PG literal explicitly.
+      const pgArrayLiteral = `{${applicableTypes.map((t) => `"${t}"`).join(",")}}`;
+      params.push(day.id, pgArrayLiteral);
       itemsQuery = `SELECT mi.id, mi.code, mi.label, mi.sort_order,
                            COALESCE(mdi.is_available, TRUE) AS is_available,
                            COALESCE(mdi.is_available, TRUE) AS isAvailable
