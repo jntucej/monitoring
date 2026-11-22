@@ -11,7 +11,8 @@ import {
   Inbox,
   ChevronRight,
 } from "lucide-react";
-import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 
 /* ── response shape (mirrors /api/admin/exceptions) ── */
@@ -105,96 +106,9 @@ function AdminExceptionsInner() {
   const [activeException, setActiveException] = useState<ExceptionRow | null>(null);
 
   /** Standardized inspection model for a scan exception (context → timeline → actions). */
-  const exceptionInspection = activeException
-    ? {
-        kind: "scan exception",
-        title: activeException.name ?? activeException.roll ?? "Unknown person",
-        subtitle: activeException.roll,
-        status: (
-          <span
-            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-              /denied|rejected|blocked/i.test(String(activeException.reason ?? ""))
-                ? "bg-rose-500/15 text-action-danger"
-                : activeException.is_correction
-                  ? "bg-amber-500/15 text-action-warning"
-                  : "bg-bg-elevated text-text-muted"
-            }`}
-          >
-            {/denied|rejected|blocked/i.test(String(activeException.reason ?? ""))
-              ? "Denied"
-              : activeException.is_correction
-                ? "Correction"
-                : "Flagged"}
-          </span>
-        ),
-        sections: [
-          {
-            title: "Context",
-            content: (
-              <KVPairs
-                items={[
-                  {
-                    label: "Gate",
-                    value: activeException.gate_name ?? activeException.gate_id ?? "—",
-                  },
-                  { label: "Direction", value: activeException.direction },
-                  { label: "Scan type", value: activeException.scan_type ?? "auto" },
-                  {
-                    label: "Person type",
-                    value: activeException.person_type ?? "—",
-                  },
-                  ...(activeException.reason
-                    ? [{ label: "Reason", value: activeException.reason }]
-                    : []),
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Timeline",
-            content: (
-              <Timeline
-                items={[
-                  {
-                    label: "Scan recorded",
-                    time: new Date(activeException.timestamp).toLocaleString(),
-                    tone: "neutral",
-                  },
-                  ...(activeException.is_correction
-                    ? [{
-                        label: "Manual correction",
-                        detail: "Recorded by a gate operator",
-                        tone: "warn" as const,
-                      }]
-                    : []),
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Actions",
-            content: (
-              <div className="flex flex-wrap gap-2">
-                {activeException.roll ? (
-                  <InspectorButton
-                    href={`/admin/students/${activeException.roll}`}
-                    variant="primary"
-                  >
-                    <ChevronRight className="size-3.5" /> Student record
-                  </InspectorButton>
-                ) : null}
-                <InspectorButton
-                  href={`/admin/gates/${activeException.gate_id ?? ""}`}
-                  variant="ghost"
-                >
-                  <ChevronRight className="size-3.5" /> Gate detail
-                </InspectorButton>
-              </div>
-            ),
-          },
-        ],
-      }
-    : null;
+  /** Standardized inspection model for a scan exception (the registry). */
+  const exceptionInspection = activeException ? scanInspection(activeException) : null;
+
 
   const fmtTime = (iso: string | null | undefined) =>
     iso

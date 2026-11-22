@@ -6,8 +6,8 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
-import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
-import { ChevronRight } from "lucide-react";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { visitorInspection as visitorModel } from "@/components/shared/inspectionModels";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
 
 interface VisitorRow {
@@ -54,91 +54,42 @@ function statusBadge(s: string) {
 function AdminVisitorsInner() {
   const [rows, setRows] = useState<VisitorRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/visitors", { headers: getAuthHeaders(), cache: "no-store" });
+      if (!res.ok) return;
+      const json = await res.json();
+      const arr = (json?.data ?? json ?? []) as Array<Record<string, unknown>>;
+      setRows(
+        arr.map((v) => ({
+          id: String(v.id ?? ""),
+          name: (v.name ?? null) as string | null,
+          purpose: (v.purpose ?? null) as string | null,
+          host: (v.host ?? null) as string | null,
+          gate: (v.gate ?? v.gate_id ?? null) as string | null,
+          status: String(v.status ?? "UNKNOWN"),
+          checkInAt: (v.checkedInAt ?? v.checkInAt ?? null) as string | null,
+          checkOutAt: (v.checkedOutAt ?? v.checkOutAt ?? null) as string | null,
+        })),
+      );
+    } catch {
+      /* non-fatal */
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   const [query, setQuery] = usePersistentQuery("gate-admin-visitors-query");
 
   const [activeVisitor, setActiveVisitor] = useState<VisitorRow | null>(null);
 
-  /** Standardized inspection model for a visitor (context → check-in timeline → actions). */
-  const visitorInspection = activeVisitor
-    ? {
-        kind: "visitor",
-        title: activeVisitor.name ?? "Unknown visitor",
-        subtitle: activeVisitor.purpose ?? undefined,
-        status: (
-          <span
-            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadge(activeVisitor.status)}`}
-          >
-            {activeVisitor.status}
-          </span>
-        ),
-        sections: [
-          {
-            title: "Context",
-            content: (
-              <KVPairs
-                items={[
-                  { label: "Purpose", value: activeVisitor.purpose ?? "—" },
-                  { label: "Host", value: activeVisitor.host ?? "—" },
-                  {
-                    label: "Gate",
-                    value: activeVisitor.gate ? (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="size-3.5" />
-                        {activeVisitor.gate}
-                      </span>
-                    ) : "—",
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Visit timeline",
-            collapsible: true,
-            content: (
-              <KVPairs
-                items={[
-                  {
-                    label: "Checked in",
-                    value: activeVisitor.checkInAt
-                      ? new Date(activeVisitor.checkInAt).toLocaleString("en-IN")
-                      : "—",
-                  },
-                  {
-                    label: "Checked out",
-                    value: activeVisitor.checkOutAt
-                      ? new Date(activeVisitor.checkOutAt).toLocaleString("en-IN")
-                      : "Still on campus",
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Actions",
-            content: activeVisitor.gate ? (
-              <a
-                href={`/admin/gates/${encodeURIComponent(activeVisitor.gate)}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
-              >
-                <ChevronRight className="size-3.5" /> Gate detail
-              </a>
-            ) : (
-              <span className="text-xs text-text-muted">No gate link recorded.</span>
-            ),
-          },
-        ],
-      }
-    : null;
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try { setRows(await fetchVisitors()); }
-    catch (e) { console.error("visitors", e); }
-    finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
+  /** Standardized inspection model for a visitor (the registry). */
+  const activeVisitorModel = activeVisitor ? visitorModel(activeVisitor) : null;
 
   const filtered = query.trim()
     ? rows.filter((r) =>
@@ -235,7 +186,7 @@ function AdminVisitorsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspector inspection={visitorInspection} onClose={() => setActiveVisitor(null)} />
+      <EntityInspector inspection={activeVisitorModel} onClose={() => setActiveVisitor(null)} />
     </div>
   );
 }

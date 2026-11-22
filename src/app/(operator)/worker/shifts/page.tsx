@@ -6,13 +6,23 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
 import { Loader2, Clock, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 
 interface MovementRow {
   id: string;
   direction: string;
   gate_name?: string;
+  gate_id?: string | null;
   is_manual?: boolean;
   timestamp: string;
+  roll?: string | null;
+  name?: string | null;
+  person_type?: string | null;
+  reason?: string | null;
+  is_correction?: boolean | null;
+  scan_type?: string | null;
 }
 
 interface TodayShiftRow {
@@ -44,6 +54,7 @@ function WorkerShiftsInner() {
   const todayShift = data?.data?.todayShifts?.[0];
 
   const busy = loading && !data;
+  const [activeMove, setActiveMove] = useState<MovementRow | null>(null);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
@@ -95,7 +106,11 @@ function WorkerShiftsInner() {
           ) : (
             <div className="divide-y divide-slate-800">
               {myRecent.map((m) => (
-                <div key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
+                <div
+                  key={m.id}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                  onClick={() => setActiveMove(m as any)}
+                >
                   <div className="flex items-center gap-2 min-w-0">
                     <ArrowRight
                       className={`h-4 w-4 shrink-0 ${m.direction === "IN" ? "text-action-success" : "text-text-muted"}`}
@@ -120,6 +135,25 @@ function WorkerShiftsInner() {
           )}
         </div>
       </OperatorWidgetBoundary>
+
+      <EntityInspector
+        inspection={activeMove
+          ? scanInspection({
+              id: activeMove.id,
+              roll: activeMove.roll ?? null,
+              name: activeMove.name ?? null,
+              person_type: activeMove.person_type ?? null,
+              direction: activeMove.direction,
+              reason: activeMove.reason ?? null,
+              gate_id: activeMove.gate_id ?? null,
+              gate_name: activeMove.gate_name ?? null,
+              timestamp: activeMove.timestamp,
+              scan_type: activeMove.scan_type ?? (activeMove.is_manual ? "manual" : null),
+              is_correction: activeMove.is_correction ?? null,
+            })
+          : null}
+        onClose={() => setActiveMove(null)}
+      />
     </div>
   );
 }

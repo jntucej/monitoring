@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { PermissionRow, type PermissionItem } from "./PermissionRow";
 import { BulkActionsBar } from "./BulkActionsBar";
 import { PermissionDetailPanel } from "./PermissionDetailPanel";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { richTicketInspection } from "@/components/shared/inspectionModels";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
@@ -49,6 +51,7 @@ export function PermissionList({
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedTickets, setSelectedTickets] = useState<Set<string>>(new Set());
   const [activeDetailTicket, setActiveDetailTicket] = useState<string | null>(null);
+  const [activeInspectTicket, setActiveInspectTicket] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const addToast = useUIStore((s) => s.addToast);
   const viewerRole = useAuthStore((s) => s.role);
@@ -333,7 +336,7 @@ export function PermissionList({
                   request={req}
                   isSelected={selectedTickets.has(req.ticket_number)}
                   onToggleSelect={handleToggleSelect}
-                  onViewDetails={(ticket) => setActiveDetailTicket(ticket)}
+                  onViewDetails={(ticket) => setActiveInspectTicket(ticket)}
                   onQuickApprove={(ticket) => handleSingleAction(ticket, "APPROVE")}
                   onQuickReject={(ticket) => handleSingleAction(ticket, "REJECT")}
                   loadingAction={actionLoading}
@@ -352,6 +355,43 @@ export function PermissionList({
         onClear={() => setSelectedTickets(new Set())}
         isLoading={actionLoading}
       />
+
+      {activeInspectTicket && (
+        (() => {
+          const item = permissions.find((p) => p.ticket_number === activeInspectTicket) ?? null;
+          const inspection = item
+            ? richTicketInspection(
+                {
+                  ticket_number: item.ticket_number,
+                  workflow_type: item.workflow_type,
+                  status: item.status,
+                  current_stage: item.current_stage,
+                  reason: item.reason ?? null,
+                  from_date: item.from_date ?? item.fromDate ?? null,
+                  to_date: item.to_date ?? item.toDate ?? null,
+                  student: item.student ?? null,
+                  sla_deadline: item.sla_deadline ?? null,
+                },
+                () => {
+                  setActiveInspectTicket(null);
+                  setActiveDetailTicket(item.ticket_number);
+                },
+                item.stage_history.map((h) => ({
+                  actorName: h.actorName,
+                  action: h.action,
+                  toStage: h.toStage,
+                  timestamp: h.timestamp,
+                })),
+              )
+            : null;
+          return (
+            <EntityInspector
+              inspection={inspection}
+              onClose={() => setActiveInspectTicket(null)}
+            />
+          );
+        })()
+      )}
 
       {activeDetailTicket && (
         <PermissionDetailPanel

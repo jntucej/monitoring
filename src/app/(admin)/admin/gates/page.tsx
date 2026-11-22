@@ -9,8 +9,8 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
-import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
-import { ChevronRight } from "lucide-react";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { gateInspection } from "@/components/shared/inspectionModels";
 
 interface AdminGate {
   id: string;
@@ -37,59 +37,8 @@ export default function AdminGatesPage() {
   const [updatingMode, setUpdatingMode] = useState<boolean>(false);
   const [activeGate, setActiveGate] = useState<AdminGate | null>(null);
 
-  /** Standardized inspection model for a gate (overview → status → actions). */
-  const gateInspection = activeGate
-    ? {
-        kind: "gate",
-        title: activeGate.name,
-        subtitle: activeGate.gateCode,
-        status: (
-          <span
-            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
-              activeGate.isActive
-                ? "bg-emerald-500/15 text-action-success"
-                : "bg-rose-500/15 text-action-danger"
-            }`}
-          >
-            {activeGate.isActive ? "Active" : "Inactive"}
-          </span>
-        ),
-        sections: [
-          {
-            title: "Overview",
-            content: (
-              <KVPairs
-                items={[
-                  { label: "Code", value: <span className="font-mono">{activeGate.gateCode}</span> },
-                  { label: "Location", value: activeGate.location },
-                  { label: "Type", value: activeGate.type },
-                  { label: "Audience", value: activeGate.audience ?? "all" },
-                  {
-                    label: "Operations mode",
-                    value: gateMode,
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Actions",
-            content: (
-              <div className="flex flex-wrap gap-2">
-                <InspectorButton
-                  href={`/admin/gates/${activeGate.id}`}
-                  variant="primary"
-                >
-                  <ChevronRight className="size-3.5" /> Status & telemetry
-                </InspectorButton>
-              </div>
-            ),
-          },
-        ],
-        detailHref: `/admin/gates/${activeGate.id}`,
-        detailLabel: "Gate status & telemetry",
-      }
-    : null;
+  /** Standardized inspection model for a gate (the registry). */
+  const gateInspectionModel = activeGate ? gateInspection(activeGate) : null;
 
   const fetchGateMode = async () => {
     try {
@@ -435,7 +384,7 @@ export default function AdminGatesPage() {
         )}
       </WidgetBoundary>
 
-      <EntityInspector inspection={gateInspection} onClose={() => setActiveGate(null)} />
+      <EntityInspector inspection={gateInspectionModel} onClose={() => setActiveGate(null)} />
     </div>
   );
 }

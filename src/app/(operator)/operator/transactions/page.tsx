@@ -8,6 +8,8 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { scanInspection } from "@/components/shared/inspectionModels";
 import {
   Loader2,
   ListOrdered,
@@ -73,6 +75,7 @@ function OperatorTransactionsInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled });
 
   const [filter, setFilter] = useState<DirectionFilter>("ALL");
+  const [activeTxn, setActiveTxn] = useState<TransactionRow | null>(null);
   const busy = loading && !data;
   const rows = data?.data?.transactions ?? [];
   const counts = data?.data?.counts;
@@ -232,7 +235,11 @@ function OperatorTransactionsInner() {
               {/* Mobile: stacked cards — no horizontal scroll */}
               <ul className="sm:hidden divide-y divide-border">
                 {filtered.map((r) => (
-                  <li key={r.id} className="px-3 py-3 space-y-1.5">
+                  <li
+                    key={r.id}
+                    className="px-3 py-3 space-y-1.5 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                    onClick={() => setActiveTxn(r)}
+                  >
                     <div className="flex items-center justify-between gap-2 min-w-0">
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-text-primary truncate">
@@ -282,7 +289,11 @@ function OperatorTransactionsInner() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {filtered.map((r) => (
-                      <tr key={r.id} className="hover:bg-bg-surface transition-colors">
+                      <tr
+                        key={r.id}
+                        className="hover:bg-bg-surface transition-colors cursor-pointer"
+                        onClick={() => setActiveTxn(r)}
+                      >
                         <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                           {fmtTime(r.timestamp)}
                         </td>
@@ -342,7 +353,9 @@ function OperatorTransactionsInner() {
             </>
           )}
         </div>
-      </OperatorWidgetBoundary>
+      
+      <EntityInspector inspection={activeTxn ? scanInspection(activeTxn) : null} onClose={() => setActiveTxn(null)} />
+</OperatorWidgetBoundary>
 
     </div>
   );
