@@ -47,6 +47,7 @@ describe("institutional decision loop (DB-backed)", () => {
       subjectType: "student",
       subjectId: "23JJ1A0599",
       origin: "decision-e2e",
+      payload: { duration_days: 15 },
       actor: { id: managerId, role: "hostel_manager", roleContext: "administrative" },
     });
 
@@ -89,6 +90,7 @@ describe("institutional decision loop (DB-backed)", () => {
       subjectType: "student",
       subjectId: "23JJ1A0599",
       origin: "decision-e2e-approve",
+      payload: { duration_days: 15 },
       actor: { id: principalId, role: "principal", roleContext: "administrative" },
     });
 
@@ -158,6 +160,7 @@ describe("institutional decision loop (DB-backed)", () => {
       subjectType: "student",
       subjectId: "23JJ1A0599",
       origin: "decision-delegation",
+      payload: { duration_days: 15 },
       actor: { id: vpId, role: "vice_principal", roleContext: "administrative" },
     });
 

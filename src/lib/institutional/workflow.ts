@@ -246,18 +246,18 @@ export async function transitionWorkflow(
   const toState = resolveWorkflowTarget(fromState, action);
 
   // Authority check (PR-04). The bounds are the case's request payload
-  // (duration, risk, ...) so a policy's max_* bound can be tested.
-  const authorityReq: AuthorityRequest & Record<string, unknown> = {
+  // (durationDays, risk, ...) so a policy's max_* bound can be tested.
+  const authorityReq = {
     actorId: actor.id,
     role: actor.role,
     context: actor.roleContext,
     operation: action as AuthorityRequest["operation"],
     caseType: definitionCode as AuthorityRequest["caseType"],
-    scope: "institution",
-    authoritySource: "role",
+    scope: "institution" as const,
+    authoritySource: "role" as const,
     ...bounds,
   };
-  const authority = await authorize(authorityReq);
+  const authority = await authorize(authorityReq as AuthorityRequest);
   if (!authority.allowed) {
     // Authority exceeded → do not move; record the refusal so PR-05 can
     // escalate it. The instance stays in fromState. The refusal is

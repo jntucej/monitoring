@@ -86,6 +86,7 @@ describe("workflow + authority end-to-end (DB-backed)", () => {
       subjectType: "student",
       subjectId: "23JJ1A0599",
       origin: "workflow-e2e",
+      payload: { duration_days: 15 },
       actor: { id: managerId, name: "test-manager", role: "hostel_manager", roleContext: "administrative" },
     });
 

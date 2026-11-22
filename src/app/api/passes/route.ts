@@ -8,6 +8,8 @@ import { validatePassRequestPayload } from "@/lib/validation";
 import { checkIdempotency, storeIdempotency } from "@/lib/idempotency";
 import type { AuthContext } from "@/lib/authContext";
 import type { Student, GatePass } from "@/lib/types";
+import { createCase, linkCaseToRecord } from "@/lib/institutional/cases";
+import { generateAttention } from "@/lib/institutional/attention";
 
 const ADMIN_ROLES = ["admin", "sysadmin", "operator", "principal", "supervisor", "principal"];
 
@@ -206,6 +208,46 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
         { success: false, error: { code: "STUDENT_NOT_FOUND", message: "No student with this roll number found" } },
         { status: 404 }
       );
+    }
+
+    // PR-13 (gate-pass migration, step 1 of 2): every gate pass is now
+    // ALSO a GATE_PASS case on the universal case layer. The pass row
+    // remains the source of truth for the pass itself; the case is the
+    // institutional tracking record that a decision (approve/reject)
+    // moves. This is additive — the old path is untouched, so a
+    // migration failure here cannot break pass creation.
+    try {
+      const durationMs = new Date(to ?? 0).getTime() - new Date(from ?? 0).getTime();
+      const durationDays = Number.isFinite(durationMs) ? Math.max(0, Math.ceil(durationMs / 86_400_000)) : 0;
+      const c = await createCase({
+        type: "gate_pass",
+        subjectType: "student",
+        subjectId: roll,
+        origin: "gate_pass_request",
+        risk: durationDays > 3 ? "MEDIUM" : "LOW",
+        payload: {
+          reason,
+          duration_days: durationDays,
+        },
+        actor: {
+          id: auth.userId,
+          name: auth.email,
+          role: auth.role,
+          roleContext: "administrative",
+        },
+      });
+      const passId = (pass as { id?: string }).id;
+      if (c && passId) {
+        await linkCaseToRecord(c.id, "gate_pass", passId, {
+          id: auth.userId,
+          name: auth.email,
+          role: auth.role,
+          roleContext: "administrative",
+        });
+      }
+    } catch (caseErr) {
+      // The case layer must never break pass creation.
+      console.error("gate_pass case link failed:", caseErr);
     }
 
     const payload = { success: true, data: pass };

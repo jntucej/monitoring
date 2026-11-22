@@ -264,6 +264,34 @@ export async function addCaseEvidence(input: AddEvidenceInput): Promise<{ eviden
   return { evidence_id: rows[0].evidence_id };
 }
 
+// ── Domain linking (PR-13) ──────────────────────────────────────────────
+
+/**
+ * Link a case to an existing domain record without copying it. For the
+ * gate-pass migration, a GATE_PASS case opened at pass creation points
+ * at the gate_passes row; a later decision (approve/reject) is the one
+ * that moves the pass's admin_status. The case layer only stores the
+ * link; the domain table stays the source of truth for the pass itself.
+ */
+export async function linkCaseToRecord(
+  caseId: string,
+  recordKind: string,
+  recordId: string,
+  actor?: Actor,
+): Promise<void> {
+  await addCaseEvent(caseId, "record_linked", {
+    record_kind: recordKind,
+    record_id: recordId,
+  }, actor);
+  await query(
+    `INSERT INTO public.case_evidence (case_id, kind, reference_id)
+     VALUES ($1, $2, $3)`,
+    [caseId, recordKind, recordId],
+  ).catch(() => {
+    /* linking is advisory; a FK mismatch must not break pass creation */
+  });
+}
+
 // ── Event stream ──────────────────────────────────────────────────────────
 
 export async function addCaseEvent(
