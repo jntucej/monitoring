@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
-import {Search, CheckCircle2, XCircle, Clock, QrCode}  from "lucide-react";
+import {Search, CheckCircle2, XCircle, Clock, QrCode, ChevronRight}  from "lucide-react";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,6 +73,78 @@ function AdminPassesInner() {
   const pending = rows.filter((r) => r.status.toUpperCase() === "PENDING" || r.status.toUpperCase() === "REQUESTED").length;
   const active = rows.filter((r) => ["APPROVED", "ACTIVE", "GRANTED"].includes(r.status.toUpperCase())).length;
 
+  const [activePass, setActivePass] = useState<PassRow | null>(null);
+
+  /** Standardized inspection model for a pass (overview → context → history → actions). */
+  const passInspection = activePass
+    ? {
+        kind: "gate pass",
+        title: activePass.name ?? activePass.roll ?? "Pass record",
+        subtitle: activePass.roll ?? activePass.id,
+        status: (
+          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusBadge(activePass.status)}`}>
+            {activePass.status}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Type", value: activePass.type.replace("_", " ") },
+                  { label: "Status", value: activePass.status },
+                  ...(activePass.reason ? [{ label: "Reason", value: activePass.reason }] : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Validity",
+            content: (
+              <KVPairs
+                items={[
+                  {
+                    label: "Created",
+                    value: activePass.createdAt
+                      ? new Date(activePass.createdAt).toLocaleString("en-IN")
+                      : "—",
+                  },
+                  {
+                    label: "Expires",
+                    value: activePass.expiresAt
+                      ? new Date(activePass.expiresAt).toLocaleString("en-IN")
+                      : "No expiry",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton
+                  href={`/admin/students/${activePass.roll ?? activePass.id}`}
+                  variant="ghost"
+                >
+                  <ChevronRight className="size-3.5" /> Student profile
+                </InspectorButton>
+                <InspectorButton
+                  href="/admin/institutional/cases"
+                  variant="ghost"
+                >
+                  <ChevronRight className="size-3.5" /> Linked cases
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: `/admin/passes`,
+        detailLabel: "All passes",
+      }
+    : null;
+
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4 py-4 md:py-6">
@@ -89,22 +163,38 @@ function AdminPassesInner() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5" /> Total</p>
-          <p className="text-2xl font-bold text-text-primary tabular-nums">{rows.length}</p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-action-warning" /> Pending</p>
-          <p className="text-2xl font-bold text-action-warning tabular-nums">{pending}</p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-action-success" /> Active</p>
-          <p className="text-2xl font-bold text-action-success tabular-nums">{active}</p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-action-danger" /> Closed</p>
-          <p className="text-2xl font-bold text-action-danger tabular-nums">{rows.length - pending - active}</p>
-        </div>
+        <HoverPreview
+          preview={<MetricPreview label="Total" value={rows.length} hint="Latest 200 pass records" />}
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted flex items-center gap-1.5"><QrCode className="w-3.5 h-3.5" /> Total</p>
+            <p className="text-2xl font-bold text-text-primary tabular-nums">{rows.length}</p>
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={<MetricPreview label="Pending" value={pending} hint="Awaiting approval — inspect a row for context" />}
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-action-warning" /> Pending</p>
+            <p className="text-2xl font-bold text-action-warning tabular-nums">{pending}</p>
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={<MetricPreview label="Active" value={active} hint="Approved / granted / in effect" />}
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-action-success" /> Active</p>
+            <p className="text-2xl font-bold text-action-success tabular-nums">{active}</p>
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={<MetricPreview label="Closed" value={rows.length - pending - active} hint="Rejected, completed, or expired" />}
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-action-danger" /> Closed</p>
+            <p className="text-2xl font-bold text-action-danger tabular-nums">{rows.length - pending - active}</p>
+          </div>
+        </HoverPreview>
       </div>
 
       <WidgetBoundary title="Pass records">
@@ -135,7 +225,11 @@ function AdminPassesInner() {
                   <tr><td colSpan={6} className="p-6 text-center text-text-muted">No passes found.</td></tr>
                 )}
                 {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-bg-elevated/40">
+                  <tr
+                    key={r.id}
+                    className="hover:bg-bg-elevated/40 cursor-pointer"
+                    onClick={() => setActivePass(r)}
+                  >
                     <td className="p-3 text-text-primary">{r.name ?? "—"}</td>
                     <td className="p-3 font-mono text-xs text-text-muted">{r.roll ?? "—"}</td>
                     <td className="p-3 text-xs capitalize">{r.type.replace("_", " ")}</td>
@@ -153,6 +247,8 @@ function AdminPassesInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={passInspection} onClose={() => setActivePass(null)} />
     </div>
   );
 }

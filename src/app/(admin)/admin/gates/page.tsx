@@ -9,6 +9,8 @@ import { getAuthHeaders } from "@/lib/utils";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { ChevronRight } from "lucide-react";
 
 interface AdminGate {
   id: string;
@@ -33,6 +35,61 @@ export default function AdminGatesPage() {
   // Gate Operations Mode state
   const [gateMode, setGateMode] = useState<"OPEN" | "CURFEW" | "MAINTENANCE">("OPEN");
   const [updatingMode, setUpdatingMode] = useState<boolean>(false);
+  const [activeGate, setActiveGate] = useState<AdminGate | null>(null);
+
+  /** Standardized inspection model for a gate (overview → status → actions). */
+  const gateInspection = activeGate
+    ? {
+        kind: "gate",
+        title: activeGate.name,
+        subtitle: activeGate.gateCode,
+        status: (
+          <span
+            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+              activeGate.isActive
+                ? "bg-emerald-500/15 text-action-success"
+                : "bg-rose-500/15 text-action-danger"
+            }`}
+          >
+            {activeGate.isActive ? "Active" : "Inactive"}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Code", value: <span className="font-mono">{activeGate.gateCode}</span> },
+                  { label: "Location", value: activeGate.location },
+                  { label: "Type", value: activeGate.type },
+                  { label: "Audience", value: activeGate.audience ?? "all" },
+                  {
+                    label: "Operations mode",
+                    value: gateMode,
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton
+                  href={`/admin/gates/${activeGate.id}`}
+                  variant="primary"
+                >
+                  <ChevronRight className="size-3.5" /> Status & telemetry
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: `/admin/gates/${activeGate.id}`,
+        detailLabel: "Gate status & telemetry",
+      }
+    : null;
 
   const fetchGateMode = async () => {
     try {
@@ -335,7 +392,8 @@ export default function AdminGatesPage() {
                   gates.map((g) => {
                     const isSentinel = g.gateCode.toUpperCase() === SENTINEL_GATE_CODE;
                     return (
-                      <tr key={g.id} className="hover:bg-bg-elevated/50 transition-colors">
+                      <tr key={g.id} onClick={() => setActiveGate(g)}
+                          className="hover:bg-bg-elevated/50 transition-colors cursor-pointer">
                         <td className="py-3 px-4 font-mono font-bold text-text-primary">
                           <span className="flex items-center gap-1.5">
                             {isSentinel && <Lock className="size-3.5 text-action-warning" />}
@@ -376,6 +434,8 @@ export default function AdminGatesPage() {
           <GateDeviceTracker devices={devices} />
         )}
       </WidgetBoundary>
+
+      <EntityInspector inspection={gateInspection} onClose={() => setActiveGate(null)} />
     </div>
   );
 }

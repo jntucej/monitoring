@@ -9,7 +9,10 @@ import {
   Loader2,
   AlertTriangle,
   Inbox,
+  ChevronRight,
 } from "lucide-react";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 
 /* ── response shape (mirrors /api/admin/exceptions) ── */
 
@@ -99,6 +102,100 @@ function AdminExceptionsInner() {
     }
   }, [rows, filter]);
 
+  const [activeException, setActiveException] = useState<ExceptionRow | null>(null);
+
+  /** Standardized inspection model for a scan exception (context → timeline → actions). */
+  const exceptionInspection = activeException
+    ? {
+        kind: "scan exception",
+        title: activeException.name ?? activeException.roll ?? "Unknown person",
+        subtitle: activeException.roll,
+        status: (
+          <span
+            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+              /denied|rejected|blocked/i.test(String(activeException.reason ?? ""))
+                ? "bg-rose-500/15 text-action-danger"
+                : activeException.is_correction
+                  ? "bg-amber-500/15 text-action-warning"
+                  : "bg-bg-elevated text-text-muted"
+            }`}
+          >
+            {/denied|rejected|blocked/i.test(String(activeException.reason ?? ""))
+              ? "Denied"
+              : activeException.is_correction
+                ? "Correction"
+                : "Flagged"}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Context",
+            content: (
+              <KVPairs
+                items={[
+                  {
+                    label: "Gate",
+                    value: activeException.gate_name ?? activeException.gate_id ?? "—",
+                  },
+                  { label: "Direction", value: activeException.direction },
+                  { label: "Scan type", value: activeException.scan_type ?? "auto" },
+                  {
+                    label: "Person type",
+                    value: activeException.person_type ?? "—",
+                  },
+                  ...(activeException.reason
+                    ? [{ label: "Reason", value: activeException.reason }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Timeline",
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: "Scan recorded",
+                    time: new Date(activeException.timestamp).toLocaleString(),
+                    tone: "neutral",
+                  },
+                  ...(activeException.is_correction
+                    ? [{
+                        label: "Manual correction",
+                        detail: "Recorded by a gate operator",
+                        tone: "warn" as const,
+                      }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                {activeException.roll ? (
+                  <InspectorButton
+                    href={`/admin/students/${activeException.roll}`}
+                    variant="primary"
+                  >
+                    <ChevronRight className="size-3.5" /> Student record
+                  </InspectorButton>
+                ) : null}
+                <InspectorButton
+                  href={`/admin/gates/${activeException.gate_id ?? ""}`}
+                  variant="ghost"
+                >
+                  <ChevronRight className="size-3.5" /> Gate detail
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
+
   const fmtTime = (iso: string | null | undefined) =>
     iso
       ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -187,7 +284,11 @@ function AdminExceptionsInner() {
                 {filtered.map((r) => {
                   const tags = tagsForRow(r);
                   return (
-                    <li key={r.id} className="px-3 py-3 space-y-1.5">
+                    <li
+                      key={r.id}
+                      className="px-3 py-3 space-y-1.5 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                      onClick={() => setActiveException(r)}
+                    >
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-text-primary truncate">
@@ -234,7 +335,11 @@ function AdminExceptionsInner() {
                     {filtered.map((r) => {
                       const tags = tagsForRow(r);
                       return (
-                        <tr key={r.id} className="hover:bg-bg-surface transition-colors">
+                        <tr
+                          key={r.id}
+                          className="hover:bg-bg-surface transition-colors cursor-pointer"
+                          onClick={() => setActiveException(r)}
+                        >
                           <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                             {fmtTime(r.timestamp)}
                           </td>
@@ -279,6 +384,8 @@ function AdminExceptionsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={exceptionInspection} onClose={() => setActiveException(null)} />
     </div>
   );
 }

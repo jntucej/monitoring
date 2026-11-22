@@ -3,9 +3,79 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
+import { useState } from "react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 import type { DecisionView } from "@/app/api/principal/decisions/route";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 
 export default function DecisionsPage() {
+  const [active, setActive] = useState<DecisionView | null>(null);
+
+  /** The standardized inspection model for a durable decision. */
+  const inspection = active
+    ? {
+        kind: "decision",
+        title: active.decision_no,
+        subtitle: `${active.operation} · ${active.actor_role}`,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted">
+            {active.resulting_state ?? "—"}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Provenance",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Operation", value: <span className="font-mono">{active.operation}</span> },
+                  { label: "Actor role", value: active.actor_role },
+                  { label: "Role context", value: active.role_context },
+                  {
+                    label: "Authority source",
+                    value: (
+                      <span className="font-mono text-action-primary">{active.authority_source}</span>
+                    ),
+                  },
+                  { label: "Case", value: <span className="font-mono text-xs">{active.case_id}</span> },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Reason",
+            content: <p className="text-xs text-text-secondary">{active.reason}</p>,
+          },
+          {
+            title: "Timeline",
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: "Decision recorded",
+                    time: new Date(active.timestamp).toLocaleString(),
+                    tone: "neutral",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/principal/governance/audit" variant="ghost">
+                  <ExternalLink className="size-3.5" /> Audit trail
+                </InspectorButton>
+                <InspectorButton href="/principal/escalations" variant="ghost">
+                  <ChevronRight className="size-3.5" /> Related escalations
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
   const { data, loading } = useApiResource<{ success: boolean; data: { decisions: DecisionView[]; total: number } }>(
     "/api/principal/decisions?limit=100",
     { ttlMs: 30_000, enabled: true },
@@ -31,7 +101,11 @@ export default function DecisionsPage() {
             </thead>
             <tbody>
               {rows.map((d) => (
-                <tr key={d.id} className="border-b border-border-1 last:border-0">
+                <tr
+                  key={d.id}
+                  className="border-b border-border-1 last:border-0 hover:bg-bg-surface/50 cursor-pointer transition-colors"
+                  onClick={() => setActive(d)}
+                >
                   <td className="p-3 font-mono text-text-primary">{d.decision_no}</td>
                   <td className="p-3 text-text-secondary">{d.operation}</td>
                   <td className="p-3 text-text-secondary">{d.actor_role}</td>
@@ -44,6 +118,8 @@ export default function DecisionsPage() {
           </table>
         </div>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setActive(null)} />
     </div>
   );
 }

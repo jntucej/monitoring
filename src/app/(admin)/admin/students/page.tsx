@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   MiniSparkline, MiniStackedBar, MiniCountPills,
 } from "@/components/admin/kit";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { parseRollNumber } from "@/lib/rollNumber";
@@ -167,6 +169,86 @@ function AdminStudentsInner() {
   const [typeFilter, setTypeFilter] = useState<"all" | "hosteller" | "day_scholar">("all");
   const [active, setActive] = useState<StudentRow | null>(null);
 
+  /** The standardized inspection model for a student row (overview → hostel → actions). */
+  const studentInspection = active
+    ? {
+        kind: "student",
+        title: active.name,
+        subtitle: active.roll ?? active.id,
+        status: (
+          <span
+            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+              active.status === "ACTIVE"
+                ? "bg-emerald-500/15 text-action-success"
+                : "bg-rose-500/15 text-action-danger"
+            }`}
+          >
+            {active.status}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Department", value: active.department ?? "—" },
+                  { label: "Course", value: active.course ?? "—" },
+                  { label: "Year", value: String(active.year ?? "—") },
+                  { label: "Section", value: active.section ?? "—" },
+                  {
+                    label: "Type",
+                    value: active.isHosteller ? "Hosteller" : "Day scholar",
+                  },
+                  ...(active.email
+                    ? [{ label: "Email", value: <span className="flex items-center gap-1"><Mail className="size-3" />{active.email}</span> }]
+                    : []),
+                  ...(active.phone
+                    ? [{ label: "Phone", value: <span className="flex items-center gap-1"><Phone className="size-3" />{active.phone}</span> }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          ...(active.hostelBlock
+            ? [{
+                title: "Hostel",
+                content: (
+                  <KVPairs
+                    columns={1}
+                    items={[
+                      { label: "Block", value: active.hostelBlock },
+                      { label: "Room", value: active.roomNumber ?? "—" },
+                    ]}
+                  />
+                ),
+              }]
+            : []),
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton
+                  href={`/admin/students/${active.roll ?? active.id}`}
+                  variant="primary"
+                >
+                  <ChevronRight className="size-3.5" /> Full profile
+                </InspectorButton>
+                <InspectorButton
+                  href={`/admin/students/${active.roll ?? active.id}`}
+                  variant="ghost"
+                >
+                  Movement history
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: `/admin/students/${active.roll ?? active.id}`,
+        detailLabel: "View full profile",
+      }
+    : null;
+
   const load = useCallback(async () => {
     try {
       setData(await fetchStudents());
@@ -236,46 +318,87 @@ function AdminStudentsInner() {
         </div>
       )}
 
-      {/* KPI row */}
+      {/* KPI row — each card is a hover-preview entry point (the quick
+          overview layer of the inspection hierarchy). */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted">Total students</p>
-          <p className="text-2xl font-bold text-text-primary tabular-nums">
-            {data?.total ?? 0}
-          </p>
-          {data && <MiniSparkline
-            label=""
-            values={[data.total * 0.85, data.total * 0.9, data.total * 0.88, data.total * 0.95, data.total]}
-            width={140}
-            height={24}
-          />}
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted">Active</p>
-          <p className="text-2xl font-bold text-action-primary tabular-nums">
-            {data?.active ?? 0}
-          </p>
-          <MiniCountPills
-            label="by state"
-            counts={[data?.active ?? 0, data?.suspended ?? 0]}
-          />
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted">On campus today</p>
-          <p className="text-2xl font-bold text-action-info tabular-nums">
-            {data?.onCampusToday ?? 0}
-          </p>
-          <p className="text-xs text-text-muted">
-            {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
-          </p>
-        </div>
-        <div className="surface-card p-4">
-          <p className="text-xs text-text-muted">Hostellers</p>
-          <p className="text-2xl font-bold text-unit-c tabular-nums">
-            {data?.byType.find((t) => t.type === "hosteller")?.count ?? 0}
-          </p>
-          <MiniStackedBar label="by type" segments={typeSegments} />
-        </div>
+        <HoverPreview
+          preview={
+            <MetricPreview
+              label="Total students"
+              value={data?.total ?? 0}
+              hint="Full roster across all departments and years"
+            />
+          }
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted">Total students</p>
+            <p className="text-2xl font-bold text-text-primary tabular-nums">
+              {data?.total ?? 0}
+            </p>
+            {data && <MiniSparkline
+              label=""
+              values={[data.total * 0.85, data.total * 0.9, data.total * 0.88, data.total * 0.95, data.total]}
+              width={140}
+              height={24}
+            />}
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={
+            <MetricPreview
+              label="By state"
+              value={`${data?.active ?? 0} active · ${data?.suspended ?? 0} suspended`}
+              hint="Suspended or locked students need a principal decision"
+            />
+          }
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted">Active</p>
+            <p className="text-2xl font-bold text-action-primary tabular-nums">
+              {data?.active ?? 0}
+            </p>
+            <MiniCountPills
+              label="by state"
+              counts={[data?.active ?? 0, data?.suspended ?? 0]}
+            />
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={
+            <MetricPreview
+              label="On campus today"
+              value={data?.onCampusToday ?? 0}
+              hint={`${data?.todayEntries ?? 0} entries · ${data?.todayExits ?? 0} exits so far today`}
+            />
+          }
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted">On campus today</p>
+            <p className="text-2xl font-bold text-action-info tabular-nums">
+              {data?.onCampusToday ?? 0}
+            </p>
+            <p className="text-xs text-text-muted">
+              {data?.todayEntries ?? 0} in · {data?.todayExits ?? 0} out
+            </p>
+          </div>
+        </HoverPreview>
+        <HoverPreview
+          preview={
+            <MetricPreview
+              label="Hostellers"
+              value={data?.byType.find((t) => t.type === "hosteller")?.count ?? 0}
+              hint="Students with a hostel block assigned — curfew applies"
+            />
+          }
+        >
+          <div className="surface-card p-4 h-full cursor-help">
+            <p className="text-xs text-text-muted">Hostellers</p>
+            <p className="text-2xl font-bold text-unit-c tabular-nums">
+              {data?.byType.find((t) => t.type === "hosteller")?.count ?? 0}
+            </p>
+            <MiniStackedBar label="by type" segments={typeSegments} />
+          </div>
+        </HoverPreview>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 section-offscreen">
@@ -455,112 +578,13 @@ function AdminStudentsInner() {
         </div>
       </div>
 
-      {/* Drawer */}
-      {active && (
-        <div className="fixed inset-0 z-[80] flex justify-end">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setActive(null)}
-          />
-          <aside className="surface-card relative w-full max-w-md h-full p-5 overflow-y-auto">
-            <header className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="size-6 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-                  style={{ background: deptColor(active.department) }}
-                >
-                  {initials(active.name)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-text-primary">
-                    {active.name}
-                  </h2>
-                  <p className="text-xs font-mono text-text-muted">
-                    {active.roll ?? "—"}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActive(null)}
-                className="surface-card min-h11 min-w11 flex items-center justify-center hover:bg-bg-surface/60"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </header>
-
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div>
-                <dt className="text-text-muted">Department</dt>
-                <dd className="text-text-primary">{active.department ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Course</dt>
-                <dd className="text-text-primary">{active.course ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Year</dt>
-                <dd className="text-text-primary">{active.year ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Section</dt>
-                <dd className="text-text-primary">{active.section ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Status</dt>
-                <dd className="text-action-primary">{active.status}</dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">Type</dt>
-                <dd className="text-text-primary">
-                  {active.isHosteller ? "Hosteller" : "Day scholar"}
-                </dd>
-              </div>
-              {active.email && (
-                <div className="col-span-2">
-                  <dt className="text-text-muted">Email</dt>
-                  <dd className="flex items-center gap-1 text-text-primary">
-                    <Mail className="size-3.5" /> {active.email}
-                  </dd>
-                </div>
-              )}
-              {active.phone && (
-                <div className="col-span-2">
-                  <dt className="text-text-muted">Phone</dt>
-                  <dd className="flex items-center gap-1 text-text-primary">
-                    <Phone className="size-3.5" /> {active.phone}
-                  </dd>
-                </div>
-              )}
-              {active.hostelBlock && (
-                <div className="col-span-2">
-                  <dt className="text-text-muted">Hostel</dt>
-                  <dd className="text-text-primary">
-                    {active.hostelBlock} · Room {active.roomNumber ?? "—"}
-                  </dd>
-                </div>
-              )}
-            </dl>
-            <div className="surface-card mt-6 pt-4">
-              <a
-                href={`/admin/students/${active.roll ?? active.id}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-action-primary hover:underline"
-              >
-                View full profile <ChevronRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </aside>
-        </div>
-      )}
+      <EntityInspector inspection={studentInspection} onClose={() => setActive(null)} />
     </div>
   );
 }
 
 export default function AdminStudentsPage() {
   return (
-    
-      <AdminStudentsInner />
-    
-    
-
+    <AdminStudentsInner />
   );
 }

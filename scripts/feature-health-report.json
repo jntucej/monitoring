@@ -2,20 +2,20 @@
   {
     "feature": "student.apply-leave",
     "role": "student",
-    "ok": true,
-    "detail": "request submitted, confirmation shown"
+    "ok": false,
+    "detail": "login-failed"
   },
   {
     "feature": "operator.scan-gate",
     "role": "operator",
-    "ok": true,
-    "detail": "gate desk IN button present"
+    "ok": false,
+    "detail": "login-failed"
   },
   {
     "feature": "parent.view-child-status",
     "role": "parent",
-    "ok": true,
-    "detail": "/guardian route exists (auth-gated for this cred)"
+    "ok": false,
+    "detail": "no child-status content on /guardian"
   },
   {
     "feature": "principal.see-inbox",
@@ -44,7 +44,67 @@
   {
     "feature": "worker.see-work",
     "role": "worker",
+    "ok": false,
+    "detail": "login-failed"
+  },
+  {
+    "feature": "caretaker.acknowledge-complaint",
+    "role": "caretaker",
     "ok": true,
-    "detail": "worker work board renders"
+    "detail": "caretaker complaint console renders"
+  },
+  {
+    "feature": "deputy_warden.approve-routine-leave",
+    "role": "deputy_warden",
+    "ok": true,
+    "detail": "deputy-warden permission queue renders"
+  },
+  {
+    "feature": "hostel_manager.see-occupancy",
+    "role": "hostel_manager",
+    "ok": true,
+    "detail": "hostel-manager occupancy panel renders"
+  },
+  {
+    "feature": "faculty.mark-attendance",
+    "role": "faculty",
+    "ok": false,
+    "detail": "login-failed"
+  },
+  {
+    "feature": "vp.see-vp-queue",
+    "role": "vice_principal",
+    "ok": true,
+    "detail": "VP queue renders"
+  },
+  {
+    "feature": "oie.see-queue",
+    "role": "oie",
+    "ok": true,
+    "detail": "OIE queue renders"
+  },
+  {
+    "feature": "exam_branch.complete-handoff",
+    "role": "exam_branch",
+    "ok": false,
+    "detail": "no exam-branch content"
+  },
+  {
+    "feature": "exam_superintendent.see-access",
+    "role": "exam_superintendent",
+    "ok": true,
+    "detail": "exam-superintendent access/incident surface renders"
+  },
+  {
+    "feature": "mess_incharge.serve-meal",
+    "role": "mess_incharge",
+    "ok": true,
+    "detail": "mess-incharge menu/token surface renders"
+  },
+  {
+    "feature": "visitor.check-in",
+    "role": "visitor",
+    "ok": false,
+    "detail": "login-failed"
   }
 ]

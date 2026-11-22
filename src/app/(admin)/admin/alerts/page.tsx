@@ -4,7 +4,8 @@ import { useState } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { DataTable } from "@/components/ui/DataTable";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
-import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle, Check, RefreshCw, ExternalLink, ShieldCheck } from "lucide-react";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 import { useToast } from "@/components/ui/toast";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { getAuthHeaders } from "@/lib/utils";
@@ -27,7 +28,127 @@ function AdminAlertsInner() {
   const [filter, setFilter] = useState<"active" | "resolved" | "all">("active");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<Alert | null>(null);
+  const [activeAlert, setActiveAlert] = useState<Alert | null>(null);
   const { addToast } = useToast();
+
+  /** Standardized inspection model for an alert (what → who/what affected →
+   *  evidence → responsible authority → actions). */
+  const alertInspection = activeAlert
+    ? {
+        kind: "alert",
+        title: activeAlert.title,
+        subtitle: activeAlert.message,
+        status: activeAlert.resolved ? (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+            Resolved
+          </span>
+        ) : (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/15 text-action-danger">
+            Open
+          </span>
+        ),
+        sections: [
+          {
+            title: "What happened",
+            content: (
+              <KVPairs
+                columns={1}
+                items={[
+                  {
+                    label: "Severity",
+                    value: (
+                      <span className="uppercase font-semibold">
+                        {activeAlert.severity}
+                      </span>
+                    ),
+                  },
+                  { label: "Raised", value: timeAgo(activeAlert.timestamp) },
+                  ...(activeAlert.studentRoll
+                    ? [{ label: "Affected student", value: <span className="font-mono">{activeAlert.studentRoll}</span> }]
+                    : []),
+                  ...(activeAlert.gateId
+                    ? [{ label: "Gate", value: <span className="font-mono">{activeAlert.gateId}</span> }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Evidence & timeline",
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: "Alert raised",
+                    time: new Date(activeAlert.timestamp).toLocaleString(),
+                    tone: "danger",
+                  },
+                  ...(activeAlert.studentRoll
+                    ? [{
+                        label: "Student involved",
+                        detail: activeAlert.studentRoll,
+                        tone: "neutral" as const,
+                      }]
+                    : []),
+                  ...(activeAlert.resolved
+                    ? [{ label: "Marked resolved", tone: "ok" as const }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Responsible authority",
+            content: (
+              <div className="text-xs text-text-muted space-y-1.5">
+                <p className="flex items-center gap-1.5">
+                  <ShieldCheck className="size-3.5 text-action-primary" />
+                  {activeAlert.severity === "critical"
+                    ? "Principal — immediate action required"
+                    : activeAlert.severity === "high"
+                    ? "Deputy Warden / HOD review"
+                    : "Operator / Gate staff"}
+                </p>
+                {activeAlert.studentRoll && (
+                  <p className="flex items-center gap-1.5">
+                    <ExternalLink className="size-3.5" />
+                    Linked to student record
+                  </p>
+                )}
+              </div>
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                {!activeAlert.resolved ? (
+                  <InspectorButton
+                    variant="primary"
+                    onClick={() => {
+                      setConfirmTarget(activeAlert);
+                      setActiveAlert(null);
+                    }}
+                  >
+                    <Check className="size-3.5" /> Resolve alert
+                  </InspectorButton>
+                ) : (
+                  <span className="text-xs text-emerald-400/70 flex items-center gap-1">
+                    <CheckCircle className="size-3.5" /> Resolved
+                  </span>
+                )}
+                <InspectorButton
+                  variant="ghost"
+                  href="/admin/audit-logs"
+                >
+                  <ExternalLink className="size-3.5" /> Audit trail
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
 
   const load = async () => {
     try {
@@ -146,14 +267,20 @@ function AdminAlertsInner() {
                 accessor: (a: Alert) => {
                   const style = SEVERITY_STYLES[a.severity] ?? SEVERITY_STYLES.low;
                   return (
-                    <div className="flex items-start gap-3">
+                    <div
+                      className="flex items-start gap-3 cursor-pointer"
+                      onClick={() => setActiveAlert(a)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter") setActiveAlert(a); }}
+                    >
                       <div
                         className={`mt-0.5 size-5 rounded-lg flex items-center justify-center flex-shrink-0 ${style.bg} ${style.text}`}
                       >
                         {a.resolved ? <CheckCircle className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                       </div>
                       <div>
-                        <p className="font-medium text-text-primary">{a.title}</p>
+                        <p className="font-medium text-text-primary hover:text-action-primary transition-colors">{a.title}</p>
                         <p className="text-xs text-text-muted mt-0.5">{a.message}</p>
                       </div>
                     </div>
@@ -209,6 +336,8 @@ function AdminAlertsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={alertInspection} onClose={() => setActiveAlert(null)} />
 
       <ConfirmDialog
         open={!!confirmTarget}

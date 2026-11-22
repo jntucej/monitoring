@@ -31,6 +31,7 @@ import { QuickActions } from "@/components/principal/shared/PrincipalQuickAction
 import { NotificationCenter } from "@/components/principal/shared/PrincipalNotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 
 interface PrincipalOverview {
   success?: boolean;
@@ -58,14 +59,43 @@ interface PrincipalOverview {
 }
 
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
+interface KpiTileProps {
+  label: string;
+  value: string | number;
+  tone?: "ok" | "warn" | "bad";
+  /** The hover-preview hint (the quick-overview layer of the inspection hierarchy). */
+  hint?: string;
+  /** The "full detail" target (the deepest layer) — makes the tile clickable. */
+  linkHref?: string;
+}
+
+function KpiTile({ label, value, tone = "ok", hint, linkHref }: KpiTileProps) {
   const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
-  return (
-    <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
+  const tile = (
+    <div
+      className={
+        "surface-card bg-[var(--bg-elev-1)] p-4 min-w-0 " +
+        (linkHref ? "cursor-pointer hover:bg-[var(--bg-elev-2)] transition-colors" : "")
+      }
+    >
       <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
+  if (hint) {
+    return (
+      <HoverPreview preview={<MetricPreview label={label} value={value} hint={hint} />}>
+        <a
+          href={linkHref ?? undefined}
+          onClick={linkHref ? undefined : (e) => e.preventDefault()}
+          aria-label={`${label}: ${value}. ${hint}`}
+        >
+          {tile}
+        </a>
+      </HoverPreview>
+    );
+  }
+  return tile;
 }
 
 const InboxReviewPanel = lazy(() => import("@/components/principal/InboxReviewPanel"));
@@ -126,10 +156,32 @@ export default function PrincipalTodayPage() {
 <PageHeader title="Principal" subtitle="Campus leadership console" />
         <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />
-            <KpiTile label="Overdue" value={d?.counts.overdue ?? 0} tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"} />
-            <KpiTile label="Emergencies" value={d?.emergency?.length ?? 0} tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"} />
-            <KpiTile label="Delegations active" value={d?.delegations.active ?? 0} />
+            <KpiTile
+              label="Pending approvals"
+              value={d?.counts.pending ?? 0}
+              hint="Approvals waiting on your decision — open the attention queue to act"
+              linkHref="/principal/attention"
+            />
+            <KpiTile
+              label="Overdue"
+              value={d?.counts.overdue ?? 0}
+              tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"}
+              hint="SLA-breached items needing immediate attention"
+              linkHref="/principal/attention"
+            />
+            <KpiTile
+              label="Emergencies"
+              value={d?.emergency?.length ?? 0}
+              tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"}
+              hint="Active emergency commands and lockdowns"
+              linkHref="/principal/emergency"
+            />
+            <KpiTile
+              label="Delegations active"
+              value={d?.delegations.active ?? 0}
+              hint="Authority you have delegated — check for expiring grants"
+              linkHref="/principal/governance/delegations"
+            />
           </div>
         </WidgetBoundary>
                 {/* 1. Emergency pulse — only when present, top priority */}

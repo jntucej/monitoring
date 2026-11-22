@@ -3,7 +3,10 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
+import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import type { EscalationView } from "@/app/api/principal/escalations/route";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 
 export default function EscalationsPage() {
   const { data, loading } = useApiResource<{ success: boolean; data: { escalations: EscalationView[]; total: number } }>(
@@ -11,6 +14,85 @@ export default function EscalationsPage() {
     { ttlMs: 15_000 },
   );
   const rows = data?.data?.escalations ?? [];
+  const [active, setActive] = useState<EscalationView | null>(null);
+
+  /** Standardized inspection model for an escalation (why → who it targets →
+   *  the recommended path → actions). */
+  const inspection = active
+    ? {
+        kind: "escalation",
+        title: active.reason,
+        subtitle: `Case ${active.case_id.slice(0, 8)}`,
+        status: (
+          <span
+            className={
+              "rounded px-1.5 py-0.5 text-[10px] font-bold " +
+              (active.severity === "CRITICAL"
+                ? "bg-red-500/10 text-red-600"
+                : "bg-amber-500/10 text-amber-600")
+            }
+          >
+            {active.severity}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Why it was generated",
+            content: (
+              <KVPairs
+                columns={1}
+                items={[
+                  { label: "Reason", value: active.reason },
+                  {
+                    label: "Source",
+                    value: <span className="font-mono">{active.source ?? "policy"}</span>,
+                  },
+                  ...(active.recommended_action
+                    ? [{ label: "Recommended", value: active.recommended_action }]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Target authority",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Target role", value: active.target_role ?? "ladder" },
+                  { label: "Target context", value: active.target_context ?? "—" },
+                  { label: "Status", value: active.status },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Timeline",
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: "Escalated",
+                    time: new Date(active.created_at).toLocaleString(),
+                    tone: "warn",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/principal/attention" variant="primary">
+                  <ChevronRight className="size-3.5" /> Open in attention queue
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
 
   return (
     <div className="space-y-4">
@@ -19,7 +101,11 @@ export default function EscalationsPage() {
       {!loading && rows.length === 0 && <EmptyState title="No open escalations" description="Nothing has been escalated to your authority." />}
       <div className="space-y-2">
         {rows.map((e) => (
-          <article key={e.id} className="surface-card p-4">
+          <article
+            key={e.id}
+            className="surface-card p-4 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+            onClick={() => setActive(e)}
+          >
             <header className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-text-primary">{e.reason}</h2>
               <span className={"rounded px-1.5 py-0.5 text-[10px] font-medium " + (e.severity === "CRITICAL" ? "bg-red-500/10 text-red-600" : "bg-amber-500/10 text-amber-600")}>
@@ -32,6 +118,8 @@ export default function EscalationsPage() {
           </article>
         ))}
       </div>
+
+      <EntityInspector inspection={inspection} onClose={() => setActive(null)} />
     </div>
   );
 }
