@@ -18,25 +18,33 @@ export function RoleOnboarding() {
   const [stepIndex, setStepIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
-  // Only show if there are steps and the user hasn't dismissed
+  // Only show if there are steps and the user hasn't dismissed.
+  // PERSIST in localStorage (not sessionStorage) so a returning user — even
+  // in a brand-new tab or browser session — never sees the tour again.
+  // sessionStorage is per-tab and cleared on close, which is why the tour
+  // was "always showing like beginner" on every visit.
   useEffect(() => {
     if (!cfg) return;
-    const storageKey = `onboarding-dismissed-${cfg.id}`;
+    const storageKey = `onboarding-done-${cfg.id}`;
     try {
-      if (sessionStorage.getItem(storageKey)) setDismissed(true);
+      if (localStorage.getItem(storageKey)) setDismissed(true);
     } catch { /* storage blocked */ }
   }, [cfg?.id]);
+
+  const persistDone = () => {
+    if (!cfg) return;
+    setDismissed(true);
+    try {
+      localStorage.setItem(`onboarding-done-${cfg.id}`, "1");
+    } catch { /* storage blocked */ }
+  };
 
   if (!cfg || dismissed || cfg.onboarding.steps.length === 0) return null;
   const step = cfg.onboarding.steps[stepIndex];
   const isLast = stepIndex === cfg.onboarding.steps.length - 1;
 
-  const handleDismiss = () => {
-    setDismissed(true);
-    try {
-      sessionStorage.setItem(`onboarding-dismissed-${cfg.id}`, "1");
-    } catch { /* storage blocked */ }
-  };
+  // Dismiss (X) marks the tour done so it never returns.
+  const handleDismiss = persistDone;
 
   return (
     <div
