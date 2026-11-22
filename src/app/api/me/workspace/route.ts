@@ -72,28 +72,41 @@ async function loadWorkspaceContext(auth: AuthContext): Promise<WorkspaceContext
   }
 
   // Active authorizations (live gate passes).
+  // NOTE: gate_passes has NO pass_type / status / expected_return_at columns —
+  // it uses reason, to_datetime, final_status (+ guardian/admin_status). The
+  // earlier query read columns that don't exist on gate_passes → 500, which
+  // the fail-open catch swallowed, so the "active pass" card always rendered
+  // empty. Query the real columns; key by roll (user_id may be null on
+  // operator-generated passes).
   const activeAuthorizations: WorkspaceContext["activeAuthorizations"] = [];
   try {
+    const studentRoll = p?.roll ?? null;
     const passes = await query<{
       id: string;
-      pass_type: string | null;
-      status: string | null;
-      expected_return_at: string | null;
+      reason: string | null;
+      to_datetime: string | null;
+      final_status: string | null;
       guardian_status: string | null;
       admin_status: string | null;
+      used_at: string | null;
     }>(
-      `SELECT id, pass_type, status, expected_return_at, guardian_status, admin_status
+      `SELECT id, reason, to_datetime, final_status, guardian_status, admin_status, used_at
          FROM public.gate_passes
-        WHERE user_id = $1 AND status IN ('pending','approved','active')
-        ORDER BY created_at DESC LIMIT 20`,
-      [auth.userId],
+        WHERE ($2::text IS NULL OR roll = $2)
+          AND final_status IN ('APPROVED','PENDING')
+          AND used_at IS NULL
+        ORDER BY to_datetime DESC NULLS LAST LIMIT 20`,
+      [studentRoll],
     );
     for (const g of passes.rows) {
       activeAuthorizations.push({
-        kind: g.pass_type === "hostel_leave" || g.pass_type === "outpass" ? "hostel_leave" : "temporary_gate_pass",
+        // gate_passes reasons map to hostel-leave / gate-pass kinds.
+        kind: g.reason === "hostel_leave" || g.reason === "outpass" || g.reason === "leave"
+          ? "hostel_leave"
+          : "temporary_gate_pass",
         code: g.id,
-        status: g.status === "approved" || g.status === "active" ? "active" : "pending",
-        expectedReturnAt: g.expected_return_at,
+        status: g.final_status === "APPROVED" ? "active" : "pending",
+        expectedReturnAt: g.to_datetime,
         parentAcknowledged: g.guardian_status === "approved",
       });
     }

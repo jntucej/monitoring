@@ -38,7 +38,7 @@ async function handleGet(req: any, { auth }: { auth: AuthContext }) {
                         ON ma.menu_item_id = mi.id
                        AND ma.applicable_to = ANY($2::text[])
                      WHERE mi.is_active = TRUE
-                       AND (mdi.id IS NOT NULL OR ma.id IS NOT NULL)
+                       AND (mdi.menu_item_id IS NOT NULL OR ma.menu_item_id IS NOT NULL)
                      ORDER BY mi.sort_order ASC`;
     } else {
       params.push(day.id);
