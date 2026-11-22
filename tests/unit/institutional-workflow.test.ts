@@ -112,6 +112,13 @@ describe("workflow + authority end-to-end (DB-backed)", () => {
       { durationDays: 15 },
     );
     expect(res.toState).toBe("approved");
+
+    // Idempotency: a second run of this test (same scratch DB) must not
+    // collide on the GATE_PASS-YYYY-0001 ref. The case ref is per-year
+    // counter, so a re-run creates a new case (0002, 0003, ...). The
+    // test is self-contained; this line is here to document the
+    // expected behavior, not to assert it (the ref collision is the
+    // failure mode the unique constraint guards against).
   });
 
   it("authorize() cites the exact policy that allowed a decision", async () => {
