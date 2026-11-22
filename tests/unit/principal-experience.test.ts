@@ -29,6 +29,7 @@ import {
   refOrUnavailable,
 } from "@/lib/principal/relationshipResolver";
 import { buildInvestigationWorkspace } from "@/components/principal/shared/InvestigationWorkspace";
+import { classifyOutcome } from "@/hooks/usePrincipalAction";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -228,6 +229,40 @@ describe("PR-07 relationship resolver (real refs, honest unavailability)", () =>
     const missing = refOrUnavailable("assigned to", "faculty", null);
     expect(missing.available).toBe(false);
     expect(missing.unavailableReason).toBeTruthy();
+  });
+});
+
+describe("PR-10 execution monitor: honest outcome classification", () => {
+  it("a 2xx + parsed body → completed with the authoritative payload", () => {
+    const r = classifyOutcome<{ id: string }>(true, true, { id: "p-1" }, 200);
+    expect(r.state).toBe("completed");
+    expect(r.data).toEqual({ id: "p-1" });
+    expect(r.unknown).toBeUndefined();
+  });
+
+  it("a known server error (parsed body) → failed with the server's message", () => {
+    const r = classifyOutcome<{ error?: { message?: string } }>(
+      false,
+      true,
+      { error: { message: "not in your authority" } },
+      403,
+    );
+    expect(r.state).toBe("failed");
+    expect(r.error).toBe("not in your authority");
+  });
+
+  it("an UNPARSEABLE body after submit → UNKNOWN (server may have processed)", () => {
+    const r = classifyOutcome<unknown>(false, false, null, 502);
+    expect(r.state).toBe("unknown");
+    expect(r.unknown).toBe(true);
+    // the message offers a safe verify path, not a "definitely failed" claim
+    expect(/refresh|verify/i.test(r.error ?? "")).toBe(true);
+  });
+
+  it("never fabricates a success from an unknown outcome", () => {
+    const r = classifyOutcome<unknown>(true, false, null, 200);
+    expect(r.state).not.toBe("completed");
+    expect(r.unknown).toBe(true);
   });
 });
 
