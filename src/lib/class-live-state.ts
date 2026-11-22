@@ -127,23 +127,30 @@ export async function getLiveSessions(
 
   const clause: string[] = ["c.is_active = TRUE", "cp.day_of_week = $2"];
   const params: unknown[] = [today, dowIST];
+  // Use a running param counter for the conditionally-added scope clauses so
+  // the $N positions always line up with the params array (a student scope has
+  // only classIds → $3; a HOD has facultyIds+departmentId → $3,$4; etc.).
+  let n = params.length;
   if (scope.facultyIds) {
     if (scope.facultyIds.length === 0) {
       clause.push("1=0"); // empty scope → nothing
     } else {
-      clause.push("cp.faculty_id = ANY($3::uuid[])");
+      n += 1;
+      clause.push(`cp.faculty_id = ANY($${n}::uuid[])`);
       params.push(scope.facultyIds);
     }
   }
   if (scope.departmentId) {
-    clause.push("c.department_id::text = $4");
+    n += 1;
+    clause.push(`c.department_id::text = $${n}`);
     params.push(scope.departmentId);
   }
   if (scope.classIds) {
     if (scope.classIds.length === 0) {
       clause.push("1=0"); // student with no enrolled class → nothing to show
     } else {
-      clause.push("cp.class_id = ANY($5::uuid[])");
+      n += 1;
+      clause.push(`cp.class_id = ANY($${n}::uuid[])`);
       params.push(scope.classIds);
     }
   }
