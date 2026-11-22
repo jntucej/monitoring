@@ -1,0 +1,56 @@
+"use client";
+import { useApiResource } from "@/hooks/useApiResource";
+import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
+import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
+import type { EmergencyCommandRow } from "@/lib/institutional/emergency";
+
+const STATE_COLOR: Record<string, string> = {
+  NORMAL: "bg-emerald-500/10 text-emerald-600",
+  ELEVATED: "bg-amber-500/10 text-amber-600",
+  CRITICAL: "bg-orange-500/10 text-orange-600",
+  EMERGENCY: "bg-red-500/10 text-red-600",
+  LOCKDOWN: "bg-red-600/20 text-red-700",
+};
+
+export default function EmergencyPage() {
+  const { data, loading } = useApiResource<{ success: boolean; data: { currentState: string; commands: EmergencyCommandRow[] } }>(
+    "/api/principal/emergency",
+    { ttlMs: 10_000, enabled: true },
+  );
+  const state = data?.data?.currentState ?? "NORMAL";
+  const commands = data?.data?.commands ?? [];
+  return (
+    <div className="space-y-4">
+      <PageHeader title="Emergency Command" subtitle="The command plane — bypasses normal workflows, never bypasses authorization + audit" />
+      {loading && <Loading />}
+      {!loading && (
+        <>
+          <div className={"surface-card p-4 flex items-center justify-between " + (STATE_COLOR[state] ?? "bg-surface-1")}>
+            <div>
+              <p className="text-xs font-medium text-text-muted">Current institutional state</p>
+              <p className="text-2xl font-semibold">{state}</p>
+            </div>
+            <p className="text-xs text-text-muted">{commands.length} command{commands.length === 1 ? "" : "s"} on record</p>
+          </div>
+          {commands.length === 0 && <EmptyState title="No emergency commands" description="The command plane is at rest." />}
+          <div className="space-y-2">
+            {commands.map((c) => (
+              <article key={c.id} className="surface-card p-4">
+                <header className="flex items-center justify-between">
+                  <h2 className="text-sm font-medium text-text-primary">{c.state}</h2>
+                  <span className={"rounded px-1.5 py-0.5 text-[10px] font-medium " + (STATE_COLOR[c.state] ?? "bg-surface-1")}>{c.review_status}</span>
+                </header>
+                <p className="mt-1 text-xs text-text-muted">{c.reason}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  {c.actor_role} · {new Date(c.created_at).toLocaleString()}
+                  {c.scopes.length ? ` · ${c.scopes.join(", ")}` : ""}
+                </p>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
