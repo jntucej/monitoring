@@ -30,6 +30,7 @@ import {
 } from "@/lib/principal/relationshipResolver";
 import { buildInvestigationWorkspace } from "@/components/principal/shared/InvestigationWorkspace";
 import { classifyOutcome } from "@/hooks/usePrincipalAction";
+import { buildExecutionFeedback } from "@/lib/principal/executionFeedback";
 
 describe("PR-02 contracts: entity identity is a closed, validated set", () => {
   const kinds: PrincipalEntityType[] = [
@@ -349,5 +350,40 @@ describe("PR-06 audit timeline mapper (real recorded events only)", () => {
     ]);
     expect(events).toHaveLength(1);
     expect(events[0].id).toBe("ok");
+  });
+});
+
+describe("PR-11 execution feedback: four distinct facts, not one 'success'", () => {
+  const ok = { state: "completed" as const, data: { id: "x" } };
+
+  it("completed + server-confirmed audit ref → audit-verified", () => {
+    const fb = buildExecutionFeedback(ok, { auditRef: "evt-123" });
+    expect(fb.kind).toBe("audit-verified");
+    expect(fb.auditConfirmed).toBe(true);
+  });
+
+  it("completed WITHOUT an audit ref → completed, audit NOT claimed", () => {
+    const fb = buildExecutionFeedback(ok, {});
+    expect(fb.kind).toBe("completed");
+    expect(fb.auditConfirmed).toBe(false);
+    expect(fb.nextStep).toBeTruthy(); // offers a verify path
+  });
+
+  it("unknown outcome → never claims success or certain failure", () => {
+    const fb = buildExecutionFeedback({
+      state: "unknown",
+      unknown: true,
+      error: "Connection lost",
+    });
+    expect(fb.kind).toBe("unknown");
+    expect(fb.auditConfirmed).toBe(false);
+    expect(/refresh|verify/i.test(fb.nextStep ?? "")).toBe(true);
+  });
+
+  it("failed → the server's message, with a safe next step", () => {
+    const fb = buildExecutionFeedback({ state: "failed", error: "not in your authority" });
+    expect(fb.kind).toBe("failed");
+    expect(fb.headline).toContain("not completed");
+    expect(fb.auditConfirmed).toBe(false);
   });
 });
