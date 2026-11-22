@@ -135,7 +135,10 @@ export function SakugaLoadingSplash({ children }: Props) {
         data-testid="sakuga-loading-splash"
         className="fixed inset-0 z-50 flex flex-col items-center justify-center"
         style={{
-          background: "--sk-card",
+          // var() with hex fallback — a bare "--sk-card" is not a valid CSS
+          // value; it must be var(--sk-card). Fallbacks cover the race where
+          // the theme vars haven't resolved yet on first paint.
+          background: "var(--sk-card, #ffffff)",
         }}
       >
         {/* Character scene — a stylised anime-inspired illustration
@@ -150,7 +153,7 @@ export function SakugaLoadingSplash({ children }: Props) {
             className="absolute inset-0 rounded-full opacity-25"
             style={{
               background:
-                "radial-gradient(circle at 40% 40%, --sk-acc 0%, transparent 70%)",
+                "radial-gradient(circle at 40% 40%, var(--sk-acc, #ff5fa8) 0%, transparent 70%)",
             }}
           />
           {/* Anime character — ink outlines, pri uniform, acc tie */}
@@ -160,42 +163,42 @@ export function SakugaLoadingSplash({ children }: Props) {
             aria-hidden="true"
           >
             {/* hair back */}
-            <ellipse cx="50" cy="42" rx="26" ry="24" fill="--sk-ink" />
+            <ellipse cx="50" cy="42" rx="26" ry="24" fill="var(--sk-ink, #1d1a4a)" />
             {/* face */}
-            <circle cx="50" cy="44" r="18" fill="--sk-card" />
+            <circle cx="50" cy="44" r="18" fill="var(--sk-card, #ffffff)" />
             {/* hair front */}
             <path
               d="M 32 38 Q 38 24 50 26 Q 62 24 68 38 L 68 46 Q 60 34 50 36 Q 40 34 32 46 Z"
-              fill="--sk-ink"
+              fill="var(--sk-ink, #1d1a4a)"
             />
             {/* eyes */}
-            <ellipse cx="43" cy="45" rx="3.5" ry="5" fill="--sk-ink" />
-            <ellipse cx="57" cy="45" rx="3.5" ry="5" fill="--sk-ink" />
+            <ellipse cx="43" cy="45" rx="3.5" ry="5" fill="var(--sk-ink, #1d1a4a)" />
+            <ellipse cx="57" cy="45" rx="3.5" ry="5" fill="var(--sk-ink, #1d1a4a)" />
             {/* eye highlights */}
-            <circle cx="44.5" cy="43" r="1.2" fill="--sk-card" />
-            <circle cx="58.5" cy="43" r="1.2" fill="--sk-card" />
+            <circle cx="44.5" cy="43" r="1.2" fill="var(--sk-card, #ffffff)" />
+            <circle cx="58.5" cy="43" r="1.2" fill="var(--sk-card, #ffffff)" />
             {/* blush */}
-            <ellipse cx="38" cy="50" rx="4" ry="2.5" fill="--sk-acc" opacity="0.4" />
-            <ellipse cx="62" cy="50" rx="4" ry="2.5" fill="--sk-acc" opacity="0.4" />
+            <ellipse cx="38" cy="50" rx="4" ry="2.5" fill="var(--sk-acc, #ff5fa8)" opacity="0.4" />
+            <ellipse cx="62" cy="50" rx="4" ry="2.5" fill="var(--sk-acc, #ff5fa8)" opacity="0.4" />
             {/* mouth */}
             <path
               d="M 47 53 Q 50 55 53 53"
-              stroke="--sk-ink"
+              stroke="var(--sk-ink, #1d1a4a)"
               strokeWidth="1.2"
               fill="none"
             />
             {/* uniform */}
-            <rect x="35" y="60" width="30" height="20" rx="6" fill="--sk-pri" />
+            <rect x="35" y="60" width="30" height="20" rx="6" fill="var(--sk-pri, #8f8df7)" />
             {/* collar */}
-            <path d="M 42 60 L 50 68 L 58 60 Z" fill="--sk-card" />
+            <path d="M 42 60 L 50 68 L 58 60 Z" fill="var(--sk-card, #ffffff)" />
             {/* tie */}
-            <path d="M 48 68 L 50 76 L 52 68 Z" fill="--sk-acc" />
+            <path d="M 48 68 L 50 76 L 52 68 Z" fill="var(--sk-acc, #ff5fa8)" />
             {/* sparkles */}
             <g opacity="0.7">
-              <path d="M 20 30 L 22 26 L 24 30 L 22 28 Z" fill="--sk-acc" />
-              <path d="M 80 35 L 82 31 L 84 35 L 82 33 Z" fill="--sk-pri" />
-              <circle cx="16" cy="50" r="2" fill="--sk-soft" />
-              <circle cx="84" cy="55" r="2.5" fill="--sk-soft" />
+              <path d="M 20 30 L 22 26 L 24 30 L 22 28 Z" fill="var(--sk-acc, #ff5fa8)" />
+              <path d="M 80 35 L 82 31 L 84 35 L 82 33 Z" fill="var(--sk-pri, #8f8df7)" />
+              <circle cx="16" cy="50" r="2" fill="var(--sk-soft, #b8b3ff)" />
+              <circle cx="84" cy="55" r="2.5" fill="var(--sk-soft, #b8b3ff)" />
             </g>
           </svg>
         </div>
@@ -205,7 +208,7 @@ export function SakugaLoadingSplash({ children }: Props) {
           data-testid="sakuga-loading-copy"
           className="mb-6 text-sm font-semibold"
           style={{
-            color: "--sk-ink",
+            color: "var(--sk-ink, #1d1a4a)",
             letterSpacing: "-0.01em",
           }}
         >
@@ -227,7 +230,7 @@ export function SakugaLoadingSplash({ children }: Props) {
         <div
           data-testid="sakuga-progress-fallback"
           className="mt-4 h-2 w-48 overflow-hidden rounded-full"
-          style={{ background: "--sk-track" }}
+          style={{ background: "var(--sk-track, #e4e1f5)" }}
           role="progressbar"
           aria-label="Loading dashboard"
           aria-valuemin={0}
@@ -237,7 +240,7 @@ export function SakugaLoadingSplash({ children }: Props) {
             className="h-full rounded-full transition-all duration-300"
             style={{
               width: "100%",
-              background: "linear-gradient(90deg, --sk-pri, --sk-acc)",
+              background: "linear-gradient(90deg, var(--sk-pri, #8f8df7), var(--sk-acc, #ff5fa8))",
             }}
           />
         </div>
