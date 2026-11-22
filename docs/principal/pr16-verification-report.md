@@ -13,7 +13,8 @@ not a claim of what *would* pass.
 | Unit tests | `vitest run` | **200/200 pass** (26 files), incl. the 39 `principal-experience` tests covering PR-02/03/04/06/07/08/10/11/13/14 |
 | Gate tests (node) | `jest --selectProjects node` | **143 pass** (3 suites fail-to-run — see §3, pre-existing tooling limitation, not a code failure) |
 | RBAC regression | `tsx scripts/verify-all-roles.ts` | **387/387 pairs OK, 0 regressions** (live app, all demo roles × leaf routes) |
-| E2E principal workflows | `playwright test principal-delegation principal-inbox approval-forward` (against live baseline) | **passed** (`test-results/.last-run.json`: `status: passed, failedTests: []`) |
+| E2E principal workflows (production) | `playwright test principal-delegation principal-inbox approval-forward` with `SMOKE_USER=PRINCIPAL` | **12/12 passed** (live production build) |
+| E2E PR-16 branch spec (production) | `playwright test pr16-branch-ui.spec.ts` with `SMOKE_USER=PRINCIPAL` | **1 passed** (Command Centre renders + auth works), **1 skipped** (palette not in production build — branch-only code, as expected) |
 
 The RBAC gate + E2E ran against the **deployed baseline** (the 22:00 image),
 proving the live system is healthy and the existing Principal workflows
@@ -66,6 +67,30 @@ A/C + approval-forward). That is a known gap (§3), not a silent "done".
    your role" state for free text rather than leaking an unfiltered roster —
    a deliberate permission-safe choice, not a defect to "fix" by weakening the
    RBAC.
+6. **Branch-UI browser observation is blocked by a dev-build auth
+   rehydration gap.** The app's Zustand auth store rehydrates from
+   `sessionStorage` (`auth.token`) via the `onRehydrateStorage` callback.
+   Against the **production build** (the deployed image, tested by the 3
+   passing Playwright E2E specs), this works: `addInitScript` +
+   `sessionStorage.setItem("auth.token", ...)` before `goto("/principal")`
+   authenticates the session. Against the **Turbopack dev build**
+   (`next dev -p 3001`), the async rehydration does not complete before
+   the AuthGuard's first render, so the session is not recognised and the
+   user is redirected to `/login`. The auth APIs themselves work
+   (`/api/auth/login` + `/api/auth/session` verified via curl, 200 +
+   valid token + principal role). **Blocker for live-browser observation
+   of the branch UI on the dev server; the production build works.**
+   The PR-16 E2E spec (`tests/pr16-branch-ui.spec.ts`) uses the
+   production-compatible approach and is designed to pass against a
+   deployed build.
+7. **React 19 controlled-input login form is not fillable by
+   Playwright/CJS in the Turbopack dev build.** Neither `page.fill()`,
+   `page.keyboard.type()`, CDP `Input.insertText`, nor JS-dispatched
+   `input`/`change` events trigger the React `onChange` handler on the
+   login form's controlled inputs. The submit button stays `disabled`.
+   This is a React 19 + Turbopack dev-mode event-delegation issue, not a
+   code defect (the existing E2E specs bypass the form entirely via the
+   API-login + `addInitScript` approach).
 
 ## 4. Rollback considerations
 
