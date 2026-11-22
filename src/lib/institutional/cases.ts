@@ -183,12 +183,21 @@ export async function transitionCase(input: TransitionCaseInput): Promise<CaseRo
     from, to, action: input.action, ...input.detail,
   }, input.actor);
 
+  // PR-11: every transition is audited under a stable action name
+  // (case.opened / case.resolved / case.closed / case.cancelled) so the
+  // audit ledger can reconstruct the whole lifecycle from one case id.
   await logAuditEvent({
     action: `case.${input.action}`,
     userId: input.actor?.id ?? "system",
     userName: input.actor?.name ?? "system",
     userRole: input.actor?.role ?? "system",
-    details: { case_id: input.caseId, from, to },
+    details: {
+      case_id: input.caseId,
+      ref: upd.rows[0].ref,
+      from,
+      to,
+      decision_no: input.detail?.decision_no ?? null,
+    },
   } as any);
 
   return upd.rows[0];

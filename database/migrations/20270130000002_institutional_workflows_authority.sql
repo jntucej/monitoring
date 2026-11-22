@@ -218,7 +218,10 @@ INSERT INTO public.authority_policies (code, name, role, context, operation, cas
    'deputy_warden', NULL, 'approve', 'hostel_leave', 'campus_wide', NULL, '{"max_duration_days":7}'::jsonb, 1),
   ('hostel_leave.approve.principal',
    'Principal approves hostel leave (all durations)',
-   'principal', NULL, 'approve', 'hostel_leave', 'institution', NULL, '{}'::jsonb, 1)
+   'principal', NULL, 'approve', 'hostel_leave', 'institution', NULL, '{}'::jsonb, 1),
+  ('academic_status.debar.principal',
+   'Principal debars a student (all conduct reviews)',
+   'principal', 'chief_warden', 'debar', 'academic_status', 'institution', NULL, '{}'::jsonb, 1)
 ON CONFLICT (code) DO NOTHING;
 
 GRANT SELECT ON public.authority_policies TO gate_app, admin, authenticated;

@@ -260,8 +260,23 @@ export async function transitionWorkflow(
   const authority = await authorize(authorityReq);
   if (!authority.allowed) {
     // Authority exceeded → do not move; record the refusal so PR-05 can
-    // escalate it. The instance stays in fromState.
-    await recordTransition(inst.id, fromState, fromState, action, actor, [], false, authority.reason);
+    // escalate it. The instance stays in fromState. The refusal is
+    // audited (authority.denied) — PR-11 hardening: the audit trail must
+    // be able to reconstruct WHY a case did not move.
+    await recordTransition(inst.id, fromState, fromState, action, actor, [authority.rule], false, authority.reason);
+    await logAuditEvent({
+      action: "authority.denied",
+      userId: actor.id,
+      userName: actor.name ?? actor.id,
+      userRole: actor.role,
+      details: {
+        case_id: caseId,
+        definition: definitionCode,
+        action,
+        rule: authority.rule,
+        reason: authority.reason ?? "authority bounds not satisfied",
+      },
+    } as any);
     throw new Error(`authority refused: ${authority.reason ?? authority.rule}`);
   }
 
