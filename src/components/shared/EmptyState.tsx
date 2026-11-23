@@ -23,6 +23,8 @@ export interface EmptyStateProps {
   icon?: ReactNode;
   action?: ReactNode;
   className?: string;
+  /** Distinguishes a clear queue from a filtered-out view or restricted/unavailable endpoint. */
+  reason?: "clear_queue" | "filtered_out" | "restricted";
 }
 
 // Issue issue-402: dev-only guard to catch action buttons with no click handler.
@@ -48,6 +50,7 @@ export function EmptyState({
   icon,
   action,
   className = "",
+  reason,
 }: EmptyStateProps) {
   warnActionWithNoHandler(action);
 
@@ -92,6 +95,16 @@ export function EmptyState({
           <div className="mb-4 text-text-muted opacity-60" aria-hidden="true">
             {icon}
           </div>
+        )}
+
+        {reason && (
+          <span className="mb-2 rounded-full border border-border bg-bg-elevated px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+            {reason === "clear_queue"
+              ? "Queue Clear"
+              : reason === "filtered_out"
+              ? "Filtered Scope"
+              : "Restricted / Unavailable"}
+          </span>
         )}
 
         <h3 className="text-sm font-semibold text-text-secondary mb-1">{title}</h3>

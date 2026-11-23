@@ -13,6 +13,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Sparkles } from "lucide-react";
+import { SakuraDualThemeControl } from "@/components/nav/SakuraDualThemeControl";
 
 type SakugaProps = Record<string, unknown> & { children?: ReactNode };
 declare module "react" {
@@ -114,6 +115,10 @@ export function SakugaConsole() {
             <span className="text-xs text-text-muted">hover</span>
           </sakuga-tooltip>
         </div>
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-border">
+        <SakuraDualThemeControl />
       </div>
     </section>
   );

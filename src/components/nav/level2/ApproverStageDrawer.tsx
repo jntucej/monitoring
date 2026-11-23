@@ -16,7 +16,7 @@
 // Complements the existing EntityInspector / EntityInspectorPanel
 // without replacing it.
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -27,6 +27,7 @@ import {
   Circle,
   ChevronRight,
   Info,
+  ArrowUpRight,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { type Role } from "@/lib/types";
@@ -35,6 +36,8 @@ import {
   type ViewerContext,
   makeViewer,
 } from "@/lib/record-abilities";
+import { PassTicketTierView } from "../PassTicketTierView";
+import { PivotStrip } from "@/components/shared/PivotStrip";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -58,7 +61,7 @@ export interface StagePivotItem {
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
-type Tab = "chain" | "context";
+type Tab = "chain" | "context" | "tier";
 
 function statusToneCls(status: string): string {
   const s = status.toUpperCase();
@@ -81,6 +84,33 @@ export function ApproverStageDrawer({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("chain");
+  const prevFocus = useRef<HTMLElement | null>(null);
+
+  // Lock body scroll + Esc-to-close + focus restoration when drawer is open
+  useEffect(() => {
+    if (!item) return;
+
+    // Save trigger focus for restoration on close
+    prevFocus.current = document.activeElement as HTMLElement | null;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKey = (e: KeyboardEvent) => {
+      // Only fire when not typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable) return;
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", handleKey);
+      // Restore focus to the trigger element
+      prevFocus.current?.focus?.();
+    };
+  }, [item, onClose]);
 
   // ── Role-ability layer: what THIS viewer can do on THIS record ──────
   const user = useAuthStore((s) => s.user);
@@ -103,6 +133,20 @@ export function ApproverStageDrawer({
         },
         viewer,
       )
+    : null;
+
+  // Pass-ticket tier rules (richer section-aware view)
+  const tierTicket = item
+    ? {
+        id: item.ticketId,
+        ticketNumber: item.ticketNumber,
+        workflowType: item.workflowType,
+        status: item.status,
+        currentStage: item.currentStage,
+        studentId: item.studentId,
+        studentName: item.studentName,
+        studentRoll: item.studentRoll,
+      }
     : null;
 
   const handleSelectTab = (t: Tab) => {
@@ -184,10 +228,15 @@ export function ApproverStageDrawer({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute right-0 top-0 bottom-0 w-full max-w-md sm:max-w-sm bg-bg-surface border-l border-border shadow-2xl flex flex-col"
+            className="absolute right-0 top-0 bottom-0 w-full sm:max-w-lg md:max-w-xl bg-bg-surface border-l border-border shadow-2xl flex flex-col"
           >
-            {/* Header */}
-            <div className="surface-card flex items-center justify-between px-4 py-3 border-b border-border">
+            {/* Header — Zone 1: Identity, Live State, Role Lens */}
+            <div
+              data-role-tier="tier-2"
+              data-event-mode={ability?.mode ?? "observe"}
+              data-testid="inspector-drawer"
+              className="surface-card flex items-center justify-between px-4 py-3 border-b border-border"
+            >
               <div className="flex items-center gap-2 min-w-0">
                 <GitBranch
                   className="h-4 w-4 text-action-primary shrink-0"
@@ -196,23 +245,51 @@ export function ApproverStageDrawer({
                 <h2 className="text-sm font-bold text-text-primary truncate">
                   {item.ticketNumber}
                 </h2>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
+                {/* Live State Pill: compound "STATUS @ STAGE" */}
                 <span
-                  className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${statusToneCls(item.status)}`}
+                  data-testid="live-state-pill"
+                  className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap ${statusToneCls(item.status)}`}
                 >
                   {item.status}
+                  {item.currentStage
+                    ? ` @ ${item.currentStage.replace(/_/g, " ").toUpperCase()}`
+                    : ""}
                 </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Full Page CTA — hidden for self-loop / kiosk roles */}
+                {!["student", "guardian", "parent", "operator", "caretaker", "worker", "mess_incharge"].includes(String(role ?? "").toLowerCase()) && (
+                  <Link
+                    href={`/permissions/${item.ticketId}`}
+                    data-testid="full-page-cta"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-action-primary text-white text-xs font-semibold hover:brightness-110 transition active:scale-[0.98]"
+                  >
+                    Full Page
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={onClose}
                   aria-label="Close"
-                  className="text-text-muted hover:text-text-primary transition-colors"
+                  className="text-text-muted hover:text-text-primary transition-colors p-1.5"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
+
+            {/* Role Lens Banner — "why I'm here" */}
+            {ability && (
+              <div
+                data-testid="role-lens-banner"
+                className="px-4 py-2 bg-bg-elevated/40 border-b border-border/50"
+              >
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {ability.roleReason}
+                </p>
+              </div>
+            )}
 
             {/* Sub-header: workflow type */}
             <div className="px-4 py-2 text-xs text-text-muted border-b border-border/50">
@@ -252,6 +329,19 @@ export function ApproverStageDrawer({
                 }`}
               >
                 Student &amp; Scope Context
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "tier"}
+                onClick={() => handleSelectTab("tier")}
+                className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors border-b-2 ${
+                  tab === "tier"
+                    ? "border-action-primary text-text-primary"
+                    : "border-transparent text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                Role View
               </button>
             </div>
 
@@ -337,7 +427,7 @@ export function ApproverStageDrawer({
 
             {/* Role-ability section: WHY this viewer is here + their turn */}
             {ability && ability.actions.length > 0 && (
-              <div className="border-t border-border/60 px-4 py-3 space-y-2.5 bg-bg-elevated/30">
+              <div data-testid="action-bar" className="border-t border-border/60 px-4 py-3 space-y-2.5 bg-bg-elevated/30">
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-action-primary shrink-0 mt-0.5" aria-hidden />
                   <div className="min-w-0">
@@ -354,6 +444,7 @@ export function ApproverStageDrawer({
                     action.href ? (
                       <Link
                         key={action.id}
+                        data-testid={`action-${action.id}`}
                         href={action.href}
                         className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                           action.intent === "primary"
@@ -390,8 +481,33 @@ export function ApproverStageDrawer({
               </div>
             )}
 
+              {tab === "tier" && tierTicket && (
+                <div className="pb-2 space-y-3">
+                  {/* Zone 3: Relational Pivot Strip */}
+                  <PivotStrip
+                    pivots={[
+                      ...(item.studentRoll
+                        ? [{
+                            kind: "student",
+                            id: item.studentId ?? item.studentRoll,
+                            label: item.studentName
+                              ? `Student: ${item.studentName}`
+                              : item.studentRoll,
+                            sublabel: item.studentRoll,
+                          }]
+                        : []),
+                    ]}
+                  />
+                  <PassTicketTierView
+                    role={role ?? undefined}
+                    ticket={tierTicket}
+                    currentPath=""
+                  />
+                </div>
+              )}
+
             {/* Footer */}
-            <div className="border-t border-border px-4 py-3 space-y-2.5">
+            <div className="border-t border-border px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] space-y-2.5">
               <div className="flex items-center gap-2">
                 <Link
                   href={`/permissions/${item.ticketId}`}

@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState, Suspense, lazy } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { PrincipalEmptyReconciler } from "@/components/nav/level3/PrincipalRecordHub";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
+import { ActionFirstApprovalsWorkspace } from "@/components/nav/ActionFirstApprovalsWorkspace";
+import { RoleExportButton } from "@/components/shared/RoleExportButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
 import { HoverPreview } from "@/components/shared/HoverPreview";
@@ -95,6 +101,52 @@ export function ApprovalsView({
   const { data, loading, refresh } = useApiResource<PermissionsResponse>(url, {
     ttlMs: 15_000,
   });
+  const addToast = useUIStore((s) => s.addToast);
+  const [actionBusy, setActionBusy] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
+  const [showRejectInput, setShowRejectInput] = useState(false);
+
+  const runPrincipalAction = async (
+    ticketNumber: string,
+    action: "APPROVE" | "REJECT" | "ESCALATE",
+    reason?: string,
+  ) => {
+    setActionBusy(action);
+    try {
+      const res = await fetch(`/api/permissions/${encodeURIComponent(ticketNumber)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ action, ...(reason ? { reason, comment: reason } : {}) }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success) {
+        addToast({
+          message: `${action === "APPROVE" ? "Approved" : action === "REJECT" ? "Rejected" : "Escalated"} ${ticketNumber}`,
+          variant: "success",
+        });
+        setSelected(null);
+        setDeepTicket(null);
+        setRejectNote("");
+        setShowRejectInput(false);
+        await refresh();
+      } else {
+        addToast({
+          message: json?.error?.message ?? `Failed to ${action.toLowerCase()} ${ticketNumber}`,
+          variant: "error",
+        });
+      }
+    } catch {
+      addToast({ message: "Network error processing approval action", variant: "error" });
+    } finally {
+      setActionBusy(null);
+    }
+  };
+  const { data: dashData } = useApiResource<{
+    data?: {
+      counts?: { pending?: number; escalated?: number; overdue?: number; delegated?: number };
+    };
+  }>("/api/principal/dashboard", { ttlMs: 30_000 });
+  const dashCounts = dashData?.data?.counts;
 
   const rows = data?.data ?? [];
 
@@ -179,6 +231,57 @@ export function ApprovalsView({
               />
             ),
           },
+          {
+            title: "Principal Decision",
+            content: (
+              <div className="space-y-2.5" data-testid="principal-inline-actions">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={actionBusy !== null}
+                    onClick={() => runPrincipalAction(activeEntity.ticket_number, "APPROVE")}
+                    data-testid="action-approve"
+                    className="rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                  >
+                    {actionBusy === "APPROVE" ? "Approving..." : "Approve & Confirm"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionBusy !== null}
+                    onClick={() => {
+                      if (!showRejectInput) {
+                        setShowRejectInput(true);
+                        return;
+                      }
+                      runPrincipalAction(activeEntity.ticket_number, "REJECT", rejectNote.trim() || "Rejected by Principal");
+                    }}
+                    data-testid="action-reject"
+                    className="rounded-lg bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/25 disabled:opacity-50"
+                  >
+                    {actionBusy === "REJECT" ? "Rejecting..." : showRejectInput ? "Confirm Reject" : "Reject"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionBusy !== null}
+                    onClick={() => runPrincipalAction(activeEntity.ticket_number, "ESCALATE")}
+                    data-testid="action-escalate"
+                    className="rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface disabled:opacity-50"
+                  >
+                    {actionBusy === "ESCALATE" ? "Escalating..." : "Escalate"}
+                  </button>
+                </div>
+                {showRejectInput && (
+                  <input
+                    type="text"
+                    value={rejectNote}
+                    onChange={(e) => setRejectNote(e.target.value)}
+                    placeholder="Enter rejection reason..."
+                    className="w-full rounded-lg border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary"
+                  />
+                )}
+              </div>
+            ),
+          },
         ],
       }
     : null;
@@ -187,76 +290,92 @@ export function ApprovalsView({
     <div className="space-y-4">
       <WeekBar />
       <section className="surface-card p-4 md:p-5">
-        <header className="mb-4">
-          <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
-          <p className="text-xs text-text-muted">
-            {rows.length} request{rows.length === 1 ? "" : "s"}
-          </p>
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
+            <p className="text-xs text-text-muted">
+              {rows.length} request{rows.length === 1 ? "" : "s"} · click any row to inspect &amp; decide
+            </p>
+          </div>
+          <nav className="flex flex-wrap items-center gap-1.5" aria-label="Approval queue slices">
+            {[
+              { key: "PENDING", label: "Pending", count: dashCounts?.pending, href: "/principal/approvals/pending" },
+              { key: "ESCALATED", label: "Escalated", count: dashCounts?.escalated, href: "/principal/approvals/escalated" },
+              { key: "OVERDUE", label: "Overdue SLA", count: dashCounts?.overdue, href: "/principal/approvals/overdue" },
+              { key: "DELEGATED", label: "Delegated", count: dashCounts?.delegated, href: "/principal/approvals/delegated" },
+            ].map((tab) => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  status === tab.key
+                    ? "border-action-primary bg-action-primary/10 text-action-primary"
+                    : "border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated"
+                }`}
+              >
+                <span>{tab.label}</span>
+                {typeof tab.count === "number" && (
+                  <span className="font-mono text-[11px] opacity-80">{tab.count}</span>
+                )}
+              </Link>
+            ))}
+            <RoleExportButton
+              resource="approvals-ledger"
+              filenamePrefix={`principal-approvals-${status.toLowerCase()}`}
+              rows={rows}
+              columns={[
+                { key: "ticket_number", header: "Ticket" },
+                { key: "student", header: "Student", accessor: (r) => r.student?.name ?? "" },
+                { key: "workflow_type", header: "Workflow" },
+                { key: "current_stage", header: "Stage" },
+                { key: "status", header: "Status" },
+                { key: "sla_deadline", header: "SLA Deadline" },
+              ]}
+            />
+          </nav>
         </header>
 
         {loading && rows.length === 0 ? (
           <ListSkeleton rows={6} />
         ) : rows.length === 0 ? (
-          <EmptyState title="Nothing here" description="No requests in this view." />
+          <PrincipalEmptyReconciler
+            title={`0 ${status.toLowerCase()} requests at Principal stage`}
+            headlineCount={
+              (dashCounts?.pending ?? 0) +
+              (dashCounts?.escalated ?? 0) +
+              (dashCounts?.overdue ?? 0) +
+              (dashCounts?.delegated ?? 0) ||
+              data?.total
+            }
+            breakdown={[
+              { label: "Pending", count: dashCounts?.pending ?? 0, href: "/principal/approvals/pending" },
+              { label: "Escalated", count: dashCounts?.escalated ?? 0, href: "/principal/approvals/escalated" },
+              { label: "Overdue SLA", count: dashCounts?.overdue ?? 0, href: "/principal/approvals/overdue" },
+              { label: "Delegated", count: dashCounts?.delegated ?? 0, href: "/principal/approvals/delegated" },
+            ]}
+          />
         ) : (
-          <>
-          <ul className="space-y-2 md:hidden">
-            {rows.map((item) => (
-              <li key={item.id}>
-                <HoverPreview
-                  preview={
-                    <div className="space-y-1">
-                      <p className="font-semibold text-xs">{item.student?.name ?? "Unknown"}</p>
-                      <p className="text-[10px] text-text-muted">{item.ticket_number} · {item.workflow_type}</p>
-                      <p className="text-[10px] text-text-secondary">{item.reason ?? item.workflow_type}</p>
-                    </div>
-                  }
-                  position="right"
-                >
-                  <button
-                    onClick={() => setSelected(item)}
-                    className="surface-card w-full min-h11 bg-bg-surface p-3 text-left"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {item.student?.name ?? "Unknown"}
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {item.ticket_number} · {item.workflow_type}
-                        </p>
-                      </div>
-                      <SlaBadge slaDeadline={item.sla_deadline ?? null} status={item.status} />
-                    </div>
-                    <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
-                      {item.reason ?? item.workflow_type}
-                    </p>
-                  </button>
-                </HoverPreview>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<PermissionItem>
-              onRowClick={(item) => setSelected(item)}
-              columns={[
-                { header: "Ticket", accessor: (r) => r.ticket_number },
-                { header: "Student", accessor: (r) => r.student?.name ?? "—" },
-                { header: "Type", accessor: (r) => r.workflow_type },
-                { header: "Stage", accessor: (r) => r.current_stage },
-                {
-                  header: "SLA",
-                  accessor: (r) => (
-                    <SlaBadge slaDeadline={r.sla_deadline ?? null} status={r.status} />
-                  ),
-                },
-              ]}
-              data={rows}
-              keyExtractor={(r) => r.id}
-            />
-          </div>
-        </>
+          <ActionFirstApprovalsWorkspace
+            items={rows}
+            role="principal"
+            currentPath="/principal/approvals"
+            treatAllPendingAsActionable
+            onInspect={(item) => setSelected(item)}
+            onRefresh={refresh}
+            focusHref="/principal/attention"
+            ledgerColumns={[
+              { header: "Ticket", accessor: (r) => r.ticket_number },
+              { header: "Student", accessor: (r) => r.student?.name ?? "—" },
+              { header: "Type", accessor: (r) => r.workflow_type },
+              { header: "Stage", accessor: (r) => r.current_stage },
+              {
+                header: "SLA",
+                accessor: (r) => (
+                  <SlaBadge slaDeadline={r.sla_deadline ?? null} status={r.status} />
+                ),
+              },
+            ]}
+          />
         )}
       </section>
 

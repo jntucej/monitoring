@@ -37,9 +37,9 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
         <PrincipalNotificationBell />
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
         <ScrollEdgeBlue className="h-full">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 pb-16">{children}</div>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 pb-[max(4rem,env(safe-area-inset-bottom))]">{children}</div>
         </ScrollEdgeBlue>
       </main>
 
@@ -53,7 +53,7 @@ export function PrincipalMobileShell({ children }: { children: React.ReactNode }
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <aside className="absolute inset-y-0 left-0 flex w-11 max-w-[85vw] flex-col bg-bg-surface shadow-xl">
+          <aside className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-bg-surface shadow-xl pb-[env(safe-area-inset-bottom)]">
             <div className="surface-card flex items-center justify-between px-4 py-3">
               <span className="text-sm font-semibold">Navigation</span>
               <button

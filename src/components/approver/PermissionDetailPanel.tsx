@@ -29,6 +29,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { levelsAbove, L4_ROLE, L1_ROLE, L2_ROLE, L3_ROLE } from "@/lib/permission-workflow-pure";
 import { resolvePermissionAbility, makeViewer } from "@/lib/record-abilities";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import { HostelForwardModal } from "./HostelForwardModal";
 import { DirectGenerateModal } from "./DirectGenerateModal";
 import type { PermissionItem } from "./PermissionRow";
@@ -93,8 +94,8 @@ export function permissionToInspection(
             { label: "Workflow", value: item.workflow_type },
             { label: "Current Stage", value: STAGE_LABELS[item.current_stage] || item.current_stage },
             { label: "Student", value: item.student?.name ?? "—" },
-            { label: "Roll", value: item.student?.student_details?.roll ?? "—" },
-            { label: "Reason", value: item.reason ?? "—" },
+            { label: "Roll", value: item.student?.student_details?.roll ? <SmartTextRef text={item.student.student_details.roll} currentPath="/permissions" /> : "—" },
+            { label: "Reason", value: item.reason ? <SmartTextRef text={item.reason} currentPath="/permissions" /> : "—" },
             { label: "Created", value: formatDateTime(item.created_at) },
           ]}
         />

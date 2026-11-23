@@ -7,6 +7,8 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { EscalationView } from "@/app/api/principal/escalations/route";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { PrincipalEmptyReconciler } from "@/components/nav/level3/PrincipalRecordHub";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export default function EscalationsPage() {
   const { data, loading } = useApiResource<{ success: boolean; data: { escalations: EscalationView[]; total: number } }>(
@@ -42,7 +44,7 @@ export default function EscalationsPage() {
               <KVPairs
                 columns={1}
                 items={[
-                  { label: "Reason", value: active.reason },
+                  { label: "Reason", value: <SmartTextRef text={active.reason} currentPath="/principal/escalations" /> },
                   {
                     label: "Source",
                     value: <span className="font-mono">{active.source ?? "policy"}</span>,

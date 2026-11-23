@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
@@ -25,6 +26,7 @@ import {
   type RoleGate,
 } from "./entityInspectionModels";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export interface AlertItem {
   id: string;
@@ -100,10 +102,20 @@ export function IncidentsView() {
     });
   };
 
+  const [filter, setFilter] = useState<"all" | "high" | "open" | "resolved">("all");
   const alerts = Array.isArray(data?.data) ? data.data : [];
-  const highSeverity = alerts.filter(
-    (a) => a.severity === "high" || a.severity === "critical"
-  ).length;
+  const isHigh = (a: AlertItem) =>
+    a.severity === "high" || a.severity === "critical";
+  const isResolved = (a: AlertItem) =>
+    Boolean(a.resolved) || (a.status ?? "").toUpperCase() === "RESOLVED";
+  const highSeverity = alerts.filter(isHigh).length;
+  const openCount = alerts.filter((a) => !isResolved(a)).length;
+  const visibleAlerts = alerts.filter((a) => {
+    if (filter === "high") return isHigh(a);
+    if (filter === "open") return !isResolved(a);
+    if (filter === "resolved") return isResolved(a);
+    return true;
+  });
 
   /**
    * Resolve the related records for an alert, honestly. The alert row carries
@@ -149,8 +161,8 @@ export function IncidentsView() {
           } as OurAlertRecord,
           related,
           actions,
-          detailHref: undefined,
-          detailLabel: undefined,
+          detailHref: gId ? `/principal/operations/gates/${gId}` : undefined,
+          detailLabel: gId ? "Open gate page" : undefined,
         })
       );
     },
@@ -167,35 +179,61 @@ export function IncidentsView() {
   return (
     <div className="space-y-4">
       <WeekBar />
-      <header>
-        <h1 className="text-lg font-semibold text-text-primary">Incidents & Alerts</h1>
-        <p className="text-xs text-text-muted">
-          Real-time institutional and security alerts · select any alert to inspect
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-text-primary">Incidents &amp; Alerts</h1>
+          <p className="text-xs text-text-muted">
+            Real-time institutional and security alerts · filter or select any alert to inspect
+          </p>
+        </div>
+        <nav className="flex flex-wrap items-center gap-1.5" aria-label="Incident filters">
+          {[
+            { key: "all" as const, label: "All", count: alerts.length },
+            { key: "high" as const, label: "Critical / High", count: highSeverity },
+            { key: "open" as const, label: "Open", count: openCount },
+            { key: "resolved" as const, label: "Resolved", count: alerts.length - openCount },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setFilter(tab.key)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                filter === tab.key
+                  ? "border-action-primary bg-action-primary/10 text-action-primary"
+                  : "border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className="font-mono text-[11px] opacity-80">{tab.count}</span>
+            </button>
+          ))}
+        </nav>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Active Alerts" value={alerts.length} />
+        <KpiCard label="Active Alerts" value={alerts.length} onClick={() => setFilter("all")} />
         <KpiCard
           label="Critical / High"
           value={highSeverity}
           tone={highSeverity > 0 ? "danger" : "ok"}
+          onClick={() => setFilter("high")}
         />
         <KpiCard
           label="Status"
           value={highSeverity > 0 ? "Requires Attention" : "All Clear"}
           tone={highSeverity > 0 ? "warn" : "ok"}
+          onClick={() => setFilter("open")}
         />
       </div>
 
       {loading && alerts.length === 0 ? (
         <ListSkeleton rows={5} />
-      ) : alerts.length === 0 ? (
-        <EmptyState title="No active alerts" description="No campus alerts or incidents reported." />
+      ) : visibleAlerts.length === 0 ? (
+        <EmptyState title="No matching alerts" description="No campus alerts match the selected filter." />
       ) : (
         <>
           <ul className="space-y-2 md:hidden">
-            {alerts.map((a) => (
+            {visibleAlerts.map((a) => (
               <li key={a.id}>
                 <button
                   type="button"
@@ -207,13 +245,17 @@ export function IncidentsView() {
                   className="surface-card w-full min-h11 bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-start justify-between">
-                    <p className="text-sm font-medium">{a.title ?? a.message ?? "Alert"}</p>
+                    <p className="text-sm font-medium">
+                      <SmartTextRef text={a.title ?? a.message ?? "Alert"} currentPath="/principal/operations/incidents" />
+                    </p>
                     <span className="surface-card bg-action-danger/10 px-2 py-0.5 text-xs text-action-danger">
                       {a.severity ?? "alert"}
                     </span>
                   </div>
                   {a.message && a.title ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{a.message}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
+                      <SmartTextRef text={a.message} currentPath="/principal/operations/incidents" />
+                    </p>
                   ) : null}
                   {a.gate_name || a.gate_id || a.gateId ? (
                     <p className="mt-1 text-xs font-mono text-text-muted">
@@ -231,7 +273,7 @@ export function IncidentsView() {
               columns={[
                 {
                   header: "Title",
-                  accessor: (r) => r.title ?? r.message ?? "Alert",
+                  accessor: (r) => <SmartTextRef text={r.title ?? r.message ?? "Alert"} currentPath="/principal/operations/incidents" />,
                 },
                 {
                   header: "Severity",
@@ -243,14 +285,43 @@ export function IncidentsView() {
                 },
                 {
                   header: "Gate",
-                  accessor: (r) => r.gate_name ?? r.gate_id ?? r.gateId ?? "—",
+                  accessor: (r) => {
+                    const gId = r.gate_id ?? r.gateId;
+                    const label = r.gate_name ?? gId;
+                    return gId ? (
+                      <Link
+                        href={`/principal/operations/gates/${gId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-mono text-xs text-action-primary hover:underline"
+                      >
+                        {label}
+                      </Link>
+                    ) : (
+                      "—"
+                    );
+                  },
                 },
                 {
                   header: "Status",
-                  accessor: (r) => r.status ?? "OPEN",
+                  accessor: (r) => r.status ?? (isResolved(r) ? "RESOLVED" : "OPEN"),
+                },
+                {
+                  header: "Overview",
+                  accessor: (r) => (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openInspector(r);
+                      }}
+                      className="text-xs font-semibold text-action-primary hover:underline"
+                    >
+                      Open &rarr;
+                    </button>
+                  ),
                 },
               ]}
-              data={alerts}
+              data={visibleAlerts}
               keyExtractor={(r) => r.id}
             />
           </div>

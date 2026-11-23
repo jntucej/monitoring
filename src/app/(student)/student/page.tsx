@@ -14,8 +14,15 @@ import { MyDayStrip } from "@/components/student/home/MyDayStrip";
 import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
 import { SakugaConsole } from "@/components/student/SakugaConsole";
+import {
+  StudentModeSwitcher,
+  StudentModeBody,
+  type StudentDashboardMode,
+} from "@/components/student/home/StudentDashboardModes";
 import { WifiOff, RotateCw } from "lucide-react";
 import { Greeting } from "@/components/Greeting";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { usePersona } from "@/hooks/usePersona";
@@ -97,8 +104,10 @@ function OfflineBanner({ onRetry, retrying }: { onRetry: () => void; retrying: b
 }
 
 function StudentHomeInner() {
+  const user = useAuthStore((s) => s.user);
   const [resetKey, setResetKey] = useState(0);
   const [retrying, setRetrying] = useState(false);
+  const [mode, setMode] = useState<StudentDashboardMode>("today");
   // Track whether the sakuga theme is active so we can swap the loading
   // fallback. The theme is set by ClientProviders after auth; we poll
   // briefly on mount (same approach as SakugaLoadingSplash).
@@ -196,18 +205,24 @@ function StudentHomeInner() {
   const dashboardContent = (
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
+      <CustomRoleGreeting name={user?.name} role={user?.role ?? "student"} />
       <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
-      {personaDataWidgets.map((id) => {
-        const Render = ALL_WIDGET_COMPONENTS[id];
-        if (!Render) return null;
-        return (
-          <WidgetBoundary key={`${personaKey}-${id}`} name={id} resetKey={resetKey}>
-            <Render />
-          </WidgetBoundary>
-        );
-      })}
+      <StudentModeSwitcher mode={mode} onChange={setMode} />
+      {mode === "today" ? (
+        personaDataWidgets.map((id) => {
+          const Render = ALL_WIDGET_COMPONENTS[id];
+          if (!Render) return null;
+          return (
+            <WidgetBoundary key={`${personaKey}-${id}`} name={id} resetKey={resetKey}>
+              <Render />
+            </WidgetBoundary>
+          );
+        })
+      ) : (
+        <StudentModeBody mode={mode} resetKey={resetKey} />
+      )}
     </div>
   );
 

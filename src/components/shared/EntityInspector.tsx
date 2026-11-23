@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { X, AlertTriangle, Lock, FileSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PivotStrip, type PivotItem } from "@/components/shared/PivotStrip";
 
 export interface InspectionSection {
   /** Section title (e.g. "Overview", "Context", "History", "Actions"). */
@@ -86,6 +87,13 @@ export interface EntityInspectorProps {
    * "Acting on this record requires elevated permissions" copy.
    */
   canActFallbackNote?: ReactNode;
+  /** Optional agent-inspectable tier & mode hooks. */
+  dataRoleTier?: string;
+  dataEventMode?: string;
+  /** Optional back handler when navigating a multi-hop inspect stack. */
+  onBack?: () => void;
+  /** Optional Zone 3 relational pivot pills. */
+  pivots?: PivotItem[];
 }
 
 /**
@@ -126,6 +134,10 @@ export function EntityInspector({
   className,
   canAct,
   canActFallbackNote,
+  dataRoleTier,
+  dataEventMode,
+  onBack,
+  pivots,
 }: EntityInspectorProps) {
   // When the caller passes no explicit `state`, the panel is considered
   // "closed" when inspection is null → render nothing (a stuck "loading"
@@ -164,15 +176,20 @@ export function EntityInspector({
     }
   }, [inspection]);
 
-  // Esc to close.
+  // Esc to close + body scroll lock.
   useEffect(() => {
-    if (!inspection) return;
+    if (!inspection && !stateProvided) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [inspection, onClose]);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [inspection, stateProvided, onClose]);
 
   // Closed state: no inspection model and no in-flight resolver state was
   // explicitly requested. Render nothing — a stuck "loading" overlay covering
@@ -227,6 +244,33 @@ export function EntityInspector({
 
   const { kind, title, subtitle, status, sections, detailHref, detailLabel } = inspection;
 
+  // Zone 4: Role-ordered sections (Approvers: Context/Eligibility -> History -> Overview;
+  // Operators: Overview/Validity -> History -> Context; SysAdmins: Context/Metadata -> History -> Actions).
+  const orderedSections = (() => {
+    if (!dataRoleTier || sections.length <= 1) return sections;
+    const score = (s: InspectionSection): number => {
+      const t = s.title.toLowerCase();
+      if (t.includes("action")) return 90;
+      if (dataRoleTier === "tier-2" || dataRoleTier === "tier-3") {
+        if (t.includes("eligib") || t.includes("context") || t.includes("scope")) return 10;
+        if (t.includes("chain") || t.includes("history") || t.includes("timeline")) return 20;
+        return 30;
+      }
+      if (dataRoleTier === "tier-1") {
+        if (t.includes("overview") || t.includes("valid") || t.includes("identity")) return 10;
+        if (t.includes("scan") || t.includes("history") || t.includes("timeline")) return 20;
+        return 30;
+      }
+      if (dataRoleTier === "tier-4") {
+        if (t.includes("meta") || t.includes("state") || t.includes("context")) return 10;
+        if (t.includes("session") || t.includes("audit") || t.includes("history")) return 20;
+        return 30;
+      }
+      return 50;
+    };
+    return [...sections].sort((a, b) => score(a) - score(b));
+  })();
+
   return (
     <div className="fixed inset-0 z-[80] flex justify-end" role="dialog" aria-modal="true" aria-label={`Inspect ${kind}: ${title}`}>
       {/* Backdrop */}
@@ -239,16 +283,32 @@ export function EntityInspector({
       {/* Drawer */}
       <aside
         ref={panelRef}
+        data-testid="inspector-drawer"
+        data-inspector-open="true"
+        data-role-tier={dataRoleTier}
+        data-event-mode={dataEventMode}
         className={cn(
-          "surface-card relative w-full max-w-md h-full overflow-y-auto bg-bg-surface p-5",
+          "surface-card relative w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto bg-bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]",
           className,
         )}
       >
         <header className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-              {kind}
-            </p>
+            <div className="flex items-center gap-2">
+              {onBack ? (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  data-testid="inspector-back"
+                  className="text-[11px] font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
+                >
+                  &larr; Back
+                </button>
+              ) : null}
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+                {kind}
+              </p>
+            </div>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <h2 className="text-lg font-semibold text-text-primary truncate">{title}</h2>
               {status ? <span className="shrink-0">{status}</span> : null}
@@ -267,8 +327,14 @@ export function EntityInspector({
           </button>
         </header>
 
+        {pivots && pivots.length > 0 ? (
+          <div className="mb-4">
+            <PivotStrip pivots={pivots} />
+          </div>
+        ) : null}
+
         <div className="space-y-4">
-          {sections.map((s, i) => {
+          {orderedSections.map((s, i) => {
             const isCollapsible = s.collapsible === true;
             const isCollapsed = !!collapsed[i];
             const isActions = s.title === "Actions" && canAct === false;

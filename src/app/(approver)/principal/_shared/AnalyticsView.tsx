@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
@@ -135,6 +136,23 @@ export function AnalyticsView({ initialStage }: { initialStage?: string } = {}) 
         />
         <KpiCard label="SLA Compliance" value={`${overallRate}%`} tone="ok" />
       </div>
+
+      {cells.length > 0 && (
+        <div className="surface-card bg-bg-surface/80 p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-text-secondary">
+            <span className="font-semibold text-text-primary">Insight:</span>{" "}
+            {totalBreached > 0
+              ? `${totalBreached} SLA breach${totalBreached === 1 ? "" : "es"} across ${cells.filter((c) => c.breached > 0).length} stage(s) — overall compliance is ${overallRate}% (target 95%).`
+              : `All ${totalVolume} tracked requests are within SLA (${overallRate}% compliance vs 95% target).`}
+          </p>
+          <Link
+            href={totalBreached > 0 ? "/principal/approvals/overdue" : "/principal/approvals/pending"}
+            className="text-xs font-semibold text-action-primary hover:underline shrink-0"
+          >
+            {totalBreached > 0 ? "Open Overdue Queue →" : "Open Pending Queue →"}
+          </Link>
+        </div>
+      )}
 
       {(activeStage || breachedView) && (
         <div className="flex flex-wrap items-center gap-2 text-xs">

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { PageLoading as Loading } from "@/components/principal/shared/PrincipalLoadingStates";
 import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import { ChevronRight } from "lucide-react";
 import type { EmergencyCommandRow } from "@/lib/institutional/emergency";
 
@@ -55,7 +56,7 @@ export default function EmergencyPage() {
             title: "Context",
             content: (
               <p className="text-xs text-text-secondary">
-                {active.reason || "No reason recorded for this command."}
+                <SmartTextRef text={active.reason || "No reason recorded for this command."} currentPath="/principal/emergency" />
               </p>
             ),
           },
@@ -83,6 +84,9 @@ export default function EmergencyPage() {
                 </InspectorButton>
                 <InspectorButton href="/principal/escalations" variant="ghost">
                   <ChevronRight className="size-3.5" /> Escalations
+                </InspectorButton>
+                <InspectorButton href="/admin/lockdown" variant="ghost">
+                  <ChevronRight className="size-3.5" /> Lockdown Console
                 </InspectorButton>
               </div>
             ),
@@ -127,7 +131,9 @@ export default function EmergencyPage() {
                   <h2 className="text-sm font-medium text-text-primary">{c.state}</h2>
                   <span className={"rounded px-1.5 py-0.5 text-[10px] font-medium " + (STATE_COLOR[c.state] ?? "bg-surface-1")}>{c.review_status}</span>
                 </header>
-                <p className="mt-1 text-xs text-text-muted">{c.reason}</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  <SmartTextRef text={c.reason} currentPath="/principal/emergency" />
+                </p>
                 <p className="mt-1 text-xs text-text-muted">
                   {c.actor_role} · {new Date(c.created_at).toLocaleString()}
                   {c.scopes.length ? ` · ${c.scopes.join(", ")}` : ""}

@@ -7,6 +7,8 @@ import { useUIStore } from "@/stores/uiStore";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { SectionCard } from "@/components/admin/shared/SectionCard";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {User as UserIcon, Mail, Shield, KeyRound, Lock, Save, Loader2, Bell, Eye, EyeOff, Sparkles, Check, Activity, ScrollText, type LucideIcon}  from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -285,6 +287,11 @@ export function AdminProfilePanel({ tab: propTab }: { tab?: Tab } = {}) {
           </WidgetBoundary>
         </div>
       )}
+
+      <RoleProfileSettingsPanel role={user?.role ?? "admin"} />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

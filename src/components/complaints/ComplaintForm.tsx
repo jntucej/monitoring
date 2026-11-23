@@ -5,6 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import {
+  HierarchyTargetPicker,
+  type HierarchyTargetSelection,
+  type RoleCandidatePerson,
+} from "@/components/complaints/HierarchyTargetPicker";
 
 export function ComplaintForm() {
   const router = useRouter();
@@ -21,6 +26,45 @@ export function ComplaintForm() {
     respondentDetails: "",
   });
   const [busy, setBusy] = useState(false);
+  const [target, setTarget] = useState<HierarchyTargetSelection>({
+    targetRole: "caretaker",
+    targetUserId: null,
+    presenceMark: "unknown",
+    presenceNote: "",
+  });
+  const [peopleInRole, setPeopleInRole] = useState<RoleCandidatePerson[]>([]);
+  const [loadingPeople, setLoadingPeople] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingPeople(true);
+    fetch(`/api/persons?role=${encodeURIComponent(target.targetRole)}&limit=50`, {
+      headers: getAuthHeaders(),
+    })
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelled) return;
+        const list = Array.isArray(j?.data) ? j.data : [];
+        setPeopleInRole(
+          list.map((p: { id: string; fullName?: string; name?: string; designation?: string | null; department?: string | null; isOnCampus?: boolean | null }) => ({
+            id: p.id,
+            name: p.fullName || p.name || p.id,
+            designation: p.designation ?? null,
+            departmentOrScope: p.department ?? null,
+            isOnCampus: p.isOnCampus ?? null,
+          })),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setPeopleInRole([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingPeople(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [target.targetRole]);
 
   useEffect(() => {
     (async () => {
@@ -38,7 +82,14 @@ export function ComplaintForm() {
     const r = await fetch("/api/complaints", {
       method: "POST",
       headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ categoryCode: selectedCode, ...form }),
+      body: JSON.stringify({
+        categoryCode: selectedCode,
+        ...form,
+        targetRole: target.targetRole,
+        targetUserId: target.targetUserId,
+        presenceMark: target.presenceMark,
+        presenceNote: target.presenceNote,
+      }),
     });
     const j = await r.json();
     setBusy(false);
@@ -178,6 +229,13 @@ export function ComplaintForm() {
           )
         )}
       </div>
+
+      <HierarchyTargetPicker
+        peopleInRole={peopleInRole}
+        loadingPeople={loadingPeople}
+        value={target}
+        onChange={setTarget}
+      />
 
       {isSakuga ? (
         <div className="flex justify-center">

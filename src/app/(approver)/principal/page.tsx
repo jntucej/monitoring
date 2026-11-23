@@ -13,11 +13,18 @@
  * business logic, file kept < 400 lines.
  */
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useSynchronization } from "@/hooks/useSynchronization";
 import { usePrincipalWorkspace } from "@/hooks/usePrincipalWorkspace";
 import { useRouter } from "next/navigation";
-import { formatDateTime } from "@/lib/utils";
+import Link from "next/link";
+import { formatDateTime, getAuthHeaders } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
+import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
+import { CustomRoleGreeting } from "@/components/nav/CustomRoleGreeting";
+import { useAuthStore } from "@/stores/authStore";
 import { PrincipalShell } from "@/components/principal/shared/PrincipalShell";
 import { PulseTile } from "@/components/principal/shared/PulseTile";
 import { SynchronizationIndicator } from "@/components/principal/shared/SynchronizationIndicator";
@@ -63,9 +70,50 @@ interface DigestResponse {
 
 export default function PrincipalCommandCenter() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const workspace = usePrincipalWorkspace();
+  const addToast = useUIStore((s) => s.addToast);
   const dash = useApiResource<DashboardResponse>("/api/principal/dashboard");
   const digestRes = useApiResource<DigestResponse>("/api/principal/digest?range=week");
+  const [selectedItem, setSelectedItem] = useState<DashboardResponse["priorityItems"][number] | null>(null);
+  const [actionBusy, setActionBusy] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
+  const [showRejectInput, setShowRejectInput] = useState(false);
+
+  const runDecision = async (
+    ticketNumber: string,
+    action: "APPROVE" | "REJECT" | "ESCALATE",
+    reason?: string,
+  ) => {
+    setActionBusy(action);
+    try {
+      const res = await fetch(`/api/permissions/${encodeURIComponent(ticketNumber)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ action, ...(reason ? { reason, comment: reason } : {}) }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success) {
+        addToast({
+          message: `${action === "APPROVE" ? "Approved" : action === "REJECT" ? "Rejected" : "Escalated"} ${ticketNumber}`,
+          variant: "success",
+        });
+        setSelectedItem(null);
+        setRejectNote("");
+        setShowRejectInput(false);
+        await dash.refresh();
+      } else {
+        addToast({
+          message: json?.error?.message ?? `Failed to ${action.toLowerCase()} ${ticketNumber}`,
+          variant: "error",
+        });
+      }
+    } catch {
+      addToast({ message: "Network error processing decision", variant: "error" });
+    } finally {
+      setActionBusy(null);
+    }
+  };
   // Keep the "now" figures fresh without hammering the API, and track an
   // HONEST synchronization state (refresh cadence + stale + connection) —
   // never a false "live" indicator (PR-14).
@@ -99,6 +147,13 @@ export default function PrincipalCommandCenter() {
       subtitle="What needs you now — every number is now + vs last week + what to do"
       actions={<SynchronizationIndicator sync={sync} />}
     >
+      <CustomRoleGreeting
+        name={user?.name}
+        role={user?.role ?? "principal"}
+        pendingCount={counts.pending}
+        urgentCount={counts.overdue + counts.escalated}
+      />
+
       {/* ── Headline row: the "what needs me" numbers. PR-05: each tile is a
             real drill-down to the register that owns the count (no fabricated
             filter params — these registers don't accept URL filters today). ── */}
@@ -146,12 +201,17 @@ export default function PrincipalCommandCenter() {
             <p className="text-xs font-semibold uppercase tracking-wide text-action-danger">
               {emergencies.length} active emergency{emergencies.length > 1 ? "s" : ""}
             </p>
-            <ul className="mt-2 flex flex-col gap-1">
+            <ul className="mt-2 flex flex-col gap-1.5">
               {emergencies.slice(0, 3).map((e) => (
                 <li key={e.ticket} className="text-sm text-text-primary">
-                  <span className="font-mono text-xs text-text-muted">{e.ticket}</span>{" "}
-                  {e.subject}{" "}
-                  <span className="text-xs text-text-muted">({e.age})</span>
+                  <Link
+                    href={`/principal/approvals?ticket=${encodeURIComponent(e.ticket)}`}
+                    className="inline-flex items-center gap-1.5 hover:underline"
+                  >
+                    <span className="font-mono text-xs font-semibold text-action-primary">{e.ticket}</span>
+                    <span>{e.subject}</span>
+                    <span className="text-xs text-text-muted">({e.age})</span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -205,9 +265,7 @@ export default function PrincipalCommandCenter() {
                     },
                     "/principal",
                   );
-                  router.push(
-                    `/principal/attention?ticket=${it.ticket_number}&returnTo=${encodeURIComponent("/principal")}`,
-                  );
+                  setSelectedItem(it);
                 }}
                 onDelegate={() => {
                   router.push("/principal/governance/delegations");
@@ -224,10 +282,10 @@ export default function PrincipalCommandCenter() {
           <SinceLastVisitCard />
         </PrincipalWidgetBoundary>
         <PrincipalWidgetBoundary>
-          <WeeklyDigest digest={digest} />
+          <WeeklyDigest digest={digest} onNavigate={(href) => router.push(href)} />
         </PrincipalWidgetBoundary>
         <PrincipalWidgetBoundary>
-          <PlaybookTile active={emergencies.length} delegations={deleg} />
+          <PlaybookTile active={emergencies.length} delegations={deleg} onNavigate={(href) => router.push(href)} />
         </PrincipalWidgetBoundary>
       </section>
 
@@ -238,6 +296,8 @@ export default function PrincipalCommandCenter() {
           exams={d?.exams}
           items={items}
           overdue={counts.overdue}
+          onNavigate={(href) => router.push(href)}
+          onSelectItem={(it) => setSelectedItem(it)}
         />
       </PrincipalWidgetBoundary>
 
@@ -245,12 +305,117 @@ export default function PrincipalCommandCenter() {
       <PrincipalWidgetBoundary>
         <DecisionPaceDigest digest={digest} />
       </PrincipalWidgetBoundary>
+
+      <EntityInspector
+        inspection={
+          selectedItem
+            ? {
+                kind: "ticket",
+                title: selectedItem.ticket_number,
+                subtitle: selectedItem.student_name
+                  ? `${selectedItem.workflow_type} · ${selectedItem.student_name}`
+                  : selectedItem.workflow_type,
+                detailHref: `/permissions/${selectedItem.id}`,
+                detailLabel: "Open full ticket",
+                sections: [
+                  {
+                    title: "Overview",
+                    content: (
+                      <KVPairs
+                        items={[
+                          { label: "Ticket", value: <span className="font-mono">{selectedItem.ticket_number}</span> },
+                          { label: "Workflow", value: selectedItem.workflow_type },
+                          { label: "Student", value: selectedItem.student_name ?? "—" },
+                          {
+                            label: "SLA Deadline",
+                            value: selectedItem.sla_deadline ? formatDateTime(selectedItem.sla_deadline) : "—",
+                          },
+                          {
+                            label: "Reason",
+                            value: selectedItem.reason ? (
+                              <SmartTextRef text={selectedItem.reason} currentPath="/principal" />
+                            ) : (
+                              "—"
+                            ),
+                          },
+                        ]}
+                      />
+                    ),
+                  },
+                  {
+                    title: "Principal Decision",
+                    content: (
+                      <div className="space-y-2.5" data-testid="principal-home-inline-actions">
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={actionBusy !== null}
+                            onClick={() => runDecision(selectedItem.ticket_number, "APPROVE")}
+                            className="rounded-lg bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                          >
+                            {actionBusy === "APPROVE" ? "Approving..." : "Approve & Confirm"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy !== null}
+                            onClick={() => {
+                              if (!showRejectInput) {
+                                setShowRejectInput(true);
+                                return;
+                              }
+                              runDecision(
+                                selectedItem.ticket_number,
+                                "REJECT",
+                                rejectNote.trim() || "Rejected by Principal",
+                              );
+                            }}
+                            className="rounded-lg bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/25 disabled:opacity-50"
+                          >
+                            {actionBusy === "REJECT" ? "Rejecting..." : showRejectInput ? "Confirm Reject" : "Reject"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionBusy !== null}
+                            onClick={() => runDecision(selectedItem.ticket_number, "ESCALATE")}
+                            className="rounded-lg border border-border bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface disabled:opacity-50"
+                          >
+                            {actionBusy === "ESCALATE" ? "Escalating..." : "Escalate"}
+                          </button>
+                        </div>
+                        {showRejectInput && (
+                          <input
+                            type="text"
+                            value={rejectNote}
+                            onChange={(e) => setRejectNote(e.target.value)}
+                            placeholder="Enter rejection reason..."
+                            className="w-full rounded-lg border border-border bg-bg-base px-3 py-1.5 text-xs text-text-primary"
+                          />
+                        )}
+                      </div>
+                    ),
+                  },
+                ],
+              }
+            : null
+        }
+        onClose={() => {
+          setSelectedItem(null);
+          setShowRejectInput(false);
+          setRejectNote("");
+        }}
+      />
     </PrincipalShell>
   );
 }
 
 /* Weekly digest — retention: what you did last week + the engine's insight. */
-function WeeklyDigest({ digest }: { digest?: DigestResponse | null }) {
+function WeeklyDigest({
+  digest,
+  onNavigate,
+}: {
+  digest?: DigestResponse | null;
+  onNavigate: (href: string) => void;
+}) {
   return (
     <div className="surface-card bg-bg-surface p-5 flex flex-col gap-3">
       <SectionHeader label="This week" hint="Your decision pace" />
@@ -262,8 +427,20 @@ function WeeklyDigest({ digest }: { digest?: DigestResponse | null }) {
       ) : (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
-            <PulseTile label="Approved" value={digest.approved ?? 0} />
-            <PulseTile label="Delegated" value={digest.delegated ?? 0} />
+            <PulseTile
+              label="Approved"
+              value={digest.approved ?? 0}
+              drillTo="/principal/decisions"
+              drillHint="View decisions"
+              onOpen={() => onNavigate("/principal/decisions")}
+            />
+            <PulseTile
+              label="Delegated"
+              value={digest.delegated ?? 0}
+              drillTo="/principal/approvals/delegated"
+              drillHint="View delegated"
+              onOpen={() => onNavigate("/principal/approvals/delegated")}
+            />
           </div>
           <div className="text-sm">
             <span className="text-text-muted">Avg decision </span>
@@ -286,9 +463,11 @@ function WeeklyDigest({ digest }: { digest?: DigestResponse | null }) {
 function PlaybookTile({
   active,
   delegations,
+  onNavigate,
 }: {
   active: number;
   delegations: { active: number; expiringSoon: number };
+  onNavigate: (href: string) => void;
 }) {
   return (
     <div className="surface-card bg-bg-surface p-5 flex flex-col gap-3">
@@ -306,8 +485,18 @@ function PlaybookTile({
           value={delegations.active}
           reference={delegations.expiringSoon}
           referenceLabel="expiring soon"
+          drillTo="/principal/governance/delegations"
+          drillHint="Manage delegations"
+          onOpen={() => onNavigate("/principal/governance/delegations")}
         />
-        <PulseTile label="Emergencies" value={active} higherIsBetter={false} />
+        <PulseTile
+          label="Emergencies"
+          value={active}
+          higherIsBetter={false}
+          drillTo="/principal/emergency"
+          drillHint="Open command plane"
+          onOpen={() => onNavigate("/principal/emergency")}
+        />
       </div>
       <a
         href="/principal/emergency"
@@ -326,17 +515,15 @@ function UpcomingObligations({
   exams,
   items,
   overdue,
+  onNavigate,
+  onSelectItem,
 }: {
   exams?: { pendingClearances: number; todayCandidates: number };
-  items: Array<{
-    id: string;
-    ticket_number: string;
-    workflow_type: string;
-    sla_deadline?: string | null;
-    student_name?: string | null;
-  }>;
+  items: DashboardResponse["priorityItems"];
   /** Server-computed count of decisions already past SLA (no client "now"). */
   overdue: number;
+  onNavigate: (href: string) => void;
+  onSelectItem: (item: DashboardResponse["priorityItems"][number]) => void;
 }) {
   // Pure: no client-side Date.now(). The "past SLA" fact is the server's
   // `overdue` count; we show items carrying an SLA deadline as "due" items
@@ -366,12 +553,14 @@ function UpcomingObligations({
                 higherIsBetter={false}
                 drillTo="/principal/examinations"
                 drillHint="Open exams"
+                onOpen={() => onNavigate("/principal/examinations")}
               />
               <PulseTile
                 label="Candidates today"
                 value={exams?.todayCandidates ?? 0}
                 drillTo="/principal/examinations"
                 drillHint="Open exams"
+                onOpen={() => onNavigate("/principal/examinations")}
               />
             </div>
           ) : null}
@@ -382,12 +571,18 @@ function UpcomingObligations({
               </p>
               <ul className="flex flex-col gap-1">
                 {dueItems.slice(0, 4).map((it) => (
-                  <li key={it.id} className="text-sm text-text-primary">
-                    <span className="font-mono text-xs text-text-muted">
-                      {it.ticket_number}
-                    </span>{" "}
-                    {it.student_name ? `${it.student_name} · ` : ""}
-                    {it.workflow_type}
+                  <li key={it.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelectItem(it)}
+                      className="text-left text-sm text-text-primary hover:text-action-primary hover:underline transition-colors"
+                    >
+                      <span className="font-mono text-xs text-action-primary">
+                        {it.ticket_number}
+                      </span>{" "}
+                      {it.student_name ? `${it.student_name} · ` : ""}
+                      {it.workflow_type}
+                    </button>
                   </li>
                 ))}
               </ul>

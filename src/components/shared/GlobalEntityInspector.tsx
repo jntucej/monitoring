@@ -28,7 +28,8 @@
  *   </GuardianConsoleLayout>
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -39,6 +40,11 @@ import {
   useEntityResolver,
   hasResolver,
 } from "@/components/shared/entityResolvers";
+import {
+  getTierForRole,
+  resolveRecordView,
+  type RecordKind,
+} from "@/lib/record-capabilities";
 import { cn } from "@/lib/utils";
 
 /* ── split inspect param ────────────────────────────────────────────────── */
@@ -71,6 +77,34 @@ export function GlobalEntityInspector() {
 
   const kind = parsed?.kind ?? null;
   const id = parsed?.id ?? null;
+
+  // Multi-hop inspect history stack (e.g. PASS-402 -> 25JJ5A1203 -> GATE-01)
+  const [inspectStack, setInspectStack] = useState<string[]>([]);
+  const prevInspectRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!inspectRaw) {
+      setInspectStack([]);
+      prevInspectRef.current = null;
+      return;
+    }
+    if (prevInspectRef.current && prevInspectRef.current !== inspectRaw) {
+      const prev = prevInspectRef.current;
+      setInspectStack((s) => (s[s.length - 1] === prev ? s : [...s, prev]));
+    }
+    prevInspectRef.current = inspectRaw;
+  }, [inspectRaw]);
+
+  const goBack = useCallback(() => {
+    if (inspectStack.length === 0) return;
+    const prev = inspectStack[inspectStack.length - 1];
+    setInspectStack((s) => s.slice(0, -1));
+    prevInspectRef.current = prev;
+    const params = new URLSearchParams(searchParams);
+    params.set("inspect", prev);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [inspectStack, pathname, searchParams, router]);
 
   // Hooks must be called unconditionally (Rules of Hooks). Pass null when
   // there is no inspect param so the resolver stays idle.
@@ -129,33 +163,46 @@ export function GlobalEntityInspector() {
     );
   }
 
-  /* ── Error ──────────────────────────────────────────────────────────── */
+  /* ── Error — scoped/unavailable card with 1-click return ────────────── */
   if (resolver.error) {
+    const isNotFound = /not found|no .* found/i.test(resolver.error);
+    const isForbidden = /403|forbidden|unauthorized|not permitted/i.test(
+      resolver.error,
+    );
+
     return (
       <DrawerShell onClose={close}>
         <DrawerHeader kind={kind} id={id} />
         <div
+          data-testid="scoped-unavailable-card"
           className="flex flex-col items-center justify-center py-12 text-center"
           role="alert"
         >
-          <p className="text-sm font-medium text-text-primary">Failed to load</p>
-          <p className="text-xs text-text-muted mt-1">{resolver.error}</p>
-          <div className="flex gap-3 mt-4">
-            <button
-              type="button"
-              onClick={resolver.retry}
-              className="text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
-            >
-              Retry
-            </button>
-            <button
-              type="button"
-              onClick={close}
-              className="text-xs font-semibold text-text-muted hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
-            >
-              Close
-            </button>
+          <div className="h-10 w-10 rounded-full bg-bg-elevated flex items-center justify-center mb-3">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
           </div>
+          <p className="text-sm font-medium text-text-primary">
+            {isForbidden
+              ? "Not available for your role"
+              : isNotFound
+                ? "Record not found"
+                : "Failed to load"}
+          </p>
+          <p className="text-xs text-text-muted mt-1 max-w-60">
+            {isForbidden
+              ? `You don't have access to this ${kind} record. It may be scoped to another department or hostel.`
+              : isNotFound
+                ? `This ${kind} may have been closed or removed.`
+                : resolver.error}
+          </p>
+          <button
+            type="button"
+            onClick={close}
+            data-testid="return-action"
+            className="mt-4 text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
+          >
+            &larr; Return to previous view
+          </button>
         </div>
       </DrawerShell>
     );
@@ -165,17 +212,57 @@ export function GlobalEntityInspector() {
   const model: EntityInspection | null = resolver.inspection;
 
   if (model) {
-    // EntityInspector renders its own fixed overlay (backdrop + drawer) and
-    // shows kind + title + subtitle in its header — the "peek" affordance
-    // is already there. onClose cleans the URL param.
-    return <EntityInspector inspection={model} onClose={close} />;
+    const user = useAuthStore.getState().user;
+    const capView = resolveRecordView(
+      (kind as RecordKind) ?? "ticket",
+      { id, status: typeof model.status === "string" ? model.status : undefined },
+      {
+        userId: user?.id ?? "",
+        role: role ?? "student",
+        departmentId: user?.departmentId ?? null,
+        hostelScope: user?.studentDetails?.hostelBlock ?? null,
+        gateId: user?.gateId ?? null,
+      },
+    );
+    return (
+      <EntityInspector
+        inspection={model}
+        onClose={close}
+        dataRoleTier={getTierForRole(role ?? undefined)}
+        dataEventMode={capView.mode}
+        onBack={inspectStack.length > 0 ? goBack : undefined}
+        pivots={capView.pivots}
+      />
+    );
   }
 
-  // Shouldn't reach here (loading/error handled above), but guard.
+  // Missing / closed / empty record fallback: render Scoped / Unavailable card.
   return (
     <DrawerShell onClose={close}>
       <DrawerHeader kind={kind} id={id} />
-      <p className="text-xs text-text-muted">No data available.</p>
+      <div
+        data-testid="scoped-unavailable-card"
+        className="flex flex-col items-center justify-center py-12 text-center"
+        role="status"
+      >
+        <div className="h-10 w-10 rounded-full bg-bg-elevated flex items-center justify-center mb-3">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+        </div>
+        <p className="text-sm font-medium text-text-primary">
+          Record unavailable
+        </p>
+        <p className="text-xs text-text-muted mt-1 max-w-60">
+          This {kind} record is missing, closed, or outside your role&apos;s scope.
+        </p>
+        <button
+          type="button"
+          onClick={close}
+          data-testid="return-action"
+          className="mt-4 text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
+        >
+          &larr; Return to previous view
+        </button>
+      </div>
     </DrawerShell>
   );
 }
@@ -195,6 +282,19 @@ function DrawerShell({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-[80] flex justify-end"
@@ -208,8 +308,10 @@ function DrawerShell({
         aria-hidden="true"
       />
       <aside
+        data-testid="inspector-drawer"
+        data-inspector-open="true"
         className={cn(
-          "surface-card relative w-full max-w-md h-full overflow-y-auto bg-bg-surface p-5",
+          "surface-card relative w-full sm:max-w-lg md:max-w-xl h-full overflow-y-auto bg-bg-surface p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]",
         )}
       >
         {children}

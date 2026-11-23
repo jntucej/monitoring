@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -16,6 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     // aria-describedby so screen readers announce it when the field has focus.
     // useId must be called unconditionally — fall back to a generated
     // identifier when the caller supplies its own `id`.
+    const isSakuga = useIsSakuga();
     const generatedId = React.useId();
     const uid = id ?? generatedId;
     const errorId = error ? `${uid}-error` : undefined;
@@ -38,20 +40,34 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               {icon}
             </div>
           )}
-          <input
-            id={uid}
-            type={type}
-            ref={ref}
-            aria-invalid={error ? "true" : undefined}
-            aria-describedby={describedBy}
-            className={cn(
-              "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary placeholder-[var(--text-muted)] transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring focus:border-transparent",
-              icon && "pl-10",
-              error && "border-action-danger focus:ring-action-danger",
-              className
-            )}
-            {...props}
-          />
+          {isSakuga && !icon && type !== "file" ? (
+            <sakuga-input
+              id={uid}
+              type={type}
+              value={props.value ?? ""}
+              placeholder={props.placeholder}
+              disabled={props.disabled}
+              required={props.required}
+              onChange={props.onChange}
+              label={label ?? props.placeholder ?? "input"}
+              className={cn("w-full", className)}
+            />
+          ) : (
+            <input
+              id={uid}
+              type={type}
+              ref={ref}
+              aria-invalid={error ? "true" : undefined}
+              aria-describedby={describedBy}
+              className={cn(
+                "w-full h-11 px-4 rounded-md bg-bg-surface border border-border text-text-primary placeholder-[var(--text-muted)] transition-colors focus:outline-none focus:ring-2 focus:ringfocus-ring focus:border-transparent",
+                icon && "pl-10",
+                error && "border-action-danger focus:ring-action-danger",
+                className
+              )}
+              {...props}
+            />
+          )}
         </div>
         {error && (
           <p

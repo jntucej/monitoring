@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Target, ArrowRight, Clock } from "lucide-react";
 import { SlaBadge } from "@/components/approver/SlaBadge";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export interface FocusItem {
   id: string;
@@ -65,7 +66,7 @@ export function FocusZone({
       </p>
       <p className="mt-1 flex items-center gap-1.5 text-xs text-text-muted">
         <Clock className="size-3" />
-        {item.age} · {item.ticket}
+        {item.age} · <SmartTextRef text={item.ticket} currentPath="/principal/home" />
       </p>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">

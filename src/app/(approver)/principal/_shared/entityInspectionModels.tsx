@@ -19,6 +19,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export type PrincipalRegisterKind =
   | "department"
@@ -931,8 +932,8 @@ export function buildExamCaseInspection(
             </div>
             <div>
               <dt className="text-text-muted">Reason</dt>
-              <dd className="mt-0.5 text-text-primary">
-                {exam.reason ?? "Exam hall clearance"}
+              <dd className="mt-0.5 text-text-primary font-mono">
+                <SmartTextRef text={exam.reason ?? "Exam hall clearance"} currentPath="/principal" />
               </dd>
             </div>
             <div>
@@ -1099,8 +1100,8 @@ export function buildApprovalInspection(
           <dl className="grid grid-cols-2 gap-2.5 text-xs">
             <div>
               <dt className="text-text-muted">Request</dt>
-              <dd className="mt-0.5 text-text-primary">
-                {approval.reason ?? approval.workflow_type ?? "—"}
+              <dd className="mt-0.5 text-text-primary font-mono">
+                <SmartTextRef text={approval.reason ?? approval.workflow_type ?? "—"} currentPath="/principal" />
               </dd>
             </div>
             <div>
@@ -1348,8 +1349,11 @@ export function buildPersonExceptionInspection(
                 <dt className="text-text-muted">
                   {p.exceptionKind === "late" ? "Minutes late" : "Flag reason"}
                 </dt>
-                <dd className="mt-0.5 text-text-primary">
-                  {p.exceptionKind === "late" ? `${p.detail}m` : String(p.detail)}
+                <dd className="mt-0.5 text-text-primary font-mono">
+                  <SmartTextRef
+                    text={p.exceptionKind === "late" ? `${p.detail}m` : String(p.detail)}
+                    currentPath="/principal"
+                  />
                 </dd>
               </div>
             ) : null}

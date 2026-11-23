@@ -15,6 +15,8 @@ import { getAuthHeaders } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { FileUp, Check, Clock, Loader2 } from "lucide-react";
+import { AssignmentConfirmationBar } from "@/components/nav/AssignmentConfirmationBar";
+import { useUIStore } from "@/stores/uiStore";
 
 interface StudentAssignment {
   id: string;
@@ -38,6 +40,7 @@ interface Resp {
 
 function StudentAssignmentsInner() {
   const user = useAuthStore((s) => s.user);
+  const addToast = useUIStore((s) => s.addToast);
   const [data, setData] = useState<Resp | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -177,6 +180,24 @@ function StudentAssignmentsInner() {
                       <Check className="h-3.5 w-3.5" /> Graded
                     </span>
                   )}
+                  <div className="w-full pt-2">
+                    <AssignmentConfirmationBar
+                      assignment={{
+                        id: a.id,
+                        title: a.title,
+                        dueDate: new Date(a.dueAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }),
+                        confirmedByCr: done,
+                        verifiedByFaculty: status === "GRADED",
+                      }}
+                      role={user?.role ?? "student"}
+                      onAction={(act, note) => {
+                        addToast({
+                          message: `${act.label} recorded for ${a.title}${note ? `: ${note}` : ""}`,
+                          variant: "success",
+                        });
+                      }}
+                    />
+                  </div>
                 </div>
               );
             })}

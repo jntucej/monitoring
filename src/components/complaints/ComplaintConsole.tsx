@@ -6,6 +6,8 @@ import Link from "next/link";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { useExport } from "@/hooks/useExport";
+import { getComplaintRulesForRole } from "@/lib/complaint-rules";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import {
   FileDown,
   AlertTriangle,
@@ -235,8 +237,24 @@ export function ComplaintConsole({
             const slaLeft = slaSecondsLeft(c.slaDeadline);
             const isOverdue = slaLeft !== null && slaLeft < 0 && c.status !== "resolved" && c.status !== "closed";
             const slaHours = slaLeft !== null ? Math.abs(Math.round(slaLeft / 3600)) : null;
+            const rules = getComplaintRulesForRole(
+              { role },
+              {
+                id: c.id,
+                complaintNumber: c.complaintNumber,
+                category: c.categoryLabel,
+                status: c.status,
+                currentStage: c.currentOwnerRole,
+              },
+            );
             return (
-              <Link key={c.id} href={`${basePath}/${c.id}`} className="block p-2.5 hover:bg-bg-elevated transition">
+              <Link
+                key={c.id}
+                href={`${basePath}/${c.id}`}
+                data-role-tier={rules.tierLabel.split("•")[0].trim().toLowerCase().replace(/\s+/g, "-")}
+                data-event-mode={rules.mode}
+                className="block p-2.5 hover:bg-bg-elevated transition"
+              >
                 <HoverPreview
                   preview={
                     <MetricPreview
@@ -253,7 +271,9 @@ export function ComplaintConsole({
                 <div className="flex justify-between items-start">
                   <div>
                     <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
-                    <h2 className="font-medium text-text-primary">{c.title}</h2>
+                    <h2 className="font-medium text-text-primary">
+                      <SmartTextRef text={c.title} currentPath={basePath} />
+                    </h2>
                     <p className="text-xs text-text-muted mt-0.5">
                       {c.categoryLabel} · Owner: <span className="font-mono">{c.currentOwnerRole}</span>
                     </p>

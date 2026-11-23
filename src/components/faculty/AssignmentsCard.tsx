@@ -16,6 +16,9 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ListChecks, CircleCheck, Clock } from "lucide-react";
 import Link from "next/link";
+import { AssignmentConfirmationBar } from "@/components/nav/AssignmentConfirmationBar";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
 
 interface AssignmentRow {
   id: string;
@@ -30,6 +33,8 @@ interface AssignmentsResp {
 }
 
 function AssignmentsCardInner() {
+  const role = useAuthStore((s) => s.user?.role);
+  const addToast = useUIStore((s) => s.addToast);
   const { data, error, loading } = useApiResource<AssignmentsResp>(
     "/api/assignments?scope=faculty",
     { ttlMs: 300_000 },
@@ -76,30 +81,46 @@ function AssignmentsCardInner() {
             {rows.slice(0, 6).map((a) => {
               const done = a.submitted >= a.total;
               return (
-                <Link
-                  key={a.id}
-                  href={`/faculty/class/${a.classId}`}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-bg-elevated p-2.5 hover:bg-bg-elevated/70"
-                >
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-text-primary truncate">{a.title}</div>
-                    <div className="flex items-center gap-1.5 text-xs text-text-muted">
-                      <Clock className="h-3 w-3" />
-                      Due {new Date(a.dueAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                <div key={a.id} className="space-y-2">
+                  <Link
+                    href={`/faculty/class/${a.classId}`}
+                    className="flex items-center justify-between gap-3 rounded-lg bg-bg-elevated p-2.5 hover:bg-bg-elevated/70"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-text-primary truncate">{a.title}</div>
+                      <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                        <Clock className="h-3 w-3" />
+                        Due {new Date(a.dueAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    {done ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-500">
-                        <CircleCheck className="h-3.5 w-3.5" /> {a.submitted}/{a.total}
-                      </span>
-                    ) : (
-                      <span className="text-text-muted tabular-nums">
-                        {a.submitted}/{a.total} submitted
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                    <div className="flex items-center gap-2 text-xs">
+                      {done ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-500">
+                          <CircleCheck className="h-3.5 w-3.5" /> {a.submitted}/{a.total}
+                        </span>
+                      ) : (
+                        <span className="text-text-muted tabular-nums">
+                          {a.submitted}/{a.total} submitted
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                  <AssignmentConfirmationBar
+                    assignment={{
+                      id: a.id,
+                      title: a.title,
+                      dueDate: new Date(a.dueAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }),
+                      verifiedByFaculty: done,
+                    }}
+                    role={role ?? "faculty"}
+                    onAction={(act, note) => {
+                      addToast({
+                        message: `${act.label} recorded for ${a.title}${note ? `: ${note}` : ""}`,
+                        variant: "success",
+                      });
+                    }}
+                  />
+                </div>
               );
             })}
           </div>

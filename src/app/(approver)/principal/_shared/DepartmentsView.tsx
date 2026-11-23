@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -61,8 +63,16 @@ export function DepartmentsView() {
   const inspectMain = (dept: DepartmentItem) =>
     setMainInspection(buildMainDepartmentInspection(dept, gate));
 
+  const router = useRouter();
   const d = data?.data;
-  const openInspector = (dept: DepartmentItem) => ourInspect(buildDepartmentInspection(dept));
+  const openInspector = (dept: DepartmentItem) => {
+    const model = buildDepartmentInspection(dept);
+    ourInspect({
+      ...model,
+      detailHref: `/principal/people/departments/${encodeURIComponent(dept.code)}`,
+      detailLabel: "Open department page",
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -82,12 +92,21 @@ export function DepartmentsView() {
             d && d.departments.length > 0 ? () => openInspector(d.departments[0]) : undefined
           }
         />
-        <KpiCard label="Students" value={d?.summary?.totalStudents} />
-        <KpiCard label="Faculty" value={d?.summary?.totalFaculty} />
+        <KpiCard
+          label="Students"
+          value={d?.summary?.totalStudents}
+          onClick={() => router.push("/principal/people")}
+        />
+        <KpiCard
+          label="Faculty"
+          value={d?.summary?.totalFaculty}
+          onClick={() => router.push("/principal/people")}
+        />
         <KpiCard
           label="Avg attendance"
           value={d?.summary?.avgAttendance !== undefined ? `${d.summary.avgAttendance}%` : "—"}
           tone="ok"
+          onClick={() => router.push("/principal/people/attendance")}
         />
       </div>
 
@@ -118,10 +137,19 @@ export function DepartmentsView() {
                       {dept.attendancePct}%
                     </span>
                   </div>
-                  <div className="mt-2 flex gap-3 text-xs text-text-secondary">
-                    <span>{dept.students} students</span>
-                    <span>{dept.faculty} faculty</span>
-                    <span>1:{dept.ratio}</span>
+                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-text-secondary">
+                    <div className="flex gap-3">
+                      <span>{dept.students} students</span>
+                      <span>{dept.faculty} faculty</span>
+                      <span>1:{dept.ratio}</span>
+                    </div>
+                    <Link
+                      href={`/principal/people/departments/${encodeURIComponent(dept.code)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-semibold text-action-primary hover:underline"
+                    >
+                      Open &rarr;
+                    </Link>
                   </div>
                 </button>
               </li>
@@ -140,6 +168,18 @@ export function DepartmentsView() {
                 {
                   header: "Attendance",
                   accessor: (r) => `${r.attendancePct}%`,
+                },
+                {
+                  header: "Page",
+                  accessor: (r) => (
+                    <Link
+                      href={`/principal/people/departments/${encodeURIComponent(r.code)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-xs font-semibold text-action-primary hover:underline"
+                    >
+                      Open &rarr;
+                    </Link>
+                  ),
                 },
               ]}
               data={d?.departments ?? []}

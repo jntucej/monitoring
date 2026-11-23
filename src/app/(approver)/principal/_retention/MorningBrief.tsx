@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Sun, CloudSun, Moon, Coffee } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { StreakBadge } from "./StreakBadge";
@@ -58,7 +59,17 @@ export function MorningBrief({
         <StreakBadge />
       </div>
 
-      <p className="mt-3 text-sm text-text-secondary">{message}</p>
+      <p className="mt-3 text-sm text-text-secondary">
+        {message}{" "}
+        {pending > 0 && (
+          <Link
+            href="/principal/approvals/pending"
+            className="font-semibold text-action-primary hover:underline"
+          >
+            View {pending} pending &rarr;
+          </Link>
+        )}
+      </p>
 
       {target > 0 && (
         <div className="mt-3">

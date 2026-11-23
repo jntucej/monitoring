@@ -10,6 +10,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useApi } from "@/hooks/useApi";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {Shield, KeyRound, Lock, Save, Loader2, CheckCircle2, Eye, EyeOff, User, Mail, Phone, Building2, Clock, ArrowRight, RefreshCw, AlertTriangle, Activity, ShieldCheck, ShieldAlert}  from "lucide-react";
 
 interface SysAdminProfile {
@@ -641,6 +643,11 @@ const api = useApi();
             </Link>
           </div>
         </div>
+      </div>
+
+      <RoleProfileSettingsPanel role={profile?.role ?? "sysadmin"} />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
@@ -29,8 +31,14 @@ export function FacultyDirectoryView() {
     ttlMs: 30_000,
   });
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [filter, setFilter] = useState<"all" | "assigned" | "active">("all");
 
   const facultyList = Array.isArray(data?.data) ? data.data : [];
+  const visibleFaculty = facultyList.filter((f) => {
+    if (filter === "assigned") return Boolean(f.employee_details?.designation);
+    if (filter === "active") return Boolean(f.email);
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -43,16 +51,18 @@ export function FacultyDirectoryView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Department Faculty" value={facultyList.length} tone="ok" />
+        <KpiCard label="Department Faculty" value={facultyList.length} tone="ok" onClick={() => setFilter("all")} />
         <KpiCard
           label="Designations Assigned"
           value={facultyList.filter((f) => !!f.employee_details?.designation).length}
           tone="neutral"
+          onClick={() => setFilter("assigned")}
         />
         <KpiCard
           label="Active Accounts"
           value={facultyList.filter((f) => !!f.email).length}
           tone="info"
+          onClick={() => setFilter("active")}
         />
       </div>
 
@@ -64,63 +74,69 @@ export function FacultyDirectoryView() {
           description="No faculty members are assigned to your department yet."
         />
       ) : (
-        <>
-          <ul className="space-y-2 md:hidden">
-            {facultyList.map((faculty) => (
-              <li
-                key={faculty.id}
-                onClick={() => inspect(buildHodFacultyDirectoryInspection(faculty))}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    inspect(buildHodFacultyDirectoryInspection(faculty));
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`Inspect faculty profile for ${faculty.name || "Faculty Member"}`}
-                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{faculty.name || "—"}</p>
-                    <p className="text-xs text-text-muted">
-                      {faculty.employee_details?.designation ?? "Faculty Member"}
-                    </p>
+        <div className="space-y-5">
+          {/* BAND 2: Faculty Action Cards */}
+          <section className="space-y-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Faculty Profiles ({visibleFaculty.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {visibleFaculty.map((faculty) => (
+                <button
+                  key={faculty.id}
+                  type="button"
+                  onClick={() => inspect(buildHodFacultyDirectoryInspection(faculty))}
+                  className="surface-card bg-bg-surface p-4 text-left hover:bg-bg-elevated/40 transition-colors flex flex-col justify-between gap-2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-text-primary">{faculty.name || "—"}</p>
+                      <p className="text-xs text-text-muted">
+                        {faculty.employee_details?.designation ?? "Faculty Member"}
+                      </p>
+                    </div>
+                    {faculty.employee_details?.employee_id && (
+                      <span className="font-mono text-xs text-text-muted">
+                        {faculty.employee_details.employee_id}
+                      </span>
+                    )}
                   </div>
-                  {faculty.employee_details?.employee_id && (
-                    <span className="font-mono text-xs text-text-muted">
-                      {faculty.employee_details.employee_id}
-                    </span>
-                  )}
-                </div>
-                {faculty.email && (
-                  <p className="mt-1 text-xs text-text-secondary">{faculty.email}</p>
-                )}
-              </li>
-            ))}
-          </ul>
+                  <div className="flex items-center justify-between text-xs text-text-secondary pt-1 border-t border-border">
+                    <span className="truncate">{faculty.email || "No email"}</span>
+                    <span className="font-semibold text-action-primary shrink-0 ml-2">Inspect &rarr;</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <div className="hidden md:block">
-            <DataTable<HodFacultyRow>
-              onRowClick={(faculty) => inspect(buildHodFacultyDirectoryInspection(faculty))}
-              columns={[
-                { header: "Name", accessor: (r) => r.name || "—" },
-                {
-                  header: "Designation",
-                  accessor: (r) => r.employee_details?.designation ?? "Faculty Member",
-                },
-                {
-                  header: "Employee ID",
-                  accessor: (r) => r.employee_details?.employee_id ?? "—",
-                },
-                { header: "Email", accessor: (r) => r.email || "—" },
-              ]}
-              data={facultyList}
-              keyExtractor={(r) => r.id}
-            />
-          </div>
-        </>
+          {/* BAND 3: Collapsible Roster Ledger */}
+          <details className="surface-card bg-bg-surface/60 p-3">
+            <summary className="cursor-pointer list-none flex items-center justify-between text-xs font-semibold text-text-secondary">
+              <span>Full Faculty Roster Table ({facultyList.length})</span>
+              <ChevronDown className="size-4 text-text-muted" />
+            </summary>
+            <div className="mt-3">
+              <DataTable<HodFacultyRow>
+                onRowClick={(faculty) => inspect(buildHodFacultyDirectoryInspection(faculty))}
+                columns={[
+                  { header: "Name", accessor: (r) => r.name || "—" },
+                  {
+                    header: "Designation",
+                    accessor: (r) => r.employee_details?.designation ?? "Faculty Member",
+                  },
+                  {
+                    header: "Employee ID",
+                    accessor: (r) => r.employee_details?.employee_id ?? "—",
+                  },
+                  { header: "Email", accessor: (r) => r.email || "—" },
+                ]}
+                data={facultyList}
+                keyExtractor={(r) => r.id}
+              />
+            </div>
+          </details>
+        </div>
       )}
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />

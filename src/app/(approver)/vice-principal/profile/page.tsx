@@ -6,6 +6,8 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { usePolling } from "@/hooks/usePolling";
 import { User, Mail, Phone, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 
 interface ProfileData {
   id: string;
@@ -120,6 +122,11 @@ function VicePrincipalProfileInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <RoleProfileSettingsPanel role={profile?.role ?? "vice_principal"} />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

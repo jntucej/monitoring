@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
@@ -16,6 +18,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { PrincipalEmptyReconciler } from "@/components/nav/level3/PrincipalRecordHub";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 interface Delegation {
   id: string;
@@ -46,6 +50,8 @@ export function DelegationsView() {
     isFaculty: role.isFaculty,
     role: role.role ?? null,
   };
+  const router = useRouter();
+  const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [mainInspection, setMainInspection] = useState<
     ReturnType<typeof buildMainDelegationInspection> | null
   >(null);
@@ -53,42 +59,86 @@ export function DelegationsView() {
     setMainInspection(buildMainDelegationInspection(d as DelegationRecord, gate));
 
   const delegations = data?.data?.delegations ?? [];
-  const activeCount = delegations.filter((d) => d.status === "ACTIVE" || !d.status).length;
+  const isActive = (d: Delegation) => (d.status ?? "ACTIVE").toUpperCase() === "ACTIVE";
+  const activeCount = delegations.filter(isActive).length;
+  const inactiveCount = delegations.length - activeCount;
+  const visibleDelegations = delegations.filter((d) => {
+    if (filter === "active") return isActive(d);
+    if (filter === "inactive") return !isActive(d);
+    return true;
+  });
   const {
     inspection: ourInspection,
-    inspect: ourInspect,
     closeInspection,
   } = useEntityInspector();
-  const openInspector = (d: Delegation) => ourInspect(buildDelegationInspection(d));
+  const openInspector = (d: Delegation) => inspectMain(d);
 
   return (
     <div className="space-y-4">
       <WeekBar />
-      <header>
-        <h1 className="text-lg font-semibold text-text-primary">Delegations Manager</h1>
-        <p className="text-xs text-text-muted">
-          Delegated authority rules and institutional scope · click any rule to inspect
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-text-primary">Delegations Manager</h1>
+          <p className="text-xs text-text-muted">
+            Delegated authority rules and institutional scope · click any rule to inspect or revoke
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <nav className="flex flex-wrap items-center gap-1.5" aria-label="Delegation filters">
+            {[
+              { key: "all" as const, label: "All", count: delegations.length },
+              { key: "active" as const, label: "Active", count: activeCount },
+              { key: "inactive" as const, label: "Inactive", count: inactiveCount },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setFilter(tab.key)}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  filter === tab.key
+                    ? "border-action-primary bg-action-primary/10 text-action-primary"
+                    : "border-border bg-bg-surface text-text-secondary hover:bg-bg-elevated"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span className="font-mono text-[11px] opacity-80">{tab.count}</span>
+              </button>
+            ))}
+          </nav>
+          <Link
+            href="/principal/approvals/delegated"
+            className="rounded-lg border border-border bg-bg-surface px-2.5 py-1 text-xs font-medium text-action-primary hover:bg-bg-elevated"
+          >
+            Delegated Queue &rarr;
+          </Link>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Total Delegations" value={delegations.length} />
-        <KpiCard label="Active Rules" value={activeCount} tone="ok" />
+        <KpiCard label="Total Delegations" value={delegations.length} onClick={() => setFilter("all")} />
+        <KpiCard label="Active Rules" value={activeCount} tone="ok" onClick={() => setFilter("active")} />
         <KpiCard
           label="Coverage"
           value={activeCount > 0 ? "Protected" : "Direct"}
           tone={activeCount > 0 ? "ok" : "warn"}
+          onClick={() => router.push("/principal/approvals/delegated")}
         />
       </div>
 
       {loading && delegations.length === 0 ? (
         <ListSkeleton rows={5} />
-      ) : delegations.length === 0 ? (
-        <EmptyState title="No active delegations" description="No delegation rules configured." />
+      ) : visibleDelegations.length === 0 ? (
+        <PrincipalEmptyReconciler
+          title="No matching delegations"
+          breakdown={[
+            { label: "Delegated Approvals", count: 0, href: "/principal/approvals/delegated" },
+            { label: "Pending Queue", count: 0, href: "/principal/approvals/pending" },
+          ]}
+        />
       ) : (
         <>
           <ul className="space-y-2 md:hidden">
-            {delegations.map((d) => (
+            {visibleDelegations.map((d) => (
               <li key={d.id}>
                 <button
                   type="button"
@@ -105,7 +155,9 @@ export function DelegationsView() {
                       {d.status ?? "ACTIVE"}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-text-secondary">Scope: {d.scope ?? "Full"}</p>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    Scope: <SmartTextRef text={d.scope ?? "Full"} currentPath="/principal/governance/delegations" />
+                  </p>
                 </button>
               </li>
             ))}
@@ -135,8 +187,23 @@ export function DelegationsView() {
                     </span>
                   ),
                 },
+                {
+                  header: "Overview",
+                  accessor: (r) => (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openInspector(r);
+                      }}
+                      className="text-xs font-semibold text-action-primary hover:underline"
+                    >
+                      Open &rarr;
+                    </button>
+                  ),
+                },
               ]}
-              data={delegations}
+              data={visibleDelegations}
               keyExtractor={(r) => r.id}
             />
           </div>

@@ -8,6 +8,7 @@ import { EntityInspector } from "@/components/shared/EntityInspector";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import {
   buildPersonExceptionInspection,
   type PersonExceptionRecord,
@@ -232,7 +233,9 @@ export function ExceptionsView() {
                     }}
                   >
                     <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-action-danger">{p.reason}</span>
+                    <span className="text-action-danger">
+                      <SmartTextRef text={p.reason} currentPath="/principal/people/attendance" />
+                    </span>
                   </li>
                 ))}
               </ul>

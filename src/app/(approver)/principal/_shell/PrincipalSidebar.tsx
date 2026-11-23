@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Flame, Target } from "lucide-react";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { cn } from "@/lib/utils";
 import { usePrincipalRetention } from "@/stores/principalRetentionStore";
 import {
@@ -134,6 +135,8 @@ export function PrincipalSidebar({
         >
           Account settings
         </Link>
+
+        <RoleLogoutButton variant="compact" className="w-full justify-center" />
       </footer>
     </div>
   );

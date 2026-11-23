@@ -3,9 +3,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
+import { getActionsForRole } from "@/lib/role-action-engine";
 
 export default function RepsPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -56,9 +58,32 @@ export default function RepsPage() {
     addToast({ variant: "success", message: "Representative revoked" });
   };
 
+  const crActions = getActionsForRole("cr", { kind: "assignment", recordId: "cr-scope" });
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-      <h1 className="text-2xl font-semibold">Student representatives</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Student representatives</h1>
+          <p className="text-xs text-text-muted">
+            CR capabilities enabled: {crActions.map((a) => a.label).join(" · ")}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/classes"
+            className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium hover:bg-bg-elevated"
+          >
+            Classes &rarr;
+          </Link>
+          <Link
+            href="/admin/faculty-assignments"
+            className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-medium hover:bg-bg-elevated"
+          >
+            Faculty Assignments &rarr;
+          </Link>
+        </div>
+      </div>
 
       <form onSubmit={create} className="surface-card grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white">
         <input

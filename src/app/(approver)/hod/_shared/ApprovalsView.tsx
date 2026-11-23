@@ -13,6 +13,7 @@ import {
   ApproverStageDrawer,
   type StagePivotItem,
 } from "@/components/nav/level2/ApproverStageDrawer";
+import { ActionFirstApprovalsWorkspace } from "@/components/nav/ActionFirstApprovalsWorkspace";
 
 interface PermissionsResponse {
   success: boolean;
@@ -77,53 +78,26 @@ export function ApprovalsView({
         ) : rows.length === 0 ? (
           <EmptyState title="Nothing here" description="No requests in this view." />
         ) : (
-          <>
-          <ul className="space-y-2 md:hidden">
-            {rows.map((item) => (
-              <li key={item.id}>
-                <button
-                  onClick={() => setSelected(item)}
-                  className="surface-card w-full min-h11 bg-bg-surface p-3 text-left"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {item.student?.name ?? "Unknown"}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {item.ticket_number} · {item.workflow_type}
-                      </p>
-                    </div>
-                    <SlaBadge slaDeadline={item.sla_deadline ?? null} status={item.status} />
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
-                    {item.reason ?? item.workflow_type}
-                  </p>
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:block">
-            <DataTable<PermissionItem>
-              columns={[
-                { header: "Ticket", accessor: (r) => r.ticket_number },
-                { header: "Student", accessor: (r) => r.student?.name ?? "—" },
-                { header: "Type", accessor: (r) => r.workflow_type },
-                { header: "Stage", accessor: (r) => r.current_stage },
-                {
-                  header: "SLA",
-                  accessor: (r) => (
-                    <SlaBadge slaDeadline={r.sla_deadline ?? null} status={r.status} />
-                  ),
-                },
-              ]}
-              data={rows}
-              keyExtractor={(r) => r.id}
-              onRowClick={(r) => openStageDrawer(r)}
-            />
-          </div>
-        </>
+          <ActionFirstApprovalsWorkspace
+            items={rows}
+            role="hod"
+            currentPath="/hod/approvals"
+            treatAllPendingAsActionable
+            onInspect={(item) => openStageDrawer(item)}
+            onRefresh={refresh}
+            ledgerColumns={[
+              { header: "Ticket", accessor: (r) => r.ticket_number },
+              { header: "Student", accessor: (r) => r.student?.name ?? "—" },
+              { header: "Type", accessor: (r) => r.workflow_type },
+              { header: "Stage", accessor: (r) => r.current_stage },
+              {
+                header: "SLA",
+                accessor: (r) => (
+                  <SlaBadge slaDeadline={r.sla_deadline ?? null} status={r.status} />
+                ),
+              },
+            ]}
+          />
         )}
       </section>
 

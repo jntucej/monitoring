@@ -6,6 +6,8 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {
   Loader2,
   UserCircle,
@@ -172,6 +174,10 @@ function OperatorProfileInner() {
         </div>
       </OperatorWidgetBoundary>
 
+      <RoleProfileSettingsPanel role={user?.role ?? "operator"} />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

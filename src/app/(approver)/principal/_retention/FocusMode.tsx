@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Keyboard, Loader2 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -48,8 +48,14 @@ export function FocusMode({
   const [busy, setBusy] = useState(false);
 
   const items = data?.data ?? [];
-  const current = items[index] ?? null;
-  const total = items.length;
+  const [localItems, setLocalItems] = useState<PermissionItem[] | null>(null);
+  const [optimisticPending, setOptimisticPending] = useState(false);
+  const prevItemsRef = useRef<PermissionItem[] | null>(null);
+
+  // Use local optimistic state when available, otherwise fall back to API data
+  const effectiveItems: PermissionItem[] = localItems ?? items;
+  const current = effectiveItems[index] ?? null;
+  const total = effectiveItems.length;
   const remaining = Math.max(0, total - index);
 
   // Clamp index when items shrink
@@ -68,6 +74,20 @@ export function FocusMode({
       if (!current || busy) return;
       setBusy(true);
 
+      // Save pre-mutation state for rollback
+      prevItemsRef.current = effectiveItems;
+
+      // Optimistic local update: remove the current ticket from the list
+      // and advance to the next item immediately
+      const currentId = current.id;
+      const currentOutcome: "APPROVED" | "REJECTED" | "ESCALATED" =
+        action === "APPROVE" ? "APPROVED"
+        : action === "REJECT" ? "REJECTED"
+        : "ESCALATED";
+
+      setOptimisticPending(true);
+      setLocalItems(effectiveItems.filter((i) => i.id !== currentId));
+
       try {
         const res = await fetch(`/api/permissions/${current.ticket_number}`, {
           method: "PATCH",
@@ -79,16 +99,14 @@ export function FocusMode({
         });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
-          throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
+          const err = new Error(j?.error?.message ?? `HTTP ${res.status}`);
+          // Rollback: restore the pre-mutation list
+          setLocalItems(prevItemsRef.current);
+          throw err;
         }
         recordWin({
           ticket: current.ticket_number,
-          outcome:
-            action === "APPROVE"
-              ? "APPROVED"
-              : action === "REJECT"
-              ? "REJECTED"
-              : "ESCALATED",
+          outcome: currentOutcome,
           subject: current.student?.name ?? current.ticket_number,
           at: new Date().toISOString(),
           unblockedCount: 1,
@@ -97,26 +115,34 @@ export function FocusMode({
         addToast(
           `${action === "APPROVE" ? "Approved" : action === "REJECT" ? "Rejected" : "Escalated"} ${current.ticket_number}`
         );
+        // Sync with server and clear local override
+        setLocalItems(null);
         await refresh();
       } catch (err: unknown) {
         errorToast(err instanceof Error ? err.message : "Action failed");
       } finally {
+        setOptimisticPending(false);
         setBusy(false);
       }
     },
-    [current, busy, refresh, recordWin, addToast, errorToast]
+    [current, busy, refresh, recordWin, addToast, errorToast, effectiveItems]
   );
 
   // Keyboard shortcuts
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
+      // Guard: don't fire when typing in an input, textarea, or contentEditable
+      const target = e.target as HTMLElement;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || target?.isContentEditable) return;
+
       if (e.key === "Escape") {
         onClose();
         return;
       }
       if (busy) return;
-      if (e.key === " ") {
+      if (e.key === " " || e.key.toLowerCase() === "a") {
         e.preventDefault();
         decide("APPROVE");
       } else if (e.key.toLowerCase() === "x") {

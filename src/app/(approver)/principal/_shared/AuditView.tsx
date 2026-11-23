@@ -15,6 +15,8 @@ import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
+import { RoleExportButton } from "@/components/shared/RoleExportButton";
 
 interface AuditLog {
   id: string;
@@ -58,11 +60,24 @@ export function AuditView() {
   return (
     <div className="space-y-4">
       <WeekBar />
-      <header>
-        <h1 className="text-lg font-semibold text-text-primary">Audit Trail</h1>
-        <p className="text-xs text-text-muted">
-          Decisions, overrides, and governance records
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-text-primary">Audit Trail</h1>
+          <p className="text-xs text-text-muted">
+            Immutable institutional action log · click any event to inspect
+          </p>
+        </div>
+        <RoleExportButton
+          resource="audit-logs"
+          filenamePrefix="principal-audit-logs"
+          rows={logs}
+          columns={[
+            { key: "action", header: "Action" },
+            { key: "user_name", header: "Actor" },
+            { key: "user_role", header: "Role" },
+            { key: "timestamp", header: "Timestamp" },
+          ]}
+        />
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -94,7 +109,9 @@ export function AuditView() {
                   className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{log.action}</p>
+                    <p className="text-sm font-medium">
+                      <SmartTextRef text={log.action} currentPath="/principal/governance/audit" />
+                    </p>
                     <span className="text-xs text-text-muted">
                       {new Date(log.timestamp).toLocaleDateString()}
                     </span>
@@ -111,7 +128,7 @@ export function AuditView() {
             <DataTable<AuditLog>
               onRowClick={openInspector}
               columns={[
-                { header: "Action", accessor: (r) => r.action },
+                { header: "Action", accessor: (r) => <SmartTextRef text={r.action} currentPath="/principal/governance/audit" /> },
                 { header: "Actor", accessor: (r) => r.user_name ?? "System" },
                 { header: "Role", accessor: (r) => r.user_role ?? "—" },
                 {

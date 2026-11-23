@@ -7,7 +7,9 @@ import { getAuthHeaders } from "@/lib/utils";
 import { ComplaintTimeline } from "@/components/shared/complaints/ComplaintTimeline";
 import { useAuthStore } from "@/stores/authStore";
 import { resolveComplaintAbility, makeViewer } from "@/lib/record-abilities";
+import { getComplaintRulesForRole } from "@/lib/complaint-rules";
 import { RecordAbilityBanner } from "@/components/shared/RecordAbilityBanner";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 export function ComplaintDetail({ role }: { role: string }) {
   const params = useParams();
@@ -33,15 +35,69 @@ export function ComplaintDetail({ role }: { role: string }) {
     load().catch(() => {});
   }, [load]);
 
-  const patchAction = async (action: string, extra = {}) => {
-    const r = await fetch(`/api/complaints/${id}`, {
-      method: "PATCH",
-      headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ action, ...extra }),
-    });
-    const j = await r.json();
-    if (j.success) load();
-    else alert(j.error?.message ?? "Failed");
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const patchAction = async (action: string, extra: Record<string, unknown> = {}) => {
+    setActionError(null);
+    const prevData = data;
+
+    // Optimistic local update
+    if (data?.complaint) {
+      const nextStatus =
+        action === "resolve"
+          ? "resolved"
+          : action === "in_progress"
+            ? "in_progress"
+            : action === "acknowledge"
+              ? "acknowledged"
+              : action === "escalate"
+                ? "escalated"
+                : data.complaint.status;
+      const nextTimeline =
+        action === "add_note" && typeof extra.note === "string"
+          ? [
+              ...(data.timeline ?? []),
+              {
+                id: `optimistic-${Date.now()}`,
+                action: "note",
+                status: nextStatus,
+                ownerRole: role,
+                notes: extra.note,
+                dueAt: null,
+              },
+            ]
+          : data.timeline;
+      setData({
+        ...data,
+        complaint: { ...data.complaint, status: nextStatus },
+        timeline: nextTimeline,
+      });
+    }
+
+    try {
+      const r = await fetch(`/api/complaints/${id}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...extra }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.success) {
+        load();
+      } else {
+        // Rollback on failure (including 403 / 409)
+        setData(prevData);
+        const msg =
+          r.status === 403
+            ? "Permission denied (403): your role cannot perform this action."
+            : r.status === 409
+              ? "Conflict (409): this complaint was updated elsewhere. Rolled back."
+              : j.error?.message ?? `Action failed (HTTP ${r.status})`;
+        setActionError(msg);
+      }
+    } catch {
+      setData(prevData);
+      setActionError("Network error — changes rolled back.");
+    }
   };
 
   const addNote = async (e: React.FormEvent) => {
@@ -114,8 +170,29 @@ export function ComplaintDetail({ role }: { role: string }) {
     viewer,
   );
 
+  const complaintRules = getComplaintRulesForRole(
+    {
+      role,
+      userId: useAuthStore.getState().user?.id ?? "",
+      hostelScope: useAuthStore.getState().user?.studentDetails?.hostelBlock ?? null,
+    },
+    {
+      id: c.id ?? id,
+      complaintNumber: c.complaintNumber,
+      category: c.categoryLabel ?? c.category,
+      status: c.status ?? "OPEN",
+      currentStage: c.currentOwnerRole,
+      raisedByUserId: c.filer_user_id ?? c.raised_by_user_id,
+      hostelScope: c.hostel_scope ?? null,
+    },
+  );
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div
+      className="max-w-4xl mx-auto space-y-6"
+      data-role-tier={complaintRules.tierLabel.split("•")[0].trim().toLowerCase().replace(/\s+/g, "-")}
+      data-event-mode={complaintRules.mode}
+    >
       <div className="surface-card pb-4">
         <span className="font-mono text-xs text-text-muted">{c.complaintNumber}</span>
         <h1 className="text-2xl font-semibold text-text-primary mt-1">{c.title}</h1>
@@ -131,17 +208,29 @@ export function ComplaintDetail({ role }: { role: string }) {
         fullRoute={role === "student" ? `/student/complaints/${id}` : `/complaints/${id}`}
       />
 
+      {actionError && (
+        <div
+          role="alert"
+          data-testid="complaint-action-error"
+          className="surface-card border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-action-danger"
+        >
+          {actionError}
+        </div>
+      )}
+
       <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
         <h2 className="font-medium text-text-primary">Description</h2>
-        <p className="text-sm text-text-muted whitespace-pre-wrap">{c.description}</p>
+        <p className="text-sm text-text-muted whitespace-pre-wrap">
+          <SmartTextRef text={c.description ?? ""} currentPath="/complaints" />
+        </p>
       </div>
 
       {c.respondent_details && (
         <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
           <h2 className="font-medium text-text-primary">About</h2>
           <p className="text-sm text-text-muted">
-            <span className="font-medium text-text-primary">
-              {c.respondent_details}
+            <span className="font-medium text-text-primary font-mono">
+              <SmartTextRef text={c.respondent_details} currentPath="/complaints" />
             </span>
             <p className="mt-1 text-xs text-text-muted">
               The person this complaint concerns, as identified by the filer.
@@ -261,7 +350,7 @@ export function ComplaintDetail({ role }: { role: string }) {
                 <span className="uppercase text-xs text-text-muted font-mono">{t.status}</span>
               </div>
               <p className="text-xs text-text-muted">Role: {t.ownerRole} · Due: {t.dueAt ? new Date(t.dueAt).toLocaleString() : "None"}</p>
-              {t.notes && <p className="surface-card text-text-muted mt-1 bg-bg-elevated p-2">{t.notes}</p>}
+              {t.notes && <p className="surface-card text-text-muted mt-1 bg-bg-elevated p-2 font-mono"><SmartTextRef text={t.notes} currentPath="/complaints" /></p>}
             </div>
           ))}
         </div>

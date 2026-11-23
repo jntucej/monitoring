@@ -5,6 +5,8 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
 import type { Role } from "@/lib/types";
@@ -81,6 +83,10 @@ function StaffMyProfileInner() {
         </div>
       </WidgetBoundary>
 
+      <RoleProfileSettingsPanel role="staff" />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

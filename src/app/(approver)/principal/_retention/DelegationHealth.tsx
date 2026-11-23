@@ -31,14 +31,14 @@ export function DelegationHealth({
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
+        <Link href="/principal/approvals/delegated" className="block hover:opacity-80 transition-opacity">
           <p className="text-xs uppercase tracking-wider text-text-muted">
             Active
           </p>
           <p className="text-2xl font-semibold tabular-nums text-action-primary">
             {active}
           </p>
-        </div>
+        </Link>
         <div>
           <p className="text-xs uppercase tracking-wider text-text-muted">
             Expiring

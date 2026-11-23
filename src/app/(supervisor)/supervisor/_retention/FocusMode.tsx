@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowUpRight, Keyboard, Loader2 } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
@@ -41,10 +41,13 @@ export function FocusMode({
 
   const [index, setIndex] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [localItems, setLocalItems] = useState<PriorityItem[] | null>(null);
+  const prevItemsRef = useRef<PriorityItem[] | null>(null);
 
   const items = data?.data?.priorityItems ?? [];
-  const current = items[index] ?? null;
-  const total = items.length;
+  const effectiveItems: PriorityItem[] = localItems ?? items;
+  const current = effectiveItems[index] ?? null;
+  const total = effectiveItems.length;
   const remaining = Math.max(0, total - index);
 
   useEffect(() => {
@@ -60,6 +63,9 @@ export function FocusMode({
     async (action: "escalate" | "resolve") => {
       if (!current || busy) return;
       setBusy(true);
+      prevItemsRef.current = effectiveItems;
+      const currentId = current.id;
+      setLocalItems(effectiveItems.filter((i) => i.id !== currentId));
 
       const t0 = Date.now();
       try {
@@ -78,10 +84,12 @@ export function FocusMode({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
-        }).catch(() => null);
+        });
 
-        if (!res || !res.ok) {
-          // If the endpoint isn't supported, simulate win for local flow
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          setLocalItems(prevItemsRef.current);
+          throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
         }
 
         recordWin({
@@ -98,14 +106,16 @@ export function FocusMode({
             : `Escalated ${current.ticket}`
         );
 
+        setLocalItems(null);
         await refresh();
       } catch (err: unknown) {
+        setLocalItems(prevItemsRef.current);
         errorToast(err instanceof Error ? err.message : "Action failed");
       } finally {
         setBusy(false);
       }
     },
-    [current, busy, recordWin, addToast, errorToast, refresh]
+    [current, busy, effectiveItems, recordWin, addToast, errorToast, refresh]
   );
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
@@ -24,6 +25,7 @@ import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
 import type { VoiceCommand } from "@/lib/voice";
 import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
 import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
+import { SmartTextRef } from "@/components/nav/SmartTextRef";
 
 interface LookupPerson {
   id: string;
@@ -265,21 +267,29 @@ function OperatorLookupInner() {
                   <p className="text-sm font-bold text-text-primary">{result.name}</p>
                   <StatusBadge status={result.status} />
                   {/* L1: open the frontline subject sheet from the lookup result */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFrontlineSubject({
-                        id: result.id,
-                        name: result.name,
-                        code: result.uniqueId,
-                        statusTag: result.status,
-                        locationOrScope: result.department ?? undefined,
-                      })
-                    }
-                    className="surface-card ml-auto min-h11 px-3 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
-                  >
-                    Verify
-                  </button>
+                  <div className="ml-auto flex items-center gap-2">
+                    <Link
+                      href={`/operator/manual-entry?id=${encodeURIComponent(result.uniqueId)}`}
+                      className="surface-card min-h11 inline-flex items-center px-3 py-1 text-xs font-semibold bg-bg-surface text-action-primary hover:bg-bg-elevated transition-colors"
+                    >
+                      Manual Entry &rarr;
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFrontlineSubject({
+                          id: result.id,
+                          name: result.name,
+                          code: result.uniqueId,
+                          statusTag: result.status,
+                          locationOrScope: result.department ?? undefined,
+                        })
+                      }
+                      className="surface-card min-h11 px-3 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                    >
+                      Verify
+                    </button>
+                  </div>
                 </div>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
                   <div><dt className="text-text-muted">Type</dt><dd className="text-text-primary font-medium capitalize">{result.personType}</dd></div>
@@ -333,7 +343,9 @@ function OperatorLookupInner() {
                     </div>
                   </div>
                   {lastScanData.data.reason && (
-                    <p className="text-xs text-text-muted">Reason: {lastScanData.data.reason}</p>
+                    <p className="text-xs text-text-muted">
+                      Reason: <SmartTextRef text={lastScanData.data.reason} currentPath="/operator/lookup" />
+                    </p>
                   )}
                 </div>
               ) : (

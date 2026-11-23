@@ -2,6 +2,8 @@
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { User, Mail, Phone } from "lucide-react";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "./KpiCard";
 import { WeekBar } from "./WeekBar";
@@ -93,6 +95,11 @@ export function ProfileView() {
           </div>
         </div>
       ) : null}
+
+      <RoleProfileSettingsPanel role={profile?.role ?? "principal"} />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

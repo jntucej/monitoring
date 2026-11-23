@@ -8,6 +8,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { RoleProfileSettingsPanel } from "@/components/nav/RoleProfileSettingsPanel";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import {
   ShieldCheck,
   Loader2,
@@ -216,6 +218,10 @@ function ContactInfoInner() {
         </form>
       </div>
 
+      <RoleProfileSettingsPanel role="guardian" />
+      <div className="flex justify-end">
+        <RoleLogoutButton />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { useAuthStore } from "@/stores/authStore";
 import { useRoleContext } from "@/hooks/useRoleContext";
@@ -11,6 +12,7 @@ import {
 } from "./entityInspectionModels";
 import type { Person } from "@/lib/types";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
+import { SatisfactionOverviewPanel } from "@/components/shared/SatisfactionOverviewPanel";
 
 interface PersonsResponse {
   success?: boolean;
@@ -76,12 +78,25 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-lg font-semibold text-text-primary">People Register</h1>
-        <p className="text-xs text-text-muted">
-          {people.length} active persons · click any person to inspect
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-text-primary">People Register</h1>
+          <p className="text-xs text-text-muted">
+            {people.length} active persons · click any person to inspect
+          </p>
+        </div>
+        <Link
+          href="/principal/people/assignment-tree"
+          className="rounded-lg border border-border bg-bg-surface px-3 py-1.5 text-xs font-semibold text-action-primary hover:bg-bg-elevated"
+        >
+          Assignment Tree &rarr;
+        </Link>
       </header>
+
+      <SatisfactionOverviewPanel
+        onCampusCount={people.filter((p) => (p as { isOnCampus?: boolean }).isOnCampus).length}
+        totalPeopleCount={people.length}
+      />
 
       {people.length === 0 ? (
         <p className="text-xs text-text-muted">Person records are currently unavailable.</p>

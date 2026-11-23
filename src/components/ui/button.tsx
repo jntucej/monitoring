@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { useGlossyMotion, buttonHover, buttonTap } from "@/lib/animations";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ringfocus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] disabled:pointer-events-none disabled:opacity-40 active:scale-[0.98]",
@@ -40,6 +41,22 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, loading, children, disabled, ...props }, ref) => {
     const isGlossyMotion = useGlossyMotion();
+    const isSakuga = useIsSakuga();
+
+    if (isSakuga && variant !== "icon" && variant !== "ghost") {
+      return (
+        <sakuga-button
+          variant={variant === "secondary" ? "secondary" : "primary"}
+          disabled={disabled || loading}
+          onClick={props.onClick}
+          type={props.type ?? "button"}
+          className={className}
+        >
+          {children}
+        </sakuga-button>
+      );
+    }
+
     return (
       <motion.button
         className={cn(buttonVariants({ variant, size, className }))}

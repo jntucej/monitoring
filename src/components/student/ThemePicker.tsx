@@ -24,6 +24,7 @@ import { Palette, Check, Loader2, Lock } from "lucide-react";
 import { LockedByPolicy } from "@/components/shared/LockedByPolicy";
 import { useEffectivePref } from "@/hooks/useEffectivePref";
 import { useAuthStore } from "@/stores/authStore";
+import { SakuraDualThemeControl } from "@/components/nav/SakuraDualThemeControl";
 
 type ThemeName = "graphite" | "sakuga";
 
@@ -158,6 +159,9 @@ export function ThemePicker() {
       <p className="mt-3 text-xs text-text-muted">
         Switching applies instantly and is saved to your account.
       </p>
+      <div className="mt-4">
+        <SakuraDualThemeControl />
+      </div>
     </section>
   );
 }

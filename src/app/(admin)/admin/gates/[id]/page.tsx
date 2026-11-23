@@ -24,6 +24,7 @@ import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 import { useAuthStore } from "@/stores/authStore";
 import { resolveGateEventAbility, makeViewer, type RecordEventAbility } from "@/lib/record-abilities";
+import { getGateEventRulesForRole } from "@/lib/gate-event-rules";
 import { RecordAbilityBanner } from "@/components/shared/RecordAbilityBanner";
 
 interface GateMetrics {
@@ -134,11 +135,29 @@ export default function GateDetailPage() {
     }
   };
 
+  const gateRules = data
+    ? getGateEventRulesForRole(
+        {
+          role: useAuthStore.getState().role ?? "admin",
+          userId: useAuthStore.getState().user?.id ?? "",
+          assignedGateId: gateId || null,
+        },
+        {
+          id: gateId,
+          gateCode: data.gateCode,
+          gateName: data.gateName,
+          status: data.status,
+        },
+      )
+    : null;
+
   return (
     
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
+        data-role-tier={gateRules ? gateRules.tierLabel.split("•")[0].trim().toLowerCase().replace(/\s+/g, "-") : undefined}
+        data-event-mode={gateRules?.mode}
         className="space-y-6"
       >
         <div className="surface-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-bg-surface p-5">

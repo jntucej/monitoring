@@ -91,10 +91,11 @@ export function EntityLink({
   // Resolve the full-page route once (used for navigate mode / Cmd+Click).
   const fullRoute = allowed ? getFullPageRoute(role ?? null, kindAsEntity, id) : null;
 
-  /** Write the inspect param to the URL (peek behavior). */
+  /** Write the inspect param to the URL (peek behavior).
+   *  Uses router.push so browser Back closes the drawer without leaving the page. */
   const peek = useCallback(() => {
     const next = withInspectParam(pathname, searchParams, `${kind}:${id}`);
-    router.replace(next, { scroll: false });
+    router.push(next, { scroll: false });
   }, [pathname, searchParams, kind, id, router]);
 
   /** Navigate to the full-page route (or fall back to peek). */
