@@ -9,6 +9,10 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
 import { DetailSheet } from "./DetailSheet";
 import { WeekBar } from "./WeekBar";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface PermissionsResponse {
   success: boolean;
@@ -24,6 +28,30 @@ export function ApprovalsView({
   title: string;
 }) {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
+
+  const openStageDrawer = (item: PermissionItem) => {
+    setSelected(item);
+    setStageItem({
+      ticketId: item.id,
+      ticketNumber: item.ticket_number,
+      workflowType: item.workflow_type,
+      currentStage: item.current_stage,
+      status: item.status,
+      studentId: item.student?.id,
+      studentName: item.student?.name,
+      studentRoll: item.student?.student_details?.roll,
+      stages: [
+        "student",
+        "faculty",
+        "hod",
+        "deputy_warden",
+        "hostel_manager",
+        "warden",
+        "principal",
+      ],
+    });
+  };
 
   const url = `/api/permissions?stage=hod&status=${status}`;
 
@@ -92,6 +120,7 @@ export function ApprovalsView({
               ]}
               data={rows}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => openStageDrawer(r)}
             />
           </div>
         </>
@@ -100,11 +129,20 @@ export function ApprovalsView({
 
       <DetailSheet
         item={selected}
-        onClose={() => setSelected(null)}
+        onClose={() => {
+          setSelected(null);
+          setStageItem(null);
+        }}
         onActionComplete={() => {
           setSelected(null);
+          setStageItem(null);
           refresh();
         }}
+      />
+
+      <ApproverStageDrawer
+        item={stageItem}
+        onClose={() => setStageItem(null)}
       />
     </div>
   );

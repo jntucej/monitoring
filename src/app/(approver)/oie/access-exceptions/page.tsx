@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
@@ -28,6 +28,10 @@ import {
   InspectorButton,
   type EntityInspection,
 } from "@/components/shared/EntityInspector";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -229,6 +233,7 @@ function AccessExceptionsInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data,
@@ -329,7 +334,22 @@ function AccessExceptionsInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <ExceptionTable rows={rows} onInspect={(r) => inspect(buildAccessExceptionInspection(r))} />
+            <ExceptionTable
+              rows={rows}
+              onInspect={(r) => {
+                inspect(buildAccessExceptionInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.candidate_name ?? undefined,
+                  studentRoll: r.roll ?? undefined,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Exceptions are surfaced for OIE review only. Resolution is handled by the
@@ -338,7 +358,14 @@ function AccessExceptionsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

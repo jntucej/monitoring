@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
@@ -21,6 +21,10 @@ import {
   InspectorButton,
   type EntityInspection,
 } from "@/components/shared/EntityInspector";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
   const cls: Record<string, string> = {
@@ -209,6 +213,7 @@ function OieRecordsInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data: oieQueue,
@@ -272,7 +277,22 @@ function OieRecordsInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
             </div>
           ) : (
-            <TicketTable rows={oieRows} onInspect={(r) => inspect(buildOiePermissionInspection(r))} />
+            <TicketTable
+            rows={oieRows}
+            onInspect={(r) => {
+              inspect(buildOiePermissionInspection(r));
+              setStageItem({
+                ticketId: r.id,
+                ticketNumber: r.ticket_number,
+                workflowType: r.workflow_type,
+                currentStage: r.current_stage,
+                status: r.status,
+                studentName: r.student?.name,
+                studentRoll: r.student?.student_details?.roll,
+                stages: ["student", "oie", "exam_branch", "vice_principal"],
+              });
+            }}
+          />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
@@ -282,7 +302,14 @@ function OieRecordsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

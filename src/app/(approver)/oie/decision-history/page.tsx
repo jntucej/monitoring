@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { decisionRecordInspection } from "@/components/approver/wardenConsoleModels";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface HistoryRow {
   id: string;
@@ -97,6 +101,7 @@ function StatusPill({ status }: { status: string }) {
 
 function HistoryTable({ rows }: { rows: HistoryRow[] }) {
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
   const onInspect = (r: HistoryRow) => {
     inspect(
       decisionRecordInspection({
@@ -115,6 +120,16 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           : null,
       }),
     );
+    setStageItem({
+      ticketId: r.id,
+      ticketNumber: r.ticket_number,
+      workflowType: r.workflow_type,
+      currentStage: r.current_stage,
+      status: r.status,
+      studentName: r.student?.name,
+      studentRoll: r.student?.student_details?.roll,
+      stages: ["student", "oie", "exam_branch", "vice_principal"],
+    });
   };
   if (rows.length === 0) {
     return (
@@ -169,7 +184,14 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           })}
         </tbody>
       </table>
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }
