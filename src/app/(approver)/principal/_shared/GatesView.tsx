@@ -6,8 +6,10 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildGateInspection } from "@/lib/principal/registerInspections";
 
-interface Gate {
+interface GateRecord {
   id: string;
   name: string;
   code?: string;
@@ -17,16 +19,18 @@ interface Gate {
 
 interface GatesResponse {
   success?: boolean;
-  data: Gate[];
+  data: GateRecord[];
 }
 
 export function GatesView() {
   const { data, loading } = useApiResource<GatesResponse>("/api/gates", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const gates = Array.isArray(data?.data) ? data.data : [];
   const activeCount = gates.filter((g) => g.status === "ACTIVE" || !g.status).length;
+  const openInspector = (g: GateRecord) => inspect(buildGateInspection(g));
 
   return (
     <div className="space-y-4">
@@ -56,23 +60,28 @@ export function GatesView() {
         <>
           <ul className="space-y-2 md:hidden">
             {gates.map((g) => (
-              <li
-                key={g.id}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{g.name}</p>
-                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                    {g.status ?? "ACTIVE"}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-text-muted">{g.location ?? g.code ?? "Main Campus"}</p>
+              <li key={g.id}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(g)}
+                  aria-label={`Inspect gate: ${g.name}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{g.name}</p>
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                      {g.status ?? "ACTIVE"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-text-muted">{g.location ?? g.code ?? "Main Campus"}</p>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
-            <DataTable<Gate>
+            <DataTable<GateRecord>
+              onRowClick={openInspector}
               columns={[
                 { header: "Name", accessor: (r) => r.name },
                 { header: "Code", accessor: (r) => r.code ?? "—" },
@@ -92,6 +101,8 @@ export function GatesView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

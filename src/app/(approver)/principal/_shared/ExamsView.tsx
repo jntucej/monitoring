@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildExamInspection } from "@/lib/principal/registerInspections";
 
 interface ExamException {
   id?: string;
@@ -30,6 +32,8 @@ export function ExamsView() {
 
   const exceptions = Array.isArray(data?.data) ? data.data : [];
   const pendingCount = exceptions.filter((e) => e.status === "PENDING" || !e.status).length;
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openInspector = (e: ExamException) => inspect(buildExamInspection(e));
 
   return (
     <div className="space-y-4">
@@ -59,23 +63,28 @@ export function ExamsView() {
         <>
           <ul className="space-y-2 md:hidden">
             {exceptions.map((e, idx) => (
-              <li
-                key={e.id ?? idx}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
-                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                    {e.status ?? "PENDING"}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-text-secondary">{e.reason ?? "Exam hall clearance"}</p>
+              <li key={e.id ?? idx}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(e)}
+                  aria-label={`Inspect exam exception: ${e.student_name ?? e.student?.name ?? "student"}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                      {e.status ?? "PENDING"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-text-secondary">{e.reason ?? "Exam hall clearance"}</p>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<ExamException>
+              onRowClick={openInspector}
               columns={[
                 {
                   header: "Candidate",
@@ -104,6 +113,8 @@ export function ExamsView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

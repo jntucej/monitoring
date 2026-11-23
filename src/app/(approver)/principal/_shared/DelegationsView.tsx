@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDelegationInspection } from "@/lib/principal/registerInspections";
 
 interface Delegation {
   id: string;
@@ -32,6 +34,8 @@ export function DelegationsView() {
 
   const delegations = data?.data?.delegations ?? [];
   const activeCount = delegations.filter((d) => d.status === "ACTIVE" || !d.status).length;
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openInspector = (d: Delegation) => inspect(buildDelegationInspection(d));
 
   return (
     <div className="space-y-4">
@@ -61,23 +65,28 @@ export function DelegationsView() {
         <>
           <ul className="space-y-2 md:hidden">
             {delegations.map((d) => (
-              <li
-                key={d.id}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
-                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
-                    {d.status ?? "ACTIVE"}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-text-secondary">Scope: {d.scope ?? "Full"}</p>
+              <li key={d.id}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(d)}
+                  aria-label={`Inspect delegation: ${d.delegate_role ?? "delegation"}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs text-action-primary">
+                      {d.status ?? "ACTIVE"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-text-secondary">Scope: {d.scope ?? "Full"}</p>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<Delegation>
+              onRowClick={openInspector}
               columns={[
                 {
                   header: "Delegate Role",
@@ -106,6 +115,8 @@ export function DelegationsView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

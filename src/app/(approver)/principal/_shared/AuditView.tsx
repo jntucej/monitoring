@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildAuditInspection } from "@/lib/principal/registerInspections";
 
 interface AuditLog {
   id: string;
@@ -27,6 +29,8 @@ export function AuditView() {
   });
 
   const logs = Array.isArray(data?.data) ? data.data : [];
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openInspector = (log: AuditLog) => inspect(buildAuditInspection(log));
 
   return (
     <div className="space-y-4">
@@ -52,25 +56,30 @@ export function AuditView() {
         <>
           <ul className="space-y-2 md:hidden">
             {logs.map((log) => (
-              <li
-                key={log.id}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{log.action}</p>
-                  <span className="text-xs text-text-muted">
-                    {new Date(log.timestamp).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-text-secondary">
-                  {log.user_name ?? "System"} ({log.user_role ?? "sys"})
-                </p>
+              <li key={log.id}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(log)}
+                  aria-label={`Inspect audit event: ${log.action}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{log.action}</p>
+                    <span className="text-xs text-text-muted">
+                      {new Date(log.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    {log.user_name ?? "System"} ({log.user_role ?? "sys"})
+                  </p>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<AuditLog>
+              onRowClick={openInspector}
               columns={[
                 { header: "Action", accessor: (r) => r.action },
                 { header: "Actor", accessor: (r) => r.user_name ?? "System" },
@@ -86,6 +95,8 @@ export function AuditView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

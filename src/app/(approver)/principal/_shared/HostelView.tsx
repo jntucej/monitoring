@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHostelInspection } from "@/lib/principal/registerInspections";
 
 interface HostelBlock {
   id?: string;
@@ -26,10 +28,12 @@ export function HostelView() {
   const { data, loading } = useApiResource<HostelBlocksResponse>("/api/hostel/blocks", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const blocks = Array.isArray(data?.data) ? data.data : [];
   const totalCapacity = blocks.reduce((sum, b) => sum + (b.capacity ?? b.total_rooms ?? 0), 0);
   const totalOccupied = blocks.reduce((sum, b) => sum + (b.occupied ?? 0), 0);
+  const openInspector = (b: HostelBlock) => inspect(buildHostelInspection(b));
 
   return (
     <div className="space-y-4">
@@ -62,15 +66,19 @@ export function HostelView() {
             {blocks.map((b, idx) => {
               const name = b.name ?? b.block_name ?? `Block ${idx + 1}`;
               return (
-                <li
-                  key={b.id ?? idx}
-                  className="surface-card bg-bg-surface p-3"
-                >
-                  <p className="text-sm font-medium">{name}</p>
-                  <div className="mt-2 flex gap-3 text-xs text-text-secondary">
-                    <span>Capacity: {b.capacity ?? b.total_rooms ?? "—"}</span>
-                    <span>Occupied: {b.occupied ?? "—"}</span>
-                  </div>
+                <li key={b.id ?? idx}>
+                  <button
+                    type="button"
+                    onClick={() => openInspector(b)}
+                    aria-label={`Inspect hostel block: ${name}`}
+                    className="surface-card block w-full bg-bg-surface p-3 text-left"
+                  >
+                    <p className="text-sm font-medium">{name}</p>
+                    <div className="mt-2 flex gap-3 text-xs text-text-secondary">
+                      <span>Capacity: {b.capacity ?? b.total_rooms ?? "—"}</span>
+                      <span>Occupied: {b.occupied ?? "—"}</span>
+                    </div>
+                  </button>
                 </li>
               );
             })}
@@ -78,6 +86,7 @@ export function HostelView() {
 
           <div className="hidden md:block">
             <DataTable<HostelBlock>
+              onRowClick={openInspector}
               columns={[
                 {
                   header: "Block",
@@ -106,6 +115,8 @@ export function HostelView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

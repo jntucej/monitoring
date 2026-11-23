@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDepartmentInspection } from "@/lib/principal/registerInspections";
 
 interface DepartmentItem {
   code: string;
@@ -34,8 +36,10 @@ export function DepartmentsView() {
   const { data, loading } = useApiResource<AcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const d = data?.data;
+  const openInspector = (dept: DepartmentItem) => inspect(buildDepartmentInspection(dept));
 
   return (
     <div className="space-y-4">
@@ -66,32 +70,35 @@ export function DepartmentsView() {
         <>
           <ul className="space-y-2 md:hidden">
             {(d?.departments ?? []).map((dept) => (
-              <li
-                key={dept.code}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{dept.name}</p>
-                    <p className="text-xs text-text-muted">
-                      HOD: {dept.hodName ?? "—"}
-                    </p>
+              <li key={dept.code}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(dept)}
+                  aria-label={`Inspect department: ${dept.name}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{dept.name}</p>
+                      <p className="text-xs text-text-muted">HOD: {dept.hodName ?? "—"}</p>
+                    </div>
+                    <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs font-semibold text-action-primary">
+                      {dept.attendancePct}%
+                    </span>
                   </div>
-                  <span className="surface-card bg-action-primary/10 px-2 py-0.5 text-xs font-semibold text-action-primary">
-                    {dept.attendancePct}%
-                  </span>
-                </div>
-                <div className="mt-2 flex gap-3 text-xs text-text-secondary">
-                  <span>{dept.students} students</span>
-                  <span>{dept.faculty} faculty</span>
-                  <span>1:{dept.ratio}</span>
-                </div>
+                  <div className="mt-2 flex gap-3 text-xs text-text-secondary">
+                    <span>{dept.students} students</span>
+                    <span>{dept.faculty} faculty</span>
+                    <span>1:{dept.ratio}</span>
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<DepartmentItem>
+              onRowClick={openInspector}
               columns={[
                 { header: "Department", accessor: (r) => r.name },
                 { header: "HOD", accessor: (r) => r.hodName ?? "—" },
@@ -110,6 +117,8 @@ export function DepartmentsView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
