@@ -1,51 +1,90 @@
 # Exam Branch — how it works
 
-## Overview
-The Exam Branch represents the administrative examination cell at JNTUH CEJ. It coordinates overall examination lifecycle management: student eligibility validation, hall ticket generation, center jumbling, seating/nominal roll generation, attendance processing, discrepancy detection, and results publication.
+## Role in institutional life
+The Exam Branch office at JNTUH CEJ is the operational authority for all examination matters. Per JNTUH examination branch (jntuh.ac.in), the exam branch is led by the Controller of Examinations with Additional Controllers for academic, results, and automation. At the constituent college level, the exam branch office handles:
 
-In the institutional hierarchy, the Exam Branch operates under the Controller of Examinations and works in tandem with the Additional Controllers (Academic, Results, Automation). While individual faculty enter internal marks and proctors record attendance, the Exam Branch runs automated validation pipelines to detect discrepancies (such as marks entering after cutoff dates, unmapped candidates, or attendance deficits). Discrepancies that cannot be settled automatically are handed off to the OIE or escalated to the Vice-Principal.
+- Examination planning and scheduling
+- Hall ticket generation and distribution
+- Center jumbling and branch-wise allocation
+- Observer allotment to exam centers
+- Seating arrangement and nominal rolls generation
+- D-forms uploading
+- Electronic distribution of encrypted question papers
+- Spot valuation application
+- Evaluator registration
+- Project panels automation
+- Notifications and timetables
+- Results processing
+- Results publishing
+- Online convocation services
+- Online certificate verification
+- Cashless transactions
 
-The Exam Branch workspace features an amber theme (`#fffbeb` surface tint) with swift motion, centered on the `ExamCalendar` and `DiscrepancyRadar` widgets.
+In the Gate Monitor system, the Exam Branch role is the office that handles the operational side of exams — planning, scheduling, and result processing. The Chief Superintendent (Principal) handles exam-day operations. The separation of duties is critical: no single role can both enter and publish a result.
 
-## Pages & workflows
+## Operational standards
+Per JNTUH exam branch procedures:
+- Examination planning: exam branch schedules all exams and publishes timetables
+- Hall ticket generation: hall tickets are generated and distributed electronically
+- Center jumbling: exam centers are jumbled to prevent bias
+- Observer allotment: observers are allotted to exam centers
+- Seating arrangement: nominal rolls are generated for seating
+- Question papers: encrypted question papers are distributed electronically
+- Spot valuation: spot valuation applications are processed
+- Results processing: results are processed by the Additional Controller of Results
+- Results publishing: results are published by the Controller
+- Convocation: online convocation services are managed
 
-### 1. Examination Planning & Discrepancies
-* **Exam Branch Dashboard & Discrepancy Radar (`/exam/permissions`, `/exam-branch`):** Tracks upcoming sessions, hall capacities, and real-time alerts flagging anomalies between student rosters and hall ticket registrations.
-* **OIE Handoff & Coordination (`/oie/exam-branch-coordination`, `/exam/permissions/oie`):** Surfaces issues that require operational adjudication by the OIE, such as attendance shortage appeals or late registrations.
-* **VP Escalations (`/exam/permissions/vice-principal`, `/vice-principal/examinations`):** Reviews exam policy discrepancies or malpractice cases requiring Vice-Principal authorization.
+Per Indian university exam standards, the separation of duties is:
+- Marks entry: faculty (first point of entry)
+- Result processing: Additional Controller of Results
+- Result sign-off: Controller of Examinations
+- Result publishing: Controller (only after sign-off)
 
-### 2. Candidate Administration & Hall Operations
-* **Candidate Attendance Reconciliation (`/oie/candidate-attendance`):** Consolidates attendance feeds from physical halls into master examination session rosters.
-* **Access Exceptions & Emergency Passes (`/oie/access-exceptions`, `/oie/examination-day-access`):** Configures rules under which students with pending dues or minor biometric faults are granted examination gate passes.
-* **Decision History & Records (`/oie/decision-history`, `/oie/records`):** Maintains permanent archival records of attendance rosters, nominal rolls, and hall ticket issuances.
+## Accountability and escalation
+- Exam Branch reports to Controller of Examinations (JNTUH) and Principal (college level)
+- Exam planning: exam branch → Principal approval
+- Hall ticket issues: exam branch → Chief Superintendent (exam-day)
+- Result disputes: exam branch → Controller → Principal
+- Center jumbling: exam branch decides → Controller approves
 
-## Key API endpoints
+## What we have in the app
+- /exam-branch — Dashboard with exam planning, scheduling, result processing
+- /exam-branch/planning — Exam planning and scheduling
+- /exam-branch/hall-tickets — Hall ticket generation and distribution
+- /exam-branch/results — Result processing view
+- /exam-branch/notifications — Exam notifications and timetables
 
-| Endpoint | Method(s) | What it does |
-|---|---|---|
-| `/exam/access` | `GET,POST` | Retrieves and creates candidate examination hall access permits. |
-| `/exam/access-exceptions` | `GET,PATCH,POST` | Manages exception records for candidates flagged during pre-exam gate checks. |
-| `/exam/candidate-attendance` | `GET` | Compiles attendance returns from examination halls across sessions. |
-| `/exam/eligibility-rules` | `GET,POST` | Configures and evaluates eligibility criteria (minimum attendance, fee clearances). |
-| `/exam/hall-tickets/generate` | `POST` | Triggers bulk batch generation or re-generation of candidate hall tickets. |
-| `/exam/results/process` | `POST` | Initiates marks compilation, grade calculation, and discrepancy validation. |
-| `/exam/results/publish` | `POST` | Signs off and publishes final processed examination results to student portals. |
-| `/exam/superintendent` | `GET` | Fetches examination hall allocations, assigned invigilators, and superintendent roster data. |
-| `/me/workspace` | `GET` | Retrieves active workspace state, exam session context, and notifications. |
-| `/auth/session` | `GET` | Revalidates Exam Branch staff session and active RBAC credentials. |
+Key API endpoints:
+- GET /api/exam-branch/planning — Exam planning
+- POST /api/exam-branch/hall-tickets — Generate hall tickets
+- GET /api/exam-branch/results — Result processing view
+- POST /api/exam-branch/results/[id]/process — Process result
+- GET /api/exam-branch/notifications — Exam notifications
 
-## Data flow
-1. **Pre-Exam Configuration:** Exam Branch configures eligibility parameters (`/exam/eligibility-rules`) and ingests attendance/fee rosters from departments.
-2. **Hall Ticket Generation:** The branch runs `/exam/hall-tickets/generate`, generating barcoded/QR-coded hall tickets for eligible candidates.
-3. **Session Execution:** During exams, attendance is captured live (`/exam/candidate-attendance`). Any gate or seating discrepancy is flagged to the Discrepancy Radar.
-4. **Handoff & Resolution:** Discrepancies are resolved by the OIE (`/oie/access-exceptions`) or escalated to the Vice-Principal.
-5. **Result Processing & Publication:** Internal marks from faculty and scanned external marks are processed (`/exam/results/process`) and published (`/exam/results/publish`).
+Data flow: Exam branch actions are the highest-severity exam entries in audit_events. Hall ticket generation creates hall ticket records. Result processing follows the separation of duties chain.
 
-## Security notes
-* **Authentication:** JWT access tokens (HttpOnly cookie + Bearer) coupled with rotating refresh tokens; revalidated via `/api/auth/session`.
-* **Separation of Duties:** Enforces rigid segregation:
-  - Faculty input internal marks but cannot process results.
-  - Exam Branch processes results but cannot arbitrarily alter raw marks memos without Addl. Controller (Academic) audit reasoning.
-  - Final results publication (`POST /exam/results/publish`) requires elevated authorization.
-* **RBAC Enforcement:** Secured by server-side `withAuthorization({ requiredRole: ['exam_branch', ...] })`. UI components are protected by `AuthGuard allowedRoles={['exam_branch']}`.
-* **Audit Trail:** Every hall ticket reissuance, exception grant, and result processing run is logged with an immutable audit hash.
+## What is missing
+1. Exam planning dashboard — no visual exam planning calendar
+2. Hall ticket tracking — no tracking of hall ticket distribution
+3. Result processing pipeline — no visual pipeline for result processing
+4. Discrepancy detection — no automatic detection of result discrepancies
+5. Exam notification management — no structured notification management
+6. Center jumbling view — no visual view of center jumbling
+7. Observer allotment — no structured observer allotment tracking
+8. Convocation management — no online convocation management
+
+## Implementation notes for dashboard/agent
+- Dashboard leads with exam planning, scheduling, result processing
+- Exam Branch agent is the operational authority for exam matters
+- Hall tickets: generated and distributed electronically
+- Results: processing follows separation of duties chain
+- Notifications: structured with priority and delivery tracking
+
+## Agent persona
+When acting as the exam_branch role:
+- Focus: exam planning, scheduling, hall tickets, result processing
+- Can: plan exams, generate hall tickets, process results, publish notifications
+- Cannot: self-approve result publishing (needs Controller sign-off), control hall access (Chief Superintendent)
+- Escalation: to Controller for result matters; to Chief Superintendent for exam-day matters
+

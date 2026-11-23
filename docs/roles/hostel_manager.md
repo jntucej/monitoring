@@ -1,51 +1,78 @@
 # Hostel Manager — how it works
 
-## Overview
-The `hostel_manager` role represents the institutional hostel administrative authority (faculty in-charge / chief residential officer). The hostel manager oversees all campus hostel blocks, supervising Deputy Wardens and Caretakers, managing student room allotments, tracking block occupancy, coordinating housekeeping tasks, handling escalated grievances, and auditing resident returns.
+## Role in institutional life
+The Hostel Manager at JNTUH CEJ is a teaching faculty member appointed as in-charge of the hostel system. Per JNTUH CEJ's own hostel staff page, the Hostel Manager is "entrusted with the twin responsibilities of allotment of rooms in hostels as well as looking after the day-to-day mess facilities to the boarders. He is ably assisted by two Deputy Wardens for each of the hostels. The Hostel Manager and Deputy Wardens are appointed from the teaching faculty as in-charge, who in turn are supported by the respective hostel Care Takers."
 
-Unlike caretakers whose scope is restricted to individual blocks, the hostel manager possesses campus-wide residential oversight and authority over room inventories, resident disciplinary incidents, and permission workflows.
+JNTUH CEJ has 4 hostel blocks: 2 boys + 2 girls. The Hostel Manager is one per college/unit and oversees all 4 blocks.
 
-## Pages & workflows
-- **/hostel-manager and /hostel-manager/home**: Executive hostel management dashboard. Summarizes campus residential metrics (`/api/hostel-manager/summary`): total occupancy, vacant beds, active complaints, pending out-pass approvals, and overdue student returns.
-- **/hostel-manager/allocation**: Student room allocation engine. Manages room assignments, bed allotments, inter-room transfers, and vacated bed updates across all blocks.
-- **/hostel-manager/rooms**: Visual block and room inventory browser. Displays floor plans, room capacities, current occupants, and maintenance statuses.
-- **/hostel-manager/residents**: Directory of all resident students. Shows room assignments, branch, semester, contact information, attendance history, and disciplinary logs.
-- **/hostel-manager/complaints and /hostel-manager/complaints/[id]**: High-level complaint oversight console. Monitors all open residential complaints across all blocks, resolves escalated disputes, and tracks contractor SLAs.
-- **/hostel-manager/housekeeping-tasks**: Operational oversight of housekeeping schedules, sanitation checklists, and common area cleaning audits across hostel premises.
-- **/hostel-manager/maintenance**: Preventive and emergency infrastructure maintenance planning, tracking vendor repairs, electrical systems, and civil works.
-- **/hostel-manager/resource-management**: Hostel inventory and asset management, covering furniture, fixtures, appliances, water supply systems, and hostel facilities.
-- **/hostel/permissions**: Hierarchical out-pass and leave permission review portal. Hostel managers approve long-term leave, emergency exits, and multi-day passes routed beyond deputy wardens.
+In the Gate Monitor system, the Hostel Manager:
+- Manages room allotment and vacate across all blocks
+- Supervises Deputy Wardens (one per block)
+- Oversees hostel inventory (beds, cots, lockers, fans, lights)
+- Tracks block-level occupancy
+- Manages day-to-day mess facilities
+- Handles student housing grievances
+- Escalates disciplinary cases to Principal (as Chief Warden)
 
-## Key API endpoints
-| Endpoint | Method(s) | What it does |
-|---|---|---|
-| `/hostel-manager/summary` | GET | Aggregates campus hostel metrics: total occupancy, vacancies, pending tickets, and overdue returns. |
-| `/hostel-manager/rooms/allot` | POST | Allots a student to a specific room/bed or processes room transfer requests. |
-| `/hostel-manager/housekeeping-tasks` | GET | Lists daily housekeeping tasks, inspection statuses, and completion rates. |
-| `/hostel-manager/incidents` | GET, POST | Records and lists disciplinary or safety incidents within hostel premises. |
-| `/hostel-manager/incidents/[id]/escalate` | POST | Escalates severe disciplinary issues to the Chief Warden or Principal. |
-| `/hostel/blocks` | GET | Returns all hostel blocks, capacities, occupancy counts, and block warden assignments. |
-| `/hostel/blocks/[block]/rooms` | GET | Lists all rooms within a specified block, detailing bed capacity and current occupants. |
-| `/hostel/blocks/[block]/students` | GET | Retrieves roster of all active students residing in a specific hostel block. |
-| `/hostel/returns-timeline` | GET | Monitors curfew returns, flagging students who failed to return to their hostel by deadline. |
-| `/complaints` | GET, POST | Reads and manages resident complaints across all blocks. |
-| `/complaints/[id]` | DELETE, GET, PATCH | Inspects ticket details, re-assigns priority, adds administrative comments, or closes complaints. |
-| `/complaints/analytics/domain-breakdown` | GET | Analyzes complaint distribution across categories (electrical, plumbing, Wi-Fi, hygiene). |
-| `/complaints/analytics/sla-breaches` | GET | Identifies overdue complaints and SLA violations across all hostel maintenance staff. |
-| `/complaints/export/advanced` | GET | Exports residential complaint and maintenance audit data for administrative review. |
+## Operational standards
+Per Indian university hostel administration (UGC, AICTE, state govt rules):
+- Room allotment: based on merit, category, and availability; managed by Hostel Manager
+- Curfew management: night curfew is enforced by Deputy Wardens; Hostel Manager monitors compliance
+- Mess facilities: day-to-day mess operations managed by Hostel Manager with Mess In-charge support
+- Hostel inventory: Hostel Manager maintains inventory of all physical assets
+- Student grievance resolution: Hostel Manager is the first point of contact for housing issues
+- Disciplinary escalation: Hostel Manager → Principal (as Chief Warden) for DEBARRED
+- Mess rule violations: Deputy Warden reports to Hostel Manager; Hostel Manager decides on sanctions
 
-## Data flow
-1. **Room Allotment & Onboarding**:
-   - The hostel manager opens `/hostel-manager/allocation`.
-   - The UI fetches available blocks via `/api/hostel/blocks` and unoccupied beds via `/api/hostel/blocks/[block]/rooms`.
-   - Submitting an allotment triggers `POST /api/hostel-manager/rooms/allot`, updating student room records and hostel occupancy statistics.
-2. **Escalations & Night Returns Audit**:
-   - The night curfew reconciler updates student return statuses.
-   - The hostel manager reviews `/api/hostel/returns-timeline` to inspect missing students or unauthorized late entries.
-   - If a disciplinary infraction occurs, the manager logs an incident via `POST /api/hostel-manager/incidents` and can escalate to higher administration via `/incidents/[id]/escalate`.
+Per JNTUH CEJ hostel rules, the approval chain is: caretaker → deputy_warden → hostel_manager → principal (each with a substitute). This 4-stage chain is encoded in the app's caretaker.ts config.
 
-## Security notes
-- **Authentication**: JWT access token delivered via HttpOnly cookie and Authorization Bearer header, paired with rotating refresh tokens (`/api/auth/refresh`). Session state is revalidated against `/api/auth/session`.
-- **Device Binding (M4)**: Enforces `device_id` cookie check against the JWT `dh` claim on every authenticated call.
-- **Institutional Authority**: Enforced via `withAuthorization` requiring `ROLES.HOSTEL_MANAGER`. Permitted to perform campus-wide allotments and close tickets across all hostel blocks.
-- **Dual Approval & Audit**: Room reassignments and incident escalations are permanently captured in the central audit ledger.
+## Accountability and escalation
+- Hostel Manager reports to Principal (as Chief Warden)
+- Curfew violations: Deputy Warden → Hostel Manager → Principal
+- Room allotment: Hostel Manager decides; Principal approves for special cases
+- Mess issues: Mess In-charge → Hostel Manager → Principal
+- Disciplinary: Hostel Manager → Principal (DEBARRED is Principal-only)
+- Student grievances: student → Hostel Manager → Principal (for unresolved cases)
+
+## What we have in the app
+- /hostel-manager — Dashboard with block occupancy, room allotment, inventory
+- /hostel-manager/blocks — Block-level view (4 blocks: 2 boys + 2 girls)
+- /hostel-manager/rooms — Room allotment and vacate management
+- /hostel-manager/inventory — Hostel physical asset inventory
+- /hostel-manager/mess — Day-to-day mess facilities oversight
+- /hostel-manager/grievances — Student housing grievance tracking
+
+Key API endpoints:
+- GET /api/hostel-manager/blocks — Block occupancy
+- POST /api/hostel-manager/rooms/[id]/allot — Room allotment
+- POST /api/hostel-manager/rooms/[id]/vacate — Room vacate
+- GET /api/hostel-manager/inventory — Hostel inventory
+- POST /api/hostel-manager/grievances — Log student grievance
+
+Data flow: Hostel Manager actions are scoped to all 4 blocks. Room allotment/vacate updates the occupancy table. Grievances are logged and tracked to resolution.
+
+## What is missing
+1. Block occupancy heat map — no visual representation of occupancy across 4 blocks
+2. Room allotment workflow — no structured workflow for new admission room allocation
+3. Mess menu integration — no integration with Mess In-charge's menu finalization
+4. Hostel maintenance ticketing — no structured ticketing for hostel maintenance issues
+5. Curfew compliance dashboard — no single view of curfew compliance across all blocks
+6. Student housing preference — no system for students to express housing preferences
+7. Hostel visitor log — no structured visitor log for hostel blocks
+8. Disciplinary case file — no structured case file for hostel disciplinary cases
+
+## Implementation notes for dashboard/agent
+- Dashboard leads with block occupancy, room allotment, inventory
+- Hostel Manager agent oversees all 4 blocks (2 boys + 2 girls)
+- Room allotment: structured form with block, room, category, merit
+- Mess: integrated with Mess In-charge's menu and token system
+- Grievances: ticket-based workflow with SLA tracking
+
+## Agent persona
+When acting as the hostel_manager role:
+- Focus: hostel administration, room allotment, mess facilities, student grievances
+- Overses: all 4 hostel blocks
+- Can: allot/vacate rooms, track inventory, manage mess, resolve grievances
+- Cannot: escalate to DEBARRED (Principal-only), approve disciplinary cases
+- Escalation: to Principal for disciplinary; to Mess In-charge for mess operations
+
