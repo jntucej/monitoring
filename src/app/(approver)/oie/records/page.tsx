@@ -11,6 +11,81 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ArrowRight, Loader2, FileText, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an OIE exam permission record. */
+function buildOiePermissionInspection(r: PermissionRequestRow): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+  const tone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "APPROVED" ? "ok" : slaBreached ? "danger" : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Student", value: r.student?.name ?? "—" },
+            { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Workflow", value: r.workflow_type.replace(/_/g, " ") },
+            { label: "Stage", value: r.current_stage.replace(/_/g, " ") },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/exam/permissions" variant="primary">
+            Open approvals desk
+          </InspectorButton>
+          <InspectorButton href={`/permissions/${r.ticket_number}`} variant="ghost">
+            View ticket
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.student?.name ?? r.ticket_number,
+    subtitle: r.ticket_number,
+    status: <StatusBadge text={r.status} tone={tone} />,
+    sections,
+    detailHref: `/permissions/${r.ticket_number}`,
+    detailLabel: "Full ticket",
+  };
+}
 
 interface PermissionRequestRow {
   id: string;
@@ -56,7 +131,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
+function TicketTable({ rows, onInspect }: { rows: PermissionRequestRow[]; onInspect: (r: PermissionRequestRow) => void }) {
   if (rows.length === 0) {
     return <EmptyState message="No pending items at the OIE examination stage. The queue is clear." />;
   }
@@ -74,7 +149,7 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 15).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => onInspect(r)}>
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
@@ -133,6 +208,7 @@ function OieRecordsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: oieQueue,
@@ -196,7 +272,7 @@ function OieRecordsInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
             </div>
           ) : (
-            <TicketTable rows={oieRows} />
+            <TicketTable rows={oieRows} onInspect={(r) => inspect(buildOiePermissionInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
@@ -205,6 +281,8 @@ function OieRecordsInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

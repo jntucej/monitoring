@@ -164,23 +164,6 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    PENDING: "border-amber-400/30 bg-amber-400/10 text-action-warning",
-    REJECTED: "border-rose-400/30 bg-rose-400/10 text-action-danger",
-    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-unit-c",
-    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
-  };
-  const cls = styles[status] ?? "border-border/30 bg-bg-elevated/10 text-text-muted";
-  return (
-    <span
-      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${cls}`}
-    >
-      {status}
-    </span>
-  );
-}
-
 function ExceptionTable({ rows, onInspect }: { rows: AccessExceptionRow[]; onInspect: (r: AccessExceptionRow) => void }) {
   if (rows.length === 0) {
     return (
