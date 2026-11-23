@@ -9,8 +9,8 @@ import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 import {
-  buildPersonInspection,
-  type PersonRecord,
+  buildPersonExceptionInspection,
+  type PersonExceptionRecord,
   type RoleGate,
 } from "./entityInspectionModels";
 
@@ -43,16 +43,11 @@ interface AcademicsResponse {
   };
 }
 
-function toPersonRecord(id: string, name: string, role: string, designation: string | null, department: string | null): PersonRecord {
-  return {
-    id,
-    uniqueId: id,
-    name,
-    role,
-    designation: designation ?? undefined,
-    department: department ?? undefined,
-    status: "ACTIVE",
-  };
+function toPersonException(
+  id: string, name: string, role: string, designation: string | null,
+  department: string | null, kind: "absent" | "late" | "flagged", detail?: number | string,
+): PersonExceptionRecord {
+  return { id, name, role, designation, department, exceptionKind: kind, detail };
 }
 
 export function ExceptionsView() {
@@ -67,9 +62,10 @@ export function ExceptionsView() {
     role: role.role ?? null,
   };
   const [inspection, setInspection] = useState<
-    ReturnType<typeof buildPersonInspection> | null
+    ReturnType<typeof buildPersonExceptionInspection> | null
   >(null);
-  const inspect = (rec: PersonRecord) => setInspection(buildPersonInspection(rec, gate));
+  const inspect = (rec: PersonExceptionRecord) =>
+    setInspection(buildPersonExceptionInspection(rec, gate));
 
   const d = data?.data;
   const absent = d?.exceptions?.absent ?? [];
@@ -88,9 +84,30 @@ export function ExceptionsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Absent" value={absent.length} tone="danger" />
-        <KpiCard label="Late" value={late.length} tone="warn" />
-        <KpiCard label="Flagged" value={flagged.length} tone="info" />
+        <KpiCard
+          label="Absent"
+          value={absent.length}
+          tone="danger"
+          onClick={() => {
+            if (absent.length) inspect(toPersonException(absent[0].id, absent[0].name, absent[0].role, absent[0].designation ?? null, absent[0].department ?? null, "absent"));
+          }}
+        />
+        <KpiCard
+          label="Late"
+          value={late.length}
+          tone="warn"
+          onClick={() => {
+            if (late.length) inspect(toPersonException(late[0].id, late[0].name, late[0].role, late[0].designation ?? null, late[0].department ?? null, "late", late[0].minutesLate));
+          }}
+        />
+        <KpiCard
+          label="Flagged"
+          value={flagged.length}
+          tone="info"
+          onClick={() => {
+            if (flagged.length) inspect(toPersonException(flagged[0].id, flagged[0].name, "", null, flagged[0].department ?? null, "flagged", flagged[0].reason));
+          }}
+        />
       </div>
 
       {loading && !d ? (
@@ -113,12 +130,12 @@ export function ExceptionsView() {
                     tabIndex={0}
                     onClick={() =>
                       inspect(
-                        toPersonRecord(p.id, p.name, p.role, p.designation, p.department)
+                        toPersonException(p.id, p.name, p.role, p.designation, p.department, "absent")
                       )
                     }
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ")
-                        inspect(toPersonRecord(p.id, p.name, p.role, p.designation, p.department));
+                        inspect(toPersonException(p.id, p.name, p.role, p.designation, p.department, "absent"));
                     }}
                   >
                     <span className="flex-1 truncate">{p.name}</span>
@@ -145,12 +162,12 @@ export function ExceptionsView() {
                     tabIndex={0}
                     onClick={() =>
                       inspect(
-                        toPersonRecord(p.id, p.name, p.role, p.designation, p.department)
+                        toPersonException(p.id, p.name, p.role, p.designation, p.department, "late", p.minutesLate)
                       )
                     }
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ")
-                        inspect(toPersonRecord(p.id, p.name, p.role, p.designation, p.department));
+                        inspect(toPersonException(p.id, p.name, p.role, p.designation, p.department, "late", p.minutesLate));
                     }}
                   >
                     <span className="flex-1 truncate">{p.name}</span>
@@ -174,11 +191,11 @@ export function ExceptionsView() {
                     role="button"
                     tabIndex={0}
                     onClick={() =>
-                      inspect(toPersonRecord(p.id, p.name, "staff", null, p.department))
+                      inspect(toPersonException(p.id, p.name, "", null, p.department, "flagged", p.reason))
                     }
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ")
-                        inspect(toPersonRecord(p.id, p.name, "staff", null, p.department));
+                        inspect(toPersonException(p.id, p.name, "", null, p.department, "flagged", p.reason));
                     }}
                   >
                     <span className="flex-1 truncate">{p.name}</span>

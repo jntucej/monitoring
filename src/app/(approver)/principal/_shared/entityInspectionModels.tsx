@@ -30,7 +30,9 @@ export type PrincipalRegisterKind =
   | "exam_case"
   | "report"
   | "approval"
-  | "person";
+  | "person"
+  | "person_exception"
+  | "sla_cell";
 
 export interface RoleGate {
   /** The top tier of the institution (Principal / Chief Warden = the warden). */
@@ -1292,5 +1294,230 @@ export function buildReportInspection(
     ],
     detailHref: "/principal/governance/reports",
     detailLabel: "View governance reports",
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  person_exception — P0.2 ExceptionsView person rows + KPIs        */
+/* ------------------------------------------------------------------ */
+
+export interface PersonExceptionRecord {
+  id: string;
+  name: string;
+  role?: string | null;
+  designation?: string | null;
+  department?: string | null;
+  /** Which list this person came from: absent / late / flagged */
+  exceptionKind: "absent" | "late" | "flagged";
+  /** For late: minutes late. For flagged: reason string. */
+  detail?: number | string;
+}
+
+export function buildPersonExceptionInspection(
+  p: PersonExceptionRecord,
+  gate: RoleGate
+): EntityInspection {
+  const tone =
+    p.exceptionKind === "absent" ? "danger"
+    : p.exceptionKind === "late" ? "warn"
+    : "neutral";
+  const statusLabel = p.exceptionKind.toUpperCase();
+  const displayName = p.name;
+  const subtitle = [p.department, p.designation ?? p.role].filter(Boolean).join(" · ") || p.id;
+
+  return {
+    kind: "person_exception",
+    title: displayName,
+    subtitle,
+    status: badge(statusLabel, tone),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <dl className="grid grid-cols-2 gap-2.5 text-xs">
+            <div>
+              <dt className="text-text-muted">Role</dt>
+              <dd className="mt-0.5 text-text-primary">{p.role ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">Department</dt>
+              <dd className="mt-0.5 text-text-primary">{p.department ?? "—"}</dd>
+            </div>
+            {p.detail != null ? (
+              <div>
+                <dt className="text-text-muted">
+                  {p.exceptionKind === "late" ? "Minutes late" : "Flag reason"}
+                </dt>
+                <dd className="mt-0.5 text-text-primary">
+                  {p.exceptionKind === "late" ? `${p.detail}m` : String(p.detail)}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt className="text-text-muted">Person ID</dt>
+              <dd className="mt-0.5 font-mono text-text-primary">{p.id}</dd>
+            </div>
+          </dl>
+        ),
+      },
+      {
+        title: "Context",
+        content: (
+          <dl className="grid grid-cols-1 gap-2.5 text-xs">
+            <div>
+              <dt className="text-text-muted">Exception type</dt>
+              <dd className="mt-0.5 text-text-primary">
+                {p.exceptionKind === "absent" && "Did not check in today"}
+                {p.exceptionKind === "late" && `Arrived ${p.detail}m after gate open`}
+                {p.exceptionKind === "flagged" && `Flagged: ${p.detail ?? "unspecified"}`}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">Responsible authority</dt>
+              <dd className="mt-0.5 text-text-primary">Principal oversight · HOD {p.department ?? ""}</dd>
+            </div>
+          </dl>
+        ),
+      },
+      {
+        title: "Actions",
+        content: gate.isPrincipal ? (
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/principal/people/attendance"
+              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+            >
+              All exceptions
+            </a>
+            <a
+              href="/principal/attention"
+              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+            >
+              Attention queue
+            </a>
+          </div>
+        ) : (
+          readOnlyNote(gate, "attendance exceptions are read-only for non-principal roles")
+        ),
+      },
+    ],
+    detailHref: "/principal/people/attendance",
+    detailLabel: "View attendance exceptions",
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  sla_cell — P0.10 AnalyticsView SLA heatmap cell inspector + KPIs */
+/* ------------------------------------------------------------------ */
+
+export interface SlaCellRecord {
+  stage: string;
+  total: number;
+  withinSla: number;
+  breached: number;
+  rate: number;
+  /** Per-workflow breakdown (from details[] in the /api/principal/sla-heatmap response). */
+  byWorkflow?: Array<{ workflow_type: string; total: number; withinSla: number; breached: number }>;
+}
+
+export function buildSlaCellInspection(
+  cell: SlaCellRecord,
+  gate: RoleGate
+): EntityInspection {
+  const stageLabel = cell.stage.replace(/_/g, " ");
+  const isBreached = cell.breached > 0;
+  return {
+    kind: "sla_cell",
+    title: `${stageLabel} stage — SLA compliance`,
+    subtitle: `${cell.total} tickets in flight · ${cell.rate}% on-time`,
+    status: badge(
+      isBreached ? `${cell.breached} BREACHED` : "COMPLIANT",
+      isBreached ? "danger" : "ok"
+    ),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <dl className="grid grid-cols-2 gap-2.5 text-xs">
+            <div>
+              <dt className="text-text-muted">Stage</dt>
+              <dd className="mt-0.5 font-mono text-text-primary">{cell.stage}</dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">Compliance</dt>
+              <dd className="mt-0.5 text-text-primary">{cell.rate}%</dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">Total in flight</dt>
+              <dd className="mt-0.5 text-text-primary">{cell.total}</dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">Within SLA / Breached</dt>
+              <dd className="mt-0.5 text-text-primary">
+                {cell.withinSla} / {cell.breached}
+              </dd>
+            </div>
+          </dl>
+        ),
+      },
+      {
+        title: "By workflow",
+        content: cell.byWorkflow && cell.byWorkflow.length > 0 ? (
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-text-muted">
+                <th className="text-left font-medium">Workflow</th>
+                <th className="text-right font-medium">Total</th>
+                <th className="text-right font-medium">Within</th>
+                <th className="text-right font-medium">Breached</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cell.byWorkflow.map((w) => (
+                <tr key={w.workflow_type} className="border-t border-border">
+                  <td className="py-1 text-text-primary">{w.workflow_type}</td>
+                  <td className="py-1 text-right text-text-primary">{w.total}</td>
+                  <td className="py-1 text-right text-text-primary">{w.withinSla}</td>
+                  <td className={`py-1 text-right ${w.breached > 0 ? "text-action-danger" : "text-text-muted"}`}>
+                    {w.breached}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-xs text-text-muted">Per-workflow breakdown not available.</p>
+        ),
+      },
+      {
+        title: "Actions",
+        content: gate.isPrincipal ? (
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/principal/approvals/overdue"
+              className="inline-flex min-h-8 items-center rounded bg-action-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+            >
+              View overdue tickets
+            </a>
+            <a
+              href="/principal/approvals"
+              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+            >
+              Pending approvals
+            </a>
+            <a
+              href="/principal/governance/analytics"
+              className="inline-flex min-h-8 items-center rounded bg-bg-elevated px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-bg-surface"
+            >
+              Full analytics
+            </a>
+          </div>
+        ) : (
+          readOnlyNote(gate, "SLA analytics are read-only for non-principal roles")
+        ),
+      },
+    ],
+    detailHref: "/principal/governance/analytics",
+    detailLabel: "View SLA analytics",
   };
 }

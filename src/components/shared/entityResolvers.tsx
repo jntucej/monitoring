@@ -27,6 +27,37 @@
 import { useCallback, useEffect, useState } from "react";
 import { cachedFetch } from "@/hooks/useApiResource";
 import {
+  ticketRowInspection,
+  hostelBlockInspection,
+  gatePresenceInspection,
+  incidentInspection,
+  shiftHandoverInspection,
+  menuInspection,
+  stockItemInspection,
+  mealDayInspection,
+  operationalRequestInspection,
+  academicDepartmentInspection,
+  vpExceptionPersonInspection,
+  delegationStatusInspection,
+  escalationInspection,
+  decisionRecordInspection,
+  type HMBoardRow,
+  type HostelBlockOccupancy,
+  type GatePresenceRow,
+  type IncidentRow,
+  type HandoverRecord,
+  type MessMenuItem,
+  type MenuDayInfo,
+  type MessInventoryItem,
+  type MessConsumptionDay,
+  type MessOperationalRequest,
+  type VPDepartmentRow,
+  type VPExceptionPerson,
+  type DelegationStatus,
+  type VPPermissionRow,
+} from "@/components/approver/wardenConsoleModels";
+import type { PermissionItem } from "@/components/approver/PermissionRow";
+import {
   KVPairs,
   Timeline,
   ActionRow,
@@ -1233,6 +1264,558 @@ register({
       ],
       detailHref: "/guardian/child-status",
       detailLabel: "Ward detail",
+    };
+  },
+});
+
+/* ── PR-05E: warden / hostel / mess / oie / vp resolvers ───────────────── */
+
+interface HostelBlockRow {
+  block: string;
+  total: number;
+  occupied: number;
+}
+
+async function fetchHostelBlock(block: string): Promise<HostelBlockRow> {
+  const res = await cachedFetch<{ success: boolean; data?: HostelBlockRow[] }>(
+    "/api/hostel/blocks",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((b) => b.block === block);
+  if (!found) throw new Error(`Hostel block ${block} not found`);
+  return found;
+}
+
+register({
+  kind: "hostel_block",
+  async resolve(id) {
+    const b = await fetchHostelBlock(id);
+    const pct = b.total > 0 ? Math.round((b.occupied / b.total) * 100) : 0;
+    const tone: "ok" | "warn" | "danger" = pct >= 95 ? "danger" : pct >= 80 ? "warn" : "ok";
+    return {
+      kind: "hostel_block",
+      title: `Block ${b.block}`,
+      subtitle: `${b.occupied}/${b.total} occupied`,
+      status: <StatusBadge text={`${pct}%`} tone={tone} />,
+      sections: [
+        overviewSection([
+          { label: "Block", value: b.block },
+          { label: "Occupied", value: String(b.occupied) },
+          { label: "Total beds", value: String(b.total) },
+          { label: "Occupancy", value: `${pct}%` },
+        ]),
+        actionsSection([
+          { label: "Hostel rooms", href: "/hostel-manager/rooms", variant: "primary" },
+          { label: "Residents", href: "/hostel-manager/residents", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/hostel-manager/rooms",
+      detailLabel: "Hostel rooms",
+    };
+  },
+});
+
+interface MenuItemRow {
+  id: string;
+  code: string;
+  label: string;
+  isAvailable: boolean;
+}
+
+async function fetchMenuItem(itemId: string): Promise<MenuItemRow> {
+  const res = await cachedFetch<{ success: boolean; data?: MenuItemRow[] }>(
+    "/api/mess/menu-items",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((i) => i.id === itemId);
+  if (!found) throw new Error(`Menu item ${itemId} not found`);
+  return found;
+}
+
+register({
+  kind: "menu",
+  async resolve(id) {
+    const item = await fetchMenuItem(id);
+    return {
+      kind: "menu",
+      title: item.label,
+      subtitle: item.code,
+      status: <StatusBadge text={item.isAvailable ? "AVAILABLE" : "UNAVAILABLE"} tone={item.isAvailable ? "ok" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "Item", value: item.label },
+          { label: "Code", value: item.code },
+          { label: "Availability", value: item.isAvailable ? "Available" : "Unavailable" },
+        ]),
+        actionsSection([
+          { label: "Menu management", href: "/mess/menu-management", variant: "primary" },
+          { label: "Token scanner", href: "/mess/scan", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/mess/menu-management",
+      detailLabel: "Menu management",
+    };
+  },
+});
+
+interface StockItemRow {
+  id: string;
+  code: string;
+  label: string;
+  isPrimary: boolean;
+  scheduledDays: number;
+}
+
+async function fetchStockItem(itemId: string): Promise<StockItemRow> {
+  const res = await cachedFetch<{ success: boolean; data?: StockItemRow[] }>(
+    "/api/mess/inventory",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((i) => i.id === itemId);
+  if (!found) throw new Error(`Stock item ${itemId} not found`);
+  return found;
+}
+
+register({
+  kind: "stock_item",
+  async resolve(id) {
+    const item = await fetchStockItem(id);
+    return {
+      kind: "stock_item",
+      title: item.label,
+      subtitle: item.code,
+      status: <StatusBadge text={item.isPrimary ? "PRIMARY" : "ADD-ON"} tone={item.isPrimary ? "warn" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "Item", value: item.label },
+          { label: "Code", value: item.code },
+          { label: "Role", value: item.isPrimary ? "Primary (meal selection)" : "Add-on" },
+          { label: "Scheduled days", value: item.scheduledDays > 0 ? `${item.scheduledDays} day(s)` : "Not scheduled" },
+        ]),
+        actionsSection([
+          { label: "All inventory", href: "/mess/inventory-stock", variant: "ghost" },
+          { label: "Raise operational request", href: "/mess/operational-requests", variant: "primary" },
+        ]),
+      ],
+      detailHref: "/mess/inventory-stock",
+      detailLabel: "Inventory & stock",
+    };
+  },
+});
+
+interface MealDayRow {
+  messDayId: string;
+  mealDate: string;
+  mealType: string;
+  isActive: boolean;
+  servedTotal: number;
+  viaToken: number;
+  viaManual: number;
+  veg: number;
+  nonVeg: number;
+  firstServedAt: string | null;
+  lastServedAt: string | null;
+}
+
+async function fetchMealDay(dayId: string): Promise<MealDayRow> {
+  const res = await cachedFetch<{ success: boolean; data?: { trend?: MealDayRow[] } }>(
+    "/api/mess/consumption?days=30",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.trend?.find((d) => d.messDayId === dayId);
+  if (!found) throw new Error(`Meal day ${dayId} not found`);
+  return found;
+}
+
+register({
+  kind: "meal_day",
+  async resolve(id) {
+    const d = await fetchMealDay(id);
+    return {
+      kind: "menu",
+      title: `Meal day · ${d.mealDate}`,
+      subtitle: d.mealType.toUpperCase(),
+      status: <StatusBadge text={d.isActive ? "ACTIVE" : "CLOSED"} tone={d.isActive ? "ok" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "Date", value: d.mealDate },
+          { label: "Meal type", value: d.mealType },
+          { label: "Served", value: String(d.servedTotal) },
+          { label: "Method", value: `${d.viaToken} token · ${d.viaManual} manual` },
+          { label: "Veg / Non-veg", value: `${d.veg} / ${d.nonVeg}` },
+        ]),
+        actionsSection([
+          { label: "Consumption reports", href: "/mess/consumption-reports", variant: "ghost" },
+          { label: "Meal attendance", href: "/mess/meal-attendance", variant: "primary" },
+        ]),
+      ],
+      detailHref: "/mess/consumption-reports",
+      detailLabel: "Consumption reports",
+    };
+  },
+});
+
+interface OperationalRequestRow {
+  id: string;
+  title: string;
+  description?: string | null;
+  category: string;
+  priority: string;
+  status: string;
+  createdAt: string | null;
+}
+
+async function fetchOperationalRequest(requestId: string): Promise<OperationalRequestRow> {
+  const res = await cachedFetch<{ success: boolean; data?: OperationalRequestRow[] }>(
+    "/api/mess/operational-requests",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((r) => r.id === requestId);
+  if (!found) throw new Error(`Operational request ${requestId} not found`);
+  return found;
+}
+
+register({
+  kind: "operational_request",
+  async resolve(id) {
+    const r = await fetchOperationalRequest(id);
+    const open = r.status === "OPEN";
+    return {
+      kind: "incident",
+      title: r.title,
+      subtitle: r.id,
+      status: <StatusBadge text={r.status} tone={open ? "warn" : "ok"} />,
+      sections: [
+        overviewSection([
+          { label: "Category", value: r.category },
+          { label: "Priority", value: r.priority },
+          { label: "Raised", value: r.createdAt ? new Date(r.createdAt).toLocaleString() : "—" },
+        ]),
+        actionsSection([
+          { label: "All requests", href: "/mess/operational-requests", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/mess/operational-requests",
+      detailLabel: "Operational requests",
+    };
+  },
+});
+
+interface ShiftHandoverRow {
+  id: string;
+  toRole: string;
+  items: Array<{ type: string; title: string; details?: string; severity?: string }>;
+  notes?: string | null;
+  byName?: string | null;
+  createdAt: string;
+}
+
+async function fetchShiftHandover(handoverId: string): Promise<ShiftHandoverRow> {
+  const res = await cachedFetch<{ success: boolean; data?: ShiftHandoverRow[] }>(
+    "/api/deputy-warden/delegation",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((h) => h.id === handoverId);
+  if (!found) throw new Error(`Shift handover ${handoverId} not found`);
+  return found;
+}
+
+register({
+  kind: "shift_handover",
+  async resolve(id) {
+    const h = await fetchShiftHandover(id);
+    const highSeverity = (h.items ?? []).some(
+      (it) => (it.severity ?? "").toLowerCase() === "high" || (it.severity ?? "").toLowerCase() === "critical",
+    );
+    return {
+      kind: "shift",
+      title: `Shift handover → ${h.toRole}`,
+      subtitle: h.id,
+      status: <StatusBadge text={`${(h.items ?? []).length} item(s)`} tone={highSeverity ? "warn" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "From", value: h.byName ?? "previous shift" },
+          { label: "To role", value: h.toRole },
+          { label: "Handed over", value: new Date(h.createdAt).toLocaleString() },
+          ...(h.notes ? [{ label: "Notes", value: h.notes }] : []),
+        ]),
+        actionsSection([
+          { label: "All handovers", href: "/deputy-warden/shift-handover", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/deputy-warden/shift-handover",
+      detailLabel: "Shift handover log",
+    };
+  },
+});
+
+interface EscalationRow {
+  id: string;
+  ticket_number: string;
+  workflow_type: string;
+  current_stage: string;
+  status: string;
+  sla_deadline?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  student?: { name?: string; student_details?: { roll?: string } | null } | null;
+}
+
+async function fetchEscalation(ticket: string): Promise<EscalationRow> {
+  const res = await cachedFetch<{ success: boolean; data?: EscalationRow[] }>(
+    "/api/permissions?stage=vice_principal&status=ESCALATED",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((r) => r.ticket_number === ticket || r.id === ticket);
+  if (!found) throw new Error(`Escalation ${ticket} not found`);
+  return found;
+}
+
+register({
+  kind: "escalation",
+  async resolve(id) {
+    const r = await fetchEscalation(id);
+    return {
+      kind: "escalation",
+      title: r.ticket_number,
+      subtitle: `${r.workflow_type} · ${r.current_stage}`,
+      status: <StatusBadge text="ESCALATED" tone="danger" />,
+      sections: [
+        overviewSection([
+          { label: "Ticket", value: r.ticket_number },
+          { label: "Workflow", value: r.workflow_type },
+          { label: "Stage", value: r.current_stage },
+          { label: "Student", value: r.student?.name ?? "—" },
+          { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+          { label: "SLA deadline", value: r.sla_deadline ? new Date(r.sla_deadline).toLocaleString() : "—" },
+        ]),
+        actionsSection([
+          { label: "Escalated requests", href: "/vice-principal/escalated-requests", variant: "primary" },
+        ]),
+      ],
+      detailHref: "/vice-principal/escalated-requests",
+      detailLabel: "Escalated requests",
+    };
+  },
+});
+
+interface DelegationStatusRow {
+  active: boolean;
+  scopes: string[];
+  delegatedBy?: string;
+  note?: string;
+}
+
+async function fetchDelegationStatus(): Promise<DelegationStatusRow> {
+  const res = await cachedFetch<{ success: boolean; data?: DelegationStatusRow }>(
+    "/api/deputy-warden/delegation",
+    { ttlMs: 30_000 },
+  );
+  if (!res.data) throw new Error("Delegation status not found");
+  return res.data;
+}
+
+register({
+  kind: "delegation_status",
+  async resolve() {
+    const d = await fetchDelegationStatus();
+    const active = d.active;
+    return {
+      kind: "delegation",
+      title: active ? "Delegation active" : "No delegation recorded",
+      subtitle: active ? `${d.scopes.length} scope(s)` : null,
+      status: <StatusBadge text={active ? "ACTIVE" : "INACTIVE"} tone={active ? "ok" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "State", value: active ? "Active" : "Not recorded" },
+          { label: "Scopes", value: d.scopes.length > 0 ? d.scopes.join(", ") : "—" },
+          { label: "Delegated by", value: d.delegatedBy ?? "—" },
+        ]),
+        actionsSection([
+          { label: "Delegated approvals", href: "/deputy-warden/delegated-approvals", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/deputy-warden/delegated-approvals",
+      detailLabel: "Delegated approvals",
+    };
+  },
+});
+
+interface AcademicDepartmentRow {
+  code: string;
+  name: string;
+  hodName: string | null;
+  faculty: number;
+  students: number;
+  ratio: number;
+  attendancePct: number;
+}
+
+async function fetchAcademicDepartment(code: string): Promise<AcademicDepartmentRow> {
+  const res = await cachedFetch<{ success: boolean; data?: AcademicDepartmentRow[] }>(
+    "/api/vp/departments",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((d) => d.code === code);
+  if (!found) throw new Error(`Department ${code} not found`);
+  return found;
+}
+
+register({
+  kind: "academic_department",
+  async resolve(id) {
+    const d = await fetchAcademicDepartment(id);
+    const tone: "ok" | "warn" | "danger" =
+      d.attendancePct >= 85 ? "ok" : d.attendancePct >= 70 ? "warn" : "danger";
+    return {
+      kind: "academic_record",
+      title: d.name,
+      subtitle: d.code,
+      status: <StatusBadge text={`${d.attendancePct}% attendance`} tone={tone} />,
+      sections: [
+        overviewSection([
+          { label: "Department", value: d.name },
+          { label: "HOD", value: d.hodName ?? "—" },
+          { label: "Students", value: String(d.students) },
+          { label: "Faculty", value: String(d.faculty) },
+          { label: "Ratio", value: `1:${d.ratio}` },
+        ]),
+        actionsSection([
+          { label: "All departments", href: "/vice-principal/academics/departments", variant: "ghost" },
+          { label: "Attendance exceptions", href: "/vice-principal/academics/exceptions", variant: "primary" },
+        ]),
+      ],
+      detailHref: "/vice-principal/academics/exceptions",
+      detailLabel: "Attendance exceptions",
+    };
+  },
+});
+
+/* ── PR-05A-1 remainder: person_exception + sla_cell ──────────────────────── */
+
+/* person_exception — attendance exception from /api/vp/academics */
+interface PersonExceptionRow {
+  id: string;
+  name: string;
+  role?: string | null;
+  designation?: string | null;
+  department?: string | null;
+  exceptionKind: string;
+  detail?: number | string;
+}
+
+async function fetchPersonException(personId: string): Promise<PersonExceptionRow> {
+  // The attendance exceptions live in /api/vp/academics under data.exceptions.
+  // We fetch the full payload and find the matching person id in any of the
+  // three lists (absent / late / flagged).
+  const res = await cachedFetch<{
+    success: boolean;
+    data?: {
+      exceptions: {
+        absent?: Array<PersonExceptionRow>;
+        late?: Array<PersonExceptionRow>;
+        flagged?: Array<PersonExceptionRow>;
+      };
+    };
+  }>("/api/vp/academics", { ttlMs: 30_000 });
+
+  const ex = res.data?.exceptions;
+  if (!ex) throw new Error(`Person exception ${personId} not found`);
+  for (const kind of ["absent", "late", "flagged"] as const) {
+    const list = ex[kind];
+    if (list?.length) {
+      const hit = list.find((p) => p.id === personId);
+      if (hit) {
+        return {
+          ...hit,
+          exceptionKind: kind,
+          detail: kind === "late" ? hit.detail : kind === "flagged" ? (hit as any).reason : undefined,
+        };
+      }
+    }
+  }
+  throw new Error(`Person exception ${personId} not found`);
+}
+
+register({
+  kind: "person_exception",
+  async resolve(id) {
+    const p = await fetchPersonException(id);
+    const kind = p.exceptionKind;
+    const tone: "ok" | "warn" | "danger" | "neutral" =
+      kind === "absent" ? "danger" : kind === "late" ? "warn" : "neutral";
+    const subtitle = [p.department, p.designation ?? p.role].filter(Boolean).join(" · ") || id;
+
+    return {
+      kind: "person_exception",
+      title: p.name,
+      subtitle,
+      status: <StatusBadge text={kind.toUpperCase()} tone={tone} />,
+      sections: [
+        overviewSection([
+          { label: "Role", value: p.role ?? "—" },
+          { label: "Department", value: p.department ?? "—" },
+          { label: "Person ID", value: <code className="font-mono">{id}</code> },
+          ...(p.detail != null
+            ? [{ label: kind === "late" ? "Minutes late" : "Flag reason", value: kind === "late" ? `${p.detail}m` : String(p.detail) }]
+            : []),
+        ]),
+        actionsSection([
+          { label: "All exceptions", href: "/principal/people/attendance", variant: "ghost" },
+          { label: "Attention queue", href: "/principal/attention", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/principal/people/attendance",
+      detailLabel: "Attendance exceptions",
+    };
+  },
+});
+
+/* sla_cell — SLA heatmap cell from /api/principal/sla-heatmap */
+interface SlaHeatmapCellRow {
+  stage: string;
+  total: number;
+  withinSla: number;
+  breached: number;
+  rate: number;
+}
+
+async function fetchSlaCell(stage: string): Promise<{ cell: SlaHeatmapCellRow; details: unknown[] }> {
+  const res = await cachedFetch<{
+    success: boolean;
+    data?: { cells?: SlaHeatmapCellRow[]; details?: unknown[] };
+  }>("/api/principal/sla-heatmap", { ttlMs: 30_000 });
+  const cell = res.data?.cells?.find((c) => c.stage === stage);
+  if (!cell) throw new Error(`SLA cell for stage "${stage}" not found`);
+  return { cell, details: res.data?.details ?? [] };
+}
+
+register({
+  kind: "sla_cell",
+  async resolve(id) {
+    const { cell } = await fetchSlaCell(id);
+    const isBreached = cell.breached > 0;
+    const stageLabel = cell.stage.replace(/_/g, " ");
+    return {
+      kind: "sla_cell",
+      title: `${stageLabel} stage — SLA compliance`,
+      subtitle: `${cell.total} tickets in flight · ${cell.rate}% on-time`,
+      status: <StatusBadge text={isBreached ? `${cell.breached} BREACHED` : "COMPLIANT"} tone={isBreached ? "danger" : "ok"} />,
+      sections: [
+        overviewSection([
+          { label: "Stage", value: <code className="font-mono">{cell.stage}</code> },
+          { label: "Compliance", value: `${cell.rate}%` },
+          { label: "Total in flight", value: String(cell.total) },
+          { label: "Within SLA / Breached", value: `${cell.withinSla} / ${cell.breached}` },
+        ]),
+        actionsSection([
+          { label: "View overdue", href: "/principal/approvals/overdue", variant: "primary" },
+          { label: "Pending approvals", href: "/principal/approvals", variant: "ghost" },
+          { label: "Full analytics", href: "/principal/governance/analytics", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/principal/governance/analytics",
+      detailLabel: "View SLA analytics",
     };
   },
 });

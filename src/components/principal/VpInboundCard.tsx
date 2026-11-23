@@ -98,7 +98,7 @@ export function VpInboundCard() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => doRespond(i.id, "ACKNOWLEDGED")}
                   disabled={busy}
@@ -113,6 +113,14 @@ export function VpInboundCard() {
                 >
                   Resolve
                 </button>
+                {i.ticket_number ? (
+                  <a
+                    href={`/principal/approvals?ticket=${encodeURIComponent(i.ticket_number)}`}
+                    className="surface-card px-2 py-1 text-xs font-semibold text-action-primary hover:bg-action-primary/10"
+                  >
+                    View original ticket
+                  </a>
+                ) : null}
               </div>
             </div>
           ))

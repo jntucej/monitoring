@@ -702,4 +702,91 @@ describe("entity inspection models", () => {
     });
     assertHierarchy(model);
   });
+
+  // ── PR-05A-1 remainder: person_exception + sla_cell ──────────────────
+
+  it("person_exception: overview → context → actions + attendance link (absent)", () => {
+    const model: EntityInspectionModel = {
+      kind: "person_exception",
+      title: "Priya Sharma",
+      subtitle: "CSE · Faculty",
+      status: "ABSENT",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/people/attendance",
+      detailLabel: "View attendance exceptions",
+    };
+    assertHierarchy(model);
+  });
+
+  it("person_exception: overview → context → actions + attendance link (late)", () => {
+    const model: EntityInspectionModel = {
+      kind: "person_exception",
+      title: "Ravi Kumar",
+      subtitle: "CSE · Student",
+      status: "LATE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/people/attendance",
+      detailLabel: "View attendance exceptions",
+    };
+    assertHierarchy(model);
+  });
+
+  it("person_exception: overview → context → actions + attendance link (flagged)", () => {
+    const model: EntityInspectionModel = {
+      kind: "person_exception",
+      title: "Dr. Iyer",
+      subtitle: "MEE · HOD",
+      status: "FLAGGED",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/people/attendance",
+      detailLabel: "View attendance exceptions",
+    };
+    assertHierarchy(model);
+  });
+
+  it("sla_cell: overview → by-workflow → actions + analytics link (compliant)", () => {
+    const model: EntityInspectionModel = {
+      kind: "sla_cell",
+      title: "principal stage — SLA compliance",
+      subtitle: "42 tickets in flight · 95% on-time",
+      status: "COMPLIANT",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "By workflow", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/governance/analytics",
+      detailLabel: "View SLA analytics",
+    };
+    assertHierarchy(model);
+  });
+
+  it("sla_cell: overview → by-workflow → actions + analytics link (breached)", () => {
+    const model: EntityInspectionModel = {
+      kind: "sla_cell",
+      title: "hod stage — SLA compliance",
+      subtitle: "18 tickets in flight · 72% on-time",
+      status: "5 BREACHED",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "By workflow", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/governance/analytics",
+      detailLabel: "View SLA analytics",
+    };
+    assertHierarchy(model);
+  });
 });
