@@ -3,7 +3,9 @@
 // PEOPLE sysadmin page (faceted-table + drawer, pollMs 60000).
 // The layout enforces withAuthorization + withRateLimit; this client page pulls
 // the aggregated payload and renders the faceted table + KPIs + cohort matrix,
-// opening the PeopleDrawer on row click (no route change).
+// opening the PeopleDrawer on row click (no route change). L4 trace drawer
+// surfaces in parallel — record-trace diagnostics + canonical sysadmin routes
+// (sessions / audit / runbooks).
 
 import { useState, useCallback } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -12,10 +14,46 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PeopleContent } from "@/components/sysadmin/domains/identity/PeopleContent";
 import { PeopleDrawer } from "@/components/sysadmin/domains/identity/PeopleDrawer";
+import {
+  SysAdminTraceDrawer,
+  type SysAdminTraceTarget,
+} from "@/components/nav/level4/SysAdminTraceDrawer";
 import type {
   PersonRow,
   PeopleData,
 } from "@/components/sysadmin/domains/identity/types";
+
+function buildUserTrace(row: PersonRow): SysAdminTraceTarget {
+  return {
+    entityType: "user",
+    identifier: row.id,
+    label: row.name,
+    diagnostics: [
+      { label: "role", value: row.role },
+      { label: "state", value: row.state },
+      { label: "email", value: row.email },
+      {
+        label: "2FA",
+        value: row.two_factor_enabled ? "enabled" : "disabled",
+      },
+      {
+        label: "sessions",
+        value: String(row.sessions_count),
+      },
+      {
+        label: "last login",
+        value: row.last_login_at
+          ? new Date(row.last_login_at).toLocaleString("en-IN")
+          : "never",
+      },
+    ],
+    traceRoutes: [
+      { label: "sessions", href: "/sysadmin/sessions" },
+      { label: "audit", href: "/sysadmin/audit" },
+      { label: "runbooks", href: "/sysadmin/runbooks" },
+    ],
+  };
+}
 
 export default function PeoplePage() {
   const { data, loading, error, refresh } = useDashboardData<PeopleData>(
@@ -34,6 +72,10 @@ export default function PeoplePage() {
     [data],
   );
 
+  const trace: SysAdminTraceTarget | null = selectedRow
+    ? buildUserTrace(selectedRow)
+    : null;
+
   return (
     <WidgetBoundary>
       <PageHeader title="People" subtitle="Identity directory" onRefresh={refresh} />
@@ -45,6 +87,10 @@ export default function PeoplePage() {
             <PeopleContent data={data} loading={loading} error={error} onRowClick={openRow} />
           </div>
           <PeopleDrawer row={selectedRow} onClose={() => setSelectedRow(null)} />
+          <SysAdminTraceDrawer
+            trace={trace}
+            onClose={() => setSelectedRow(null)}
+          />
         </>
       )}
     </WidgetBoundary>

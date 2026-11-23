@@ -10,6 +10,10 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import {
+  SysAdminTraceDrawer,
+  type SysAdminTraceTarget,
+} from "@/components/nav/level4/SysAdminTraceDrawer";
 
 interface JobRow {
   id: string;
@@ -33,14 +37,65 @@ interface RunRow {
   error_message: string | null;
 }
 
+function fmtLocal(iso: string | null): string {
+  if (!iso) return "Never";
+  return new Date(iso).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function buildJobTrace(
+  job: JobRow,
+  runs: RunRow[],
+): SysAdminTraceTarget {
+  const jobRuns = runs.filter((r) => r.scheduledJobs_id === job.id);
+  const lastRun = jobRuns[0] ?? null;
+  return {
+    entityType: "job",
+    identifier: job.id,
+    label: job.name,
+    diagnostics: [
+      { label: "schedule", value: job.cron_expression ?? "—" },
+      { label: "enabled", value: job.enabled ? "yes" : "no" },
+      { label: "last run", value: fmtLocal(job.last_run) },
+      {
+        label: "next run",
+        value: job.next_run
+          ? new Date(job.next_run).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—",
+      },
+      { label: "recent runs", value: String(jobRuns.length) },
+      {
+        label: "last status",
+        value: lastRun?.status ?? "—",
+      },
+    ],
+    traceRoutes: [
+      { label: "cron jobs", href: "/sysadmin/cron" },
+      { label: "audit", href: "/sysadmin/audit" },
+    ],
+  };
+}
+
 /**
  * Sysadmin Cron / Scheduled Jobs — job list + recent run history.
  * Backend: /api/admin/scheduled-jobs (sysadmin|admin scope; { rows, runs }).
+ * L4 trace drawer: clicking a job row opens the record-trace drawer with
+ * schedule + last-run diagnostics and deep links into canonical routes.
  */
 function SysadminCronInner() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<JobRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +129,10 @@ function SysadminCronInner() {
     return "bg-bg-elevated text-text-muted";
   };
 
+  const trace: SysAdminTraceTarget | null = selectedJob
+    ? buildJobTrace(selectedJob, runs)
+    : null;
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
@@ -104,7 +163,11 @@ function SysadminCronInner() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {jobs.map((j) => (
-                    <tr key={j.id} className="hover:bg-bg-elevated/40">
+                    <tr
+                      key={j.id}
+                      onClick={() => setSelectedJob(j)}
+                      className="hover:bg-bg-elevated/40 cursor-pointer"
+                    >
                       <td className="p-3">
                         <p className="text-sm font-medium text-text-primary">{j.name}</p>
                         {j.description && <p className="text-xs text-text-muted mt-0.5">{j.description}</p>}
@@ -116,10 +179,17 @@ function SysadminCronInner() {
                         </span>
                       </td>
                       <td className="p-3 text-xs text-text-muted">
-                        {j.last_run ? new Date(j.last_run).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "Never"}
+                        {fmtLocal(j.last_run)}
                       </td>
                       <td className="p-3 text-xs text-text-muted">
-                        {j.next_run ? new Date(j.next_run).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                        {j.next_run
+                          ? new Date(j.next_run).toLocaleString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -159,6 +229,11 @@ function SysadminCronInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <SysAdminTraceDrawer
+        trace={trace}
+        onClose={() => setSelectedJob(null)}
+      />
     </div>
   );
 }
