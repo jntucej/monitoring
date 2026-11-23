@@ -9,7 +9,10 @@ import { getAuthHeaders } from "@/lib/utils";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Clock, MapPin, Loader2 } from "lucide-react";
+import { EntityInspector, type EntityInspection } from "@/components/shared/EntityInspector";
+import { visitorVisitInspection } from "@/components/shared/visitorInspection";
+import type { VisitorLogRow } from "../types";
+import { Clock, MapPin, Loader2, Search } from "lucide-react";
 
 interface VisitorsMineResponse {
   success: boolean;
@@ -37,6 +40,7 @@ export default function VisitorVisitPage() {
   });
   const [acting, setActing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [inspection, setInspection] = useState<EntityInspection | null>(null);
 
   if (loading) return <PageLoading />;
   const d = data?.data;
@@ -113,8 +117,21 @@ export default function VisitorVisitPage() {
           {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
           {action.label}
         </button>
+        {d.active ? (
+          <button
+            type="button"
+            onClick={() => setInspection(visitorVisitInspection(d.active.log as unknown as VisitorLogRow))}
+            className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
+          >
+            <Search className="size-3.5" />
+            Inspect visit details
+          </button>
+        ) : null}
         {msg && <p className="text-center text-xs text-text-muted">{msg}</p>}
       </div>
+      {inspection ? (
+        <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
+      ) : null}
     </WidgetBoundary>
   );
 }

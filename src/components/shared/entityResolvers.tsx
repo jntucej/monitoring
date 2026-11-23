@@ -899,7 +899,7 @@ interface GateExceptionRow {
   reason: string | null;
   timestamp: string;
 }
-async function fetchPersonException(id: string): Promise<GateExceptionRow> {
+async function fetchGateExceptionPerson(id: string): Promise<GateExceptionRow> {
   const res = await cachedFetch<{ success: boolean; data?: { transactions: GateExceptionRow[] } }>(
     "/api/admin/exceptions",
     { ttlMs: 15_000 },
@@ -912,7 +912,7 @@ async function fetchPersonException(id: string): Promise<GateExceptionRow> {
 register({
   kind: "person_exception",
   async resolve(id) {
-    const x = await fetchPersonException(id);
+    const x = await fetchGateExceptionPerson(id);
     return {
       kind: "person_exception",
       title: x.name || x.unique_id,
@@ -1693,8 +1693,8 @@ register({
 
 /* ── PR-05A-1 remainder: person_exception + sla_cell ──────────────────────── */
 
-/* person_exception — attendance exception from /api/vp/academics */
-interface PersonExceptionRow {
+/* academic_person_exception — attendance exception from /api/vp/academics */
+interface AcademicPersonExceptionRow {
   id: string;
   name: string;
   role?: string | null;
@@ -1704,7 +1704,7 @@ interface PersonExceptionRow {
   detail?: number | string;
 }
 
-async function fetchPersonException(personId: string): Promise<PersonExceptionRow> {
+async function fetchAcademicPersonException(personId: string): Promise<AcademicPersonExceptionRow> {
   // The attendance exceptions live in /api/vp/academics under data.exceptions.
   // We fetch the full payload and find the matching person id in any of the
   // three lists (absent / late / flagged).
@@ -1712,9 +1712,9 @@ async function fetchPersonException(personId: string): Promise<PersonExceptionRo
     success: boolean;
     data?: {
       exceptions: {
-        absent?: Array<PersonExceptionRow>;
-        late?: Array<PersonExceptionRow>;
-        flagged?: Array<PersonExceptionRow>;
+        absent?: Array<AcademicPersonExceptionRow>;
+        late?: Array<AcademicPersonExceptionRow>;
+        flagged?: Array<AcademicPersonExceptionRow>;
       };
     };
   }>("/api/vp/academics", { ttlMs: 30_000 });
@@ -1738,16 +1738,16 @@ async function fetchPersonException(personId: string): Promise<PersonExceptionRo
 }
 
 register({
-  kind: "person_exception",
+  kind: "academic_person_exception",
   async resolve(id) {
-    const p = await fetchPersonException(id);
+    const p = await fetchAcademicPersonException(id);
     const kind = p.exceptionKind;
     const tone: "ok" | "warn" | "danger" | "neutral" =
       kind === "absent" ? "danger" : kind === "late" ? "warn" : "neutral";
     const subtitle = [p.department, p.designation ?? p.role].filter(Boolean).join(" · ") || id;
 
     return {
-      kind: "person_exception",
+      kind: "academic_person_exception",
       title: p.name,
       subtitle,
       status: <StatusBadge text={kind.toUpperCase()} tone={tone} />,

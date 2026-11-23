@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Sparkles } from "lucide-react";
 import { usePrincipalRetention, type PrincipalWin } from "@/stores/principalRetentionStore";
@@ -77,6 +78,15 @@ export function WinFeed() {
             {merged.slice(0, 6).map((w) => {
               const style = outcomeStyle(w.outcome);
               const Icon = style.icon;
+              // Every win references a ticket. Decided tickets (APPROVED /
+              // REJECTED) surface on the pending register where the ?ticket=
+              // deep link opens the inspector; escalated wins surface on the
+              // escalated register. Link the row to that register with the
+              // ticket pre-identified so the click lands somewhere meaningful.
+              const registerHref =
+                w.outcome === "ESCALATED" || w.outcome === "DELEGATED" || w.outcome === "OVERRIDDEN"
+                  ? `/principal/approvals/escalated?ticket=${encodeURIComponent(w.ticket)}`
+                  : `/principal/approvals?ticket=${encodeURIComponent(w.ticket)}`;
               return (
                 <motion.li
                   key={w.ticket}
@@ -90,15 +100,18 @@ export function WinFeed() {
                   >
                     <Icon className="size-4" />
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-text-primary">
+                  <Link
+                    href={registerHref}
+                    className="group min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                  >
+                    <p className="truncate font-medium text-text-primary group-hover:text-action-primary transition-colors">
                       {w.subject}
                     </p>
                     <p className="text-xs text-text-muted">
                       {w.ticket} · {w.outcome.toLowerCase()} · {relativeTime(w.at)}
                       {w.unblockedCount > 1 && ` · unblocked ${w.unblockedCount}`}
                     </p>
-                  </div>
+                  </Link>
                 </motion.li>
               );
             })}

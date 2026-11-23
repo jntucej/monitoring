@@ -265,6 +265,7 @@ async function handleGet(
   const asParam = url.searchParams.get("as");
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 100), 500);
   const offset = Math.max(Number(url.searchParams.get("offset") ?? 0), 0);
+  const ticket = url.searchParams.get("ticket") ?? undefined;
 
   const where: string[] = [];
   const params: unknown[] = [];
@@ -370,6 +371,10 @@ async function handleGet(
   if (stage) {
     params.push(stage);
     where.push(`current_stage = $${params.length}`);
+  }
+  if (ticket) {
+    params.push(ticket);
+    where.push(`ticket_number = $${params.length}`);
   }
 
   params.push(limit, offset);

@@ -9,10 +9,10 @@ import { Notification } from '@/lib/notification-types';
 import { useGlossyMotion } from '@/lib/animations';
 import {
   EntityInspector,
-  KVPairs,
-  InspectorButton,
-  type EntityInspection,
 } from '@/components/shared/EntityInspector';
+import {
+  buildNotificationInspection,
+} from '@/components/shared/notificationInspection';
 
 const PRIORITY_ICONS = {
   low: Info,
@@ -37,98 +37,6 @@ const BELL_SUPPORTED_ROLES = new Set([
   'vice_principal', 'principal', 'hod', 'staff', 'faculty', 'student',
 ]);
 
-/**
- * Build the standardized EntityInspection model for a notification row.
- * The notification references an entity (via `data` or `type`); this maps
- * it onto the overview → context → actions hierarchy.
- */
-function notificationInspection(n: Notification): EntityInspection {
-  const kind = n.type ?? 'notification';
-  const title = n.title;
-  const subtitle = n.data?.ticket_number ?? n.data?.id ?? undefined;
-
-  // For notification types that reference a gate pass / permission ticket,
-  // link the "Open in approvals" action; otherwise just show context.
-  const isTicketRelated =
-    kind.includes('pass') ||
-    kind.includes('permission') ||
-    kind.includes('entry') ||
-    kind.includes('exit') ||
-    (n.data?.ticket_number !== undefined);
-
-  const actions: React.ReactNode[] = [];
-  if (isTicketRelated && subtitle) {
-    actions.push(
-      <InspectorButton
-        key="open-approval"
-        href={`/principal/approvals?ticket=${encodeURIComponent(String(subtitle))}`}
-        variant="primary"
-      >
-        <ExternalLink className="size-3.5" /> Open in approvals
-      </InspectorButton>
-    );
-  }
-  actions.push(
-    <InspectorButton key="attention" href="/principal/attention" variant="ghost">
-      <ExternalLink className="size-3.5" /> Attention queue
-    </InspectorButton>
-  );
-
-  return {
-    kind: isTicketRelated ? 'permission ticket' : kind,
-    title,
-    subtitle: subtitle ?? undefined,
-    status: (
-      <span
-        className={
-          'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ' +
-          (n.priority === 'critical'
-            ? 'bg-red-500/10 text-red-600'
-            : n.priority === 'high'
-              ? 'bg-amber-500/10 text-amber-600'
-              : 'bg-bg-elevated text-text-muted')
-        }
-      >
-        {n.priority}
-      </span>
-    ),
-    sections: [
-      {
-        title: 'What',
-        content: (
-          <KVPairs
-            columns={1}
-            items={[
-              { label: 'Message', value: n.message },
-              { label: 'Type', value: <span className="font-mono text-xs">{kind}</span> },
-              {
-                label: 'Created',
-                value: n.createdAt
-                  ? new Date(n.createdAt).toLocaleString()
-                  : '—',
-              },
-            ]}
-          />
-        ),
-      },
-      {
-        title: 'Context',
-        content: n.data && Object.keys(n.data).length > 0 ? (
-          <pre className="text-[11px] font-mono text-text-muted whitespace-pre-wrap break-all">
-            {JSON.stringify(n.data, null, 2)}
-          </pre>
-        ) : (
-          <p className="text-xs text-text-muted">No additional context attached.</p>
-        ),
-      },
-      {
-        title: 'Actions',
-        content: <div className="flex flex-wrap gap-2">{actions}</div>,
-      },
-    ],
-  };
-}
-
 export function NotificationBell() {
   const { user } = useAuthStore();
   const bellSupported = BELL_SUPPORTED_ROLES.has(user?.role ?? '');
@@ -144,7 +52,27 @@ export function NotificationBell() {
   // Clicking a notification row opens the inspector for the referenced
   // entity AND marks it read. The row is no longer a dead end.
   const [activeNotif, setActiveNotif] = useState<Notification | null>(null);
-  const inspection = activeNotif ? notificationInspection(activeNotif) : null;
+  const inspection = activeNotif
+    ? buildNotificationInspection({
+        id: activeNotif.id,
+        title: activeNotif.title,
+        message: activeNotif.message,
+        ticketNumber: activeNotif.data?.ticket_number
+          ? String(activeNotif.data.ticket_number)
+          : activeNotif.data?.id
+            ? String(activeNotif.data.id)
+            : undefined,
+        urgency:
+          activeNotif.priority === 'critical'
+            ? 'urgent'
+            : activeNotif.priority === 'high'
+              ? 'overdue'
+              : 'info',
+        type: activeNotif.type,
+        createdAt: activeNotif.createdAt,
+        canActOnTickets: true,
+      })
+    : null;
 
   const loadNotifications = async () => {
     if (!bellSupported) return; // role not served by /api/notifications — stay inert

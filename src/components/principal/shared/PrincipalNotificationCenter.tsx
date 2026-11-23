@@ -23,7 +23,8 @@ import { usePolling } from "@/hooks/usePolling";
 import { getTimeAgo } from "@/lib/utils";
 import { useNotificationStore, deriveNotifications, type NotificationItem, type NotificationUrgency } from "@/stores/notificationStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
-import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { buildNotificationInspection } from "@/components/shared/notificationInspection";
 
 /**
  * NotificationCenter — a notification dropdown / inbox that groups alerts
@@ -188,61 +189,16 @@ export function NotificationCenter({
   const [activeNotif, setActiveNotif] = useState<NotificationItem | null>(null);
 
   const inspection = activeNotif
-    ? {
-        kind: activeNotif.ticketNumber ? "permission ticket" : "alert",
+    ? buildNotificationInspection({
+        id: activeNotif.id,
         title: activeNotif.title,
-        subtitle: activeNotif.ticketNumber ?? undefined,
-        status: (
-          <span
-            className={
-              "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase " +
-              (activeNotif.urgency === "urgent"
-                ? "bg-red-500/10 text-red-600"
-                : activeNotif.urgency === "overdue"
-                  ? "bg-amber-500/10 text-amber-600"
-                  : "bg-bg-elevated text-text-muted")
-            }
-          >
-            {activeNotif.urgency}
-          </span>
-        ),
-        sections: [
-          {
-            title: "What",
-            content: (
-              <KVPairs
-                columns={1}
-                items={[
-                  { label: "Detail", value: activeNotif.message ?? activeNotif.title },
-                  ...(activeNotif.createdAt
-                    ? [
-                        { label: "Raised", value: getTimeAgo(activeNotif.createdAt) },
-                      ]
-                    : []),
-                ]}
-              />
-            ),
-          },
-          {
-            title: "Actions",
-            content: (
-              <div className="flex flex-wrap gap-2">
-                {activeNotif.ticketNumber ? (
-                  <InspectorButton
-                    href={`/principal/approvals?ticket=${encodeURIComponent(activeNotif.ticketNumber)}`}
-                    variant="primary"
-                  >
-                    Open in approvals
-                  </InspectorButton>
-                ) : null}
-                <InspectorButton href="/principal/attention" variant="ghost">
-                  Attention queue
-                </InspectorButton>
-              </div>
-            ),
-          },
-        ],
-      }
+        message: activeNotif.message,
+        ticketNumber: activeNotif.ticketNumber,
+        urgency: activeNotif.urgency,
+        type: activeNotif.type,
+        createdAt: activeNotif.createdAt,
+        canActOnTickets: true,
+      })
     : null;
 
   const handleItemClick = useCallback(
