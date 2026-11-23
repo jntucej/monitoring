@@ -159,27 +159,27 @@ export default function PrincipalTodayPage() {
             <KpiTile
               label="Pending approvals"
               value={d?.counts.pending ?? 0}
-              hint="Approvals waiting on your decision — open the attention queue to act"
-              linkHref="/principal/attention"
+              hint="Approvals waiting on your decision — click to open the queue"
+              linkHref="/principal/approvals"
             />
             <KpiTile
               label="Overdue"
               value={d?.counts.overdue ?? 0}
               tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"}
-              hint="SLA-breached items needing immediate attention"
-              linkHref="/principal/attention"
+              hint="SLA-breached items needing immediate attention — click to open the breached list"
+              linkHref="/principal/approvals/overdue"
             />
             <KpiTile
               label="Emergencies"
               value={d?.emergency?.length ?? 0}
               tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"}
-              hint="Active emergency commands and lockdowns"
+              hint="Active emergency commands and lockdowns — click for the command plane"
               linkHref="/principal/emergency"
             />
             <KpiTile
               label="Delegations active"
               value={d?.delegations.active ?? 0}
-              hint="Authority you have delegated — check for expiring grants"
+              hint="Authority you have delegated — click to review expiring grants"
               linkHref="/principal/governance/delegations"
             />
           </div>

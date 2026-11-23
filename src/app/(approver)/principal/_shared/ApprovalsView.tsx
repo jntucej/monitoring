@@ -4,11 +4,17 @@ import { useEffect, useState, Suspense, lazy } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
-import { DetailSheet } from "./DetailSheet";
 import { WeekBar } from "./WeekBar";
+import {
+  buildApprovalInspection,
+  type ApprovalRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 const DecisionHistoryPanel = lazy(
   () => import("@/components/approver/DecisionHistoryPanel")
@@ -19,7 +25,6 @@ interface PermissionsResponse {
   data: PermissionItem[];
   total?: number;
 }
-
 export function ApprovalsView({
   status,
   title,
@@ -30,7 +35,7 @@ export function ApprovalsView({
   const [selected, setSelected] = useState<PermissionItem | null>(null);
 
   // ?ticket= deep link (retention widgets / notification emails open a specific
-  // ticket's DetailSheet on the matching view).
+  // ticket's inspector on the matching view).
   const [ticketParam] = useState(() =>
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("ticket")
@@ -57,6 +62,88 @@ export function ApprovalsView({
   const rows = data?.data ?? [];
 
   useEffect(() => { openTicket(rows); }, [data]); // eslint-disable-line
+
+  // Role-appropriate depth: the Actions section of the shared model is built
+  // for the current viewer (the /principal/cases pattern).
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+
+  const toApprovalRecord = (item: PermissionItem): ApprovalRecord => ({
+    ticket_number: item.ticket_number,
+    workflow_type: item.workflow_type,
+    status: item.status,
+    current_stage: item.current_stage,
+    reason: item.reason ?? null,
+    student_name: item.student?.name,
+    roll: item.student?.student_details?.roll,
+    hostel_block: item.student?.student_details?.hostel_block,
+    room_number: item.student?.student_details?.room_number,
+    sla_deadline: item.sla_deadline ?? null,
+    created_at: item.created_at,
+  });
+
+  const base = selected ? buildApprovalInspection(toApprovalRecord(selected), gate) : null;
+  const inspection = base
+    ? {
+        ...base,
+        sections: [
+          ...base.sections,
+          {
+            title: "Workflow",
+            collapsible: true,
+            content: (
+              <KVPairs
+                items={[
+                  {
+                    label: "Stage",
+                    value: <span className="font-mono">{selected.current_stage}</span>,
+                  },
+                  {
+                    label: "SLA deadline",
+                    value: selected.sla_deadline
+                      ? new Date(selected.sla_deadline).toLocaleString("en-IN")
+                      : "—",
+                  },
+                  {
+                    label: "Created",
+                    value: new Date(selected.created_at).toLocaleString("en-IN"),
+                  },
+                  ...(selected.from_date || selected.to_date
+                    ? [
+                        {
+                          label: "Validity",
+                          value: `${selected.from_date ?? "—"} → ${selected.to_date ?? "—"}`,
+                        },
+                      ]
+                    : []),
+                  {
+                    label: "Document",
+                    value: selected.document_url ? (
+                      <a
+                        href={selected.document_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-action-primary hover:underline"
+                      >
+                        View document
+                      </a>
+                    ) : selected.document_required ? (
+                      <span className="text-text-muted">Required — not provided</span>
+                    ) : (
+                      "Not required"
+                    ),
+                  },
+                ]}
+              />
+            ),
+          },
+        ],
+      }
+    : null;
 
   return (
     <div className="space-y-4">
@@ -124,13 +211,9 @@ export function ApprovalsView({
         )}
       </section>
 
-      <DetailSheet
-        item={selected}
+      <EntityInspector
+        inspection={inspection}
         onClose={() => setSelected(null)}
-        onActionComplete={() => {
-          setSelected(null);
-          refresh();
-        }}
       />
 
       {/* Decision history — monthly review of this approver's own decisions */}

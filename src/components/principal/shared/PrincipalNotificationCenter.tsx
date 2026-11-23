@@ -23,6 +23,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { getTimeAgo } from "@/lib/utils";
 import { useNotificationStore, deriveNotifications, type NotificationItem, type NotificationUrgency } from "@/stores/notificationStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
 
 /**
  * NotificationCenter — a notification dropdown / inbox that groups alerts
@@ -179,6 +180,79 @@ export function NotificationCenter({
 
   const store = useNotificationStore();
   const readIds = useNotificationStore((s) => s.readIds);
+
+  // ── Entity inspector for notification items ──────────────────────────
+  // Clicking a notification card opens the inspector for the referenced
+  // entity (permission ticket / alert) AND marks it read. The mark-as-read
+  // behavior is preserved; the card is no longer a dead end.
+  const [activeNotif, setActiveNotif] = useState<NotificationItem | null>(null);
+
+  const inspection = activeNotif
+    ? {
+        kind: activeNotif.ticketNumber ? "permission ticket" : "alert",
+        title: activeNotif.title,
+        subtitle: activeNotif.ticketNumber ?? undefined,
+        status: (
+          <span
+            className={
+              "rounded px-1.5 py-0.5 text-[10px] font-bold uppercase " +
+              (activeNotif.urgency === "urgent"
+                ? "bg-red-500/10 text-red-600"
+                : activeNotif.urgency === "overdue"
+                  ? "bg-amber-500/10 text-amber-600"
+                  : "bg-bg-elevated text-text-muted")
+            }
+          >
+            {activeNotif.urgency}
+          </span>
+        ),
+        sections: [
+          {
+            title: "What",
+            content: (
+              <KVPairs
+                columns={1}
+                items={[
+                  { label: "Detail", value: activeNotif.message ?? activeNotif.title },
+                  ...(activeNotif.createdAt
+                    ? [
+                        { label: "Raised", value: getTimeAgo(activeNotif.createdAt) },
+                      ]
+                    : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                {activeNotif.ticketNumber ? (
+                  <InspectorButton
+                    href={`/principal/approvals?ticket=${encodeURIComponent(activeNotif.ticketNumber)}`}
+                    variant="primary"
+                  >
+                    Open in approvals
+                  </InspectorButton>
+                ) : null}
+                <InspectorButton href="/principal/attention" variant="ghost">
+                  Attention queue
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
+
+  const handleItemClick = useCallback(
+    (item: NotificationItem) => {
+      // Mark as read AND open the inspector for the referenced entity.
+      store.markRead(item.id);
+      setActiveNotif(item);
+    },
+    [store]
+  );
   const unreadCount = useMemo(
     () => items.filter((n) => !readIds.includes(n.id)).length,
     [items, readIds]
@@ -310,7 +384,7 @@ export function NotificationCenter({
                           <button
                             key={item.id}
                             type="button"
-                            onClick={() => handleMarkRead(item.id)}
+                            onClick={() => handleItemClick(item)}
                             className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
                               isRead
                                 ? "border-border bg-bg-surface opacity-60"
@@ -350,22 +424,30 @@ export function NotificationCenter({
   );
 
   if (compact) {
-    return <WidgetBoundary title="Notifications">{inner}</WidgetBoundary>;
+    return (
+      <>
+        <WidgetBoundary title="Notifications">{inner}</WidgetBoundary>
+        <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
+      </>
+    );
   }
 
   return (
-    <WidgetBoundary title="Notifications">
-      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-action-primary" />
-            <h3 className="text-sm font-semibold text-text-primary">NotificationCenter</h3>
+    <>
+      <WidgetBoundary title="Notifications">
+        <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-action-primary" />
+              <h3 className="text-sm font-semibold text-text-primary">NotificationCenter</h3>
+            </div>
+            <span className="text-xs text-text-muted">{unreadCount} unread</span>
           </div>
-          <span className="text-xs text-text-muted">{unreadCount} unread</span>
+          {inner}
         </div>
-        {inner}
-      </div>
-    </WidgetBoundary>
+      </WidgetBoundary>
+      <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
+    </>
   );
 }
 

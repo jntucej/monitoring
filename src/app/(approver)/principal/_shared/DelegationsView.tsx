@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildDelegationInspection,
+  type DelegationRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface Delegation {
   id: string;
@@ -30,6 +38,18 @@ export function DelegationsView() {
     ttlMs: 30_000,
   });
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildDelegationInspection> | null
+  >(null);
+  const inspect = (d: Delegation) =>
+    setInspection(buildDelegationInspection(d as DelegationRecord, gate));
+
   const delegations = data?.data?.delegations ?? [];
   const activeCount = delegations.filter((d) => d.status === "ACTIVE" || !d.status).length;
 
@@ -39,7 +59,7 @@ export function DelegationsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Delegations Manager</h1>
         <p className="text-xs text-text-muted">
-          Delegated authority rules and institutional scope
+          Delegated authority rules and institutional scope · click any rule to inspect
         </p>
       </header>
 
@@ -63,7 +83,13 @@ export function DelegationsView() {
             {delegations.map((d) => (
               <li
                 key={d.id}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(d)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") inspect(d);
+                }}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
@@ -78,6 +104,7 @@ export function DelegationsView() {
 
           <div className="hidden md:block">
             <DataTable<Delegation>
+              onRowClick={(d) => inspect(d)}
               columns={[
                 {
                   header: "Delegate Role",
@@ -106,6 +133,8 @@ export function DelegationsView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

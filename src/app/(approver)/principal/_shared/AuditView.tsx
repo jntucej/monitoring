@@ -1,11 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildAuditEventInspection,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface AuditLog {
   id: string;
@@ -28,6 +35,18 @@ export function AuditView() {
 
   const logs = Array.isArray(data?.data) ? data.data : [];
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildAuditEventInspection> | null
+  >(null);
+  const inspect = (log: AuditLog) =>
+    setInspection(buildAuditEventInspection(log, gate));
+
   return (
     <div className="space-y-4">
       <WeekBar />
@@ -39,7 +58,11 @@ export function AuditView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Recent Events" value={logs.length} />
+        <KpiCard
+          label="Recent Events"
+          value={logs.length}
+          onClick={logs.length > 0 ? () => inspect(logs[0]) : undefined}
+        />
         <KpiCard label="Audit Logging" value="Active" tone="ok" />
         <KpiCard label="Integrity" value="Verified" tone="ok" />
       </div>
@@ -54,7 +77,13 @@ export function AuditView() {
             {logs.map((log) => (
               <li
                 key={log.id}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(log)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") inspect(log);
+                }}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{log.action}</p>
@@ -71,6 +100,7 @@ export function AuditView() {
 
           <div className="hidden md:block">
             <DataTable<AuditLog>
+              onRowClick={(log) => inspect(log)}
               columns={[
                 { header: "Action", accessor: (r) => r.action },
                 { header: "Actor", accessor: (r) => r.user_name ?? "System" },
@@ -86,6 +116,8 @@ export function AuditView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

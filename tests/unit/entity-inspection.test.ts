@@ -138,4 +138,136 @@ describe("entity inspection models", () => {
     };
     expect(() => assertHierarchy(bad)).toThrow();
   });
+
+  it("department: overview → context → actions + register link", () => {
+    const model: EntityInspectionModel = {
+      kind: "department",
+      title: "Computer Science",
+      subtitle: "CSE",
+      status: "82% present",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/people/departments",
+      detailLabel: "View department register",
+    };
+    assertHierarchy(model);
+  });
+
+  it("hostel: overview → context → actions + oversight link", () => {
+    const model: EntityInspectionModel = {
+      kind: "hostel",
+      title: "Block A",
+      subtitle: "A",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/operations/hostel",
+    };
+    assertHierarchy(model);
+  });
+
+  it("incident: overview → context → timeline (collapsible) → actions (no detail page)", () => {
+    const model: EntityInspectionModel = {
+      kind: "incident",
+      title: "Critical breach at G-MAIN",
+      subtitle: "evt-123",
+      status: "CRITICAL",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("audit_event: overview → context → details (collapsible) → actions + audit trail link", () => {
+    const model: EntityInspectionModel = {
+      kind: "audit_event",
+      title: "HOSTEL_APPROVAL",
+      subtitle: "Dr. Iyer (principal)",
+      status: "RECORDED",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Details", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/audit",
+    };
+    assertHierarchy(model);
+  });
+
+  it("delegation: overview → context → actions + delegation manager link", () => {
+    const model: EntityInspectionModel = {
+      kind: "delegation",
+      title: "Delegation → Hostel Manager",
+      subtitle: "hostel workflows",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/governance/delegations",
+    };
+    assertHierarchy(model);
+  });
+
+  it("exam_case: overview → context → actions + examination oversight link", () => {
+    const model: EntityInspectionModel = {
+      kind: "exam_case",
+      title: "Priya Sharma — exam clearance",
+      subtitle: "EXM-2027-014",
+      status: "PENDING",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/examinations",
+    };
+    assertHierarchy(model);
+  });
+
+  it("report: overview → context → actions + governance reports link", () => {
+    const model: EntityInspectionModel = {
+      kind: "report",
+      title: "hostel workflow volume",
+      subtitle: "7-day digest",
+      status: "12 this week",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/principal/governance/reports",
+    };
+    assertHierarchy(model);
+  });
+
+  it("approval: overview → context → actions + full ticket link", () => {
+    const model: EntityInspectionModel = {
+      kind: "approval",
+      title: "P-1027 · hostel",
+      subtitle: "Priya Sharma",
+      status: "PENDING",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Actions", content: null },
+        { title: "Workflow", content: null, collapsible: true },
+      ],
+      detailHref: "/approver/permissions/P-1027",
+      detailLabel: "View full ticket",
+    };
+    assertHierarchy(model);
+  });
 });

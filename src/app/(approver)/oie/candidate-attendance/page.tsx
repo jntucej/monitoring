@@ -17,6 +17,76 @@ import {
   AlertTriangle,
   Inbox,
 } from "lucide-react";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a candidate attendance record. */
+function buildCandidateAttendanceInspection(r: AttendanceRow): EntityInspection {
+  const dirTone: "ok" | "warn" = r.direction === "IN" ? "ok" : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Candidate", value: r.candidate_name ?? "—" },
+            { label: "Unique ID", value: r.candidate_unique_id ?? "—" },
+            { label: "Roll", value: r.roll ?? "—" },
+            { label: "Direction", value: r.direction },
+            { label: "Date", value: r.date },
+            { label: "Timestamp", value: new Date(r.timestamp_utc).toLocaleString() },
+            { label: "Time in", value: r.time_in ?? "—" },
+            { label: "Time out", value: r.time_out ?? "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/oie/candidate-attendance" variant="ghost">
+            All records
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "attendance",
+    title: r.candidate_name ?? r.roll ?? "Unknown candidate",
+    subtitle: `${r.direction} · ${r.date}`,
+    status: <StatusBadge text={r.direction} tone={dirTone} />,
+    sections,
+    detailHref: "/oie/candidate-attendance",
+    detailLabel: "All candidate attendance",
+  };
+}
 
 interface AttendanceRow {
   id: string;
@@ -67,7 +137,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
+function AttendanceTable({ rows, onInspect }: { rows: AttendanceRow[]; onInspect: (r: AttendanceRow) => void }) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No candidate attendance records found. Records appear here as exam-day gate scans are logged." />
@@ -88,7 +158,7 @@ function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 25).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => onInspect(r)}>
               <td className="px-4 py-3 text-text-secondary min-w-0">
                 {r.candidate_name || "—"}
                 {r.candidate_unique_id ? (
@@ -130,6 +200,7 @@ function CandidateAttendanceInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -192,7 +263,7 @@ function CandidateAttendanceInner() {
               <TableSkeleton rows={5} />
             </div>
           ) : (
-            <AttendanceTable rows={rows} />
+            <AttendanceTable rows={rows} onInspect={(r) => inspect(buildCandidateAttendanceInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Records are read-only. Marks, grades, and confidential results are not exposed at
@@ -201,6 +272,7 @@ function CandidateAttendanceInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

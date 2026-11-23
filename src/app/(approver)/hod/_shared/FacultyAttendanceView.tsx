@@ -6,6 +6,78 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a faculty attendance record (HOD view). */
+function buildFacultyAttendanceInspection(r: AttendanceRecord): EntityInspection {
+  const tone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "PRESENT" || r.status === "INSIDE" ? "ok"
+    : r.status === "ABSENT" ? "danger"
+    : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Name", value: r.fullName },
+            { label: "Designation", value: r.designation },
+            { label: "Status", value: r.status },
+            { label: "Punctuality", value: r.punctualityStatus ?? "—" },
+            { label: "First in", value: r.firstInTime ?? "—" },
+            { label: "Last out", value: r.lastOutTime ?? "—" },
+            { label: "Hours today", value: r.totalHoursToday ?? "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/hod/faculty/attendance" variant="ghost">
+            All records
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "attendance",
+    title: r.fullName,
+    subtitle: r.designation,
+    status: <StatusBadge text={r.status} tone={tone} />,
+    sections,
+    detailHref: "/hod/faculty/attendance",
+    detailLabel: "All faculty attendance",
+  };
+}
 
 interface AttendanceRecord {
   id: string;
@@ -33,6 +105,7 @@ export function FacultyAttendanceView() {
   const { data, loading } = useApiResource<FacultyAttendanceResponse>("/api/faculty/attendance", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const records = data?.records ?? [];
   const summary = data?.summary;
@@ -70,7 +143,8 @@ export function FacultyAttendanceView() {
             {records.map((r) => (
               <li
                 key={r.id}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/60 transition"
+                onClick={() => inspect(buildFacultyAttendanceInspection(r))}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -138,10 +212,13 @@ export function FacultyAttendanceView() {
               ]}
               data={records}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => inspect(buildFacultyAttendanceInspection(r))}
             />
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

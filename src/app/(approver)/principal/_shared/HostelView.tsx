@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildHostelInspection,
+  type HostelRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface HostelBlock {
   id?: string;
@@ -27,6 +35,29 @@ export function HostelView() {
     ttlMs: 30_000,
   });
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildHostelInspection> | null
+  >(null);
+  const inspect = (block: HostelBlock) => {
+    const name = block.name ?? block.block_name ?? "block";
+    setInspection(
+      buildHostelInspection(
+        {
+          block: name,
+          total: block.capacity ?? block.total_rooms ?? 0,
+          occupied: block.occupied ?? 0,
+        } as HostelRecord,
+        gate
+      )
+    );
+  };
+
   const blocks = Array.isArray(data?.data) ? data.data : [];
   const totalCapacity = blocks.reduce((sum, b) => sum + (b.capacity ?? b.total_rooms ?? 0), 0);
   const totalOccupied = blocks.reduce((sum, b) => sum + (b.occupied ?? 0), 0);
@@ -37,7 +68,7 @@ export function HostelView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Hostel Oversight</h1>
         <p className="text-xs text-text-muted">
-          Hostel block status and occupancy
+          Hostel block status and occupancy · click any block to inspect
         </p>
       </header>
 
@@ -64,7 +95,13 @@ export function HostelView() {
               return (
                 <li
                   key={b.id ?? idx}
-                  className="surface-card bg-bg-surface p-3"
+                  className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => inspect(b)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") inspect(b);
+                  }}
                 >
                   <p className="text-sm font-medium">{name}</p>
                   <div className="mt-2 flex gap-3 text-xs text-text-secondary">
@@ -78,6 +115,7 @@ export function HostelView() {
 
           <div className="hidden md:block">
             <DataTable<HostelBlock>
+              onRowClick={(b) => inspect(b)}
               columns={[
                 {
                   header: "Block",
@@ -106,6 +144,8 @@ export function HostelView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

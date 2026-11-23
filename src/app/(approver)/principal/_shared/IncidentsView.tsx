@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildIncidentInspection,
+  type IncidentRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface AlertItem {
   id: string;
@@ -14,6 +22,8 @@ interface AlertItem {
   severity?: string;
   created_at?: string;
   status?: string;
+  gate_id?: string | null;
+  gate_name?: string | null;
 }
 
 interface AlertsResponse {
@@ -26,6 +36,30 @@ export function IncidentsView() {
     ttlMs: 15_000,
   });
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildIncidentInspection> | null
+  >(null);
+  const inspect = (a: AlertItem) =>
+    setInspection(
+      buildIncidentInspection(
+        {
+          id: a.id,
+          title: a.title,
+          message: a.message,
+          severity: a.severity,
+          created_at: a.created_at ?? a.timestamp,
+          status: a.status ?? (a.resolved ? "RESOLVED" : "OPEN"),
+        } as IncidentRecord,
+        gate
+      )
+    );
+
   const alerts = Array.isArray(data?.data) ? data.data : [];
   const highSeverity = alerts.filter(
     (a) => a.severity === "high" || a.severity === "critical"
@@ -37,7 +71,7 @@ export function IncidentsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Incidents & Alerts</h1>
         <p className="text-xs text-text-muted">
-          Real-time institutional and security alerts
+          Real-time institutional and security alerts · click any alert to inspect
         </p>
       </header>
 
@@ -61,7 +95,13 @@ export function IncidentsView() {
             {alerts.map((a) => (
               <li
                 key={a.id}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(a)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") inspect(a);
+                }}
               >
                 <div className="flex items-start justify-between">
                   <p className="text-sm font-medium">{a.title ?? a.message ?? "Alert"}</p>
@@ -72,12 +112,18 @@ export function IncidentsView() {
                 {a.message && a.title && (
                   <p className="mt-1 text-xs text-text-secondary">{a.message}</p>
                 )}
+                {a.gate_name || a.gate_id ? (
+                  <p className="mt-1 text-xs font-mono text-text-muted">
+                    {a.gate_name ?? a.gate_id}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<AlertItem>
+              onRowClick={(a) => inspect(a)}
               columns={[
                 {
                   header: "Title",
@@ -92,6 +138,10 @@ export function IncidentsView() {
                   ),
                 },
                 {
+                  header: "Gate",
+                  accessor: (r) => r.gate_name ?? r.gate_id ?? "—",
+                },
+                {
                   header: "Status",
                   accessor: (r) => r.status ?? "OPEN",
                 },
@@ -102,6 +152,8 @@ export function IncidentsView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

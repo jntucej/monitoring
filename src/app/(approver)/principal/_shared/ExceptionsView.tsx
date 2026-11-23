@@ -1,10 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildPersonInspection,
+  type PersonRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface AcademicsResponse {
   success?: boolean;
@@ -35,10 +43,33 @@ interface AcademicsResponse {
   };
 }
 
+function toPersonRecord(id: string, name: string, role: string, designation: string | null, department: string | null): PersonRecord {
+  return {
+    id,
+    uniqueId: id,
+    name,
+    role,
+    designation: designation ?? undefined,
+    department: department ?? undefined,
+    status: "ACTIVE",
+  };
+}
+
 export function ExceptionsView() {
   const { data, loading } = useApiResource<AcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
+
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildPersonInspection> | null
+  >(null);
+  const inspect = (rec: PersonRecord) => setInspection(buildPersonInspection(rec, gate));
 
   const d = data?.data;
   const absent = d?.exceptions?.absent ?? [];
@@ -52,7 +83,7 @@ export function ExceptionsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Attendance exceptions</h1>
         <p className="text-xs text-text-muted">
-          {total} exception{total === 1 ? "" : "s"} today
+          {total} exception{total === 1 ? "" : "s"} today · click any person to inspect
         </p>
       </header>
 
@@ -75,7 +106,21 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {absent.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      inspect(
+                        toPersonRecord(p.id, p.name, p.role, p.designation, p.department)
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ")
+                        inspect(toPersonRecord(p.id, p.name, p.role, p.designation, p.department));
+                    }}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-text-muted">
                       {p.designation ?? p.role}
@@ -93,7 +138,21 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {late.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      inspect(
+                        toPersonRecord(p.id, p.name, p.role, p.designation, p.department)
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ")
+                        inspect(toPersonRecord(p.id, p.name, p.role, p.designation, p.department));
+                    }}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-action-warning">{p.minutesLate}m late</span>
                   </li>
@@ -109,7 +168,19 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {flagged.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      inspect(toPersonRecord(p.id, p.name, "staff", null, p.department))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ")
+                        inspect(toPersonRecord(p.id, p.name, "staff", null, p.department));
+                    }}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-action-danger">{p.reason}</span>
                   </li>
@@ -119,6 +190,8 @@ export function ExceptionsView() {
           )}
         </div>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

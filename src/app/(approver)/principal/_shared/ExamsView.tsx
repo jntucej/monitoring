@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildExamCaseInspection,
+  type ExamCaseRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface ExamException {
   id?: string;
@@ -28,6 +36,18 @@ export function ExamsView() {
     { ttlMs: 30_000 }
   );
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildExamCaseInspection> | null
+  >(null);
+  const inspect = (e: ExamException) =>
+    setInspection(buildExamCaseInspection(e as ExamCaseRecord, gate));
+
   const exceptions = Array.isArray(data?.data) ? data.data : [];
   const pendingCount = exceptions.filter((e) => e.status === "PENDING" || !e.status).length;
 
@@ -37,7 +57,7 @@ export function ExamsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Examination Oversight</h1>
         <p className="text-xs text-text-muted">
-          Exam clearance queues, attendance, and hall exceptions
+          Exam clearance queues, attendance, and hall exceptions · click any case to inspect
         </p>
       </header>
 
@@ -61,7 +81,13 @@ export function ExamsView() {
             {exceptions.map((e, idx) => (
               <li
                 key={e.id ?? idx}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(e)}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter" || ev.key === " ") inspect(e);
+                }}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
@@ -76,6 +102,7 @@ export function ExamsView() {
 
           <div className="hidden md:block">
             <DataTable<ExamException>
+              onRowClick={(e) => inspect(e)}
               columns={[
                 {
                   header: "Candidate",
@@ -104,6 +131,8 @@ export function ExamsView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

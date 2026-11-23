@@ -6,6 +6,72 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a class request row (faculty/HOD view). */
+function buildClassRequestInspection(r: QueueRow): EntityInspection {
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Student", value: r.student_name },
+            { label: "Class", value: r.class_name ?? "—" },
+            { label: "Category", value: r.category_code },
+            { label: "Priority", value: r.priority },
+            { label: "Status", value: r.status },
+            { label: "Created", value: new Date(r.created_at).toLocaleString() },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/faculty/class-requests" variant="ghost">
+            All requests
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "complaint",
+    title: r.title,
+    subtitle: `${r.student_name} · ${r.class_name ?? ""}`,
+    status: <StatusBadge text={r.status} tone={r.status === "open" ? "warn" : "neutral"} />,
+    sections,
+    detailHref: "/faculty/class-requests",
+    detailLabel: "All class requests",
+  };
+}
 
 interface QueueRow {
   id: string;
@@ -31,6 +97,7 @@ export default function FacultyClassRequestsPage() {
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [issues, setIssues] = useState<IssueRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   // Publish form
   const [noticeBody, setNoticeBody] = useState("");
@@ -121,7 +188,7 @@ export default function FacultyClassRequestsPage() {
         ) : (
           <ul className="space-y-2">
             {queue.map(r => (
-              <li key={r.id} className="surface-card rounded-lg p-3 space-y-1">
+              <li key={r.id} className="surface-card rounded-lg p-3 space-y-1 cursor-pointer hover:bg-bg-elevated/60 transition" onClick={() => inspect(buildClassRequestInspection(r))}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-text-primary truncate">{r.title}</span>
                   {r.priority === "urgent" && <span className="text-[10px] font-semibold text-action-warning shrink-0">URGENT</span>}
@@ -192,6 +259,8 @@ export default function FacultyClassRequestsPage() {
           )}
         </section>
       ) : null}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

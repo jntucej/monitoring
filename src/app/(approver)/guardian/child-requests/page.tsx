@@ -1,18 +1,113 @@
 "use client";
 
-import { Suspense, useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import {
   Loader2,
   Inbox,
   AlertTriangle,
-  Ticket
+  Ticket,
+  Search
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  Timeline,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/**
+ * Build an EntityInspection for a permission ticket (guardian view).
+ * Sections: overview → stage history → actions (guardian can only view,
+ * cannot approve — the approval chain is the campus office's job).
+ */
+function buildChildTicketInspection(r: PermissionRow): EntityInspection {
+  const ticketNum = r.ticket_number ?? r.id.slice(0, 8);
+  const statusTone: "ok" | "warn" | "danger" | "neutral" =
+    (r.status ?? "").toUpperCase() === "APPROVED" || (r.status ?? "").toUpperCase() === "COMPLETED" ? "ok"
+    : (r.status ?? "").toUpperCase() === "REJECTED" ? "danger"
+    : "warn";
+
+  const historyItems = (r.stage_history ?? []).map((h) => ({
+    label: `${h.actorName} ${h.action.toLowerCase()}`,
+    time: h.timestamp ? new Date(h.timestamp).toLocaleString() : undefined,
+    detail: h.comment ?? undefined,
+    tone: "neutral" as const,
+  }));
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Ward", value: r.student?.name ?? "—" },
+            { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+            { label: "Workflow", value: (r.workflow_type ?? "").replace(/_/g, " ") },
+            { label: "Current stage", value: r.current_stage?.replace(/_/g, " ") ?? "—" },
+            { label: "Created", value: r.created_at ? new Date(r.created_at).toLocaleString() : "—" },
+            { label: "SLA", value: r.sla_deadline ? new Date(r.sla_deadline).toLocaleString() : "—" },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  if (historyItems.length > 0) {
+    sections.push({
+      title: "Stage history",
+      collapsible: true,
+      content: <Timeline items={historyItems} />,
+    });
+  }
+
+  // Guardian can view the full request status but cannot approve/reject
+  sections.push({
+    title: "Actions",
+    content: (
+      <ActionRow>
+        <InspectorButton href="/guardian/request-status" variant="primary">
+          View request status
+        </InspectorButton>
+      </ActionRow>
+    ),
+  });
+
+  return {
+    kind: "permission_ticket",
+    title: ticketNum,
+    subtitle: `${r.student?.name ?? "Unknown ward"} · ${r.workflow_type ?? ""}`.trim() || null,
+    status: <StatusBadge text={r.status ?? "PENDING"} tone={statusTone} />,
+    sections,
+    detailHref: "/guardian/request-status",
+    detailLabel: "All requests",
+  };
+}
 
 
 /* ── shapes ── */
@@ -27,6 +122,7 @@ interface PermissionRow {
   sla_deadline?: string | null;
   created_at?: string;
   student?: { name?: string; student_details?: { roll?: string } | null } | null;
+  stage_history?: Array<{ actorName: string; actorRole: string; action: string; comment?: string | null; timestamp: string }>;
 }
 
 interface PermissionListData {
@@ -62,6 +158,7 @@ function EmptyState({ message }: { message: string }) {
 function ChildRequestsInner() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id ?? "";
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   // /api/permissions?status=PENDING — the server auto-scopes to the
   // guardian's linked wards (parent/guardian branch in the route handler).
@@ -154,7 +251,7 @@ function ChildRequestsInner() {
                     ? new Date(r.sla_deadline).getTime() < Date.now()
                     : false;
                   return (
-                    <tr key={r.id} className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none">
+                    <tr key={r.id} className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none cursor-pointer" onClick={() => inspect(buildChildTicketInspection(r))}>
                       <td className="px-4 py-3 text-white font-mono text-xs">
                         {r.ticket_number || r.id.slice(0, 8)}
                       </td>
@@ -219,6 +316,8 @@ function ChildRequestsInner() {
           permissions flow at the campus office.
         </p>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -18,6 +18,102 @@ import {
   Inbox,
   FileWarning,
 } from "lucide-react";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    PENDING: "border-amber-400/30 bg-amber-400/10 text-action-warning",
+    REJECTED: "border-rose-400/30 bg-rose-400/10 text-action-danger",
+    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-unit-c",
+    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
+  };
+  const cls = styles[status] ?? "border-border/30 bg-bg-elevated/10 text-text-muted";
+  return (
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${cls}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function StatusBadgeTone({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an exam access-exception record. */
+function buildAccessExceptionInspection(r: AccessExceptionRow): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+  const statusTone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "APPROVED" ? "ok"
+    : r.status === "REJECTED" ? "danger"
+    : slaBreached ? "danger"
+    : r.status === "ESCALATED" ? "warn"
+    : "neutral";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Candidate", value: r.candidate_name ?? "—" },
+            { label: "Roll", value: r.roll ?? r.candidate_unique_id ?? "—" },
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Stage", value: r.current_stage?.replace(/_/g, " ") ?? "—" },
+            { label: "Created", value: r.created_at ? new Date(r.created_at).toLocaleString() : "—" },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/oie/access-exceptions" variant="ghost">
+            All exceptions
+          </InspectorButton>
+          <InspectorButton href={`/permissions/${r.ticket_number}`} variant="primary">
+            View ticket
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.candidate_name ?? r.ticket_number,
+    subtitle: r.ticket_number,
+    status: <StatusBadgeTone text={r.status} tone={statusTone} />,
+    sections,
+    detailHref: `/permissions/${r.ticket_number}`,
+    detailLabel: "Full ticket",
+  };
+}
 
 interface AccessExceptionRow {
   id: string;
@@ -85,7 +181,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function ExceptionTable({ rows }: { rows: AccessExceptionRow[] }) {
+function ExceptionTable({ rows, onInspect }: { rows: AccessExceptionRow[]; onInspect: (r: AccessExceptionRow) => void }) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No access exceptions found. All exam-day access requests are in good standing." />
@@ -105,7 +201,7 @@ function ExceptionTable({ rows }: { rows: AccessExceptionRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 20).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => onInspect(r)}>
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
@@ -149,6 +245,7 @@ function AccessExceptionsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -249,7 +346,7 @@ function AccessExceptionsInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <ExceptionTable rows={rows} />
+            <ExceptionTable rows={rows} onInspect={(r) => inspect(buildAccessExceptionInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Exceptions are surfaced for OIE review only. Resolution is handled by the
@@ -258,6 +355,7 @@ function AccessExceptionsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

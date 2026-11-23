@@ -1,11 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildDepartmentInspection,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface DepartmentItem {
   code: string;
@@ -35,6 +42,18 @@ export function DepartmentsView() {
     ttlMs: 60_000,
   });
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildDepartmentInspection> | null
+  >(null);
+  const inspect = (dept: DepartmentItem) =>
+    setInspection(buildDepartmentInspection(dept, gate));
+
   const d = data?.data;
 
   return (
@@ -48,7 +67,13 @@ export function DepartmentsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Departments" value={d?.summary?.totalDepts} />
+        <KpiCard
+          label="Departments"
+          value={d?.summary?.totalDepts}
+          onClick={
+            d && d.departments.length > 0 ? () => inspect(d.departments[0]) : undefined
+          }
+        />
         <KpiCard label="Students" value={d?.summary?.totalStudents} />
         <KpiCard label="Faculty" value={d?.summary?.totalFaculty} />
         <KpiCard
@@ -68,7 +93,13 @@ export function DepartmentsView() {
             {(d?.departments ?? []).map((dept) => (
               <li
                 key={dept.code}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(dept)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") inspect(dept);
+                }}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -92,6 +123,7 @@ export function DepartmentsView() {
 
           <div className="hidden md:block">
             <DataTable<DepartmentItem>
+              onRowClick={(dept) => inspect(dept)}
               columns={[
                 { header: "Department", accessor: (r) => r.name },
                 { header: "HOD", accessor: (r) => r.hodName ?? "—" },
@@ -110,6 +142,8 @@ export function DepartmentsView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

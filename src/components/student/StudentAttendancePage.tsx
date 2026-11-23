@@ -29,6 +29,7 @@ import {
   TrendingDown,
   XCircle,
   BookOpen,
+  Search,
 } from "lucide-react";
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { useExport } from "@/hooks/useExport";
@@ -39,6 +40,100 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUIStore } from "@/stores/uiStore";
 import { PERIOD_OPTIONS } from "@/lib/period";
 import type { PeriodKey } from "@/lib/period";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  Timeline,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a single attendance day entry. */
+function buildAttendanceInspection(
+  date: string,
+  status: string | null,
+  nextClasses: Array<{ periodNo: number; start: string; end: string; hall: string; faculty: string; subject: string }>
+): EntityInspection {
+  const isPresent = status?.toUpperCase() === "PRESENT" || status?.toUpperCase() === "IN";
+  const isAbsent = status?.toUpperCase() === "ABSENT" || status?.toUpperCase() === "OUT";
+  const tone = isPresent ? "ok" : isAbsent ? "danger" : "neutral";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Date", value: new Date(date + "T00:00:00").toLocaleDateString() },
+            { label: "Status", value: status?.toUpperCase() ?? "UNMARKED" },
+            { label: "Day of week", value: new Date(date + "T00:00:00").toLocaleDateString(undefined, { weekday: "long" }) },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  // Context: scheduled classes for that day
+  if (nextClasses.length > 0) {
+    sections.push({
+      title: "Scheduled classes",
+      collapsible: true,
+      content: (
+        <div className="space-y-1.5 text-xs">
+          {nextClasses.map((c, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="font-medium">P{c.periodNo}</span>
+              <span className="text-text-muted">{c.start}–{c.end}</span>
+              <span className="text-text-muted">{c.faculty}</span>
+              <span className="text-text-muted">{c.hall}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    });
+  }
+
+  // Actions: student can dispute this day
+  sections.push({
+    title: "Actions",
+    content: (
+      <ActionRow>
+        <InspectorButton href="/student/attendance" variant="primary">
+          File dispute for this day
+        </InspectorButton>
+      </ActionRow>
+    ),
+  });
+
+  return {
+    kind: "attendance",
+    title: new Date(date + "T00:00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }),
+    subtitle: date,
+    status: <StatusBadge text={status?.toUpperCase() ?? "UNMARKED"} tone={tone} />,
+    sections,
+    detailHref: "/student/attendance",
+    detailLabel: "All attendance",
+  };
+}
 
 // ── Types from API ──────────────────────────────────────────────────────────
 
@@ -73,6 +168,7 @@ const PERIOD_KEYS: PeriodKey[] = PERIOD_OPTIONS.map((o) => o.key);
 export function StudentAttendancePage() {
   const { exportCSV } = useExport();
   const { addToast } = useUIStore();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const [period, setPeriod] = useState<PeriodKey>("this-month");
   const [data, setData] = useState<OverviewPayload | null>(null);
@@ -295,10 +391,12 @@ export function StudentAttendancePage() {
                   const isPresent = status === "PRESENT" || status === "IN";
                   const isAbsent = status === "ABSENT" || status === "OUT";
                   return (
-                    <div
+                    <button
                       key={i}
+                      type="button"
+                      onClick={() => inspect(buildAttendanceInspection(d.date, d.status, data.nextClasses ?? []))}
                       className={cn(
-                        "aspect-square rounded-full text-[10px] flex items-center justify-center font-mono",
+                        "aspect-square rounded-full text-[10px] flex items-center justify-center font-mono hover:ring-2 hover:ring-action-primary/40 transition",
                         isPresent && "bg-action-success/20 text-action-success ring-1 ring-action-success/40",
                         isAbsent && "bg-action-danger/20 text-action-danger ring-1 ring-action-danger/40",
                         !status && "bg-bg-surface text-text-muted ring-1 ring-border"
@@ -306,7 +404,7 @@ export function StudentAttendancePage() {
                       title={`${d.date}: ${status ?? "Unmarked"}`}
                     >
                       {new Date(d.date + "T00:00:00").getDate()}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -418,6 +516,7 @@ export function StudentAttendancePage() {
           </>
         )}
       </div>
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </WidgetBoundary>
   );
 }

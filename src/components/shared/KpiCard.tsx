@@ -6,9 +6,27 @@ export interface KpiCardProps {
   value: ReactNode;
   tone?: "ok" | "warn" | "danger" | "info" | "neutral";
   className?: string;
+  /**
+   * Drilldown behavior: when provided, the whole card (and its number)
+   * becomes a control. `onClick` opens an in-page inspector (preferred —
+   * the register state stays intact); `drilldownHref` navigates to the
+   * register WITH the pre-filter applied (e.g. ?overdue=true).
+   */
+  onClick?: () => void;
+  drilldownHref?: string;
+  /** Hover hint shown as a small subtitle under the value. */
+  hint?: string;
 }
 
-export function KpiCard({ label, value, tone = "neutral", className }: KpiCardProps) {
+export function KpiCard({
+  label,
+  value,
+  tone = "neutral",
+  className,
+  onClick,
+  drilldownHref,
+  hint,
+}: KpiCardProps) {
   const toneClasses = {
     ok: "text-action-primary",
     warn: "text-action-warning",
@@ -17,10 +35,11 @@ export function KpiCard({ label, value, tone = "neutral", className }: KpiCardPr
     neutral: "text-text-primary",
   };
 
-  return (
+  const body = (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-bg-surface p-4",
+        "rounded-2xl border border-border bg-bg-surface p-4 h-full",
+        onClick && "cursor-pointer transition-colors hover:border-action-primary/40",
         className
       )}
     >
@@ -33,6 +52,25 @@ export function KpiCard({ label, value, tone = "neutral", className }: KpiCardPr
       >
         {value ?? "—"}
       </p>
+      {hint ? (
+        <p className="mt-1 text-[11px] text-text-muted">{hint}</p>
+      ) : null}
     </div>
   );
+
+  if (drilldownHref) {
+    return (
+      <a href={drilldownHref} onClick={onClick} aria-label={`${label}: ${String(value ?? "")} — open filtered register`}>
+        {body}
+      </a>
+    );
+  }
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="block w-full text-left" aria-label={`${label}: ${String(value ?? "")}`}>
+        {body}
+      </button>
+    );
+  }
+  return body;
 }

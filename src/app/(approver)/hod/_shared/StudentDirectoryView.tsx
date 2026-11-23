@@ -6,6 +6,71 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a student record (HOD view — department level). */
+function buildStudentInspection(s: StudentRow): EntityInspection {
+  const isHostel = !!s.hostelBlock;
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Roll / ID", value: s.roll ?? s.uniqueId ?? "—" },
+            { label: "Year / Section", value: s.year != null || s.section ? `Y${s.year ?? "—"} / ${s.section ?? "—"}` : "—" },
+            { label: "Department", value: s.department ?? "—" },
+            { label: "Residential", value: isHostel ? `Hostel: ${s.hostelBlock}-${s.roomNumber ?? ""}` : "Day Scholar" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href={`/hod/students`} variant="ghost">
+            All students
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "student",
+    title: s.name,
+    subtitle: s.roll ?? s.uniqueId ?? s.id,
+    status: <StatusBadge text={isHostel ? "HOSTEL" : "DAY SCHOLAR"} tone={isHostel ? "warn" : "neutral"} />,
+    sections,
+    detailHref: "/hod/students",
+    detailLabel: "Student directory",
+  };
+}
 
 interface StudentRow {
   id: string;
@@ -28,6 +93,7 @@ export function StudentDirectoryView() {
   const { data, loading } = useApiResource<StudentsResponse>("/api/students", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const students = Array.isArray(data?.data) ? data.data : [];
   const hostelCount = students.filter((s) => !!s.hostelBlock).length;
@@ -62,7 +128,8 @@ export function StudentDirectoryView() {
             {students.map((s) => (
               <li
                 key={s.id}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/60 transition"
+                onClick={() => inspect(buildStudentInspection(s))}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -107,10 +174,13 @@ export function StudentDirectoryView() {
               ]}
               data={students}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => inspect(buildStudentInspection(r))}
             />
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

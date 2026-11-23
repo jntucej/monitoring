@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildReportInspection,
+  type ReportRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface WeekDigestResponse {
   success?: boolean;
@@ -26,6 +34,29 @@ export function ReportsView() {
   const d = data?.data;
   const breakdown = d?.byWorkflowType ?? [];
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildReportInspection> | null
+  >(null);
+  const inspect = (item: { workflow_type: string; count: number }) =>
+    setInspection(
+      buildReportInspection(
+        {
+          workflow_type: item.workflow_type,
+          count: item.count,
+          totalPending: d?.totalPending,
+          totalApproved: d?.totalApproved,
+          totalEscalated: d?.totalEscalated,
+        } satisfies ReportRecord,
+        gate
+      )
+    );
+
   return (
     <div className="space-y-4">
       <WeekBar />
@@ -37,9 +68,33 @@ export function ReportsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Pending Now" value={d?.totalPending} />
-        <KpiCard label="Decisions Cleared" value={d?.totalApproved} tone="ok" />
-        <KpiCard label="Escalations" value={d?.totalEscalated} tone={d?.totalEscalated ? "warn" : "ok"} />
+        <KpiCard
+          label="Pending Now"
+          value={d?.totalPending}
+          onClick={
+            breakdown.length > 0 ? () => inspect({ workflow_type: "pending", count: d?.totalPending ?? 0 }) : undefined
+          }
+        />
+        <KpiCard
+          label="Decisions Cleared"
+          value={d?.totalApproved}
+          tone="ok"
+          onClick={
+            breakdown.length > 0
+              ? () => inspect({ workflow_type: "approved", count: d?.totalApproved ?? 0 })
+              : undefined
+          }
+        />
+        <KpiCard
+          label="Escalations"
+          value={d?.totalEscalated}
+          tone={d?.totalEscalated ? "warn" : "ok"}
+          onClick={
+            breakdown.length > 0
+              ? () => inspect({ workflow_type: "escalated", count: d?.totalEscalated ?? 0 })
+              : undefined
+          }
+        />
       </div>
 
       {loading && !d ? (
@@ -52,7 +107,13 @@ export function ReportsView() {
             {breakdown.map((item) => (
               <li
                 key={item.workflow_type}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                role="button"
+                tabIndex={0}
+                onClick={() => inspect(item)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") inspect(item);
+                }}
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{item.workflow_type}</p>
@@ -66,6 +127,7 @@ export function ReportsView() {
 
           <div className="hidden md:block">
             <DataTable<{ workflow_type: string; count: number }>
+              onRowClick={(item) => inspect(item)}
               columns={[
                 {
                   header: "Workflow Category",
@@ -82,6 +144,8 @@ export function ReportsView() {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }
