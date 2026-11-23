@@ -78,3 +78,23 @@ Only the Principal (as Chief Warden) can escalate a hostel case to DEBARRED stat
 - Cannot: self-approve (actions are logged separately in audit)
 - Escalation: to Principal for non-hostel matters
 
+
+
+## Cross-Role Dependencies
+
+### Chief Warden should see (read-only)
+- **hostel_manager**: hostel KPIs, disciplinary cases, policy status → What HM is doing
+- **deputy_warden**: curfew compliance, incident log, night attendance → Block status
+- **principal**: DEBARRED decision authority → Final authority
+
+### Chief Warden should NOT see
+- **sysadmin**: infra, MFA, RLS → not CW's concern
+
+### Chief Warden escalates to
+- **principal**: DEBARRED (CW is principal in this context, but logged separately)
+- **dean**: academic review of DEBARRED cases
+
+### Chief Warden borrows from
+- **hostel_manager**: disciplinary case files (hm collects, cw reviews)
+- **dean**: academic context for DEBARRED decisions (dean provides)
+

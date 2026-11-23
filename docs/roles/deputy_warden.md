@@ -130,3 +130,24 @@ In the Gate Monitor system, the Deputy Warden manages block-level curfew verific
 - Cannot: escalate to DEBARRED (Principal-only), approve cross-block room changes
 - Escalation: to Hostel Manager for block-level decisions; to Principal for disciplinary
 
+
+
+## Cross-Role Dependencies
+
+### Deputy Warden should see (read-only)
+- **caretaker**: maintenance tickets, housekeeping, asset damage → Block upkeep
+- **hostel_manager**: room allot/vacate, mess menu → Block status
+- **student**: curfew status, expected return, overstay → Who's in the block
+
+### Deputy Warden should NOT see
+- **sysadmin**: infra, MFA, RLS → not DW's concern
+- **admin**: user governance, audit → not DW's concern
+
+### Deputy Warden escalates to
+- **hostel_manager**: curfew violations, mess rule violations, major incidents
+- **principal**: DEBARRED (via hostel_manager chain)
+
+### Deputy Warden borrows from
+- **caretaker**: block maintenance status (caretaker reports, dw sees)
+- **hostel_manager**: room allot decisions (hm decides, dw executes within block)
+

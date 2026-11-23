@@ -95,3 +95,25 @@ Per Indian university facility management best practices:
 - Cannot: assign tasks (admin territory), modify gate configuration
 - Escalation: to Admin for operational; to Hostel Manager for hostel tasks
 
+
+
+## Cross-Role Dependencies
+
+### Worker should see (read-only)
+- **emo**: assigned tasks, equipment status → Worker knows what to do
+- **hostel_manager**: hostel maintenance tasks → Worker handles hostel upkeep
+- **admin**: shift schedule → Worker knows when to work
+
+### Worker should NOT see
+- **sysadmin**: infra, MFA, RLS → not worker's concern
+- **principal**: strategic KPIs → not worker's concern
+
+### Worker escalates to
+- **emo**: equipment failures, safety hazards
+- **hostel_manager**: hostel maintenance issues
+- **admin**: shift issues, task SLA breaches
+
+### Worker borrows from
+- **emo**: task assignment (emo creates ticket, worker completes)
+- **hostel_manager**: block-specific tasks (hostel_manager assigns, worker executes)
+

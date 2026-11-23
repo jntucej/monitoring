@@ -79,3 +79,25 @@ DEBARRED requires two-person approval (HOD + Dean/Principal) — the Dean is the
 - Cannot: self-approve academic status; must follow two-person rule for DEBARRED
 - Escalation: to Principal for final academic decisions; to JNTUH VC for compliance matters
 
+
+
+## Cross-Role Dependencies
+
+### Dean should see (read-only)
+- **hod**: department KPIs, academic status, exam proposals → Department health
+- **vp**: academic exceptions, exam coordination → What VP is handling
+- **principal**: DEBARRED case files, compliance → What Principal decided
+- **exam_branch**: result processing, discrepancy reports → Exam accuracy
+
+### Dean should NOT see
+- **sysadmin**: infra, MFA, RLS → not Dean's concern
+- **admin**: user governance, audit → not Dean's concern
+
+### Dean escalates to
+- **principal**: DEBARRED (two-person with HOD), compliance matters
+- **JNTUH VC**: AICTE/NBA inspections, academic governance
+
+### Dean borrows from
+- **hod**: academic status flags (hod flags, dean approves DEBARRED with principal)
+- **exam_branch**: discrepancy reports (exam_branch detects, dean reviews)
+

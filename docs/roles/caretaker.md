@@ -77,3 +77,24 @@ The Caretaker handles day-to-day facilities maintenance, student grievance resol
 - Cannot: escalate to DEBARRED (Principal-only), approve cross-block changes
 - Escalation: to Deputy Warden for major issues; to Hostel Manager for cross-block decisions
 
+
+
+## Cross-Role Dependencies
+
+### Caretaker should see (read-only)
+- **deputy_warden**: block incidents, maintenance priorities → What to fix
+- **hostel_manager**: room allot/vacate, block occupancy → Who's in the block
+- **emo**: infrastructure complaints, vendor status → What's being fixed
+
+### Caretaker should NOT see
+- **sysadmin**: infra, MFA, RLS → not caretaker's concern
+- **admin**: user governance, audit → not caretaker's concern
+
+### Caretaker escalates to
+- **deputy_warden**: major maintenance issues, student grievances
+- **emo**: infrastructure failures, vendor issues
+
+### Caretaker borrows from
+- **deputy_warden**: incident log (dw logs, caretaker fixes)
+- **emo**: maintenance ticket assignment (emo assigns, caretaker completes)
+

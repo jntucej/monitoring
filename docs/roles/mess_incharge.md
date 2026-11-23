@@ -86,3 +86,23 @@ Per TMU Mess Policy: "Provide hygienic, wholesome, nutritious and balanced meals
 - Cannot: approve bill payment (needs Hostel Manager/Principal), self-approve menu changes
 - Escalation: to Hostel Manager for mess disputes; to Principal for food safety
 
+
+
+## Cross-Role Dependencies
+
+### Mess In-charge should see (read-only)
+- **hostel_manager**: hostel occupancy, mess menu oversight → Who's eating
+- **student**: token balance, mess complaints → What residents need
+- **admin**: mess bill status, vendor contracts → Financial status
+
+### Mess In-charge should NOT see
+- **sysadmin**: infra, MFA, RLS → not MI's concern
+
+### Mess In-charge escalates to
+- **hostel_manager**: menu disputes, mess rule violations
+- **principal**: food safety incidents, vendor contract changes
+
+### Mess In-charge borrows from
+- **hostel_manager**: occupancy data (hm tracks, mi plans menu)
+- **student**: token usage (student consumes, mi issues)
+

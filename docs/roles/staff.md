@@ -84,3 +84,24 @@ The Staff role represents general staff (non-teaching) at JNTUH CEJ — administ
 - Cannot: modify gate configuration (admin territory), approve exam matters
 - Escalation: to Admin for operational matters; to exam branch for exam matters
 
+
+
+## Cross-Role Dependencies
+
+### Staff should see (read-only)
+- **operator**: gate status, occupancy → Staff knows gate state for shifts
+- **admin**: shift schedule, maintenance tickets → Staff gets assigned tasks
+- **emo**: infrastructure complaints → Staff handles non-infra tasks
+
+### Staff should NOT see
+- **sysadmin**: infra, MFA, RLS → not staff's concern
+- **principal**: strategic KPIs → not staff's concern
+
+### Staff escalates to
+- **admin**: SLA breaches, equipment issues, unresolved items
+- **exam_branch**: exam day support duties
+
+### Staff borrows from
+- **operator**: gate status view (staff sees same gate view as operator, read-only)
+- **emo**: maintenance ticket assignment (emo assigns, staff completes)
+

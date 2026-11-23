@@ -80,3 +80,25 @@ Per JNTUH CEJ gate-pass rules, parent/guardian acknowledgement is a required ste
 - Cannot: approve leave (needs HOD/Principal), modify academic records
 - Escalation: to HOD for academic; to Hostel Manager for gate-pass; to Principal for disputes
 
+
+
+## Cross-Role Dependencies
+
+### Guardian should see (read-only)
+- **student**: attendance %, marks, gate passes → Child's status
+- **admin**: fee dues, payment status → Child's financial status
+- **deputy_warden**: curfew status, visitor log → Child's hostel status
+
+### Guardian should NOT see
+- **sysadmin**: infra, MFA, RLS → not guardian's concern
+- **admin**: user governance, audit → not guardian's concern
+
+### Guardian escalates to
+- **faculty**: academic concerns
+- **deputy_warden**: hostel issues
+- **admin**: fee disputes, general complaints
+
+### Guardian borrows from
+- **student**: gate pass acknowledgements (guardian acknowledges for hostel students)
+- **deputy_warden**: curfew status, visitor log (read-only)
+

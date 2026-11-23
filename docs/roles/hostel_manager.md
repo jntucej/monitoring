@@ -82,3 +82,26 @@ JNTUH CEJ has 4 hostel blocks (2 boys + 2 girls). The Hostel Manager is one per 
 - Cannot: escalate to DEBARRED (Principal-only), approve disciplinary cases
 - Escalation: to Principal for disciplinary; to Mess In-charge for mess operations
 
+
+
+## Cross-Role Dependencies
+
+### Hostel Manager should see (read-only)
+- **deputy_warden**: curfew compliance, night attendance, incidents, visitor log → Block status
+- **caretaker**: maintenance tickets, housekeeping status → Block upkeep
+- **mess_incharge**: menu, token consumption, bill status → Mess status
+- **vp**: hostel aggregate (no PII) → What VP sees
+
+### Hostel Manager should NOT see
+- **sysadmin**: infra, MFA, RLS → not HM's concern
+- **admin**: user governance, audit → not HM's concern
+
+### Hostel Manager escalates to
+- **vp**: major hostel issues, curfew non-compliance
+- **principal**: DEBARRED (with chief_warden context), hostel policy
+- **emo**: infrastructure complaints in hostel blocks
+
+### Hostel Manager borrows from
+- **deputy_warden**: block-level data (dw collects, hm aggregates)
+- **mess_incharge**: mess operations (mi manages, hm oversees)
+

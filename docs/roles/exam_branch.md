@@ -82,3 +82,25 @@ Per Indian university exam standards, no single exam role can both enter and pub
 - Cannot: self-approve result publishing (needs Controller sign-off), control hall access (Chief Superintendent)
 - Escalation: to Controller for result matters; to Chief Superintendent for exam-day matters
 
+
+
+## Cross-Role Dependencies
+
+### Exam Branch should see (read-only)
+- **exam_superintendent**: candidate attendance, hall status → Exam-day data
+- **faculty**: internal marks, CBT results → Input for result processing
+- **oie**: exam queue, exceptions → What OIE is triaging
+- **principal**: result sign-off, exam policy → Final authority
+
+### Exam Branch should NOT see
+- **sysadmin**: infra, MFA, RLS → not EB's concern
+
+### Exam Branch escalates to
+- **principal**: result publishing (after Controller sign-off)
+- **vc**: exam policy, compliance matters
+
+### Exam Branch borrows from
+- **faculty**: marks entry (faculty enters, eb aggregates)
+- **oie**: exception data (oie triages, eb processes)
+- **exam_superintendent**: candidate attendance (cs collects, eb verifies)
+

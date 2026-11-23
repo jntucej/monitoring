@@ -107,3 +107,27 @@ In a real university, this maps to the College Office / Administrative Manager w
 - Can: configure gates, manage users, trigger lockdown, broadcast alerts, export audit logs
 - Escalation: gate issues → supervisor; infra issues → sysadmin; academic issues → principal
 
+
+
+## Cross-Role Dependencies
+
+### Admin should see (read-only)
+- **operator**: gate scan log, operator stats, device health → Admin monitors gate operations
+- **supervisor**: overstay alerts, watchlist status → Admin sees security KPIs
+- **staff**: shift status, handover docs → Admin monitors staff operations
+- **worker**: task completion rate → Admin monitors maintenance SLAs
+- **emo**: infrastructure complaints, vendor SLA → Admin sees estate status
+- **sysadmin**: deployment status, MFA status → Admin sees infra health
+
+### Admin should NOT see
+- **sysadmin**: full audit with UUIDs, RLS internals, break-glass triggers → sysadmin territory
+- **principal**: strategic KPIs, DEBARRED case files → Principal territory
+
+### Two-person rules
+- Lockdown: admin + principal
+- Gate config changes: admin triggers, sysadmin approves for infra changes
+
+### Admin borrows from
+- **operator**: device health reports (admin monitors, operator generates)
+- **supervisor**: exception resolution times (admin sees KPIs, supervisor resolves)
+

@@ -95,3 +95,24 @@ Per Indian university campus security best practices:
 - Cannot: approve passes (needs HOD/Hostel Manager), modify gate configuration
 - Escalation: unresolved passes → Security Supervisor; device issues → SysAdmin
 
+
+
+## Cross-Role Dependencies
+
+### Operator should see (read-only)
+- **supervisor**: watchlist status, overstay alerts → Operator checks watchlist on scan
+- **admin**: lockdown state, gate schedule → Operator knows gate open/close times
+- **staff**: shift handover docs → Operator picks up open items
+
+### Operator should NOT see
+- **admin**: user governance, audit exports → not operator's concern
+- **sysadmin**: infra, MFA, RLS → not operator's concern
+
+### Operator escalates to
+- **supervisor**: unresolved passes, device malfunctions, security incidents
+- **admin**: gate hardware config issues, peak hour staffing
+
+### Operator borrows from
+- **supervisor**: watchlist auto-check (currently manual, should be automatic on scan)
+- **admin**: lockdown state broadcast (operator should see real-time lockdown)
+

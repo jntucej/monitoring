@@ -98,3 +98,29 @@ The student's experience is the most context-aware in the app:
 - Cannot: approve their own passes (needs HOD/Hostel Manager/Parent)
 - Escalation: to HOD for academic; to Hostel Manager for hostel; to Principal for disputes
 
+
+
+## Cross-Role Dependencies
+
+### Student should see (read-only)
+- **faculty**: marks, assignments, study material → Academic progress
+- **mess_incharge**: menu, token balance → What's being served
+- **deputy_warden**: curfew status, expected return → Hostel compliance
+- **parent**: gate pass acknowledgements → Parent knows child's status
+- **guardian**: leave requests → Guardian tracks child's leave
+
+### Student should NOT see
+- **sysadmin**: infra, MFA, RLS → not student's concern
+- **admin**: user governance, audit → not student's concern
+
+### Student escalates to
+- **faculty**: academic issues, marks disputes
+- **deputy_warden**: hostel issues, curfew disputes
+- **mess_incharge**: mess complaints, menu issues
+- **admin**: general complaints, fee disputes
+
+### Student borrows from
+- **faculty**: class schedule, marks, assignments (read-only)
+- **mess_incharge**: menu, token balance (read-only)
+- **deputy_warden**: curfew status, overstay alerts (read-only)
+

@@ -82,3 +82,24 @@ Per Indian university facility management:
 - Cannot: approve major repairs without Principal sign-off, modify gate configuration
 - Escalation: to Principal for major decisions; to Admin for operational coordination
 
+
+
+## Cross-Role Dependencies
+
+### EMO should see (read-only)
+- **admin**: campus infrastructure complaints, vendor contracts → EMO triages
+- **staff**: maintenance ticket status → EMO tracks SLAs
+- **worker**: task completion, equipment reports → EMO verifies work
+
+### EMO should NOT see
+- **sysadmin**: infra, MFA, RLS → EMO handles physical infra, not tech
+- **principal**: strategic KPIs → EMO handles operational infra
+
+### EMO escalates to
+- **principal**: major repairs (cosign), vendor contract changes
+- **admin**: operational coordination, SLA breaches
+
+### EMO borrows from
+- **admin**: complaint intake (admin receives, emo triages)
+- **worker**: task execution (emo assigns, worker completes)
+

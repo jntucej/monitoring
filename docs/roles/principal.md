@@ -93,3 +93,28 @@ The Vice-Principal discharges the Principal's duties during leave. No single per
 - Cannot: self-approve without two-person for lockdown; cannot bypass exam SoD
 - Escalation: to Vice Chancellor, JNTUH Hyderabad
 
+
+
+## Cross-Role Dependencies
+
+### Principal should see (read-only)
+- **admin**: campus KPIs, user stats, gate status, alert status → Operational health
+- **vp**: flagged items, delegation chain, exam coordination → What VP is doing
+- **dean**: academic KPIs, compliance, cross-department view → Academic health
+- **hostel_manager**: hostel occupancy, curfew compliance, incident rate → Hostel KPIs
+- **exam_superintendent**: candidate attendance, hall status, exceptions → Exam-day status
+- **exam_branch**: result processing, hall ticket distribution → Exam progress
+- **emo**: infrastructure KPIs, vendor SLA → Campus physical health
+
+### Principal should NOT see
+- **sysadmin**: full audit with UUIDs, RLS internals, break-glass triggers → sysadmin territory
+
+### Principal escalates to
+- **VC (JNTUH)**: all final decisions, compliance matters, DEBARRED
+- **JNTUH IT Cell**: security incidents
+
+### Principal borrows from
+- **vp**: delegation chain (principal delegates, vp discharges)
+- **admin**: campus KPIs (admin monitors, principal sees)
+- **exam_superintendent**: exam-day data (chief sup monitors, principal sees KPI)
+

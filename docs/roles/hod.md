@@ -89,3 +89,26 @@ Per UGC / JNTUH ordinances, the HOD is the primary academic authority within the
 - Cannot: self-approve DEBARRED (needs Dean/Principal), cross-department actions
 - Escalation: to Principal/VP for department-level decisions; to OIE for exam matters
 
+
+
+## Cross-Role Dependencies
+
+### HOD should see (read-only)
+- **faculty**: workload, leave requests, marks entry, assignments → What my faculty are doing
+- **student**: attendance, marks, academic status → My department's students
+- **exam_branch**: internal exam schedule, CBT results → Exam timing
+- **vp**: department KPIs, exam coordination → What VP expects
+
+### HOD should NOT see
+- **sysadmin**: infra, MFA, RLS → not HOD's concern
+- **admin**: user governance, audit → not HOD's concern
+
+### HOD escalates to
+- **vp**: academic exceptions, cross-department matters
+- **principal**: DEBARRED (with Dean two-person rule), major policy
+- **exam_branch**: exam proposals, CBT results
+
+### HOD borrows from
+- **faculty**: marks entry, assignment tracking (faculty creates, HOD reviews)
+- **vp**: exam coordination data (vp coordinates, HOD sees)
+

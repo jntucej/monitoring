@@ -93,3 +93,28 @@ In the Gate Monitor system, the VP has a capability-gated view: the Principal Br
 - Cannot: self-approve; all final authority rests with Principal
 - Escalation: exam → OIE → VP → Principal; academic → HOD → VP → Principal
 
+
+
+## Cross-Role Dependencies
+
+### VP should see (read-only)
+- **principal**: flagged items, delegation chain, exam coordination → What Principal expects
+- **hod**: department KPIs, exam proposals, academic status → Department health
+- **oie**: exam queue, candidate attendance, exceptions → Exam status
+- **exam_branch**: result processing status, hall ticket distribution → Exam progress
+- **hostel_manager**: hostel aggregate (no PII) → Hostel KPIs
+
+### VP should NOT see
+- **sysadmin**: infra, MFA, RLS → not VP's concern
+- **admin**: user governance, audit → not VP's concern
+
+### VP escalates to
+- **principal**: all final approvals, DEBARRED, lockdown
+- **dean**: academic governance, compliance
+- **exam_branch**: result processing, exam disputes
+
+### VP borrows from
+- **principal**: flagged items via Principal Bridge (vp flags, principal responds)
+- **hod**: exam proposals, academic status (hod creates, vp reviews)
+- **oie**: exam queue (oie triages, vp sees)
+

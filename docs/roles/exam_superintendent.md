@@ -76,3 +76,23 @@ Per JNTUH exam office procedures, the Controller of Examinations oversees the ex
 - Cannot: process results (exam branch), self-approve result publishing
 - Escalation: to Principal for non-exam matters; to exam branch for result matters
 
+
+
+## Cross-Role Dependencies
+
+### Exam Superintendent should see (read-only)
+- **oie**: exam queue, candidate exceptions → What OIE is handling
+- **exam_branch**: hall ticket distribution, exam schedule → What EB prepared
+- **principal**: exam policy, final authority → What Principal decided
+
+### Exam Superintendent should NOT see
+- **sysadmin**: infra, MFA, RLS → not CS's concern
+
+### Exam Superintendent escalates to
+- **principal**: major exam-day decisions, candidate disputes
+- **exam_branch**: result processing issues
+
+### Exam Superintendent borrows from
+- **oie**: exception queue (oie triages, cs handles)
+- **exam_branch**: hall tickets, seating (eb generates, cs uses)
+

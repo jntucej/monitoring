@@ -85,3 +85,26 @@ Per JNTUH exam procedures, faculty are the first point of entry for marks. Marks
 - Cannot: self-approve leave (needs HOD), cross-department actions, result processing
 - Escalation: to HOD for academic matters; to OIE for exam matters
 
+
+
+## Cross-Role Dependencies
+
+### Faculty should see (read-only)
+- **hod**: department schedule, exam proposals, leave approvals → What HOD expects
+- **student**: mentee list, attendance, marks → Who I'm responsible for
+- **exam_branch**: internal exam schedule, CBT results → When exams happen
+- **vp**: class confirmation status → Did VP confirm my class?
+
+### Faculty should NOT see
+- **sysadmin**: infra, MFA, RLS → not faculty's concern
+- **admin**: user governance, audit → not faculty's concern
+
+### Faculty escalates to
+- **hod**: leave disputes, workload issues, exam proposals
+- **vp**: academic exceptions, class confirmations
+- **exam_branch**: result processing issues
+
+### Faculty borrows from
+- **hod**: class schedule, exam proposals (hod creates, faculty sees)
+- **vp**: class confirmation (vp confirms on faculty's behalf if faculty is absent)
+

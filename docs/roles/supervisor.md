@@ -80,3 +80,24 @@ The Supervisor is the single point of escalation for all gate security matters. 
 - Cannot: modify gate configuration (admin territory), approve watchlist changes without Admin
 - Escalation: to Admin for operational matters; to Principal for security matters
 
+
+
+## Cross-Role Dependencies
+
+### Supervisor should see (read-only)
+- **operator**: gate scan log, transaction history → Supervisor verifies operator actions
+- **admin**: campus occupancy, gate config → Supervisor makes gate decisions
+- **staff**: shift status → Supervisor coordinates handovers
+
+### Supervisor should NOT see
+- **sysadmin**: infra, MFA, RLS → not supervisor's concern
+- **principal**: strategic KPIs, DEBARRED → not supervisor's concern
+
+### Supervisor escalates to
+- **admin**: gate hardware issues, peak hour staffing, visitor policy
+- **principal**: security emergencies, campus-wide incidents
+
+### Supervisor borrows from
+- **operator**: scan queue, device health (supervisor needs real-time gate state)
+- **visitor**: overstay alerts (supervisor receives, admin sees KPI)
+

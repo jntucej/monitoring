@@ -82,3 +82,24 @@ Per JNTUH exam office procedures, the OIE is the first point of contact for exam
 - Cannot: process results (exam branch), control hall access (Chief Superintendent)
 - Escalation: to Vice-Principal for exam matters; to Principal for major decisions
 
+
+
+## Cross-Role Dependencies
+
+### OIE should see (read-only)
+- **exam_superintendent**: candidate attendance, hall status, exceptions → Exam-day status
+- **exam_branch**: hall ticket distribution, result processing status → Exam progress
+- **vp**: exam coordination, decision queue → What VP is handling
+
+### OIE should NOT see
+- **sysadmin**: infra, MFA, RLS → not OIE's concern
+- **principal**: strategic KPIs → not OIE's concern
+
+### OIE escalates to
+- **vp**: exam queue items, candidate exceptions
+- **principal**: major exam decisions
+
+### OIE borrows from
+- **exam_superintendent**: candidate attendance (cs collects, oie reconciles)
+- **exam_branch**: hall ticket data (eb generates, oie verifies)
+

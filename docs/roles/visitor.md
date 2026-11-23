@@ -83,3 +83,24 @@ Per NIT Hamirpur security SOP, all visitor matters are reported to the Security 
 - Cannot: extend pass (needs host/Admin), access restricted areas
 - Escalation: overstay → Security Supervisor → Admin
 
+
+
+## Cross-Role Dependencies
+
+### Visitor should see (read-only)
+- **host**: host name, purpose of visit, time limit → Who invited me, how long
+- **operator**: gate check-in/out status → Where I am in the pass lifecycle
+- **supervisor**: overstay alerts → Know if I'm overstaying
+
+### Visitor should NOT see
+- **admin**: user governance, audit → not visitor's concern
+- **sysadmin**: infra, MFA, RLS → not visitor's concern
+
+### Visitor escalates to
+- **supervisor**: overstay, access issues
+- **admin**: visitor policy disputes
+
+### Visitor borrows from
+- **host**: pre-registration QR, visit details (host creates, visitor scans)
+- **operator**: check-in/out status (operator records, visitor sees)
+
