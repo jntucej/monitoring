@@ -18,6 +18,49 @@ interface AuditItem {
   timestamp: string;
 }
 
+interface AuditTimelineEntry {
+  label: string;
+  time?: string;
+  detail?: string;
+  tone?: "ok" | "warn" | "danger" | "neutral";
+}
+
+/**
+ * Build the timeline for an audit event: the event itself plus any
+ * structured entries embedded in `details` (e.g. before/after payloads,
+ * related ticket / case ids). No relationships are invented — every entry
+ * comes straight from the /api/admin/audit-logs response.
+ */
+function auditEventTimeline(item: AuditItem): AuditTimelineEntry[] {
+  const entries: AuditTimelineEntry[] = [
+    {
+      label: item.action,
+      time: item.timestamp ? new Date(item.timestamp).toLocaleString("en-IN") : undefined,
+      detail: [item.userName ?? item.userId, item.userRole].filter(Boolean).join(" · ") || undefined,
+      tone: "neutral",
+    },
+  ];
+
+  const d = item.details;
+  if (d && typeof d === "object") {
+    // Surface any "before" / "after" style payloads as a second entry so the
+    // timeline shows the state transition without a separate detail fetch.
+    const before = (d as Record<string, unknown>).before;
+    const after = (d as Record<string, unknown>).after;
+    if (before !== undefined || after !== undefined) {
+      entries.push({
+        label: "State transition",
+        detail: [before !== undefined ? `before: ${JSON.stringify(before)}` : null, after !== undefined ? `after: ${JSON.stringify(after)}` : null]
+          .filter(Boolean)
+          .join(" · ") || undefined,
+        tone: "warn",
+      });
+    }
+  }
+
+  return entries;
+}
+
 const PAGE_SIZE = 25;
 
 /**
@@ -346,16 +389,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
                     collapsible: true,
                     content: (
                       <Timeline
-                        items={[
-                          {
-                            label: active.action,
-                            time: active.timestamp
-                              ? new Date(active.timestamp).toLocaleString("en-IN")
-                              : undefined,
-                            detail: active.userName || active.userId || undefined,
-                            tone: "neutral",
-                          },
-                        ]}
+                        items={auditEventTimeline(active)}
                       />
                     ),
                   },

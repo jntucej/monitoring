@@ -1,13 +1,16 @@
 "use client";
 // src/components/sysadmin/domains/identity/PeopleDrawer.tsx
-// PEOPLE drawer: right-hand panel with sections profile / roles / sessions /
-// audit / links. Opens on row click (no route change); fetches the single
-// person detail from /api/admin/people/<id> via ok() + query (not Supabase).
-// "use client"; CSS vars only; cn from @/lib/utils.
+// PEOPLE deepest layer: fetches the single-person payload from
+// /api/admin/people/<id> and renders it through the shared EntityInspector
+// (kind `person`). The progressive-disclosure hierarchy is the same as
+// every other record in the app: overview → roles → sessions → audit →
+// links (server-authorized mutation routes).
+// Loading / error / not-found states are exposed through the
+// inspector's built-in state placeholders (design rule 31).
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import { EntityInspector, KVPairs, InspectorButton, Timeline, type EntityInspection } from "@/components/shared/EntityInspector";
 import type {
   PersonDetail,
   PersonRow,
@@ -22,6 +25,163 @@ interface Props {
 }
 
 type LoadState = "idle" | "loading" | "ready" | "error";
+
+function stateTone(state: string): "ok" | "warn" | "danger" | "neutral" {
+  const s = state.toUpperCase();
+  if (s === "ACTIVE") return "ok";
+  if (s === "SUSPENDED" || s === "LOCKED") return "danger";
+  if (s === "DISABLED" || s === "DEPROVISIONED") return "neutral";
+  return "warn";
+}
+
+function stateClass(tone: "ok" | "warn" | "danger" | "neutral"): string {
+  switch (tone) {
+    case "ok":
+      return "bg-emerald-500/15 text-action-success";
+    case "warn":
+      return "bg-amber-500/15 text-action-warning";
+    case "danger":
+      return "bg-rose-500/15 text-action-danger";
+    default:
+      return "bg-bg-elevated text-text-muted";
+  }
+}
+
+/** Build the standardized `EntityInspection` model for a person record. */
+function personInspectionModel(
+  row: PersonRow,
+  detail: PersonDetail | null,
+): EntityInspection {
+  const name = detail?.name ?? row.name;
+  const email = detail?.email ?? row.email;
+  const role = detail?.role ?? row.role;
+  const state = detail?.state ?? row.state;
+  const tone = stateTone(state);
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Email", value: email },
+            { label: "Role", value: role },
+            { label: "State", value: state },
+            {
+              label: "MFA",
+              value: (detail?.two_factor_enabled ?? row.two_factor_enabled)
+                ? "Enabled"
+                : "Disabled",
+            },
+            {
+              label: "Created",
+              value: new Date(detail?.created_at ?? row.created_at).toLocaleDateString("en-IN"),
+            },
+          ]}
+        />
+      ),
+    },
+    ...(detail
+      ? [
+          {
+            title: `Roles (${detail.roles.length})`,
+            collapsible: true,
+            content:
+              detail.roles.length === 0 ? (
+                <p className="text-xs text-text-muted">No roles recorded.</p>
+              ) : (
+                <Timeline
+                  items={detail.roles.map((r) => ({
+                    label: r.role,
+                    time: new Date(r.granted_at).toLocaleDateString("en-IN"),
+                    detail: "granted",
+                    tone: "neutral" as const,
+                  }))}
+                />
+              ),
+          },
+          {
+            title: `Sessions (${detail.sessionsCount})`,
+            collapsible: true,
+            content:
+              detail.sessions.length === 0 ? (
+                <p className="text-xs text-text-muted">No sessions.</p>
+              ) : (
+                <Timeline
+                  items={detail.sessions.map((s) => ({
+                    label: s.revoked_at ? "Session revoked" : "Active session",
+                    time: s.last_seen_at
+                      ? new Date(s.last_seen_at).toLocaleString("en-IN")
+                      : undefined,
+                    detail: [s.ip_address, s.user_agent].filter(Boolean).join(" · "),
+                    tone: s.revoked_at ? ("neutral" as const) : ("ok" as const),
+                  }))}
+                />
+              ),
+          },
+          {
+            title: "Recent audit",
+            collapsible: true,
+            content:
+              detail.audit.length === 0 ? (
+                <p className="text-xs text-text-muted">No audit entries.</p>
+              ) : (
+                <Timeline
+                  items={detail.audit.map((a) => ({
+                    label: a.action,
+                    time: new Date(a.timestamp).toLocaleString("en-IN"),
+                    detail: a.ip_address ?? undefined,
+                    tone: "neutral" as const,
+                  }))}
+                />
+              ),
+          },
+        ]
+      : []),
+    {
+      title: "Actions",
+      content: (
+        <div className="flex flex-wrap gap-2">
+          {detail ? (
+            <>
+              <InspectorButton href={detail.links.users} variant="ghost">
+                <ChevronRight className="size-3.5" /> User record
+              </InspectorButton>
+              <InspectorButton href={detail.links.userRoles} variant="ghost">
+                <ChevronRight className="size-3.5" /> Roles
+              </InspectorButton>
+              <InspectorButton href={detail.links.roleRequests} variant="ghost">
+                <ChevronRight className="size-3.5" /> Role requests
+              </InspectorButton>
+              <InspectorButton href={detail.links.auditLogs} variant="ghost">
+                <ChevronRight className="size-3.5" /> Audit logs
+              </InspectorButton>
+            </>
+          ) : (
+            <p className="text-xs text-text-muted">
+              Open a role mutation (grant / revoke / suspend) from the sysadmin
+              role console — the server authorizes these routes.
+            </p>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  return {
+    kind: "person",
+    title: name,
+    subtitle: email,
+    status: (
+      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${stateClass(tone)}`}>
+        {state.toUpperCase()}
+      </span>
+    ),
+    sections,
+    detailHref: "/sysadmin/people",
+    detailLabel: "People directory",
+  };
+}
 
 export function PeopleDrawer({ row, personId, onClose }: Props) {
   // Normalize to a single "active" row: prefer `row`; else build one from
@@ -50,9 +210,9 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
         setDetail(json.data as PersonDetail);
         setState("ready");
       })
-      .catch((e) => {
+      .catch((e: unknown) => {
         if (cancelled) return;
-        setError(e?.message ?? "Failed to load");
+        setError(e instanceof Error ? e.message : "Failed to load");
         setState("error");
       });
     return () => {
@@ -60,205 +220,27 @@ export function PeopleDrawer({ row, personId, onClose }: Props) {
     };
   }, [activeRow?.id, activeRow]);
 
-  useEffect(() => {
-    if (!activeRow) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [activeRow, onClose]);
-
   if (!activeRow) return null;
 
-  const d = detail;
-
-  return (
-    <div className="fixed inset-0 z-40">
-      <button
-        type="button"
-        aria-label="Close drawer"
-        className="absolute inset-0 h-full w-full cursor-default bg-black/30"
-        onClick={onClose}
+  // While the person detail is still in flight or failed, surface the state
+  // through the inspector's built-in placeholder so the panel never renders
+  // blank (design rule 31).
+  if (error) {
+    return (
+      <EntityInspector
+        inspection={null}
+        onClose={onClose}
+        state="error"
+        errorMessage={error}
       />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Person detail: ${d?.name ?? activeRow.name ?? activeRow.id}`}
-        className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto border-l border-border bg-bg-base shadow-xl"
-      >
-        {/* header */}
-        <div className="surface-card sticky top-0 z-10 flex items-center justify-between bg-bg-base px-4 py-3">
-          <div className="min-w-0">
-            <div className="truncate text-base font-semibold text-text-primary">
-              {d?.name ?? activeRow.name}
-            </div>
-            <div className="truncate text-xs text-text-muted">
-              {d?.email ?? activeRow.email}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="surface-card p-1.5 text-text-secondary hover:bg-[var(--surface-raised)]"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    );
+  }
+  if (state === "loading" || state === "idle" || !detail) {
+    return (
+      <EntityInspector inspection={null} onClose={onClose} state="loading" />
+    );
+  }
 
-        <div className="space-y-4 p-4">
-          {state === "loading" && (
-            <div className="space-y-2">
-              <div className="size-3.52 animate-pulse rounded bg-[var(--surface-raised)]" />
-              <div className="h-24 animate-pulse rounded bg-[var(--surface-raised)]" />
-            </div>
-          )}
-          {state === "error" && (
-            <div className="surface-card bg-action-danger/10 p-3 text-sm text-action-danger">
-              {error}
-            </div>
-          )}
-
-          {state === "ready" && d && (
-            <>
-              {/* PROFILE */}
-              <Section title="Profile">
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                  <Field k="Role" v={d.role} />
-                  <Field k="State" v={d.state} />
-                  <Field k="Phone" v={d.phone ?? "—"} />
-                  <Field
-                    k="Pw changed"
-                    v={
-                      d.last_password_change
-                        ? new Date(d.last_password_change).toLocaleDateString()
-                        : "—"
-                    }
-                  />
-                  <Field k="Created" v={new Date(d.created_at).toLocaleDateString()} />
-                </dl>
-              </Section>
-
-              {/* ROLES */}
-              <Section title={`Roles (${d.roles.length})`}>
-                <ul className="space-y-1">
-                  {d.roles.map((r) => (
-                    <li
-                      key={r.role}
-                      className="surface-card flex items-center justify-between px-2 py-1 text-sm"
-                    >
-                      <span className="text-text-primary">{r.role}</span>
-                      <span className="text-xs text-text-muted">
-                        {new Date(r.granted_at).toLocaleDateString()}
-                      </span>
-                    </li>
-                  ))}
-                  {d.roles.length === 0 && (
-                    <li className="text-sm text-text-muted">No roles recorded.</li>
-                  )}
-                </ul>
-              </Section>
-
-              {/* SESSIONS */}
-              <Section title={`Sessions (${d.sessionsCount})`}>
-                {d.sessions.length === 0 ? (
-                  <p className="text-sm text-text-muted">No sessions.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {d.sessions.map((s) => (
-                      <li
-                        key={s.id}
-                        className={cn(
-                          "rounded border px-2 py-1 text-xs",
-                          s.revoked_at
-                            ? "border-border text-text-muted"
-                            : "border-[var(--action-ok)]/40 text-text-primary",
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>{s.revoked_at ? "Revoked" : "Active"}</span>
-                          <span className="font-mono">{s.ip_address ?? "—"}</span>
-                        </div>
-                        <div className="truncate text-text-muted">
-                          {s.user_agent ?? "unknown agent"}
-                        </div>
-                        <div className="text-text-muted">
-                          seen{" "}
-                          {s.last_seen_at
-                            ? new Date(s.last_seen_at).toLocaleString()
-                            : "—"}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Section>
-
-              {/* AUDIT */}
-              <Section title="Recent audit">
-                {d.audit.length === 0 ? (
-                  <p className="text-sm text-text-muted">No audit entries.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {d.audit.map((a, i) => (
-                      <li key={i} className="text-xs">
-                        <span className="font-medium text-text-primary">
-                          {a.action}
-                        </span>{" "}
-                        <span className="text-text-muted">
-                          · {new Date(a.timestamp).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Section>
-
-              {/* LINKS */}
-              <Section title="Links">
-                <ul className="flex flex-wrap gap-2">
-                  <DrawerLink href={d.links.users}>User record</DrawerLink>
-                  <DrawerLink href={d.links.userRoles}>Roles</DrawerLink>
-                  <DrawerLink href={d.links.roleRequests}>Role requests</DrawerLink>
-                  <DrawerLink href={d.links.auditLogs}>Audit logs</DrawerLink>
-                </ul>
-              </Section>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Local helpers ────────────────────────────────────────────
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
-
-function Field({ k, v }: { k: string; v: string }) {
-  return (
-    <div>
-      <dt className="text-xs text-text-muted">{k}</dt>
-      <dd className="text-text-primary">{v}</dd>
-    </div>
-  );
-}
-
-function DrawerLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="surface-card px-2.5 py-0.5 text-xs text-text-secondary hover:text-action-primary"
-    >
-      {children}
-    </a>
-  );
+  const model = personInspectionModel(activeRow, detail);
+  return <EntityInspector inspection={model} onClose={onClose} />;
 }

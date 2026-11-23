@@ -18,6 +18,7 @@ import {
   Clock,
   WifiOff,
   RotateCw,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
@@ -26,6 +27,8 @@ import { QuickActions } from "@/components/admin/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { LiveEventsPanel } from "@/components/shared/LiveEventsPanel";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
+import { EntityInspector, KVPairs, InspectorButton, Timeline } from "@/components/shared/EntityInspector";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
@@ -81,6 +84,7 @@ function AdminOverviewInner() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [activeAuditEvent, setActiveAuditEvent] = useState<AuditEvent | null>(null);
 
   // RC7/AX3 — announce data changes to screen readers without moving focus.
   const liveRef = useRef<HTMLParagraphElement | null>(null);
@@ -148,14 +152,84 @@ function AdminOverviewInner() {
     (alerts.critical ?? 0) + (alerts.high ?? 0) + (alerts.medium ?? 0) + (alerts.low ?? 0);
   const hasCritical = (alerts.critical ?? 0) > 0;
 
-  const statCards = data
+  const statCards: Array<{
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    value: string | number;
+    hint: string;
+    href: string;
+  }> = data
     ? [
-        { icon: Users, label: "Active Users", value: data.identity?.active ?? 0, href: "/admin/users" },
-        { icon: Shield, label: "Gates Online", value: `${activeGates}/${totalGates}`, href: "/admin/gates" },
-        { icon: Ticket, label: "Pending Approvals", value: data.counts?.access ?? 0, href: "/admin/passes" },
-        { icon: Zap, label: "Suspended Users", value: data.identity?.suspended ?? 0, href: "/admin/users" },
+        { icon: Users, label: "Active Users", value: data.identity?.active ?? 0, hint: `${data.identity?.suspended ?? 0} suspended`, href: "/admin/users" },
+        { icon: Shield, label: "Gates Online", value: `${activeGates}/${totalGates}`, hint: totalGates - activeGates > 0 ? `${totalGates - activeGates} offline` : "All online", href: "/admin/gates" },
+        { icon: Ticket, label: "Pending Approvals", value: data.counts?.access ?? 0, hint: (data.counts?.access ?? 0) > 0 ? "Action required" : "Inbox clear", href: "/admin/passes" },
+        { icon: Zap, label: "Suspended Users", value: data.identity?.suspended ?? 0, hint: `${data.identity?.deprovisioned ?? 0} deprovisioned`, href: "/admin/users" },
       ]
     : [];
+
+  /** Standardized inspection model for a recent campus audit event (kind audit_event). */
+  const auditEventInspection = activeAuditEvent
+    ? {
+        kind: "audit_event",
+        title: activeAuditEvent.action,
+        subtitle: activeAuditEvent.id,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+            RECORDED
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Action", value: <code className="font-mono">{activeAuditEvent.action}</code> },
+                  { label: "Actor", value: activeAuditEvent.userName ?? "—" },
+                  { label: "Role", value: activeAuditEvent.userRole ?? "—" },
+                  {
+                    label: "Recorded",
+                    value: activeAuditEvent.timestamp
+                      ? new Date(activeAuditEvent.timestamp).toLocaleString("en-IN")
+                      : "—",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Timeline",
+            collapsible: true,
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: activeAuditEvent.action,
+                    time: activeAuditEvent.timestamp
+                      ? new Date(activeAuditEvent.timestamp).toLocaleString("en-IN")
+                      : undefined,
+                    detail: activeAuditEvent.userName || activeAuditEvent.userRole || undefined,
+                    tone: "neutral",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/admin/audit-logs" variant="primary">
+                  <ChevronRight className="size-3.5" /> Full audit trail
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: "/admin/audit-logs",
+        detailLabel: "Full audit trail",
+      }
+    : null;
 
   // Skeleton grid matching the final 4-card layout (RC4/SD4 — no layout shift on load).
   const skeleton = (
@@ -253,23 +327,27 @@ function AdminOverviewInner() {
               {statCards.map((card) => {
                 const Icon = card.icon;
                 return (
-                  <Link
+                  <HoverPreview
                     key={card.label}
-                    href={card.href}
-                    aria-describedby={descId(card.label)}
-                    className="surface-card group bg-bg-surface p-2.5 hover:bg-emerald-500/5 transition-all"
+                    preview={<MetricPreview label={card.label} value={fmt(card.value)} hint={card.hint} />}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="p-2 bg-emerald-500/10 text-action-success">
-                        <Icon className="w-4 h-4" />
+                    <Link
+                      href={card.href}
+                      aria-describedby={descId(card.label)}
+                      className="surface-card group bg-bg-surface p-2.5 hover:bg-emerald-500/5 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="p-2 bg-emerald-500/10 text-action-success">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-action-success group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="mt-3 text-2xl font-black text-text-primary">{fmt(card.value)}</p>
-                    <p id={descId(card.label)} className="text-xs text-text-muted mt-0.5">
-                      {card.label}
-                    </p>
-                  </Link>
+                      <p className="mt-3 text-2xl font-black text-text-primary">{fmt(card.value)}</p>
+                      <p id={descId(card.label)} className="text-xs text-text-muted mt-0.5">
+                        {card.label}
+                      </p>
+                    </Link>
+                  </HoverPreview>
                 );
               })}
             </div>
@@ -283,7 +361,11 @@ function AdminOverviewInner() {
                 </h3>
                 <div className="surface-card bg-bg-surface divide-y divide-border">
                   {data.recentAuditEvents.map((e) => (
-                    <div key={e.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                    <div
+                      key={e.id}
+                      onClick={() => setActiveAuditEvent(e)}
+                      className="px-4 py-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-bg-elevated/30 transition"
+                    >
                       <div className="min-w-4">
                         <code className="text-xs bg-bg-elevated px-1.5 py-1.5 text-action-success">
                           {e.action}
@@ -376,6 +458,8 @@ function AdminOverviewInner() {
       <WidgetBoundary name="LiveEvents" title="Live Events">
         <LiveEventsPanel />
       </WidgetBoundary>
+
+      <EntityInspector inspection={auditEventInspection} onClose={() => setActiveAuditEvent(null)} />
 
       {/* RC2/UE2 — retention widgets demoted to a secondary rail, below the operational modules. */}
       <section aria-label="Secondary campus widgets">
