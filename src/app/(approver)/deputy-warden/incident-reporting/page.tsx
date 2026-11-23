@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   Inbox
 } from "lucide-react";
+import { incidentInspection, type IncidentRow } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -41,6 +42,18 @@ function DeputyWardenIncidentsInner() {
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const inspectIncident = useCallback(
+    (a: AlertItem) => {
+      inspect(incidentInspection({
+        id: a.id,
+        title: a.title,
+        severity: a.severity,
+        status: a.status,
+        created_at: a.created_at ?? null,
+      } satisfies IncidentRow));
+    },
+    [inspect]
+  );
 
   const {
     data,

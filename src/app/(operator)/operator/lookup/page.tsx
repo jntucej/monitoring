@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { VoiceAssistantModal } from "@/components/operator/VoiceAssistantModal";
 import type { VoiceCommand } from "@/lib/voice";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 interface LookupPerson {
   id: string;
@@ -88,6 +90,8 @@ function OperatorLookupInner() {
   // O12: voice-assisted lookup — prefill the id field on high-confidence
   // recognition so the operator confirms before searching.
   const [_voiceOpen, setVoiceOpen] = useState(false);
+  // L1 FrontlinePivot: open the duty-scoped subject sheet from a lookup result.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
   const handleVoiceCommand = useCallback((cmd: VoiceCommand) => {
     if (cmd.roll_number) {
       setIdNumber(cmd.roll_number);
@@ -260,6 +264,22 @@ function OperatorLookupInner() {
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   <p className="text-sm font-bold text-text-primary">{result.name}</p>
                   <StatusBadge status={result.status} />
+                  {/* L1: open the frontline subject sheet from the lookup result */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFrontlineSubject({
+                        id: result.id,
+                        name: result.name,
+                        code: result.uniqueId,
+                        statusTag: result.status,
+                        locationOrScope: result.department ?? undefined,
+                      })
+                    }
+                    className="surface-card ml-auto min-h11 px-3 py-1 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                  >
+                    Verify
+                  </button>
                 </div>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mt-3 text-xs min-w-0">
                   <div><dt className="text-text-muted">Type</dt><dd className="text-text-primary font-medium capitalize">{result.personType}</dd></div>
@@ -327,6 +347,11 @@ function OperatorLookupInner() {
         </>
       )}
 
+      {/* L1 FrontlinePivot: duty-scoped subject sheet */}
+      <FrontlineSubjectSheet
+        subject={frontlineSubject}
+        onClose={() => setFrontlineSubject(null)}
+      />
     </div>
   );
 }

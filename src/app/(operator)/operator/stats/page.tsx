@@ -7,6 +7,8 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { shiftInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import {
   Loader2,
   ListOrdered,
@@ -36,6 +38,7 @@ interface StatsResponse {
 
 function OperatorStatsInner() {
   const user = useAuthStore((s) => s.user);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
 
   const {
     data,
@@ -100,14 +103,35 @@ function OperatorStatsInner() {
         </div>
       )}
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
+      {/* Summary cards — the KPI tiles are the shift's movement record: tap
+          to inspect the shift (counts, split, top movers) before drilling
+          into the full transaction log. */}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0 cursor-pointer rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+        onClick={() =>
+          inspect(
+            shiftInspection(
+              {
+                startedAt: null,
+                endsAt: null,
+                unresolvedIncidents: counts?.total ?? 0,
+              },
+              role,
+            ),
+          )
+        }
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.click();
+        }}
+      >
         {[
           { label: "Total Scans", value: counts?.total ?? 0, tone: "text-text-primary", icon: ListOrdered },
           { label: "Entries", value: counts?.entries ?? 0, tone: "text-action-success", icon: ArrowDownLeft },
           { label: "Exits", value: counts?.exits ?? 0, tone: "text-action-danger", icon: ArrowUpRight },
         ].map((s) => (
-          <div key={s.label} className="surface-card bg-bg-elevated p-4 min-w-0">
+          <div key={s.label} className="surface-card bg-bg-elevated p-4 min-w-0 hover:bg-bg-surface/60 transition-colors">
             <div className="flex items-center gap-2 mb-2">
               <s.icon className={`w-4 h-4 ${s.tone} shrink-0`} />
               <p className="text-xs font-bold uppercase tracking-wider text-text-muted">{s.label}</p>
@@ -190,6 +214,7 @@ function OperatorStatsInner() {
         <RecentScansShiftSummary />
       </Suspense>
 
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -44,3 +44,57 @@ Caretakers operate primarily through the complaints and maintenance workflow eng
 - **Device Binding (M4)**: Validates incoming requests against the `device_id` cookie matching the JWT `dh` claim.
 - **Hostel Block Scoping**: Caretakers are restricted via `withAuthorization` and row-level database filters to complaints and assets located within their assigned hostel blocks (`users.hostel_scope`). Attempts to access other blocks return 403 or empty sets.
 - **Audit Logging**: Every status transition, note addition, and attachment change writes an entry to `complaint_timeline` with user attribution.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH CEJ's hostel staff page: caretakers support the Hostel Manager and Deputy Wardens: "The Hostel Manager and Deputy Wardens are appointed from the teaching faculty as in-charge, who in turn are supported by the respective hostel Care Takers."
+
+The Caretaker handles day-to-day facilities maintenance, student grievance resolution, housekeeping tracking, and physical asset upkeep within assigned hostel blocks.
+
+### Missing (not in app yet)
+1. **Ticket SLA tracking** — no SLA timers for maintenance ticket resolution
+2. **Housekeeping score** — no structured housekeeping score per block
+3. **Asset damage reporting** — no structured reporting of asset damage with photos
+4. **Caretaker task scheduling** — no way to schedule recurring maintenance tasks
+5. **Student satisfaction** — no periodic student satisfaction survey for housing
+6. **Maintenance cost tracking** — no tracking of maintenance costs per block
+7. **Emergency maintenance** — no fast-track workflow for emergency maintenance issues
+8. **Caretaker shift management** — no shift scheduling for block caretakers
+
+### Implementation notes
+- Dashboard leads with block maintenance status, ticket queue
+- Caretaker agent is scoped to a single block
+- Tickets: structured workflow with priority, SLA, resolution status
+- Grievances: logged with type, severity, resolution status
+- Housekeeping: weekly compliance score per block
+
+### Agent persona
+- Focus: block maintenance, ticket resolution, student grievances
+- Scoped to: a single hostel block
+- Can: create/resolve tickets, log grievances, track housekeeping
+- Cannot: escalate to DEBARRED (Principal-only), approve cross-block changes
+- Escalation: to Deputy Warden for major issues; to Hostel Manager for cross-block decisions
+
+
+
+## Cross-Role Dependencies
+
+### Caretaker should see (read-only)
+- **deputy_warden**: block incidents, maintenance priorities → What to fix
+- **hostel_manager**: room allot/vacate, block occupancy → Who's in the block
+- **emo**: infrastructure complaints, vendor status → What's being fixed
+
+### Caretaker should NOT see
+- **sysadmin**: infra, MFA, RLS → not caretaker's concern
+- **admin**: user governance, audit → not caretaker's concern
+
+### Caretaker escalates to
+- **deputy_warden**: major maintenance issues, student grievances
+- **emo**: infrastructure failures, vendor issues
+
+### Caretaker borrows from
+- **deputy_warden**: incident log (dw logs, caretaker fixes)
+- **emo**: maintenance ticket assignment (emo assigns, caretaker completes)
+

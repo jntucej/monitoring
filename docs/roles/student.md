@@ -63,3 +63,64 @@ Upon navigating to `/student`, the dashboard performs parallel GET requests to `
 
 ## Security notes
 Students are strictly isolated under row-level security (Postgres RLS) to access only their own records (`auth.uid() = user_id`). A student cannot approve passes, override attendance, clear gate violations, or inspect other students' profiles or passes. Pass issuance employs fail-close validation: if `student_details.academic_status` is `DEBARRED` or `SUSPENDED`, or if monthly outpass quotas (4/month for hostellers) are exceeded, pass generation is blocked at the API layer. Day scholars are prevented from requesting hosteller-restricted overnight passes without explicit caretaker pre-clearance.
+
+
+## Gaps & Research
+
+### Institutional context
+The student is the primary user of the system. Per JNTUH CEJ, the student's gate-pass experience is the core of the system: request → approval chain → QR pass → gate scan → check-in/check-out.
+
+The student's experience is the most context-aware in the app:
+- Day scholars see: Day Out, Early Leave, Late Arrival, academic milestones
+- Hostel residents see: Curfew countdown, ActivePassCard, Expected Return, Overstay alerts
+
+### Missing (not in app yet)
+1. **Attendance alerts** — no proactive alert when attendance drops below 75% threshold
+2. **Fee payment integration** — no direct payment link for fee dues
+3. **Mess menu personalization** — no way to customize menu preferences
+4. **Academic planning** — no structured academic planning (electives, projects, internships)
+5. **Library digital resources** — no integration with digital library
+6. **Exam preparation** — no structured exam preparation resources
+7. **Hostel visit booking** — no structured booking for parent visits to hostel
+8. **Student feedback** — no structured feedback on campus facilities and services
+
+### Implementation notes
+- Dashboard is persona-aware: day scholar vs hosteller
+- Day scholar: Day Out, Early Leave, Late Arrival, academic milestones
+- Hosteller: Curfew countdown, ActivePassCard, Expected Return, Overstay
+- Pass request: structured form with persona rules and approval chain
+- Attendance: real-time view with 75% threshold alerts
+
+### Agent persona
+- Focus: gate passes, attendance, mess, complaints, fees, marks
+- Persona: day scholar or hosteller (drives the entire UI)
+- Can: request passes, view attendance, submit complaints, view fees/marks
+- Cannot: approve their own passes (needs HOD/Hostel Manager/Parent)
+- Escalation: to HOD for academic; to Hostel Manager for hostel; to Principal for disputes
+
+
+
+## Cross-Role Dependencies
+
+### Student should see (read-only)
+- **faculty**: marks, assignments, study material → Academic progress
+- **mess_incharge**: menu, token balance → What's being served
+- **deputy_warden**: curfew status, expected return → Hostel compliance
+- **parent**: gate pass acknowledgements → Parent knows child's status
+- **guardian**: leave requests → Guardian tracks child's leave
+
+### Student should NOT see
+- **sysadmin**: infra, MFA, RLS → not student's concern
+- **admin**: user governance, audit → not student's concern
+
+### Student escalates to
+- **faculty**: academic issues, marks disputes
+- **deputy_warden**: hostel issues, curfew disputes
+- **mess_incharge**: mess complaints, menu issues
+- **admin**: general complaints, fee disputes
+
+### Student borrows from
+- **faculty**: class schedule, marks, assignments (read-only)
+- **mess_incharge**: menu, token balance (read-only)
+- **deputy_warden**: curfew status, overstay alerts (read-only)
+

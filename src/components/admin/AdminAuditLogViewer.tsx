@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, History, Download, RefreshCw } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 import { generateCSV } from "@/lib/export";
+import { EntityInspector, KVPairs, InspectorButton, Timeline } from "@/components/shared/EntityInspector";
 
 type Scope = "campus" | "all";
 
@@ -15,6 +16,49 @@ interface AuditItem {
   userRole: string | null;
   details: Record<string, unknown>;
   timestamp: string;
+}
+
+interface AuditTimelineEntry {
+  label: string;
+  time?: string;
+  detail?: string;
+  tone?: "ok" | "warn" | "danger" | "neutral";
+}
+
+/**
+ * Build the timeline for an audit event: the event itself plus any
+ * structured entries embedded in `details` (e.g. before/after payloads,
+ * related ticket / case ids). No relationships are invented — every entry
+ * comes straight from the /api/admin/audit-logs response.
+ */
+function auditEventTimeline(item: AuditItem): AuditTimelineEntry[] {
+  const entries: AuditTimelineEntry[] = [
+    {
+      label: item.action,
+      time: item.timestamp ? new Date(item.timestamp).toLocaleString("en-IN") : undefined,
+      detail: [item.userName ?? item.userId, item.userRole].filter(Boolean).join(" · ") || undefined,
+      tone: "neutral",
+    },
+  ];
+
+  const d = item.details;
+  if (d && typeof d === "object") {
+    // Surface any "before" / "after" style payloads as a second entry so the
+    // timeline shows the state transition without a separate detail fetch.
+    const before = (d as Record<string, unknown>).before;
+    const after = (d as Record<string, unknown>).after;
+    if (before !== undefined || after !== undefined) {
+      entries.push({
+        label: "State transition",
+        detail: [before !== undefined ? `before: ${JSON.stringify(before)}` : null, after !== undefined ? `after: ${JSON.stringify(after)}` : null]
+          .filter(Boolean)
+          .join(" · ") || undefined,
+        tone: "warn",
+      });
+    }
+  }
+
+  return entries;
 }
 
 const PAGE_SIZE = 25;
@@ -40,6 +84,7 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [active, setActive] = useState<AuditItem | null>(null);
 
   // Generation counter guards against a stale in-flight response (fast
   // page/scope/refresh changes) clobbering newer state.
@@ -252,7 +297,11 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
               </thead>
               <tbody className="divide-y divide-border">
                 {items.map((l) => (
-                  <tr key={l.id || l.timestamp} className="hover:bg-bg-elevated">
+                  <tr
+                    key={l.id || l.timestamp}
+                    onClick={() => setActive(l)}
+                    className="hover:bg-bg-elevated cursor-pointer"
+                  >
                     <td className="py-2.5 px-4 text-xs text-text-muted whitespace-nowrap">
                       {l.timestamp ? new Date(l.timestamp).toLocaleString("en-IN") : "—"}
                     </td>
@@ -294,6 +343,74 @@ export function AdminAuditLogViewer({ canViewAll }: { canViewAll?: boolean }) {
           </div>
         </div>
       </div>
+
+      <EntityInspector
+        inspection={
+          active
+            ? {
+                kind: "audit_event",
+                title: active.action,
+                subtitle: active.id ?? active.timestamp,
+                status: (
+                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+                    RECORDED
+                  </span>
+                ),
+                sections: [
+                  {
+                    title: "Overview",
+                    content: (
+                      <KVPairs
+                        items={[
+                          { label: "Action", value: <code className="font-mono">{active.action}</code> },
+                          { label: "Actor", value: active.userName || active.userId || "—" },
+                          { label: "Role", value: active.userRole ?? "—" },
+                          {
+                            label: "Recorded",
+                            value: active.timestamp
+                              ? new Date(active.timestamp).toLocaleString("en-IN")
+                              : "—",
+                          },
+                        ]}
+                      />
+                    ),
+                  },
+                  {
+                    title: "Details",
+                    collapsible: true,
+                    content: (
+                      <pre className="text-xs font-mono whitespace-pre-wrap break-all max-h-60 overflow-auto surface-card bg-bg-elevated p-3">
+                        {JSON.stringify(active.details ?? {}, null, 2)}
+                      </pre>
+                    ),
+                  },
+                  {
+                    title: "Timeline",
+                    collapsible: true,
+                    content: (
+                      <Timeline
+                        items={auditEventTimeline(active)}
+                      />
+                    ),
+                  },
+                  {
+                    title: "Actions",
+                    content: (
+                      <div className="flex flex-wrap gap-2">
+                        <InspectorButton href="/admin/audit-logs" variant="primary">
+                          <ChevronRight className="size-3.5" /> All audit events
+                        </InspectorButton>
+                      </div>
+                    ),
+                  },
+                ],
+                detailHref: "/admin/audit-logs",
+                detailLabel: "Full audit trail",
+              }
+            : null
+        }
+        onClose={() => setActive(null)}
+      />
     </div>
   );
 }

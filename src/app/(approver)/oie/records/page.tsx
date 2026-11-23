@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useAuthStore } from "@/stores/authStore";
@@ -13,6 +13,81 @@ import { ArrowRight, Loader2, FileText, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieRecordInspection } from "@/lib/role-registers/oieInspections";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an OIE exam permission record. */
+function buildOiePermissionInspection(r: PermissionRequestRow): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+  const tone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "APPROVED" ? "ok" : slaBreached ? "danger" : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Student", value: r.student?.name ?? "—" },
+            { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Workflow", value: r.workflow_type.replace(/_/g, " ") },
+            { label: "Stage", value: r.current_stage.replace(/_/g, " ") },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/exam/permissions" variant="primary">
+            Open approvals desk
+          </InspectorButton>
+          <InspectorButton href={`/permissions/${r.ticket_number}`} variant="ghost">
+            View ticket
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.student?.name ?? r.ticket_number,
+    subtitle: r.ticket_number,
+    status: <StatusBadge text={r.status} tone={tone} />,
+    sections,
+    detailHref: `/permissions/${r.ticket_number}`,
+    detailLabel: "Full ticket",
+  };
+}
 
 interface PermissionRequestRow {
   id: string;
@@ -156,6 +231,7 @@ function OieRecordsInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data: oieQueue,
@@ -219,7 +295,22 @@ function OieRecordsInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
             </div>
           ) : (
-            <TicketTable rows={oieRows} onInspect={(r) => inspect(buildOieRecordInspection(r))} />
+            <TicketTable
+              rows={oieRows}
+              onInspect={(r) => {
+                inspect(buildOieRecordInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.student?.name,
+                  studentRoll: r.student?.student_details?.roll,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
@@ -229,7 +320,14 @@ function OieRecordsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

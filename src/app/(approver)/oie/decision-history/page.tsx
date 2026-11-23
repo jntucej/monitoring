@@ -21,6 +21,11 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { decisionRecordInspection } from "@/components/approver/wardenConsoleModels";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface HistoryRow {
   id: string;
@@ -177,6 +182,7 @@ function DecisionHistoryInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const [filter, setFilter] = useState<StatusFilter>("ALL");
 
@@ -276,7 +282,22 @@ function DecisionHistoryInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <HistoryTable rows={filteredRows} onInspect={(r) => inspect(buildOieDecisionHistoryInspection(r))} />
+            <HistoryTable
+              rows={filteredRows}
+              onInspect={(r) => {
+                inspect(buildOieDecisionHistoryInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.student?.name,
+                  studentRoll: r.student?.student_details?.roll,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Records show the final disposition of exam permission tickets that passed
@@ -285,7 +306,14 @@ function DecisionHistoryInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

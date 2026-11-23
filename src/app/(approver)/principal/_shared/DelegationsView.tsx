@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDelegationInspection } from "@/lib/principal/registerInspections";
+import {
+  buildDelegationInspection as buildMainDelegationInspection,
+  type DelegationRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
-import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildDelegationInspection } from "@/lib/principal/registerInspections";
 
 interface Delegation {
   id: string;
@@ -32,10 +40,26 @@ export function DelegationsView() {
     ttlMs: 30_000,
   });
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [mainInspection, setMainInspection] = useState<
+    ReturnType<typeof buildMainDelegationInspection> | null
+  >(null);
+  const inspectMain = (d: Delegation) =>
+    setMainInspection(buildMainDelegationInspection(d as DelegationRecord, gate));
+
   const delegations = data?.data?.delegations ?? [];
   const activeCount = delegations.filter((d) => d.status === "ACTIVE" || !d.status).length;
-  const { inspection, inspect, closeInspection } = useEntityInspector();
-  const openInspector = (d: Delegation) => inspect(buildDelegationInspection(d));
+  const {
+    inspection: ourInspection,
+    inspect: ourInspect,
+    closeInspection,
+  } = useEntityInspector();
+  const openInspector = (d: Delegation) => ourInspect(buildDelegationInspection(d));
 
   return (
     <div className="space-y-4">
@@ -43,7 +67,7 @@ export function DelegationsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Delegations Manager</h1>
         <p className="text-xs text-text-muted">
-          Delegated authority rules and institutional scope
+          Delegated authority rules and institutional scope · click any rule to inspect
         </p>
       </header>
 
@@ -69,8 +93,11 @@ export function DelegationsView() {
                 <button
                   type="button"
                   onClick={() => openInspector(d)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") openInspector(d);
+                  }}
                   aria-label={`Inspect delegation: ${d.delegate_role ?? "delegation"}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{d.delegate_role?.replace(/_/g, " ")}</p>
@@ -116,7 +143,8 @@ export function DelegationsView() {
         </>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

@@ -47,3 +47,58 @@ When the guardian lands on `/guardian`, the page invokes `/api/parents/me` to id
 
 ## Security notes
 Guardians are strictly confined by Postgres RLS to view data exclusively for students mapped via `student_details.guardian_id` or `parents_students` linking tables. A guardian cannot view other students' passes, override campus disciplinary flags, or issue gate passes directly bypassing faculty/hostel approvers. Guardian link verification uses fail-close security: if the ward's profile transitions to `INACTIVE` or `SUSPENDED`, or if the guardian link fails reverification (`/api/guardian/links/reverify`), consent actions and pass visibility are immediately restricted.
+
+
+## Gaps & Research
+
+### Institutional context
+The Guardian is specifically the local guardian — the person the student lives with if not in a hostel. The Parent role has broader academic visibility. The Guardian is distinct from the Parent role.
+
+Per JNTUH CEJ gate-pass rules, parent/guardian acknowledgement is a required step in the gate-pass chain for hostel students. Without acknowledgement, the pass is not issued.
+
+### Missing (not in app yet)
+1. **Fee payment integration** — no direct payment link for fee dues
+2. **Academic alerting** — no proactive alert when child's attendance drops below threshold
+3. **Leave approval status** — no real-time view of leave approval status
+4. **Visitor notification** — no notification when a scheduled visitor arrives
+5. **Multiple child support** — no support for guardians of multiple children
+6. **Communication log** — no structured log of communications with the institution
+7. **Emergency contact** — no way to set/update emergency contact for the child
+8. **Hostel visit booking** — no structured booking for hostel visits
+
+### Implementation notes
+- Dashboard leads with child's fee status, academic progress, leave requests
+- Guardian agent is scoped to their child's records
+- Fee: read-only view with payment schedule
+- Leave: structured request with HOD/Principal approval tracking
+- Gate-pass: acknowledgement is a required step for hostel students
+
+### Agent persona
+- Focus: child's fees, academics, leave, gate-pass acknowledgement
+- Scoped to: their child's records
+- Can: view fees/academics, request leave, acknowledge gate passes, schedule visitors
+- Cannot: approve leave (needs HOD/Principal), modify academic records
+- Escalation: to HOD for academic; to Hostel Manager for gate-pass; to Principal for disputes
+
+
+
+## Cross-Role Dependencies
+
+### Guardian should see (read-only)
+- **student**: attendance %, marks, gate passes → Child's status
+- **admin**: fee dues, payment status → Child's financial status
+- **deputy_warden**: curfew status, visitor log → Child's hostel status
+
+### Guardian should NOT see
+- **sysadmin**: infra, MFA, RLS → not guardian's concern
+- **admin**: user governance, audit → not guardian's concern
+
+### Guardian escalates to
+- **faculty**: academic concerns
+- **deputy_warden**: hostel issues
+- **admin**: fee disputes, general complaints
+
+### Guardian borrows from
+- **student**: gate pass acknowledgements (guardian acknowledges for hostel students)
+- **deputy_warden**: curfew status, visitor log (read-only)
+

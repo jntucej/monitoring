@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   Inbox
 } from "lucide-react";
+import { gatePresenceInspection, type GatePresenceRow } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -59,6 +60,13 @@ function DeputyWardenGatemovementInner() {
   const onCampusTotal = gates.reduce(
     (sum, g) => sum + Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0),
     0
+  );
+  const inspectGate = useCallback(
+    (g: GateInfo) => {
+      const onCampus = Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0);
+      inspect(gatePresenceInspection({ id: g.id, name: g.name, code: g.code, audience: g.audience, type: g.type, onCampus } satisfies GatePresenceRow));
+    },
+    [matrix, inspect]
   );
 
   const refreshAll = useCallback(async () => {

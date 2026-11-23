@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Users, ShieldCheck, HardHat, UtensilsCrossed, Car, Phone, MapPin, Search, X } from "lucide-react";
+import { Users, ShieldCheck, HardHat, UtensilsCrossed, Car, Phone, MapPin, Search } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { ListSkeleton } from "./ListSkeleton";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { assetInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
 interface Worker {
   id: string;
@@ -51,7 +53,7 @@ export function WorkersView() {
   const [category, setCategory] = useState("all");
   const [selectedGate, setSelectedGate] = useState("all");
   const [search, setSearch] = useState("");
-  const [activeWorker, setActiveWorker] = useState<Worker | null>(null);
+  const { inspection, inspect, closeInspection } = useRoleInspectorHost();
 
   const url = useMemo(() => {
     const params = new URLSearchParams();
@@ -170,7 +172,17 @@ export function WorkersView() {
               return (
                 <li
                   key={w.id}
-                  onClick={() => setActiveWorker(w)}
+                  onClick={() =>
+                    inspect(
+                      assetInspection({
+                        id: w.id,
+                        name: w.name,
+                        category: w.designation ?? w.staffCategory,
+                        status: w.status,
+                        location: w.gateName ?? undefined,
+                      }),
+                    )
+                  }
                   className="flex cursor-pointer items-center gap-3 p-3 text-xs transition hover:bg-bg-elevated"
                 >
                   <span className={`size-4 shrink-0 rounded-full ${statusColor}`} />
@@ -204,56 +216,7 @@ export function WorkersView() {
         </div>
       )}
 
-      {/* Worker detail popup / side drawer */}
-      {activeWorker && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setActiveWorker(null)}
-            aria-hidden="true"
-          />
-          <div className="surface-card relative z-10 w-full max-w-md bg-bg-surface p-6">
-            <div className="surface-card mb-4 flex items-center justify-between pb-3">
-              <div>
-                <h3 className="text-base font-bold text-text-primary">{activeWorker.name}</h3>
-                <p className="text-xs text-text-muted">{activeWorker.designation ?? activeWorker.staffCategory}</p>
-              </div>
-              <button
-                onClick={() => setActiveWorker(null)}
-                aria-label="Close"
-                className="flex size-4 min-h11 min-w11 items-center justify-center rounded-lg text-text-muted hover:bg-bg-elevated"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="space-y-3 text-xs">
-              <div>
-                <p className="text-xs uppercase text-text-muted">Staff Category</p>
-                <p className="font-medium text-text-primary">{activeWorker.staffCategory}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-text-muted">Assigned Gate</p>
-                <p className="font-medium text-text-primary">{activeWorker.gateName ?? "Unassigned"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase text-text-muted">Status</p>
-                <p className="font-medium text-text-primary">{activeWorker.status}</p>
-              </div>
-              {activeWorker.phoneTail && (
-                <div className="pt-3">
-                  <a
-                    href={`tel:***${activeWorker.phoneTail}`}
-                    className="surface-card flex min-h11 items-center justify-center gap-2 bg-action-primary py-2.5 font-medium text-white transition hover:bg-action-primary/90"
-                  >
-                    <Phone className="size-4" />
-                    Call Worker (***{activeWorker.phoneTail})
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

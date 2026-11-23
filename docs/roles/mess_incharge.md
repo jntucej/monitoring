@@ -54,3 +54,55 @@ The mess incharge balances operational dining logistics (verifying student meal 
 - **Device Binding (M4)**: Enforces `device_id` cookie verification matching the token's `dh` SHA-256 hash.
 - **Role Scoping**: Enforced via `withAuthorization` with `ROLES.MESS_INCHARGE` (and admin/sysadmin). Meal attendance modification, token revocation, and inventory reconciliation endpoints require valid mess incharge credentials.
 - **Double-Redemption Prevention**: Meal token redemptions use database atomic transactions to prevent duplicate scans across parallel counters.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH CEJ's hostel staff page: the Hostel Manager is "entrusted with the twin responsibilities of allotment of rooms in hostels as well as looking after the day-to-day mess facilities to the boarders." The Mess In-charge is the dedicated role for mess operations.
+
+Per TMU Mess Policy: "Provide hygienic, wholesome, nutritious and balanced meals at reasonable and approved rates. Maintain standards for food quality, preparation, storage, serving, sanitation and waste management. Ensure transparent management of mess operations, fees, procurement, vendor performance and user feedback."
+
+### Missing (not in app yet)
+1. **Menu publication calendar** — no visual calendar showing upcoming menus
+2. **Token balance alerts** — no alert when a resident's token balance is low
+3. **Inventory low-stock alerts** — no proactive alert when inventory is below threshold
+4. **Vendor performance dashboard** — no structured vendor KPI tracking
+5. **Food safety audit** — no structured FSSAI compliance audit checklist
+6. **Waste tracking** — no tracking of food waste vs consumption
+7. **Resident feedback** — no structured resident feedback on food quality
+8. **Cost per plate tracking** — no tracking of cost per meal served
+
+### Implementation notes
+- Dashboard leads with menu, token status, consumption vs inventory
+- Mess In-charge agent is scoped to mess operations
+- Menu: structured finalization with publication date and Mess Committee sign-off
+- Tokens: per resident, per meal, per day; usage tracked in real time
+- Inventory: weekly reconciliation with low-stock alerts
+
+### Agent persona
+- Focus: menu, tokens, inventory, vendors, bills, rebates
+- Can: finalize menu, issue tokens, verify bills, track vendor compliance
+- Cannot: approve bill payment (needs Hostel Manager/Principal), self-approve menu changes
+- Escalation: to Hostel Manager for mess disputes; to Principal for food safety
+
+
+
+## Cross-Role Dependencies
+
+### Mess In-charge should see (read-only)
+- **hostel_manager**: hostel occupancy, mess menu oversight → Who's eating
+- **student**: token balance, mess complaints → What residents need
+- **admin**: mess bill status, vendor contracts → Financial status
+
+### Mess In-charge should NOT see
+- **sysadmin**: infra, MFA, RLS → not MI's concern
+
+### Mess In-charge escalates to
+- **hostel_manager**: menu disputes, mess rule violations
+- **principal**: food safety incidents, vendor contract changes
+
+### Mess In-charge borrows from
+- **hostel_manager**: occupancy data (hm tracks, mi plans menu)
+- **student**: token usage (student consumes, mi issues)
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
@@ -20,6 +20,102 @@ import {
   Inbox,
   FileWarning,
 } from "lucide-react";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    PENDING: "border-amber-400/30 bg-amber-400/10 text-action-warning",
+    REJECTED: "border-rose-400/30 bg-rose-400/10 text-action-danger",
+    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-unit-c",
+    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
+  };
+  const cls = styles[status] ?? "border-border/30 bg-bg-elevated/10 text-text-muted";
+  return (
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${cls}`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function StatusBadgeTone({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an exam access-exception record. */
+function buildAccessExceptionInspection(r: AccessExceptionRow): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+  const statusTone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "APPROVED" ? "ok"
+    : r.status === "REJECTED" ? "danger"
+    : slaBreached ? "danger"
+    : r.status === "ESCALATED" ? "warn"
+    : "neutral";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Candidate", value: r.candidate_name ?? "—" },
+            { label: "Roll", value: r.roll ?? r.candidate_unique_id ?? "—" },
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Stage", value: r.current_stage?.replace(/_/g, " ") ?? "—" },
+            { label: "Created", value: r.created_at ? new Date(r.created_at).toLocaleString() : "—" },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/oie/access-exceptions" variant="ghost">
+            All exceptions
+          </InspectorButton>
+          <InspectorButton href={`/permissions/${r.ticket_number}`} variant="primary">
+            View ticket
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.candidate_name ?? r.ticket_number,
+    subtitle: r.ticket_number,
+    status: <StatusBadgeTone text={r.status} tone={statusTone} />,
+    sections,
+    detailHref: `/permissions/${r.ticket_number}`,
+    detailLabel: "Full ticket",
+  };
+}
 
 interface AccessExceptionRow {
   id: string;
@@ -67,23 +163,6 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
         Retry
       </button>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    PENDING: "border-amber-400/30 bg-amber-400/10 text-action-warning",
-    REJECTED: "border-rose-400/30 bg-rose-400/10 text-action-danger",
-    ESCALATED: "border-purple-400/30 bg-purple-400/10 text-unit-c",
-    APPROVED: "border-emerald-400/30 bg-emerald-400/10 text-action-success",
-  };
-  const cls = styles[status] ?? "border-border/30 bg-bg-elevated/10 text-text-muted";
-  return (
-    <span
-      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${cls}`}
-    >
-      {status}
-    </span>
   );
 }
 
@@ -172,6 +251,7 @@ function AccessExceptionsInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data,
@@ -272,7 +352,22 @@ function AccessExceptionsInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <ExceptionTable rows={rows} onInspect={(r) => inspect(buildOieAccessExceptionInspection(r))} />
+            <ExceptionTable
+              rows={rows}
+              onInspect={(r) => {
+                inspect(buildOieAccessExceptionInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.candidate_name ?? undefined,
+                  studentRoll: r.roll ?? undefined,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Exceptions are surfaced for OIE review only. Resolution is handled by the
@@ -281,7 +376,14 @@ function AccessExceptionsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { X, AlertTriangle, Lock, FileSearch } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface InspectionSection {
@@ -37,12 +37,55 @@ export interface EntityInspection {
   detailLabel?: string;
 }
 
+/**
+ * The lifecycle state of the inspector when it is open but the
+ * `EntityInspection` model has not (yet) resolved. The page or the
+ * `useEntityResolver` hook drives this; `EntityInspector` renders the
+ * matching placeholder.
+ *
+ * Design rule 31: the inspector must always show a meaningful state —
+ * never a blank panel.
+ */
+export type InspectorState =
+  | "loading"      // skeleton shimmer
+  | "empty"        // "No related records"
+  | "error"        // retry button
+  | "unauthorized" // "You do not have permission"
+  | "missing";     // record not found
+
 export interface EntityInspectorProps {
   /** The open inspection (null = closed). */
   inspection: EntityInspection | null;
   onClose: () => void;
+  /**
+   * Optional: when `inspection` is null and the inspector is still open
+   * (e.g. a resolver is in flight), show the matching placeholder state.
+   * Default: "loading".
+   */
+  state?: InspectorState;
+  /** Error message shown in the "error" state. */
+  errorMessage?: string;
+  /** Called when the user clicks "Retry" in the error state. */
+  onRetry?: () => void;
   /** Optional: renders a slot behind the panel content (e.g. a backdrop). */
   className?: string;
+  /**
+   * Optional: coarse capability gate for the "Actions" section. When
+   * `canAct === false`, every `<InspectorButton>` inside the Actions
+   * section is hidden and replaced with a muted read-only note via the
+   * `ActionGate` helper. Pass through to a wrapping `<ActionGate>` (or
+   * leave unset when the model already wraps its own buttons).
+   *
+   * Navigation-only "Open full detail" / "View full detail" CTAs are
+   * NOT gated: those are links, not writes.
+   */
+  canAct?: boolean;
+  /**
+   * Optional: a custom read-only note rendered in the Actions section in
+   * place of the buttons when `canAct === false`. Defaults to a generic
+   * "Acting on this record requires elevated permissions" copy.
+   */
+  canActFallbackNote?: ReactNode;
 }
 
 /**
@@ -70,19 +113,56 @@ export interface EntityInspectorProps {
  *   - Closes on focus-out of the panel (tabbing away).
  *   - Long sections collapse behind a toggle (a11y: aria-expanded).
  *   - No layout shift: the drawer is position:fixed and overlays.
+ *   - Focus moves into the panel on open and back to the trigger on close.
+ *   - When `inspection` is null the panel shows a state placeholder
+ *     (loading / empty / error / unauthorized / missing) per design rule 31.
  */
 export function EntityInspector({
   inspection,
   onClose,
+  state,
+  errorMessage,
+  onRetry,
   className,
+  canAct,
+  canActFallbackNote,
 }: EntityInspectorProps) {
+  // When the caller passes no explicit `state`, the panel is considered
+  // "closed" when inspection is null → render nothing (a stuck "loading"
+  // overlay covering the whole page is the /principal bug). When the caller
+  // DOES pass an explicit `state` (the documented resolver-in-flight case),
+  // keep the panel open with the placeholder so the user always sees a
+  // meaningful panel (design rule 31).
+  const stateProvided = state !== undefined;
+  const inspectorState = state ?? "loading";
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const prevFocusRef = useRef<HTMLElement | null>(null);
 
   // Reset collapsed state whenever a new inspection opens.
   useEffect(() => {
     setCollapsed({});
   }, [inspection?.kind, inspection?.title]);
+
+  // ── focus management ─────────────────────────────────────────────────────
+  // On open: move focus into the panel (to the close button, the first
+  // focusable element). On close: restore focus to the previously focused
+  // element so the user's keyboard position is not lost.
+  useEffect(() => {
+    if (inspection) {
+      // Save the element that had focus before the inspector opened.
+      prevFocusRef.current = document.activeElement as HTMLElement;
+      // Move focus into the panel.
+      requestAnimationFrame(() => {
+        closeBtnRef.current?.focus();
+      });
+    } else if (prevFocusRef.current) {
+      // Restore focus to the element that was focused before the panel opened.
+      prevFocusRef.current.focus();
+      prevFocusRef.current = null;
+    }
+  }, [inspection]);
 
   // Esc to close.
   useEffect(() => {
@@ -94,7 +174,56 @@ export function EntityInspector({
     return () => window.removeEventListener("keydown", onKey);
   }, [inspection, onClose]);
 
-  if (!inspection) return null;
+  // Closed state: no inspection model and no in-flight resolver state was
+  // explicitly requested. Render nothing — a stuck "loading" overlay covering
+  // the whole page (the old behavior) is what made /principal and friends
+  // look broken. Callers that are genuinely mid-resolve keep the panel open
+  // by passing an explicit `state` prop, in which case the placeholder below
+  // still renders so the user always sees a meaningful panel (rule 31).
+  if (!inspection && inspectorState === "loading" && !stateProvided) {
+    return null;
+  }
+
+  // If there is no inspection model, render the state placeholder.
+  if (!inspection) {
+    return (
+      <div
+        className="fixed inset-0 z-[80] flex justify-end"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Entity inspector"
+      >
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+        <aside
+          className={cn(
+            "surface-card relative w-full max-w-md h-full overflow-y-auto bg-bg-surface p-5 flex flex-col",
+            className,
+          )}
+        >
+          <header className="flex items-center justify-between mb-4">
+            <p className="text-xs text-text-muted">Inspector</p>
+            <button
+              ref={closeBtnRef}
+              onClick={onClose}
+              className="surface-card min-h-9 min-w-9 shrink-0 flex items-center justify-center hover:bg-bg-surface/60 text-text-primary focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none"
+              aria-label="Close inspector"
+            >
+              <X className="size-4" />
+            </button>
+          </header>
+          <InspectorStatePlaceholder
+            state={inspectorState}
+            errorMessage={errorMessage}
+            onRetry={onRetry}
+          />
+        </aside>
+      </div>
+    );
+  }
 
   const { kind, title, subtitle, status, sections, detailHref, detailLabel } = inspection;
 
@@ -129,8 +258,9 @@ export function EntityInspector({
             ) : null}
           </div>
           <button
+            ref={closeBtnRef}
             onClick={onClose}
-            className="surface-card min-h-9 min-w-9 shrink-0 flex items-center justify-center hover:bg-bg-surface/60 text-text-primary"
+            className="surface-card min-h-9 min-w-9 shrink-0 flex items-center justify-center hover:bg-bg-surface/60 text-text-primary focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none"
             aria-label="Close inspector"
           >
             <X className="size-4" />
@@ -141,6 +271,14 @@ export function EntityInspector({
           {sections.map((s, i) => {
             const isCollapsible = s.collapsible === true;
             const isCollapsed = !!collapsed[i];
+            const isActions = s.title === "Actions" && canAct === false;
+            const sectionContent = isActions ? (
+              canActFallbackNote ?? (
+                <p className="text-xs text-text-muted">
+                  Acting on this record requires elevated permissions.
+                </p>
+              )
+            ) : s.content;
             return (
               <section key={i} className="space-y-2">
                 {isCollapsible ? (
@@ -159,7 +297,7 @@ export function EntityInspector({
                     {s.title}
                   </h3>
                 )}
-                {!isCollapsed && <div className="surface-card bg-bg-surface p-3">{s.content}</div>}
+                {!isCollapsed && <div className="surface-card bg-bg-surface p-3">{sectionContent}</div>}
               </section>
             );
           })}
@@ -178,6 +316,87 @@ export function EntityInspector({
       </aside>
     </div>
   );
+}
+
+/* ── state placeholder (design rule 31: never show a blank panel) ─────── */
+
+function InspectorStatePlaceholder({
+  state,
+  errorMessage,
+  onRetry,
+}: {
+  state: InspectorState;
+  errorMessage?: string;
+  onRetry?: () => void;
+}) {
+  switch (state) {
+    case "loading":
+      return (
+        <div className="space-y-4 animate-pulse" role="status" aria-live="polite">
+          <div className="h-4 w-2/3 bg-bg-elevated rounded" />
+          <div className="h-3 w-1/3 bg-bg-elevated rounded" />
+          <div className="space-y-2 mt-6">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-3 bg-bg-elevated rounded" style={{ width: `${100 - i * 10}%` }} />
+            ))}
+          </div>
+          <div className="space-y-2 mt-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-3 bg-bg-elevated rounded" style={{ width: `${90 - i * 10}%` }} />
+            ))}
+          </div>
+        </div>
+      );
+    case "empty":
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center" role="status">
+          <FileSearch className="size-8 text-text-muted mb-3" />
+          <p className="text-sm font-medium text-text-primary">No related records</p>
+          <p className="text-xs text-text-muted mt-1">
+            This entity has no associated data to display.
+          </p>
+        </div>
+      );
+    case "error":
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center" role="alert">
+          <AlertTriangle className="size-8 text-action-danger mb-3" />
+          <p className="text-sm font-medium text-text-primary">Failed to load</p>
+          {errorMessage ? (
+            <p className="text-xs text-text-muted mt-1">{errorMessage}</p>
+          ) : null}
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-4 text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
+      );
+    case "unauthorized":
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center" role="alert">
+          <Lock className="size-8 text-action-warning mb-3" />
+          <p className="text-sm font-medium text-text-primary">You do not have permission</p>
+          <p className="text-xs text-text-muted mt-1">
+            Contact an administrator if you believe this is an error.
+          </p>
+        </div>
+      );
+    case "missing":
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center" role="status">
+          <FileSearch className="size-8 text-text-muted mb-3" />
+          <p className="text-sm font-medium text-text-primary">Record not found</p>
+          <p className="text-xs text-text-muted mt-1">
+            This entity may have been deleted or the link is stale.
+          </p>
+        </div>
+      );
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -251,6 +470,34 @@ export function ActionRow({
   return <div className="flex flex-wrap gap-2">{children}</div>;
 }
 
+/**
+ * ActionGate — the coarse capability gate for inspector action bars.
+ *
+ * Renders `children` only when `canAct` is truthy; otherwise renders
+ * `fallbackNote` (defaulting to a muted "requires elevated permissions"
+ * note). Compose with `useCanActEntity(kind)` to drive the boolean
+ * from the central `canActOnEntity` map. Navigation-only buttons
+ * ("Open full detail") are NOT wrapped in `ActionGate` — they are
+ * links, not writes.
+ */
+export function ActionGate({
+  canAct,
+  fallbackNote,
+  children,
+}: {
+  canAct: boolean;
+  fallbackNote?: ReactNode;
+  children: ReactNode;
+}) {
+  if (canAct) return <>{children}</>;
+  return (
+    <div className="text-xs text-text-muted">
+      {fallbackNote ??
+        "Acting on this record requires elevated permissions."}
+    </div>
+  );
+}
+
 export function InspectorButton({
   children,
   href,
@@ -265,7 +512,7 @@ export function InspectorButton({
   disabled?: boolean;
 }) {
   const base =
-    "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 min-h-8 rounded transition disabled:opacity-40 disabled:pointer-events-none";
+    "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 min-h-8 rounded transition disabled:opacity-40 disabled:pointer-events-none focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none";
   const styles: Record<string, string> = {
     primary: "bg-action-primary text-white hover:opacity-90",
     ghost: "surface-card bg-bg-elevated text-text-primary hover:bg-bg-surface",

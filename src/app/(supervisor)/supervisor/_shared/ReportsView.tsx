@@ -3,6 +3,8 @@
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { transactionInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
@@ -22,6 +24,7 @@ export function ReportsView() {
   const { data, loading } = useApiResource<StudentsStatsResponse>("/api/students/stats", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
 
   const stats = data?.data;
 
@@ -64,7 +67,20 @@ export function ReportsView() {
             {rows.map((row) => (
               <li
                 key={row.metric}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                onClick={() =>
+                  inspect(
+                    transactionInspection(
+                      {
+                        id: row.metric,
+                        direction: /inbound/i.test(row.metric) ? "IN" : /outbound/i.test(row.metric) ? "OUT" : "IN",
+                        reason: row.description,
+                        timestamp: new Date().toISOString(),
+                      },
+                      role,
+                    ),
+                  )
+                }
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{row.metric}</p>
@@ -96,10 +112,25 @@ export function ReportsView() {
               ]}
               data={rows}
               keyExtractor={(r) => r.metric}
+              onRowClick={(r) =>
+                inspect(
+                  transactionInspection(
+                    {
+                      id: r.metric,
+                      direction: /inbound/i.test(r.metric) ? "IN" : /outbound/i.test(r.metric) ? "OUT" : "IN",
+                      reason: r.description,
+                      timestamp: new Date().toISOString(),
+                    },
+                    role,
+                  ),
+                )
+              }
             />
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -58,3 +58,61 @@ The operator UI is designed as an operational scanning kiosk surface rather than
 - **Device Binding (M4)**: Authenticated operator requests carry a `device_id` cookie whose SHA-256 hash must match the `dh` claim embedded in the JWT. Unattended kiosk sessions created via `/api/operator/kiosk-session` operate under explicit IP/PIN constraints.
 - **Server-Side RBAC**: Protected endpoints enforce `withAuthorization` requiring `ROLES.OPERATOR`. Page navigation is guarded by `<AuthGuard allowedRoles={["operator"]}>`.
 - **CSRF & Rate Limiting**: All mutation endpoints require CSRF token validation and enforce per-IP / per-user sliding window rate limits.
+
+
+## Gaps & Research
+
+### Institutional context
+The Operator is the most time-critical role in the system. Per NIT Hamirpur security SOP: "The Security room at Gate 1 Exit side will be the Control Room for Security... All matters related to security, emergency etc. will be reported to the Control Room Only. The Control Room will be under the control of Security Supervisor."
+
+Per Indian university campus security best practices:
+- Operator must verify photo ID against the pass
+- Operator must check watchlist before granting access
+- Operator must log all manual entries
+- Operator must report any device malfunction immediately
+
+### Missing (not in app yet)
+1. **Real-time scan queue** — no visual queue of pending scans at the gate
+2. **Batch verification** — no structured batch verification for peak hours
+3. **Watchlist check** — no automatic watchlist check on scan
+4. **Photo verification** — no photo comparison at scan
+5. **Peak hour alerting** — no alert when scan queue exceeds threshold
+6. **Manual entry audit** — no structured audit of manual entries
+7. **Device self-test** — no automatic device self-test at shift start
+8. **Operator workload** — no tracking of operator scan count and accuracy
+
+### Implementation notes
+- Dashboard leads with gate view, scan queue, device health
+- Operator agent is the most time-critical role — instant motion preset
+- Scan: QR scan → verify → record → next; must be fast
+- Manual entry: flagged for audit, requires photo ID verification
+- Shift handover: structured with open items and pending passes
+
+### Agent persona
+- Focus: gate operations, scan, verify, record, device health
+- Most time-critical role in the system
+- Can: scan, lookup, manual entry, record transactions, report device health
+- Cannot: approve passes (needs HOD/Hostel Manager), modify gate configuration
+- Escalation: unresolved passes → Security Supervisor; device issues → SysAdmin
+
+
+
+## Cross-Role Dependencies
+
+### Operator should see (read-only)
+- **supervisor**: watchlist status, overstay alerts → Operator checks watchlist on scan
+- **admin**: lockdown state, gate schedule → Operator knows gate open/close times
+- **staff**: shift handover docs → Operator picks up open items
+
+### Operator should NOT see
+- **admin**: user governance, audit exports → not operator's concern
+- **sysadmin**: infra, MFA, RLS → not operator's concern
+
+### Operator escalates to
+- **supervisor**: unresolved passes, device malfunctions, security incidents
+- **admin**: gate hardware config issues, peak hour staffing
+
+### Operator borrows from
+- **supervisor**: watchlist auto-check (currently manual, should be automatic on scan)
+- **admin**: lockdown state broadcast (operator should see real-time lockdown)
+

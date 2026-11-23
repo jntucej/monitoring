@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
-import {Search, X, Home, Building2, ChevronRight, Mail, Phone}  from "lucide-react";
+import {Search, X, Home, Building2, ChevronRight, Mail, Phone, AlertTriangle, RotateCw}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +11,8 @@ import {
 } from "@/components/admin/kit";
 import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { DataFreshness } from "@/components/shared/DataFreshness";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
 import { parseRollNumber } from "@/lib/rollNumber";
@@ -163,6 +165,7 @@ async function fetchStudents(): Promise<StudentsData> {
 function AdminStudentsInner() {
   const [data, setData] = useState<StudentsData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetched, setLastFetched] = useState<number | null>(null);
   const [query, setQuery] = usePersistentQuery("gate-admin-students-query");
   const [deptFilter, setDeptFilter] = useState<string[]>([]);
   const [yearFilter, setYearFilter] = useState<string[]>([]);
@@ -251,8 +254,10 @@ function AdminStudentsInner() {
 
   const load = useCallback(async () => {
     try {
-      setData(await fetchStudents());
+      const result = await fetchStudents();
+      setData(result);
       setError(null);
+      setLastFetched(Date.now());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load students");
     }
@@ -313,13 +318,26 @@ function AdminStudentsInner() {
       />
 
       {error && (
-        <div className="surface-card p-3 text-sm text-action-danger">
-          {error}
+        <div className="surface-card bg-rose-500/5 p-3 text-sm" role="alert">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="size-4 text-action-danger shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-text-primary">Roster unavailable</p>
+              <p className="text-xs text-text-muted mt-0.5">{error}</p>
+            </div>
+            <button
+              onClick={() => { void load(); }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+            >
+              <RotateCw className="size-3.5" /> Retry
+            </button>
+          </div>
         </div>
       )}
 
       {/* KPI row — each card is a hover-preview entry point (the quick
           overview layer of the inspection hierarchy). */}
+      {error && !data ? null : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <HoverPreview
           preview={
@@ -400,6 +418,28 @@ function AdminStudentsInner() {
           </div>
         </HoverPreview>
       </div>
+      )}
+
+      {lastFetched !== null && !error && (
+        <div className="flex justify-end">
+          <DataFreshness timestamp={lastFetched} autoRefresh />
+        </div>
+      )}
+
+      {data && data.total === 0 && !error ? (
+        <EmptyState
+          title="No students in roster"
+          description="The roster is empty. Add students from the import flow, or check that the admin scope has at least one enrolled record."
+          action={
+            <button
+              onClick={() => { void load(); }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-surface px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+            >
+              <RotateCw className="size-3.5" /> Reload roster
+            </button>
+          }
+        />
+      ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 section-offscreen">
         {/* Facet rail */}

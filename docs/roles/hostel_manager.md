@@ -49,3 +49,59 @@ Unlike caretakers whose scope is restricted to individual blocks, the hostel man
 - **Device Binding (M4)**: Enforces `device_id` cookie check against the JWT `dh` claim on every authenticated call.
 - **Institutional Authority**: Enforced via `withAuthorization` requiring `ROLES.HOSTEL_MANAGER`. Permitted to perform campus-wide allotments and close tickets across all hostel blocks.
 - **Dual Approval & Audit**: Room reassignments and incident escalations are permanently captured in the central audit ledger.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH CEJ's hostel staff page: "The Hostel Manager is entrusted with the twin responsibilities of allotment of rooms in hostels as well as looking after the day-to-day mess facilities to the boarders. He is ably assisted by two Deputy Wardens for each of the hostels."
+
+JNTUH CEJ has 4 hostel blocks (2 boys + 2 girls). The Hostel Manager is one per college/unit and oversees all 4 blocks. The approval chain is: caretaker → deputy_warden → hostel_manager → principal (each with a substitute).
+
+### Missing (not in app yet)
+1. **Block occupancy heat map** — no visual representation of occupancy across 4 blocks
+2. **Room allotment workflow** — no structured workflow for new admission room allocation
+3. **Mess menu integration** — no integration with Mess In-charge's menu finalization
+4. **Hostel maintenance ticketing** — no structured ticketing for hostel maintenance issues
+5. **Curfew compliance dashboard** — no single view of curfew compliance across all blocks
+6. **Student housing preference** — no system for students to express housing preferences
+7. **Hostel visitor log** — no structured visitor log for hostel blocks
+8. **Disciplinary case file** — no structured case file for hostel disciplinary cases
+
+### Implementation notes
+- Dashboard leads with block occupancy, room allotment, inventory
+- Hostel Manager agent oversees all 4 blocks (2 boys + 2 girls)
+- Room allotment: structured form with block, room, category, merit
+- Mess: integrated with Mess In-charge's menu and token system
+- Grievances: ticket-based workflow with SLA tracking
+
+### Agent persona
+- Focus: hostel administration, room allotment, mess facilities, student grievances
+- Overses: all 4 hostel blocks
+- Can: allot/vacate rooms, track inventory, manage mess, resolve grievances
+- Cannot: escalate to DEBARRED (Principal-only), approve disciplinary cases
+- Escalation: to Principal for disciplinary; to Mess In-charge for mess operations
+
+
+
+## Cross-Role Dependencies
+
+### Hostel Manager should see (read-only)
+- **deputy_warden**: curfew compliance, night attendance, incidents, visitor log → Block status
+- **caretaker**: maintenance tickets, housekeeping status → Block upkeep
+- **mess_incharge**: menu, token consumption, bill status → Mess status
+- **vp**: hostel aggregate (no PII) → What VP sees
+
+### Hostel Manager should NOT see
+- **sysadmin**: infra, MFA, RLS → not HM's concern
+- **admin**: user governance, audit → not HM's concern
+
+### Hostel Manager escalates to
+- **vp**: major hostel issues, curfew non-compliance
+- **principal**: DEBARRED (with chief_warden context), hostel policy
+- **emo**: infrastructure complaints in hostel blocks
+
+### Hostel Manager borrows from
+- **deputy_warden**: block-level data (dw collects, hm aggregates)
+- **mess_incharge**: mess operations (mi manages, hm oversees)
+

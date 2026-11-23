@@ -11,6 +11,7 @@ import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { DockerFleetPanel } from "@/components/sysadmin/monitoring/DockerFleetPanel";
 import { AlertTriangle, Container } from "lucide-react";
+import { SysAdminGroupTrace } from "@/components/nav/level4/SysAdminGroupTrace";
 
 interface ServicesData {
   status?: string;
@@ -72,6 +73,17 @@ function DockerServicesInner() {
           Signed in as <span className="font-mono text-text-secondary">{role}</span>
         </p>
       </div>
+
+      {/* L4 system & audit traces strip */}
+      <SysAdminGroupTrace
+        groupLabel="System & Audit Traces"
+        links={[
+          { label: "docker", href: "/sysadmin/docker-services" },
+          { label: "db", href: "/sysadmin/database-health" },
+          { label: "redis", href: "/sysadmin/redis-worker" },
+          { label: "audit", href: "/sysadmin/audit" },
+        ]}
+      />
 
       {error && (
         <div className="surface-card bg-amber-500/10 p-3 text-sm text-action-warning">

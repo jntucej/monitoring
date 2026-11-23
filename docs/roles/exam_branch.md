@@ -49,3 +49,58 @@ The Exam Branch workspace features an amber theme (`#fffbeb` surface tint) with 
   - Final results publication (`POST /exam/results/publish`) requires elevated authorization.
 * **RBAC Enforcement:** Secured by server-side `withAuthorization({ requiredRole: ['exam_branch', ...] })`. UI components are protected by `AuthGuard allowedRoles={['exam_branch']}`.
 * **Audit Trail:** Every hall ticket reissuance, exception grant, and result processing run is logged with an immutable audit hash.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH examination branch (jntuh.ac.in), the exam branch is led by the Controller of Examinations with Additional Controllers for academic, results, and automation. At the constituent college level, the exam branch office handles: examination planning, hall ticket generation, center jumbling, observer allotment, seating arrangement, encrypted question papers, spot valuation, evaluator registration, project panels, notifications, results processing, results publishing, convocation services, certificate verification.
+
+Per Indian university exam standards, no single exam role can both enter and publish a result:
+- Marks entry (faculty) ≠ result processing (Addl. Ctrl Results) ≠ result sign-off (Controller)
+
+### Missing (not in app yet)
+1. **Exam planning dashboard** — no visual exam planning calendar
+2. **Hall ticket tracking** — no tracking of hall ticket distribution
+3. **Result processing pipeline** — no visual pipeline for result processing
+4. **Discrepancy detection** — no automatic detection of result discrepancies
+5. **Exam notification management** — no structured notification management
+6. **Center jumbling view** — no visual view of center jumbling
+7. **Observer allotment** — no structured observer allotment tracking
+8. **Convocation management** — no online convocation management
+
+### Implementation notes
+- Dashboard leads with exam planning, scheduling, result processing
+- Exam Branch agent is the operational authority for exam matters
+- Hall tickets: generated and distributed electronically
+- Results: processing follows separation of duties chain
+- Notifications: structured with priority and delivery tracking
+
+### Agent persona
+- Focus: exam planning, scheduling, hall tickets, result processing
+- Can: plan exams, generate hall tickets, process results, publish notifications
+- Cannot: self-approve result publishing (needs Controller sign-off), control hall access (Chief Superintendent)
+- Escalation: to Controller for result matters; to Chief Superintendent for exam-day matters
+
+
+
+## Cross-Role Dependencies
+
+### Exam Branch should see (read-only)
+- **exam_superintendent**: candidate attendance, hall status → Exam-day data
+- **faculty**: internal marks, CBT results → Input for result processing
+- **oie**: exam queue, exceptions → What OIE is triaging
+- **principal**: result sign-off, exam policy → Final authority
+
+### Exam Branch should NOT see
+- **sysadmin**: infra, MFA, RLS → not EB's concern
+
+### Exam Branch escalates to
+- **principal**: result publishing (after Controller sign-off)
+- **vc**: exam policy, compliance matters
+
+### Exam Branch borrows from
+- **faculty**: marks entry (faculty enters, eb aggregates)
+- **oie**: exception data (oie triages, eb processes)
+- **exam_superintendent**: candidate attendance (cs collects, eb verifies)
+

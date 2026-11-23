@@ -4,6 +4,11 @@ import { Suspense } from "react";
 import { Wrench } from "lucide-react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  boardRowTicketInspection,
+  type HMBoardRow,
+} from "@/components/approver/wardenConsoleModels";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -21,6 +26,7 @@ import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function CaretakerPage() {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   return (
 <>
 <Greeting />
@@ -54,6 +60,7 @@ export default function CaretakerPage() {
               source="/api/caretaker/summary"
               groupBy="status"
               columns={["Open", "In Progress", "Resolved"]}
+              onSelect={(row) => inspect(boardRowTicketInspection(row as HMBoardRow, { consoleHref: "/caretaker", consoleLabel: "Caretaker console" }))}
             />
           </WidgetBoundary>
           <WidgetBoundary name="AttentionQueue" title="Attention Queue">
@@ -84,6 +91,7 @@ export default function CaretakerPage() {
             <NotificationCenter />
           </WidgetBoundary>
 
+          <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
         </div>
     </Suspense>
 </>

@@ -7,6 +7,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { AdminSidebar, type AdminOverviewPayload } from "@/components/admin/AdminSidebar";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { Menu } from "lucide-react";
 import { cn, getAuthHeaders } from "@/lib/utils";
 import type { Role } from "@/lib/types";
@@ -137,6 +138,7 @@ export default function AdminConsoleLayout({
               />
             </MobileNavDrawer>
           </div>
+          <GlobalEntityInspector />
         </div>
       </React.Suspense>
     </AuthGuard>

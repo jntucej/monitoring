@@ -46,3 +46,55 @@ In the escalation ladder, hostel issues escalate from Caretakers to Deputy Warde
 * **Role Context Pattern:** `chief_warden` operates as an execution context for the `principal`. Operations verify that `auth.role === 'chief_warden' || auth.role === 'principal'`.
 * **RBAC & Authorization:** Endpoints enforce access using `withAuthorization({ requiredRole: ['chief_warden', 'principal', ...] })`. UI pages are gated using `AuthGuard allowedRoles={['chief_warden', 'principal', ...]}`.
 * **Separation of Concerns:** Logging actions under `role_context='chief_warden'` guarantees distinct audit trails for residential governance versus academic administration, preserving institutional accountability.
+
+
+## Gaps & Research
+
+### Institutional context
+The Chief Warden is the highest hostel authority at JNTUH CEJ. Per JNTUH convention, the Principal acts as Chief Warden. The Chief Warden has full authority over hostel administration, disciplinary escalation, and DEBARRED status.
+
+Only the Principal (as Chief Warden) can escalate a hostel case to DEBARRED status. This is the highest disciplinary authority in the hostel system.
+
+### Missing (not in app yet)
+1. **DEBARRED case file** — no structured case file for disciplinary escalation
+2. **Hostel KPI dashboard** — no single view of hostel KPIs across all blocks
+3. **Hostel policy versioning** — no version history for hostel policy changes
+4. **Incident severity tracking** — no structured severity levels for hostel incidents
+5. **Hostel visitor policy** — no structured visitor policy for hostel blocks
+6. **Monthly hostel report** — no auto-generated monthly hostel report
+7. **Disciplinary hearing record** — no structured record of disciplinary hearings
+8. **Hostel safety audit** — no structured safety audit checklist for hostel blocks
+
+### Implementation notes
+- Dashboard leads with hostel KPIs, disciplinary cases, policy review
+- Chief Warden agent is scoped to hostel matters only
+- DEBARRED: structured case file with evidence, hearing record, and decision
+- Policy: versioned with change history and approval trail
+- Incidents: severity levels with SLA tracking
+
+### Agent persona
+- Focus: hostel administration, disciplinary escalation, policy
+- Can: escalate to DEBARRED, approve hostel policy, handle major incidents
+- Cannot: self-approve (actions are logged separately in audit)
+- Escalation: to Principal for non-hostel matters
+
+
+
+## Cross-Role Dependencies
+
+### Chief Warden should see (read-only)
+- **hostel_manager**: hostel KPIs, disciplinary cases, policy status → What HM is doing
+- **deputy_warden**: curfew compliance, incident log, night attendance → Block status
+- **principal**: DEBARRED decision authority → Final authority
+
+### Chief Warden should NOT see
+- **sysadmin**: infra, MFA, RLS → not CW's concern
+
+### Chief Warden escalates to
+- **principal**: DEBARRED (CW is principal in this context, but logged separately)
+- **dean**: academic review of DEBARRED cases
+
+### Chief Warden borrows from
+- **hostel_manager**: disciplinary case files (hm collects, cw reviews)
+- **dean**: academic context for DEBARRED decisions (dean provides)
+

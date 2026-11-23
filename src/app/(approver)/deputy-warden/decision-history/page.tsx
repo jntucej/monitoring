@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -22,6 +22,11 @@ import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildDeputyWardenDecisionInspection } from "@/lib/role-registers/deputyWardenInspections";
+import { decisionRecordInspection, ticketRowInspection } from "@/components/approver/wardenConsoleModels";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 /* response shapes */
 
@@ -34,6 +39,10 @@ interface PermissionRequestRow {
   sla_deadline?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  student?: {
+    name?: string;
+    student_details?: { roll?: string } | null;
+  } | null;
 }
 
 interface PermissionsResponse {
@@ -94,6 +103,19 @@ function DeputyWardenDecisionHistoryInner() {
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
+
+  const inspectDecision = (d: PermissionRequestRow & { decidedAt: string | null }) => {
+    inspect(buildDeputyWardenDecisionInspection(d));
+    setStageItem({
+      ticketId: d.id,
+      ticketNumber: d.ticket_number,
+      workflowType: d.workflow_type,
+      currentStage: d.current_stage,
+      status: d.status,
+      stages: ["student", "faculty", "hod", "deputy_warden", "warden", "principal"],
+    });
+  };
 
   const {
     data,
@@ -241,11 +263,11 @@ function DeputyWardenDecisionHistoryInner() {
                   {decisions.map((d) => (
                     <tr
                       key={d.id}
-                      onClick={() => inspect(buildDeputyWardenDecisionInspection(d))}
+                      onClick={() => inspectDecision(d)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          inspect(buildDeputyWardenDecisionInspection(d));
+                          inspectDecision(d);
                         }
                       }}
                       tabIndex={0}
@@ -278,7 +300,14 @@ function DeputyWardenDecisionHistoryInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

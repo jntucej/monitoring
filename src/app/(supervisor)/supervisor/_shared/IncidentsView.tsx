@@ -3,6 +3,8 @@
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector, type EntityInspection } from "@/components/shared/EntityInspector";
+import { alertInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
@@ -21,13 +23,28 @@ interface IncidentsResponse {
   };
 }
 
-export function IncidentsView() {
+export function IncidentsView({ onInspect }: { onInspect?: (m: EntityInspection) => void }) {
   const { data, loading } = useApiResource<IncidentsResponse>(
     "/api/supervisor/dashboard",
     { ttlMs: 15_000 }
   );
+  // Internal inspector state only when no external channel is wired, so the
+  // page-level EntityInspector stays the single drawer instance.
+  const renderInspector = !onInspect;
+  const host = useRoleInspectorHost();
+  const inspection = host.inspection;
+  const inspect = host.inspect;
+  const closeInspection = host.closeInspection;
 
   const rows = data?.data?.incidents ?? [];
+  // When the host page owns the inspector (onInspect provided), the alert
+  // model routes into that channel; otherwise the view keeps its own
+  // internal inspector state as before.
+  const openIncident = (item: IncidentItem) => {
+    const model = alertInspection(item);
+    if (onInspect) onInspect(model);
+    else inspect(model);
+  };
 
   return (
     <div className="space-y-4">
@@ -49,7 +66,8 @@ export function IncidentsView() {
             {rows.map((item) => (
               <li
                 key={item.id}
-                className="surface-card bg-bg-surface p-3 text-xs"
+                className="surface-card bg-bg-surface p-3 text-xs cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                onClick={() => openIncident(item)}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-text-primary">{item.title}</span>
@@ -99,10 +117,13 @@ export function IncidentsView() {
               ]}
               data={rows}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => openIncident(r)}
             />
           </div>
         </>
       )}
+
+      {renderInspector && <EntityInspector inspection={inspection} onClose={closeInspection} />}
     </div>
   );
 }

@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   Inbox,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { mealDayInspection } from "@/components/approver/wardenConsoleModels";
 
 interface ConsumptionDay {
   messDayId: string;
@@ -92,6 +94,7 @@ function MessConsumptionReportsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: report,
@@ -209,7 +212,7 @@ function MessConsumptionReportsInner() {
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {trend.map((row) => (
-                      <tr key={row.messDayId} className="hover:bg-bg-elevated/30 transition-colors">
+                      <tr key={row.messDayId} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspect(mealDayInspection(row))}>
                         <td className="px-4 py-2.5 text-text-secondary font-medium whitespace-nowrap">
                           {fmtDate(row.mealDate)}
                           {!row.isActive && (
@@ -255,6 +258,7 @@ function MessConsumptionReportsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

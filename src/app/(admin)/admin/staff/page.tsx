@@ -1,6 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
-
 import { useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react";
 import {Search, X, Briefcase, Mail, ChevronRight, GraduationCap, Wrench}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
@@ -151,7 +149,6 @@ function initials(name: string) {
 }
 
 function AdminStaffInner() {
-  const router = useRouter();
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [rows, setRows] = useState<StaffRow[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -374,7 +371,7 @@ function AdminStaffInner() {
                   {filtered.map((r) => (
                     <tr
                       key={r.id}
-                      onClick={() => router.push(`/admin/staff/${r.id}`)}
+                      onClick={() => setActive(r)}
                       className="border-t border-border hover:bg-bg-surface/40 cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
@@ -437,7 +434,7 @@ function AdminStaffInner() {
       {(() => {
         const staffInspection = active
           ? {
-              kind: "staff",
+              kind: "staff_member",
               title: active.name,
               subtitle: active.email,
               status: (

@@ -7,6 +7,13 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import {
+  exceptionInspection,
+  passTicketInspection,
+  useRoleInspectorHost,
+  type ExceptionTag,
+} from "@/components/shared/roleInspectors";
 import {
   Loader2,
   AlertTriangle,
@@ -65,6 +72,7 @@ function safeText(v: string | number | null | undefined, fallback = "—"): stri
 
 function ExceptionsInner() {
   const user = useAuthStore((s) => s.user);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
   const [filter, setFilter] = useState<Filter>("ALL");
 
   const {
@@ -141,6 +149,19 @@ function ExceptionsInner() {
       ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       : "—";
 
+  const tagsForRow = (r: TransactionRow): ExceptionTag[] => {
+    const tags: ExceptionTag[] = [];
+    if (isDenied(r)) tags.push("Denied");
+    if (isFlagged(r)) tags.push("Flagged");
+    if (isManual(r)) tags.push("Manual");
+    if (Boolean(r.is_correction)) tags.push("Correction");
+    return tags;
+  };
+
+  const openException = (r: TransactionRow) => {
+    inspect(exceptionInspection(r, tagsForRow(r), role));
+  };
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {(txError || permError) && (
@@ -195,13 +216,9 @@ function ExceptionsInner() {
               {/* Mobile: stacked cards — no horizontal scroll */}
               <ul className="sm:hidden divide-y divide-border">
                 {filtered.map((r) => {
-                  const tags: string[] = [];
-                  if (isDenied(r)) tags.push("Denied");
-                  if (isFlagged(r)) tags.push("Flagged");
-                  if (isManual(r)) tags.push("Manual");
-                  if (Boolean(r.is_correction)) tags.push("Correction");
+                  const tags = tagsForRow(r);
                   return (
-                    <li key={r.id} className="px-3 py-3 space-y-1.5">
+                    <li key={r.id} className="px-3 py-3 space-y-1.5 cursor-pointer hover:bg-bg-surface/40 transition-colors" onClick={() => openException(r)}>
                       <div className="flex items-center justify-between gap-2 min-w-0">
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-text-primary truncate">
@@ -245,14 +262,9 @@ function ExceptionsInner() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {filtered.map((r) => {
-                      const tags: string[] = [];
-                      if (isDenied(r)) tags.push("Denied");
-                      if (isFlagged(r)) tags.push("Flagged");
-                      if (isManual(r)) tags.push("Manual");
-                      if (Boolean(r.is_correction))
-                        tags.push("Correction");
+                      const tags = tagsForRow(r);
                       return (
-                        <tr key={r.id} className="hover:bg-bg-surface transition-colors">
+                        <tr key={r.id} className="hover:bg-bg-surface transition-colors cursor-pointer" onClick={() => openException(r)}>
                           <td className="px-3 py-2.5 text-text-muted text-xs whitespace-nowrap">
                             {fmtTime(r.timestamp)}
                           </td>
@@ -321,7 +333,27 @@ function ExceptionsInner() {
           ) : (
             <ul className="divide-y divide-border min-w-0">
               {deniedPermissionRows.map((p) => (
-                <li key={p.id} className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 min-w-0">
+                <li
+                  key={p.id}
+                  className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                  onClick={() =>
+                    inspect(
+                      passTicketInspection({
+                        id: p.id,
+                        ticket_number: p.ticket_number,
+                        workflow_type: p.workflow_type,
+                        status: p.status ?? "REJECTED",
+                        current_stage: "main_gate",
+                        student: p.student
+                          ? {
+                              name: p.student.name,
+                              unique_id: p.student.unique_id,
+                            }
+                          : null,
+                      }),
+                    )
+                  }
+                >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-text-primary truncate">
                       {p.student?.name || "Unknown applicant"}
@@ -345,6 +377,7 @@ function ExceptionsInner() {
         </div>
       </OperatorWidgetBoundary>
 
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

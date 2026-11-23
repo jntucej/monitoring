@@ -40,6 +40,8 @@ import {
   CONSEQUENTIAL_QUICK_ACTIONS,
   type PaletteCommand,
 } from "@/lib/principal/commandPaletteData";
+import { getConsoleConfig } from "@/config/consoles";
+import { getAuthHeaders } from "@/lib/utils";
 
 /** A recent entity the caller persisted. */
 
@@ -119,6 +121,31 @@ export function PrincipalCommandBar({
   const [searchError, setSearchError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // ── In-component entity search (main's fallback path when !searchEntities) ─
+  interface PersonResult {
+    id: string;
+    name: string;
+    roll: string | null;
+    role: string;
+    status: string;
+  }
+  interface TicketResult {
+    ticket_number: string;
+    workflow_type: string;
+    status: string;
+    current_stage: string;
+    reason: string | null;
+    student_name: string | null;
+    roll: string | null;
+  }
+  type MainResultRow =
+    | { kind: "nav"; cmd: { id: string; label: string; hint: string; href: string } }
+    | { kind: "person"; person: PersonResult }
+    | { kind: "ticket"; ticket: TicketResult };
+  const [personResults, setPersonResults] = useState<PersonResult[]>([]);
+  const [ticketResults, setTicketResults] = useState<TicketResult[]>([]);
+  const [mainSearching, setMainSearching] = useState(false);
+
   const { commands, searching: inSearch } = commandsForQuery(query);
 
   const recentsCommands = useMemo(
@@ -149,38 +176,93 @@ export function PrincipalCommandBar({
   // when a search returns fewer rows). Derived, not effect-synced.
   const activeIdx = Math.min(active, Math.max(list.length - 1, 0));
 
-  // Debounced entity search via the injected (verified) search fn.
+  // Debounced entity search: delegated path (when searchEntities provided) OR
+  // main's in-component fetch (fallback when not).
   useEffect(() => {
     if (!open) return;
-    if (!inSearch || !searchEntities) {
-      setSearchRows([]);
-      setSearchError(null);
-      setSearching(false);
-      return;
-    }
-    const q = query.trim();
-    if (q.length < 2) {
-      setSearchRows([]);
-      return;
-    }
-    setSearching(true);
-    setSearchError(null);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const rows = await searchEntities(q);
-        setSearchRows(rows ?? []);
-      } catch (e) {
+    // If delegated search is available, use it. Otherwise fall back to our
+    // own fetch of /api/persons + /api/permissions (main's path).
+    if (searchEntities && inSearch) {
+      const q = query.trim();
+      if (q.length < 2) {
         setSearchRows([]);
-        setSearchError(e instanceof Error ? e.message : "Search failed");
+        return;
+      }
+      setSearching(true);
+      setSearchError(null);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(async () => {
+        try {
+          const rows = await searchEntities(q);
+          setSearchRows(rows ?? []);
+        } catch (e) {
+          setSearchRows([]);
+          setSearchError(e instanceof Error ? e.message : "Search failed");
+        } finally {
+          setSearching(false);
+          setActive(0);
+        }
+      }, 250);
+      return () => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+      };
+    }
+    // Fallback: main's in-component register fetch.
+    const trimmed = query.trim();
+    if (!trimmed || !inSearch) {
+      setPersonResults([]);
+      setTicketResults([]);
+      setMainSearching(false);
+      return;
+    }
+    setMainSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const headers = getAuthHeaders();
+        const [personsRes, permsRes] = await Promise.all([
+          fetch(`/api/persons?q=${encodeURIComponent(trimmed)}`, { headers }).catch(() => null),
+          fetch(`/api/permissions?stage=principal&status=PENDING,ESCALATED&limit=50`, { headers }).catch(() => null),
+        ]);
+        const personsJson = personsRes ? await personsRes.json().catch(() => null) : null;
+        const permsJson = permsRes ? await permsRes.json().catch(() => null) : null;
+        const people: PersonResult[] = Array.isArray(personsJson?.data)
+          ? (personsJson.data as Array<Record<string, unknown>>).slice(0, 5).map((p) => ({
+              id: String(p.id ?? ""),
+              name: String(p.fullName ?? p.name ?? p.uniqueId ?? "Unknown"),
+              roll: p.roll ? String(p.roll) : null,
+              role: String(p.role ?? p.personType ?? "person"),
+              status: String(p.status ?? "ACTIVE"),
+            }))
+          : [];
+        const tickets: TicketResult[] = Array.isArray(permsJson?.data)
+          ? ((permsJson.data as Array<Record<string, unknown>>)
+              .filter((t) => {
+                const status = String(t.status ?? "");
+                if (status !== "PENDING" && status !== "ESCALATED") return false;
+                if (t.current_stage && !["principal", "warden_or_principal"].includes(String(t.current_stage))) return false;
+                return true;
+              })
+              .slice(0, 5)
+              .map((t) => ({
+                ticket_number: String(t.ticket_number ?? ""),
+                workflow_type: String(t.workflow_type ?? "request"),
+                status: String(t.status ?? "PENDING"),
+                current_stage: String(t.current_stage ?? "principal"),
+                reason: t.reason ? String(t.reason) : null,
+                student_name: t.student_name ? String(t.student_name) : null,
+                roll: null,
+              })))
+          : [];
+        setPersonResults(people);
+        setTicketResults(tickets);
+      } catch {
+        setPersonResults([]);
+        setTicketResults([]);
       } finally {
-        setSearching(false);
-        setActive(0);
+        setMainSearching(false);
       }
     }, 250);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => clearTimeout(timer);
   }, [query, inSearch, open, searchEntities]);
 
   // Reset on open. A single functional reset avoids cascading setStates.

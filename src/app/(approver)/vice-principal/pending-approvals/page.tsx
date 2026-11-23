@@ -9,6 +9,9 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import { Inbox, CheckCircle2, XCircle, ArrowUpRight, ShieldCheck } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { escalationInspection } from "@/components/approver/wardenConsoleModels";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 
 /* ── response shapes ── */
@@ -40,6 +43,40 @@ function slaBreached(row: PermissionRequestRow): boolean {
 
 function VpPendingApprovalsInner() {
   const user = useAuthStore((s) => s.user);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
+
+  const inspectRow = (r: PermissionRequestRow) => {
+    inspect(
+      escalationInspection({
+        id: r.id,
+        ticket_number: r.ticket_number,
+        workflow_type: r.workflow_type,
+        current_stage: r.current_stage,
+        status: r.status,
+        sla_deadline: r.sla_deadline ?? null,
+        created_at: null,
+        student: r.student
+          ? { name: r.student.name, student_details: r.student.student_details ? { roll: r.student.student_details.roll } : null }
+          : null,
+      }),
+    );
+    setPivot({
+      kind: "ticket",
+      id: r.ticket_number,
+      title: r.student?.name || r.ticket_number,
+      subtitle: `${r.workflow_type.replace(/_/g, " ")} · ${r.current_stage} · ${r.status}${slaBreached(r) ? " · SLA BREACHED" : ""}`,
+      fullRoute: `/permissions/${encodeURIComponent(r.ticket_number)}`,
+      relatedLinks: [
+        { label: "VP Approvals", href: "/vice-principal/pending-approvals" },
+        { label: "Escalated", href: "/vice-principal/approvals/escalated" },
+        { label: "Decision History", href: "/vice-principal/decision-history" },
+        { label: "Academics", href: "/vice-principal/academics" },
+        { label: "Hostel Security", href: "/vice-principal/hostel-security-summaries" },
+        { label: "Delegated", href: "/vice-principal/delegated-responsibilities" },
+      ],
+    });
+  };
 
 
   const {
@@ -169,9 +206,10 @@ function VpPendingApprovalsInner() {
                 return (
                   <li
                     key={r.id}
-                    className="surface-card bg-bg-surface/40 p-3 min-w-0"
+                    className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                    onClick={() => inspectRow(r)}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <span className="font-mono text-xs text-action-info">{r.ticket_number}</span>
                       <span className="text-sm text-text-secondary truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
@@ -191,7 +229,7 @@ function VpPendingApprovalsInner() {
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => void actOnTicket(r, "APPROVE")}
+                        onClick={(e) => { e.stopPropagation(); void actOnTicket(r, "APPROVE"); }}
                         disabled={busy || !inScope}
                         title={inScope ? "Approve" : "View-only: outside delegated scope"}
                         className="surface-card inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-action-success hover:bg-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -200,7 +238,7 @@ function VpPendingApprovalsInner() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => void actOnTicket(r, "REJECT")}
+                        onClick={(e) => { e.stopPropagation(); void actOnTicket(r, "REJECT"); }}
                         disabled={busy || !inScope}
                         title={inScope ? "Reject" : "View-only: outside delegated scope"}
                         className="surface-card inline-flex items-center gap-1.5 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-rose-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -209,7 +247,7 @@ function VpPendingApprovalsInner() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => void actOnTicket(r, "ESCALATE")}
+                        onClick={(e) => { e.stopPropagation(); void actOnTicket(r, "ESCALATE"); }}
                         disabled={busy}
                         title="Escalate to the next stage (principal)"
                         className="surface-card inline-flex items-center gap-1.5 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-action-warning hover:bg-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -234,6 +272,9 @@ function VpPendingApprovalsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={() => { closeInspection(); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }

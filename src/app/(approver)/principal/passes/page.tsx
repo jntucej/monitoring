@@ -8,6 +8,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAuthHeaders } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import { EntityInspector, KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { ChevronRight } from "lucide-react";
+import type { PermissionItem } from "@/components/approver/PermissionRow";
 
 const REASONS = [
   { value: "home_out", label: "Home / Outing (rank 1)", rank: 1 },
@@ -26,7 +29,8 @@ export default function PrincipalPassesPage() {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [recent, setRecent] = useState<any[]>([]);
+  const [recent, setRecent] = useState<PermissionItem[]>([]);
+  const [activePass, setActivePass] = useState<PermissionItem | null>(null);
 
   const role = user?.role ?? "principal";
 
@@ -45,7 +49,7 @@ export default function PrincipalPassesPage() {
         );
         const json = await res.json().catch(() => null);
         const rows = json?.data?.items ?? json?.items ?? [];
-        setRecent(rows.filter((r: any) => r.direct_generated).slice(0, 12));
+        setRecent(rows.filter((r: any) => r.direct_generated).slice(0, 12) as PermissionItem[]);
       } catch {
         setRecent([]);
       }
@@ -84,6 +88,60 @@ export default function PrincipalPassesPage() {
       setBusy(false);
     }
   }
+
+  const active = activePass
+    ? {
+        kind: "gate pass",
+        title: `${activePass.student?.name ?? activePass.ticket_number} · ${activePass.reason ?? activePass.workflow_type}`,
+        subtitle: activePass.ticket_number,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+            {activePass.status}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Ticket", value: <span className="font-mono">{activePass.ticket_number}</span> },
+                  { label: "Workflow", value: activePass.workflow_type },
+                  { label: "Student", value: activePass.student?.name ?? "Unknown" },
+                  { label: "From", value: activePass.from_date ? new Date(activePass.from_date).toLocaleString() : "—" },
+                  { label: "To", value: activePass.to_date ? new Date(activePass.to_date).toLocaleString() : "—" },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Timeline",
+            collapsible: true,
+            content: (
+              <Timeline
+                items={[
+                  {
+                    label: "Generated directly (authority-issued)",
+                    time: new Date(activePass.created_at).toLocaleString(),
+                    tone: "neutral",
+                  },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/principal/passes" variant="ghost">
+                  <ChevronRight className="size-3.5" /> Back to generator
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
 
   const input =
     "w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none";
@@ -152,7 +210,9 @@ export default function PrincipalPassesPage() {
       </section>
 
       <section className="rounded-xl border border-border bg-bg-base p-4">
-        <h2 className="mb-2 text-sm font-semibold text-text-primary">Recently generated</h2>
+        <h2 className="mb-2 text-sm font-semibold text-text-primary">
+          Recently generated <span className="text-xs font-normal text-text-muted">· click any row to inspect</span>
+        </h2>
         {recent.length === 0 ? (
           <p className="text-xs text-text-muted">No generated passes in this view yet.</p>
         ) : (
@@ -167,11 +227,15 @@ export default function PrincipalPassesPage() {
               </tr>
             </thead>
             <tbody>
-              {recent.map((r: any) => (
-                <tr key={r.id} className="border-t border-border">
+              {recent.map((r) => (
+                <tr
+                  key={r.id}
+                  className="border-t border-border cursor-pointer hover:bg-bg-elevated transition-colors"
+                  onClick={() => setActivePass(r)}
+                >
                   <td className="py-1.5 pr-3 font-mono">{r.ticket_number}</td>
                   <td className="py-1.5 pr-3">{r.student_user_id?.slice(0, 8)}</td>
-                  <td className="py-1.5 pr-3">{new Date(r.from_date).toLocaleString()}</td>
+                  <td className="py-1.5 pr-3">{new Date(r.from_date ?? 0).toLocaleString()}</td>
                   <td className="py-1.5 pr-3">{r.to_date ? new Date(r.to_date).toLocaleString() : "—"}</td>
                   <td className="py-1.5">{r.reason}</td>
                 </tr>
@@ -180,6 +244,8 @@ export default function PrincipalPassesPage() {
           </table>
         )}
       </section>
+
+      <EntityInspector inspection={active} onClose={() => setActivePass(null)} />
     </div>
   );
 }

@@ -12,6 +12,8 @@ import { usePolling } from "@/hooks/usePolling";
 import { MessEligibilityCard } from "@/components/mess/MessEligibilityCard";
 import Link from "next/link";
 import {Users, AlertTriangle, Loader2, Inbox, Building2}  from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { hostelBlockInspection, type HostelBlockOccupancy } from "@/components/approver/wardenConsoleModels";
 
 interface AttendanceBlockRow {
   hostelBlock: string;
@@ -80,6 +82,17 @@ function MessMealAttendanceInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectBlock = (b: AttendanceBlockRow) => {
+    inspect(
+      hostelBlockInspection({
+        block: b.hostelBlock,
+        total: b.declared,
+        occupied: b.confirmed,
+      } satisfies HostelBlockOccupancy),
+    );
+  };
 
   const {
     data: attendance,
@@ -177,7 +190,7 @@ function MessMealAttendanceInner() {
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {blocks.map((b) => (
-                      <tr key={b.hostelBlock} className="hover:bg-bg-elevated/30 transition-colors">
+                      <tr key={b.hostelBlock} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspectBlock(b)}>
                         <td className="px-4 py-3 text-text-secondary font-medium whitespace-nowrap flex items-center gap-2 min-w-0">
                           <Building2 className="w-3.5 h-3.5 text-text-muted shrink-0" />
                           <span className="truncate">{b.hostelBlock}</span>
@@ -217,6 +230,7 @@ function MessMealAttendanceInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

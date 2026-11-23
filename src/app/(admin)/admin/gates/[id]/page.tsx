@@ -14,12 +14,17 @@ import {
   TrendingUp,
   Lock,
   Power,
+  Compass,
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { useApi } from "@/hooks/useApi";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
+import { useAuthStore } from "@/stores/authStore";
+import { resolveGateEventAbility, makeViewer, type RecordEventAbility } from "@/lib/record-abilities";
+import { RecordAbilityBanner } from "@/components/shared/RecordAbilityBanner";
 
 interface GateMetrics {
   gateId: string;
@@ -55,8 +60,27 @@ export default function GateDetailPage() {
   const [operatorNote, setOperatorNote] = useState<string | null>(null);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
   const [toggleBusy, setToggleBusy] = useState(false);
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
 
   const isSentinel = data?.gateCode?.toUpperCase() === "UNKNOWN";
+
+  // Role-ability layer: why THIS viewer manages / operates this gate.
+  const viewer = makeViewer(useAuthStore.getState().role, {
+    userId: useAuthStore.getState().user?.id ?? "",
+    assignedGateId: gateId || null,
+  });
+  const gateAbility: RecordEventAbility | null = data
+    ? resolveGateEventAbility(
+        {
+          id: gateId,
+          gate_code: data.gateCode,
+          direction: null,
+          status: data.status,
+          hostel_scope: null,
+        },
+        viewer,
+      )
+    : null;
 
   const fetchGateDetails = async () => {
     setLoading(true);
@@ -158,6 +182,28 @@ export default function GateDetailPage() {
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </button>
+            <button
+              onClick={() =>
+                setPivot({
+                  kind: "gate",
+                  id: gateId,
+                  title: data?.gateName || `Gate ${gateId}`,
+                  subtitle: `${data?.gateCode ? data.gateCode + " · " : ""}${data?.location || "Campus"} · ${data?.status || ""}`,
+                  fullRoute: `/admin/gates/${gateId}`,
+                  relatedLinks: [
+                    { label: "Gate List", href: "/admin/gates" },
+                    { label: "Attendance", href: "/admin/attendance" },
+                    { label: "Incidents", href: "/admin/alerts" },
+                    { label: "Reports", href: "/admin/reports" },
+                    { label: "Hostel", href: "/admin/occupancy" },
+                    { label: "Gate Schedule", href: "/admin/gates/schedule" },
+                  ],
+                })
+              }
+              className="surface-card px-3 py-2 bg-bg-elevated text-xs font-semibold hover:bg-bg-base flex items-center gap-1.5 transition-colors"
+            >
+              <Compass className="w-3.5 h-3.5" /> Pivot
+            </button>
             {data && !isSentinel && (
               data.status === "ACTIVE" ? (
                 <button
@@ -184,6 +230,9 @@ export default function GateDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Role-ability banner: why this role manages/operates this gate */}
+        <RecordAbilityBanner ability={gateAbility} fullRoute={`/admin/gates/${gateId}`} />
 
         {operatorNote && (
           <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">
@@ -350,6 +399,8 @@ export default function GateDetailPage() {
           variant="destructive"
           onConfirm={() => toggleActive(false)}
         />
+
+        <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
       </motion.div>
     
     

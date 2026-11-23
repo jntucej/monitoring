@@ -5,6 +5,8 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { vpExceptionPersonInspection, type VPExceptionPerson } from "@/components/approver/wardenConsoleModels";
 
 interface VPAcademicsResponse {
   success?: boolean;
@@ -39,6 +41,11 @@ export function ExceptionsView() {
   const { data, loading } = useApiResource<VPAcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectAbsent = (p: VPExceptionPerson) => inspect(vpExceptionPersonInspection(p, "absent"));
+  const inspectLate = (p: VPExceptionPerson) => inspect(vpExceptionPersonInspection(p, "late"));
+  const inspectFlagged = (p: VPExceptionPerson) => inspect(vpExceptionPersonInspection(p, "flagged"));
 
   const d = data?.data;
   const absent = d?.exceptions?.absent ?? [];
@@ -75,7 +82,11 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {absent.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                    onClick={() => inspectAbsent({ id: p.id, name: p.name, role: p.role, designation: p.designation, department: p.department })}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-text-muted">
                       {p.designation ?? p.role}
@@ -93,7 +104,11 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {late.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                    onClick={() => inspectLate({ id: p.id, name: p.name, role: p.role, designation: p.designation, department: p.department, minutesLate: p.minutesLate })}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-action-warning">{p.minutesLate}m late</span>
                   </li>
@@ -109,7 +124,11 @@ export function ExceptionsView() {
               </header>
               <ul className="divide-y divide-border">
                 {flagged.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 px-4 py-2 text-xs">
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-3 px-4 py-2 text-xs cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                    onClick={() => inspectFlagged({ id: p.id, name: p.name, department: p.department, reason: p.reason })}
+                  >
                     <span className="flex-1 truncate">{p.name}</span>
                     <span className="text-action-danger">{p.reason}</span>
                   </li>
@@ -119,6 +138,8 @@ export function ExceptionsView() {
           )}
         </div>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

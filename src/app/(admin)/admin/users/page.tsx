@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight } from "lucide-react";
+import { Shield, GraduationCap, Briefcase, Grid, Lock, ArrowRight, ChevronRight } from "lucide-react";
 import { getAuthHeaders } from "@/lib/utils";
 
 import { UserManagementPanel } from "@/components/admin/UserManagementPanel";
 import Link from "next/link";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface DepartmentData {
   code: string;
@@ -20,6 +21,62 @@ export default function AdminUsersPage() {
   const [departments, setDepartments] = useState<DepartmentData[]>([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [activeTab, setActiveTab] = useState<"roles" | "heatmap">("roles");
+  const [activeDept, setActiveDept] = useState<DepartmentData | null>(null);
+
+  /** Standardized inspection model for a department row (heatmap tab). */
+  const deptInspection = activeDept
+    ? {
+        kind: "department",
+        title: activeDept.name,
+        subtitle: activeDept.code,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+            ACTIVE
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Code", value: <span className="font-mono">{activeDept.code}</span> },
+                  { label: "HOD", value: activeDept.hod },
+                  { label: "Students", value: String(activeDept.totalStudents) },
+                  { label: "Faculty", value: String(activeDept.facultyCount) },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Year density",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Year 1", value: String(activeDept.heatmap?.y1 ?? 0) },
+                  { label: "Year 2", value: String(activeDept.heatmap?.y2 ?? 0) },
+                  { label: "Year 3", value: String(activeDept.heatmap?.y3 ?? 0) },
+                  { label: "Year 4", value: String(activeDept.heatmap?.y4 ?? 0) },
+                  { label: "Lower eng", value: String(activeDept.heatmap?.le ?? 0) },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/admin/departments" variant="primary">
+                  <ChevronRight className="size-3.5" /> Department roster
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: "/admin/departments",
+        detailLabel: "All departments",
+      }
+    : null;
 
   const loadDepartments = async () => {
     setLoadingDepts(true);
@@ -129,7 +186,11 @@ export default function AdminUsersPage() {
                     <tr><td colSpan={8} className="p-8 text-center text-text-muted">No departments mapped</td></tr>
                   ) : (
                     departments.map(dept => (
-                      <tr key={dept.code} className="hover:bg-white/5 transition">
+                      <tr
+                        key={dept.code}
+                        onClick={() => setActiveDept(dept)}
+                        className="hover:bg-white/5 transition cursor-pointer"
+                      >
                         <td className="p-2 text-left font-sans">
                           <span className="font-bold block text-sm">{dept.code}</span>
                           <span className="text-xs text-text-muted">{dept.name}</span>
@@ -222,6 +283,8 @@ export default function AdminUsersPage() {
 
         </div>
       )}
+
+      <EntityInspector inspection={deptInspection} onClose={() => setActiveDept(null)} />
     </div>
     
     

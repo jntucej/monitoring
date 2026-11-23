@@ -17,6 +17,8 @@ import {
   Loader2,
   Inbox,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { stockItemInspection, type MessInventoryItem } from "@/components/approver/wardenConsoleModels";
 
 interface InventoryItem {
   id: string;
@@ -58,6 +60,11 @@ function MessInventoryStockInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectItem = (item: MessInventoryItem) => {
+    inspect(stockItemInspection(item));
+  };
 
   const {
     data: inventory,
@@ -143,7 +150,7 @@ function MessInventoryStockInner() {
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {items.map((item) => (
-                      <tr key={item.id} className="hover:bg-bg-elevated/30 transition-colors">
+                      <tr key={item.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspectItem(item)}>
                         <td className="px-4 py-3 text-text-secondary font-medium min-w-0 truncate">{item.label}</td>
                         <td className="px-4 py-3 text-text-muted font-mono text-xs whitespace-nowrap">{item.code}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -194,6 +201,7 @@ function MessInventoryStockInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

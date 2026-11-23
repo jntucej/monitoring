@@ -7,6 +7,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { MobileNavDrawer } from "@/components/shared/MobileNavDrawer";
 import { ScrollEdgeBlue } from "@/components/shared/ScrollEdgeBlue";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { Sidebar, type OverviewPayload } from "@/components/sysadmin/Sidebar";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -130,6 +131,7 @@ export default function SysadminConsoleLayout({
               <Sidebar overview={overview} forceExpanded onNavigate={closeMobile} />
             </MobileNavDrawer>
           </div>
+          <GlobalEntityInspector />
         </div>
       </React.Suspense>
     </AuthGuard>

@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildExamInspection } from "@/lib/principal/registerInspections";
+import {
+  buildExamCaseInspection,
+  type ExamCaseRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
-import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildExamInspection } from "@/lib/principal/registerInspections";
 
 interface ExamException {
   id?: string;
@@ -30,10 +38,26 @@ export function ExamsView() {
     { ttlMs: 30_000 }
   );
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [mainInspection, setMainInspection] = useState<
+    ReturnType<typeof buildExamCaseInspection> | null
+  >(null);
+  const inspectMain = (e: ExamException) =>
+    setMainInspection(buildExamCaseInspection(e as ExamCaseRecord, gate));
+
   const exceptions = Array.isArray(data?.data) ? data.data : [];
   const pendingCount = exceptions.filter((e) => e.status === "PENDING" || !e.status).length;
-  const { inspection, inspect, closeInspection } = useEntityInspector();
-  const openInspector = (e: ExamException) => inspect(buildExamInspection(e));
+  const {
+    inspection: ourInspection,
+    inspect: ourInspect,
+    closeInspection,
+  } = useEntityInspector();
+  const openInspector = (e: ExamException) => ourInspect(buildExamInspection(e));
 
   return (
     <div className="space-y-4">
@@ -41,7 +65,7 @@ export function ExamsView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Examination Oversight</h1>
         <p className="text-xs text-text-muted">
-          Exam clearance queues, attendance, and hall exceptions
+          Exam clearance queues, attendance, and hall exceptions · click any case to inspect
         </p>
       </header>
 
@@ -67,8 +91,11 @@ export function ExamsView() {
                 <button
                   type="button"
                   onClick={() => openInspector(e)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === "Enter" || ev.key === " ") openInspector(e);
+                  }}
                   aria-label={`Inspect exam exception: ${e.student_name ?? e.student?.name ?? "student"}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{e.student_name ?? e.student?.name ?? "Student"}</p>
@@ -114,7 +141,8 @@ export function ExamsView() {
         </>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

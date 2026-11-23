@@ -32,9 +32,69 @@ const ParentConsentInbox = lazy(
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
 import { useAuthStore } from "@/stores/authStore";
 import type { GatePass, Person } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+
+/** Build an EntityInspection for a ward record (guardian view). */
+function buildChildRecordInspection(p: Person): EntityInspection {
+  const onCampus = !!(p.checkedInAt && !p.checkedOutAt);
+  const roll = p.roll ?? p.uniqueId ?? p.id;
+  const displayName = p.name ?? p.fullName ?? "Unknown ward";
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Name", value: displayName },
+            { label: "Roll", value: roll },
+            { label: "On campus", value: onCampus ? "Yes" : "No" },
+            { label: "Checked in", value: p.checkedInAt ? new Date(p.checkedInAt).toLocaleString() : "—" },
+            { label: "Checked out", value: p.checkedOutAt ? new Date(p.checkedOutAt).toLocaleString() : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/guardian/child-status" variant="primary">
+            Ward status
+          </InspectorButton>
+          <InspectorButton href="/guardian/child-attendance" variant="ghost">
+            Attendance
+          </InspectorButton>
+          <InspectorButton href="/guardian/child-movement" variant="ghost">
+            Movement
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "child_record",
+    title: displayName,
+    subtitle: roll,
+    status: (
+      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${onCampus ? "bg-emerald-500/10 text-action-success border border-emerald-500/20" : "bg-bg-elevated text-text-muted border border-border"}`}>
+        {onCampus ? "ON CAMPUS" : "OFF CAMPUS"}
+      </span>
+    ),
+    sections,
+    detailHref: "/guardian/child-status",
+    detailLabel: "Ward detail",
+  };
+}
 
 
 /* ── response shapes ── */
@@ -130,6 +190,7 @@ function SectionLink({
 function GuardianOverviewInner() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id ?? "";
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: persons,
@@ -238,6 +299,28 @@ function GuardianOverviewInner() {
         />
       </div>
 
+      {/* Ward cards — click to inspect */}
+      {wards.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {wards.map((w) => (
+            <button
+              key={w.id}
+              type="button"
+              onClick={() => inspect(buildChildRecordInspection(w))}
+              className="surface-card bg-bg-surface p-4 text-left hover:bg-bg-elevated transition cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-text-primary">{w.name ?? w.fullName}</p>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${!(!w.checkedInAt || w.checkedOutAt) ? "bg-emerald-500/10 text-action-success" : "bg-bg-elevated text-text-muted"}`}>
+                  {w.checkedInAt && !w.checkedOutAt ? "ON CAMPUS" : "OFF CAMPUS"}
+                </span>
+              </div>
+              <p className="text-xs text-text-muted mt-1">{w.roll ?? w.uniqueId ?? w.id}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* section quick-links — aligned to the 7 spec sections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <SectionLink
@@ -295,6 +378,8 @@ function GuardianOverviewInner() {
         <ParentWeeklyDigest />
         <ParentConsentInbox />
       </Suspense>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -47,6 +47,7 @@ export const PRINCIPAL_NAV: PrincipalEntry[] = [
     label: "People",
     icon: Users,
     children: [
+      { href: "/principal/people", label: "People" },
       { href: "/principal/people/departments", label: "Departments" },
       { href: "/principal/people/attendance", label: "Attendance" },
     ],

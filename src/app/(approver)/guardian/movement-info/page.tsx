@@ -9,6 +9,7 @@ import { usePolling } from "@/hooks/usePolling";
 
 import type { Person, Scan } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
 import {
   Loader2,
   ArrowRight,
@@ -121,6 +122,17 @@ function MovementInfoInner() {
     String(s.direction ?? "").toUpperCase().startsWith("IN") || String(s.direction ?? "").toUpperCase() === "ENTRY"
   ).length;
   const exits = scans.length - entries;
+
+  // Level-0 ward pivot: surface the focused ward's follow-up routes with the
+  // ?ward= context carried through so it persists across the page.
+  const wardName = activeWard?.fullName || activeWard?.name || "Ward";
+  const wardSteps: NextActionStep[] = activeRoll
+    ? [
+        { label: "Movement Detail", href: `/guardian/movement-info?ward=${encodeURIComponent(activeRoll)}` },
+        { label: "Request Status", href: `/guardian/request-status?ward=${encodeURIComponent(activeRoll)}` },
+        { label: "Child Profile", href: `/guardian/child-status?ward=${encodeURIComponent(activeRoll)}` },
+      ]
+    : [];
 
   return (
     <div className="min-w-0 space-y-6">
@@ -240,6 +252,16 @@ function MovementInfoInner() {
               </div>
             )}
           </div>
+
+          {/* Level-0 record pivot: focused ward's next-step actions, with
+              ward context carried via ?ward=<id>. */}
+          {activeRoll && (
+            <SelfActionLoop
+              title={`Ward ${wardName}`}
+              meta={`Roll ${activeRoll} — where to take this ward next`}
+              steps={wardSteps}
+            />
+          )}
         </>
       )}
     </div>

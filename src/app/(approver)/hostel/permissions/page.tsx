@@ -21,8 +21,8 @@ import {
   Users,
   AlertTriangle,
   Loader2,
-
 } from "lucide-react";
+import { gatePresenceInspection } from "@/components/approver/wardenConsoleModels";
 
 /* ── response shapes (mirror the route handlers — all read-only) ── */
 
@@ -178,6 +178,19 @@ function HostelPermissionsInner() {
     0
   );
 
+  const inspectGate = (g: PresenceMatrixData["gates"][number]) => {
+    inspect(
+      gatePresenceInspection({
+        id: g.id,
+        name: g.name,
+        code: g.code,
+        audience: g.audience,
+        type: g.type,
+        onCampus: Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0),
+      }),
+    );
+  };
+
   return (
     <div className="mx-auto max-w-7xl w-full min-w-0 overflow-x-hidden space-y-6 px-4 py-6 md:px-6">
       {/* header */}
@@ -207,14 +220,25 @@ function HostelPermissionsInner() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Students On Campus"
-          value={presence ? studentsInside : "…"}
-          sub={presence ? `Live across ${gates.length} gates · updated ${new Date(presence.data.lastUpdated).toLocaleTimeString()}` : "Presence matrix unavailable"}
-          accent="text-action-success"
-          loading={presenceLoading && !presence}
-        />
+        <div
+          className="surface-card bg-bg-base p-4 flex flex-col gap-2 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+          onClick={() => gates.length > 0 && inspectGate(gates[0])}
+        >
+          <div className="flex items-center gap-2 text-text-muted">
+            <Users className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-semibold uppercase tracking-wide">Students On Campus</span>
+          </div>
+          {presenceLoading && !presence ? (
+            <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
+          ) : (
+            <p className="text-2xl font-bold text-action-success">{presence ? studentsInside : "…"}</p>
+          )}
+          <p className="text-xs text-text-muted">
+            {presence
+              ? `Live across ${gates.length} gates · updated ${new Date(presence.data.lastUpdated).toLocaleTimeString()}`
+              : "Presence matrix unavailable"}
+          </p>
+        </div>
         <StatCard
           icon={Inbox}
           label="Pending Hostel Passes"

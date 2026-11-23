@@ -20,6 +20,10 @@ import {
   Inbox,
   CheckCircle2,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 interface MessIssue {
   id: string;
@@ -38,6 +42,53 @@ interface IssuesResponse {
   data: {
     issues: MessIssue[];
     total: number;
+  };
+}
+
+function issueInspection(i: MessIssue) {
+  const sent = i.status === "SENT";
+  return {
+    kind: "incident",
+    title: i.eventType.replace(/_/g, " "),
+    subtitle: i.id,
+    status: (
+      <span
+        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+          sent ? "bg-emerald-500/10 text-action-success" : "bg-bg-elevated text-text-muted"
+        }`}
+      >
+        {i.status}
+      </span>
+    ),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <KVPairs
+            items={[
+              { label: "Event", value: i.eventType.replace(/_/g, " ") },
+              { label: "Channel", value: i.channel },
+              { label: "User", value: i.userName ?? "—" },
+              { label: "Meal date", value: i.mealDate ?? "—" },
+              { label: "Raised", value: i.createdAt ? new Date(i.createdAt).toLocaleString("en-IN") : "—" },
+              { label: "Sent", value: i.sentAt ? new Date(i.sentAt).toLocaleString("en-IN") : "Pending" },
+            ]}
+          />
+        ),
+      },
+      {
+        title: "Actions",
+        content: (
+          <ActionRow>
+            <InspectorButton href="/mess/mess-issues" variant="ghost">
+              All issues
+            </InspectorButton>
+          </ActionRow>
+        ),
+      },
+    ],
+    detailHref: "/mess/mess-issues",
+    detailLabel: "All issues",
   };
 }
 
@@ -78,6 +129,7 @@ function MessIssuesInner() {
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
   const { addToast } = useUIStore();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: issuesRes,
@@ -90,6 +142,8 @@ function MessIssuesInner() {
   const [raiseOpen, setRaiseOpen] = useState(false);
   const [eventType, setEventType] = useState("NO_SHOW_FLAGGED");
   const [description, setDescription] = useState("");
+  // L1 FrontlinePivot: duty-scoped subject sheet.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -238,11 +292,12 @@ function MessIssuesInner() {
                     <th className="text-left px-4 py-2.5">Status</th>
                     <th className="text-left px-4 py-2.5">Meal Date</th>
                     <th className="text-left px-4 py-2.5">Raised</th>
+                    <th className="text-left px-4 py-2.5">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {issues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr key={issue.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspect(issueInspection(issue))}>
                       <td className="px-4 py-2.5 min-w-0">
                         <p className="text-text-secondary font-medium capitalize truncate">
                           {issue.eventType.replace(/_/g, " ")}
@@ -269,6 +324,24 @@ function MessIssuesInner() {
                       <td className="px-4 py-2.5 text-text-muted text-xs whitespace-nowrap">
                         {fmtTs(issue.createdAt)}
                       </td>
+                      <td className="px-4 py-2.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFrontlineSubject({
+                              id: issue.id,
+                              name: issue.eventType.replace(/_/g, " "),
+                              code: issue.id,
+                              statusTag: issue.status,
+                              locationOrScope: issue.channel,
+                            });
+                          }}
+                          className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                        >
+                          Verify
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -286,6 +359,13 @@ function MessIssuesInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+
+      {/* L1 FrontlinePivot: duty-scoped subject sheet */}
+      <FrontlineSubjectSheet
+        subject={frontlineSubject}
+        onClose={() => setFrontlineSubject(null)}
+      />
     </div>
   );
 }

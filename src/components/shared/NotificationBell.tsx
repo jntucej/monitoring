@@ -7,6 +7,12 @@ import { useAuthStore } from '@/stores/authStore';
 
 import { Notification } from '@/lib/notification-types';
 import { useGlossyMotion } from '@/lib/animations';
+import {
+  EntityInspector,
+} from '@/components/shared/EntityInspector';
+import {
+  buildNotificationInspection,
+} from '@/components/shared/notificationInspection';
 
 const PRIORITY_ICONS = {
   low: Info,
@@ -41,6 +47,32 @@ export function NotificationBell() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isGlossyMotion = useGlossyMotion();
+
+  // ── Entity inspector state ────────────────────────────────────────────
+  // Clicking a notification row opens the inspector for the referenced
+  // entity AND marks it read. The row is no longer a dead end.
+  const [activeNotif, setActiveNotif] = useState<Notification | null>(null);
+  const inspection = activeNotif
+    ? buildNotificationInspection({
+        id: activeNotif.id,
+        title: activeNotif.title,
+        message: activeNotif.message,
+        ticketNumber: activeNotif.data?.ticket_number
+          ? String(activeNotif.data.ticket_number)
+          : activeNotif.data?.id
+            ? String(activeNotif.data.id)
+            : undefined,
+        urgency:
+          activeNotif.priority === 'critical'
+            ? 'urgent'
+            : activeNotif.priority === 'high'
+              ? 'overdue'
+              : 'info',
+        type: activeNotif.type,
+        createdAt: activeNotif.createdAt,
+        canActOnTickets: true,
+      })
+    : null;
 
   const loadNotifications = async () => {
     if (!bellSupported) return; // role not served by /api/notifications — stay inert
@@ -119,6 +151,15 @@ export function NotificationBell() {
     } catch {
       // best-effort — local state already updated
     }
+  };
+
+  /**
+   * Click on a notification row: mark it read AND open the entity inspector
+   * for the referenced entity (ticket / alert).
+   */
+  const handleRowClick = (n: Notification) => {
+    if (!n.readAt) handleMarkRead(n.id);
+    setActiveNotif(n);
   };
 
   const handleMarkAllRead = async () => {
@@ -231,11 +272,17 @@ export function NotificationBell() {
                   return (
                     <div
                       key={n.id}
-                      className={`p-4 transition-colors hover:bg-[var(--bg-card)]/60 flex items-start gap-3 ${
-                        !n.readAt ? 'bg-[var(--bg-card)]/30' : ''
+                      className={`p-4 transition-colors flex items-start gap-3 cursor-pointer ${
+                        !n.readAt ? 'bg-[var(--bg-card)]/30 hover:bg-[var(--bg-card)]/60' : 'hover:bg-[var(--bg-card)]/60'
                       }`}
+                      onClick={() => handleRowClick(n)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') handleRowClick(n);
+                      }}
                     >
-                      <div className="p-2 bg-bg-base mt-0.5 shrink-0">
+                      <div className={`p-2 bg-bg-base mt-0.5 shrink-0 ${color}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -254,6 +301,7 @@ export function NotificationBell() {
                           <a
                             href={(n as any).action_url}
                             className="inline-flex items-center gap-1 text-xs text-action-info hover:text-action-info mt-2 font-medium"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             View details
                             <ExternalLink className="size-3.5" />
@@ -262,7 +310,10 @@ export function NotificationBell() {
                       </div>
                       {!n.readAt && (
                         <button
-                          onClick={() => handleMarkRead(n.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkRead(n.id);
+                          }}
                           className="surface-card text-text-muted hover:text-action-success p-1 hover:bg-bg-base transition-colors mt-0.5 shrink-0"
                           title="Mark as read"
                         >
@@ -277,6 +328,9 @@ export function NotificationBell() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Entity inspector — opens when a notification row is clicked */}
+      <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
     </div>
   );
 }

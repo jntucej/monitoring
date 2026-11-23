@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
 import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
 import { DEPUTY_WARDEN_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
@@ -27,6 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="block lg:hidden">
           <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

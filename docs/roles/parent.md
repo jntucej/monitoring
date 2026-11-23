@@ -46,3 +46,58 @@ Upon loading `/guardian`, the application issues simultaneous GET calls to `/api
 
 ## Security notes
 Data access is enforced at the database layer using Postgres RLS: parents are permitted to read only student records mapped to their identity via the `parents_students` linking table. Parents cannot access data of unlinked students, modify attendance marks, or unilaterally approve gate passes without subsequent campus administration clearance. A fail-close model governs outpasses: if a parent explicitly denies consent, the gate pass is automatically marked `REJECTED`, preventing gate turnstiles from issuing an exit release regardless of staff override attempts.
+
+
+## Gaps & Research
+
+### Institutional context
+The Parent is the primary academic stakeholder for the student. For hostel students, the Parent is the mandatory gate-pass acknowledgement authority.
+
+Per JNTUH CEJ gate-pass rules, parent acknowledgement is a required step in the gate-pass chain for hostel students. The Parent's mobile app shows the pass details and requires an explicit acknowledgement.
+
+### Missing (not in app yet)
+1. **Academic KPI dashboard** — no visual representation of academic trends
+2. **Fee payment integration** — no direct payment link for fee dues
+3. **Multiple child support** — no support for parents of multiple children
+4. **Parent-teacher communication** — no structured communication log with faculty
+5. **Hostel visit booking** — no structured booking for hostel visits
+6. **Emergency contact management** — no way to manage emergency contacts
+7. **Campus event calendar** — no view of upcoming campus events relevant to the parent
+8. **Academic alerting** — no proactive alert when child's attendance or marks drop below threshold
+
+### Implementation notes
+- Dashboard leads with child's academic progress, fee status, leave acknowledgements
+- Parent agent is scoped to their child's records
+- Leave: acknowledgement is a required step for hostel gate-passes
+- Notifications: one-way (institution → Parent) for campus safety
+
+### Agent persona
+- Focus: child's academics, fees, leave acknowledgements, visitors
+- Scoped to: their child's records
+- Can: view academics/fees, acknowledge gate passes, schedule visitors
+- Cannot: approve leave (needs HOD/Principal), modify academic records
+- Escalation: to HOD for academic; to Hostel Manager for gate-pass; to Principal for disputes
+
+
+
+## Cross-Role Dependencies
+
+### Parent should see (read-only)
+- **student**: attendance %, marks, gate passes → Child's status
+- **admin**: fee dues, payment status → Child's financial status
+- **faculty**: class reviews, performance → Child's academic progress
+- **hostel_manager**: hostel occupancy, curfew status → Child's hostel status (for hostellers)
+
+### Parent should NOT see
+- **sysadmin**: infra, MFA, RLS → not parent's concern
+- **admin**: user governance, audit → not parent's concern
+
+### Parent escalates to
+- **faculty**: academic concerns
+- **hostel_manager**: hostel issues (for hostellers)
+- **admin**: fee disputes, general complaints
+
+### Parent borrows from
+- **student**: gate pass acknowledgements (parent acknowledges for hostel students)
+- **faculty**: academic progress data (read-only)
+

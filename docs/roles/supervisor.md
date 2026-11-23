@@ -48,3 +48,56 @@ The supervisor acts as the primary operational authority for gate security, poss
 - **Device Binding (M4)**: Enforces `device_id` cookie verification matching the token's `dh` SHA-256 hash.
 - **Supervisor Role Elevation**: Requires `ROLES.SUPERVISOR`. Endpoints permit modifying gate modes, issuing claim codes, and dismissing security escalations. High-risk administrative actions (e.g. watchlist insertion, manual curfew overrides) write to `audit_events`.
 - **Dual-Control Gates**: Sensitive overrides require supervisor authentication and an explicit audit reason before state transition occurs.
+
+
+## Gaps & Research
+
+### Institutional context
+Per NIT Hamirpur security SOP: "The Security room at Gate 1 Exit side will be the Control Room for Security... The Control Room will be under the control of Security Supervisor who shall forward the case to the related authority."
+
+The Supervisor is the single point of escalation for all gate security matters. Maintains the watchlist, handles overstay alerts, and coordinates shift handovers across all gates.
+
+### Missing (not in app yet)
+1. **Exception severity levels** — no structured severity levels for gate exceptions
+2. **Watchlist photo capture** — no photo capture for watchlist entries
+3. **Emergency response protocol** — no structured emergency response protocol
+4. **Real-time all-gate map** — no visual map of all gates with live status
+5. **Supervisor workload** — no tracking of exception count and resolution time
+6. **Cross-gate coordination** — no way to coordinate operators across multiple gates
+7. **Security incident report** — no structured incident report for security events
+8. **Supervisor KPI dashboard** — no KPI view of gate security performance
+
+### Implementation notes
+- Dashboard leads with all-gate live view, exception queue, watchlist
+- Supervisor agent is the escalation hub for gate security
+- Exceptions: structured queue with severity, status, and resolution
+- Watchlist: changes require Admin approval
+- Overstay: real-time alerts with visitor details and host info
+
+### Agent persona
+- Focus: gate security, exceptions, watchlist, overstay, shift handover
+- Can: resolve exceptions, manage watchlist, view all gates, handle overstay
+- Cannot: modify gate configuration (admin territory), approve watchlist changes without Admin
+- Escalation: to Admin for operational matters; to Principal for security matters
+
+
+
+## Cross-Role Dependencies
+
+### Supervisor should see (read-only)
+- **operator**: gate scan log, transaction history → Supervisor verifies operator actions
+- **admin**: campus occupancy, gate config → Supervisor makes gate decisions
+- **staff**: shift status → Supervisor coordinates handovers
+
+### Supervisor should NOT see
+- **sysadmin**: infra, MFA, RLS → not supervisor's concern
+- **principal**: strategic KPIs, DEBARRED → not supervisor's concern
+
+### Supervisor escalates to
+- **admin**: gate hardware issues, peak hour staffing, visitor policy
+- **principal**: security emergencies, campus-wide incidents
+
+### Supervisor borrows from
+- **operator**: scan queue, device health (supervisor needs real-time gate state)
+- **visitor**: overstay alerts (supervisor receives, admin sees KPI)
+

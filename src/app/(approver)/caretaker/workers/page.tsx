@@ -3,6 +3,8 @@
 import { Suspense, useCallback } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { requestInspection } from "@/components/shared/roleInspectors";
 
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -25,6 +27,7 @@ function CaretakerWorkersInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "caretaker") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -96,19 +99,49 @@ function CaretakerWorkersInner() {
           ) : (
             <div className="p-4 min-w-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
+                <div
+                  className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                  onClick={() => inspect(requestInspection({
+                    id: "caretaker-status",
+                    ticket: "Workers status",
+                    type: "facility",
+                    stage: "caretaker",
+                    status: "LIVE",
+                    requesterName: "Campus gate network",
+                  }))}
+                >
                   <p className="text-xs text-text-muted uppercase tracking-wide">Status</p>
                   <p className="mt-1 text-lg font-bold text-action-success">Live</p>
                   <p className="text-xs text-text-muted">Workers data streams from the campus gate network.</p>
                 </div>
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
+                <div
+                  className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                  onClick={() => inspect(requestInspection({
+                    id: "caretaker-last-updated",
+                    ticket: "Last updated",
+                    type: "polling",
+                    stage: "caretaker",
+                    status: "ACTIVE",
+                    createdAt: new Date().toISOString(),
+                  }))}
+                >
                   <p className="text-xs text-text-muted uppercase tracking-wide">Last Updated</p>
                   <p className="mt-1 text-lg font-bold text-action-info">
                     {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
                   </p>
                   <p className="text-xs text-text-muted">Auto-refreshes every 30 seconds.</p>
                 </div>
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
+                <div
+                  className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                  onClick={() => inspect(requestInspection({
+                    id: "caretaker-workers",
+                    ticket: "Workers records",
+                    type: "records",
+                    stage: "caretaker",
+                    status: "VISIBLE",
+                    requesterName: String((data as DataResponse | null)?.total ?? 0),
+                  }))}
+                >
                   <p className="text-xs text-text-muted uppercase tracking-wide">Records</p>
                   <p className="mt-1 text-lg font-bold text-action-warning">
                     {Array.isArray((data as unknown as { data?: unknown[] })?.data)
@@ -123,6 +156,7 @@ function CaretakerWorkersInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

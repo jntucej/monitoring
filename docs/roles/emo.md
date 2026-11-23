@@ -47,3 +47,59 @@ In the current Next.js application, `emo` acts as a specialized backend authorit
 - **Device Binding (M4)**: Enforces `device_id` cookie verification matching the token's `dh` SHA-256 hash.
 - **Authority Access**: Recognized in the `AUTHORITIES` set inside `/api/complaints/route.ts` alongside principal, admin, and hostel management. This grants campus-wide visibility across all complaints regardless of block boundaries, but restricts access from academic, grading, or gate security operations.
 - **Immutable Audit Trail**: All engineering approvals, cosign actions, and status overrides are permanently recorded in `complaint_audit` with officer timestamps.
+
+
+## Gaps & Research
+
+### Institutional context
+The EMO is the institutional authority for campus engineering and central physical infrastructure oversight. The EMO has no dedicated UI surface in the current build — it operates through shared consoles (complaints console, maintenance APIs).
+
+Per Indian university facility management:
+- EMO is the technical authority for all campus engineering matters
+- EMO works with Admin for operational coordination
+- EMO reports to Principal for major infrastructure decisions
+
+### Missing (not in app yet)
+1. **Dedicated EMO dashboard** — no dedicated UI surface for the EMO role
+2. **Estate asset register** — no structured asset register with maintenance history
+3. **Vendor SLA dashboard** — no visual SLA tracking for vendors
+4. **Major repair workflow** — no structured workflow for major repair cosign
+5. **Campus infrastructure map** — no visual map of campus infrastructure
+6. **EMO KPI dashboard** — no KPI view of infrastructure performance
+7. **Contractor safety audit** — no structured safety audit for contractors
+8. **Infrastructure budget tracking** — no tracking of infrastructure repair budget
+
+### Implementation notes
+- EMO operates through shared consoles (complaints, maintenance)
+- EMO agent is the technical authority for all campus engineering matters
+- Triage: structured complaint intake with priority and assignment
+- Major repairs: EMO cosign → Principal approval
+- Vendor SLA: visual dashboard with compliance tracking
+
+### Agent persona
+- Focus: campus infrastructure, complaint triage, major repairs, vendor SLA
+- Can: triage complaints, cosign major repairs, audit vendor SLAs
+- Cannot: approve major repairs without Principal sign-off, modify gate configuration
+- Escalation: to Principal for major decisions; to Admin for operational coordination
+
+
+
+## Cross-Role Dependencies
+
+### EMO should see (read-only)
+- **admin**: campus infrastructure complaints, vendor contracts → EMO triages
+- **staff**: maintenance ticket status → EMO tracks SLAs
+- **worker**: task completion, equipment reports → EMO verifies work
+
+### EMO should NOT see
+- **sysadmin**: infra, MFA, RLS → EMO handles physical infra, not tech
+- **principal**: strategic KPIs → EMO handles operational infra
+
+### EMO escalates to
+- **principal**: major repairs (cosign), vendor contract changes
+- **admin**: operational coordination, SLA breaches
+
+### EMO borrows from
+- **admin**: complaint intake (admin receives, emo triages)
+- **worker**: task execution (emo assigns, worker completes)
+

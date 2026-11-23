@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDepartmentInspection } from "@/lib/principal/registerInspections";
+import {
+  buildDepartmentInspection as buildMainDepartmentInspection,
+  type RoleGate,
+} from "./entityInspectionModels";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
-import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildDepartmentInspection } from "@/lib/principal/registerInspections";
 
 interface DepartmentItem {
   code: string;
@@ -36,10 +43,26 @@ export function DepartmentsView() {
   const { data, loading } = useApiResource<AcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
-  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const {
+    inspection: ourInspection,
+    inspect: ourInspect,
+    closeInspection,
+  } = useEntityInspector();
+
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [mainInspection, setMainInspection] = useState<
+    ReturnType<typeof buildMainDepartmentInspection> | null
+  >(null);
+  const inspectMain = (dept: DepartmentItem) =>
+    setMainInspection(buildMainDepartmentInspection(dept, gate));
 
   const d = data?.data;
-  const openInspector = (dept: DepartmentItem) => inspect(buildDepartmentInspection(dept));
+  const openInspector = (dept: DepartmentItem) => ourInspect(buildDepartmentInspection(dept));
 
   return (
     <div className="space-y-4">
@@ -52,7 +75,13 @@ export function DepartmentsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard label="Departments" value={d?.summary?.totalDepts} />
+        <KpiCard
+          label="Departments"
+          value={d?.summary?.totalDepts}
+          onClick={
+            d && d.departments.length > 0 ? () => openInspector(d.departments[0]) : undefined
+          }
+        />
         <KpiCard label="Students" value={d?.summary?.totalStudents} />
         <KpiCard label="Faculty" value={d?.summary?.totalFaculty} />
         <KpiCard
@@ -74,8 +103,11 @@ export function DepartmentsView() {
                 <button
                   type="button"
                   onClick={() => openInspector(dept)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") openInspector(dept);
+                  }}
                   aria-label={`Inspect department: ${dept.name}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -118,7 +150,8 @@ export function DepartmentsView() {
         </>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

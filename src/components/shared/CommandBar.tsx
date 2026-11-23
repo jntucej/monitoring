@@ -6,6 +6,12 @@
  * Lists the role's configured actions (scan, manual-entry, pass-verify,
  * lookup) with keyboard navigation (up/down, Enter, Escape). Each action
  * navigates to the corresponding sub-route via next/navigation router.
+ *
+ * When the free-text query is 2+ chars the palette also runs a debounced
+ * authenticated search against /api/persons?q=… and renders matching
+ * person records above the static command list. Selecting a record row
+ * navigates to the lookup page carrying the record id so the destination
+ * page's own inspector opens it.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -14,9 +20,13 @@ import {
   UserPlus,
   BadgeCheck,
   Search,
+  UserRound,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getConsoleConfig, type ConsoleCommand } from "@/config/consoles";
+import { getAuthHeaders } from "@/lib/utils";
+import type { Person } from "@/lib/types";
 
 interface CommandDef {
   id: ConsoleCommand;
@@ -24,6 +34,14 @@ interface CommandDef {
   hint: string;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
+}
+
+/** A person record returned by the /api/persons search. */
+interface PersonHit {
+  uniqueId: string;
+  name: string;
+  roll: string;
+  personType: string;
 }
 
 function buildCommands(role: string): CommandDef[] {
@@ -115,29 +133,94 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const commands = useMemo(() => buildCommands(role), [role]);
-  const lookupHref = commands.find((c) => c.id === "lookup")?.href ?? "/operator/manual-entry";
 
+  const commands = useMemo(() => buildCommands(role), [role]);
+  const lookupHref =
+    commands.find((c) => c.id === "lookup")?.href ?? "/operator/manual-entry";
+
+  // ── entity search state ────────────────────────────────────────────────
+  const [personHits, setPersonHits] = useState<PersonHit[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // 2+ chars and not matching a command label/hint exactly (trim check)
+  const q = query.trim();
+  const isSearching = q.length >= 2;
+
+  useEffect(() => {
+    if (!open) return;
+    if (!isSearching) {
+      setPersonHits([]);
+      setSearchLoading(false);
+      setSearchError(false);
+      return;
+    }
+    setSearchLoading(true);
+    setSearchError(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ q });
+        const res = await fetch(`/api/persons?${params.toString()}`, {
+          headers: getAuthHeaders(),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const body = await res.json();
+        const rows: Person[] | undefined = Array.isArray(body?.data)
+          ? body.data
+          : undefined;
+        setPersonHits(
+          (rows ?? []).slice(0, 8).map((p) => ({
+            uniqueId: p.uniqueId,
+            name: p.fullName || p.name || "Unknown",
+            roll:
+              p.studentDetails?.roll ||
+              p.employeeDetails?.employeeId ||
+              p.uniqueId,
+            personType: p.personType,
+          })),
+        );
+        setSearchLoading(false);
+      } catch {
+        setPersonHits([]);
+        setSearchLoading(false);
+        setSearchError(true);
+      }
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [q, isSearching, open]);
+
+  // ── filtered command list ──────────────────────────────────────────────
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
-    const q = query.toLowerCase();
-    return commands.filter((c) => c.label.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q));
+    const lower = query.toLowerCase();
+    return commands.filter(
+      (c) =>
+        c.label.toLowerCase().includes(lower) ||
+        c.hint.toLowerCase().includes(lower),
+    );
   }, [query, commands]);
 
+  // Reset state when palette opens
   useEffect(() => {
     if (open) {
       setQuery("");
       setActive(0);
+      setPersonHits([]);
+      setSearchLoading(false);
+      setSearchError(false);
       const t = setTimeout(() => inputRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
   }, [open]);
 
-  const handleSelect = useCallback(
+  // ── select handlers ────────────────────────────────────────────────────
+  const handleSelectCommand = useCallback(
     (cmd: CommandDef) => {
       if (cmd.id === "lookup") {
-        // Carry the free-text query into the manual-entry (person lookup) page
-        // as an initial id so the operator can continue without retyping.
         const params = new URLSearchParams();
         if (query.trim()) params.set("id", query.trim());
         const qs = params.toString();
@@ -150,21 +233,57 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
     [lookupHref, onClose, query, router],
   );
 
+  const handleSelectPerson = useCallback(
+    (hit: PersonHit) => {
+      const params = new URLSearchParams({ id: hit.uniqueId });
+      router.push(`${lookupHref}?${params.toString()}`);
+      onClose();
+    },
+    [lookupHref, onClose, router],
+  );
+
+  // ── combined list for keyboard nav ─────────────────────────────────────
+  // Records come first when a search query is present; commands follow.
+  type NavItem =
+    | { kind: "person"; index: number; hit: PersonHit }
+    | { kind: "command"; index: number; cmd: CommandDef };
+
+  const navItems: NavItem[] = useMemo(() => {
+    const items: NavItem[] = [];
+    if (isSearching) {
+      personHits.forEach((hit, i) =>
+        items.push({ kind: "person", index: i, hit }),
+      );
+    }
+    filtered.forEach((cmd, i) => items.push({ kind: "command", index: i, cmd }));
+    return items;
+  }, [isSearching, personHits, filtered]);
+
+  const navCount = navItems.length;
+
   const onListKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setActive((i) => Math.min(i + 1, filtered.length - 1));
+        setActive((i) => Math.min(i + 1, navCount - 1));
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setActive((i) => Math.max(i - 1, 0));
       } else if (e.key === "Enter") {
         e.preventDefault();
-        if (filtered[active]) handleSelect(filtered[active]);
+        if (navCount === 0) return;
+        const item = navItems[active];
+        if (!item) return;
+        if (item.kind === "person") handleSelectPerson(item.hit);
+        else handleSelectCommand(item.cmd);
       }
     },
-    [filtered, active, handleSelect],
+    [navItems, navCount, active, handleSelectCommand, handleSelectPerson],
   );
+
+  // Active index helpers
+  const activePersonIdx = isSearching ? active : -1;
+  const activeCmdOffset = isSearching ? active - personHits.length : active;
 
   if (!open) return null;
 
@@ -195,38 +314,117 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
             aria-label="Command input"
           />
-          <kbd className="surface-card text-xs font-mono px-1.5 py-0.5 bg-bg-elevated text-text-muted">esc</kbd>
+          <kbd className="surface-card text-xs font-mono px-1.5 py-0.5 bg-bg-elevated text-text-muted">
+            esc
+          </kbd>
         </div>
 
+        {/* Records section (only when searching) */}
+        {isSearching && (
+          <div className="max-h-48 overflow-y-auto">
+            <div className="px-4 pt-2 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                Records
+              </span>
+            </div>
+            {searchLoading ? (
+              <div className="px-4 py-3 flex items-center gap-2 text-xs text-text-muted">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Searching…
+              </div>
+            ) : searchError ? (
+              <div className="px-4 py-2 text-xs text-text-muted">
+                Search unavailable
+              </div>
+            ) : personHits.length === 0 ? (
+              <div className="px-4 py-2 text-xs text-text-muted">
+                No matching records
+              </div>
+            ) : (
+              <ul role="listbox" aria-label="Matching records">
+                {personHits.map((hit, i) => {
+                  const isActive = i === activePersonIdx;
+                  return (
+                    <li key={hit.uniqueId} role="option" aria-selected={isActive}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectPerson(hit)}
+                        onMouseEnter={() => setActive(i)}
+                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
+                          isActive ? "bg-action-primary/10" : "hover:bg-bg-elevated"
+                        }`}
+                      >
+                        <span
+                          className={`size-5 rounded flex items-center justify-center shrink-0 ${
+                            isActive
+                              ? "bg-action-primary/20 text-action-primary"
+                              : "bg-bg-elevated text-text-secondary"
+                          }`}
+                        >
+                          <UserRound className="w-3 h-3" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-sm truncate ${
+                              isActive ? "text-action-primary" : "text-text-primary"
+                            }`}
+                          >
+                            {hit.name}
+                          </p>
+                        </div>
+                        <span className="font-mono text-xs text-text-muted shrink-0">
+                          {hit.roll}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* Divider between records and commands when both are visible */}
+        {isSearching && filtered.length > 0 && (
+          <div className="border-t border-border" />
+        )}
+
         {/* Command list */}
-        <ul role="listbox" aria-label="Commands" className="max-h-64 overflow-y-auto py-1">
-          {filtered.length === 0 ? (
-            <li className="px-4 py-6 text-center text-xs text-text-muted">
-              No matching commands
-            </li>
-          ) : (
-            filtered.map((cmd, idx) => {
+        {filtered.length > 0 ? (
+          <ul
+            role="listbox"
+            aria-label="Commands"
+            className="max-h-64 overflow-y-auto py-1"
+          >
+            {filtered.map((cmd, i) => {
+              const globalIdx = isSearching ? personHits.length + i : i;
               const Icon = cmd.icon;
-              const isActive = idx === active;
+              const isActive = globalIdx === activeCmdOffset;
               return (
                 <li key={cmd.id} role="option" aria-selected={isActive}>
                   <button
                     type="button"
-                    onClick={() => handleSelect(cmd)}
-                    onMouseEnter={() => setActive(idx)}
+                    onClick={() => handleSelectCommand(cmd)}
+                    onMouseEnter={() => setActive(globalIdx)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
                       isActive ? "bg-action-primary/10" : "hover:bg-bg-elevated"
                     }`}
                   >
                     <span
                       className={`size-6 rounded-lg flex items-center justify-center shrink-0 ${
-                        isActive ? "bg-action-primary/20 text-action-primary" : "bg-bg-elevated text-text-secondary"
+                        isActive
+                          ? "bg-action-primary/20 text-action-primary"
+                          : "bg-bg-elevated text-text-secondary"
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
                     </span>
                     <div className="min-w-0">
-                      <p className={`text-sm font-semibold ${isActive ? "text-action-primary" : "text-text-primary"}`}>
+                      <p
+                        className={`text-sm font-semibold ${
+                          isActive ? "text-action-primary" : "text-text-primary"
+                        }`}
+                      >
                         {cmd.label}
                       </p>
                       <p className="text-xs text-text-muted truncate">{cmd.hint}</p>
@@ -234,9 +432,15 @@ export function CommandBar({ role, open, onClose }: CommandBarProps) {
                   </button>
                 </li>
               );
-            })
-          )}
-        </ul>
+            })}
+          </ul>
+        ) : (
+          !isSearching && (
+            <div className="px-4 py-6 text-center text-xs text-text-muted">
+              No matching commands
+            </div>
+          )
+        )}
       </div>
     </div>
   );

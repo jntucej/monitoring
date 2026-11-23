@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { EntityInspector, type EntityInspection } from "@/components/shared/EntityInspector";
+import { visitorVisitInspection } from "@/components/shared/visitorInspection";
 
 import { useAuthStore } from "@/stores/authStore";
 import { getRoleTier } from "@/lib/alert-hierarchy";
@@ -10,7 +12,7 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
-import { Loader2, History, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, History, AlertTriangle, ArrowRight, Search } from "lucide-react";
 import type { VisitorsMineResponse, VisitorLogRow } from "../types";
 
 function fmtRange(l: VisitorLogRow): string {
@@ -31,6 +33,11 @@ function VisitorHistoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "visitor") as Role;
   const tier = getRoleTier(role);
+
+  const [
+    inspection,
+    setInspection,
+  ] = useState<EntityInspection | null>(null);
 
   const {
     data,
@@ -104,7 +111,12 @@ function VisitorHistoryInner() {
           ) : (
             <div className="divide-y divide-slate-800 min-w-0">
               {history.map((l) => (
-                <div key={l.id} className="px-4 py-3 flex flex-wrap items-center gap-3 min-w-0">
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => setInspection(visitorVisitInspection(l))}
+                  className="w-full text-left px-4 py-3 flex flex-wrap items-center gap-3 min-w-0 hover:bg-bg-elevated/30 transition-colors focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none"
+                >
                   <span className="text-xs text-text-muted w-40 shrink-0">{fmtRange(l)}</span>
                   <div className="flex-1 min-w-0">
                     {l.host?.name ? (
@@ -116,14 +128,20 @@ function VisitorHistoryInner() {
                       <p className="text-xs text-text-muted truncate">Purpose: {l.purpose}</p>
                     )}
                   </div>
-                  <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated/40 text-text-secondary shrink-0">completed</span>
-                </div>
+                  <span className="surface-card px-2 py-0.5 text-xs bg-bg-elevated/40 text-text-secondary shrink-0">{l.check_out_at ? "completed" : "active"}</span>
+                  <Search className="size-3.5 text-text-muted shrink-0" aria-hidden="true" />
+                </button>
               ))}
             </div>
           )}
         </div>
       </WidgetBoundary>
 
+      {/* Read-only inspection drawer: inspect + context only (no write
+          actions — a visitor cannot act on their own visit records). */}
+      {inspection ? (
+        <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
+      ) : null}
     </div>
   );
 }

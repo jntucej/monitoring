@@ -3,13 +3,7 @@
 // src/components/operator/shared/OperatorNotifications.tsx
 // Operator-specific copy of @/components/shared/NotificationCenter
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell,
   AlertTriangle,
@@ -25,6 +19,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getTimeAgo } from "@/lib/utils";
 import { useNotificationStore, deriveNotifications, type NotificationItem, type NotificationUrgency } from "@/stores/notificationStore";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { passTicketInspection, alertInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { OperatorWidgetBoundary } from "./OperatorWidgetBoundary";
 
 /**
@@ -84,6 +80,7 @@ export function OperatorNotifications({
   const hasHydrated = useHasHydrated();
   const user = useAuthStore((s) => s.user);
   const role = user?.role ?? null;
+  const { inspection, inspect, closeInspection } = useRoleInspectorHost();
 
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -223,6 +220,42 @@ export function OperatorNotifications({
     [store]
   );
 
+  /**
+   * Notification items that reference a real entity (a ticket or an alert)
+   * open the standardized inspector instead of just marking read — the
+   * quick-overview layer before navigating to the full detail. Items
+   * without an entity reference keep their mark-read behavior only.
+   */
+  const handleItemActivate = useCallback(
+    (item: NotificationItem) => {
+      store.markRead(item.id);
+      if (item.ticketNumber) {
+        inspect(
+          passTicketInspection(
+            {
+              id: item.ticketNumber,
+              ticket_number: item.ticketNumber,
+              status: item.urgency === "overdue" ? "OVERDUE" : item.urgency === "urgent" ? "ESCALATED" : "PENDING",
+              student: undefined,
+            },
+            { role },
+          ),
+        );
+      } else if (item.urgency === "urgent" && (item.type === "alert" || /alert/i.test(item.type ?? "") || /alert/i.test(item.title))) {
+        inspect(
+          alertInspection({
+            id: item.id,
+            severity: item.urgency === "urgent" ? "critical" : "warning",
+            title: item.title,
+            timestamp: item.createdAt ?? new Date().toISOString(),
+            resolved: false,
+          }),
+        );
+      }
+    },
+    [store, inspect, role],
+  );
+
   const handleMarkAllRead = useCallback(() => {
     store.markAllRead(items.map((n) => n.id));
   }, [store, items]);
@@ -306,12 +339,13 @@ export function OperatorNotifications({
                     <div className="space-y-2">
                       {group.map((item) => {
                         const isRead = readIds.includes(item.id);
+                        const hasEntity = Boolean(item.ticketNumber || (item.urgency === "urgent" && /alert/i.test(item.title)));
                         return (
                           <button
                             key={item.id}
                             type="button"
-                            onClick={() => handleMarkRead(item.id)}
-                            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
+                            onClick={() => (hasEntity ? handleItemActivate(item) : handleMarkRead(item.id))}
+                            className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer ${
                               isRead
                                 ? "border-border bg-bg-surface opacity-60"
                                 : "border-border bg-bg-elevated hover:bg-bg-surface"
@@ -350,7 +384,12 @@ export function OperatorNotifications({
   );
 
   if (compact) {
-    return <OperatorWidgetBoundary title="OperatorNotifications">{inner}</OperatorWidgetBoundary>;
+    return (
+      <OperatorWidgetBoundary title="OperatorNotifications">
+        {inner}
+        <EntityInspector inspection={inspection} onClose={closeInspection} />
+      </OperatorWidgetBoundary>
+    );
   }
 
   return (
@@ -365,6 +404,7 @@ export function OperatorNotifications({
         </div>
         {inner}
       </div>
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </OperatorWidgetBoundary>
   );
 }

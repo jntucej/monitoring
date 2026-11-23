@@ -44,3 +44,55 @@ The Exam Superintendent workspace uses a red-orange theme (`#fff7ed` surface tin
 * **RBAC & Authorization:** Protected by `withAuthorization({ requiredRole: ['exam_superintendent', ...] })` and UI guarded by `AuthGuard allowedRoles={['exam_superintendent']}`.
 * **Tamper Prevention:** Attendance records finalized by the Exam Superintendent cannot be updated after session closure without two-person authorization from the Controller of Examinations and Principal.
 * **Session Integrity:** Exam-day access permissions are strictly time-bounded to the active examination schedule.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH convention, the Principal acts as Chief Superintendent of Examinations during exam days. The Chief Superintendent runs the exam-day command console, manages candidate attendance, controls hall access, and handles spot exceptions.
+
+Per JNTUH exam office procedures, the Controller of Examinations oversees the exam branch office. The Chief Superintendent is the on-ground authority at the college level. Exam-day operations: candidate attendance, hall discipline, exception handling.
+
+### Missing (not in app yet)
+1. **Exam-day KPI dashboard** — no single view of all halls, candidates, and exceptions
+2. **Candidate check-in** — no structured candidate check-in at gate
+3. **Hall capacity tracking** — no tracking of hall capacity vs candidates
+4. **Exception SLA** — no SLA timers for spot exception resolution
+5. **Exam discipline log** — no structured log of exam rule violations
+6. **Result processing view** — no view of result processing status (that's exam branch)
+7. **Exam day schedule** — no visual exam day schedule
+8. **Candidate communication** — no way to communicate with candidates on exam day
+
+### Implementation notes
+- Dashboard leads with exam-day KPIs: halls, candidates, exceptions
+- Exam Superintendent agent is scoped to exam-day operations
+- Attendance: real-time candidate check-in across all halls
+- Hall access: controlled by Chief Superintendent, enforced in real time
+- Exceptions: structured queue with severity and resolution tracking
+
+### Agent persona
+- Focus: exam-day operations, candidate attendance, hall access, spot exceptions
+- Can: control hall access, log exceptions, track attendance
+- Cannot: process results (exam branch), self-approve result publishing
+- Escalation: to Principal for non-exam matters; to exam branch for result matters
+
+
+
+## Cross-Role Dependencies
+
+### Exam Superintendent should see (read-only)
+- **oie**: exam queue, candidate exceptions → What OIE is handling
+- **exam_branch**: hall ticket distribution, exam schedule → What EB prepared
+- **principal**: exam policy, final authority → What Principal decided
+
+### Exam Superintendent should NOT see
+- **sysadmin**: infra, MFA, RLS → not CS's concern
+
+### Exam Superintendent escalates to
+- **principal**: major exam-day decisions, candidate disputes
+- **exam_branch**: result processing issues
+
+### Exam Superintendent borrows from
+- **oie**: exception queue (oie triages, cs handles)
+- **exam_branch**: hall tickets, seating (eb generates, cs uses)
+

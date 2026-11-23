@@ -73,3 +73,39 @@ The 15 most important endpoints across the sysadmin surface:
 - **Two-Person Approval Safeguard:** High-consequence actions (e.g. disaster recovery drills, mass role reassignment, schema resets) are gated by two-person rules (`/api/sysadmin/approvals/two-person` and `/api/sysadmin/actions/[id]/approve`).
 - **Privileged Login Alerting:** Ingress alerts fire immediately upon session initiation, informing external audit channels (Telegram notification) of sysadmin access.
 - **Session Tamper Termination:** Device hash discrepancies immediately invalidate all sessions for the sysadmin user ID (`UPDATE public.sessions SET revoked_at = NOW()`).
+
+
+## Gaps & Research
+
+### Institutional context
+In a real university IT department, this maps to the College IT Administrator or CISM who owns the LMS, ERP, and gate security systems. The sysadmin is the last line of technical defense — the only person who can bypass access controls, restore from backup, or take a service down.
+
+### Operational standards
+- MFA is mandatory for all privileged accounts; sysadmin owns the MFA policy (TOTP, hardware keys, passkey)
+- Backup/restore drills must be tested quarterly; sysadmin owns the schedule and recovery testing
+- RLS (Row-Level Security) audit: sysadmin reviews policy drift weekly; any unauthorized policy change is a security incident
+- Break-glass access is a last resort: documented, time-boxed, and auto-expiring
+- Service daemons (gate scanners, QR readers, notification services) must have health checks; sysadmin monitors and restarts
+- Per AICTE / NBA audit requirements, the system must maintain an immutable audit trail
+
+### Missing (not in app yet)
+1. **Deployment rollback** — no one-click rollback to previous version
+2. **RLS drift alerting** — drift is detected on request; no proactive alert when a policy changes
+3. **MFA key expiry notification** — no warning before keys expire
+4. **Break-glass auto-expiry enforcement** — no system-enforced expiry; relies on manual revocation
+5. **Service daemon auto-restart** — health checks exist but no automatic restart
+6. **Backup restore testing** — no scheduled test-restore to verify backup integrity
+7. **Audit log search** — no full-text search across audit_events
+8. **Environment variable management** — no UI for managing config variables per environment
+
+### Implementation notes
+- Break-glass is the highest-severity action: two-person approval (sysadmin + principal), time-boxed to 30 minutes, auto-revokes
+- RLS audit should show: last policy change, who changed it, when, and drift score
+- MFA dashboard should show: active keys, expiry dates, rotation status, last successful auth
+
+### Agent persona
+- Focus: infrastructure, security, MFA, backup, RLS, deployments
+- Do NOT: manage users, gates, alerts (that's operational admin)
+- Can: access full audit log with UUIDs, trigger break-glass, manage MFA policy, deploy
+- Escalation: security incidents → Principal → JNTUH IT Cell
+

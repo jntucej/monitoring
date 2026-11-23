@@ -48,3 +48,67 @@ When the HOD accesses the console, the dashboard executes calls to `/api/hod/das
 
 ## Security notes
 HOD operations are strictly bound by departmental tenancy: an HOD belongs to a specific department (e.g. CSE) and Postgres RLS restricts all modifications to students, faculty, and classes within that department. An HOD cannot alter records in other academic departments. An HOD cannot unilaterally issue gate exit passes for students (which belongs to hostel and gate management) or alter campus security gate devices. Marking a student as `DEBARRED` operates under fail-close governance: the HOD initiates the status flag, but the gate restriction is parked in `pending_approvals` until executive approval from the Principal or Dean is recorded.
+
+
+## Gaps & Research
+
+### Institutional context
+The HOD is the academic head of a single department. There are 5 B.Tech departments (EEE, ME, ECE, CSE, IT) and 5 M.Tech specializations, each with its own HOD. The HOD role is scoped to a single department via auth.departmentId.
+
+In real institutional life, the HOD:
+- Convenes and presides over department meetings and Board of Studies
+- Organizes teaching and research work
+- Frames the time table
+- Maintains discipline in classrooms and laboratories
+- Assigns duties to teachers and exercises control over non-teaching staff
+- Is responsible for department records, equipment, and library
+- Operates the department budget
+
+Per UGC / JNTUH ordinances, the HOD is the primary academic authority within the department. DEBARRED requires two-person approval (HOD + Dean/Principal).
+
+### Missing (not in app yet)
+1. **Department KPI dashboard** — no single view showing department performance, attendance, marks, and compliance
+2. **Faculty workload heat map** — no visual representation of faculty workload distribution
+3. **Marking entry workflow** — no structured workflow for faculty to enter marks and HOD to verify
+4. **Board of Studies minutes** — no digital record of department council decisions
+5. **Cross-department comparison** — no way for HOD to see how their department compares to others
+6. **Student mentor tracking** — no structured mentor-mentee relationship tracking
+7. **Lab mark integration** — no integration with lab practical marks entry
+8. **CBT result tracking** — no view of Computer Based Test results per student
+
+### Implementation notes
+- Dashboard leads with department KPIs: attendance, marks, faculty workload, compliance
+- HOD agent is scoped to a single department — always show the department name in the UI
+- Academic status: DEBARRED requires two-person approval (HOD + Dean/Principal)
+- Exam proposals: structured form with schedule, question paper reference, and CBT integration
+
+### Agent persona
+- Focus: department operations, faculty workload, academic status, exam proposals
+- Scoped to: a single department (EEE/ME/ECE/CSE/IT)
+- Can: flag academic status, approve faculty leave, submit exam proposals, view class analytics
+- Cannot: self-approve DEBARRED (needs Dean/Principal), cross-department actions
+- Escalation: to Principal/VP for department-level decisions; to OIE for exam matters
+
+
+
+## Cross-Role Dependencies
+
+### HOD should see (read-only)
+- **faculty**: workload, leave requests, marks entry, assignments → What my faculty are doing
+- **student**: attendance, marks, academic status → My department's students
+- **exam_branch**: internal exam schedule, CBT results → Exam timing
+- **vp**: department KPIs, exam coordination → What VP expects
+
+### HOD should NOT see
+- **sysadmin**: infra, MFA, RLS → not HOD's concern
+- **admin**: user governance, audit → not HOD's concern
+
+### HOD escalates to
+- **vp**: academic exceptions, cross-department matters
+- **principal**: DEBARRED (with Dean two-person rule), major policy
+- **exam_branch**: exam proposals, CBT results
+
+### HOD borrows from
+- **faculty**: marks entry, assignment tracking (faculty creates, HOD reviews)
+- **vp**: exam coordination data (vp coordinates, HOD sees)
+

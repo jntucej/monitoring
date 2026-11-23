@@ -46,3 +46,61 @@ Visitors do not possess an internal administrative dashboard or complex operatio
 - **Device Binding (M4)**: Enforces `device_id` cookie verification matching the token's `dh` SHA-256 hash when logging in via web interfaces.
 - **Strict Least Privilege**: The `visitor` role is strictly sandboxed. Visitors cannot access internal student records, faculty data, hostel areas, or administrative functions. Access is restricted to personal pass records (`/visitors/mine`).
 - **Overstay Auto-Flagging**: Visitor passes have hard expiry windows. Failure to check out within the designated window marks the record as an overstay, dispatching alerts to security supervisors.
+
+
+## Gaps & Research
+
+### Institutional context
+Per Indian university visitor management best practices:
+- Visitor categories: parent, guardian, vendor, contractor, guest, government, alumnus
+- Pre-registration with host verification and time-limited digital badges
+- Real-time headcount across all gates
+- Automated check-in/check-out with photo and ID capture
+- Host notification on visitor arrival
+
+Per NIT Hamirpur security SOP, all visitor matters are reported to the Security Control Room. The Security Supervisor is the escalation hub for visitor issues.
+
+### Missing (not in app yet)
+1. **Pre-registration portal** — no way for hosts to pre-register visitors in advance
+2. **Visitor photo capture** — no photo capture at check-in
+3. **Visitor categorization** — no structured visitor categories (parent, vendor, guest, government, alumnus)
+4. **Visitor badge** — no digital badge with time-limited access
+5. **Visitor history** — no history of previous visits
+6. **Visitor feedback** — no way for visitors to provide feedback on the visit
+7. **Visitor notification** — no notification to host when visitor arrives
+8. **Multi-visitor support** — no support for groups of visitors (e.g. government delegation)
+
+### Implementation notes
+- Dashboard shows pass details, host info, check-in/out status
+- Visitor agent is external to the institution
+- Overstay: auto-flag with security alert
+- Pre-registration: host-initiated flow with QR generation
+
+### Agent persona
+- Focus: pass lifecycle, check-in/out, overstay
+- External: not an institutional user
+- Can: view pass, check in/out, view host info
+- Cannot: extend pass (needs host/Admin), access restricted areas
+- Escalation: overstay → Security Supervisor → Admin
+
+
+
+## Cross-Role Dependencies
+
+### Visitor should see (read-only)
+- **host**: host name, purpose of visit, time limit → Who invited me, how long
+- **operator**: gate check-in/out status → Where I am in the pass lifecycle
+- **supervisor**: overstay alerts → Know if I'm overstaying
+
+### Visitor should NOT see
+- **admin**: user governance, audit → not visitor's concern
+- **sysadmin**: infra, MFA, RLS → not visitor's concern
+
+### Visitor escalates to
+- **supervisor**: overstay, access issues
+- **admin**: visitor policy disputes
+
+### Visitor borrows from
+- **host**: pre-registration QR, visit details (host creates, visitor scans)
+- **operator**: check-in/out status (operator records, visitor sees)
+

@@ -97,3 +97,57 @@ shift-change.
   `/deputy-warden/decision-history` and the global audit log.
 - **Internal IDs:** the warden sees human identifiers (roll / name), not
   UUIDs — internal-ID display is reserved to `sysadmin`.
+
+
+## Gaps & Research
+
+### Institutional context
+The Deputy Warden is the block-level supervisor of a single hostel. JNTUH CEJ has 4 blocks (2 boys + 2 girls). Per JNTUH CEJ's hostel staff page: Deputy Wardens are appointed from teaching faculty.
+
+In the Gate Monitor system, the Deputy Warden manages block-level curfew verification, night attendance reconciliation, room vacate/allot within their block, incident log, visitor log, and mess rule violation reporting.
+
+### Missing (not in app yet)
+1. **Block curfew compliance dashboard** — no single view of curfew compliance for the block
+2. **Night attendance alerts** — no proactive alert when night attendance drops
+3. **Incident categorization** — no structured categorization of incident types
+4. **Visitor photo capture** — no photo capture at hostel visitor check-in
+5. **Mess rule violation tracking** — no structured tracking of mess rule violations
+6. **Student satisfaction survey** — no periodic student satisfaction survey for the block
+7. **Caretaker task assignment** — no way to assign tasks to block caretakers
+8. **Block KPI dashboard** — no single view of block KPIs (occupancy, curfew, incidents)
+
+### Implementation notes
+- Dashboard leads with block curfew status, incident log, night attendance
+- Deputy Warden agent is scoped to a single block
+- Curfew: nightly verification with time stamp and non-compliance list
+- Incidents: structured log with type, severity, resolution status
+- Visitor log: structured with host, purpose, check-in/out times
+
+### Agent persona
+- Focus: block-level curfew, night attendance, incidents, visitor log
+- Scoped to: a single hostel block
+- Can: verify curfew, reconcile night attendance, log incidents, manage room vacate/allot within block
+- Cannot: escalate to DEBARRED (Principal-only), approve cross-block room changes
+- Escalation: to Hostel Manager for block-level decisions; to Principal for disciplinary
+
+
+
+## Cross-Role Dependencies
+
+### Deputy Warden should see (read-only)
+- **caretaker**: maintenance tickets, housekeeping, asset damage → Block upkeep
+- **hostel_manager**: room allot/vacate, mess menu → Block status
+- **student**: curfew status, expected return, overstay → Who's in the block
+
+### Deputy Warden should NOT see
+- **sysadmin**: infra, MFA, RLS → not DW's concern
+- **admin**: user governance, audit → not DW's concern
+
+### Deputy Warden escalates to
+- **hostel_manager**: curfew violations, mess rule violations, major incidents
+- **principal**: DEBARRED (via hostel_manager chain)
+
+### Deputy Warden borrows from
+- **caretaker**: block maintenance status (caretaker reports, dw sees)
+- **hostel_manager**: room allot decisions (hm decides, dw executes within block)
+

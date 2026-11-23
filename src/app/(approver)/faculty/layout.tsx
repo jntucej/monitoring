@@ -6,6 +6,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
 import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
 import { FACULTY_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { useAuthStore } from "@/stores/authStore";
 import { hasTeachingBinding } from "@/lib/teaching-binding";
 import type { Role } from "@/lib/types";
@@ -95,6 +96,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <div className="block lg:hidden">
         <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
       </div>
+      <GlobalEntityInspector />
     </>
   );
 }

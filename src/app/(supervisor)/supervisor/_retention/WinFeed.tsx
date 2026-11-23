@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowUpRight, Sparkles } from "lucide-react";
 import { useSupervisorRetention, type SupervisorWin } from "@/stores/supervisorRetentionStore";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { alertInspection, passTicketInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
 function relativeTime(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
@@ -34,6 +36,36 @@ function outcomeStyle(kind: SupervisorWin["kind"]): {
 export function WinFeed() {
   const sessionWins = useSupervisorRetention((s) => s.sessionWins);
   const shiftWins = useSupervisorRetention((s) => s.shiftWins);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
+
+  /** A win IS a decided record: opening it shows the quick overview of the
+   *  underlying entity (escalation ticket or incident) with a link back to
+   *  the response console — no re-acting possible from here. */
+  const openWin = (w: SupervisorWin) => {
+    if (w.kind === "incident_resolved") {
+      inspect(
+        alertInspection({
+          id: w.ticket,
+          severity: "high",
+          title: w.subject,
+          timestamp: w.at,
+          resolved: true,
+        }),
+      );
+    } else {
+      inspect(
+        passTicketInspection(
+          {
+            id: w.ticket,
+            ticket_number: w.ticket,
+            status: "RESOLVED",
+            student: undefined,
+          },
+          { role },
+        ),
+      );
+    }
+  };
 
   // Merge: session wins first, then shift wins (deduped by ticket)
   const seen = new Set<string>();
@@ -80,7 +112,8 @@ export function WinFeed() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="flex items-center gap-3 py-2 text-xs"
+                  className="flex cursor-pointer items-center gap-3 py-2 text-xs hover:bg-bg-elevated transition-colors rounded"
+                  onClick={() => openWin(w)}
                 >
                   <span
                     className={`flex size-6 shrink-0 items-center justify-center rounded-full bg-bg-elevated ${style.color}`}
@@ -101,6 +134,8 @@ export function WinFeed() {
           </AnimatePresence>
         </ul>
       )}
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </section>
   );
 }

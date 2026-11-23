@@ -7,6 +7,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { History, ScrollText } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { decisionRecordInspection } from "@/components/approver/wardenConsoleModels";
 
 
 interface DecisionRow {
@@ -32,6 +34,24 @@ type StatusFilter = "ALL" | "APPROVED" | "REJECTED";
 
 function VpDecisionHistoryInner() {
   const [filter, setFilter] = useState<StatusFilter>("ALL");
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectRow = (r: DecisionRow) => {
+    inspect(
+      decisionRecordInspection({
+        id: r.id,
+        ticket_number: r.ticket_number,
+        workflow_type: r.workflow_type,
+        current_stage: r.current_stage,
+        status: r.status,
+        updated_at: r.updated_at ?? null,
+        created_at: null,
+        student: r.student
+          ? { name: r.student.name, student_details: r.student.student_details ? { roll: r.student.student_details.roll } : null }
+          : null,
+      }),
+    );
+  };
 
   const {
     data: approved,
@@ -134,7 +154,8 @@ function VpDecisionHistoryInner() {
               {merged.slice(0, 20).map((r) => (
                 <li
                   key={`${r.status}-${r.id}`}
-                  className="surface-card bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2"
+                  className="surface-card bg-bg-surface/40 px-3 py-2 min-w-0 flex flex-wrap items-center gap-2 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                  onClick={() => inspectRow(r)}
                 >
                   <span
                     className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${
@@ -173,6 +194,8 @@ function VpDecisionHistoryInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

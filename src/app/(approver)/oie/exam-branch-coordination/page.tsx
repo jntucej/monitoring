@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
@@ -20,6 +20,12 @@ import {
   Inbox,
   Users,
 } from "lucide-react";
+import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
+import type { WorkflowType, PermissionStatus } from "@/lib/types";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface CoordinationRow {
   id: string;
@@ -170,6 +176,7 @@ function ExamBranchCoordinationInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data,
@@ -263,7 +270,22 @@ function ExamBranchCoordinationInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <CoordinationTable rows={rows} onInspect={(r) => inspect(buildOieCoordinationInspection(r))} />
+            <CoordinationTable
+              rows={rows}
+              onInspect={(r) => {
+                inspect(buildOieCoordinationInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.student?.name,
+                  studentRoll: r.student?.student_details?.roll,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             OIE coordinates with the Exam Branch on candidate eligibility, scheduling, and
@@ -272,7 +294,14 @@ function ExamBranchCoordinationInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

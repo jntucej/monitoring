@@ -52,3 +52,59 @@ When loading `/faculty`, the interface calls `/api/faculty/my-classes` and `/api
 
 ## Security notes
 Access to `/faculty/*` is guarded by the **Teaching Capability Gate** (`TeachingBindingGate`): access requires an active record in `faculty_assignments`. Under Postgres RLS, faculty can only view and mutate attendance and marks for student cohorts explicitly assigned to them. Faculty cannot modify institutional gate rules, issue hostel gate release passes, alter classes outside their department, or override supervisor shift logs. Attendance submissions employ a freeze window: once confirmed and closed, retroactive modifications require departmental HOD approval via correction workflows.
+
+
+## Gaps & Research
+
+### Institutional context
+The Faculty role represents teaching staff at JNTUH CEJ. Each faculty member has a mentee list (scoped to their assigned students), marks entry responsibility, assignment management, study material duties, and leave/substitution requests.
+
+Per JNTUH exam procedures, faculty are the first point of entry for marks. Marks entry (faculty) ≠ result processing (Addl. Ctrl Results) ≠ result sign-off (Controller) — separation of duties is enforced.
+
+### Missing (not in app yet)
+1. **Study material upload** — no digital repository for study material, notes, and references
+2. **Lab practical scheduling** — no integration with lab practical schedules
+3. **CBT result upload** — no structured upload for Computer Based Test results
+4. **Assignment auto-grading** — no integration with automated assignment submission and grading
+5. **Class recording** — no integration with class recording/replay
+6. **Faculty workload view** — no visual representation of class load, mentee count, and extra duties
+7. **Peer review** — no structured peer review of teaching quality
+8. **Research output tracking** — no tracking of publications, patents, or research projects
+
+### Implementation notes
+- Dashboard leads with class view, mentee list, marks entry
+- Faculty agent is scoped to their assigned classes and students
+- Marks entry: structured form with subject, semester, exam type, and marks
+- Assignment: create → assign → track → grade → submit
+- Leave: request → HOD approval → substitution arrangement
+
+### Agent persona
+- Focus: teaching, marks entry, assignments, mentoring, class attendance
+- Scoped to: assigned classes, students, and departments
+- Can: enter marks, create assignments, request leave, view mentee list
+- Cannot: self-approve leave (needs HOD), cross-department actions, result processing
+- Escalation: to HOD for academic matters; to OIE for exam matters
+
+
+
+## Cross-Role Dependencies
+
+### Faculty should see (read-only)
+- **hod**: department schedule, exam proposals, leave approvals → What HOD expects
+- **student**: mentee list, attendance, marks → Who I'm responsible for
+- **exam_branch**: internal exam schedule, CBT results → When exams happen
+- **vp**: class confirmation status → Did VP confirm my class?
+
+### Faculty should NOT see
+- **sysadmin**: infra, MFA, RLS → not faculty's concern
+- **admin**: user governance, audit → not faculty's concern
+
+### Faculty escalates to
+- **hod**: leave disputes, workload issues, exam proposals
+- **vp**: academic exceptions, class confirmations
+- **exam_branch**: result processing issues
+
+### Faculty borrows from
+- **hod**: class schedule, exam proposals (hod creates, faculty sees)
+- **vp**: class confirmation (vp confirms on faculty's behalf if faculty is absent)
+

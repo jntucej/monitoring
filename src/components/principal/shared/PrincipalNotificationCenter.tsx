@@ -23,6 +23,8 @@ import { usePolling } from "@/hooks/usePolling";
 import { getTimeAgo } from "@/lib/utils";
 import { useNotificationStore, deriveNotifications, type NotificationItem, type NotificationUrgency } from "@/stores/notificationStore";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { buildNotificationInspection } from "@/components/shared/notificationInspection";
 
 /**
  * NotificationCenter — a notification dropdown / inbox that groups alerts
@@ -187,6 +189,34 @@ export function NotificationCenter({
 
   const store = useNotificationStore();
   const readIds = useNotificationStore((s) => s.readIds);
+
+  // ── Entity inspector for notification items ──────────────────────────
+  // Clicking a notification card opens the inspector for the referenced
+  // entity (permission ticket / alert) AND marks it read. The mark-as-read
+  // behavior is preserved; the card is no longer a dead end.
+  const [activeNotif, setActiveNotif] = useState<NotificationItem | null>(null);
+
+  const inspection = activeNotif
+    ? buildNotificationInspection({
+        id: activeNotif.id,
+        title: activeNotif.title,
+        message: activeNotif.message,
+        ticketNumber: activeNotif.ticketNumber,
+        urgency: activeNotif.urgency,
+        type: activeNotif.type,
+        createdAt: activeNotif.createdAt,
+        canActOnTickets: true,
+      })
+    : null;
+
+  const handleItemClick = useCallback(
+    (item: NotificationItem) => {
+      // Mark as read AND open the inspector for the referenced entity.
+      store.markRead(item.id);
+      setActiveNotif(item);
+    },
+    [store]
+  );
   const unreadCount = useMemo(
     () => items.filter((n) => !readIds.includes(n.id)).length,
     [items, readIds]
@@ -320,6 +350,7 @@ export function NotificationCenter({
                             type="button"
                             onClick={() => {
                               handleMarkRead(item.id);
+                              handleItemClick(item);
                               onInspect?.(item);
                             }}
                             aria-label={`Notification: ${item.title}${item.ticketNumber ? ` (${item.ticketNumber})` : ""}`}
@@ -362,22 +393,30 @@ export function NotificationCenter({
   );
 
   if (compact) {
-    return <WidgetBoundary title="Notifications">{inner}</WidgetBoundary>;
+    return (
+      <>
+        <WidgetBoundary title="Notifications">{inner}</WidgetBoundary>
+        <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
+      </>
+    );
   }
 
   return (
-    <WidgetBoundary title="Notifications">
-      <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-action-primary" />
-            <h3 className="text-sm font-semibold text-text-primary">NotificationCenter</h3>
+    <>
+      <WidgetBoundary title="Notifications">
+        <div className="surface-card bg-bg-surface/40 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-action-primary" />
+              <h3 className="text-sm font-semibold text-text-primary">NotificationCenter</h3>
+            </div>
+            <span className="text-xs text-text-muted">{unreadCount} unread</span>
           </div>
-          <span className="text-xs text-text-muted">{unreadCount} unread</span>
+          {inner}
         </div>
-        {inner}
-      </div>
-    </WidgetBoundary>
+      </WidgetBoundary>
+      <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
+    </>
   );
 }
 

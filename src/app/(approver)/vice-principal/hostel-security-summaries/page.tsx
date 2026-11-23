@@ -6,6 +6,8 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { usePolling } from "@/hooks/usePolling";
 import { Loader2, Inbox, Siren, ShieldCheck, Users } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 /**
  * VP hostel-security rollup — aggregate only, no per-student rows.
@@ -40,6 +42,58 @@ function VpHostelSecurityInner() {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [alerts, setAlerts] = useState<AlertSummary | null>(null);
   const [alertsRestricted, setAlertsRestricted] = useState(false);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectSummary = () => {
+    if (!summary) return;
+    inspect({
+      kind: "hostel_block",
+      title: "Hostel security rollup",
+      subtitle: `generated ${new Date(summary.generatedAt).toLocaleTimeString()}`,
+      status: (
+        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-bg-elevated text-text-muted border border-border">
+          {summary.activeAlerts} active alert(s)
+        </span>
+      ),
+      sections: [
+        {
+          title: "Overview",
+          content: (
+            <KVPairs
+              items={[
+                { label: "Hostellers total", value: String(summary.hostellersTotal) },
+                { label: "On campus", value: String(summary.hostellersOnCampus) },
+                { label: "Out today", value: String(summary.hostellersOutToday) },
+                { label: "Hostel leave active", value: String(summary.hostelLeaveActive) },
+                { label: "Critical alerts (7d)", value: String(summary.criticalAlerts7d) },
+              ]}
+            />
+          ),
+        },
+        {
+          title: "Context",
+          content: (
+            <p className="text-xs text-text-muted">
+              Counts only — the VP tier is not exposed to raw alert rows or the
+              gate × role presence matrix.
+            </p>
+          ),
+        },
+        {
+          title: "Actions",
+          content: (
+            <ActionRow>
+              <InspectorButton href="/vice-principal/home" variant="ghost">
+                Back to VP home
+              </InspectorButton>
+            </ActionRow>
+          ),
+        },
+      ],
+      detailHref: "/vice-principal/home",
+      detailLabel: "VP home",
+    });
+  };
 
   const loadSummary = async () => {
     try {
@@ -122,7 +176,19 @@ function VpHostelSecurityInner() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4 min-w-0">
             {kpis.map((k) => (
-              <div key={k.label} className="surface-card bg-bg-elevated/40 p-3 min-w-0">
+              <div
+                key={k.label}
+                className="surface-card bg-bg-elevated/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/60 transition-colors"
+                onClick={inspectSummary}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspectSummary();
+                  }
+                }}
+              >
                 <div className="flex items-center gap-2 text-text-muted">
                   <k.icon className="w-4 h-4" />
                   <span className="text-xs uppercase tracking-wide">{k.label}</span>
@@ -172,7 +238,19 @@ function VpHostelSecurityInner() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {(["critical", "high", "medium", "low"] as const).map((sev) => (
-                <div key={sev} className="surface-card bg-bg-elevated/30 p-3 min-w-0">
+                <div
+                  key={sev}
+                  className="surface-card bg-bg-elevated/30 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/50 transition-colors"
+                  onClick={inspectSummary}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      inspectSummary();
+                    }
+                  }}
+                >
                   <p className="text-xs uppercase tracking-wide text-text-muted">{sev}</p>
                   <p
                     className={`text-2xl font-bold tabular-nums ${
@@ -191,6 +269,8 @@ function VpHostelSecurityInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

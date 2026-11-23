@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Database, Server, Cpu, HardDrive, Globe, X } from "lucide-react";
+import { Database, Server, Cpu, HardDrive, Globe, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { cachedFetch } from "@/hooks/useApiResource";
+import { EntityInspector, KVPairs, InspectorButton, Timeline, type EntityInspection } from "@/components/shared/EntityInspector";
 import type { HealthData } from "@/components/sysadmin/domains/monitoring/types";
 
 const SERVICE_META: Record<string, { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; label: string; detail: string; section: keyof HealthData }> = {
@@ -39,52 +40,169 @@ const SERVICE_META: Record<string, { icon: React.ComponentType<{ className?: str
   },
 };
 
-function SectionPanel({ section, data, loading }: { section: keyof HealthData; data: HealthData; loading: boolean }) {
-  if (loading) {
-    return <p className="text-xs text-text-muted py-2">Loading inspector…</p>;
+/**
+ * ServiceInspector — the sysadmin service-node inspector.
+ *
+ * Renders the shared `EntityInspector` drawer (not an inline card) with a
+ * standardized `EntityInspection` model for the selected service, so the
+ * service topology click exposes the same progressive-disclosure hierarchy
+ * every other record in the app uses:
+ *
+ *   overview (status + key metric) → context (24h trend / pool / queue)
+ *   → actions (jump to the matching health page).
+ *
+ * Data is lazy-loaded from `/api/admin/health/overview` via `cachedFetch`
+ * (the same fetcher the dashboard uses); the model is built locally from
+ * the response so no new API surface is required. Loading / error / not-
+ * found states are exposed through the inspector's state placeholders.
+ */
+
+function serviceInspectionModel(
+  serviceId: string,
+  data: HealthData | null,
+  health: string | undefined,
+): EntityInspection {
+  const meta = SERVICE_META[serviceId];
+  const Icon = meta?.icon ?? Server;
+  const label = meta?.label ?? serviceId;
+  const detail = meta?.detail ?? "";
+  const state = health?.toLowerCase() ?? "unknown";
+  const tone: "ok" | "warn" | "danger" | "neutral" =
+    state === "ok" || state === "online" ? "ok"
+    : state === "warn" || state === "degraded" ? "warn"
+    : state === "error" || state === "offline" || state === "unhealthy" ? "danger"
+    : "neutral";
+
+  const toneClass: Record<string, string> = {
+    ok: "bg-emerald-500/15 text-action-success",
+    warn: "bg-amber-500/15 text-action-warning",
+    danger: "bg-rose-500/15 text-action-danger",
+    neutral: "bg-bg-elevated text-text-muted",
+  };
+
+  // ── overview KVPairs (section 1) ───────────────────────────────────────
+  const overviewItems: Array<{ label: string; value: React.ReactNode }> = [
+    {
+      label: "Status",
+      value: (
+        <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${toneClass[tone]}`}>
+          {state.toUpperCase()}
+        </span>
+      ),
+    },
+  ];
+  if (meta?.section === "app") {
+    const rate = data?.app?.errorRate24h ?? [];
+    const avg = rate.length ? rate.reduce((a, b) => a + b, 0) / rate.length : 0;
+    overviewItems.push({ label: "24h avg error rate", value: `${(avg * 100).toFixed(2)}%` });
+  } else if (meta?.section === "database") {
+    if (data?.database) {
+      overviewItems.push({ label: "Active connections", value: String(data.database.conns) });
+      overviewItems.push({ label: "Pool slots", value: String(data.database.pool) });
+    }
+  } else if (meta?.section === "redis") {
+    if (data?.redis) {
+      overviewItems.push({
+        label: "Worker",
+        value: data.redis.worker_healthy ? "Healthy" : "Degraded",
+      });
+      overviewItems.push({ label: "Queue depth", value: String(data.redis.queue_depth) });
+    }
   }
-  switch (section) {
-    case "app": {
-      const rate = data.app?.errorRate24h ?? [];
-      const avg = rate.length ? rate.reduce((a, b) => a + b, 0) / rate.length : 0;
-      return (
+
+  // ── context (section 2, collapsible where it is long) ──────────────────
+  const contextItems: Array<{ label: string; value: React.ReactNode }> = [];
+  if (meta?.section === "app") {
+    const rate = data?.app?.errorRate24h ?? [];
+    contextItems.push({
+      label: "Last 5 samples",
+      value: rate.length
+        ? rate.slice(-5).map((v) => `${Math.round(v * 100)}%`).join(" · ")
+        : "—",
+    });
+  }
+  if (meta?.section === "database" && data?.database) {
+    contextItems.push({ label: "Section", value: "database" });
+  }
+  if (meta?.section === "redis" && data?.redis) {
+    contextItems.push({ label: "Section", value: "redis" });
+  }
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: <KVPairs items={overviewItems} columns={1} />,
+    },
+    ...(contextItems.length
+      ? [{
+          title: "Context",
+          collapsible: true,
+          content: <KVPairs items={contextItems} columns={1} />,
+        }]
+      : []),
+    {
+      title: "Service detail",
+      content: (
         <div className="space-y-2">
-          <p className="text-xs text-text-muted">24h average API error rate: <span className="font-semibold text-text-primary">{(avg * 100).toFixed(2)}%</span></p>
-          <p className="text-xs text-text-muted">Last 5 samples: <span className="font-mono text-xs text-text-primary">{rate.slice(-5).map((v) => `${Math.round(v * 100)}%`).join(" · ")}</span></p>
-        </div>
-      );
-    }
-    case "database": {
-      const db = data.database;
-      if (!db) return <p className="text-xs text-text-muted">No database metrics.</p>;
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="surface-card bg-bg-surface p-2">
-            <p className="text-xs uppercase text-text-muted">Active Conns</p>
-            <p className="text-lg font-semibold text-text-primary">{db.conns}</p>
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-flex items-center justify-center size-6 rounded-lg"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--action-primary) 16%, transparent)",
+              }}
+            >
+              <Icon className="h-3.5 w-3.5 text-action-primary" />
+            </span>
+            <p className="text-sm font-semibold text-text-primary">{label}</p>
           </div>
-          <div className="surface-card bg-bg-surface p-2">
-            <p className="text-xs uppercase text-text-muted">Pool Slots</p>
-            <p className="text-lg font-semibold text-text-primary">{db.pool}</p>
-          </div>
+          <p className="text-xs text-text-muted">{detail}</p>
+          {!data ? (
+            <p className="text-xs text-text-muted">Health data not loaded yet.</p>
+          ) : null}
         </div>
-      );
-    }
-    case "redis": {
-      const r = data.redis;
-      if (!r) return <p className="text-xs text-text-muted">No redis metrics.</p>;
-      return (
-        <div className="space-y-1">
-          <p className="text-xs text-text-muted">
-            Worker status: <span className={cn("font-semibold", r.worker_healthy ? "text-action-primary" : "text-action-danger")}>{r.worker_healthy ? "Healthy" : "Degraded"}</span>
-          </p>
-          <p className="text-xs text-text-muted">Queue depth: <span className="font-semibold text-text-primary">{r.queue_depth}</span></p>
+      ),
+    },
+    {
+      title: "Timeline",
+      collapsible: true,
+      content: (
+        <Timeline
+          items={[
+            {
+              label: "Service health",
+              detail: state.toUpperCase(),
+              tone,
+            },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <div className="flex flex-wrap gap-2">
+          <InspectorButton href="/sysadmin/health" variant="primary">
+            <ChevronRight className="size-3.5" /> Full health dashboard
+          </InspectorButton>
         </div>
-      );
-    }
-    default:
-      return null;
-  }
+      ),
+    },
+  ];
+
+  return {
+    kind: "service",
+    title: label,
+    subtitle: serviceId,
+    status: (
+      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${toneClass[tone]}`}>
+        {state.toUpperCase()}
+      </span>
+    ),
+    sections,
+    detailHref: "/sysadmin/health",
+    detailLabel: "Open health dashboard",
+  };
 }
 
 export function ServiceInspector({ serviceId, onClose }: { serviceId: string; onClose: () => void }) {
@@ -95,6 +213,8 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
   // Lazy-load health details on mount; cachedFetch handles auth headers.
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setError(null);
     cachedFetch<{ data: HealthData }>("/api/admin/health/overview")
       .then((json) => {
         if (cancelled) return;
@@ -111,42 +231,31 @@ export function ServiceInspector({ serviceId, onClose }: { serviceId: string; on
 
   const meta = SERVICE_META[serviceId];
   if (!meta) return null;
-  const Icon = meta.icon;
 
-  return (
-    <div
-      className="surface-card bg-bg-elevated p-4 mt-3 animate-in fade-in slide-in-from-top-2 duration-200"
-      role="region"
-      aria-label={`${meta.label} inspection`}
-    >
-      <div className="flex items-center gap-3">
-        <span
-          className="inline-flex items-center justify-center size-9 rounded-lg shrink-0"
-          style={{ backgroundColor: "color-mix(in srgb, var(--action-primary) 16%, transparent)" }}
-        >
-          <Icon className="h-4 w-4 text-action-primary" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-text-primary">{meta.label}</p>
-          <p className="text-xs text-text-muted truncate">{meta.detail}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="surface-card p-1 hover:bg-bg-surface text-text-muted transition-colors"
-          aria-label="Close inspector"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
+  // While the health payload is still in flight or failed, surface the
+  // state through the inspector's built-in placeholder (design rule 31:
+  // the inspector never shows a blank panel).
+  const health = undefined;
+  const model = data
+    ? serviceInspectionModel(serviceId, data, health)
+    : null;
 
-      <div className="mt-3">
-        {error ? (
-          <p className="text-xs text-action-danger">Failed to load service details: {error}</p>
-        ) : (
-          <SectionPanel section={meta.section} data={data ?? ({} as HealthData)} loading={loading} />
-        )}
-      </div>
-    </div>
-  );
+  if (error) {
+    return (
+      <EntityInspector
+        inspection={null}
+        onClose={onClose}
+        state="error"
+        errorMessage={error}
+      />
+    );
+  }
+  if (loading || !model) {
+    return (
+      <EntityInspector inspection={null} onClose={onClose} state="loading" />
+    );
+  }
+
+  return <EntityInspector inspection={model} onClose={onClose} />;
 }
+

@@ -6,6 +6,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleConsole } from "@/components/shared/RoleConsole";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import type { Role } from "@/lib/types";
 
 /**
@@ -30,6 +31,7 @@ export default function GuardianConsoleLayout({
           <RoleConsole role="guardian" roleRoot="/guardian">
             {children}
           </RoleConsole>
+          <GlobalEntityInspector />
 
         </div>
       </Suspense>

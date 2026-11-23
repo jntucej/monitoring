@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import {
+  buildSlaCellInspection,
+  type SlaCellRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 
 interface SlaHeatmapCell {
   stage: string;
@@ -17,20 +24,41 @@ interface SlaHeatmapCell {
   rate: number;
 }
 
+interface SlaHeatmapDetail {
+  stage: string;
+  workflow_type: string;
+  total: number;
+  within_sla: number;
+  breached: number;
+}
+
 interface SlaHeatmapResponse {
   success?: boolean;
   data: {
     cells: SlaHeatmapCell[];
-    details?: unknown[];
+    details?: SlaHeatmapDetail[];
   };
 }
 
-export function AnalyticsView({ initialStage }: { initialStage?: string }) {
+/** Build the per-workflow breakdown for a given stage from the raw details rows. */
+function byWorkflowForStage(stage: string, details: SlaHeatmapDetail[] | undefined) {
+  if (!details?.length) return undefined;
+  const rows = details
+    .filter((d) => d.stage === stage)
+    .map((d) => ({
+      workflow_type: d.workflow_type,
+      total: d.total,
+      withinSla: d.within_sla,
+      breached: d.breached,
+    }));
+  return rows.length > 0 ? rows : undefined;
+}
+
+export function AnalyticsView({ initialStage }: { initialStage?: string } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [stageFilter, setStageFilter] = useState<string | null>(initialStage ?? null);
   const [breachedOnly, setBreachedOnly] = useState(false);
-
   const { data, loading } = useApiResource<SlaHeatmapResponse>("/api/principal/sla-heatmap", {
     ttlMs: 30_000,
   });
@@ -57,6 +85,18 @@ export function AnalyticsView({ initialStage }: { initialStage?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStageParam, breachedParam]);
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildSlaCellInspection> | null
+  >(null);
+
+  const details = data?.data?.details;
   const cells = (data?.data?.cells ?? []).filter((c) => {
     if (activeStage && c.stage !== activeStage) return false;
     if (breachedView && (c.breached ?? 0) === 0) return false;
@@ -65,6 +105,14 @@ export function AnalyticsView({ initialStage }: { initialStage?: string }) {
   const totalBreached = cells.reduce((sum, c) => sum + (c.breached ?? 0), 0);
   const totalVolume = cells.reduce((sum, c) => sum + (c.total ?? 0), 0);
   const overallRate = totalVolume > 0 ? Math.round(((totalVolume - totalBreached) / totalVolume) * 100) : 100;
+
+  const inspectCell = (cell: SlaHeatmapCell) => {
+    const record: SlaCellRecord = {
+      ...cell,
+      byWorkflow: byWorkflowForStage(cell.stage, details),
+    };
+    setInspection(buildSlaCellInspection(record, gate));
+  };
 
   return (
     <div className="space-y-4">
@@ -177,6 +225,8 @@ export function AnalyticsView({ initialStage }: { initialStage?: string }) {
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </div>
   );
 }

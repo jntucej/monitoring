@@ -28,6 +28,7 @@ import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { levelsAbove, L4_ROLE, L1_ROLE, L2_ROLE, L3_ROLE } from "@/lib/permission-workflow-pure";
+import { resolvePermissionAbility, makeViewer } from "@/lib/record-abilities";
 import { HostelForwardModal } from "./HostelForwardModal";
 import { DirectGenerateModal } from "./DirectGenerateModal";
 import type { PermissionItem } from "./PermissionRow";
@@ -41,12 +42,118 @@ import { PersonaBadge } from "@/components/shared/PersonaBadge";
 import { FlagBadge } from "@/components/shared/FlagBadge";
 import { PASS_TYPE_SEED } from "@/lib/pass-types";
 import type { FlagLevel } from "@/lib/permission-model";
+import type {
+  EntityInspection,
+  InspectionSection,
+} from "@/components/shared/EntityInspector";
+import { KVPairs, Timeline, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 export interface PermissionDetailPanelProps {
   ticket: string | null;
   onClose: () => void;
   onActionComplete?: () => void;
   isStandalonePage?: boolean;
+}
+
+/**
+ * A pure function that converts a `PermissionItem` (the shape the
+ * `/api/permissions/:ticket` route returns) into an `EntityInspection`
+ * model. This is the consolidation seam: the local `DetailSheet` and
+ * the shared `EntityInspector` both consume the same model, so they
+ * always show the same data.
+ *
+ * The model's `detailHref` points to the page's approvals view — the
+ * local sheet is the "deepest layer" (per the design doc's hierarchy:
+ * ELEMENT → drawer → full detail page). The sheet itself is the
+ * deepest layer; `detailHref` is the footer CTA that links out.
+ */
+export function permissionToInspection(
+  item: PermissionItem,
+  opts?: { detailHref?: string; detailLabel?: string },
+): EntityInspection {
+  const statusTone: "ok" | "warn" | "danger" | "neutral" =
+    item.status === "APPROVED" ? "ok"
+    : item.status === "REJECTED" ? "danger"
+    : item.status === "PENDING" ? "warn"
+    : "neutral";
+
+  const historyItems = (item.stage_history ?? []).map((h) => ({
+    label: `${h.actorName} ${h.action.toLowerCase()}`,
+    time: h.timestamp ? formatDateTime(h.timestamp) : undefined,
+    detail: h.comment ?? undefined,
+    tone: h.action === "FORWARDED" ? ("warn" as const) : ("neutral" as const),
+  }));
+
+  const sections: InspectionSection[] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Workflow", value: item.workflow_type },
+            { label: "Current Stage", value: STAGE_LABELS[item.current_stage] || item.current_stage },
+            { label: "Student", value: item.student?.name ?? "—" },
+            { label: "Roll", value: item.student?.student_details?.roll ?? "—" },
+            { label: "Reason", value: item.reason ?? "—" },
+            { label: "Created", value: formatDateTime(item.created_at) },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  if (historyItems.length > 0) {
+    sections.push({
+      title: "Timeline",
+      collapsible: true,
+      content: <Timeline items={historyItems} />,
+    });
+  }
+
+  // The sheet IS the deepest layer — the actions live here, not in a
+  // separate detail page. So the model exposes an Actions section.
+  sections.push({
+    title: "Actions",
+    content: (
+      <ActionRow>
+        <InspectorButton variant="primary">Approve</InspectorButton>
+        <InspectorButton variant="danger">Reject</InspectorButton>
+      </ActionRow>
+    ),
+  });
+
+  return {
+    kind: "permission",
+    title: item.ticket_number,
+    subtitle: `${item.workflow_type} · stage ${STAGE_LABELS[item.current_stage] || item.current_stage}`,
+    status: (
+      <span
+        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+          statusTone === "ok" ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
+          : statusTone === "danger" ? "bg-rose-500/10 text-action-danger border border-rose-500/20"
+          : statusTone === "warn" ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
+          : "bg-bg-elevated text-text-muted border border-border"
+        }`}
+      >
+        {item.status}
+      </span>
+    ),
+    sections,
+    detailHref: opts?.detailHref ?? "/principal",
+    detailLabel: opts?.detailLabel ?? "Approvals view",
+  };
+}
+
+export interface PermissionDetailPanelResult {
+  /** The panel's render tree (the local "deepest layer"). */
+  element: React.ReactNode;
+  /**
+   * The `EntityInspection` model derived from the ticket data.
+   * Non-null when data has loaded.
+   * Pass this to `useEntityInspector().inspect()` to show the
+   * same data in the shared inspector.
+   */
+  inspection: EntityInspection | null;
 }
 
 const STAGE_LABELS: Record<string, string> = {
@@ -150,6 +257,33 @@ export function PermissionDetailPanel({
 
   // Exam/memo requests carry an uploaded document + digital signature (Step 7).
   const isExamMemo = data?.workflow_type === "exam" || data?.workflow_type === "memo";
+
+  // Role-ability layer: why THIS viewer is on this ticket. Computed from the
+  // live record + the viewer's role/scope. The real buttons below are still
+  // gated by canForward/canEscalate/canDirectGenerate + the server; this is
+  // the "your role here" banner.
+  const ability =
+    data && currentRole
+      ? resolvePermissionAbility(
+          {
+            id: data.id ?? ticket ?? "",
+            ticket_number: data.ticket_number,
+            workflow_type: data.workflow_type,
+            current_stage: data.current_stage,
+            status: data.status,
+            student_user_id: data.student_user_id,
+            hostel_scope: (data as unknown as { hostel_scope?: string | null }).hostel_scope,
+          },
+          makeViewer(currentRole, {
+            userId: currentUser?.id ?? "",
+            departmentId: currentUser?.departmentId ?? null,
+            hostelScope:
+              currentUser?.studentDetails?.hostelBlock ??
+              null,
+            assignedGateId: currentUser?.gateId ?? null,
+          }),
+        )
+      : null;
 
   const fetchDetail = useCallback(async () => {
     if (!ticket) return;
@@ -534,6 +668,18 @@ export function PermissionDetailPanel({
 
           {data.status === "PENDING" && (
             <div className="surface-card bg-bg-elevated p-4 space-y-4">
+              {/* Role-ability banner: why THIS viewer is here + their turn */}
+              {ability && (
+                <div className="flex items-start gap-2 rounded-lg border border-action-primary/20 bg-bg-surface p-3">
+                  <Shield className="h-4 w-4 text-action-primary shrink-0 mt-0.5" aria-hidden />
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                      Your role here · {ability.mode}
+                    </p>
+                    <p className="mt-0.5 text-xs text-text-secondary">{ability.roleReason}</p>
+                  </div>
+                </div>
+              )}
               <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">
                 Workflow Decisions
               </h3>

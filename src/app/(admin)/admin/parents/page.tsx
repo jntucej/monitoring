@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {Search, Users, RefreshCw}  from "lucide-react";
+import {Search, Users, RefreshCw, ChevronRight}  from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { EntityInspector, KVPairs, InspectorButton, Timeline } from "@/components/shared/EntityInspector";
 
 interface ParentRow {
   id: string;
@@ -26,6 +27,60 @@ function AdminParentsInner() {
   const [rows, setRows] = useState<ParentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [active, setActive] = useState<ParentRow | null>(null);
+
+  /** Standardized inspection model for a guardian row. */
+  const parentInspection = active
+    ? {
+        kind: "parent",
+        title: active.name,
+        subtitle: active.uniqueId ?? active.id,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-bg-elevated text-text-muted">
+            {active.status}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Email", value: active.email },
+                  ...(active.phone ? [{ label: "Phone", value: active.phone }] : []),
+                  { label: "Linked children", value: String(active.children.length) },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Linked children",
+            content:
+              active.children.length === 0 ? (
+                <p className="text-xs text-text-muted">No children linked to this guardian.</p>
+              ) : (
+                <Timeline
+                  items={active.children.map((c) => ({
+                    label: c.name,
+                    detail: c.roll ? `Roll ${c.roll}` : undefined,
+                    tone: "neutral" as const,
+                  }))}
+                />
+              ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/admin/parents" variant="primary">
+                  <ChevronRight className="size-3.5" /> All guardians
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
 
 
   const load = useCallback(async () => {
@@ -87,7 +142,11 @@ function AdminParentsInner() {
           ) : (
             <div className="divide-y divide-border">
               {rows.map((r) => (
-                <div key={r.id} className="p-4 flex items-start gap-3">
+                <div
+                  key={r.id}
+                  onClick={() => setActive(r)}
+                  className="p-4 flex items-start gap-3 cursor-pointer hover:bg-bg-elevated/30 transition"
+                >
                   <div className="size-6 rounded-xl bg-bg-elevated flex items-center justify-center text-text-secondary shrink-0">
                     <Users className="w-4 h-4" />
                   </div>
@@ -109,12 +168,15 @@ function AdminParentsInner() {
                       ))}
                     </div>
                   </div>
+                  <ChevronRight className="w-4 h-4 text-text-muted shrink-0" />
                 </div>
               ))}
             </div>
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={parentInspection} onClose={() => setActive(null)} />
     </div>
   );
 }

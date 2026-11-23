@@ -54,3 +54,54 @@ Plus the shared auth endpoints (`/auth/login`, `/auth/session`, `/auth/refresh`,
 - **Self-only visibility:** every endpoint is scoped to the authenticated user's own records. A staff account cannot read another staff's attendance, leave, or request history — the server filters by `auth.userId`.
 - **No privileged surface:** staff cannot see internal UUIDs (the internal-ID display is gated to `isSuperAdmin(role)`), cannot view the audit logs of others, and cannot trigger lockdown / escalation.
 - **Request chain is fail-close:** an unapproved request cannot be "acted on" by the staff — the status is authoritative and a request in `PENDING`/`REJECTED` does not appear as "approved" anywhere.
+
+
+## Gaps & Research
+
+### Institutional context
+The Staff role represents general staff (non-teaching) at JNTUH CEJ — administrative staff, laboratory staff, library staff, and support staff. Per NIT Hamirpur security SOP, outsourced security services staff follow standard operating procedures for gate operations, campus security, parking, and emergency response.
+
+### Missing (not in app yet)
+1. **Shift scheduling** — no way to schedule shifts in advance
+2. **Handover checklist** — no structured handover checklist
+3. **Gate hardware health** — no view of gate hardware status (scanner uptime, sensor health)
+4. **Ticket SLA tracking** — no SLA timers for maintenance tickets
+5. **Exam day checklist** — no structured checklist for exam-day support duties
+6. **Staff performance** — no tracking of staff performance metrics
+7. **Training records** — no tracking of staff training and certifications
+8. **Staff feedback** — no way for staff to provide feedback on operations
+
+### Implementation notes
+- Dashboard leads with shift status, gate view, occupancy
+- Staff agent is scoped to their assigned shifts and tickets
+- Handover: structured checklist with open items and escalation
+- Exam support: assigned by exam branch, tracked in the exam console
+
+### Agent persona
+- Focus: shifts, handover, gate status, occupancy, maintenance tickets
+- Scoped to: assigned shifts and tickets
+- Can: view shifts, complete handover, view gate/occupancy, complete tickets
+- Cannot: modify gate configuration (admin territory), approve exam matters
+- Escalation: to Admin for operational matters; to exam branch for exam matters
+
+
+
+## Cross-Role Dependencies
+
+### Staff should see (read-only)
+- **operator**: gate status, occupancy → Staff knows gate state for shifts
+- **admin**: shift schedule, maintenance tickets → Staff gets assigned tasks
+- **emo**: infrastructure complaints → Staff handles non-infra tasks
+
+### Staff should NOT see
+- **sysadmin**: infra, MFA, RLS → not staff's concern
+- **principal**: strategic KPIs → not staff's concern
+
+### Staff escalates to
+- **admin**: SLA breaches, equipment issues, unresolved items
+- **exam_branch**: exam day support duties
+
+### Staff borrows from
+- **operator**: gate status view (staff sees same gate view as operator, read-only)
+- **emo**: maintenance ticket assignment (emo assigns, staff completes)
+

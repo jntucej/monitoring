@@ -2,20 +2,21 @@
 
 import { useState } from "react";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import type { BoardRow } from "@/components/shared/Board";
 import { EntityInspector } from "@/components/shared/EntityInspector";
-import { scanInspection } from "@/components/shared/inspectionModels";
+import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 
 export default function Page() {
-  const [active, setActive] = useState<BoardRow | null>(null);
-  const inspection = active ? scanInspection(active) : null;
+  const [active, setActive] = useState<HMBoardRow | null>(null);
+  const inspection = active
+    ? boardRowTicketInspection(active, { consoleHref: "/oie/queue/pending", consoleLabel: "Pending queue" })
+    : null;
   return (
     <div className="space-y-4">
       <KanbanBoard
         source="/api/oie/queue?status=PENDING"
         columns={["PENDING"]}
         itemKey="permission"
-        onSelect={(row) => setActive(row)}
+        onSelect={(row) => setActive(row as HMBoardRow)}
       />
       <EntityInspector inspection={inspection} onClose={() => setActive(null)} />
     </div>

@@ -11,6 +11,16 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { ShieldCheck, AlertTriangle, Inbox, ArrowRight, FileWarning } from "lucide-react";
 import Link from "next/link";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
 
 interface PermissionRequest {
   id: string;
@@ -23,6 +33,7 @@ interface PermissionRequest {
   updated_at: string;
   sla_deadline?: string;
   hostel_scope?: string | null;
+  student?: { name?: string; student_details?: { roll?: string } | null } | null;
   [key: string]: unknown;
 }
 
@@ -43,10 +54,74 @@ function stageLabel(stage: string): string {
   return map[stage] ?? stage;
 }
 
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an OIE approval request (exam-branch view — read-only). */
+function buildOieApprovalInspection(r: PermissionRequest): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Student", value: r.student?.name ?? r.student_user_id ?? "—" },
+            { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+            { label: "Stage", value: stageLabel(r.current_stage) },
+            { label: "Created", value: new Date(r.created_at).toLocaleString() },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/oie/queue" variant="primary">
+            OIE queue
+          </InspectorButton>
+          <InspectorButton href="/exam-branch/oie-approval-requests" variant="ghost">
+            All requests
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.ticket_number,
+    subtitle: `${r.student?.name ?? ""} · ${stageLabel(r.current_stage)}`.trim() || null,
+    status: <StatusBadge text={slaBreached ? "SLA BREACHED" : "PENDING OIE"} tone={slaBreached ? "danger" : "warn"} />,
+    sections,
+    detailHref: "/exam-branch/oie-approval-requests",
+    detailLabel: "All OIE requests",
+  };
+}
+
 function OieApprovalRequestsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "exam_branch") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -163,7 +238,7 @@ function OieApprovalRequestsInner() {
           ) : (
             <ul className="divide-y divide-slate-800 min-w-0">
               {requests.map((req) => (
-                <li key={req.id} className="px-4 py-3 min-w-0">
+                <li key={req.id} className="px-4 py-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition" onClick={() => inspect(buildOieApprovalInspection(req))}>
                   <div className="flex flex-col gap-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 min-w-0">
                       <span className="font-mono text-xs text-text-secondary">
@@ -214,6 +289,7 @@ function OieApprovalRequestsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

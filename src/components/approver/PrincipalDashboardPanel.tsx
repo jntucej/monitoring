@@ -9,15 +9,22 @@
  * Reads GET /api/principal/dashboard. The endpoint exposes
  * `data.pendingApprovals` (count of PENDING exam permissions at the principal
  * stage) and `data.recentAlerts` (the 5 newest unresolved alerts, newest
- * first) but has no dedicated "top-priority items" field, so the panel lists
- * the recent alerts — each with title, severity, status and timestamp — and
- * shows an EmptyState when none are active.
+ * first). Each recent alert is a live incident entity: clicking it opens the
+ * standardized incident inspection (overview → context → timeline → actions)
+ * in place, without navigating away from the console.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Radio, Loader2, ShieldAlert } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import {
+  buildIncidentInspection,
+  type IncidentRecord,
+  type RoleGate,
+} from "@/app/(approver)/principal/_shared/entityInspectionModels";
 
 interface AlertRow {
   id: string;
@@ -73,6 +80,30 @@ export function PrincipalDashboardPanel() {
 
   const pendingApprovals = data?.data?.pendingApprovals ?? 0;
 
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [inspection, setInspection] = useState<
+    ReturnType<typeof buildIncidentInspection> | null
+  >(null);
+  const inspect = (a: AlertRow) =>
+    setInspection(
+      buildIncidentInspection(
+        {
+          id: a.id,
+          title: a.title,
+          message: a.message,
+          severity: a.severity,
+          created_at: a.timestamp,
+          status: a.resolved ? "RESOLVED" : "OPEN",
+        } as IncidentRecord,
+        gate
+      )
+    );
+
   return (
     <section className="surface-card bg-bg-surface/60 p-4 min-w-0">
       {/* Header */}
@@ -100,7 +131,13 @@ export function PrincipalDashboardPanel() {
           {alerts.map((a) => (
             <li
               key={a.id}
-              className="surface-card flex items-start justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0"
+              className="surface-card flex items-start justify-between gap-2 bg-bg-elevated px-2.5 py-1.5 min-w-0 cursor-pointer hover:bg-bg-surface transition-colors"
+              role="button"
+              tabIndex={0}
+              onClick={() => inspect(a)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") inspect(a);
+              }}
             >
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-text-primary truncate">
@@ -129,6 +166,8 @@ export function PrincipalDashboardPanel() {
           icon={<ShieldAlert className="w-4 h-4 text-text-muted" />}
         />
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
     </section>
   );
 }

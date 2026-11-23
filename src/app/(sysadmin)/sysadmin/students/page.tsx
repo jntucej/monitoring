@@ -11,6 +11,8 @@ import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
 import { BulkUserImportModal } from "@/components/sysadmin/BulkUserImportModal";
 import { ROLL_DEPT_CODES, parseRollNumber, getStudentYearFromRoll, getDepartmentFromRoll, resolveCourseType } from "@/lib/rollNumber";
+import { useEntityInspector } from "@/components/shared/useEntityInspector";
+import { EntityInspector, KVPairs, InspectorButton, type EntityInspection } from "@/components/shared/EntityInspector";
 
 interface StudentRecord {
   id: string;
@@ -75,7 +77,7 @@ interface StudentRecord {
 
 export default function SysAdminStudentsPage() {
 const api = useApi();
-
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   const { addToast } = useUIStore();
   const [students, setStudents] = useState<StudentRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -547,6 +549,65 @@ const api = useApi();
     return byBranchCanonical.entries.slice().sort((a, b) => b[1] - a[1])[0] || byBranch[0];
   }, [byBranchCanonical, byBranch]);
 
+  // Inline entity inspection from the row data already loaded by /api/students —
+  // no extra fetch.
+  const buildStudentInspection = useCallback((s: StudentRecord): EntityInspection => {
+    const d = s.studentDetails ?? {};
+    const overview: Array<{ label: string; value: React.ReactNode }> = [
+      { label: "Roll / Unique ID", value: <code className="font-mono">{s.roll || s.uniqueId || s.id}</code> },
+      { label: "Course", value: courseOf(s) },
+      { label: "Branch", value: branchOf(s) },
+      { label: "Year", value: s.year != null ? `Year ${s.year}` : "—" },
+      { label: "Email", value: s.email || "—" },
+      { label: "Phone", value: s.phone || d.mobile || "—" },
+      { label: "Guardian", value: d.guardianName ?? d.fatherGuardianName ?? "—" },
+      { label: "Guardian phone", value: d.guardianPhone ?? d.parentMobile ?? "—" },
+    ];
+    if (d.htNo) overview.push({ label: "HT No", value: <code className="font-mono">{d.htNo}</code> });
+    if (d.bloodGroup) overview.push({ label: "Blood group", value: d.bloodGroup });
+    if (d.dob) overview.push({ label: "Date of birth", value: d.dob });
+    if (d.caste || d.subcaste) overview.push({ label: "Caste", value: [d.caste, d.subcaste].filter(Boolean).join(" / ") });
+    if (d.hostelRoom || s.hostelRoom || d.isHosteller != null) {
+      overview.push({ label: "Hostel", value: [s.isHosteller ? "Hosteler" : null, s.hostelRoom || d.hostelRoom].filter(Boolean).join(" · ") || "Day scholar" });
+    }
+    if (d.address) overview.push({ label: "Address", value: d.address });
+    if (d.city || d.state) overview.push({ label: "City / State", value: [d.city, d.state].filter(Boolean).join(", ") });
+
+    const statusTone = s.status === "ACTIVE" ? "ok" : s.status === "SUSPENDED" || s.status === "DISABLED" || s.status === "DEPROVISIONED" ? "danger" : "warn";
+    const badgeCls: Record<string, string> = {
+      ok: "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+      danger: "bg-rose-500/10 text-rose-600 border border-rose-500/20",
+      warn: "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+      neutral: "bg-bg-elevated text-text-muted border border-border",
+    };
+
+    return {
+      kind: "student",
+      title: s.name,
+      subtitle: s.roll || s.uniqueId || s.id,
+      status: (
+        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${badgeCls[statusTone]}`}>
+          {s.status}
+        </span>
+      ),
+      sections: [
+        { title: "Overview", content: <KVPairs items={overview} /> },
+        {
+          title: "Actions",
+          content: (
+            <div className="flex flex-wrap gap-2">
+              <InspectorButton onClick={() => openEditModal(s)}>Edit student</InspectorButton>
+              <InspectorButton onClick={() => openLinkParentModal(s)} variant="ghost">Link guardian</InspectorButton>
+              <InspectorButton onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} variant="ghost">Enrollment code</InspectorButton>
+            </div>
+          ),
+        },
+      ],
+      detailHref: "/sysadmin/students",
+      detailLabel: "Student roster",
+    };
+  }, [courseOf, branchOf]);
+
   // ponytail: newest 4 by createdAt (capped so the panel doesn't flood)
   const recentStudents = useMemo(() => {
     return [...students]
@@ -771,7 +832,7 @@ const api = useApi();
                   </tr>
                 ) : (
                   filteredStudents.map((s) => (
-                    <tr key={s.id} className="hover:bg-bg-elevated/40 transition-colors">
+                    <tr key={s.id} className="cursor-pointer transition-colors" onClick={() => inspect(buildStudentInspection(s))}>
                       <td className="px-4 py-3 font-mono text-xs text-action-success">{s.roll || s.uniqueId || "—"}</td>
                       <td className="px-4 py-3 font-medium text-white">{s.name}</td>
                       <td className="px-4 py-3 text-xs">
@@ -784,6 +845,7 @@ const api = useApi();
                       <td className="px-4 py-3">
                         <select
                           value={s.status}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => handleSetStatus(s, e.target.value)}
                           className="surface-card bg-bg-surface px-2 py-1 min-h11 text-xs"
                         >
@@ -792,7 +854,7 @@ const api = useApi();
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
                           <button onClick={() => openLinkParentModal(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-unit-c" title="Link Parent"><LinkIcon className="w-4 h-4" /></button>
@@ -974,6 +1036,8 @@ const api = useApi();
         {showBulkModal && (
           <BulkUserImportModal onClose={() => setShowBulkModal(false)} onSuccess={() => { setShowBulkModal(false); loadStudents(); }} />
         )}
+
+        <EntityInspector inspection={inspection} onClose={closeInspection} />
       </div>
     </AuthGuard>
   );

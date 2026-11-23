@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildAuditInspection } from "@/lib/principal/registerInspections";
+import {
+  buildAuditEventInspection,
+  type RoleGate,
+} from "./entityInspectionModels";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
-import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildAuditInspection } from "@/lib/principal/registerInspections";
 
 interface AuditLog {
   id: string;
@@ -29,8 +36,24 @@ export function AuditView() {
   });
 
   const logs = Array.isArray(data?.data) ? data.data : [];
-  const { inspection, inspect, closeInspection } = useEntityInspector();
-  const openInspector = (log: AuditLog) => inspect(buildAuditInspection(log));
+  const {
+    inspection: ourInspection,
+    inspect: ourInspect,
+    closeInspection,
+  } = useEntityInspector();
+  const openInspector = (log: AuditLog) => ourInspect(buildAuditInspection(log));
+
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [mainInspection, setMainInspection] = useState<
+    ReturnType<typeof buildAuditEventInspection> | null
+  >(null);
+  const inspectMain = (log: AuditLog) =>
+    setMainInspection(buildAuditEventInspection(log, gate));
 
   return (
     <div className="space-y-4">
@@ -43,7 +66,11 @@ export function AuditView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <KpiCard label="Recent Events" value={logs.length} />
+        <KpiCard
+          label="Recent Events"
+          value={logs.length}
+          onClick={logs.length > 0 ? () => openInspector(logs[0]) : undefined}
+        />
         <KpiCard label="Audit Logging" value="Active" tone="ok" />
         <KpiCard label="Integrity" value="Verified" tone="ok" />
       </div>
@@ -60,8 +87,11 @@ export function AuditView() {
                 <button
                   type="button"
                   onClick={() => openInspector(log)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") openInspector(log);
+                  }}
                   aria-label={`Inspect audit event: ${log.action}`}
-                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                  className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{log.action}</p>
@@ -96,7 +126,8 @@ export function AuditView() {
         </>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

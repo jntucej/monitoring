@@ -16,15 +16,14 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { AllocationPanel } from "@/components/approver/AllocationPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import type { BoardRow } from "@/components/shared/Board";
 import { EntityInspector } from "@/components/shared/EntityInspector";
-import { scanInspection } from "@/components/shared/inspectionModels";
+import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function HostelManagerPage() {
-    const [active, setActive] = useState<BoardRow | null>(null);
+    const [active, setActive] = useState<HMBoardRow | null>(null);
 return (
 <>
 <Greeting />
@@ -51,10 +50,10 @@ return (
             source="/api/hostel-manager/summary"
             itemKey="pendingTickets"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
-            onSelect={(row) => setActive(row)}
+            onSelect={(row) => setActive(row as HMBoardRow)}
           />
           <EntityInspector
-            inspection={active ? scanInspection(active) : null}
+            inspection={active ? boardRowTicketInspection(active, { consoleHref: "/hostel-manager", consoleLabel: "Resident tickets" }) : null}
             onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AllocationPanel" title="Room Allocation">

@@ -7,6 +7,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { Inbox, UserX, Clock4, Flag, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { vpExceptionPersonInspection } from "@/components/approver/wardenConsoleModels";
 
 
 interface ExceptionRecord {
@@ -39,6 +41,25 @@ interface AttendanceExceptionsResponse {
 }
 
 function VpAttendanceExceptionsInner() {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectException = (e: ExceptionRecord, kind: "absent" | "late" | "flagged") => {
+    inspect(
+      vpExceptionPersonInspection(
+        {
+          id: e.id,
+          name: e.fullName,
+          role: e.designation ?? undefined,
+          designation: e.designation,
+          department: e.department,
+          reason: e.flagStatus ?? undefined,
+          minutesLate: undefined,
+        },
+        kind,
+      ),
+    );
+  };
+
   const {
     data: resp,
     loading,
@@ -120,7 +141,8 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.absent.map((e) => (
                           <li
                             key={`a-${e.id}`}
-                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                            onClick={() => inspectException(e, "absent")}
                           >
                             <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-text-muted">{e.department}</span>
@@ -139,7 +161,8 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.late.map((e) => (
                           <li
                             key={`l-${e.id}`}
-                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                            onClick={() => inspectException(e, "late")}
                           >
                             <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-text-muted">{e.department}</span>
@@ -160,7 +183,8 @@ function VpAttendanceExceptionsInner() {
                         {exceptions.flagged.map((e) => (
                           <li
                             key={`f-${e.id}`}
-                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0"
+                            className="surface-card bg-bg-surface/40 px-3 py-2 text-sm flex flex-wrap items-center gap-2 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                            onClick={() => inspectException(e, "flagged")}
                           >
                             <span className="text-text-secondary truncate min-w-0 flex-1">{e.fullName}</span>
                             <span className="text-xs text-action-info">{e.flagStatus}</span>
@@ -179,6 +203,8 @@ function VpAttendanceExceptionsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

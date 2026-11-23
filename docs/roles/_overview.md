@@ -154,3 +154,25 @@ their own, so they are not separate files):
 - [`vice_principal.md`](./vice_principal.md)
 - [`chief_warden.md`](./chief_warden.md) (role context on Principal)
 - [`dean.md`](./dean.md)
+
+## Gaps & Research
+
+Each role doc now includes a **Gaps & Research** section appended after the existing content. This section covers:
+
+- **Institutional context** — what the role IS in real JNTUH CEJ life
+- **Operational standards** — research-backed best practices (JNTUH exam branch, NIT Hamirpur SOP, TMU Mess Policy, UGC/AICTE/NBA)
+- **Missing** — 8 numbered functional gaps per role
+- **Implementation notes** — dashboard/agent design considerations
+- **Agent persona** — what the agent should know to act as this role
+
+The original page routes, API endpoints, data flow, and security notes are preserved unchanged. The Gaps & Research section is additive only.
+
+## Cross-Role Dependency Map
+
+Each role doc now includes a **Cross-Role Dependencies** section covering:
+- What data this role should see (read-only) from other roles
+- What this role should NOT see
+- Where this role escalates to
+- What this role borrows from other roles
+
+See [cross-role-dependency.md](./cross-role-dependency.md) for the full capability sharing matrix.

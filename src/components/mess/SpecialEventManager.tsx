@@ -13,6 +13,8 @@ import {
   type MealType, type SpecialEvent, type SpecialItemCategory,
 } from "@/lib/mess-reviews";
 import { InterestCountsPanel } from "./InterestCountsPanel";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface DraftItem { code: string; label: string; category: SpecialItemCategory; isPrimary: boolean }
 const emptyItem = (): DraftItem => ({ code: "", label: "", category: "VEG", isPrimary: false });
@@ -31,6 +33,71 @@ function defaultDeadline(dateIso: string): string {
 
 export function SpecialEventManager() {
   const addToast = useUIStore((s) => s.addToast);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectEvent = (ev: SpecialEvent) => {
+    const status = effectiveEventStatus(ev);
+    inspect({
+      kind: "menu",
+      title: ev.title,
+      subtitle: `${ev.eventDate} · ${MEAL_LABEL[ev.mealType]}`,
+      status: (
+        <span
+          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+            status === "CLOSED" || status === "CANCELLED"
+              ? "bg-bg-elevated text-text-muted"
+              : "bg-emerald-500/10 text-action-success"
+          }`}
+        >
+          {status}
+        </span>
+      ),
+      sections: [
+        {
+          title: "Overview",
+          content: (
+            <KVPairs
+              items={[
+                { label: "Event date", value: ev.eventDate },
+                { label: "Meal", value: MEAL_LABEL[ev.mealType] },
+                { label: "Hostel-only", value: ev.hostelOnly ? "Yes" : "No" },
+                { label: "Items", value: String(ev.items?.length ?? 0) },
+                ...(ev.notes ? [{ label: "Notes", value: ev.notes }] : []),
+              ]}
+            />
+          ),
+        },
+        {
+          title: "Context",
+          content: (
+            <p className="text-xs text-text-muted">
+              Interest counts are visible in the counts panel. Status changes
+              (close / cancel) run through the real{" "}
+              <code className="font-mono">PATCH /api/mess/special-events/[id]</code>{" "}
+              route.
+            </p>
+          ),
+        },
+        {
+          title: "Actions",
+          content: (
+            <ActionRow>
+              <InspectorButton
+                onClick={() =>
+                  setActiveEventId(activeEventId === ev.id ? null : ev.id)
+                }
+                variant="primary"
+              >
+                {activeEventId === ev.id ? "Hide counts" : "View counts"}
+              </InspectorButton>
+            </ActionRow>
+          ),
+        },
+      ],
+      detailHref: "/mess/special-events",
+      detailLabel: "All special events",
+    });
+  };
   const [events, setEvents] = useState<SpecialEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -228,7 +295,11 @@ export function SpecialEventManager() {
             {events.map((ev) => {
               const status = effectiveEventStatus(ev);
               return (
-                <div key={ev.id} className="surface-card p-3">
+                <div
+                  key={ev.id}
+                  className="surface-card p-3 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                  onClick={() => inspectEvent(ev)}
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-text-primary">{ev.title}</div>
@@ -236,7 +307,10 @@ export function SpecialEventManager() {
                         {ev.eventDate} · {MEAL_LABEL[ev.mealType]} · {status}
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div
+                      className="flex flex-wrap items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button type="button" onClick={() => setActiveEventId(activeEventId === ev.id ? null : ev.id)}
                         className="surface-card px-2 py-1 text-xs">
                         {activeEventId === ev.id ? "Hide counts" : "View counts"}
@@ -261,6 +335,8 @@ export function SpecialEventManager() {
             })}
           </div>
         </SectionCard>
+
+        <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
       </div>
     </WidgetBoundary>
   );

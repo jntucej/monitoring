@@ -19,6 +19,72 @@ import {
   AlertTriangle,
   Inbox,
 } from "lucide-react";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
+
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for a candidate attendance record. */
+function buildCandidateAttendanceInspection(r: AttendanceRow): EntityInspection {
+  const dirTone: "ok" | "warn" = r.direction === "IN" ? "ok" : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Candidate", value: r.candidate_name ?? "—" },
+            { label: "Unique ID", value: r.candidate_unique_id ?? "—" },
+            { label: "Roll", value: r.roll ?? "—" },
+            { label: "Direction", value: r.direction },
+            { label: "Date", value: r.date },
+            { label: "Timestamp", value: new Date(r.timestamp_utc).toLocaleString() },
+            { label: "Time in", value: r.time_in ?? "—" },
+            { label: "Time out", value: r.time_out ?? "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/oie/candidate-attendance" variant="ghost">
+            All records
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "attendance",
+    title: r.candidate_name ?? r.roll ?? "Unknown candidate",
+    subtitle: `${r.direction} · ${r.date}`,
+    status: <StatusBadge text={r.direction} tone={dirTone} />,
+    sections,
+    detailHref: "/oie/candidate-attendance",
+    detailLabel: "All candidate attendance",
+  };
+}
 
 interface AttendanceRow {
   id: string;

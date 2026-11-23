@@ -15,6 +15,12 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  menuInspection,
+  type MenuDayInfo,
+  type MessMenuItem,
+} from "@/components/approver/wardenConsoleModels";
 
 interface MenuResponse {
   success: boolean;
@@ -78,6 +84,7 @@ function WidgetError({ message, onRetry }: { message: string; onRetry: () => voi
 }
 
 function MessMenuInner() {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   const {
     data: menu,
     loading: menuLoading,
@@ -90,6 +97,14 @@ function MessMenuInner() {
   const menuData = menu?.data;
   const menuItems = menuData?.items ?? [];
   const menuHasDay = Boolean(menuData?.mealDate);
+  const dayInfo: MenuDayInfo = {
+    mealDate: menuData?.mealDate ?? null,
+    windowOpens: menuData?.windowOpens ?? null,
+    windowCloses: menuData?.windowCloses ?? null,
+  };
+  const inspectItem = (item: MessMenuItem) => {
+    inspect(menuInspection(item, dayInfo));
+  };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
@@ -140,7 +155,7 @@ function MessMenuInner() {
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
                       {menuItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-bg-elevated/30 transition-colors">
+                        <tr key={item.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspectItem(item)}>
                           <td className="px-3 py-2.5 text-text-secondary font-medium min-w-0 truncate">{item.label}</td>
                           <td className="px-3 py-2.5 text-text-muted font-mono text-xs whitespace-nowrap">{item.code}</td>
                           <td className="px-3 py-2.5">
@@ -180,6 +195,7 @@ function MessMenuInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

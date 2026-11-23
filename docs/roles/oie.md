@@ -50,3 +50,56 @@ The OIE workspace is styled in an orange theme (`#fff7ed` surface tint) with com
 * **RBAC & Authorization:** Protected by server-side `withAuthorization({ requiredRole: ['oie', ...] })` checks. UI access is locked using `AuthGuard allowedRoles={['oie']}`.
 * **Separation of Duties:** The OIE can issue conditional day-of-exam access exceptions, but cannot alter published results or permanently clear academic suspensions without HOD and Controller sign-off.
 * **Tamper-Evident Logs:** Every exception granted during an active exam window is tagged with the candidate ID, timestamp, proctor station, and OIE user ID.
+
+
+## Gaps & Research
+
+### Institutional context
+The OIE (Office of the Registrar/Examination Officer) is the operational office that handles exam queue triage, access and exception intake, candidate attendance reconciliation, and decision queues. The Vice-Principal discharges OIE duties during the Principal's absence.
+
+Per JNTUH exam office procedures, the OIE is the first point of contact for exam-related queries and exceptions. The OIE does NOT process results (that's the exam branch office) and does NOT control hall access (that's the Chief Superintendent).
+
+### Missing (not in app yet)
+1. **Exam queue dashboard** — no visual exam queue with priority and status
+2. **Access request workflow** — no structured access request workflow
+3. **Attendance reconciliation alerts** — no alerts when attendance discrepancy is detected
+4. **Decision queue SLA** — no SLA timers for decision queue items
+5. **OIE KPI dashboard** — no KPI view of OIE performance
+6. **Exception categorization** — no structured categorization of exam exceptions
+7. **OIE exam day view** — no dedicated exam day view for OIE
+8. **Communication log** — no structured log of OIE communications with candidates
+
+### Implementation notes
+- Dashboard leads with exam queue, access requests, candidate attendance
+- OIE agent is the first point of contact for exam matters
+- Queue: structured triage with priority and status
+- Access: structured workflow with verification and approval
+- Attendance: reconciliation with discrepancy alerts
+
+### Agent persona
+- Focus: exam queue, access requests, candidate attendance, decision queue
+- Can: triage exam queue, handle access requests, reconcile attendance
+- Cannot: process results (exam branch), control hall access (Chief Superintendent)
+- Escalation: to Vice-Principal for exam matters; to Principal for major decisions
+
+
+
+## Cross-Role Dependencies
+
+### OIE should see (read-only)
+- **exam_superintendent**: candidate attendance, hall status, exceptions → Exam-day status
+- **exam_branch**: hall ticket distribution, result processing status → Exam progress
+- **vp**: exam coordination, decision queue → What VP is handling
+
+### OIE should NOT see
+- **sysadmin**: infra, MFA, RLS → not OIE's concern
+- **principal**: strategic KPIs → not OIE's concern
+
+### OIE escalates to
+- **vp**: exam queue items, candidate exceptions
+- **principal**: major exam decisions
+
+### OIE borrows from
+- **exam_superintendent**: candidate attendance (cs collects, oie reconciles)
+- **exam_branch**: hall ticket data (eb generates, oie verifies)
+

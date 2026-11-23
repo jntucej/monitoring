@@ -8,7 +8,7 @@ import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptySt
 import { Loader2, Clock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { EntityInspector } from "@/components/shared/EntityInspector";
-import { scanInspection } from "@/components/shared/inspectionModels";
+import { transactionInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
 interface MovementRow {
   id: string;
@@ -49,12 +49,12 @@ function WorkerShiftsInner() {
   const { data, loading, error } = useApiResource<MyShiftResponse>("/api/workers/my-shift", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
 
   const myRecent = useMemo(() => data?.data?.myRecent ?? [], [data]);
   const todayShift = data?.data?.todayShifts?.[0];
 
   const busy = loading && !data;
-  const [activeMove, setActiveMove] = useState<MovementRow | null>(null);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6 py-6 min-w-0">
@@ -109,7 +109,26 @@ function WorkerShiftsInner() {
                 <div
                   key={m.id}
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
-                  onClick={() => setActiveMove(m as any)}
+                  onClick={() =>
+                    inspect(
+                      transactionInspection(
+                        {
+                          id: m.id,
+                          roll: m.roll ?? null,
+                          name: m.name ?? null,
+                          person_type: m.person_type ?? null,
+                          direction: m.direction,
+                          reason: m.reason ?? null,
+                          gate_id: m.gate_id ?? null,
+                          gate_name: m.gate_name ?? null,
+                          timestamp: m.timestamp,
+                          scan_type: m.scan_type ?? (m.is_manual ? "manual" : null),
+                          is_correction: m.is_correction ?? null,
+                        },
+                        role,
+                      ),
+                    )
+                  }
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <ArrowRight
@@ -136,24 +155,7 @@ function WorkerShiftsInner() {
         </div>
       </OperatorWidgetBoundary>
 
-      <EntityInspector
-        inspection={activeMove
-          ? scanInspection({
-              id: activeMove.id,
-              roll: activeMove.roll ?? null,
-              name: activeMove.name ?? null,
-              person_type: activeMove.person_type ?? null,
-              direction: activeMove.direction,
-              reason: activeMove.reason ?? null,
-              gate_id: activeMove.gate_id ?? null,
-              gate_name: activeMove.gate_name ?? null,
-              timestamp: activeMove.timestamp,
-              scan_type: activeMove.scan_type ?? (activeMove.is_manual ? "manual" : null),
-              is_correction: activeMove.is_correction ?? null,
-            })
-          : null}
-        onClose={() => setActiveMove(null)}
-      />
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

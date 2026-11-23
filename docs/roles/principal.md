@@ -52,3 +52,69 @@ The Principal interface adopts a navy theme (`#f8fafc` surface tint) with compos
 * **RBAC Enforcement:** Server-side API protection is enforced using `withAuthorization({ requiredRole: ['principal', ...] })`. UI routing is guarded by `AuthGuard allowedRoles={['principal']}`.
 * **Separation of Duties & Two-Person Rules:** High-consequence actions such as debarring a student require two-person verification (initiated by HOD or Chief Warden, approved by Principal/Dean).
 * **Dual Roles:** While the Principal holds Chief Warden and Chief Superintendent authority, administrative hostel actions are logged with `role_context='chief_warden'` to preserve separation of audit logs.
+
+
+## Gaps & Research
+
+### Institutional context
+Per JNTUH convention, the Principal wears three hats simultaneously:
+1. **Principal** — overall campus authority, strategic decisions, all-level approver
+2. **Chief Warden** — head of hostel administration, disciplinary escalation to DEBARRED
+3. **Chief Superintendent of Examinations** — exam-day authority, candidate attendance, hall access
+
+The Vice-Principal discharges the Principal's duties during leave. No single person can both enter and publish a result — separation of duties is enforced across the exam branch.
+
+### Operational standards
+- The Principal is the Convener of the Academic Council and the Board of Studies
+- All gate-pass approvals at the highest level flow through the Principal
+- Lockdown authority: only the Principal can declare a campus-wide lockdown
+- Disciplinary authority: only the Principal (as Chief Warden) can escalate a hostel case to DEBARRED
+- Exam authority: the Principal (as Chief Superintendent) is the final approver for exam-day exceptions
+- Delegation: the Principal can delegate specific approval authority to the Vice-Principal or Dean with time-boxed expiry
+
+### Missing (not in app yet)
+1. **Strategic KPI dashboard** — no single view showing academic performance, gate security, hostel occupancy, and exam status
+2. **Delegation expiry alerting** — no notification when a delegation is about to expire
+3. **Lockdown drill mode** — no way to test lockdown without triggering it
+4. **Cross-department view** — no way to see all 5 B.Tech departments + 5 M.Tech in one view
+5. **Principal's leave workflow** — no formal process for handing off to Vice-Principal
+6. **Board of Studies minutes** — no digital record of academic council decisions
+7. **Exam-day command center** — no single screen for the Chief Superintendent on exam day
+8. **DEBARRED case file** — no structured case file for disciplinary escalation
+
+### Implementation notes
+- Dashboard leads with strategic KPIs: gate status, pending approvals, hostel occupancy, exam status
+- Lockdown: two-person approval (Principal + one designated authority), time-boxed, auto-revokes
+- Exam-day: the Chief Superintendent console should be a separate view with candidate attendance, hall access, spot exceptions
+
+### Agent persona
+- Focus: strategic campus view, all-level approvals, delegation, lockdown, DEBARRED
+- Can: sign any approval, delegate authority, declare lockdown, escalate to DEBARRED
+- Cannot: self-approve without two-person for lockdown; cannot bypass exam SoD
+- Escalation: to Vice Chancellor, JNTUH Hyderabad
+
+
+
+## Cross-Role Dependencies
+
+### Principal should see (read-only)
+- **admin**: campus KPIs, user stats, gate status, alert status → Operational health
+- **vp**: flagged items, delegation chain, exam coordination → What VP is doing
+- **dean**: academic KPIs, compliance, cross-department view → Academic health
+- **hostel_manager**: hostel occupancy, curfew compliance, incident rate → Hostel KPIs
+- **exam_superintendent**: candidate attendance, hall status, exceptions → Exam-day status
+- **exam_branch**: result processing, hall ticket distribution → Exam progress
+- **emo**: infrastructure KPIs, vendor SLA → Campus physical health
+
+### Principal should NOT see
+- **sysadmin**: full audit with UUIDs, RLS internals, break-glass triggers → sysadmin territory
+
+### Principal escalates to
+- **VC (JNTUH)**: all final decisions, compliance matters, DEBARRED
+- **JNTUH IT Cell**: security incidents
+
+### Principal borrows from
+- **vp**: delegation chain (principal delegates, vp discharges)
+- **admin**: campus KPIs (admin monitors, principal sees)
+- **exam_superintendent**: exam-day data (chief sup monitors, principal sees KPI)
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
@@ -20,6 +20,12 @@ import {
   AlertTriangle,
   Inbox,
 } from "lucide-react";
+import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
+import type { WorkflowType, PermissionStatus } from "@/lib/types";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface DayAccessRow {
   id: string;
@@ -157,6 +163,7 @@ function ExaminationDayAccessInner() {
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const {
     data: accessData,
@@ -254,12 +261,34 @@ function ExaminationDayAccessInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <AccessDayTable rows={rows} onInspect={(r) => inspect(buildOieExaminationDayAccessInspection(r))} />
+            <AccessDayTable
+              rows={rows}
+              onInspect={(r) => {
+                inspect(buildOieExaminationDayAccessInspection(r));
+                setStageItem({
+                  ticketId: r.id,
+                  ticketNumber: r.ticket_number,
+                  workflowType: r.workflow_type,
+                  currentStage: r.current_stage,
+                  status: r.status,
+                  studentName: r.student?.name,
+                  studentRoll: r.student?.student_details?.roll,
+                  stages: ["student", "oie", "exam_branch", "vice_principal"],
+                });
+              }}
+            />
           )}
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

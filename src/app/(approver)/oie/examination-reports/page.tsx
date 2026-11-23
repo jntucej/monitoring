@@ -20,6 +20,8 @@ import {
   TrendingUp,
   CalendarDays,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface AnalyticsResponse {
   success: boolean;
@@ -94,6 +96,42 @@ function ExaminationReportsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectReports = () => {
+    inspect({
+      kind: "academic_record",
+      title: "Examination reports (30-day)",
+      subtitle: data?.data?.role ?? "oie",
+      sections: [
+        {
+          title: "Overview",
+          content: (
+            <KVPairs
+              items={
+                metrics.map((m) => ({
+                  label: m.label,
+                  value: `${m.value}${m.unit ? ` ${m.unit}` : ""}`,
+                }))
+              }
+            />
+          ),
+        },
+        {
+          title: "Actions",
+          content: (
+            <ActionRow>
+              <InspectorButton href="/oie/examination-reports" variant="ghost">
+                Back to reports
+              </InspectorButton>
+            </ActionRow>
+          ),
+        },
+      ],
+      detailHref: "/oie/examination-reports",
+      detailLabel: "Examination reports",
+    });
+  };
 
   const {
     data,
@@ -172,20 +210,33 @@ function ExaminationReportsInner() {
             </div>
           ) : metrics.length > 0 ? (
             metrics.map((m, i) => (
-              <StatCard
+              <div
                 key={m.key}
-                icon={i === 0 ? TrendingUp : i === 1 ? CalendarDays : i === 2 ? Inbox : FileBarChart}
-                label={m.label}
-                value={
-                  <span>
-                    {m.value}
-                    {m.unit ? <span className="text-sm text-text-muted ml-1">{m.unit}</span> : null}
-                  </span>
-                }
-                sub={m.key}
-                accent={i === 0 ? "text-action-success" : i === 1 ? "text-action-info" : i === 2 ? "text-action-warning" : "text-white"}
-                loading={loading && !data}
-              />
+                className="surface-card bg-bg-base p-4 flex flex-col gap-2 min-w-0 cursor-pointer hover:bg-bg-elevated/40 transition-colors"
+                onClick={inspectReports}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspectReports();
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2 text-text-muted min-w-0">
+                  {(i === 0 ? <TrendingUp className="w-4 h-4 shrink-0" /> : i === 1 ? <CalendarDays className="w-4 h-4 shrink-0" /> : i === 2 ? <Inbox className="w-4 h-4 shrink-0" /> : <FileBarChart className="w-4 h-4 shrink-0" />)}
+                  <span className="text-xs font-semibold uppercase tracking-wide truncate">{m.label}</span>
+                </div>
+                <p className={`text-2xl font-bold ${i === 0 ? "text-action-success" : i === 1 ? "text-action-info" : i === 2 ? "text-action-warning" : "text-white"}`}>
+                  {m.value}
+                  {m.unit ? <span className="text-sm text-text-muted ml-1">{m.unit}</span> : null}
+                </p>
+                {loading && !data ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                ) : (
+                  <p className="text-xs text-text-muted">{m.key}</p>
+                )}
+              </div>
             ))
           ) : (
             <EmptyState message="No report data available for the selected period. Exam season metrics will appear once activity is recorded." />
@@ -236,6 +287,7 @@ function ExaminationReportsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

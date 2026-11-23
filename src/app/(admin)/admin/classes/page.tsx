@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Layers, Plus, Loader2, Search } from "lucide-react";
+import { Layers, Plus, Loader2, Search, ChevronRight } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface Dept {
   id: string;
@@ -58,6 +59,57 @@ function AdminClassesInner() {
     departmentId: "", year: "", section: "", name: "", roomNumber: "", capacity: "",
   });
   const [saving, setSaving] = useState(false);
+  const [active, setActive] = useState<ClassRow | null>(null);
+
+  const deptName = (id: string) => depts.find((d) => d.id === id)?.name ?? id;
+
+  /** Standardized inspection model for a class row (overview → actions).
+   *  Built lazily so it can reference `deptName`, which depends on the
+   *  loaded `depts` list. */
+  const classInspection = active
+    ? {
+        kind: "class",
+        title: active.name ?? `${deptName(active.departmentId)} ${active.year} ${active.section}`,
+        subtitle: `${active.year} · ${active.section}`,
+        status: (
+          <span
+            className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+              active.isActive
+                ? "bg-emerald-500/15 text-action-success"
+                : "bg-bg-elevated text-text-muted"
+            }`}
+          >
+            {active.isActive ? "ACTIVE" : "INACTIVE"}
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Department", value: deptName(active.departmentId) },
+                  { label: "Year", value: String(active.year) },
+                  { label: "Section", value: active.section },
+                  ...(active.roomNumber ? [{ label: "Room", value: active.roomNumber }] : []),
+                  ...(active.capacity ? [{ label: "Capacity", value: String(active.capacity) }] : []),
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/admin/classes" variant="primary">
+                  <ChevronRight className="size-3.5" /> All classes
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+      }
+    : null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,7 +129,6 @@ function AdminClassesInner() {
   const filtered = useMemo(() => {
     if (!query.trim()) return rows;
     const q = query.toLowerCase();
-    const deptName = (id: string) => depts.find((d) => d.id === id)?.name ?? id;
     return rows.filter((r) =>
       `${r.departmentId} ${deptName(r.departmentId)} ${r.year} ${r.section} ${r.name ?? ""}`.toLowerCase().includes(q)
     );
@@ -109,8 +160,6 @@ function AdminClassesInner() {
       setSaving(false);
     }
   };
-
-  const deptName = (id: string) => depts.find((d) => d.id === id)?.name ?? id;
 
   if (loading) {
     return (
@@ -187,20 +236,26 @@ function AdminClassesInner() {
                   <th className="p-3 text-left">Name</th>
                   <th className="p-3 text-left">Room</th>
                   <th className="p-3 text-left">Capacity</th>
+                  <th aria-label="Inspect" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filtered.length === 0 && (
-                  <tr><td colSpan={6} className="p-6 text-center text-text-muted">No classes yet.</td></tr>
+                  <tr><td colSpan={7} className="p-6 text-center text-text-muted">No classes yet.</td></tr>
                 )}
                 {filtered.map((r) => (
-                  <tr key={r.id} className="hover:bg-bg-elevated/40">
+                  <tr
+                    key={r.id}
+                    onClick={() => setActive(r)}
+                    className="hover:bg-bg-elevated/40 cursor-pointer"
+                  >
                     <td className="p-3 text-text-primary">{deptName(r.departmentId)}</td>
                     <td className="p-3 tabular-nums">{r.year}</td>
                     <td className="p-3 font-medium">{r.section}</td>
                     <td className="p-3 text-text-muted">{r.name ?? "—"}</td>
                     <td className="p-3 text-text-muted">{r.roomNumber ?? "—"}</td>
                     <td className="p-3 tabular-nums">{r.capacity ?? "—"}</td>
+                    <td className="p-3 text-text-muted"><ChevronRight className="w-4 h-4" /></td>
                   </tr>
                 ))}
               </tbody>
@@ -208,6 +263,8 @@ function AdminClassesInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={classInspection} onClose={() => setActive(null)} />
     </div>
   );
 }

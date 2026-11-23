@@ -71,3 +71,63 @@ The 15 most important endpoints for admin operations:
 - **Privileged Login Alert:** Every successful login by an `admin` account dispatches an immediate administrative security alert (`sendPrivilegedLoginAlert`) via Telegram/webhook.
 - **UUID Masking / Information Hiding:** In accordance with platform governance, internal UUIDs are hidden from administrators (`isSuperAdmin(role) === false`) to prevent internal reference leakage.
 - **Session Revocation on Anomaly:** Any device mismatch or tamper detection invalidates active database sessions (`UPDATE public.sessions SET revoked_at = NOW()`).
+
+
+## Gaps & Research
+
+### Institutional context
+In a real university, this maps to the College Office / Administrative Manager who handles user provisioning, gate hardware, visitor policy, SMS alerts, and operational dashboards. Per NIT Hamirpur security SOP, campus security operations run through a Security Control Room under a Security Supervisor — our admin dashboard mirrors this: one screen, all gates, all alerts, all user activity.
+
+### Operational standards
+- Visitor categories (parent, guardian, vendor, contractor, guest, government, alumnus) each need different access scopes and badge rules
+- Pre-registration with host verification and time-limited digital badges
+- Real-time headcount across all gates (who is on campus at any moment)
+- Automated check-in/check-out with photo and ID capture
+- Host notification on visitor arrival
+- SMS queue monitoring: pending count, delivered count, failed count, last batch timestamp
+
+### Missing (not in app yet)
+1. **Visitor category management** — no UI for defining visitor types with different access scopes and badge rules
+2. **Pre-registration workflow** — no way for hosts to pre-register visitors in advance; visitors arrive at gate and operator handles manually
+3. **SMS queue monitoring** — no live view of pending SMS dispatches, delivery status, or failed sends
+4. **Gate hardware health dashboard** — no visual indicator of scanner uptime, sensor status, or last heartbeat
+5. **Multi-gate visitor headcount** — no single screen showing "who is on campus right now" across all gates
+6. **Lockdown drill testing** — no way to test lockdown without actually triggering it
+7. **User self-service portal** — parents/students cannot request their own access changes; admin must handle manually
+8. **Compliance audit reports** — no pre-built reports for JNTUH / AICTE / NBA inspection
+
+### Implementation notes
+- Dashboard should lead with CampusStatusBar (lg) + GateHealth (md) + UserStats (md)
+- Lockdown is the highest-severity admin action: require two-person approval (admin + principal)
+- Visitor pre-registration should be a host-initiated flow: host fills form, system generates QR, visitor scans at gate
+
+### Agent persona
+- Focus: campus operational health, user governance, gate hardware, alerts
+- Do NOT: touch infrastructure, database, deployments, RLS policies (sysadmin territory)
+- Can: configure gates, manage users, trigger lockdown, broadcast alerts, export audit logs
+- Escalation: gate issues → supervisor; infra issues → sysadmin; academic issues → principal
+
+
+
+## Cross-Role Dependencies
+
+### Admin should see (read-only)
+- **operator**: gate scan log, operator stats, device health → Admin monitors gate operations
+- **supervisor**: overstay alerts, watchlist status → Admin sees security KPIs
+- **staff**: shift status, handover docs → Admin monitors staff operations
+- **worker**: task completion rate → Admin monitors maintenance SLAs
+- **emo**: infrastructure complaints, vendor SLA → Admin sees estate status
+- **sysadmin**: deployment status, MFA status → Admin sees infra health
+
+### Admin should NOT see
+- **sysadmin**: full audit with UUIDs, RLS internals, break-glass triggers → sysadmin territory
+- **principal**: strategic KPIs, DEBARRED case files → Principal territory
+
+### Two-person rules
+- Lockdown: admin + principal
+- Gate config changes: admin triggers, sysadmin approves for infra changes
+
+### Admin borrows from
+- **operator**: device health reports (admin monitors, operator generates)
+- **supervisor**: exception resolution times (admin sees KPIs, supervisor resolves)
+

@@ -1,13 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { useRoleContext } from "@/hooks/useRoleContext";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHostelInspection } from "@/lib/principal/registerInspections";
+import {
+  buildHostelInspection as buildMainHostelInspection,
+  type HostelRecord,
+  type RoleGate,
+} from "./entityInspectionModels";
 import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
-import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildHostelInspection } from "@/lib/principal/registerInspections";
 
 interface HostelBlock {
   id?: string;
@@ -28,12 +36,39 @@ export function HostelView() {
   const { data, loading } = useApiResource<HostelBlocksResponse>("/api/hostel/blocks", {
     ttlMs: 30_000,
   });
-  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const {
+    inspection: ourInspection,
+    inspect: ourInspect,
+    closeInspection,
+  } = useEntityInspector();
+
+  const role = useRoleContext();
+  const gate: RoleGate = {
+    isPrincipal: role.isPrincipal,
+    isFaculty: role.isFaculty,
+    role: role.role ?? null,
+  };
+  const [mainInspection, setMainInspection] = useState<
+    ReturnType<typeof buildMainHostelInspection> | null
+  >(null);
+  const inspectMain = (block: HostelBlock) => {
+    const name = block.name ?? block.block_name ?? "block";
+    setMainInspection(
+      buildMainHostelInspection(
+        {
+          block: name,
+          total: block.capacity ?? block.total_rooms ?? 0,
+          occupied: block.occupied ?? 0,
+        } as HostelRecord,
+        gate
+      )
+    );
+  };
 
   const blocks = Array.isArray(data?.data) ? data.data : [];
   const totalCapacity = blocks.reduce((sum, b) => sum + (b.capacity ?? b.total_rooms ?? 0), 0);
   const totalOccupied = blocks.reduce((sum, b) => sum + (b.occupied ?? 0), 0);
-  const openInspector = (b: HostelBlock) => inspect(buildHostelInspection(b));
+  const openInspector = (b: HostelBlock) => ourInspect(buildHostelInspection(b));
 
   return (
     <div className="space-y-4">
@@ -41,7 +76,7 @@ export function HostelView() {
       <header>
         <h1 className="text-lg font-semibold text-text-primary">Hostel Oversight</h1>
         <p className="text-xs text-text-muted">
-          Hostel block status and occupancy
+          Hostel block status and occupancy · click any block to inspect
         </p>
       </header>
 
@@ -70,8 +105,11 @@ export function HostelView() {
                   <button
                     type="button"
                     onClick={() => openInspector(b)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") openInspector(b);
+                    }}
                     aria-label={`Inspect hostel block: ${name}`}
-                    className="surface-card block w-full bg-bg-surface p-3 text-left"
+                    className="surface-card block w-full bg-bg-surface p-3 text-left cursor-pointer hover:bg-bg-surface/60 transition-colors"
                   >
                     <p className="text-sm font-medium">{name}</p>
                     <div className="mt-2 flex gap-3 text-xs text-text-secondary">
@@ -116,7 +154,8 @@ export function HostelView() {
         </>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={ourInspection} onClose={closeInspection} />
+      <EntityInspector inspection={mainInspection} onClose={() => setMainInspection(null)} />
     </div>
   );
 }

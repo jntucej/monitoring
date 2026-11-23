@@ -1,12 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Suspense } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoading";
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 import { OperatorEmptyState } from "@/components/operator/shared/OperatorEmptyState";
 import { Loader2, ClipboardList, CheckCircle2 } from "lucide-react";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { requestInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 interface WorkOrderRow {
   id: string;
@@ -40,6 +44,9 @@ function WorkerWorkOrdersInner() {
   const { data, loading, error } = useApiResource<MyWorkOrdersResponse>("/api/workers/my-work-orders", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useRoleInspectorHost();
+  // L1 FrontlinePivot: duty-scoped subject sheet.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
 
   const open = useMemo(() => data?.data?.open ?? [], [data]);
   const recentlyClosed = useMemo(() => data?.data?.recentlyClosed ?? [], [data]);
@@ -75,7 +82,11 @@ function WorkerWorkOrdersInner() {
           ) : (
             <div className="divide-y divide-slate-800">
               {open.map((o) => (
-                <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
+                <div
+                  key={o.id}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                  onClick={() => inspect(requestInspection(o))}
+                >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{o.ticket}</p>
                     <p className="text-xs text-text-muted truncate">
@@ -84,9 +95,27 @@ function WorkerWorkOrdersInner() {
                       {o.stage ? ` · ${o.stage}` : ""}
                     </p>
                   </div>
-                  <span className="surface-card shrink-0 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
-                    {o.status ?? "PENDING"}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFrontlineSubject({
+                          id: o.id,
+                          name: o.ticket,
+                          code: o.id,
+                          statusTag: o.status ?? "PENDING",
+                          locationOrScope: o.stage ? `Stage: ${o.stage}` : undefined,
+                        });
+                      }}
+                      className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                    >
+                      Verify
+                    </button>
+                    <span className="surface-card shrink-0 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-action-warning">
+                      {o.status ?? "PENDING"}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -99,7 +128,20 @@ function WorkerWorkOrdersInner() {
           <div className="min-w-0">
             <div className="divide-y divide-slate-800">
               {recentlyClosed.map((c) => (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0">
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                  onClick={() =>
+                    inspect(
+                      requestInspection({
+                        id: c.id,
+                        ticket: c.ticket,
+                        status: c.status,
+                        updatedAt: c.updatedAt,
+                      }),
+                    )
+                  }
+                >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-white truncate">{c.ticket}</p>
                     {c.updatedAt && (
@@ -117,6 +159,14 @@ function WorkerWorkOrdersInner() {
           </div>
         </OperatorWidgetBoundary>
       )}
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
+
+      {/* L1 FrontlinePivot: duty-scoped subject sheet */}
+      <FrontlineSubjectSheet
+        subject={frontlineSubject}
+        onClose={() => setFrontlineSubject(null)}
+      />
     </div>
   );
 }

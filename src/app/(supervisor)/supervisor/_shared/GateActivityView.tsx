@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { gateLiveInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 import { DoorOpen, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface GateLiveItem {
   id: string;
@@ -30,8 +34,28 @@ export function GateActivityView() {
     "/api/supervisor/gate-live",
     { ttlMs: 15_000 }
   );
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
 
   const gates = data?.data?.gates ?? [];
+  const openGate = (g: GateLiveItem) => {
+    inspect(gateLiveInspection(g, role));
+    setPivot({
+      kind: "gate",
+      id: g.id,
+      title: g.name,
+      subtitle: `${g.gateCode} · ${g.location ?? ""} · ${g.onPost} guards · In: ${g.recentEntries} / Out: ${g.recentExits}`,
+      fullRoute: `/admin/gates/${g.id}`,
+      relatedLinks: [
+        { label: "Gate Wall", href: "/supervisor/gates/wall" },
+        { label: "Gate Activity", href: "/supervisor/gates/activity" },
+        { label: "Incidents", href: "/supervisor/response/incidents" },
+        { label: "Escalations", href: "/supervisor/response/escalations" },
+        { label: "Team", href: "/supervisor/team" },
+        { label: "Shifts", href: "/supervisor/shift" },
+      ],
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -53,7 +77,8 @@ export function GateActivityView() {
             {gates.map((g) => (
               <li
                 key={g.id}
-                className="surface-card bg-bg-surface p-3 text-xs"
+                className="surface-card bg-bg-surface p-3 text-xs cursor-pointer hover:bg-bg-surface/60 transition-colors"
+                onClick={() => openGate(g)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -113,10 +138,14 @@ export function GateActivityView() {
               ]}
               data={gates}
               keyExtractor={(g) => g.id}
+              onRowClick={(g) => openGate(g)}
             />
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={() => { closeInspection(); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }
