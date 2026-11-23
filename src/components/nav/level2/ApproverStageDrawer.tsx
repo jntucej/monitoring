@@ -26,7 +26,15 @@ import {
   ExternalLink,
   Circle,
   ChevronRight,
+  Info,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import { type Role } from "@/lib/types";
+import {
+  resolvePermissionAbility,
+  type ViewerContext,
+  makeViewer,
+} from "@/lib/record-abilities";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -73,6 +81,29 @@ export function ApproverStageDrawer({
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("chain");
+
+  // ── Role-ability layer: what THIS viewer can do on THIS record ──────
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role) as Role | undefined;
+  const viewer: ViewerContext = makeViewer(role, {
+    userId: user?.id ?? "",
+    departmentId: user?.departmentId ?? null,
+    hostelScope: user?.studentDetails?.hostelBlock ?? null,
+    assignedGateId: user?.gateId ?? null,
+  });
+  const ability = item
+    ? resolvePermissionAbility(
+        {
+          id: item.ticketId,
+          ticket_number: item.ticketNumber,
+          workflow_type: item.workflowType,
+          current_stage: item.currentStage,
+          status: item.status,
+          student_user_id: item.studentId,
+        },
+        viewer,
+      )
+    : null;
 
   const handleSelectTab = (t: Tab) => {
     setTab(t);
@@ -303,6 +334,61 @@ export function ApproverStageDrawer({
                 </div>
               )}
             </div>
+
+            {/* Role-ability section: WHY this viewer is here + their turn */}
+            {ability && ability.actions.length > 0 && (
+              <div className="border-t border-border/60 px-4 py-3 space-y-2.5 bg-bg-elevated/30">
+                <div className="flex items-start gap-2">
+                  <Info className="h-4 w-4 text-action-primary shrink-0 mt-0.5" aria-hidden />
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                      Your role here · {ability.mode}
+                    </p>
+                    <p className="mt-0.5 text-xs text-text-secondary">
+                      {ability.roleReason}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {ability.actions.map((action) =>
+                    action.href ? (
+                      <Link
+                        key={action.id}
+                        href={action.href}
+                        className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                          action.intent === "primary"
+                            ? "bg-action-primary text-white hover:brightness-110"
+                            : action.intent === "danger"
+                              ? "bg-rose-500/15 text-action-danger hover:bg-rose-500/25"
+                              : "surface-card bg-bg-elevated text-text-primary hover:bg-bg-surface"
+                        }`}
+                      >
+                        <span>{action.label}</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        key={action.id}
+                        href={`/permissions/${item!.ticketId}`}
+                        className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                          action.intent === "primary"
+                            ? "bg-action-primary text-white hover:brightness-110"
+                            : action.intent === "danger"
+                              ? "bg-rose-500/15 text-action-danger hover:bg-rose-500/25"
+                              : "surface-card bg-bg-elevated text-text-primary hover:bg-bg-surface"
+                        }`}
+                      >
+                        <span>{action.label}</span>
+                        {action.disabledReason && (
+                          <span className="ml-1 text-[10px] opacity-70">
+                            ({action.disabledReason})
+                          </span>
+                        )}
+                      </Link>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Footer */}
             <div className="border-t border-border px-4 py-3 space-y-2.5">

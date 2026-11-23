@@ -5,6 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getAuthHeaders } from "@/lib/utils";
 import { ComplaintTimeline } from "@/components/shared/complaints/ComplaintTimeline";
+import { useAuthStore } from "@/stores/authStore";
+import { resolveComplaintAbility, makeViewer } from "@/lib/record-abilities";
+import { RecordAbilityBanner } from "@/components/shared/RecordAbilityBanner";
 
 export function ComplaintDetail({ role }: { role: string }) {
   const params = useParams();
@@ -91,6 +94,26 @@ export function ComplaintDetail({ role }: { role: string }) {
 
   const isAuthority = role !== "student";
 
+  // Role-ability layer: why THIS role is on this complaint. The real action
+  // buttons below are still gated by `role` + status; this is the reason
+  // banner + the role's next-step pivots.
+  const viewer = makeViewer(role, {
+    userId: useAuthStore.getState().user?.id ?? "",
+    hostelScope: useAuthStore.getState().user?.studentDetails?.hostelBlock ?? null,
+  });
+  const ability = resolveComplaintAbility(
+    {
+      id: c.id ?? id,
+      complaint_number: c.complaintNumber,
+      category: c.categoryLabel ?? c.category,
+      status: c.status,
+      current_stage: c.currentOwnerRole,
+      raised_by_user_id: c.filer_user_id ?? c.raised_by_user_id,
+      hostel_scope: c.hostel_scope ?? null,
+    },
+    viewer,
+  );
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="surface-card pb-4">
@@ -101,6 +124,12 @@ export function ComplaintDetail({ role }: { role: string }) {
           <span className="font-mono">{c.currentOwnerRole}</span>
         </p>
       </div>
+
+      {/* Role-ability banner: why this role is on this complaint */}
+      <RecordAbilityBanner
+        ability={ability}
+        fullRoute={role === "student" ? `/student/complaints/${id}` : `/complaints/${id}`}
+      />
 
       <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
         <h2 className="font-medium text-text-primary">Description</h2>

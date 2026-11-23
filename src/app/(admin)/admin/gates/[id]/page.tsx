@@ -22,6 +22,9 @@ import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageLoading } from "@/components/admin/shared/LoadingStates";
 import { ConfirmDialog } from "@/components/admin/shared/ConfirmDialog";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
+import { useAuthStore } from "@/stores/authStore";
+import { resolveGateEventAbility, makeViewer, type RecordEventAbility } from "@/lib/record-abilities";
+import { RecordAbilityBanner } from "@/components/shared/RecordAbilityBanner";
 
 interface GateMetrics {
   gateId: string;
@@ -60,6 +63,24 @@ export default function GateDetailPage() {
   const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
 
   const isSentinel = data?.gateCode?.toUpperCase() === "UNKNOWN";
+
+  // Role-ability layer: why THIS viewer manages / operates this gate.
+  const viewer = makeViewer(useAuthStore.getState().role, {
+    userId: useAuthStore.getState().user?.id ?? "",
+    assignedGateId: gateId || null,
+  });
+  const gateAbility: RecordEventAbility | null = data
+    ? resolveGateEventAbility(
+        {
+          id: gateId,
+          gate_code: data.gateCode,
+          direction: null,
+          status: data.status,
+          hostel_scope: null,
+        },
+        viewer,
+      )
+    : null;
 
   const fetchGateDetails = async () => {
     setLoading(true);
@@ -209,6 +230,9 @@ export default function GateDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Role-ability banner: why this role manages/operates this gate */}
+        <RecordAbilityBanner ability={gateAbility} fullRoute={`/admin/gates/${gateId}`} />
 
         {operatorNote && (
           <div className="surface-card p-4 bg-rose-500/10 text-action-danger text-sm flex items-center gap-2">

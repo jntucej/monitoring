@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect } from "react";
 import Link from "next/link";
-import { X, ArrowUpRight, Compass } from "lucide-react";
+import { X, ArrowUpRight, Compass, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
+import { type Role } from "@/lib/types";
+import {
+  resolvePermissionAbility,
+  makeViewer,
+} from "@/lib/record-abilities";
 
 export interface CommandPivotTarget {
   kind: "student" | "faculty" | "gate" | "ticket";
@@ -12,6 +18,11 @@ export interface CommandPivotTarget {
   subtitle?: string;
   fullRoute: string;
   relatedLinks: Array<{ label: string; href: string }>;
+  /** When kind === "ticket": the live stage/status so the drawer can show
+   *  this role's ability ("your role here") via record-abilities. */
+  ticketStage?: string;
+  ticketStatus?: string;
+  ticketNumber?: string;
 }
 
 const KIND_LABEL: Record<CommandPivotTarget["kind"], string> = {
@@ -44,6 +55,30 @@ export function CommandPivotDrawer({
     },
     [onClose],
   );
+
+  // Role-ability layer: when the target is a ticket, compute why THIS viewer
+  // can act (or observe) on it via record-abilities.
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role) as Role | undefined;
+  const viewer = makeViewer(role, {
+    userId: user?.id ?? "",
+    departmentId: user?.departmentId ?? null,
+    hostelScope: user?.studentDetails?.hostelBlock ?? null,
+    assignedGateId: user?.gateId ?? null,
+  });
+  const ticketAbility =
+    target && target.kind === "ticket"
+      ? resolvePermissionAbility(
+          {
+            id: target.id,
+            ticket_number: target.ticketNumber ?? target.id,
+            workflow_type: target.subtitle ?? "",
+            current_stage: target.ticketStage ?? "",
+            status: target.ticketStatus ?? "",
+          },
+          viewer,
+        )
+      : null;
 
   if (!target) return null;
 
@@ -108,6 +143,40 @@ export function CommandPivotDrawer({
           {target.subtitle && (
             <div className="surface-card bg-bg-elevated px-3 py-2 text-xs text-text-secondary">
               {target.subtitle}
+            </div>
+          )}
+
+          {ticketAbility && ticketAbility.actions.length > 0 && (
+            <div className="surface-card bg-bg-elevated/40 border border-border/50 px-3 py-2.5 space-y-2">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-action-primary shrink-0 mt-0.5" aria-hidden />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                    Your role here · {ticketAbility.mode}
+                  </p>
+                  <p className="mt-0.5 text-xs text-text-secondary">
+                    {ticketAbility.roleReason}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {ticketAbility.actions.map((a) => (
+                  <Link
+                    key={a.id}
+                    href={a.href ?? target.fullRoute}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+                      a.intent === "primary"
+                        ? "bg-action-primary text-white hover:brightness-110"
+                        : a.intent === "danger"
+                          ? "bg-rose-500/15 text-action-danger hover:bg-rose-500/25"
+                          : "surface-card bg-bg-surface hover:bg-bg-elevated",
+                    )}
+                  >
+                    <span>{a.label}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
 
