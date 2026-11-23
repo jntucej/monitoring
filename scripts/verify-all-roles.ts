@@ -20,7 +20,12 @@
  *   SMOKE_BASE   — default https://monitor.ucej.in
  *   SMOKE_CREDS  — default /root/monitoring/scripts/smoke-creds.json
  */
-import { chromium, type Browser, type BrowserContext } from "playwright";
+import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+
+// `goto()`'s options are an inline anonymous type in playwright's Page
+// interface — there is no exported PageGotoOptions type, so name the union
+// locally (same values, same positions).
+type GotoWaitUntil = "commit" | "domcontentloaded" | "load" | "networkidle";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -33,21 +38,38 @@ const OUT_PATH = process.argv.includes("--out")
 
 const onlyRole = process.argv.find((a) => a.startsWith("--role="))?.split("=")[1];
 
+// One stalled goto must NOT abort the whole role walk — retry a bounded
+// number of times with backoff, and only give up (rethrow) after all
+// attempts, so a single flake degrades gracefully instead of crashing
+// main() and marking every remaining leaf broken.
+//
 // A domcontentloaded on a heavy client-side-rendered Next.js app can stall
 // transiently under concurrent sweep load even when prod itself is fast
-// (curl confirms /login resolves in ~0.3s). One stalled goto must NOT abort
-// the whole role walk — retry a bounded number of times with backoff, and only
-// give up (rethrow) after all attempts, so a single flake degrades gracefully
-// instead of crashing main() and marking every remaining leaf broken.
+// (curl confirms /login resolves in ~0.3s). A stalled page also LIES about
+// its URL — it still reports the previous document, so an early "not on
+// /login" check against a half-loaded page reads a stale URL. The reload /
+// landing check in login() therefore needs networkidle, not just
+// domcontentloaded.
+interface GotoRetryOptions {
+  attempts?: number;
+  timeout?: number;
+  backoffMs?: number;
+  waitUntil?: GotoWaitUntil;
+}
+
 async function gotoRetry(
-  page: import("playwright").Page,
+  page: Page,
   url: string,
-  { attempts = 3, timeout = 60_000, backoffMs = 4_000 } = {},
+  opts: GotoRetryOptions = {},
 ): Promise<void> {
+  const attempts = opts.attempts ?? 3;
+  const timeout = opts.timeout ?? 60_000;
+  const backoffMs = opts.backoffMs ?? 4_000;
+  const waitMode = opts.waitUntil ?? "domcontentloaded";
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
-      await page.goto(url, { waitUntil: "domcontentloaded", timeout });
+      await page.goto(url, { waitUntil: waitMode, timeout });
       return;
     } catch (e) {
       lastErr = e;
@@ -246,9 +268,12 @@ async function login(ctx: BrowserContext, c: Creds, role: string, roleRootParam?
           .reload({ waitUntil: "domcontentloaded", timeout: 60_000 })
           .catch(() => {});
       } else {
-        await gotoRetry(page, `${BASE}${roleRoot}`).catch(() => {});
+        await gotoRetry(page, `${BASE}${roleRoot}`, { waitUntil: "networkidle" }).catch(() => {});
         await seedStore();
       }
+      // A stalled/half-loaded page still REPORTS THE PREVIOUS document URL —
+      // reading page.url() before network settle makes a logged-in role read
+      // the /login seed URL and get falsely marked "redirected-to-login".
       await page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => {});
       await page.waitForTimeout(5000);
       landed = page.url();

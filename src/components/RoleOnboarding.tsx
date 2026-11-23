@@ -4,8 +4,13 @@
 // and renders a guided tour. Each step highlights a target element
 // (by data-testid or CSS selector) and shows the step's title/body.
 //
-// The existing OnboardingTour component can be used for the actual
-// visual tour; this component provides the role-specific content.
+// "Show once" is enforced by PERSISTING the done state in localStorage
+// (survives browser restarts), not just in-memory. Two extra guards
+// keep it honest across tabs:
+//   - `storage` event: if another tab dismisses the tour, this tab hides
+//     it immediately instead of re-showing it on the next mount.
+//   - `dismissed` starts as null (unknown) until the read completes, so
+//     a dismissed user is never shown a flash of the tour on mount.
 
 "use client";
 
@@ -16,30 +21,40 @@ import { X, ChevronRight } from "lucide-react";
 export function RoleOnboarding() {
   const cfg = useRoleConfig();
   const [stepIndex, setStepIndex] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
+  // null = not read yet; true = tour already completed (persisted).
+  const [dismissed, setDismissed] = useState<boolean | null>(null);
 
-  // Only show if there are steps and the user hasn't dismissed.
-  // PERSIST in localStorage (not sessionStorage) so a returning user — even
-  // in a brand-new tab or browser session — never sees the tour again.
-  // sessionStorage is per-tab and cleared on close, which is why the tour
-  // was "always showing like beginner" on every visit.
+  const storageKey = cfg ? `onboarding-done-${cfg.id}` : null;
+
   useEffect(() => {
-    if (!cfg) return;
-    const storageKey = `onboarding-done-${cfg.id}`;
+    if (!storageKey) return;
+    let read: boolean | null = null;
     try {
-      if (localStorage.getItem(storageKey)) setDismissed(true);
-    } catch { /* storage blocked */ }
-  }, [cfg?.id]);
+      read = localStorage.getItem(storageKey) ? true : null;
+    } catch {
+      /* storage blocked */
+    }
+    setDismissed(read);
+
+    // Cross-tab: another tab dismissed the tour — hide it here too.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === storageKey && e.newValue) setDismissed(true);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [storageKey]);
 
   const persistDone = () => {
-    if (!cfg) return;
+    if (!storageKey) return;
     setDismissed(true);
     try {
-      localStorage.setItem(`onboarding-done-${cfg.id}`, "1");
-    } catch { /* storage blocked */ }
+      localStorage.setItem(storageKey, "1");
+    } catch {
+      /* storage blocked — in-memory dismissal still applies */
+    }
   };
 
-  if (!cfg || dismissed || cfg.onboarding.steps.length === 0) return null;
+  if (!cfg || dismissed !== false || cfg.onboarding.steps.length === 0) return null;
   const step = cfg.onboarding.steps[stepIndex];
   const isLast = stepIndex === cfg.onboarding.steps.length - 1;
 
@@ -49,7 +64,7 @@ export function RoleOnboarding() {
   return (
     <div
       data-testid="role-onboarding"
-      className="fixed bottom-4 left-4 z-50 max-w-xs rounded-xl border bg-white p-4 shadow-lg"
+      className="fixed bottom-4 right-4 left-auto z-50 max-w-xs rounded-xl border bg-white p-4 shadow-lg md:left-auto"
       style={{ borderColor: "var(--role-accent, var(--border))" }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -72,7 +87,7 @@ export function RoleOnboarding() {
           {stepIndex + 1} / {cfg.onboarding.steps.length}
         </span>
         <button
-          onClick={() => isLast ? handleDismiss() : setStepIndex((i) => i + 1)}
+          onClick={() => (isLast ? handleDismiss() : setStepIndex((i) => i + 1))}
           className="flex items-center gap-1 text-xs font-semibold"
           style={{ color: "var(--role-accent, var(--action-primary))" }}
         >

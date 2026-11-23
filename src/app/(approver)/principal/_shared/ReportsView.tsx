@@ -7,6 +7,8 @@ import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
 
+const wfHref = (wf: string) => `/principal/approvals?workflowType=${encodeURIComponent(wf)}`;
+
 interface WeekDigestResponse {
   success?: boolean;
   data: {
@@ -37,9 +39,23 @@ export function ReportsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Pending Now" value={d?.totalPending} />
-        <KpiCard label="Decisions Cleared" value={d?.totalApproved} tone="ok" />
-        <KpiCard label="Escalations" value={d?.totalEscalated} tone={d?.totalEscalated ? "warn" : "ok"} />
+        <KpiCard
+          label="Pending Now"
+          value={d?.totalPending}
+          drilldown={{ label: "View decisions", href: "/principal/approvals" }}
+        />
+        <KpiCard
+          label="Decisions Cleared"
+          value={d?.totalApproved}
+          tone="ok"
+          drilldown={{ label: "View decisions", href: "/principal/decisions" }}
+        />
+        <KpiCard
+          label="Escalations"
+          value={d?.totalEscalated}
+          tone={d?.totalEscalated ? "warn" : "ok"}
+          drilldown={{ label: "View escalations", href: "/principal/escalations" }}
+        />
       </div>
 
       {loading && !d ? (
@@ -50,22 +66,30 @@ export function ReportsView() {
         <>
           <ul className="space-y-2 md:hidden">
             {breakdown.map((item) => (
-              <li
-                key={item.workflow_type}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{item.workflow_type}</p>
-                  <span className="font-semibold tabular-nums text-action-primary">
-                    {item.count}
-                  </span>
-                </div>
+              <li key={item.workflow_type}>
+                <a
+                  href={wfHref(item.workflow_type)}
+                  aria-label={`Open pending approvals for ${item.workflow_type}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{item.workflow_type}</p>
+                    <span className="font-semibold tabular-nums text-action-primary">
+                      {item.count}
+                    </span>
+                  </div>
+                </a>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<{ workflow_type: string; count: number }>
+              onRowClick={(r) => {
+                // Row → register: the workflow type is a drilldown into the
+                // pending approvals filtered to that category.
+                window.location.href = wfHref(r.workflow_type);
+              }}
               columns={[
                 {
                   header: "Workflow Category",

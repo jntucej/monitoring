@@ -23,9 +23,12 @@ interface PermissionsResponse {
 export function ApprovalsView({
   status,
   title,
+  workflowType,
 }: {
   status: "PENDING" | "ESCALATED" | "OVERDUE" | "DELEGATED";
   title: string;
+  /** Restrict the register to one workflow type (KPI drilldowns arrive via ?workflowType=). */
+  workflowType?: string;
 }) {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
 
@@ -43,12 +46,15 @@ export function ApprovalsView({
     }
   };
 
-  const url =
+  const base =
     status === "OVERDUE"
       ? "/api/permissions?stage=principal&overdue=true"
       : status === "DELEGATED"
       ? "/api/permissions?stage=principal&delegated_to=me"
       : `/api/permissions?stage=principal&status=${status}`;
+  const url = workflowType
+    ? `${base}&workflow_type=${encodeURIComponent(workflowType)}`
+    : base;
 
   const { data, loading, refresh } = useApiResource<PermissionsResponse>(url, {
     ttlMs: 15_000,

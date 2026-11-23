@@ -103,6 +103,12 @@ export function LiveEventToaster() {
   const addToast = useUIStore((s) => s.addToast);
   const addEvent = useLiveEventStore((s) => s.addEvent);
 
+  // Dedupe MUST survive component remounts: the toaster unmounts on every
+  // client-side navigation, and resetting the set here is why the same
+  // alerts re-toasted on every page visit ("notifications keep coming").
+  // The ref is typed non-null: it holds the Set for the component's whole
+  // lifetime; the sessionStorage restore happens once inside the mount
+  // effect (where document is guaranteed to exist — SSR-safe).
   const seenIdsRef = useRef<Set<string>>(new Set());
   const eventSourceRef = useRef<EventSource | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -123,10 +129,31 @@ export function LiveEventToaster() {
 
     let stopped = false;
 
+    // Restore the seen-set from sessionStorage ONCE per mount — this is
+    // what makes the dedupe survive client-side navigation (the bug).
+    // Runs before the first poll so stale ids are honored immediately.
+    try {
+      const raw = sessionStorage.getItem("live-toaster-seen");
+      if (raw) {
+        const arr: unknown = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          for (const x of arr) if (typeof x === "string") seenIdsRef.current.add(x);
+        }
+      }
+    } catch {
+      /* storage unavailable or corrupt — start fresh */
+    }
+
     const ingest = (event: LiveEvent) => {
-      // Skip anything we've already toasted (dedupe across stream + poll).
+      // Skip anything we've already toasted (dedupe across stream + poll
+      // AND across component remounts via the session-persisted set).
       if (seenIdsRef.current.has(event.id)) return;
       seenIdsRef.current.add(event.id);
+      try {
+        sessionStorage.setItem("live-toaster-seen", JSON.stringify(Array.from(seenIdsRef.current)));
+      } catch {
+        /* storage full/blocked — in-memory dedupe still works */
+      }
       addEvent(event);
       addToast({
         variant: severityToVariant(event.severity),
@@ -195,10 +222,17 @@ export function LiveEventToaster() {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
       if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
-      // Copy to a local so the cleanup captures the current ref value, not
-      // a live binding that may have been replaced.
-      const seen = seenIdsRef.current;
-      seen.clear();
+      // Persist the seen-set for the NEXT mount (client-side navigation
+      // remounts this component constantly). Do NOT clear it — that was
+      // the "same notification re-toasts on every page" bug. The set is
+      // session-scoped on purpose: a new browser session re-toasts
+      // genuinely new alerts again, and stale ids are dropped after the
+      // first poll cycle that no longer returns them.
+      try {
+        sessionStorage.setItem("live-toaster-seen", JSON.stringify(Array.from(seenIdsRef.current)));
+      } catch {
+        /* storage unavailable — dedupe resets on next mount (acceptable) */
+      }
     };
   }, [role, userId, hydrateState, addEvent, addToast]);
 

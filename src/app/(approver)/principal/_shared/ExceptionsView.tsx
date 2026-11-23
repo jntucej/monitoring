@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PrincipalEmptyState as EmptyState } from "@/components/principal/shared/PrincipalEmptyState";
 import { KpiCard } from "./KpiCard";
@@ -36,6 +37,9 @@ interface AcademicsResponse {
 }
 
 export function ExceptionsView() {
+  // KPI drilldown: "Absent" / "Late" / "Flagged" cards filter the register
+  // in place (null = show all three sections).
+  const [section, setSection] = useState<"absent" | "late" | "flagged" | null>(null);
   const { data, loading } = useApiResource<AcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
@@ -45,6 +49,10 @@ export function ExceptionsView() {
   const late = d?.exceptions?.late ?? [];
   const flagged = d?.exceptions?.flagged ?? [];
   const total = absent.length + late.length + flagged.length;
+
+  const showAbsent = !section || section === "absent";
+  const showLate = !section || section === "late";
+  const showFlagged = !section || section === "flagged";
 
   return (
     <div className="space-y-4">
@@ -57,10 +65,48 @@ export function ExceptionsView() {
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <KpiCard label="Absent" value={absent.length} tone="danger" />
-        <KpiCard label="Late" value={late.length} tone="warn" />
-        <KpiCard label="Flagged" value={flagged.length} tone="info" />
+        <KpiCard
+          label="Absent"
+          value={absent.length}
+          tone="danger"
+          drilldown={
+            section === "absent"
+              ? { label: "Showing absent", onClick: () => setSection(null) }
+              : { label: "Show absent", onClick: () => setSection("absent") }
+          }
+        />
+        <KpiCard
+          label="Late"
+          value={late.length}
+          tone="warn"
+          drilldown={
+            section === "late"
+              ? { label: "Showing late", onClick: () => setSection(null) }
+              : { label: "Show late", onClick: () => setSection("late") }
+          }
+        />
+        <KpiCard
+          label="Flagged"
+          value={flagged.length}
+          tone="info"
+          drilldown={
+            section === "flagged"
+              ? { label: "Showing flagged", onClick: () => setSection(null) }
+              : { label: "Show flagged", onClick: () => setSection("flagged") }
+          }
+        />
       </div>
+      {section && (
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-text-muted">Filtering: {section}</span>
+          <button
+            onClick={() => setSection(null)}
+            className="surface-card bg-action-primary/10 px-2 py-0.5 font-medium text-action-primary"
+          >
+            Show all
+          </button>
+        </div>
+      )}
 
       {loading && !d ? (
         <ListSkeleton rows={5} />
@@ -68,7 +114,7 @@ export function ExceptionsView() {
         <EmptyState title="No exceptions" description="Everyone checked in on time." />
       ) : (
         <div className="space-y-3">
-          {absent.length > 0 && (
+          {showAbsent && absent.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
               <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Absent today ({absent.length})</h2>
@@ -86,7 +132,7 @@ export function ExceptionsView() {
             </section>
           )}
 
-          {late.length > 0 && (
+          {showLate && late.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
               <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Late arrivals ({late.length})</h2>
@@ -102,7 +148,7 @@ export function ExceptionsView() {
             </section>
           )}
 
-          {flagged.length > 0 && (
+          {showFlagged && flagged.length > 0 && (
             <section className="rounded-2xl border border-border bg-bg-surface">
               <header className="surface-card px-4 py-3">
                 <h2 className="text-sm font-semibold">Flagged ({flagged.length})</h2>
