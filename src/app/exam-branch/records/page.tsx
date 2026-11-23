@@ -11,6 +11,16 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { UserCheck, AlertTriangle, ArrowRight, ClipboardList } from "lucide-react";
+import {
+  useEntityInspector,
+  EntityInspectorPanel,
+} from "@/components/shared/useEntityInspector";
+import {
+  KVPairs,
+  ActionRow,
+  InspectorButton,
+  type EntityInspection,
+} from "@/components/shared/EntityInspector";
 
 /* /api/permissions response shape */
 interface PermissionRequest {
@@ -22,7 +32,9 @@ interface PermissionRequest {
   current_stage: string;
   created_at: string;
   updated_at: string;
+  sla_deadline?: string | null;
   hostel_scope?: string | null;
+  student?: { name?: string; student_details?: { roll?: string } | null } | null;
   [key: string]: unknown;
 }
 
@@ -32,25 +44,80 @@ interface PermissionsResponse {
   total: number;
 }
 
-function statusBadge(status: string): string {
-  switch (status) {
-    case "PENDING":
-      return "bg-amber-500/15 text-action-warning";
-    case "APPROVED":
-    case "RESOLVED":
-      return "bg-emerald-500/15 text-action-success";
-    case "REJECTED":
-    case "DENIED":
-      return "bg-rose-500/15 text-action-danger";
-    default:
-      return "bg-bg-elevated/50 text-text-secondary";
-  }
+function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
+  const cls: Record<string, string> = {
+    ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",
+    warn: "bg-amber-500/10 text-action-warning border border-amber-500/20",
+    danger: "bg-rose-500/10 text-action-danger border border-rose-500/20",
+    neutral: "bg-bg-elevated text-text-muted border border-border",
+  };
+  const t = tone ?? "neutral";
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls[t]}`}>
+      {text}
+    </span>
+  );
+}
+
+/** Build an EntityInspection for an exam-branch permission record. */
+function buildExamBranchInspection(r: PermissionRequest): EntityInspection {
+  const slaBreached = r.sla_deadline
+    ? new Date(r.sla_deadline).getTime() < Date.now()
+    : false;
+  const tone: "ok" | "warn" | "danger" | "neutral" =
+    r.status === "APPROVED" || r.status === "RESOLVED" ? "ok"
+    : r.status === "REJECTED" || r.status === "DENIED" ? "danger"
+    : slaBreached ? "danger"
+    : "warn";
+
+  const sections: EntityInspection["sections"] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Ticket", value: <code className="font-mono">{r.ticket_number}</code> },
+            { label: "Student", value: r.student?.name ?? r.student_user_id ?? "—" },
+            { label: "Roll", value: r.student?.student_details?.roll ?? "—" },
+            { label: "Workflow", value: r.workflow_type.replace(/_/g, " ") },
+            { label: "Stage", value: r.current_stage.replace(/_/g, " ") },
+            { label: "Created", value: new Date(r.created_at).toLocaleString() },
+            { label: "SLA", value: r.sla_deadline ? (slaBreached ? "BREACHED" : new Date(r.sla_deadline).toLocaleString()) : "—" },
+          ]}
+        />
+      ),
+    },
+    {
+      title: "Actions",
+      content: (
+        <ActionRow>
+          <InspectorButton href="/exam-branch/records" variant="ghost">
+            All records
+          </InspectorButton>
+          <InspectorButton href="/exam/permissions" variant="primary">
+            Approvals desk
+          </InspectorButton>
+        </ActionRow>
+      ),
+    },
+  ];
+
+  return {
+    kind: "exam_case",
+    title: r.ticket_number,
+    subtitle: `${r.student?.name ?? ""} · ${r.workflow_type}`.trim() || null,
+    status: <StatusBadge text={r.status} tone={tone} />,
+    sections,
+    detailHref: "/exam-branch/records",
+    detailLabel: "All exam records",
+  };
 }
 
 function ExamBranchRecordsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "exam_branch") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   /*
    * exam_branch participates in the exam permission workflow: it sits in
@@ -177,7 +244,7 @@ function ExamBranchRecordsInner() {
           ) : (
             <ul className="divide-y divide-slate-800 min-w-0">
               {requests.slice(0, 50).map((req) => (
-                <li key={req.id} className="px-4 py-3 flex flex-col gap-1 min-w-0">
+                <li key={req.id} className="px-4 py-3 flex flex-col gap-1 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition" onClick={() => inspect(buildExamBranchInspection(req))}>
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="font-mono text-xs text-text-secondary">
                       {req.ticket_number}
@@ -213,6 +280,7 @@ function ExamBranchRecordsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

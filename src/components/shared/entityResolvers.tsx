@@ -398,6 +398,116 @@ register({
 
 /* ── public API ──────────────────────────────────────────────────────────── */
 
+/* Complaint — /api/complaints/[id] */
+interface ComplaintRow {
+  id: string;
+  complaint_number: string;
+  category_code: string;
+  category_label?: string;
+  title: string;
+  status: string;
+  priority?: string;
+  current_owner_role?: string;
+  sla_deadline?: string | null;
+  created_at: string;
+  raised_by_name?: string | null;
+}
+
+async function fetchComplaintById(complaintId: string): Promise<ComplaintRow> {
+  const res = await cachedFetch<{ success: boolean; complaint?: ComplaintRow }>(
+    `/api/complaints/${encodeURIComponent(complaintId)}`,
+    { ttlMs: 15_000 },
+  );
+  if (!res.complaint) throw new Error(`Complaint ${complaintId} not found`);
+  return res.complaint;
+}
+
+register({
+  kind: "complaint",
+  async resolve(id) {
+    const c = await fetchComplaintById(id);
+    const statusTone: "ok" | "warn" | "danger" | "neutral" =
+      c.status === "resolved" || c.status === "closed" ? "ok"
+      : c.status === "submitted" || c.status === "acknowledged" ? "warn"
+      : "neutral";
+
+    return {
+      kind: "complaint",
+      title: c.title,
+      subtitle: c.complaint_number,
+      status: <StatusBadge text={c.status.toUpperCase()} tone={statusTone} />,
+      sections: [
+        overviewSection([
+          { label: "Category", value: c.category_label ?? c.category_code },
+          { label: "Priority", value: c.priority ?? "—" },
+          { label: "Owner", value: c.current_owner_role ?? "—" },
+          { label: "Raised by", value: c.raised_by_name ?? "—" },
+          { label: "Created", value: new Date(c.created_at).toLocaleString() },
+          { label: "SLA", value: c.sla_deadline ? new Date(c.sla_deadline).toLocaleString() : "—" },
+        ]),
+        actionsSection([
+          { label: "All complaints", href: "/student/complaints", variant: "ghost" },
+        ]),
+      ],
+      detailHref: `/student/complaints/${c.id}`,
+      detailLabel: "Full complaint",
+    };
+  },
+});
+
+/* Child record — /api/persons (filter by parentId=me, client-side) */
+interface ChildRecordRow {
+  id: string;
+  name?: string;
+  fullName?: string;
+  roll?: string;
+  uniqueId?: string;
+  checkedInAt?: string;
+  checkedOutAt?: string;
+}
+
+async function fetchChildRecord(personId: string): Promise<ChildRecordRow> {
+  const res = await cachedFetch<{ success: boolean; data?: ChildRecordRow[] }>(
+    "/api/persons?parentId=me",
+    { ttlMs: 30_000 },
+  );
+  const found = res.data?.find((p) => p.id === personId || p.uniqueId === personId);
+  if (!found) throw new Error(`Child record ${personId} not found`);
+  return found;
+}
+
+register({
+  kind: "child_record",
+  async resolve(id) {
+    const p = await fetchChildRecord(id);
+    const onCampus = !!(p.checkedInAt && !p.checkedOutAt);
+    const displayName = p.name ?? p.fullName ?? "Unknown ward";
+    const roll = p.roll ?? p.uniqueId ?? p.id;
+
+    return {
+      kind: "child_record",
+      title: displayName,
+      subtitle: roll,
+      status: <StatusBadge text={onCampus ? "ON CAMPUS" : "OFF CAMPUS"} tone={onCampus ? "ok" : "neutral"} />,
+      sections: [
+        overviewSection([
+          { label: "Roll", value: roll },
+          { label: "On campus", value: onCampus ? "Yes" : "No" },
+          { label: "Checked in", value: p.checkedInAt ? new Date(p.checkedInAt).toLocaleString() : "—" },
+          { label: "Checked out", value: p.checkedOutAt ? new Date(p.checkedOutAt).toLocaleString() : "—" },
+        ]),
+        actionsSection([
+          { label: "Ward status", href: "/guardian/child-status", variant: "primary" },
+          { label: "Attendance", href: "/guardian/child-attendance", variant: "ghost" },
+          { label: "Movement", href: "/guardian/child-movement", variant: "ghost" },
+        ]),
+      ],
+      detailHref: "/guardian/child-status",
+      detailLabel: "Ward detail",
+    };
+  },
+});
+
 /**
  * Resolve an entity to its `EntityInspection` model by kind and id.
  *
