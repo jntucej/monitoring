@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   Inbox
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { incidentInspection, type IncidentRow } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -38,6 +40,20 @@ function DeputyWardenIncidentsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectIncident = useCallback(
+    (a: AlertItem) => {
+      inspect(incidentInspection({
+        id: a.id,
+        title: a.title,
+        severity: a.severity,
+        status: a.status,
+        created_at: a.created_at ?? null,
+      } satisfies IncidentRow));
+    },
+    [inspect]
+  );
 
   const {
     data,
@@ -125,7 +141,7 @@ function DeputyWardenIncidentsInner() {
                 </thead>
                 <tbody>
                   {alerts.slice(0, 20).map((a) => (
-                    <tr key={a.id} className="border-b border-border/50 last:border-0">
+                    <tr key={a.id} className="border-b border-border/50 last:border-0 cursor-pointer" onClick={() => inspectIncident(a)}>
                       <td className="py-2 pr-4 text-text-secondary">{a.title}</td>
                       <td className="py-2 pr-4">
                         <span className={`text-xs font-semibold ${a.severity === "critical" || a.severity === "high" ? "text-action-danger" : a.severity === "medium" ? "text-action-warning" : "text-text-muted"}`}>
@@ -145,6 +161,7 @@ function DeputyWardenIncidentsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

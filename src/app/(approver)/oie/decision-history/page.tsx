@@ -19,6 +19,8 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { decisionRecordInspection } from "@/components/approver/wardenConsoleModels";
 
 interface HistoryRow {
   id: string;
@@ -94,6 +96,26 @@ function StatusPill({ status }: { status: string }) {
 }
 
 function HistoryTable({ rows }: { rows: HistoryRow[] }) {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const onInspect = (r: HistoryRow) => {
+    inspect(
+      decisionRecordInspection({
+        id: r.id,
+        ticket_number: r.ticket_number,
+        workflow_type: r.workflow_type,
+        current_stage: r.current_stage,
+        status: r.status,
+        updated_at: r.updated_at ?? null,
+        created_at: r.created_at ?? null,
+        student: r.student
+          ? {
+              name: r.student.name,
+              student_details: r.student.student_details ? { roll: r.student.student_details.roll } : null,
+            }
+          : null,
+      }),
+    );
+  };
   if (rows.length === 0) {
     return (
       <EmptyState message="No decision history records found. Completed exam approvals will appear here." />
@@ -115,11 +137,12 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           {rows.slice(0, 20).map((r) => {
             const stageCount = Array.isArray(r.stage_history) ? r.stage_history.length : 0;
             return (
-              <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+              <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => onInspect(r)}>
                 <td className="px-4 py-3">
                   <a
                     href={`/permissions/${r.ticket_number}`}
                     className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {r.ticket_number}
                   </a>
@@ -146,6 +169,7 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           })}
         </tbody>
       </table>
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

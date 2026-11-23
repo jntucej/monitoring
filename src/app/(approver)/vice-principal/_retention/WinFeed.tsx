@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ArrowUpRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { useVPRetention, type Win } from "@/stores/vpRetentionStore";
 import { EmptyState } from "@/components/shared/EmptyState";
 
@@ -89,9 +90,12 @@ export function WinFeed() {
                     <Icon className="size-4" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-text-primary">
+                    <Link
+                      href="/vice-principal/decision-history"
+                      className="truncate font-medium text-text-primary hover:underline"
+                    >
                       {w.subject}
-                    </p>
+                    </Link>
                     <p className="text-xs text-text-muted">
                       {w.ticket} · {w.outcome.toLowerCase()} · {relativeTime(w.at)}
                     </p>

@@ -18,6 +18,9 @@ import {
   AlertTriangle,
   Inbox,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
+import type { WorkflowType, PermissionStatus } from "@/lib/types";
 
 interface DayAccessRow {
   id: string;
@@ -69,6 +72,36 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 }
 
 function AccessDayTable({ rows }: { rows: DayAccessRow[] }) {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const onInspect = (r: DayAccessRow) => {
+    inspect(
+      ticketRowInspection(
+        {
+          ticket_number: r.ticket_number,
+          workflow_type: (r.workflow_type as WorkflowType) ?? "exam",
+          status: (r.status as PermissionStatus) ?? "PENDING",
+          current_stage: r.current_stage,
+          reason: null,
+          created_at: r.created_at ?? "",
+          updated_at: r.created_at ?? "",
+          sla_deadline: r.sla_deadline ?? null,
+          stage_history: [],
+          student: r.student
+            ? {
+                id: "",
+                name: r.student.name,
+                email: "",
+                role: "student",
+                student_details: r.student.student_details
+                  ? { roll: r.student.student_details.roll }
+                  : undefined,
+              }
+            : null,
+        },
+        { detailHref: "/oie/examination-day-access", detailLabel: "Day-access queue" },
+      ),
+    );
+  };
   if (rows.length === 0) {
     return (
       <EmptyState message="No exam-day access exceptions detected today. All candidates cleared the gate as expected." />
@@ -88,11 +121,12 @@ function AccessDayTable({ rows }: { rows: DayAccessRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 20).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => onInspect(r)}>
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
                   className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {r.ticket_number}
                 </a>
@@ -126,6 +160,7 @@ function AccessDayTable({ rows }: { rows: DayAccessRow[] }) {
           ))}
         </tbody>
       </table>
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

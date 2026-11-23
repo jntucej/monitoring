@@ -20,6 +20,8 @@ import {
   Inbox,
   CheckCircle2,
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface MessIssue {
   id: string;
@@ -38,6 +40,53 @@ interface IssuesResponse {
   data: {
     issues: MessIssue[];
     total: number;
+  };
+}
+
+function issueInspection(i: MessIssue) {
+  const sent = i.status === "SENT";
+  return {
+    kind: "incident",
+    title: i.eventType.replace(/_/g, " "),
+    subtitle: i.id,
+    status: (
+      <span
+        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+          sent ? "bg-emerald-500/10 text-action-success" : "bg-bg-elevated text-text-muted"
+        }`}
+      >
+        {i.status}
+      </span>
+    ),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <KVPairs
+            items={[
+              { label: "Event", value: i.eventType.replace(/_/g, " ") },
+              { label: "Channel", value: i.channel },
+              { label: "User", value: i.userName ?? "—" },
+              { label: "Meal date", value: i.mealDate ?? "—" },
+              { label: "Raised", value: i.createdAt ? new Date(i.createdAt).toLocaleString("en-IN") : "—" },
+              { label: "Sent", value: i.sentAt ? new Date(i.sentAt).toLocaleString("en-IN") : "Pending" },
+            ]}
+          />
+        ),
+      },
+      {
+        title: "Actions",
+        content: (
+          <ActionRow>
+            <InspectorButton href="/mess/mess-issues" variant="ghost">
+              All issues
+            </InspectorButton>
+          </ActionRow>
+        ),
+      },
+    ],
+    detailHref: "/mess/mess-issues",
+    detailLabel: "All issues",
   };
 }
 
@@ -78,6 +127,7 @@ function MessIssuesInner() {
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
   const { addToast } = useUIStore();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: issuesRes,
@@ -242,7 +292,7 @@ function MessIssuesInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {issues.map((issue) => (
-                    <tr key={issue.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr key={issue.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspect(issueInspection(issue))}>
                       <td className="px-4 py-2.5 min-w-0">
                         <p className="text-text-secondary font-medium capitalize truncate">
                           {issue.eventType.replace(/_/g, " ")}
@@ -286,6 +336,7 @@ function MessIssuesInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

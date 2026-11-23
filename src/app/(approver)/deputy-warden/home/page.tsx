@@ -15,15 +15,14 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import type { BoardRow } from "@/components/shared/Board";
 import { EntityInspector } from "@/components/shared/EntityInspector";
-import { scanInspection } from "@/components/shared/inspectionModels";
+import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 
 export default function DeputyWardenPage() {
-    const [active, setActive] = useState<BoardRow | null>(null);
+    const [active, setActive] = useState<HMBoardRow | null>(null);
 return (
 <>
 <Greeting />
@@ -52,10 +51,10 @@ return (
             source="/api/permissions?workflow_type=hostel"
             itemKey="permission"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
-            onSelect={(row) => setActive(row)}
+            onSelect={(row) => setActive(row as HMBoardRow)}
           />
           <EntityInspector
-            inspection={active ? scanInspection(active) : null}
+            inspection={active ? boardRowTicketInspection(active, { consoleHref: "/deputy-warden", consoleLabel: "Outpass queue" }) : null}
             onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>

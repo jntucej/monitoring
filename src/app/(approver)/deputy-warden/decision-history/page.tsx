@@ -20,6 +20,8 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { decisionRecordInspection, ticketRowInspection } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -91,6 +93,23 @@ function DeputyWardenDecisionHistoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectDecision = (d: PermissionRequestRow & { decidedAt: string | null }) => {
+    inspect(
+      decisionRecordInspection({
+        id: d.id,
+        ticket_number: d.ticket_number,
+        workflow_type: d.workflow_type,
+        current_stage: d.current_stage,
+        status: d.status,
+        sla_deadline: d.sla_deadline ?? null,
+        created_at: d.created_at ?? null,
+        updated_at: d.decidedAt,
+        student: null,
+      }),
+    );
+  };
 
   const {
     data,
@@ -236,7 +255,7 @@ function DeputyWardenDecisionHistoryInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {decisions.map((d) => (
-                    <tr key={d.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr key={d.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspectDecision(d)}>
                       <td className="px-4 py-3 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {d.ticket_number}
                       </td>
@@ -262,6 +281,7 @@ function DeputyWardenDecisionHistoryInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -34,11 +34,19 @@ export function HotSpots({ spots }: { spots: HotSpot[] }) {
             s.rate >= 30
               ? "text-action-danger"
               : s.rate >= 15
-              ? "text-action-warning"
-              : "text-text-secondary";
+                ? "text-action-warning"
+                : "text-text-secondary";
           return (
-            <li key={s.department} className="flex items-center justify-between text-xs">
-              <span className="font-medium text-text-primary">{s.department}</span>
+            <li
+              key={s.department}
+              className="flex items-center justify-between text-xs cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <Link
+                href="/vice-principal/academics/exceptions"
+                className="font-medium text-text-primary hover:underline"
+              >
+                {s.department}
+              </Link>
               <span className={`tabular-nums ${severity}`}>
                 {s.rate}% absent ({s.absent}/{s.total})
               </span>

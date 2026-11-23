@@ -27,6 +27,9 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { KpiCard } from "../_shared/KpiCard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface VPOverview {
   success?: boolean;
@@ -61,18 +64,72 @@ interface VPOverview {
 }
 
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
-  return (
-    <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
-      <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
-    </div>
-  );
-}
-
 export default function VPTodayPage() {
   const [focusOpen, setFocusOpen] = useState(false);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectQueue = (kind: "pending" | "escalated" | "hot") => {
+    const pending = d?.counts.pendingApprovals ?? 0;
+    const escalated = d?.counts.escalated ?? 0;
+    const hot = (d?.hotSpots ?? []).length;
+    inspect({
+      kind: kind === "pending" ? "escalation" : kind === "escalated" ? "escalation" : "academic_record",
+      title:
+        kind === "pending"
+          ? "Pending approvals"
+          : kind === "escalated"
+            ? "Escalated requests"
+            : "Attendance hot spots",
+      subtitle:
+        kind === "pending" ? `${pending} in queue` : kind === "escalated" ? `${escalated} escalated` : `${hot} department(s)`,
+      sections: [
+        {
+          title: "Overview",
+          content: (
+            <KVPairs
+              items={
+                kind === "hot"
+                  ? (d?.hotSpots ?? []).map((s) => ({
+                      label: s.department,
+                      value: `${s.rate}% absent (${s.absent}/${s.total})`,
+                    }))
+                  : [
+                      { label: "Pending approvals", value: String(pending) },
+                      { label: "Escalated", value: String(escalated) },
+                    ]
+              }
+            />
+          ),
+        },
+        {
+          title: "Actions",
+          content: (
+            <ActionRow>
+              <InspectorButton
+                href={
+                  kind === "pending"
+                    ? "/vice-principal/pending-approvals"
+                    : kind === "escalated"
+                      ? "/vice-principal/escalated-requests"
+                      : "/vice-principal/academics/exceptions"
+                }
+                variant="primary"
+              >
+                Open queue
+              </InspectorButton>
+            </ActionRow>
+          ),
+        },
+      ],
+      detailHref:
+        kind === "pending"
+          ? "/vice-principal/pending-approvals"
+          : kind === "escalated"
+            ? "/vice-principal/escalated-requests"
+            : "/vice-principal/academics/exceptions",
+      detailLabel: "Open queue",
+    });
+  };
 
   const {data, refresh} = useApiResource<VPOverview>("/api/vp/dashboard", {
     ttlMs: 15_000,
@@ -120,10 +177,30 @@ export default function VPTodayPage() {
 <PageHeader title="Vice Principal" subtitle="Campus operations & exams" />
         <WidgetBoundary name="VpKpis" title="Vice Principal KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiTile label="Pending approvals" value={d?.counts.pendingApprovals ?? 0} />
-            <KpiTile label="Exam day" value={d?.counts.examDayState ?? "—"} tone={d?.counts.examDayState === "closed" ? "warn" : "ok"} />
-            <KpiTile label="Escalated" value={d?.counts.escalated ?? 0} tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"} />
-            <KpiTile label="Hot spots" value={d?.hotSpots?.length ?? 0} />
+            <KpiCard
+              label="Pending approvals"
+              value={d?.counts.pendingApprovals ?? 0}
+              onClick={() => inspectQueue("pending")}
+              hint="Open the pending queue"
+            />
+            <KpiCard
+              label="Exam day"
+              value={d?.counts.examDayState ?? "—"}
+              tone={d?.counts.examDayState === "closed" ? "warn" : "ok"}
+            />
+            <KpiCard
+              label="Escalated"
+              value={d?.counts.escalated ?? 0}
+              tone={(d?.counts.escalated ?? 0) > 0 ? "warn" : "ok"}
+              onClick={() => inspectQueue("escalated")}
+              hint="Open the escalation queue"
+            />
+            <KpiCard
+              label="Hot spots"
+              value={d?.hotSpots?.length ?? 0}
+              onClick={() => inspectQueue("hot")}
+              hint="Departments with elevated absence"
+            />
           </div>
         </WidgetBoundary>
                 {/* 1. Morning Brief — greeting + streak + progress */}
@@ -198,10 +275,11 @@ export default function VPTodayPage() {
         <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
           <UnifiedCampusCalendar />
         </WidgetBoundary>
-<WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+        <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
           <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         </div>
 
+        <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
       </div>
     </>
 </>

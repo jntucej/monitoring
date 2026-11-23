@@ -13,6 +13,8 @@ import Link from "next/link";
 import { getAuthHeaders } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import {Wrench, Send, Loader2, AlertTriangle, Inbox, Plus}  from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { operationalRequestInspection } from "@/components/approver/wardenConsoleModels";
 
 interface OperationalRequest {
   id: string;
@@ -83,6 +85,22 @@ function MessOperationalRequestsInner() {
   const role = (user?.role ?? "mess_incharge") as Role;
   const tier = getRoleTier(role);
   const { addToast } = useUIStore();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectRequest = (r: OperationalRequest) => {
+    inspect(
+      operationalRequestInspection({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        category: r.category,
+        priority: r.priority,
+        status: r.status,
+        createdAt: r.createdAt || null,
+        resolvedAt: r.resolvedAt,
+      }),
+    );
+  };
 
   const {
     data: queue,
@@ -302,7 +320,7 @@ function MessOperationalRequestsInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {requests.map((r) => (
-                    <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors cursor-pointer" onClick={() => inspectRequest(r)}>
                       <td className="px-4 py-2.5 min-w-0 max-w-md">
                         <p className="text-text-secondary font-medium truncate">{r.title}</p>
                         {r.description ? (
@@ -350,6 +368,7 @@ function MessOperationalRequestsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

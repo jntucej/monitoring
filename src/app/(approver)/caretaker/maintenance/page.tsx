@@ -2,10 +2,10 @@
 
 import { useCallback, Suspense } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
-import { EntityInspector } from "@/components/shared/EntityInspector";
-import { requestInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { requestInspection } from "@/components/shared/roleInspectors";
 import { ClipboardList, Loader2, Inbox, Clock } from "lucide-react";
 
 /**
@@ -49,7 +49,7 @@ function CaretakerMaintenanceInner() {
     "/api/caretaker/maintenance",
     { ttlMs: 30_000 },
   );
-  const { inspection, inspect, closeInspection } = useRoleInspectorHost();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const tickets = data?.data?.tickets ?? [];
   const summary = data?.data?.summary;
@@ -166,7 +166,7 @@ function CaretakerMaintenanceInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspector inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

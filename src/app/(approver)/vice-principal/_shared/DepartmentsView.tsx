@@ -7,6 +7,11 @@ import { KpiCard } from "./KpiCard";
 import { AttendancePill } from "./AttendancePill";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  academicDepartmentInspection,
+  type VPDepartmentRow,
+} from "@/components/approver/wardenConsoleModels";
 
 interface VPAcademicsResponse {
   success?: boolean;
@@ -35,6 +40,11 @@ export function DepartmentsView() {
   const { data, loading } = useApiResource<VPAcademicsResponse>("/api/vp/academics", {
     ttlMs: 60_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectDept = (dept: VPDepartmentRow) => {
+    inspect(academicDepartmentInspection(dept));
+  };
 
   const d = data?.data;
 
@@ -69,7 +79,8 @@ export function DepartmentsView() {
             {(d?.departments ?? []).map((dept: VPAcademics["departments"][0]) => (
               <li
                 key={dept.code}
-                className="surface-card bg-bg-surface p-3"
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                onClick={() => inspectDept(dept)}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -106,10 +117,13 @@ export function DepartmentsView() {
               ]}
               data={d?.departments ?? []}
               keyExtractor={(r: VPAcademics["departments"][0]) => r.code}
+              onRowClick={(r: VPAcademics["departments"][0]) => inspectDept(r)}
             />
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

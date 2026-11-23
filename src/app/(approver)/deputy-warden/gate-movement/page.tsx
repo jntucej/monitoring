@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   Inbox
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { gatePresenceInspection, type GatePresenceRow } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -43,6 +45,7 @@ function DeputyWardenGatemovementInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -56,6 +59,13 @@ function DeputyWardenGatemovementInner() {
   const onCampusTotal = gates.reduce(
     (sum, g) => sum + Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0),
     0
+  );
+  const inspectGate = useCallback(
+    (g: GateInfo) => {
+      const onCampus = Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0);
+      inspect(gatePresenceInspection({ id: g.id, name: g.name, code: g.code, audience: g.audience, type: g.type, onCampus } satisfies GatePresenceRow));
+    },
+    [matrix, inspect]
   );
 
   const refreshAll = useCallback(async () => {
@@ -138,7 +148,7 @@ function DeputyWardenGatemovementInner() {
                   {gates.map((g) => {
                     const count = Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0);
                     return (
-                      <tr key={g.id} className="border-b border-border/50 last:border-0">
+                      <tr key={g.id} className="border-b border-border/50 last:border-0 cursor-pointer" onClick={() => inspectGate(g)}>
                         <td className="py-2 pr-4 font-mono text-xs text-text-secondary whitespace-nowrap">{g.name || g.code}</td>
                         <td className="py-2 pr-4 text-text-muted">{g.audience}</td>
                         <td className="py-2 pr-4 text-text-muted">{g.type}</td>
@@ -153,6 +163,7 @@ function DeputyWardenGatemovementInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

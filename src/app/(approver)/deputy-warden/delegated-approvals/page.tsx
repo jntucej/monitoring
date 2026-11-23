@@ -20,6 +20,12 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PermissionList } from "@/components/approver/PermissionList";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  escalationInspection,
+  delegationStatusInspection,
+  type VPPermissionRow,
+} from "@/components/approver/wardenConsoleModels";
 
 /* response shapes */
 
@@ -113,6 +119,28 @@ function DeputyWardenDelegatedApprovalsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectFirstBreached = () => {
+    const first = rows.find((r) => {
+      if (!r.sla_deadline) return false;
+      const ts = new Date(r.sla_deadline).getTime();
+      return !Number.isNaN(ts) && ts < Date.now();
+    });
+    if (first) {
+      inspect(
+        escalationInspection({
+          id: first.id,
+          ticket_number: first.ticket_number,
+          workflow_type: first.workflow_type,
+          current_stage: first.current_stage,
+          status: first.status,
+          sla_deadline: first.sla_deadline ?? null,
+          created_at: null,
+        } satisfies VPPermissionRow),
+      );
+    }
+  };
 
   const {
     data,
@@ -228,7 +256,19 @@ function DeputyWardenDelegatedApprovalsInner() {
       </WidgetBoundary>
 
       {/* Delegation status banner */}
-      <div className="surface-card bg-bg-base p-4 flex flex-wrap items-center gap-3 min-w-0">
+      <div
+        className="surface-card bg-bg-base p-4 flex flex-wrap items-center gap-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+        onClick={() =>
+          inspect(
+            delegationStatusInspection({
+              active: delegationActive,
+              scopes: delegation?.data?.scopes ?? [],
+              delegatedBy: delegation?.data?.delegatedBy,
+              note: delegation?.data?.note,
+            }),
+          )
+        }
+      >
         <DelegationBadge active={delegationActive} loading={delegationLoading && !delegation} />
         <p className="text-xs text-text-muted min-w-0">
           {delegation?.data?.note ??
@@ -273,6 +313,7 @@ function DeputyWardenDelegatedApprovalsInner() {
         </WidgetBoundary>
       )}
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

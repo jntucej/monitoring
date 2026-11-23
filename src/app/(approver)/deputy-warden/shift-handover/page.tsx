@@ -18,6 +18,8 @@ import {
   ArrowRight,
   AlertTriangle
 } from "lucide-react";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { shiftHandoverInspection } from "@/components/approver/wardenConsoleModels";
 
 /* response shapes (mirror /api/campus-extra/handover) */
 
@@ -46,6 +48,7 @@ function DeputyWardenHandoverInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -127,7 +130,7 @@ function DeputyWardenHandoverInner() {
           ) : (
             <div className="p-4 space-y-3 min-w-0">
               {(data?.data?.handovers ?? []).map((h) => (
-                <div key={h.id} className="surface-card bg-bg-surface/40 p-3 min-w-0">
+                <div key={h.id} className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors" onClick={() => inspect(shiftHandoverInspection(h))}>
                   <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
                     <p className="text-sm font-semibold text-white min-w-0">
                       {h.byName ? `From ${h.byName}` : "From previous shift"}
@@ -153,6 +156,7 @@ function DeputyWardenHandoverInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -1,4 +1,20 @@
 import { describe, it, expect } from "vitest";
+import {
+  boardRowTicketInspection,
+  hostelBlockInspection,
+  gatePresenceInspection,
+  incidentInspection,
+  shiftHandoverInspection,
+  menuInspection,
+  stockItemInspection,
+  mealDayInspection,
+  operationalRequestInspection,
+  academicDepartmentInspection,
+  vpExceptionPersonInspection,
+  escalationInspection,
+  decisionRecordInspection,
+  delegationStatusInspection,
+} from "@/components/approver/wardenConsoleModels";
 
 /**
  * Entity Inspection System — pure-model tests.
@@ -472,6 +488,218 @@ describe("entity inspection models", () => {
       detailHref: "/admin/audit-logs",
       detailLabel: "Full audit trail",
     };
+    assertHierarchy(model);
+  });
+
+  // ── PR-05E: WARDEN/DEPUTY-WARDEN, HOSTEL-MANAGER, MESS, OIE/EMO, VP ──
+  // These pin the exact model shapes the warden-console pages build.
+
+  it("boardRowTicket: overview → actions + console link", () => {
+    const model = boardRowTicketInspection({
+      id: "P-1",
+      roll: "23JJ1A0599",
+      name: "Priya Sharma",
+      person_type: "student",
+      direction: "PENDING",
+      reason: "hostel",
+      gate_id: "G-MAIN",
+      gate_name: "Main Gate",
+      timestamp: "2027-01-01T09:00:00Z",
+      scan_type: "badge",
+      is_correction: false,
+      created_at: "2027-01-01T09:00:00Z",
+    });
+    assertHierarchy(model);
+  });
+
+  it("hostelBlock: overview → occupancy + actions", () => {
+    const model = hostelBlockInspection({
+      block: "A",
+      occupied: 95,
+      total: 100,
+    });
+    assertHierarchy(model);
+  });
+
+  it("gatePresence: overview → telemetry + actions", () => {
+    const model = gatePresenceInspection({
+      id: "G-MAIN",
+      name: "Main Gate",
+      code: "G-MAIN",
+      audience: "students",
+      type: "main",
+      onCampus: 120,
+    });
+    assertHierarchy(model);
+  });
+
+  it("incident: overview → context → timeline (collapsible) → actions", () => {
+    const model = incidentInspection({
+      id: "INC-1",
+      title: "Critical breach",
+      severity: "critical",
+      status: "OPEN",
+      created_at: "2027-01-01T09:00:00Z",
+      source: "G-MAIN",
+    });
+    assertHierarchy(model);
+  });
+
+  it("shiftHandover: overview → handover items (collapsible) → actions", () => {
+    const model = shiftHandoverInspection({
+      id: "SH-1",
+      toRole: "deputy",
+      items: [{ type: "gate", title: "Gate open" }],
+      notes: "no incidents",
+      byName: "warden",
+      createdAt: "2027-01-01T18:00:00Z",
+    });
+    assertHierarchy(model);
+  });
+
+  it("menu: overview → day info + actions", () => {
+    const model = menuInspection(
+      { id: "m1", code: "DAL", label: "Dal", isAvailable: true },
+      { mealDate: "2027-01-01", windowOpens: "12:00", windowCloses: "14:00" },
+    );
+    assertHierarchy(model);
+  });
+
+  it("stockItem: overview → stock levels + actions", () => {
+    const model = stockItemInspection({
+      id: "s1",
+      code: "RICE",
+      label: "Rice",
+      sortOrder: 1,
+      isPrimary: true,
+      scheduledDays: 2,
+    });
+    assertHierarchy(model);
+  });
+
+  it("mealDay: overview → consumption + actions", () => {
+    const model = mealDayInspection({
+      messDayId: "d1",
+      mealDate: "2027-01-01",
+      mealType: "LUNCH",
+      isActive: true,
+      servedTotal: 90,
+      viaToken: 80,
+      viaManual: 10,
+      veg: 70,
+      nonVeg: 20,
+      firstServedAt: "12:00",
+      lastServedAt: "14:00",
+    });
+    assertHierarchy(model);
+  });
+
+  it("operationalRequest: overview → request details + actions", () => {
+    const model = operationalRequestInspection({
+      id: "or1",
+      title: "Extra rice",
+      description: "more rice",
+      category: "stock",
+      priority: "high",
+      status: "OPEN",
+      createdAt: "2027-01-01",
+    });
+    assertHierarchy(model);
+  });
+
+  it("academicDepartment: overview → department + actions", () => {
+    const model = academicDepartmentInspection({
+      code: "CSE",
+      name: "Computer Science",
+      hodName: "Dr. Iyer",
+      faculty: 10,
+      students: 300,
+      ratio: 30,
+      attendancePct: 88,
+    });
+    assertHierarchy(model);
+  });
+
+  it("vpExceptionPerson: overview → exception + actions", () => {
+    const model = vpExceptionPersonInspection(
+      {
+        id: "vp1",
+        name: "Priya",
+        role: "student",
+        designation: null,
+        department: "CSE",
+        reason: "late",
+        minutesLate: 15,
+      },
+      "late",
+    );
+    assertHierarchy(model);
+  });
+
+  it("vpExceptionPerson: absent", () => {
+    const model = vpExceptionPersonInspection(
+      {
+        id: "vp2",
+        name: "Priya",
+        role: "student",
+        department: "CSE",
+        reason: "not seen",
+      },
+      "absent",
+    );
+    assertHierarchy(model);
+  });
+
+  it("vpExceptionPerson: flagged", () => {
+    const model = vpExceptionPersonInspection(
+      {
+        id: "vp3",
+        name: "Priya",
+        role: "student",
+        department: "CSE",
+      },
+      "flagged",
+    );
+    assertHierarchy(model);
+  });
+
+  it("escalation: overview → escalation + actions", () => {
+    const model = escalationInspection({
+      id: "P-2",
+      ticket_number: "P-2",
+      workflow_type: "hostel",
+      current_stage: "vice_principal",
+      status: "ESCALATED",
+      sla_deadline: null,
+      created_at: "2027-01-01T09:00:00Z",
+      updated_at: "2027-01-01T10:00:00Z",
+      student: null,
+    });
+    assertHierarchy(model);
+  });
+
+  it("decisionRecord: overview → decision + actions", () => {
+    const model = decisionRecordInspection({
+      id: "P-3",
+      ticket_number: "P-3",
+      workflow_type: "hostel",
+      current_stage: "principal",
+      status: "APPROVED",
+      created_at: "2027-01-01T09:00:00Z",
+      updated_at: "2027-01-01T10:00:00Z",
+      sla_deadline: null,
+      student: null,
+    });
+    assertHierarchy(model);
+  });
+
+  it("delegationStatus: overview → delegation + actions", () => {
+    const model = delegationStatusInspection({
+      active: true,
+      scopes: ["hostel", "exam"],
+      delegatedBy: "warden",
+      note: "test",
+    });
     assertHierarchy(model);
   });
 });

@@ -8,6 +8,8 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { Inbox, ChevronDown, ChevronUp } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { escalationInspection } from "@/components/approver/wardenConsoleModels";
 
 
 interface PermissionRequestRow {
@@ -30,6 +32,25 @@ interface PermissionsResponse {
 }
 
 function VpEscalatedInner() {
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectRow = (r: PermissionRequestRow) => {
+    inspect(
+      escalationInspection({
+        id: r.id,
+        ticket_number: r.ticket_number,
+        workflow_type: r.workflow_type,
+        current_stage: r.current_stage,
+        status: r.status,
+        sla_deadline: r.sla_deadline ?? null,
+        created_at: null,
+        student: r.student
+          ? { name: r.student.name, student_details: r.student.student_details ? { roll: r.student.student_details.roll } : null }
+          : null,
+      }),
+    );
+  };
+
   const {
     data: escalated,
     loading: queueLoading,
@@ -79,9 +100,10 @@ function VpEscalatedInner() {
                 return (
                   <li
                     key={r.id}
-                    className="surface-card bg-bg-surface/40 p-3 min-w-0"
+                    className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/30 transition-colors"
+                    onClick={() => inspectRow(r)}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <span className="font-mono text-xs text-action-warning">{r.ticket_number}</span>
                       <span className="text-sm text-text-secondary truncate min-w-0 flex-1">
                         {r.student?.name || "—"}
@@ -97,7 +119,7 @@ function VpEscalatedInner() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setOpenTicket(open ? null : r.ticket_number)}
+                        onClick={(e) => { e.stopPropagation(); setOpenTicket(open ? null : r.ticket_number); }}
                         aria-expanded={open}
                         className="surface-card inline-flex items-center gap-1 bg-bg-elevated px-2.5 py-1.5 text-xs text-text-secondary hover:bg-bg-elevated transition-colors"
                       >
@@ -117,9 +139,12 @@ function VpEscalatedInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
+
 export default function VpEscalatedPage() {
   return (
     <AuthGuard allowedRoles={['vice_principal', 'exam_branch', 'oie', 'admin', 'sysadmin']}>

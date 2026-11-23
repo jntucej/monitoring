@@ -14,9 +14,8 @@ import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import type { BoardRow } from "@/components/shared/Board";
 import { EntityInspector } from "@/components/shared/EntityInspector";
-import { scanInspection } from "@/components/shared/inspectionModels";
+import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 import { PageHeader } from "@/components/shared/PageHeader";
 
 
@@ -38,7 +37,7 @@ export default function OiePage() {
   const pendingCount = queue.filter((i) => i.status?.toUpperCase() === "PENDING").length;
   const escalatedCount = queue.filter((i) => i.status?.toUpperCase() === "ESCALATED").length;
 
-    const [active, setActive] = useState<BoardRow | null>(null);
+  const [active, setActive] = useState<HMBoardRow | null>(null);
 return (
     <Suspense fallback={<PageLoading />}>
       <AuthGuard allowedRoles={["oie"]}>
@@ -56,10 +55,10 @@ return (
             source="/api/oie/queue"
             columns={["PENDING", "ESCALATED", "APPROVED", "REJECTED"]}
             itemKey="permission"
-            onSelect={(row) => setActive(row)}
+            onSelect={(row) => setActive(row as HMBoardRow)}
           />
           <EntityInspector
-            inspection={active ? scanInspection(active) : null}
+            inspection={active ? boardRowTicketInspection(active, { consoleHref: "/oie", consoleLabel: "OIE queue" }) : null}
             onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>

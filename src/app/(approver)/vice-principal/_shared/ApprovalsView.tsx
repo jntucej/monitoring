@@ -9,6 +9,8 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
 import { ApprovalDetailSheet } from "./ApprovalDetailSheet";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
 
 interface PermissionsResponse {
   success: boolean;
@@ -24,6 +26,27 @@ export function ApprovalsView({
   title: string;
 }) {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+
+  const inspectRow = (item: PermissionItem) => {
+    inspect(
+      ticketRowInspection(
+        {
+          ticket_number: item.ticket_number,
+          workflow_type: item.workflow_type,
+          status: item.status,
+          current_stage: item.current_stage,
+          reason: item.reason ?? null,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          sla_deadline: item.sla_deadline ?? null,
+          stage_history: item.stage_history ?? [],
+          student: item.student ?? null,
+        },
+        { detailHref: "/vice-principal/pending-approvals", detailLabel: "Pending approvals" },
+      ),
+    );
+  };
 
   const url =
     status === "ALL"
@@ -57,7 +80,7 @@ export function ApprovalsView({
             {rows.map((item) => (
               <li key={item.id}>
                 <button
-                  onClick={() => setSelected(item)}
+                  onClick={() => inspectRow(item)}
                   className="surface-card w-full min-h11 bg-bg-surface p-3 text-left"
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -95,6 +118,7 @@ export function ApprovalsView({
               ]}
               data={rows}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => inspectRow(r)}
             />
           </div>
         </>
@@ -109,6 +133,8 @@ export function ApprovalsView({
           refresh();
         }}
       />
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
