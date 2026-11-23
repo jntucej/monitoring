@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { DataFreshness, type FreshnessStatus } from "./DataFreshness";
 
 export interface KpiCardProps {
   label: string;
@@ -16,6 +17,16 @@ export interface KpiCardProps {
   drilldownHref?: string;
   /** Hover hint shown as a small subtitle under the value. */
   hint?: string;
+  /**
+   * Show a data-freshness indicator in the card footer.
+   * Requires `lastFetched` to be set; when both are provided the footer
+   * renders a <DataFreshness/> dot + "Updated Xs ago" text.
+   */
+  freshness?: boolean;
+  /** Epoch-ms (or Date) timestamp of when this KPI's data was last fetched. */
+  lastFetched?: Date | number;
+  /** Override the derived freshness status (e.g. when the panel is offline). */
+  freshnessStatus?: FreshnessStatus;
 }
 
 export function KpiCard({
@@ -26,6 +37,9 @@ export function KpiCard({
   onClick,
   drilldownHref,
   hint,
+  freshness,
+  lastFetched,
+  freshnessStatus,
 }: KpiCardProps) {
   const toneClasses = {
     ok: "text-action-primary",
@@ -54,6 +68,15 @@ export function KpiCard({
       </p>
       {hint ? (
         <p className="mt-1 text-[11px] text-text-muted">{hint}</p>
+      ) : null}
+      {freshness && lastFetched !== undefined ? (
+        <div className="mt-3 pt-2 border-t border-border">
+          <DataFreshness
+            timestamp={lastFetched}
+            status={freshnessStatus}
+            autoRefresh
+          />
+        </div>
       ) : null}
     </div>
   );

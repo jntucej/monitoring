@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, Suspense } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import {
   Shield,
   AlertTriangle,
@@ -29,6 +29,8 @@ import { LiveEventsPanel } from "@/components/shared/LiveEventsPanel";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { EntityInspector, KVPairs, InspectorButton, Timeline } from "@/components/shared/EntityInspector";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { DataFreshness } from "@/components/shared/DataFreshness";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
@@ -305,7 +307,7 @@ function AdminOverviewInner() {
 
           {error ? (
             // RC8/SD2 — recoverable error card with retry (was a bare string with no action).
-            <div className="surface-card bg-rose-500/5 p-2.5 text-sm">
+            <div className="surface-card bg-rose-500/5 p-2.5 text-sm" role="alert">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="size-4 text-action-danger shrink-0 mt-0.5" />
                 <div className="flex-1">
@@ -352,6 +354,19 @@ function AdminOverviewInner() {
               })}
             </div>
           )}
+
+          {data && statCards.length > 0 && lastUpdated ? (
+            <div className="mt-2 flex justify-end">
+              <DataFreshness timestamp={lastUpdated} status={isOffline ? "offline" : undefined} autoRefresh />
+            </div>
+          ) : null}
+
+          {data && statCards.length === 0 && !error ? (
+            <EmptyState
+              title="No operational metrics"
+              description="Telemetry has been loaded but no modules are reporting yet. Open a module below to begin tracking."
+            />
+          ) : null}
 
           {data && data.recentAuditEvents && data.recentAuditEvents.length > 0 && (
               <div className="mt-6">

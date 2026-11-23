@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState, lazy, Suspense } from "react";
+import { useMemo, useState, useCallback, lazy, Suspense } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { usePrincipalRetention } from "@/stores/principalRetentionStore";
 import { usePrincipalStreak } from "@/hooks/usePrincipalStreak";
+import { AlertTriangle, RotateCw } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { DataFreshness } from "@/components/shared/DataFreshness";
 import { MorningBrief } from "../_retention/MorningBrief";
 import { FocusZone, type FocusItem } from "../_retention/FocusZone";
 import { FocusMode } from "../_retention/FocusMode";
@@ -102,10 +105,24 @@ const InboxReviewPanel = lazy(() => import("@/components/principal/InboxReviewPa
 
 export default function PrincipalTodayPage() {
   const [focusOpen, setFocusOpen] = useState(false);
-  const { data, refresh } = useApiResource<PrincipalOverview>("/api/principal/dashboard", {
+  const [lastFetched, setLastFetched] = useState<number | null>(null);
+  const { data, loading, error, refresh } = useApiResource<PrincipalOverview>("/api/principal/dashboard", {
     ttlMs: 15_000,
   });
-  usePolling(refresh, { intervalMs: 15_000 });
+
+  // Track when the payload last arrived so the KPI grid can show a freshness dot.
+  // Stamp the timestamp on each successful poll; on failure keep the previous value
+  // so the dot flips to amber/red instead of vanishing.
+  const trackRefresh = useCallback(async () => {
+    const started = Date.now();
+    try {
+      await refresh();
+      setLastFetched(started);
+    } catch {
+      /* keep previous timestamp on failure */
+    }
+  }, [refresh]);
+  usePolling(trackRefresh, { intervalMs: 15_000 });
 
   const sessionDecisions = usePrincipalRetention((s) => s.sessionDecisions);
 
@@ -155,34 +172,65 @@ export default function PrincipalTodayPage() {
       <div className="mx-auto w-full max-w-7xl space-y-4 min-w-0">
 <PageHeader title="Principal" subtitle="Campus leadership console" />
         <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <KpiTile
-              label="Pending approvals"
-              value={d?.counts.pending ?? 0}
-              hint="Approvals waiting on your decision — click to open the queue"
-              linkHref="/principal/approvals"
+          {error && !loading && data === null ? (
+            // Recoverable error with retry — mirrors the admin overview pattern (RC8/SD2).
+            <div className="surface-card bg-rose-500/5 p-4 text-sm" role="alert">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="size-4 text-action-danger shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium text-text-primary">Dashboard unavailable</p>
+                  <p className="text-xs text-text-muted mt-0.5">{error}</p>
+                </div>
+                <button
+                  onClick={() => void trackRefresh()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-surface px-2.5 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-elevated"
+                >
+                  <RotateCw className="size-3.5" /> Retry
+                </button>
+              </div>
+            </div>
+          ) : !loading && data && (d?.counts.pending ?? 0) + (d?.counts.escalated ?? 0) + (d?.counts.overdue ?? 0) + (d?.emergency?.length ?? 0) === 0 ? (
+            <EmptyState
+              title="All clear"
+              description="No pending approvals, escalations, or active emergencies. Your queue is empty."
             />
-            <KpiTile
-              label="Overdue"
-              value={d?.counts.overdue ?? 0}
-              tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"}
-              hint="SLA-breached items needing immediate attention — click to open the breached list"
-              linkHref="/principal/approvals/overdue"
-            />
-            <KpiTile
-              label="Emergencies"
-              value={d?.emergency?.length ?? 0}
-              tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"}
-              hint="Active emergency commands and lockdowns — click for the command plane"
-              linkHref="/principal/emergency"
-            />
-            <KpiTile
-              label="Delegations active"
-              value={d?.delegations.active ?? 0}
-              hint="Authority you have delegated — click to review expiring grants"
-              linkHref="/principal/governance/delegations"
-            />
-          </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <KpiTile
+                  label="Pending approvals"
+                  value={d?.counts.pending ?? 0}
+                  hint="Approvals waiting on your decision — click to open the queue"
+                  linkHref="/principal/approvals"
+                />
+                <KpiTile
+                  label="Overdue"
+                  value={d?.counts.overdue ?? 0}
+                  tone={(d?.counts.overdue ?? 0) > 0 ? "bad" : "ok"}
+                  hint="SLA-breached items needing immediate attention — click to open the breached list"
+                  linkHref="/principal/approvals/overdue"
+                />
+                <KpiTile
+                  label="Emergencies"
+                  value={d?.emergency?.length ?? 0}
+                  tone={(d?.emergency?.length ?? 0) > 0 ? "warn" : "ok"}
+                  hint="Active emergency commands and lockdowns — click for the command plane"
+                  linkHref="/principal/emergency"
+                />
+                <KpiTile
+                  label="Delegations active"
+                  value={d?.delegations.active ?? 0}
+                  hint="Authority you have delegated — click to review expiring grants"
+                  linkHref="/principal/governance/delegations"
+                />
+              </div>
+              {lastFetched !== null && (
+                <div className="mt-2 flex justify-end">
+                  <DataFreshness timestamp={lastFetched} autoRefresh />
+                </div>
+              )}
+            </>
+          )}
         </WidgetBoundary>
                 {/* 1. Emergency pulse — only when present, top priority */}
         {d?.emergency && d.emergency.length > 0 && (
