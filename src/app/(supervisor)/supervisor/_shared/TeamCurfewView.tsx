@@ -2,6 +2,8 @@
 
 import { useApiResource } from "@/hooks/useApiResource";
 import { Moon } from "lucide-react";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { assetInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { ListSkeleton } from "./ListSkeleton";
 
 export function TeamCurfewView() {
@@ -16,6 +18,7 @@ export function TeamCurfewView() {
       }>;
     };
   }>("/api/supervisor/team-roster");
+  const { inspection, inspect, closeInspection } = useRoleInspectorHost();
 
   const workers = data?.data?.workers ?? [];
   const inside = workers.filter((w) => w.status === "INSIDE");
@@ -45,7 +48,21 @@ export function TeamCurfewView() {
         <div className="overflow-hidden rounded-2xl border border-border bg-bg-surface">
           <ul className="divide-y divide-border">
             {inside.map((w) => (
-              <li key={w.id} className="flex items-center justify-between p-3 text-xs">
+              <li
+                key={w.id}
+                className="flex cursor-pointer items-center justify-between p-3 text-xs transition hover:bg-bg-elevated"
+                onClick={() =>
+                  inspect(
+                    assetInspection({
+                      id: w.id,
+                      name: w.name,
+                      category: w.staffCategory,
+                      status: w.status,
+                      location: w.gateName ?? undefined,
+                    }),
+                  )
+                }
+              >
                 <div>
                   <p className="font-semibold text-text-primary">{w.name}</p>
                   <p className="text-xs text-text-muted">{w.staffCategory}</p>
@@ -58,6 +75,8 @@ export function TeamCurfewView() {
           </ul>
         </div>
       )}
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

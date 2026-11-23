@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { passTicketInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import { SlaBadge } from "@/components/approver/SlaBadge";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
@@ -23,12 +25,45 @@ interface EscalationsResponse {
 
 export function EscalationsView() {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
 
   const { data, loading, refresh } = useApiResource<EscalationsResponse>(
     "/api/supervisor/escalations",
     { ttlMs: 15_000 }
   );
 
+  /** Quick-inspect: overview + SLA + a single CTA that opens the deepest
+   *  layer (the local DecisionSheet with the full approve/reject workflow).
+   *  The decision itself only ships through the real route
+   *  PATCH /api/permissions/[ticket]; the inspector never invents one. */
+  const quickInspect = (item: PermissionItem) => {
+    inspect(
+      passTicketInspection(
+        {
+          id: item.id,
+          ticket_number: item.ticket_number,
+          workflow_type: item.workflow_type,
+          status: item.status,
+          current_stage: item.current_stage,
+          sla_deadline: item.sla_deadline ?? null,
+          reason: item.reason,
+          student: item.student
+            ? {
+                name: item.student.name,
+                student_details: item.student.student_details ?? undefined,
+              }
+            : null,
+        },
+        {
+          role,
+          onVerify: () => {
+            closeInspection();
+            setSelected(item);
+          },
+        },
+      ),
+    );
+  };
   // The API returns data as an object (not a bare array): {
   //   escalatedPermissions: PermissionItem[], activeAlerts, recentDecisions,
   //   scope, counts }. Guard with Array.isArray so a null/object never
@@ -105,10 +140,13 @@ export function EscalationsView() {
               ]}
               data={rows}
               keyExtractor={(r) => r.id}
+              onRowClick={(r) => quickInspect(r)}
             />
           </div>
         </>
       )}
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
 
       <DetailSheet
         item={selected}

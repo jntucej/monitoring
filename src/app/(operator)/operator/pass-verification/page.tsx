@@ -8,6 +8,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { passTicketInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 import {
   Check,
   X,
@@ -49,6 +51,7 @@ function safeText(v: string | number | null | undefined, fallback = "—"): stri
 
 function PassVerificationInner() {
   const user = useAuthStore((s) => s.user);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
   const [actingTicket, setActingTicket] = useState<string | null>(null);
   const [rejectingTicket, setRejectingTicket] = useState<string | null>(null);
   const [rejectComment, setRejectComment] = useState("");
@@ -105,6 +108,25 @@ function PassVerificationInner() {
     setRejectComment("");
   };
 
+  const openPass = useCallback(
+    (row: PermissionRow) => {
+      const ticket = row.ticket_number ?? row.id;
+      inspect(
+        passTicketInspection(row, {
+          role,
+          onVerify: () => {
+            void act(ticket, "APPROVE");
+          },
+          onReject: () => {
+            setRejectingTicket(ticket);
+            setRejectComment("");
+          },
+        }),
+      );
+    },
+    [inspect, role, act],
+  );
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
       {error && (
@@ -158,7 +180,11 @@ function PassVerificationInner() {
                   : null;
                 const slaBreached = sla ? sla.getTime() < Date.now() : false;
                 return (
-                  <li key={row.id} className="px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between min-w-0">
+                  <li
+                    key={row.id}
+                    className="px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between min-w-0 cursor-pointer hover:bg-bg-surface/40 transition-colors"
+                    onClick={() => openPass(row)}
+                  >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-text-primary truncate">
                         {row.student?.name || safeText(row.student?.unique_id, "Unknown applicant")}
@@ -183,7 +209,7 @@ function PassVerificationInner() {
                     </div>
 
                     {rejectingTicket === ticket ? (
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center w-full sm:w-auto min-w-0">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center w-full sm:w-auto min-w-0" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="text"
                           value={rejectComment}
@@ -218,7 +244,7 @@ function PassVerificationInner() {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           onClick={() => void act(ticket, "APPROVE")}
@@ -254,12 +280,13 @@ function PassVerificationInner() {
           {!busy && rows.length > 0 && (
             <div className="surface-card px-4 py-2.5 text-xs text-text-muted flex items-center gap-1.5 min-w-0">
               <Clock className="w-3.5 h-3.5 shrink-0" />
-              Auto-refreshes every 30 seconds.
+              Auto-refreshes every 30 seconds. Tap a ticket to inspect before acting.
             </div>
           )}
         </div>
       </OperatorWidgetBoundary>
 
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -76,7 +76,7 @@ export interface TxnRow {
   gate_id?: string | null;
   gate_name?: string | null;
   timestamp: string;
-  scan_type?: string | null;
+  scan_type?: string | boolean | null;
   is_correction?: boolean | null;
 }
 
@@ -101,8 +101,8 @@ export function transactionInspection(t: TxnRow, role?: string | null): EntityIn
         content: (
           <KVPairs
             items={[
-              { label: "Gate", value: t.gate_name ? <span className={MONO}>{t.gate_name}</span> : "—" },
-              { label: "Direction", value: t.direction },
+              { label: "Gate", value: t.gate_name ? <span className={MONO}>{String(t.gate_name)}</span> : "—" },
+              { label: "Direction", value: String(t.direction) },
               { label: "Recorded", value: new Date(t.timestamp).toLocaleString() },
               ...(t.reason ? [{ label: "Reason", value: t.reason }] : []),
             ]}
@@ -225,8 +225,8 @@ export function exceptionInspection(t: TxnRow, tags: ExceptionTag[] = [], role?:
       <KVPairs
         items={[
           { label: "Tags", value: tags.length ? tags.join(" · ") : "Flagged" },
-          ...(t.person_type ? [{ label: "Person type", value: t.person_type }] : []),
-          ...(t.scan_type ? [{ label: "Scan type", value: t.scan_type }] : []),
+          ...(t.person_type ? [{ label: "Person type", value: String(t.person_type) }] : []),
+          ...(t.scan_type ? [{ label: "Scan type", value: String(t.scan_type) }] : []),
         ]}
       />
     ),

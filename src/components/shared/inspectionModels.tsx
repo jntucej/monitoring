@@ -101,7 +101,7 @@ export interface ScanModel {
 export function scanInspection(s: ScanModel): EntityInspection {
   const isDenied = /denied|rejected|blocked/i.test(String(s.reason ?? ""));
   return {
-    kind: "scan",
+    kind: "exception",
     title: s.name ?? s.roll ?? "Unknown",
     subtitle: s.roll,
     status: (

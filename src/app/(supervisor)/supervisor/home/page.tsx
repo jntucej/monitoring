@@ -27,11 +27,36 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { gateLiveInspection, shiftInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" | "neutral" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : tone === "neutral" ? "text-text-muted" : "text-text-primary";
+function KpiTile({
+  label,
+  value,
+  tone = "ok",
+  onInspect,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "ok" | "warn" | "bad" | "neutral";
+  onInspect?: () => void;
+}) {
+  const toneClass =
+    tone === "bad"
+      ? "text-red-400"
+      : tone === "warn"
+        ? "text-action-warning"
+        : tone === "neutral"
+          ? "text-text-muted"
+          : "text-text-primary";
   return (
-    <div className="surface-card bg-bg-surface p-3 min-w-0">
+    <div
+      onClick={onInspect}
+      className={`surface-card bg-bg-surface p-3 min-w-0 ${onInspect ? "cursor-pointer hover:bg-bg-elevated transition-colors" : ""}`}
+      role={onInspect ? "button" : undefined}
+      tabIndex={onInspect ? 0 : undefined}
+      onKeyDown={onInspect ? (e) => e.key === "Enter" && e.currentTarget.click() : undefined}
+    >
       <div className="text-xs font-bold uppercase tracking-wider text-text-muted">{label}</div>
       <div className={`mt-1 text-lg font-extrabold truncate ${toneClass}`}>{value}</div>
     </div>
@@ -77,6 +102,7 @@ interface SupervisorOverview {
 
 export default function SupervisorTodayPage() {
   const [focusOpen, setFocusOpen] = useState(false);
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
   const { data, refresh } = useApiResource<{ data: SupervisorOverview }>(
     "/api/supervisor/dashboard",
     { ttlMs: 15_000 }
@@ -124,11 +150,46 @@ export default function SupervisorTodayPage() {
   const gatesOnline = d?.gates.filter((g) => g.isActive && g.onPost > 0).length ?? 0;
   const securityOnDuty = 0; // enriched by TeamRoster's own fetch
   const shiftActive = d?.shift.startedAt != null;
-  const kpis = [
-    { label: "Shift", value: shiftActive ? "On shift" : "Off shift", tone: shiftActive ? ("ok" as const) : ("neutral" as const) },
-    { label: "Gates online", value: `${gatesOnline}/${totalGates}`, tone: "neutral" as const },
-    { label: "Open escalations", value: escalationsOpen, tone: escalationsOpen > 0 ? ("bad" as const) : ("ok" as const) },
-    { label: "Open incidents", value: incidentsOpen, tone: incidentsOpen > 0 ? ("bad" as const) : ("ok" as const) },
+  const kpis: Array<{
+    label: string;
+    value: string | number;
+    tone: "ok" | "warn" | "bad" | "neutral";
+    onInspect?: () => void;
+  }> = [
+    {
+      label: "Shift",
+      value: shiftActive ? "On shift" : "Off shift",
+      tone: shiftActive ? ("ok" as const) : ("neutral" as const),
+      onInspect: () =>
+        inspect(
+          shiftInspection(
+            {
+              startedAt: d?.shift.startedAt,
+              endsAt: d?.shift.endsAt,
+              unresolvedIncidents: incidentsOpen,
+            },
+            role,
+          ),
+        ),
+    },
+    {
+      label: "Gates online",
+      value: `${gatesOnline}/${totalGates}`,
+      tone: "neutral",
+      onInspect: () =>
+        inspect(
+          shiftInspection(
+            {
+              startedAt: d?.shift.startedAt,
+              endsAt: d?.shift.endsAt,
+              gateCoverage: { total: totalGates, staffed: gatesOnline },
+            },
+            role,
+          ),
+        ),
+    },
+    { label: "Open escalations", value: escalationsOpen, tone: escalationsOpen > 0 ? ("bad" as const) : ("ok" as const), onInspect: () => window.location.assign("/supervisor/response/escalations") },
+    { label: "Open incidents", value: incidentsOpen, tone: incidentsOpen > 0 ? ("bad" as const) : ("ok" as const), onInspect: () => window.location.assign("/supervisor/response/incidents") },
   ];
 
   return (
@@ -146,12 +207,29 @@ export default function SupervisorTodayPage() {
         </div>
         {/* 1. Shift bar — shift-aware, not day-aware */}
         <WidgetBoundary name="ShiftBar" title="Shift Bar">
-          <ShiftBar
-            startedAt={d?.shift.startedAt ?? null}
-            endsAt={d?.shift.endsAt ?? null}
-            escalationsOpen={escalationsOpen}
-            incidentsOpen={incidentsOpen}
-          />
+          <div
+            onClick={() =>
+              inspect(
+                shiftInspection(
+                  {
+                    startedAt: d?.shift.startedAt ?? null,
+                    endsAt: d?.shift.endsAt ?? null,
+                    unresolvedIncidents: incidentsOpen,
+                    gateCoverage: { total: totalGates, staffed: gatesOnline },
+                  },
+                  role,
+                ),
+              )
+            }
+            className="cursor-pointer"
+          >
+            <ShiftBar
+              startedAt={d?.shift.startedAt ?? null}
+              endsAt={d?.shift.endsAt ?? null}
+              escalationsOpen={escalationsOpen}
+              incidentsOpen={incidentsOpen}
+            />
+          </div>
         </WidgetBoundary>
 
         {/* 2. Focus zone — the one thing to clear right now */}
@@ -163,7 +241,16 @@ export default function SupervisorTodayPage() {
         <WidgetBoundary name="TeamAndGates" title="Team & Gates">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <TeamRoster />
-            <GateWall gates={d?.gates ?? []} />
+            <div
+              onClick={() =>
+                d?.gates.length
+                  ? inspect(gateLiveInspection({ id: d.gates[0].id, name: d.gates[0].name, isActive: d.gates[0].isActive, onPost: d.gates[0].onPost, lastActivity: d.gates[0].lastActivity }, role))
+                  : undefined
+              }
+              className="cursor-pointer"
+            >
+              <GateWall gates={d?.gates ?? []} />
+            </div>
           </div>
         </WidgetBoundary>
 
@@ -230,6 +317,8 @@ export default function SupervisorTodayPage() {
         </WidgetBoundary>
 
       </div>
+
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </>
 </>
     );
