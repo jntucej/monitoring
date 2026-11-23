@@ -7,9 +7,11 @@
 // "use client"; CSS vars only; cn from @/lib/utils; viz from kit/viz; minis
 // from kit/sidebar.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { EntityInspector, KVPairs, InspectorButton, Timeline, type EntityInspection } from "@/components/shared/EntityInspector";
 import { Sankey } from "@/components/sysadmin/kit/viz";
 import type {
   PromotionsData,
@@ -34,7 +36,118 @@ const COLUMN_TONE: Record<PromotionStatus, string> = {
   REJECTED: "var(--action-danger)",
 };
 
+/**
+ * Build the standardized `EntityInspection` model for a promotion row.
+ *
+ * Sections follow the progressive-disclosure contract:
+ *   1. Overview — what this request is (from → to role, status).
+ *   2. Context — SLA posture and approver.
+ *   3. Timeline (collapsible) — created / decided markers.
+ *   4. Actions — server-authorized approve/reject (PATCH /api/admin/role-requests/[id],
+ *      admin|sysadmin-only) and a link to the full promotions board.
+ */
+function promotionInspection(row: PromotionRow, status: PromotionStatus): EntityInspection {
+  const slaFrac = row.decision_seconds == null
+    ? Math.min(1, Math.max(0, (Date.now() - Date.parse(row.created_at)) / 1000 / SLA_SECONDS))
+    : row.decision_seconds >= SLA_SECONDS ? 1 : row.decision_seconds / SLA_SECONDS;
+  const breached = slaFrac >= 1 && status === "PENDING";
+
+  const timelineItems: Array<{ label: string; time?: string; detail?: string; tone?: "ok" | "warn" | "danger" | "neutral" }> = [
+    { label: "Request created", time: new Date(row.created_at).toLocaleString(), tone: "neutral" },
+  ];
+  if (row.decision_seconds != null) {
+    timelineItems.push({
+      label: status === "APPROVED" ? "Approved" : "Rejected",
+      time: new Date(row.updated_at).toLocaleString(),
+      detail: `Decided in ${formatSeconds(row.decision_seconds)}`,
+      tone: status === "APPROVED" ? "ok" : "danger",
+    });
+  }
+
+  return {
+    kind: "promotion",
+    title: row.target_user_name ?? row.target_user_id,
+    subtitle: `from ${row.target_user_role ?? "unknown"} → ${row.requested_role}`,
+    status: (
+      <span
+        className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+          status === "PENDING"
+            ? breached
+              ? "bg-rose-500/15 text-action-danger"
+              : "bg-amber-500/15 text-action-warning"
+            : status === "APPROVED"
+              ? "bg-emerald-500/15 text-action-success"
+              : "bg-rose-500/15 text-action-danger"
+        }`}
+      >
+        {breached ? "SLA BREACHED" : status}
+      </span>
+    ),
+    sections: [
+      {
+        title: "Overview",
+        content: (
+          <KVPairs
+            items={[
+              { label: "From role", value: row.target_user_role ?? "unknown" },
+              { label: "To role", value: row.requested_role },
+              { label: "Request id", value: <span className="font-mono">{row.id}</span> },
+            ]}
+          />
+        ),
+      },
+      {
+        title: "Context",
+        content: (
+          <KVPairs
+            items={[
+              {
+                label: "SLA posture",
+                value: breached
+                  ? "Breached the 48h decision SLA"
+                  : `${Math.round(slaFrac * 100)}% of the 48h decision SLA consumed`,
+              },
+              ...(row.approver_name
+                ? [{ label: "Decided by", value: row.approver_name }]
+                : []),
+            ]}
+          />
+        ),
+      },
+      {
+        title: "Timeline",
+        collapsible: true,
+        content: <Timeline items={timelineItems} />,
+      },
+      {
+        title: "Actions",
+        content: (
+          <div className="flex flex-wrap gap-2">
+            {status === "PENDING" ? (
+              <span className="text-xs text-text-muted">
+                Approve or reject via <span className="font-mono">PATCH /api/admin/role-requests/{row.id}</span> (admin / sysadmin only).
+              </span>
+            ) : null}
+            <InspectorButton href="/sysadmin/promotions" variant="ghost">
+              <ChevronRight className="size-3.5" /> All promotions
+            </InspectorButton>
+          </div>
+        ),
+      },
+    ],
+    detailHref: "/sysadmin/promotions",
+    detailLabel: "All promotions",
+  };
+}
+
+/**
+ * The sysadmin promotions board. Every kanban card is a record: clicking it
+ * opens the standardized EntityInspector drawer (the same progressive-
+ * disclosure hierarchy used across the app), so a request is inspected
+ * in-place instead of navigating away.
+ */
 export function PromotionsContent({ data, loading, error }: Props) {
+  const [active, setActive] = useState<{ row: PromotionRow; status: PromotionStatus } | null>(null);
   // Total across all columns for the per-column donuts.
   const total = useMemo(() => {
     if (!data) return 0;
@@ -129,7 +242,12 @@ export function PromotionsContent({ data, loading, error }: Props) {
                     </div>
                   ) : (
                     rows.map((row) => (
-                      <PromotionCard key={row.id} row={row} tone={COLUMN_TONE[status]} />
+                      <PromotionCard
+                        key={row.id}
+                        row={row}
+                        tone={COLUMN_TONE[status]}
+                        onInspect={() => setActive({ row, status })}
+                      />
                     ))
                   )}
                 </div>
@@ -156,6 +274,11 @@ export function PromotionsContent({ data, loading, error }: Props) {
             No role transitions recorded yet.
           </div>
         )}
+
+        <EntityInspector
+          inspection={active ? promotionInspection(active.row, active.status) : null}
+          onClose={() => setActive(null)}
+        />
       </div>
     </WidgetBoundary>
   );
@@ -203,7 +326,15 @@ function ColumnDonut({ count, total, tone }: { count: number; total: number; ton
 }
 
 /** A single kanban card with an SLA arc (progress vs. the 48h decision SLA). */
-function PromotionCard({ row, tone }: { row: PromotionRow; tone: string }) {
+function PromotionCard({
+  row,
+  tone,
+  onInspect,
+}: {
+  row: PromotionRow;
+  tone: string;
+  onInspect: () => void;
+}) {
   const slaFrac = useMemo(() => {
     if (row.decision_seconds == null) {
       const created = Date.parse(row.created_at);
@@ -223,8 +354,9 @@ function PromotionCard({ row, tone }: { row: PromotionRow; tone: string }) {
 
   return (
     <div
+      onClick={onInspect}
       className={cn(
-        "rounded-lg border bg-[var(--surface-raised)] p-2.5 text-xs",
+        "rounded-lg border bg-[var(--surface-raised)] p-2.5 text-xs cursor-pointer transition hover:ring-2 hover:ring-action-primary/30",
         breached ? "border-action-danger/50" : "border-border",
       )}
     >

@@ -434,7 +434,7 @@ function AdminStaffInner() {
       {(() => {
         const staffInspection = active
           ? {
-              kind: "staff",
+              kind: "staff_member",
               title: active.name,
               subtitle: active.email,
               status: (

@@ -78,7 +78,7 @@ function AdminPassesInner() {
   /** Standardized inspection model for a pass (overview → context → history → actions). */
   const passInspection = activePass
     ? {
-        kind: "gate pass",
+        kind: "pass",
         title: activePass.name ?? activePass.roll ?? "Pass record",
         subtitle: activePass.roll ?? activePass.id,
         status: (

@@ -25,10 +25,12 @@ import {
   Server,
   ShieldAlert,
   Clock,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FlowMap } from "@/components/sysadmin/kit/viz";
 import { MiniSparkline } from "@/components/sysadmin/kit/sidebar";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { ServiceInspector } from "./ServiceInspector";
 import type { CommandCenterData } from "./types";
 import { useState } from "react";
@@ -136,13 +138,26 @@ function KpiCard({ tile }: { tile: KpiTile }) {
     </div>
   );
 
+  // Every KPI tile is a hover-preview entry point (the quick layer of the
+  // inspection hierarchy); the click still navigates to the matching view
+  // (the deepest layer) without losing the tile's context.
   return tile.href ? (
-    <Link
-      href={tile.href}
-      className="block hover:ring-2 hover:ring-action-primary/30 rounded-2xl transition-shadow"
+    <HoverPreview
+      preview={
+        <MetricPreview
+          label={tile.label}
+          value={String(tile.value)}
+          hint={tile.hint}
+        />
+      }
     >
-      {body}
-    </Link>
+      <Link
+        href={tile.href}
+        className="block hover:ring-2 hover:ring-action-primary/30 rounded-2xl transition-shadow"
+      >
+        {body}
+      </Link>
+    </HoverPreview>
   ) : (
     body
   );

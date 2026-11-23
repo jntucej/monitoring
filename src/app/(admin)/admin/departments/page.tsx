@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Building2 } from "lucide-react";
+import { Building2, ChevronRight } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface DeptRow {
   code: string;
@@ -24,6 +25,49 @@ interface DeptRow {
 function AdminDepartmentsInner() {
   const [rows, setRows] = useState<DeptRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState<DeptRow | null>(null);
+
+  /** Standardized inspection model for a department row. */
+  const deptInspection = active
+    ? {
+        kind: "department",
+        title: active.name,
+        subtitle: active.code,
+        status: (
+          <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-action-success">
+            ACTIVE
+          </span>
+        ),
+        sections: [
+          {
+            title: "Overview",
+            content: (
+              <KVPairs
+                items={[
+                  { label: "Code", value: <span className="font-mono">{active.code}</span> },
+                  { label: "HOD", value: active.hod ?? "—" },
+                  { label: "Faculty", value: String(active.facultyCount) },
+                  { label: "Students", value: String(active.totalStudents) },
+                  { label: "Total", value: String(active.facultyCount + active.totalStudents) },
+                ]}
+              />
+            ),
+          },
+          {
+            title: "Actions",
+            content: (
+              <div className="flex flex-wrap gap-2">
+                <InspectorButton href="/sysadmin/departments" variant="primary">
+                  <ChevronRight className="size-3.5" /> Manage in sysadmin
+                </InspectorButton>
+              </div>
+            ),
+          },
+        ],
+        detailHref: "/sysadmin/departments",
+        detailLabel: "All departments",
+      }
+    : null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,11 +116,16 @@ function AdminDepartmentsInner() {
                     <th className="p-3 text-center">Faculty</th>
                     <th className="p-3 text-center">Students</th>
                     <th className="p-3 text-center">Total</th>
+                    <th aria-label="Inspect" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
-                    <tr key={r.code} className="hover:bg-bg-elevated/40">
+                    <tr
+                      key={r.code}
+                      onClick={() => setActive(r)}
+                      className="hover:bg-bg-elevated/40 cursor-pointer"
+                    >
                       <td className="p-3 font-mono text-xs text-text-secondary">{r.code}</td>
                       <td className="p-3 text-sm font-semibold text-text-primary">{r.name}</td>
                       <td className="p-3 text-xs text-text-muted">{r.hod || "—"}</td>
@@ -87,6 +136,7 @@ function AdminDepartmentsInner() {
                           {r.facultyCount + r.totalStudents}
                         </span>
                       </td>
+                      <td className="p-3 text-text-muted"><ChevronRight className="w-4 h-4" /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -95,6 +145,8 @@ function AdminDepartmentsInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspector inspection={deptInspection} onClose={() => setActive(null)} />
     </div>
   );
 }

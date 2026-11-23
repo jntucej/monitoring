@@ -10,6 +10,7 @@
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
+import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { HeatMatrix } from "@/components/sysadmin/kit/viz";
 import { MiniSparkline } from "@/components/sysadmin/kit/sidebar";
 import type {PeopleData} from "@/components/sysadmin/domains/identity/types";
@@ -256,11 +257,13 @@ function Kpi({
   value,
   spark,
   tone,
+  hint,
 }: {
   label: string;
   value: string;
   spark: number[];
   tone: "neutral" | "ok" | "info" | "error";
+  hint?: string;
 }) {
   const color =
     tone === "ok"
@@ -270,14 +273,24 @@ function Kpi({
         : tone === "error"
           ? "var(--action-danger)"
           : "var(--action-primary)";
-  return (
+
+  const card = (
     <div className="surface-card flex items-center justify-between bg-bg-base p-4">
       <div>
         <div className="text-xs uppercase tracking-wide text-text-muted">{label}</div>
         <div className="mt-1 text-2xl font-bold text-text-primary">{value}</div>
+        {hint ? <div className="text-xs text-text-muted -mt-0.5">{hint}</div> : null}
       </div>
       <MiniSparkline label={label} values={spark} color={color} />
     </div>
+  );
+
+  // Every KPI tile is a hover-preview entry point (the quick layer of the
+  // inspection hierarchy); the value itself is the preview's payload.
+  return (
+    <HoverPreview preview={<MetricPreview label={label} value={value} hint={hint} />}>
+      {card}
+    </HoverPreview>
   );
 }
 

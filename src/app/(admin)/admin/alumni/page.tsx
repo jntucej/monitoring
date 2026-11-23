@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePersistentQuery } from "@/hooks/usePersistentQuery";
-import { GraduationCap, Search, RefreshCw } from "lucide-react";
+import { GraduationCap, Search, RefreshCw, ChevronRight } from "lucide-react";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
+import { EntityInspector, KVPairs, InspectorButton } from "@/components/shared/EntityInspector";
 
 interface AlumniRow {
   id: string;
@@ -28,6 +29,7 @@ function AdminAlumniInner() {
   const [rows, setRows] = useState<AlumniRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = usePersistentQuery("gate-admin-alumni-query");
+  const [active, setActive] = useState<AlumniRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,11 +104,16 @@ function AdminAlumniInner() {
                     <th className="p-3 text-left">Dept</th>
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">Checked out</th>
+                    <th aria-label="Inspect" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {rows.map((r) => (
-                    <tr key={r.id} className="hover:bg-bg-elevated/40">
+                    <tr
+                      key={r.id}
+                      onClick={() => setActive(r)}
+                      className="hover:bg-bg-elevated/40 cursor-pointer"
+                    >
                       <td className="p-3 font-semibold text-text-primary">{r.name}</td>
                       <td className="p-3 font-mono text-xs text-text-muted">{r.uniqueId ?? r.id}</td>
                       <td className="p-3 text-xs text-text-muted">{r.department ?? "—"}</td>
@@ -120,6 +127,7 @@ function AdminAlumniInner() {
                             })
                           : "—"}
                       </td>
+                      <td className="p-3 text-text-muted"><ChevronRight className="w-4 h-4" /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -128,6 +136,59 @@ function AdminAlumniInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <EntityInspector
+        inspection={
+          active
+            ? {
+                kind: "student",
+                title: active.name,
+                subtitle: active.uniqueId ?? active.id,
+                status: (
+                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/15 text-action-danger">
+                    DEPROVISIONED
+                  </span>
+                ),
+                sections: [
+                  {
+                    title: "Overview",
+                    content: (
+                      <KVPairs
+                        items={[
+                          { label: "Department", value: active.department ?? "—" },
+                          ...(active.year ? [{ label: "Year", value: String(active.year) }] : []),
+                          ...(active.email ? [{ label: "Email", value: active.email }] : []),
+                          {
+                            label: "Checked out",
+                            value: active.checkedOutAt
+                              ? new Date(active.checkedOutAt).toLocaleDateString("en-IN")
+                              : "—",
+                          },
+                        ]}
+                      />
+                    ),
+                  },
+                  {
+                    title: "Actions",
+                    content: (
+                      <div className="flex flex-wrap gap-2">
+                        <InspectorButton
+                          href={`/admin/students/${active.id}`}
+                          variant="primary"
+                        >
+                          <ChevronRight className="size-3.5" /> Full record
+                        </InspectorButton>
+                      </div>
+                    ),
+                  },
+                ],
+                detailHref: `/admin/students/${active.id}`,
+                detailLabel: "View full profile",
+              }
+            : null
+        }
+        onClose={() => setActive(null)}
+      />
     </div>
   );
 }

@@ -270,4 +270,208 @@ describe("entity inspection models", () => {
     };
     assertHierarchy(model);
   });
+
+  // ── PR-05B: admin role record surfaces ───────────────────────────────
+  // These pin the exact model shapes the admin pages build (the canonical
+  // kinds: staff_member, visitor, exception, pass, case, service, person,
+  // promotion, plus the department / class / parent / audit_event rows).
+  // Every model must pass the same progressive-disclosure contract:
+  //   overview first · long sections collapsible · Actions OR detailHref.
+
+  it("staff_member: overview → actions + full record link", () => {
+    const model: EntityInspectionModel = {
+      kind: "staff_member",
+      title: "Dr. Iyer",
+      subtitle: "iyer@example.edu",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/admin/staff/st-1",
+      detailLabel: "Full record",
+    };
+    assertHierarchy(model);
+  });
+
+  it("pass: overview → validity → actions (no detail page — the panel is the detail)", () => {
+    const model: EntityInspectionModel = {
+      kind: "pass",
+      title: "Priya Sharma",
+      subtitle: "23JJ1A0599",
+      status: "PENDING",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Validity", content: null },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("exception: context → timeline (collapsible) → actions (scan-ledger row)", () => {
+    const model: EntityInspectionModel = {
+      kind: "exception",
+      title: "Priya Sharma",
+      subtitle: "23JJ1A0599",
+      status: "DENIED",
+      sections: [
+        { title: "Context", content: null },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("visitor: context → visit timeline (collapsible) → gate action", () => {
+    const model: EntityInspectionModel = {
+      kind: "visitor",
+      title: "Ramesh Kumar",
+      subtitle: "Parent visit",
+      status: "IN",
+      sections: [
+        { title: "Context", content: null },
+        { title: "Visit timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("case: overview → timeline (collapsible) → actions + all-cases link", () => {
+    const model: EntityInspectionModel = {
+      kind: "case",
+      title: "CASE-2027-004",
+      subtitle: "Type: security",
+      status: "OPEN",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/admin/cases",
+      detailLabel: "All cases",
+    };
+    assertHierarchy(model);
+  });
+
+  it("service: overview → context (collapsible) → detail → timeline (collapsible) → actions", () => {
+    const model: EntityInspectionModel = {
+      kind: "service",
+      title: "PostgreSQL Database",
+      subtitle: "postgres",
+      status: "OK",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null, collapsible: true },
+        { title: "Service detail", content: null },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/sysadmin/health",
+      detailLabel: "Open health dashboard",
+    };
+    assertHierarchy(model);
+  });
+
+  it("person: overview → roles → sessions → audit (collapsible) → links", () => {
+    const model: EntityInspectionModel = {
+      kind: "person",
+      title: "Dr. Iyer",
+      subtitle: "iyer@example.edu",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Roles", content: null },
+        { title: "Sessions", content: null },
+        { title: "Audit", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/sysadmin/people",
+      detailLabel: "People directory",
+    };
+    assertHierarchy(model);
+  });
+
+  it("promotion: overview → context → timeline (collapsible) → actions + board link", () => {
+    const model: EntityInspectionModel = {
+      kind: "promotion",
+      title: "Rakesh Rao",
+      subtitle: "from operator → admin",
+      status: "PENDING",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Context", content: null },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/sysadmin/promotions",
+      detailLabel: "All promotions",
+    };
+    assertHierarchy(model);
+  });
+
+  it("department (admin): overview → actions + register link", () => {
+    const model: EntityInspectionModel = {
+      kind: "department",
+      title: "Computer Science",
+      subtitle: "CSE",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/sysadmin/departments",
+      detailLabel: "All departments",
+    };
+    assertHierarchy(model);
+  });
+
+  it("class (admin): overview → actions + roster link", () => {
+    const model: EntityInspectionModel = {
+      kind: "class",
+      title: "CSE 3 A",
+      subtitle: "3 · A",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("parent (admin): overview → linked children → actions", () => {
+    const model: EntityInspectionModel = {
+      kind: "parent",
+      title: "Mrs. Sharma",
+      subtitle: "GUARD-123",
+      status: "ACTIVE",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Linked children", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+    };
+    assertHierarchy(model);
+  });
+
+  it("audit_event (admin): overview → details (collapsible) → timeline (collapsible) → actions", () => {
+    const model: EntityInspectionModel = {
+      kind: "audit_event",
+      title: "ROLE_GRANT",
+      subtitle: "evt-900",
+      status: "RECORDED",
+      sections: [
+        { title: "Overview", content: null },
+        { title: "Details", content: null, collapsible: true },
+        { title: "Timeline", content: null, collapsible: true },
+        { title: "Actions", content: null },
+      ],
+      detailHref: "/admin/audit-logs",
+      detailLabel: "Full audit trail",
+    };
+    assertHierarchy(model);
+  });
 });
