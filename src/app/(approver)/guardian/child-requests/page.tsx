@@ -14,6 +14,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { SelfActionLoop, type NextActionStep } from "@/components/nav/level0/SelfActionLoop";
 import {
   useEntityInspector,
   EntityInspectorPanel,
@@ -159,6 +160,9 @@ function ChildRequestsInner() {
   const user = useAuthStore((s) => s.user);
   const userId = user?.id ?? "";
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  // Level-0 record pivot: the ward context currently in focus. Set when a
+  // request row is inspected so the next-step links carry ?ward=<id>.
+  const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
 
   // /api/permissions?status=PENDING — the server auto-scopes to the
   // guardian's linked wards (parent/guardian branch in the route handler).
@@ -186,6 +190,27 @@ function ChildRequestsInner() {
 
   const pending = rows.filter((r) => (r.status ?? "PENDING").toUpperCase() === "PENDING");
   const total = perms?.total ?? rows.length;
+
+  // Level-0 ward pivot: the focused request's ward (roll) drives the steps.
+  const focusedRow = selectedTicket
+    ? rows.find((r) => (r.ticket_number ?? r.id) === selectedTicket) ?? null
+    : null;
+  const focusedRoll =
+    focusedRow?.student?.student_details?.roll ??
+    (focusedRow?.student_user_id ? String(focusedRow.student_user_id) : "");
+  const wardSteps: NextActionStep[] = focusedRoll
+    ? [
+        { label: "Movement Detail", href: `/guardian/movement-info?ward=${encodeURIComponent(focusedRoll)}` },
+        { label: "Request Status", href: `/guardian/request-status?ward=${encodeURIComponent(focusedRoll)}` },
+        { label: "Child Profile", href: `/guardian/child-status?ward=${encodeURIComponent(focusedRoll)}` },
+      ]
+    : [];
+
+  const openRecord = (r: PermissionRow) => {
+    const ticket = r.ticket_number ?? r.id;
+    setSelectedTicket(ticket);
+    inspect(buildChildTicketInspection(r));
+  };
 
   return (
     <div className="min-w-0 space-y-6">
@@ -251,7 +276,7 @@ function ChildRequestsInner() {
                     ? new Date(r.sla_deadline).getTime() < Date.now()
                     : false;
                   return (
-                    <tr key={r.id} className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none cursor-pointer" onClick={() => inspect(buildChildTicketInspection(r))}>
+                    <tr key={r.id} className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none cursor-pointer" onClick={() => openRecord(r)}>
                       <td className="px-4 py-3 text-white font-mono text-xs">
                         {r.ticket_number || r.id.slice(0, 8)}
                       </td>
@@ -315,6 +340,16 @@ function ChildRequestsInner() {
           {pending.length} request(s) currently pending. Approval actions are available on the full
           permissions flow at the campus office.
         </p>
+      )}
+
+      {/* Level-0 record pivot: the selected ward/record's next-step actions,
+          carrying ward context via ?ward=<id>. */}
+      {selectedTicket && focusedRoll && (
+        <SelfActionLoop
+          title={`Request ${selectedTicket}`}
+          meta={`Ward ${focusedRoll} — where to take it next`}
+          steps={wardSteps}
+        />
       )}
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
