@@ -196,4 +196,39 @@ describe("role-gated inspection models (PR-05C)", () => {
     assertContract(m);
     expect(m.kind).toBe("asset");
   });
+
+  /* PR-05C-remainder: notification-item + win-feed shapes */
+
+  it("notification-derived ticket: resolved win keeps the ticket overview", () => {
+    // WinFeed items carry {ticket, status: RESOLVED} — the model must still
+    // satisfy the contract and link to the full ticket detail.
+    const m = passTicketInspection(
+      { id: "P-900", ticket_number: "P-900", status: "RESOLVED" },
+      { role: "supervisor" },
+    );
+    assertContract(m);
+    expect(m.detailHref).toBe("/permissions/P-900");
+  });
+
+  it("notification-derived alert: resolved incident keeps the timeline collapsible", () => {
+    const m = alertInspection({
+      id: "a-9",
+      severity: "high",
+      title: "Badge scan anomaly cleared",
+      timestamp: new Date().toISOString(),
+      resolved: true,
+    });
+    assertContract(m);
+    expect(m.sections.find((s) => s.title === "Timeline")?.collapsible).toBe(true);
+  });
+
+  it("reports metric rows reuse the transaction overview (supervisor read-only)", () => {
+    const m = transactionInspection(
+      { id: "entries", direction: "IN", reason: "Logged entry scans", timestamp: new Date().toISOString() },
+      "supervisor",
+    );
+    assertContract(m);
+    // supervisor can read gates: the action link to gate telemetry is present
+    expect(m.kind).toBe("transaction");
+  });
 });

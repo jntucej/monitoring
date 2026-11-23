@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { OperatorWidgetBoundary as WidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
+import { EntityInspector } from "@/components/shared/EntityInspector";
+import { gateLiveInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
+import { DoorOpen, ChevronRight } from "lucide-react";
 
 import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
@@ -14,6 +17,7 @@ import { QuickActions } from "@/components/operator/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { PageHeader } from "@/components/operator/shared/PageHeader";
 import { useAuthStore } from "@/stores/authStore";
+import { useGateStore } from "@/stores/gateStore";
 
 
 /** The operator's daily loop is the gate desk, not widgets: the landing
@@ -23,16 +27,45 @@ import { useAuthStore } from "@/stores/authStore";
 function OperatorDeskHero() {
   const user = useAuthStore((s) => s.user);
   const gateId = user?.gateId;
+  const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
+  const gateMeta = useGateStore((s) => s.gate);
+
+  const openGateInspector = () => {
+    if (!gateId) return;
+    inspect(
+      gateLiveInspection(
+        {
+          id: gateId,
+          name: gateMeta?.name ?? `Gate ${gateId}`,
+          isActive: true,
+          onPost: 0,
+          lastActivity: null,
+        },
+        role,
+      ),
+    );
+  };
+
   return (
     <WidgetBoundary name="DeskEntry" title="Your Desk">
       <div className="surface-card bg-bg-surface p-4 sm:p-5 space-y-3">
-        <div>
-          <p className="text-sm font-bold text-text-primary">
-            {gateId ? `Your gate: ${gateId}` : "No gate assigned yet"}
-          </p>
+        <div
+          onClick={openGateInspector}
+          className={gateId ? "cursor-pointer" : undefined}
+          role={gateId ? "button" : undefined}
+          tabIndex={gateId ? 0 : undefined}
+          onKeyDown={gateId ? (e) => e.key === "Enter" && openGateInspector() : undefined}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <DoorOpen className="w-4 h-4 text-action-info shrink-0" />
+            <p className="text-sm font-bold text-text-primary min-w-0">
+              {gateId ? `Your gate: ${gateId}` : "No gate assigned yet"}
+            </p>
+            {gateId && <ChevronRight className="w-3.5 h-3.5 text-text-muted shrink-0 ml-auto" />}
+          </div>
           <p className="text-xs text-text-muted mt-1">
             {gateId
-              ? "The scan desk opens on your assigned gate — one tap."
+              ? "The scan desk opens on your assigned gate — tap the card to inspect its live status."
               : "Claim a gate (or use the desk picker) before you can scan."}
           </p>
         </div>
@@ -43,6 +76,7 @@ function OperatorDeskHero() {
           {gateId ? "Open gate desk" : "Claim your gate"}
         </Link>
       </div>
+      <EntityInspector inspection={inspection} onClose={closeInspection} />
     </WidgetBoundary>
   );
 }
