@@ -41,12 +41,118 @@ import { PersonaBadge } from "@/components/shared/PersonaBadge";
 import { FlagBadge } from "@/components/shared/FlagBadge";
 import { PASS_TYPE_SEED } from "@/lib/pass-types";
 import type { FlagLevel } from "@/lib/permission-model";
+import type {
+  EntityInspection,
+  InspectionSection,
+} from "@/components/shared/EntityInspector";
+import { KVPairs, Timeline, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 
 export interface PermissionDetailPanelProps {
   ticket: string | null;
   onClose: () => void;
   onActionComplete?: () => void;
   isStandalonePage?: boolean;
+}
+
+/**
+ * A pure function that converts a `PermissionItem` (the shape the
+ * `/api/permissions/:ticket` route returns) into an `EntityInspection`
+ * model. This is the consolidation seam: the local `DetailSheet` and
+ * the shared `EntityInspector` both consume the same model, so they
+ * always show the same data.
+ *
+ * The model's `detailHref` points to the page's approvals view — the
+ * local sheet is the "deepest layer" (per the design doc's hierarchy:
+ * ELEMENT → drawer → full detail page). The sheet itself is the
+ * deepest layer; `detailHref` is the footer CTA that links out.
+ */
+export function permissionToInspection(
+  item: PermissionItem,
+  opts?: { detailHref?: string; detailLabel?: string },
+): EntityInspection {
+  const statusTone: "ok" | "warn" | "danger" | "neutral" =
+    item.status === "APPROVED" ? "ok"
+    : item.status === "REJECTED" ? "danger"
+    : item.status === "PENDING" ? "warn"
+    : "neutral";
+
+  const historyItems = (item.stage_history ?? []).map((h) => ({
+    label: `${h.actorName} ${h.action.toLowerCase()}`,
+    time: h.timestamp ? formatDateTime(h.timestamp) : undefined,
+    detail: h.comment ?? undefined,
+    tone: h.action === "FORWARDED" ? ("warn" as const) : ("neutral" as const),
+  }));
+
+  const sections: InspectionSection[] = [
+    {
+      title: "Overview",
+      content: (
+        <KVPairs
+          items={[
+            { label: "Workflow", value: item.workflow_type },
+            { label: "Current Stage", value: STAGE_LABELS[item.current_stage] || item.current_stage },
+            { label: "Student", value: item.student?.name ?? "—" },
+            { label: "Roll", value: item.student?.student_details?.roll ?? "—" },
+            { label: "Reason", value: item.reason ?? "—" },
+            { label: "Created", value: formatDateTime(item.created_at) },
+          ]}
+        />
+      ),
+    },
+  ];
+
+  if (historyItems.length > 0) {
+    sections.push({
+      title: "Timeline",
+      collapsible: true,
+      content: <Timeline items={historyItems} />,
+    });
+  }
+
+  // The sheet IS the deepest layer — the actions live here, not in a
+  // separate detail page. So the model exposes an Actions section.
+  sections.push({
+    title: "Actions",
+    content: (
+      <ActionRow>
+        <InspectorButton variant="primary">Approve</InspectorButton>
+        <InspectorButton variant="danger">Reject</InspectorButton>
+      </ActionRow>
+    ),
+  });
+
+  return {
+    kind: "permission",
+    title: item.ticket_number,
+    subtitle: `${item.workflow_type} · stage ${STAGE_LABELS[item.current_stage] || item.current_stage}`,
+    status: (
+      <span
+        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+          statusTone === "ok" ? "bg-emerald-500/10 text-action-success border border-emerald-500/20"
+          : statusTone === "danger" ? "bg-rose-500/10 text-action-danger border border-rose-500/20"
+          : statusTone === "warn" ? "bg-amber-500/10 text-action-warning border border-amber-500/20"
+          : "bg-bg-elevated text-text-muted border border-border"
+        }`}
+      >
+        {item.status}
+      </span>
+    ),
+    sections,
+    detailHref: opts?.detailHref ?? "/principal",
+    detailLabel: opts?.detailLabel ?? "Approvals view",
+  };
+}
+
+export interface PermissionDetailPanelResult {
+  /** The panel's render tree (the local "deepest layer"). */
+  element: React.ReactNode;
+  /**
+   * The `EntityInspection` model derived from the ticket data.
+   * Non-null when data has loaded.
+   * Pass this to `useEntityInspector().inspect()` to show the
+   * same data in the shared inspector.
+   */
+  inspection: EntityInspection | null;
 }
 
 const STAGE_LABELS: Record<string, string> = {
