@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { HodDesktopShell } from "./_shell/HodDesktopShell";
 import { HodMobileShell } from "./_shell/HodMobileShell";
 
@@ -17,7 +18,7 @@ export default function HodLayout({ children }: { children: React.ReactNode }) {
         <div className="block lg:hidden">
           <HodMobileShell>{children}</HodMobileShell>
         </div>
-
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

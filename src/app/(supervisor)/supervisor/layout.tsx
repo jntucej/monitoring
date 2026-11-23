@@ -5,6 +5,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
 import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { SUPERVISOR_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 
 const MANIFEST = {
@@ -25,6 +26,7 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
         <div className="block lg:hidden">
           <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

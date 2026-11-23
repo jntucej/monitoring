@@ -6,6 +6,7 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
 import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
 import { STUDENT_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import type { Role } from "@/lib/types";
 import { useNavContext } from "@/hooks/useNavContext";
 import type { NavContext } from "@/components/shell/types";
@@ -34,6 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="block lg:hidden">
           <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

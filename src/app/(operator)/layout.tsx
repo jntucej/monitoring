@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { OperatorShell } from "./OperatorShell";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import type { Role } from "@/lib/types";
 
 export default function OperatorLayout({
@@ -34,6 +35,7 @@ export default function OperatorLayout({
     <AuthGuard allowedRoles={["operator", "worker"] as Role[]}>
       <Suspense fallback={<PageLoading />}>
         <OperatorShell>{children}</OperatorShell>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

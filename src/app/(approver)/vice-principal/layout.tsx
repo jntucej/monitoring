@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { VPDesktopShell } from "./_shell/VPDesktopShell";
 import { VPMobileShell } from "./_shell/VPMobileShell";
 
@@ -21,7 +22,7 @@ export default function VicePrincipalLayout({
         <div className="block lg:hidden">
           <VPMobileShell>{children}</VPMobileShell>
         </div>
-
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );

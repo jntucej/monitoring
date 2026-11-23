@@ -5,6 +5,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { RoleDesktopShell } from "@/components/shell/RoleDesktopShell";
 import { RoleMobileShell } from "@/components/shell/RoleMobileShell";
+import { GlobalEntityInspector } from "@/components/shared/GlobalEntityInspector";
 import { EXAM_BRANCH_NAV, NAV_STORAGE_KEY } from "./_shell/nav";
 import type { Role } from "@/lib/types";
 
@@ -19,7 +20,9 @@ const MANIFEST = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard allowedRoles={["exam_branch", "principal", "admin", "sysadmin"] as Role[]}>
+    <AuthGuard
+      allowedRoles={["exam_branch", "principal", "admin", "sysadmin"] as Role[]}
+    >
       <Suspense fallback={<PageLoading />}>
         <div className="hidden lg:block">
           <RoleDesktopShell manifest={MANIFEST}>{children}</RoleDesktopShell>
@@ -27,6 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="block lg:hidden">
           <RoleMobileShell manifest={MANIFEST}>{children}</RoleMobileShell>
         </div>
+        <GlobalEntityInspector />
       </Suspense>
     </AuthGuard>
   );
