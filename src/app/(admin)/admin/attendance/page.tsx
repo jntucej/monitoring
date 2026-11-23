@@ -3,6 +3,7 @@ import { errMsg } from "@/lib/err-msg";
 
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
+import { EntityInspector, KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
@@ -31,6 +32,7 @@ const api = useApi();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [active, setActive] = useState<Row | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,6 +167,7 @@ const api = useApi();
         </div>
       <DataTable
         mobileLayout="cards"
+        onRowClick={(r) => setActive(r)}
         columns={[
           { header: "Student", accessor: (r) => r.name, className: "font-medium" },
           { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-text-muted" },
@@ -190,6 +193,62 @@ const api = useApi();
         keyExtractor={(r) => r.roll}
       />
       </div>
+
+      <EntityInspector
+        inspection={active ? {
+          kind: "attendance",
+          title: active.name,
+          subtitle: active.roll,
+          status: (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                active.status === "present"
+                  ? "bg-emerald-500/10 text-action-success"
+                  : active.status === "absent"
+                  ? "bg-rose-500/10 text-action-danger"
+                  : "bg-amber-500/10 text-action-warning"
+              }`}
+            >
+              {active.status}
+            </span>
+          ),
+          sections: [
+            {
+              title: "Overview",
+              content: (
+                <KVPairs
+                  items={[
+                    { label: "Roll", value: <span className="font-mono text-xs">{active.roll}</span> },
+                    { label: "Department", value: active.department || "—" },
+                    { label: "Time in", value: fmtTime(active.timeIn) },
+                    { label: "Time out", value: fmtTime(active.timeOut) },
+                  ]}
+                />
+              ),
+            },
+            {
+              title: "Context",
+              content: (
+                <p className="text-xs text-text-muted">Daily student attendance record — {date}.</p>
+              ),
+            },
+            {
+              title: "Actions",
+              content: (
+                <ActionRow>
+                  <InspectorButton
+                    variant="ghost"
+                    href="/admin/students"
+                  >
+                    View student directory
+                  </InspectorButton>
+                </ActionRow>
+              ),
+            },
+          ],
+        } : null}
+        onClose={() => setActive(null)}
+      />
       </div>
     
     
