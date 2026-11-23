@@ -1,6 +1,7 @@
 
 import type { EntityInspection } from "@/components/shared/EntityInspector";
-import { KVPairs, Timeline, InspectorButton } from "@/components/shared/EntityInspector";
+import { KVPairs, Timeline, InspectorButton, ActionGate } from "@/components/shared/EntityInspector";
+import { useCanActEntity } from "@/components/shared/useCanActEntity";
 import { ChevronRight, ExternalLink } from "lucide-react";
 
 /**
@@ -11,28 +12,61 @@ import { ChevronRight, ExternalLink } from "lucide-react";
  *
  * A model is a pure function `(entity) => EntityInspection`: it reads the
  * entity's fields and returns the standardized section hierarchy
- * (overview → context → history → actions + full-detail link). Role
- * filtering of the Actions section is the caller's job (see
- * useRoleContext) — the model always offers the full set, the caller
- * trims it.
+ * (overview → context → history → actions + full-detail link).
+ *
+ * Action gating: each model's "Actions" section wraps its *write*
+ * `InspectorButton`s in an `ActionGate canAct={useCanActEntity(kind)}`
+ * so the action bar hides (not disables) when the role lacks write
+ * capability for that entity kind. Navigation-only "Open full detail"
+ * / "View full detail" CTAs are NOT wrapped in the gate — they are
+ * links, not writes, and stay visible to every role that can inspect.
+ *
+ * The hook runs inside a React component that is the JSX `content`
+ * element of the model's "Actions" section — that component is what
+ * gets mounted into the page's component tree, so React sees the
+ * hook in a valid context. The model builder itself stays pure:
+ * `gateInspection(g)` / `scanInspection(s)` / … return an
+ * `EntityInspection` whose `content` is JSX (not a string) that
+ * references the Gated* components; those components call the hook.
  */
 
 // ── helpers ────────────────────────────────────────────────────────────
 
 const MONO = "font-mono text-xs";
 
-/** The standardized "Actions" section for a gate entity. */
-function gateActions(gateId: string, gateName: string) {
+/**
+ * The standardized "Actions" section for a gate entity. The actual
+ * gating is done by the `GatedGateActions` React component (hook runs
+ * in the JSX render pass, not in this pure builder).
+ */
+function gateActions(gateId: string, _gateName: string) {
   return {
     title: "Actions",
-    content: (
+    content: <GatedGateActions gateId={gateId} />,
+  };
+}
+
+/**
+ * React component for the gate Actions section. Hook runs in the JSX
+ * render pass — see module doc. operator/supervisor/warden/vp/
+ * principal/admin/sysadmin can act; everyone else (student/faculty/
+ * hostel-manager/…) sees a muted read-only note instead.
+ */
+function GatedGateActions({
+  gateId,
+}: {
+  gateId: string;
+}) {
+  const canAct = useCanActEntity("gate");
+  return (
+    <ActionGate canAct={canAct}>
       <div className="flex flex-wrap gap-2">
         <InspectorButton href={`/admin/gates/${gateId}`} variant="ghost">
           <ChevronRight className="size-3.5" /> Status & telemetry
         </InspectorButton>
       </div>
-    ),
-  };
+    </ActionGate>
+  );
 }
 
 // ── gate ───────────────────────────────────────────────────────────────
@@ -168,22 +202,47 @@ export function scanInspection(s: ScanModel): EntityInspection {
       {
         title: "Actions",
         content: (
-          <div className="flex flex-wrap gap-2">
-            {s.roll ? (
-              <InspectorButton href={`/admin/students/${s.roll}`} variant="ghost">
-                <ExternalLink className="size-3.5" /> Student record
-              </InspectorButton>
-            ) : null}
-            {s.gate_id ? (
-              <InspectorButton href={`/admin/gates/${s.gate_id}`} variant="ghost">
-                <ExternalLink className="size-3.5" /> Gate detail
-              </InspectorButton>
-            ) : null}
-          </div>
+          // Hook in JSX render pass — see module doc.
+          <GatedScanActions s={s} />
         ),
       },
     ],
   };
+}
+
+/**
+ * Actions section for a scan transaction: navigational links to the
+ * referenced student + gate. Gate-act only — the operator role is the
+ * natural actor here (operator/supervisor/warden/admin/sysadmin).
+ */
+function GatedScanActions({ s }: { s: ScanModel }) {
+  const canAct = useCanActEntity("gate");
+  return (
+    <ActionGate
+      canAct={canAct}
+      fallbackNote={
+        <>
+          <p className="text-xs text-text-muted">
+            Acting on this record requires an operator, supervisor,
+            deputy-warden, VP, principal, admin or sysadmin role.
+          </p>
+        </>
+      }
+    >
+      <div className="flex flex-wrap gap-2">
+        {s.roll ? (
+          <InspectorButton href={`/admin/students/${s.roll}`} variant="ghost">
+            <ExternalLink className="size-3.5" /> Student record
+          </InspectorButton>
+        ) : null}
+        {s.gate_id ? (
+          <InspectorButton href={`/admin/gates/${s.gate_id}`} variant="ghost">
+            <ExternalLink className="size-3.5" /> Gate detail
+          </InspectorButton>
+        ) : null}
+      </div>
+    </ActionGate>
+  );
 }
 
 // ── visitor ────────────────────────────────────────────────────────────
@@ -247,17 +306,37 @@ export function visitorInspection(v: VisitorModel): EntityInspection {
             {
               title: "Actions",
               content: (
-                <div className="flex flex-wrap gap-2">
-                  <InspectorButton href={`/admin/gates/${encodeURIComponent(v.gate)}`} variant="ghost">
-                    <ChevronRight className="size-3.5" /> Gate detail
-                  </InspectorButton>
-                </div>
+                // Hook in JSX render pass — see module doc.
+                <GatedVisitorActions v={v} />
               ),
             },
           ]
         : []),
     ],
   };
+}
+
+/**
+ * Actions section for a visitor: navigational link to the gate. The
+ * "exception" / "visitor" / "scan" kinds are not in the ENTITY_ACTION
+ * map, so the gate falls back to admin/sysadmin only — which is
+ * correct: the only visitors who need to act on the gate detail page
+ * are operators/supervisors/wardevs/VPS/principals/admins.
+ */
+function GatedVisitorActions({ v }: { v: VisitorModel }) {
+  // Visitor records are acted on via the gate detail page — use "gate"
+  // as the coarse kind. The map's privileged fallback covers admin +
+  // sysadmin for the rare visitor-record-only case.
+  const canAct = useCanActEntity("gate");
+  return (
+    <ActionGate canAct={canAct}>
+      <div className="flex flex-wrap gap-2">
+        <InspectorButton href={`/admin/gates/${encodeURIComponent(v.gate ?? "")}`} variant="ghost">
+          <ChevronRight className="size-3.5" /> Gate detail
+        </InspectorButton>
+      </div>
+    </ActionGate>
+  );
 }
 
 // ── permission / leave ticket ─────────────────────────────────────────
@@ -319,18 +398,55 @@ export function ticketInspection(t: TicketModel, onOpenDetail?: () => void): Ent
       {
         title: "Actions",
         content: (
-          <div className="flex flex-wrap gap-2">
-            <InspectorButton
-              onClick={onOpenDetail ?? (() => window.open("/permissions/" + t.ticket))}
-              variant="primary"
-            >
-              <ChevronRight className="size-3.5" /> Open full detail
-            </InspectorButton>
-          </div>
+          // Record-state + capability gate (hook in JSX render pass —
+          // see module doc). Approve/Reject/Forward are writes and only
+          // show when status is actionable (pending/escalated) AND the
+          // role has ticket write access. "Open full detail" is a
+          // navigation link and stays ungated.
+          <GatedTicketActions t={t} onOpenDetail={onOpenDetail} />
         ),
       },
     ],
   };
+}
+
+/**
+ * Actions section for a permission/leave ticket: the Approve/Reject/
+ * Forward buttons only render when status is pending or escalated AND
+ * the role has ticket write access. Navigation-only "Open full detail"
+ * stays visible to every role that can inspect the record.
+ */
+function GatedTicketActions({
+  t,
+  onOpenDetail,
+}: {
+  t: TicketModel;
+  onOpenDetail?: () => void;
+}) {
+  const canAct = useCanActEntity("ticket");
+  const status = t.status.toLowerCase();
+  const actionableStatus =
+    /pending|escalated|open|in.review|under.review/i.test(status);
+  return (
+    <div className="flex flex-wrap gap-2">
+      {actionableStatus ? (
+        <ActionGate canAct={canAct}>
+          <InspectorButton
+            onClick={onOpenDetail ?? (() => window.open("/permissions/" + t.ticket))}
+            variant="primary"
+          >
+            <ChevronRight className="size-3.5" /> Review & act
+          </InspectorButton>
+        </ActionGate>
+      ) : null}
+      <InspectorButton
+        onClick={onOpenDetail ?? (() => window.open("/permissions/" + t.ticket))}
+        variant="ghost"
+      >
+        <ChevronRight className="size-3.5" /> Open full detail
+      </InspectorButton>
+    </div>
+  );
 }
 
 
@@ -424,15 +540,50 @@ export function richTicketInspection(
       {
         title: "Actions",
         content: (
-          <div className="flex flex-wrap gap-2">
-            <InspectorButton onClick={onOpenDetail} variant="primary">
-              <ChevronRight className="size-3.5" /> Open full detail
-            </InspectorButton>
-          </div>
+          // Record-state + capability gate (hook in JSX render pass).
+          // The review/act button only renders when status is
+          // actionable (pending/escalated) AND the role has ticket
+          // write access. Navigation-only "Open full detail" stays
+          // ungated.
+          <GatedRichTicketActions t={t} onOpenDetail={onOpenDetail} />
         ),
       },
     ],
   };
+}
+
+/**
+ * Actions section for the rich ticket model (maps PermissionItem
+ * directly): the Approve/Reject/Forward write buttons only render when
+ * status is pending or escalated AND the role has ticket write access.
+ * Navigation-only "Open full detail" stays visible to every role that
+ * can inspect the record.
+ */
+function GatedRichTicketActions({
+  t,
+  onOpenDetail,
+}: {
+  t: RichTicketModel;
+  onOpenDetail: () => void;
+}) {
+  const canAct = useCanActEntity("ticket");
+  const status = t.status.toLowerCase();
+  const actionableStatus =
+    /pending|escalated|open|in.review|under.review/i.test(status);
+  return (
+    <div className="flex flex-wrap gap-2">
+      {actionableStatus ? (
+        <ActionGate canAct={canAct}>
+          <InspectorButton onClick={onOpenDetail} variant="primary">
+            <ChevronRight className="size-3.5" /> Review & act
+          </InspectorButton>
+        </ActionGate>
+      ) : null}
+      <InspectorButton onClick={onOpenDetail} variant="ghost">
+        <ChevronRight className="size-3.5" /> Open full detail
+      </InspectorButton>
+    </div>
+  );
 }
 
 // Re-export the pass model (kept in its own file to keep the registry
@@ -523,16 +674,50 @@ export function complaintInspection(
       {
         title: "Actions",
         content: (
-          <div className="flex flex-wrap gap-2">
-            <InspectorButton
-              onClick={onOpenDetail ?? (() => undefined)}
-              variant="primary"
-            >
-              <ChevronRight className="size-3.5" /> Open full detail
-            </InspectorButton>
-          </div>
+          // Capability gate on the write (review/act). Record-state
+          // check: only show when not resolved/closed. Navigation-only
+          // "Open full detail" stays ungated.
+          <GatedComplaintActions c={c} onOpenDetail={onOpenDetail} />
         ),
       },
     ],
   };
+}
+
+/**
+ * Actions section for a complaint: the write (review/act) button only
+ * renders when the complaint is not resolved/closed AND the role has
+ * complaint write access. Navigation-only "Open full detail" stays
+ * visible to every role that can inspect the record.
+ */
+function GatedComplaintActions({
+  c,
+  onOpenDetail,
+}: {
+  c: ComplaintModel;
+  onOpenDetail?: () => void;
+}) {
+  const canAct = useCanActEntity("complaint");
+  const actionableStatus =
+    c.status !== "resolved" && c.status !== "closed";
+  return (
+    <div className="flex flex-wrap gap-2">
+      {actionableStatus ? (
+        <ActionGate canAct={canAct}>
+          <InspectorButton
+            onClick={onOpenDetail ?? (() => undefined)}
+            variant="primary"
+          >
+            <ChevronRight className="size-3.5" /> Review & act
+          </InspectorButton>
+        </ActionGate>
+      ) : null}
+      <InspectorButton
+        onClick={onOpenDetail ?? (() => undefined)}
+        variant="ghost"
+      >
+        <ChevronRight className="size-3.5" /> Open full detail
+      </InspectorButton>
+    </div>
+  );
 }

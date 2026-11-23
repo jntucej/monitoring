@@ -108,6 +108,103 @@ export function canInspectEntity(
 }
 
 /**
+ * ENTITY_ACTION — the UI-side "can this role act on a record of this kind?"
+ * capability map. Separate from ENTITY_ACCESS: inspection is read-only
+ * (view the drawer / timeline); acting is a write (approve, reject,
+ * forward, mark corrected, check-in/out, escalate, resolve).
+ *
+ * admin / sysadmin are always in the action allowlist (privileged fallback
+ * below, mirroring canInspectEntity).
+ *
+ * Used by the inspector's "Actions" section to *hide* (not disable) the
+ * action bar when the role is not in the allowlist.
+ */
+export const ENTITY_ACTION: Record<EntityKind, readonly Role[]> = {
+  student: [
+    ROLES.FACULTY,
+    ROLES.HOD,
+    ROLES.DEPUTY_WARDEN,
+    ROLES.HOSTEL_MANAGER,
+    ROLES.VICE_PRINCIPAL,
+    ROLES.PRINCIPAL,
+    ROLES.SUPERVISOR,
+    ROLES.ADMIN,
+    ROLES.SYSADMIN,
+  ],
+  faculty: [
+    ROLES.HOD,
+    ROLES.VICE_PRINCIPAL,
+    ROLES.PRINCIPAL,
+    ROLES.ADMIN,
+    ROLES.SYSADMIN,
+  ],
+  gate: [
+    ROLES.OPERATOR,
+    ROLES.SUPERVISOR,
+    ROLES.DEPUTY_WARDEN,
+    ROLES.VICE_PRINCIPAL,
+    ROLES.PRINCIPAL,
+    ROLES.ADMIN,
+    ROLES.SYSADMIN,
+  ],
+  ticket: [
+    ROLES.STUDENT,
+    ROLES.GUARDIAN,
+    ROLES.FACULTY,
+    ROLES.HOD,
+    ROLES.DEPUTY_WARDEN,
+    ROLES.HOSTEL_MANAGER,
+    ROLES.EXAM_BRANCH,
+    ROLES.OIE,
+    ROLES.VICE_PRINCIPAL,
+    ROLES.PRINCIPAL,
+    ROLES.SUPERVISOR,
+    ROLES.ADMIN,
+    ROLES.SYSADMIN,
+  ],
+  complaint: [
+    ROLES.STUDENT,
+    ROLES.CARETAKER,
+    ROLES.EMO,
+    ROLES.HOSTEL_MANAGER,
+    ROLES.DEPUTY_WARDEN,
+    ROLES.PRINCIPAL,
+    ROLES.ADMIN,
+    ROLES.SYSADMIN,
+  ],
+  device: [ROLES.SUPERVISOR, ROLES.ADMIN, ROLES.SYSADMIN],
+  case: [ROLES.VICE_PRINCIPAL, ROLES.PRINCIPAL, ROLES.ADMIN, ROLES.SYSADMIN],
+  alert: [ROLES.ADMIN, ROLES.SYSADMIN, ROLES.SUPERVISOR],
+};
+
+/**
+ * Whether the given role may act on the entity of the given kind.
+ *
+ * - nullish role → false.
+ * - admin / sysadmin → always true (privileged fallback, same as inspect).
+ * - Unknown kind (e.g. a resolver-registered kind not in ENTITY_ACTION,
+ *   such as "visitor" / "exception" / "scan" / "notification" used by
+ *   inspectionModels.tsx) → true only if role is sysadmin or admin;
+ *   otherwise false. The caller can widen the allowlist by extending the
+ *   EntityKind union + the map.
+ */
+export function canActOnEntity(
+  kind: EntityKind,
+  role: Role | string | undefined | null,
+): boolean {
+  if (!role) return false;
+  if (role === ROLES.SYSADMIN || role === ROLES.ADMIN) return true;
+  const allowed = ENTITY_ACTION[kind];
+  if (allowed === undefined) {
+    // Unknown kind: privileged fallback only. (admin / sysadmin already
+    // returned true above; reach here means an unknown kind + non-privileged
+    // role → false.)
+    return false;
+  }
+  return allowed.includes(role as Role);
+}
+
+/**
  * Resolve the "deepest layer" page route for a role/kind/id combo.
  *
  * Returns null when no role-appropriate full page exists for this entity —

@@ -69,6 +69,23 @@ export interface EntityInspectorProps {
   onRetry?: () => void;
   /** Optional: renders a slot behind the panel content (e.g. a backdrop). */
   className?: string;
+  /**
+   * Optional: coarse capability gate for the "Actions" section. When
+   * `canAct === false`, every `<InspectorButton>` inside the Actions
+   * section is hidden and replaced with a muted read-only note via the
+   * `ActionGate` helper. Pass through to a wrapping `<ActionGate>` (or
+   * leave unset when the model already wraps its own buttons).
+   *
+   * Navigation-only "Open full detail" / "View full detail" CTAs are
+   * NOT gated: those are links, not writes.
+   */
+  canAct?: boolean;
+  /**
+   * Optional: a custom read-only note rendered in the Actions section in
+   * place of the buttons when `canAct === false`. Defaults to a generic
+   * "Acting on this record requires elevated permissions" copy.
+   */
+  canActFallbackNote?: ReactNode;
 }
 
 /**
@@ -107,6 +124,8 @@ export function EntityInspector({
   errorMessage,
   onRetry,
   className,
+  canAct,
+  canActFallbackNote,
 }: EntityInspectorProps) {
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const panelRef = useRef<HTMLDivElement>(null);
@@ -234,6 +253,14 @@ export function EntityInspector({
           {sections.map((s, i) => {
             const isCollapsible = s.collapsible === true;
             const isCollapsed = !!collapsed[i];
+            const isActions = s.title === "Actions" && canAct === false;
+            const sectionContent = isActions ? (
+              canActFallbackNote ?? (
+                <p className="text-xs text-text-muted">
+                  Acting on this record requires elevated permissions.
+                </p>
+              )
+            ) : s.content;
             return (
               <section key={i} className="space-y-2">
                 {isCollapsible ? (
@@ -252,7 +279,7 @@ export function EntityInspector({
                     {s.title}
                   </h3>
                 )}
-                {!isCollapsed && <div className="surface-card bg-bg-surface p-3">{s.content}</div>}
+                {!isCollapsed && <div className="surface-card bg-bg-surface p-3">{sectionContent}</div>}
               </section>
             );
           })}
@@ -423,6 +450,34 @@ export function ActionRow({
   children: ReactNode;
 }) {
   return <div className="flex flex-wrap gap-2">{children}</div>;
+}
+
+/**
+ * ActionGate — the coarse capability gate for inspector action bars.
+ *
+ * Renders `children` only when `canAct` is truthy; otherwise renders
+ * `fallbackNote` (defaulting to a muted "requires elevated permissions"
+ * note). Compose with `useCanActEntity(kind)` to drive the boolean
+ * from the central `canActOnEntity` map. Navigation-only buttons
+ * ("Open full detail") are NOT wrapped in `ActionGate` — they are
+ * links, not writes.
+ */
+export function ActionGate({
+  canAct,
+  fallbackNote,
+  children,
+}: {
+  canAct: boolean;
+  fallbackNote?: ReactNode;
+  children: ReactNode;
+}) {
+  if (canAct) return <>{children}</>;
+  return (
+    <div className="text-xs text-text-muted">
+      {fallbackNote ??
+        "Acting on this record requires elevated permissions."}
+    </div>
+  );
 }
 
 export function InspectorButton({
