@@ -20,6 +20,8 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDeputyWardenDecisionInspection } from "@/lib/role-registers/deputyWardenInspections";
 
 /* response shapes */
 
@@ -91,6 +93,7 @@ function DeputyWardenDecisionHistoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -236,7 +239,20 @@ function DeputyWardenDecisionHistoryInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {decisions.map((d) => (
-                    <tr key={d.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr
+                      key={d.id}
+                      onClick={() => inspect(buildDeputyWardenDecisionInspection(d))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildDeputyWardenDecisionInspection(d));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect decision ${d.ticket_number}`}
+                      className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="px-4 py-3 font-mono text-xs text-text-secondary whitespace-nowrap">
                         {d.ticket_number}
                       </td>
@@ -262,6 +278,7 @@ function DeputyWardenDecisionHistoryInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

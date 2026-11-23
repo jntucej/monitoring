@@ -17,12 +17,16 @@ export function StoryChart({
   xKey = "day",
   valueKey = "value",
   label = "Last 7 days",
+  onPointClick,
 }: {
   /** 7 (or fewer) points, oldest → newest: [{ day: "Mon", value: 12 }, ...] */
   points: Array<Record<string, number | string>>;
   xKey?: string;
   valueKey?: string;
   label?: string;
+  /** §12 drilldown: surface the records behind a data point when the caller
+   * provides it. Omitted for display-only stories (no invented drill). */
+  onPointClick?: (row: Record<string, number | string>) => void;
 }) {
   const series: SeriesDef[] = [
     { key: valueKey, label: label, color: "var(--action-success)" },
@@ -59,7 +63,7 @@ export function StoryChart({
         // series, so a non-sighted user gets the data, not a blank canvas.
         <div
           role="img"
-          aria-label={`${label}: ${points.length}-point trend. ${summary}`}
+          aria-label={`${label}: ${points.length}-point trend. ${summary}${onPointClick ? ". Click a point to see the records behind it." : ""}`}
         >
           <ChartRenderer
             type="area"
@@ -67,6 +71,7 @@ export function StoryChart({
             series={series}
             xKey={xKey}
             height={120}
+            onPointClick={onPointClick as ((row: any) => void) | undefined}
           />
         </div>
       )}

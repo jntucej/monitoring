@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildOieCoordinationInspection } from "@/lib/role-registers/oieInspections";
 import {
   ArrowRight,
   GitMerge,
@@ -68,7 +70,13 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
+function CoordinationTable({
+  rows,
+  onInspect,
+}: {
+  rows: CoordinationRow[];
+  onInspect: (r: CoordinationRow) => void;
+}) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No items awaiting coordination with the Exam Branch. The queue is clear." />
@@ -88,10 +96,24 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 20).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr
+              key={r.id}
+              onClick={() => onInspect(r)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onInspect(r);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Inspect coordination ticket ${r.ticket_number}`}
+              className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            >
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
                 >
                   {r.ticket_number}
@@ -147,6 +169,7 @@ function ExamBranchCoordinationInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -240,7 +263,7 @@ function ExamBranchCoordinationInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <CoordinationTable rows={rows} />
+            <CoordinationTable rows={rows} onInspect={(r) => inspect(buildOieCoordinationInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             OIE coordinates with the Exam Branch on candidate eligibility, scheduling, and
@@ -249,6 +272,7 @@ function ExamBranchCoordinationInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

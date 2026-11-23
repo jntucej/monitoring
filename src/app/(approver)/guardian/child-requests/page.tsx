@@ -13,6 +13,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  buildGuardianChildRequestInspection,
+  type GuardianChildRequestRecord,
+} from "@/lib/role-registers/guardianInspections";
 
 
 /* ── shapes ── */
@@ -90,6 +95,9 @@ function ChildRequestsInner() {
   const pending = rows.filter((r) => (r.status ?? "PENDING").toUpperCase() === "PENDING");
   const total = perms?.total ?? rows.length;
 
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openInspector = (r: PermissionRow) => inspect(buildGuardianChildRequestInspection(r as GuardianChildRequestRecord));
+
   return (
     <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -136,7 +144,38 @@ function ChildRequestsInner() {
               {total > 0 ? `${total} total` : "queue clear"}
             </span>
           </div>
-          <div className="overflow-x-auto min-w-0">
+          {/* Mobile list view */}
+          <ul className="space-y-2 md:hidden p-3">
+            {rows.slice(0, 20).map((r) => {
+              const ticket = r.ticket_number || r.id.slice(0, 8);
+              const ward = r.student?.name || "—";
+              return (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() => openInspector(r)}
+                    aria-label={`Inspect request ${ticket} for ${ward}`}
+                    className="surface-card block w-full bg-bg-surface p-3 text-left hover:bg-bg-base/40 focus-visible:ring-2 focus-visible:ring-action-primary focus:outline-none rounded transition-colors motion-reduce:transition-none"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-semibold text-white">{ticket}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap ${statusBadge(r.status)}`}>
+                        {r.status || "PENDING"}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-text-primary font-medium truncate">{ward}</p>
+                    <div className="mt-1 flex items-center justify-between text-xs text-text-muted">
+                      <span className="capitalize">{(r.workflow_type ?? "").replace(/_/g, " ")}</span>
+                      <span>{r.current_stage || "—"}</span>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block overflow-x-auto min-w-0">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-muted text-xs uppercase tracking-wide">
@@ -154,7 +193,20 @@ function ChildRequestsInner() {
                     ? new Date(r.sla_deadline).getTime() < Date.now()
                     : false;
                   return (
-                    <tr key={r.id} className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none">
+                    <tr
+                      key={r.id}
+                      onClick={() => openInspector(r)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openInspector(r);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Inspect request ${r.ticket_number || r.id.slice(0, 8)}`}
+                      className="hover:bg-bg-base/40 transition-colors motion-reduce:transition-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:ring-inset"
+                    >
                       <td className="px-4 py-3 text-white font-mono text-xs">
                         {r.ticket_number || r.id.slice(0, 8)}
                       </td>
@@ -219,6 +271,8 @@ function ChildRequestsInner() {
           permissions flow at the campus office.
         </p>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

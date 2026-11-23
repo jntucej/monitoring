@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDeputyWardenIncidentInspection } from "@/lib/role-registers/deputyWardenInspections";
 import {
   ShieldCheck,
   Loader2,
@@ -38,6 +40,7 @@ function DeputyWardenIncidentsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -125,7 +128,20 @@ function DeputyWardenIncidentsInner() {
                 </thead>
                 <tbody>
                   {alerts.slice(0, 20).map((a) => (
-                    <tr key={a.id} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={a.id}
+                      onClick={() => inspect(buildDeputyWardenIncidentInspection(a))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildDeputyWardenIncidentInspection(a));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect incident alert: ${a.title}`}
+                      className="border-b border-border/50 last:border-0 hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="py-2 pr-4 text-text-secondary">{a.title}</td>
                       <td className="py-2 pr-4">
                         <span className={`text-xs font-semibold ${a.severity === "critical" || a.severity === "high" ? "text-action-danger" : a.severity === "medium" ? "text-action-warning" : "text-text-muted"}`}>
@@ -145,6 +161,7 @@ function DeputyWardenIncidentsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

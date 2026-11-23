@@ -10,87 +10,18 @@ import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import type { Person, Scan } from "@/lib/types";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  buildGuardianWardStatusInspection,
+  buildGuardianScanActivityInspection,
+} from "@/lib/role-registers/guardianInspections";
 import {
   Loader2,
   CheckCircle2,
   XCircle,
   AlertCircle,
-  MapPin,
-  GitBranch
+  MapPin
 } from "lucide-react";
-
-/* ── pass-request timeline ── */
-
-interface PassTimelineItem {
-  id: string;
-  passType: string;
-  status: string;
-  requestedAt: string;
-  reason: string | null;
-}
-
-function PassTimeline({ wardRoll }: { wardRoll: string }) {
-  const [items, setItems] = useState<PassTimelineItem[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!wardRoll) return;
-    setLoading(true);
-    fetch(`/api/pass-requests?wardRoll=${encodeURIComponent(wardRoll)}&limit=5`, {
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((b) => setItems((b?.data?.requests ?? []) as PassTimelineItem[]))
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false));
-  }, [wardRoll]);
-
-  if (!wardRoll) return null;
-
-  const tone = (status: string) => {
-    const s = status.toUpperCase();
-    if (["APPROVED"].includes(s)) return "ok";
-    if (["REJECTED", "CANCELLED", "DISMISSED"].includes(s)) return "danger";
-    if (["IN_PROGRESS"].includes(s)) return "warn";
-    return "info";
-  };
-
-  return (
-    <div className="surface-card bg-bg-surface p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-text-muted flex items-center gap-1.5 mb-3">
-        <GitBranch className="w-3.5 h-3.5" /> Pass requests
-      </p>
-      {loading ? (
-        <p className="text-xs text-text-muted">Loading…</p>
-      ) : items && items.length === 0 ? (
-        <p className="text-xs text-text-muted">No pass requests yet.</p>
-      ) : items && items.length > 0 ? (
-        <ol className="relative border-l border-border ml-2 space-y-3">
-          {items.map((it) => (
-            <li key={it.id} className="ml-4">
-              <span
-                className={`absolute -left-1.5 size-4 rounded-full ring-4 ring-bg-surface ${
-                  tone(it.status) === "ok" ? "bg-action-success" :
-                  tone(it.status) === "danger" ? "bg-action-danger" :
-                  tone(it.status) === "warn" ? "bg-action-warning" : "bg-action-info"
-                }`}
-              />
-              <p className="text-sm text-text-primary">
-                <span className="font-medium">{it.passType}</span>
-                <span className="ml-2 text-xs uppercase text-text-muted">{it.status}</span>
-              </p>
-              {it.reason && <p className="text-xs text-text-muted mt-0.5">{it.reason}</p>}
-              <p className="text-[11px] text-text-muted mt-0.5">
-                {new Date(it.requestedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
-              </p>
-            </li>
-          ))}
-        </ol>
-      ) : null}
-    </div>
-  );
-}
 
 /* ── shapes ── */
 
@@ -159,7 +90,15 @@ function WardStatusCard({ ward, status }: { ward: Person; status: PersonStatus |
 
 /* ── recent gate activity feed ── */
 
-function ActivityFeed({ activities, wardName }: { activities: Scan[]; wardName: string | null }) {
+function ActivityFeed({
+  activities,
+  wardName,
+  onInspectScan,
+}: {
+  activities: Scan[];
+  wardName: string | null;
+  onInspectScan?: (scan: Scan) => void;
+}) {
   if (activities.length === 0) {
     return (
       <p className="text-sm text-text-muted">No recent gate activity recorded.</p>
@@ -173,8 +112,15 @@ function ActivityFeed({ activities, wardName }: { activities: Scan[]; wardName: 
       <div className="space-y-2 max-h-64 overflow-y-auto">
         {activities.map((a) => {
           const isIn = a.direction === "IN";
+          const label = `${isIn ? "Entry" : "Exit"} at ${a.gateName}`;
           return (
-            <div key={a.id} className="flex items-center justify-between gap-3">
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => onInspectScan?.(a)}
+              aria-label={`Inspect ${label}`}
+              className="w-full flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-bg-base/40 text-left transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            >
               <div className={`flex items-center gap-2 text-sm ${isIn ? "text-action-success" : "text-action-danger"}`}>
                 {isIn ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                 <span className="font-medium">{isIn ? "Entry" : "Exit"}</span>
@@ -187,7 +133,7 @@ function ActivityFeed({ activities, wardName }: { activities: Scan[]; wardName: 
                   minute: "2-digit",
                 })}
               </span>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -280,6 +226,12 @@ function ChildStatusInner() {
 
   const anyLoading = personsLoading || statusLoading;
 
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openWardInspector = (w: Person, st: PersonStatus | null) =>
+    inspect(buildGuardianWardStatusInspection(w, st));
+  const openScanInspector = (s: Scan) =>
+    inspect(buildGuardianScanActivityInspection(s, activityWard));
+
   return (
     <div className="min-w-0 space-y-6">
       <div>
@@ -321,6 +273,7 @@ function ChildStatusInner() {
           {wards.map((w) => {
             const roll = w.uniqueId || w.roll || "";
             const st = roll ? statuses[roll] : null;
+            const name = w.fullName || w.name || "Linked ward";
             return (
               <HoverPreview
                 key={w.id}
@@ -332,7 +285,21 @@ function ChildStatusInner() {
                   />
                 }
               >
-                <WardStatusCard ward={w} status={st} />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openWardInspector(w, st)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openWardInspector(w, st);
+                    }
+                  }}
+                  aria-label={`Inspect ward status for ${name}`}
+                  className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary rounded-xl"
+                >
+                  <WardStatusCard ward={w} status={st} />
+                </div>
               </HoverPreview>
             );
           })}
@@ -341,9 +308,15 @@ function ChildStatusInner() {
 
       <WidgetBoundary title="Recent Gate Activity">
         <div className="surface-card bg-bg-surface p-4">
-          <ActivityFeed activities={activity} wardName={activityWard} />
+          <ActivityFeed
+            activities={activity}
+            wardName={activityWard}
+            onInspectScan={openScanInspector}
+          />
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

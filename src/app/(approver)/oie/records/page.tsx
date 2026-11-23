@@ -11,6 +11,8 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ArrowRight, Loader2, FileText, AlertTriangle } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildOieRecordInspection } from "@/lib/role-registers/oieInspections";
 
 interface PermissionRequestRow {
   id: string;
@@ -56,7 +58,13 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
+function TicketTable({
+  rows,
+  onInspect,
+}: {
+  rows: PermissionRequestRow[];
+  onInspect: (r: PermissionRequestRow) => void;
+}) {
   if (rows.length === 0) {
     return <EmptyState message="No pending items at the OIE examination stage. The queue is clear." />;
   }
@@ -74,10 +82,24 @@ function TicketTable({ rows }: { rows: PermissionRequestRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 15).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr
+              key={r.id}
+              onClick={() => onInspect(r)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onInspect(r);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Inspect operational record ${r.ticket_number}`}
+              className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            >
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
                 >
                   {r.ticket_number}
@@ -133,6 +155,7 @@ function OieRecordsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: oieQueue,
@@ -196,7 +219,7 @@ function OieRecordsInner() {
               <Loader2 className="w-4 h-4 animate-spin shrink-0" /> Loading OIE queue…
             </div>
           ) : (
-            <TicketTable rows={oieRows} />
+            <TicketTable rows={oieRows} onInspect={(r) => inspect(buildOieRecordInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Broader institutional records (staff attendance, attendance statistics) are
@@ -205,6 +228,8 @@ function OieRecordsInner() {
           </div>
         </div>
       </WidgetBoundary>
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

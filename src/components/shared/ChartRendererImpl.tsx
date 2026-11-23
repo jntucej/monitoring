@@ -50,7 +50,7 @@ const TOOLTIP = {
  * re-renders on every layout tick.
  */
 export function ChartRenderer({
-  type, data, series, xKey, height = 280, stacked = false,
+  type, data, series, xKey, height = 280, stacked = false, onPointClick,
 }: {
   type: ChartType;
   data: any[];
@@ -58,6 +58,11 @@ export function ChartRenderer({
   xKey: string;
   height?: number;
   stacked?: boolean;
+  /** Optional §12 chart drilldown: click a data point to surface the
+   * underlying record(s) for that period. Receives the raw data row.
+   * Only wired when a caller actually provides it — display-only charts
+   * keep working unchanged. */
+  onPointClick?: (row: any) => void;
 }) {
   const { isLowEndDevice } = useGlass();
 
@@ -193,7 +198,10 @@ export function ChartRenderer({
   if (type === "area") {
     return (
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={chartData} {...animationProps}>
+        <AreaChart data={chartData} onClick={(e: any) => {
+          const row = e?.activePayload?.[0]?.payload;
+          if (onPointClick && row) onPointClick(row);
+        }} {...animationProps}>
           <defs>
             {series.map((s) => (
               <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
@@ -210,7 +218,8 @@ export function ChartRenderer({
           {series.map((s) => (
             <Area key={s.key} type="monotone" dataKey={s.key} name={s.label}
                   stroke={s.color} fill={`url(#grad-${s.key})`}
-                  stackId={stacked ? "stack" : undefined} />
+                  stackId={stacked ? "stack" : undefined}
+                  activeDot={onPointClick ? { r: 5 } : undefined} />
           ))}
         </AreaChart>
       </ResponsiveContainer>
@@ -220,7 +229,10 @@ export function ChartRenderer({
   /* default: line */
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={chartData} {...animationProps}>
+      <LineChart data={chartData} onClick={(e: any) => {
+        const row = e?.activePayload?.[0]?.payload;
+        if (onPointClick && row) onPointClick(row);
+      }} {...animationProps}>
         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
         <XAxis dataKey={xKey} {...AXIS} />
         <YAxis {...AXIS} />
@@ -229,7 +241,8 @@ export function ChartRenderer({
         {series.map((s) => (
           <Line key={s.key} type="monotone" dataKey={s.key} name={s.label}
                 stroke={s.color} strokeWidth={2.5}
-                dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                dot={onPointClick ? { r: 4 } : { r: 3 }}
+                activeDot={{ r: 5 }} />
         ))}
       </LineChart>
     </ResponsiveContainer>

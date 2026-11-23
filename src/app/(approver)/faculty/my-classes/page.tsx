@@ -14,6 +14,8 @@ import { LiveClassCard } from "@/components/shared/LiveClassCard";
 import { AssignmentsCard } from "@/components/faculty/AssignmentsCard";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildFacultyClassInspection } from "@/lib/role-registers/facultyInspections";
 import {
   ShieldCheck,
   Loader2,
@@ -43,6 +45,7 @@ function FacultyMyclassesInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -141,7 +144,20 @@ function FacultyMyclassesInner() {
                 </thead>
                 <tbody>
                   {classes.map((c) => (
-                    <tr key={c.id} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={c.id}
+                      onClick={() => inspect(buildFacultyClassInspection(c))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildFacultyClassInspection(c));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect class Year ${c.year} Section ${c.section}`}
+                      className="border-b border-border/50 last:border-0 hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="py-2 pr-4 font-mono text-xs text-text-secondary whitespace-nowrap">Year {c.year}</td>
                       <td className="py-2 pr-4 text-text-secondary">{c.section}</td>
                       <td className="py-2 pr-4 text-text-muted">{c.capacity ?? "—"}</td>
@@ -155,6 +171,7 @@ function FacultyMyclassesInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

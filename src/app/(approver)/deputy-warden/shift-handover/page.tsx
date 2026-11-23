@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDeputyWardenHandoverInspection } from "@/lib/role-registers/deputyWardenInspections";
 import {
   ShieldCheck,
   Inbox,
@@ -46,6 +48,7 @@ function DeputyWardenHandoverInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -127,7 +130,20 @@ function DeputyWardenHandoverInner() {
           ) : (
             <div className="p-4 space-y-3 min-w-0">
               {(data?.data?.handovers ?? []).map((h) => (
-                <div key={h.id} className="surface-card bg-bg-surface/40 p-3 min-w-0">
+                <div
+                  key={h.id}
+                  onClick={() => inspect(buildDeputyWardenHandoverInspection(h))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      inspect(buildDeputyWardenHandoverInspection(h));
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Inspect shift handover from ${h.byName ?? "previous shift"}`}
+                  className="surface-card bg-bg-surface/40 p-3 min-w-0 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
                     <p className="text-sm font-semibold text-white min-w-0">
                       {h.byName ? `From ${h.byName}` : "From previous shift"}
@@ -153,6 +169,7 @@ function DeputyWardenHandoverInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

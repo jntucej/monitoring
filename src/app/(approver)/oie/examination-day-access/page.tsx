@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildOieExaminationDayAccessInspection } from "@/lib/role-registers/oieInspections";
 import {
   ArrowRight,
   CalendarClock,
@@ -68,7 +70,13 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function AccessDayTable({ rows }: { rows: DayAccessRow[] }) {
+function AccessDayTable({
+  rows,
+  onInspect,
+}: {
+  rows: DayAccessRow[];
+  onInspect: (r: DayAccessRow) => void;
+}) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No exam-day access exceptions detected today. All candidates cleared the gate as expected." />
@@ -88,10 +96,24 @@ function AccessDayTable({ rows }: { rows: DayAccessRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 20).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr
+              key={r.id}
+              onClick={() => onInspect(r)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onInspect(r);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Inspect exam-day access ticket ${r.ticket_number}`}
+              className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            >
               <td className="px-4 py-3">
                 <a
                   href={`/permissions/${r.ticket_number}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
                 >
                   {r.ticket_number}
@@ -134,6 +156,7 @@ function ExaminationDayAccessInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data: accessData,
@@ -231,11 +254,12 @@ function ExaminationDayAccessInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <AccessDayTable rows={rows} />
+            <AccessDayTable rows={rows} onInspect={(r) => inspect(buildOieExaminationDayAccessInspection(r))} />
           )}
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

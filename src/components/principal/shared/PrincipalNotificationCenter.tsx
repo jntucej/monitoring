@@ -70,6 +70,13 @@ export interface NotificationCenterProps {
   /** Whether the dropdown is controlled externally. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /**
+   * §13 notification → inspector bridge. When provided, clicking a
+   * notification that references a record (ticket / alert) opens it in the
+   * shared entity inspector in addition to marking it read. Info-only
+   * notifications just mark read. Omitted = legacy mark-read-only behaviour.
+   */
+  onInspect?: (item: NotificationItem) => void;
 }
 
 export function NotificationCenter({
@@ -77,6 +84,7 @@ export function NotificationCenter({
   pollMs = 30_000,
   open: controlledOpen,
   onOpenChange,
+  onInspect,
 }: NotificationCenterProps) {
   const hasHydrated = useHasHydrated();
   const user = useAuthStore((s) => s.user);
@@ -310,7 +318,11 @@ export function NotificationCenter({
                           <button
                             key={item.id}
                             type="button"
-                            onClick={() => handleMarkRead(item.id)}
+                            onClick={() => {
+                              handleMarkRead(item.id);
+                              onInspect?.(item);
+                            }}
+                            aria-label={`Notification: ${item.title}${item.ticketNumber ? ` (${item.ticketNumber})` : ""}`}
                             className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${
                               isRead
                                 ? "border-border bg-bg-surface opacity-60"

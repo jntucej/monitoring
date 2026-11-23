@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildOieDecisionHistoryInspection } from "@/lib/role-registers/oieInspections";
 import {
   ArrowRight,
   History,
@@ -93,7 +95,13 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
-function HistoryTable({ rows }: { rows: HistoryRow[] }) {
+function HistoryTable({
+  rows,
+  onInspect,
+}: {
+  rows: HistoryRow[];
+  onInspect: (r: HistoryRow) => void;
+}) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No decision history records found. Completed exam approvals will appear here." />
@@ -115,10 +123,24 @@ function HistoryTable({ rows }: { rows: HistoryRow[] }) {
           {rows.slice(0, 20).map((r) => {
             const stageCount = Array.isArray(r.stage_history) ? r.stage_history.length : 0;
             return (
-              <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+              <tr
+                key={r.id}
+                onClick={() => onInspect(r)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onInspect(r);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect decision record ${r.ticket_number}`}
+                className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+              >
                 <td className="px-4 py-3">
                   <a
                     href={`/permissions/${r.ticket_number}`}
+                    onClick={(e) => e.stopPropagation()}
                     className="text-white font-mono text-xs whitespace-nowrap hover:text-action-success"
                   >
                     {r.ticket_number}
@@ -154,6 +176,7 @@ function DecisionHistoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const [filter, setFilter] = useState<StatusFilter>("ALL");
 
@@ -253,7 +276,7 @@ function DecisionHistoryInner() {
               <TableSkeleton rows={4} />
             </div>
           ) : (
-            <HistoryTable rows={filteredRows} />
+            <HistoryTable rows={filteredRows} onInspect={(r) => inspect(buildOieDecisionHistoryInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Records show the final disposition of exam permission tickets that passed
@@ -262,6 +285,7 @@ function DecisionHistoryInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

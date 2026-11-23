@@ -6,6 +6,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthHeaders } from "@/lib/utils";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import {
+  buildFacultyClassRequestInspection,
+  buildFacultyClassIssueInspection,
+} from "@/lib/role-registers/facultyInspections";
 
 interface QueueRow {
   id: string;
@@ -28,6 +33,7 @@ interface IssueRow {
 
 export default function FacultyClassRequestsPage() {
   const user = useAuthStore(s => s.user);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   const [queue, setQueue] = useState<QueueRow[]>([]);
   const [issues, setIssues] = useState<IssueRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +94,25 @@ export default function FacultyClassRequestsPage() {
     setPublishing(false);
   }
 
+  async function resolveRequest(reqRow: QueueRow) {
+    setMsg(null);
+    const note = prompt("Resolution note:", "");
+    if (!note) return;
+    try {
+      const res = await fetch(`/api/class-requests/${reqRow.id}/resolve`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ note }),
+      });
+      const d = await res.json();
+      setMsg(d.success ? { ok: true, text: "Class request resolved." } : { ok: false, text: d.error?.message ?? "Resolve failed." });
+      closeInspection();
+      void load();
+    } catch {
+      setMsg({ ok: false, text: "Network error." });
+    }
+  }
+
   async function resolveIssue(issue: IssueRow) {
     setMsg(null);
     const resolution = prompt("Resolution note:", "");
@@ -99,6 +124,7 @@ export default function FacultyClassRequestsPage() {
     });
     const d = await res.json();
     setMsg(d.success ? { ok: true, text: "Issue resolved; linked requests flipped to resolved." } : { ok: false, text: d.error?.message ?? "Resolve failed." });
+    closeInspection();
     void load();
   }
 
@@ -121,7 +147,20 @@ export default function FacultyClassRequestsPage() {
         ) : (
           <ul className="space-y-2">
             {queue.map(r => (
-              <li key={r.id} className="surface-card rounded-lg p-3 space-y-1">
+              <li
+                key={r.id}
+                onClick={() => inspect(buildFacultyClassRequestInspection(r, true, () => void resolveRequest(r)))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspect(buildFacultyClassRequestInspection(r, true, () => void resolveRequest(r)));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect request: ${r.title}`}
+                className="surface-card rounded-lg p-3 space-y-1 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+              >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-text-primary truncate">{r.title}</span>
                   {r.priority === "urgent" && <span className="text-[10px] font-semibold text-action-warning shrink-0">URGENT</span>}
@@ -177,13 +216,32 @@ export default function FacultyClassRequestsPage() {
           {issues.length === 0 ? <p className="text-xs text-text-muted italic">No open class-level issues.</p> : (
             <ul className="space-y-2">
               {issues.map(i => (
-                <li key={i.id} className="surface-card rounded-lg p-3 flex items-center justify-between gap-2">
+                <li
+                  key={i.id}
+                  onClick={() => inspect(buildFacultyClassIssueInspection(i, isHod, () => void resolveIssue(i)))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      inspect(buildFacultyClassIssueInspection(i, isHod, () => void resolveIssue(i)));
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Inspect class issue: ${i.topic}`}
+                  className="surface-card rounded-lg p-3 flex items-center justify-between gap-2 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                >
                   <div>
                     <span className="text-sm font-medium text-text-primary">{i.topic}</span>
                     <span className="text-[10px] text-text-muted block">{i.class_name ?? "—"} · {i.request_ids?.length ?? 0} linked requests</span>
                   </div>
-                  <button onClick={() => resolveIssue(i)}
-                    className="rounded-lg border border-border text-xs font-semibold px-3 py-1.5 hover:bg-bg-elevated">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void resolveIssue(i);
+                    }}
+                    className="rounded-lg border border-border text-xs font-semibold px-3 py-1.5 hover:bg-bg-elevated"
+                  >
                     Resolve
                   </button>
                 </li>
@@ -192,6 +250,8 @@ export default function FacultyClassRequestsPage() {
           )}
         </section>
       ) : null}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

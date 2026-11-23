@@ -29,6 +29,8 @@ import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalen
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
 import { QuickActions } from "@/components/principal/shared/PrincipalQuickActions";
 import { NotificationCenter } from "@/components/principal/shared/PrincipalNotificationCenter";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildNotificationInspection, type NotificationItem } from "@/lib/principal/notificationInspection";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
@@ -108,6 +110,14 @@ export default function PrincipalTodayPage() {
   usePolling(refresh, { intervalMs: 15_000 });
 
   const sessionDecisions = usePrincipalRetention((s) => s.sessionDecisions);
+
+  // §13 notification → inspector bridge: clicking a notification that
+  // references a record opens the shared inspector; info-only ones stay mark-read.
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const handleInspectNotification = (item: NotificationItem) => {
+    const insp = buildNotificationInspection(item);
+    if (insp) inspect(insp);
+  };
 
   const d = data?.data;
   const pending =
@@ -290,10 +300,14 @@ export default function PrincipalTodayPage() {
           <CampusKnowledgeCentre />
         </WidgetBoundary>
 <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter onInspect={handleInspectNotification} /></WidgetBoundary>
         </div>
 
       </div>
+
+      {/* §13: notification → shared entity inspector (record-backed notices
+          open the same inspector a table row would; info-only stay mark-read) */}
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </>
 </>
     );

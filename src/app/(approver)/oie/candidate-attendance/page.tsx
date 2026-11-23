@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildOieCandidateAttendanceInspection } from "@/lib/role-registers/oieInspections";
 import {
   ArrowRight,
   Users,
@@ -67,7 +69,13 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
   );
 }
 
-function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
+function AttendanceTable({
+  rows,
+  onInspect,
+}: {
+  rows: AttendanceRow[];
+  onInspect: (r: AttendanceRow) => void;
+}) {
   if (rows.length === 0) {
     return (
       <EmptyState message="No candidate attendance records found. Records appear here as exam-day gate scans are logged." />
@@ -88,7 +96,20 @@ function AttendanceTable({ rows }: { rows: AttendanceRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-800/60">
           {rows.slice(0, 25).map((r) => (
-            <tr key={r.id} className="hover:bg-bg-elevated/30 transition-colors">
+            <tr
+              key={r.id}
+              onClick={() => onInspect(r)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onInspect(r);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`Inspect attendance record for ${r.candidate_name || r.roll || "candidate"}`}
+              className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+            >
               <td className="px-4 py-3 text-text-secondary min-w-0">
                 {r.candidate_name || "—"}
                 {r.candidate_unique_id ? (
@@ -130,6 +151,7 @@ function CandidateAttendanceInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "oie") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -192,7 +214,7 @@ function CandidateAttendanceInner() {
               <TableSkeleton rows={5} />
             </div>
           ) : (
-            <AttendanceTable rows={rows} />
+            <AttendanceTable rows={rows} onInspect={(r) => inspect(buildOieCandidateAttendanceInspection(r))} />
           )}
           <div className="surface-card px-4 py-3 text-xs text-text-muted min-w-0">
             Records are read-only. Marks, grades, and confidential results are not exposed at
@@ -201,6 +223,7 @@ function CandidateAttendanceInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

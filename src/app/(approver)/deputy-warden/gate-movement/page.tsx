@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildDeputyWardenGateMovementInspection } from "@/lib/role-registers/deputyWardenInspections";
 import {
   ShieldCheck,
   Loader2,
@@ -43,6 +45,7 @@ function DeputyWardenGatemovementInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -137,8 +140,26 @@ function DeputyWardenGatemovementInner() {
                 <tbody>
                   {gates.map((g) => {
                     const count = Object.values(matrix[g.id] ?? {}).reduce((a, b) => a + b, 0);
+                    const gateRecord = {
+                      ...g,
+                      onCampusCount: count,
+                      roleCounts: matrix[g.id] ?? {},
+                    };
                     return (
-                      <tr key={g.id} className="border-b border-border/50 last:border-0">
+                      <tr
+                        key={g.id}
+                        onClick={() => inspect(buildDeputyWardenGateMovementInspection(gateRecord))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            inspect(buildDeputyWardenGateMovementInspection(gateRecord));
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Inspect gate ${g.name || g.code}`}
+                        className="border-b border-border/50 last:border-0 hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                      >
                         <td className="py-2 pr-4 font-mono text-xs text-text-secondary whitespace-nowrap">{g.name || g.code}</td>
                         <td className="py-2 pr-4 text-text-muted">{g.audience}</td>
                         <td className="py-2 pr-4 text-text-muted">{g.type}</td>
@@ -153,6 +174,7 @@ function DeputyWardenGatemovementInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
