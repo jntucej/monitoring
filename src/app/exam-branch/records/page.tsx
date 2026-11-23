@@ -44,6 +44,16 @@ interface PermissionsResponse {
   total: number;
 }
 
+function statusBadge(s: string) {
+  const c = s.toUpperCase();
+  if (c === "APPROVED" || c === "ACTIVE" || c === "GRANTED")
+    return "bg-emerald-500/10 text-action-success";
+  if (c === "PENDING" || c === "REQUESTED") return "bg-amber-500/10 text-action-warning";
+  if (c === "REJECTED" || c === "DENIED" || c === "EXPIRED")
+    return "bg-rose-500/10 text-action-danger";
+  return "bg-bg-elevated/10 text-text-muted";
+}
+
 function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "danger" | "neutral" }) {
   const cls: Record<string, string> = {
     ok: "bg-emerald-500/10 text-action-success border border-emerald-500/20",

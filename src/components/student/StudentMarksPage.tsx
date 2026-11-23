@@ -42,7 +42,7 @@ function StatusBadge({ text, tone }: { text: string; tone?: "ok" | "warn" | "dan
 /** Build an EntityInspection for a student grade card row. */
 function buildGradeInspection(r: GradeCard, groupLabel: string): EntityInspection {
   const pct = r.score !== null && r.maxMarks > 0 ? Math.round((r.score / r.maxMarks) * 100) : null;
-  const tone: "ok" | "warn" | "danger" = pct === null ? "neutral" as const : pct >= 40 ? "ok" : "danger";
+  const tone: "ok" | "warn" | "danger" = pct === null ? "warn" : pct >= 40 ? "ok" : "danger";
 
   const sections: EntityInspection["sections"] = [
     {

@@ -119,7 +119,7 @@ export function ApprovalsView({
 
   const activeEntity = selected ?? deepTicket;
   const base = activeEntity ? buildApprovalInspection(toApprovalRecord(activeEntity), gate) : null;
-  const inspection = base
+  const inspection = base && activeEntity
     ? {
         ...base,
         sections: [

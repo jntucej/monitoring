@@ -120,7 +120,7 @@ export default function VisitorVisitPage() {
         {d.active ? (
           <button
             type="button"
-            onClick={() => setInspection(visitorVisitInspection(d.active.log as unknown as VisitorLogRow))}
+            onClick={() => setInspection(visitorVisitInspection(d.active!.log as unknown as VisitorLogRow))}
             className="flex w-full items-center justify-center gap-1.5 text-xs font-semibold text-action-primary hover:underline focus-visible:ring-2 focus-visible:ring-action-primary focus-visible:outline-none rounded"
           >
             <Search className="size-3.5" />
