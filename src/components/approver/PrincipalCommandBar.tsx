@@ -169,8 +169,8 @@ export function PrincipalCommandBar({ role, open, onClose }: PrincipalCommandBar
   // palette behaves exactly like the navigation launcher it was.
   const entityRows: ResultRow[] = isEntityQuery
     ? [
-        ...personResults.map((person) => ({ kind: "person", person })),
-        ...ticketResults.map((ticket) => ({ kind: "ticket", ticket })),
+        ...personResults.map((person): ResultRow => ({ kind: "person", person })),
+        ...ticketResults.map((ticket): ResultRow => ({ kind: "ticket", ticket })),
       ]
     : [];
 
@@ -227,7 +227,7 @@ export function PrincipalCommandBar({ role, open, onClose }: PrincipalCommandBar
                 if (t.current_stage && !["principal", "warden_or_principal"].includes(String(t.current_stage))) return false;
                 const hay = [
                   String(t.ticket_number ?? ""),
-                  String(t.student?.name ?? t.student_name ?? ""),
+                  String((t.student as unknown as { name?: string } | undefined)?.name ?? t.student_name ?? ""),
                   String(t.reason ?? ""),
                   String(t.workflow_type ?? ""),
                 ]
@@ -242,8 +242,8 @@ export function PrincipalCommandBar({ role, open, onClose }: PrincipalCommandBar
                 status: String(t.status ?? "PENDING"),
                 current_stage: String(t.current_stage ?? "principal"),
                 reason: t.reason ? String(t.reason) : null,
-                student_name: t.student ? String((t.student as { name?: string }).name ?? "") : t.student_name ? String(t.student_name) : null,
-                roll: t.student?.student_details ? String((t.student as { student_details?: { roll?: string } }).student_details?.roll ?? null) : null,
+                student_name: t.student ? String((t.student as unknown as { name?: string }).name ?? "") : t.student_name ? String(t.student_name) : null,
+                roll: t.student && "student_details" in (t.student as Record<string, unknown>) ? String(((t.student as Record<string, unknown>).student_details as { roll?: string } | null)?.roll ?? null) : null,
               })))
           : [];
 
@@ -442,7 +442,7 @@ function RowButton({
   onSelect: () => void;
   onHover: () => void;
 }) {
-  let Icon = Search;
+  let Icon: React.ComponentType<{ className?: string }> = Search;
   let label = "";
   let hint = "";
   if (row.kind === "navigation") {

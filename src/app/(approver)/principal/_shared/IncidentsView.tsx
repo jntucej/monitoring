@@ -21,7 +21,9 @@ interface AlertItem {
   message?: string;
   severity?: string;
   created_at?: string;
+  timestamp?: string;
   status?: string;
+  resolved?: boolean;
   gate_id?: string | null;
   gate_name?: string | null;
 }

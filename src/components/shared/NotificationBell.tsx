@@ -7,6 +7,12 @@ import { useAuthStore } from '@/stores/authStore';
 
 import { Notification } from '@/lib/notification-types';
 import { useGlossyMotion } from '@/lib/animations';
+import {
+  EntityInspector,
+  KVPairs,
+  InspectorButton,
+  type EntityInspection,
+} from '@/components/shared/EntityInspector';
 
 const PRIORITY_ICONS = {
   low: Info,
@@ -31,6 +37,98 @@ const BELL_SUPPORTED_ROLES = new Set([
   'vice_principal', 'principal', 'hod', 'staff', 'faculty', 'student',
 ]);
 
+/**
+ * Build the standardized EntityInspection model for a notification row.
+ * The notification references an entity (via `data` or `type`); this maps
+ * it onto the overview → context → actions hierarchy.
+ */
+function notificationInspection(n: Notification): EntityInspection {
+  const kind = n.type ?? 'notification';
+  const title = n.title;
+  const subtitle = n.data?.ticket_number ?? n.data?.id ?? undefined;
+
+  // For notification types that reference a gate pass / permission ticket,
+  // link the "Open in approvals" action; otherwise just show context.
+  const isTicketRelated =
+    kind.includes('pass') ||
+    kind.includes('permission') ||
+    kind.includes('entry') ||
+    kind.includes('exit') ||
+    (n.data?.ticket_number !== undefined);
+
+  const actions: React.ReactNode[] = [];
+  if (isTicketRelated && subtitle) {
+    actions.push(
+      <InspectorButton
+        key="open-approval"
+        href={`/principal/approvals?ticket=${encodeURIComponent(String(subtitle))}`}
+        variant="primary"
+      >
+        <ExternalLink className="size-3.5" /> Open in approvals
+      </InspectorButton>
+    );
+  }
+  actions.push(
+    <InspectorButton key="attention" href="/principal/attention" variant="ghost">
+      <ExternalLink className="size-3.5" /> Attention queue
+    </InspectorButton>
+  );
+
+  return {
+    kind: isTicketRelated ? 'permission ticket' : kind,
+    title,
+    subtitle: subtitle ?? undefined,
+    status: (
+      <span
+        className={
+          'text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ' +
+          (n.priority === 'critical'
+            ? 'bg-red-500/10 text-red-600'
+            : n.priority === 'high'
+              ? 'bg-amber-500/10 text-amber-600'
+              : 'bg-bg-elevated text-text-muted')
+        }
+      >
+        {n.priority}
+      </span>
+    ),
+    sections: [
+      {
+        title: 'What',
+        content: (
+          <KVPairs
+            columns={1}
+            items={[
+              { label: 'Message', value: n.message },
+              { label: 'Type', value: <span className="font-mono text-xs">{kind}</span> },
+              {
+                label: 'Created',
+                value: n.createdAt
+                  ? new Date(n.createdAt).toLocaleString()
+                  : '—',
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        title: 'Context',
+        content: n.data && Object.keys(n.data).length > 0 ? (
+          <pre className="text-[11px] font-mono text-text-muted whitespace-pre-wrap break-all">
+            {JSON.stringify(n.data, null, 2)}
+          </pre>
+        ) : (
+          <p className="text-xs text-text-muted">No additional context attached.</p>
+        ),
+      },
+      {
+        title: 'Actions',
+        content: <div className="flex flex-wrap gap-2">{actions}</div>,
+      },
+    ],
+  };
+}
+
 export function NotificationBell() {
   const { user } = useAuthStore();
   const bellSupported = BELL_SUPPORTED_ROLES.has(user?.role ?? '');
@@ -41,6 +139,12 @@ export function NotificationBell() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isGlossyMotion = useGlossyMotion();
+
+  // ── Entity inspector state ────────────────────────────────────────────
+  // Clicking a notification row opens the inspector for the referenced
+  // entity AND marks it read. The row is no longer a dead end.
+  const [activeNotif, setActiveNotif] = useState<Notification | null>(null);
+  const inspection = activeNotif ? notificationInspection(activeNotif) : null;
 
   const loadNotifications = async () => {
     if (!bellSupported) return; // role not served by /api/notifications — stay inert
@@ -119,6 +223,15 @@ export function NotificationBell() {
     } catch {
       // best-effort — local state already updated
     }
+  };
+
+  /**
+   * Click on a notification row: mark it read AND open the entity inspector
+   * for the referenced entity (ticket / alert).
+   */
+  const handleRowClick = (n: Notification) => {
+    if (!n.readAt) handleMarkRead(n.id);
+    setActiveNotif(n);
   };
 
   const handleMarkAllRead = async () => {
@@ -231,11 +344,17 @@ export function NotificationBell() {
                   return (
                     <div
                       key={n.id}
-                      className={`p-4 transition-colors hover:bg-[var(--bg-card)]/60 flex items-start gap-3 ${
-                        !n.readAt ? 'bg-[var(--bg-card)]/30' : ''
+                      className={`p-4 transition-colors flex items-start gap-3 cursor-pointer ${
+                        !n.readAt ? 'bg-[var(--bg-card)]/30 hover:bg-[var(--bg-card)]/60' : 'hover:bg-[var(--bg-card)]/60'
                       }`}
+                      onClick={() => handleRowClick(n)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') handleRowClick(n);
+                      }}
                     >
-                      <div className="p-2 bg-bg-base mt-0.5 shrink-0">
+                      <div className={`p-2 bg-bg-base mt-0.5 shrink-0 ${color}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -254,6 +373,7 @@ export function NotificationBell() {
                           <a
                             href={(n as any).action_url}
                             className="inline-flex items-center gap-1 text-xs text-action-info hover:text-action-info mt-2 font-medium"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             View details
                             <ExternalLink className="size-3.5" />
@@ -262,7 +382,10 @@ export function NotificationBell() {
                       </div>
                       {!n.readAt && (
                         <button
-                          onClick={() => handleMarkRead(n.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkRead(n.id);
+                          }}
                           className="surface-card text-text-muted hover:text-action-success p-1 hover:bg-bg-base transition-colors mt-0.5 shrink-0"
                           title="Mark as read"
                         >
@@ -277,6 +400,9 @@ export function NotificationBell() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Entity inspector — opens when a notification row is clicked */}
+      <EntityInspector inspection={inspection} onClose={() => setActiveNotif(null)} />
     </div>
   );
 }

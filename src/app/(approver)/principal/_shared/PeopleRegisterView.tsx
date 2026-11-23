@@ -33,7 +33,7 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
     role: role.role ?? null,
   };
 
-  const [data] = useApiResource<PersonsResponse>(
+  const { data } = useApiResource<PersonsResponse>(
     user?.id ? `/api/persons?limit=200` : null,
     { enabled: true, ttlMs: 30_000 }
   );
