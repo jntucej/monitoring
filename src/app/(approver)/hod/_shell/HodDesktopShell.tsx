@@ -24,9 +24,7 @@ export function HodDesktopShell({ children }: { children: React.ReactNode }) {
 
       <div className="relative flex-1 overflow-y-auto">
         <ScrollEdgeBlue className="h-full">
-          <ScrollEdgeBlue className="h-full">
-                      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24">{children}</div>
-          </ScrollEdgeBlue>
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 pb-24">{children}</div>
         </ScrollEdgeBlue>
         <RoleChrome role="hod" variant="footer" />
       </div>

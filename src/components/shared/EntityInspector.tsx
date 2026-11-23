@@ -120,13 +120,21 @@ export interface EntityInspectorProps {
 export function EntityInspector({
   inspection,
   onClose,
-  state: inspectorState = "loading",
+  state,
   errorMessage,
   onRetry,
   className,
   canAct,
   canActFallbackNote,
 }: EntityInspectorProps) {
+  // When the caller passes no explicit `state`, the panel is considered
+  // "closed" when inspection is null → render nothing (a stuck "loading"
+  // overlay covering the whole page is the /principal bug). When the caller
+  // DOES pass an explicit `state` (the documented resolver-in-flight case),
+  // keep the panel open with the placeholder so the user always sees a
+  // meaningful panel (design rule 31).
+  const stateProvided = state !== undefined;
+  const inspectorState = state ?? "loading";
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const panelRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -165,6 +173,16 @@ export function EntityInspector({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [inspection, onClose]);
+
+  // Closed state: no inspection model and no in-flight resolver state was
+  // explicitly requested. Render nothing — a stuck "loading" overlay covering
+  // the whole page (the old behavior) is what made /principal and friends
+  // look broken. Callers that are genuinely mid-resolve keep the panel open
+  // by passing an explicit `state` prop, in which case the placeholder below
+  // still renders so the user always sees a meaningful panel (rule 31).
+  if (!inspection && inspectorState === "loading" && !stateProvided) {
+    return null;
+  }
 
   // If there is no inspection model, render the state placeholder.
   if (!inspection) {
