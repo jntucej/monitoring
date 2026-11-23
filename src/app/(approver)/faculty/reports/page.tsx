@@ -12,6 +12,8 @@ import { usePolling } from "@/hooks/usePolling";
 import { ClassReviewsWidget } from "@/components/faculty/ClassReviewsWidget";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildFacultyReportDeptInspection, type FacultyDeptSummaryRecord } from "@/lib/role-registers/facultyInspections";
 import {
   ShieldCheck,
   Loader2,
@@ -51,6 +53,7 @@ function FacultyReportsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   const {
     data,
     loading,
@@ -159,7 +162,20 @@ function FacultyReportsInner() {
                       </thead>
                       <tbody>
                         {data.departmentSummaries.map((d) => (
-                          <tr key={d.department} className="border-b border-border/50 last:border-0">
+                          <tr
+                            key={d.department}
+                            onClick={() => inspect(buildFacultyReportDeptInspection(d))}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                inspect(buildFacultyReportDeptInspection(d));
+                              }
+                            }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Inspect ${d.department} report`}
+                            className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                          >
                             <td className="py-2 pr-4 text-text-secondary">{d.department}</td>
                             <td className="py-2 pr-4 text-text-muted">{d.totalFaculty}</td>
                             <td className="py-2 pr-4 text-text-muted">{d.presentToday}</td>
@@ -180,6 +196,7 @@ function FacultyReportsInner() {
           class.review.view capability; renders nothing unless faculty grants it. */}
       <ClassReviewsWidget />
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildStudentDirectoryInspection } from "@/lib/role-registers/studentDirectoryInspection";
 
 interface StudentRow {
   id: string;
@@ -32,6 +34,8 @@ export function StudentDirectoryView() {
   const students = Array.isArray(data?.data) ? data.data : [];
   const hostelCount = students.filter((s) => !!s.hostelBlock).length;
   const dayScholarCount = students.length - hostelCount;
+  const { inspection, inspect, closeInspection } = useEntityInspector();
+  const openInspector = (s: StudentRow) => inspect(buildStudentDirectoryInspection(s, true));
 
   return (
     <div className="space-y-4">
@@ -60,30 +64,35 @@ export function StudentDirectoryView() {
         <>
           <ul className="space-y-2 md:hidden">
             {students.map((s) => (
-              <li
-                key={s.id}
-                className="surface-card bg-bg-surface p-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{s.name}</p>
-                    <p className="font-mono text-xs text-text-muted">
-                      {s.roll ?? s.uniqueId ?? "—"}
-                    </p>
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => openInspector(s)}
+                  aria-label={`Inspect student: ${s.name}`}
+                  className="surface-card block w-full bg-bg-surface p-3 text-left"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{s.name}</p>
+                      <p className="font-mono text-xs text-text-muted">
+                        {s.roll ?? s.uniqueId ?? "—"}
+                      </p>
+                    </div>
+                    <span className="surface-card bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
+                      {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
+                    </span>
                   </div>
-                  <span className="surface-card bg-bg-elevated px-2 py-0.5 text-xs text-text-secondary">
-                    {s.year != null ? `Y${s.year}` : "—"} / {s.section ?? "—"}
-                  </span>
-                </div>
-                <div className="mt-2 text-xs text-text-muted">
-                  {s.hostelBlock ? `Hostel: ${s.hostelBlock}-${s.roomNumber ?? ""}` : "Day Scholar"}
-                </div>
+                  <div className="mt-2 text-xs text-text-muted">
+                    {s.hostelBlock ? `Hostel: ${s.hostelBlock}-${s.roomNumber ?? ""}` : "Day Scholar"}
+                  </div>
+                </button>
               </li>
             ))}
           </ul>
 
           <div className="hidden md:block">
             <DataTable<StudentRow>
+              onRowClick={openInspector}
               columns={[
                 { header: "Name", accessor: (r) => r.name },
                 {
@@ -111,6 +120,8 @@ export function StudentDirectoryView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

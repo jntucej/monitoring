@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHodReportMetricInspection, type HodReportMetricRecord } from "@/lib/role-registers/hodInspections";
 
 interface StudentsStatsResponse {
   success: boolean;
@@ -22,6 +24,7 @@ export function ReportsView() {
   const { data, loading } = useApiResource<StudentsStatsResponse>("/api/students/stats", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const stats = data?.data;
 
@@ -64,7 +67,17 @@ export function ReportsView() {
             {rows.map((row) => (
               <li
                 key={row.metric}
-                className="surface-card bg-bg-surface p-3"
+                onClick={() => inspect(buildHodReportMetricInspection(row))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspect(buildHodReportMetricInspection(row));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect metric ${row.metric}`}
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">{row.metric}</p>
@@ -79,6 +92,7 @@ export function ReportsView() {
 
           <div className="hidden md:block">
             <DataTable<{ metric: string; value: number; description: string }>
+              onRowClick={(row) => inspect(buildHodReportMetricInspection(row))}
               columns={[
                 { header: "Activity Metric", accessor: (r) => r.metric },
                 {
@@ -100,6 +114,8 @@ export function ReportsView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

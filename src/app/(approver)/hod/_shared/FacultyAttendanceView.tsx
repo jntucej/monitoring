@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHodFacultyAttendanceInspection, type HodFacultyAttendanceRecord } from "@/lib/role-registers/hodInspections";
 
 interface AttendanceRecord {
   id: string;
@@ -33,6 +35,7 @@ export function FacultyAttendanceView() {
   const { data, loading } = useApiResource<FacultyAttendanceResponse>("/api/faculty/attendance", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const records = data?.records ?? [];
   const summary = data?.summary;
@@ -70,7 +73,17 @@ export function FacultyAttendanceView() {
             {records.map((r) => (
               <li
                 key={r.id}
-                className="surface-card bg-bg-surface p-3"
+                onClick={() => inspect(buildHodFacultyAttendanceInspection(r))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspect(buildHodFacultyAttendanceInspection(r));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect attendance record for ${r.fullName}`}
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -101,6 +114,7 @@ export function FacultyAttendanceView() {
 
           <div className="hidden md:block">
             <DataTable<AttendanceRecord>
+              onRowClick={(r) => inspect(buildHodFacultyAttendanceInspection(r))}
               columns={[
                 { header: "Name", accessor: (r) => r.fullName },
                 { header: "Designation", accessor: (r) => r.designation },
@@ -142,6 +156,8 @@ export function FacultyAttendanceView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

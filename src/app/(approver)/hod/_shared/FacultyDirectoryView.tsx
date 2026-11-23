@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHodFacultyDirectoryInspection, type HodFacultyDirectoryRecord } from "@/lib/role-registers/hodInspections";
 
 interface HodFacultyRow {
   id: string;
@@ -26,6 +28,7 @@ export function FacultyDirectoryView() {
   const { data, loading } = useApiResource<HodFacultyResponse>("/api/hod/faculty", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const facultyList = Array.isArray(data?.data) ? data.data : [];
 
@@ -66,7 +69,17 @@ export function FacultyDirectoryView() {
             {facultyList.map((faculty) => (
               <li
                 key={faculty.id}
-                className="surface-card bg-bg-surface p-3"
+                onClick={() => inspect(buildHodFacultyDirectoryInspection(faculty))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspect(buildHodFacultyDirectoryInspection(faculty));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect faculty profile for ${faculty.name || "Faculty Member"}`}
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -90,6 +103,7 @@ export function FacultyDirectoryView() {
 
           <div className="hidden md:block">
             <DataTable<HodFacultyRow>
+              onRowClick={(faculty) => inspect(buildHodFacultyDirectoryInspection(faculty))}
               columns={[
                 { header: "Name", accessor: (r) => r.name || "—" },
                 {
@@ -108,6 +122,8 @@ export function FacultyDirectoryView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

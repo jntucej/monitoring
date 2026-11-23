@@ -12,6 +12,8 @@ import type { Role } from "@/lib/types";
 import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHostelGateOccupancyInspection } from "@/lib/role-registers/hostelInspections";
 import {
   Building2,
   Inbox,
@@ -133,6 +135,7 @@ function HostelPermissionsInner() {
   const role = (user?.role ?? "caretaker") as Role;
   const tier = getRoleTier(role);
   const curfew = curfewState();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   // Pending hostel outpasses at the caller's own stage (server filters by role).
   const {
@@ -272,8 +275,30 @@ function HostelPermissionsInner() {
                   {gates.map((g) => {
                     const row = matrix[g.id] ?? {};
                     const total = Object.values(row).reduce((a, b) => a + b, 0);
+                    const gateRecord = {
+                      id: g.id,
+                      name: g.name,
+                      code: g.code,
+                      audience: g.audience,
+                      type: g.type,
+                      totalOnCampus: total,
+                      roleCounts: row,
+                    };
                     return (
-                      <tr key={g.id} className="hover:bg-bg-elevated/30 transition-colors">
+                      <tr
+                        key={g.id}
+                        onClick={() => inspect(buildHostelGateOccupancyInspection(gateRecord))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            inspect(buildHostelGateOccupancyInspection(gateRecord));
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Inspect gate ${g.name}`}
+                        className="hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                      >
                         <td className="px-4 py-3 text-white font-medium">
                           {g.name}
                           <span className="ml-2 text-xs text-text-muted font-mono">{g.code}</span>
@@ -311,6 +336,7 @@ function HostelPermissionsInner() {
         />
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

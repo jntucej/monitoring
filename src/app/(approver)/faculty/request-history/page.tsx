@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildFacultyRequestHistoryInspection, type FacultyRequestHistoryRecord } from "@/lib/role-registers/facultyRequestHistoryInspection";
 import {
   ShieldCheck,
   Loader2,
@@ -41,6 +43,7 @@ function FacultyRequestHistoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -129,7 +132,20 @@ function FacultyRequestHistoryInner() {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.id} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={r.id}
+                      onClick={() => inspect(buildFacultyRequestHistoryInspection(r))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildFacultyRequestHistoryInspection(r));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect request ${r.ticket_number}`}
+                      className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="py-2 pr-4 font-mono text-xs text-text-secondary whitespace-nowrap">{r.ticket_number}</td>
                       <td className="py-2 pr-4 text-text-secondary">{r.workflow_type}</td>
                       <td className="py-2 pr-4 text-text-muted">{r.current_stage}</td>
@@ -144,6 +160,7 @@ function FacultyRequestHistoryInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

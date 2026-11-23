@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildFacultyCorrectionInspection } from "@/lib/role-registers/facultyInspections";
 import {
   ShieldCheck,
   Loader2,
@@ -42,6 +44,7 @@ function FacultyCorrectionRequestsInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -130,7 +133,20 @@ function FacultyCorrectionRequestsInner() {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.id} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={r.id}
+                      onClick={() => inspect(buildFacultyCorrectionInspection(r))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildFacultyCorrectionInspection(r));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect correction request ${r.ticket_number}`}
+                      className="border-b border-border/50 last:border-0 hover:bg-bg-elevated/30 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="py-2 pr-4 font-mono text-xs text-text-secondary whitespace-nowrap">{r.ticket_number}</td>
                       <td className="py-2 pr-4 text-text-secondary">{r.student?.name ?? "—"}</td>
                       <td className="py-2 pr-4 text-text-muted">{r.current_stage}</td>
@@ -147,6 +163,7 @@ function FacultyCorrectionRequestsInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

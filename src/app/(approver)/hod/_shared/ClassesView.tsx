@@ -6,6 +6,8 @@ import { DataTable } from "@/components/ui/DataTable";
 import { KpiCard } from "./KpiCard";
 import { ListSkeleton } from "./ListSkeleton";
 import { WeekBar } from "./WeekBar";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildHodScheduleInspection, type HodScheduleRecord } from "@/lib/role-registers/hodInspections";
 
 interface ScheduleItem {
   id: string;
@@ -30,6 +32,7 @@ export function ClassesView() {
   const { data, loading } = useApiResource<ScheduleResponse>("/api/hod/schedule", {
     ttlMs: 30_000,
   });
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const raw = data?.data;
   const items: ScheduleItem[] = Array.isArray(raw)
@@ -76,7 +79,17 @@ export function ClassesView() {
             {items.map((item, idx) => (
               <li
                 key={item.id ?? idx}
-                className="surface-card bg-bg-surface p-3"
+                onClick={() => inspect(buildHodScheduleInspection(item))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    inspect(buildHodScheduleInspection(item));
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect schedule item ${item.subjectName ?? item.subjectCode ?? (item.periodNumber ?? idx + 1)}`}
+                className="surface-card bg-bg-surface p-3 cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -106,6 +119,7 @@ export function ClassesView() {
 
           <div className="hidden md:block">
             <DataTable<ScheduleItem>
+              onRowClick={(item) => inspect(buildHodScheduleInspection(item))}
               columns={[
                 {
                   header: "Period",
@@ -143,6 +157,8 @@ export function ClassesView() {
           </div>
         </>
       )}
+
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }

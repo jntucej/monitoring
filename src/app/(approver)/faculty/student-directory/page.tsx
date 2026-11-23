@@ -11,6 +11,8 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
+import { buildStudentDirectoryInspection, type StudentDirectoryRecord } from "@/lib/role-registers/studentDirectoryInspection";
 import {
   ShieldCheck,
   Loader2,
@@ -39,6 +41,7 @@ function FacultyStudentDirectoryInner() {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "faculty") as Role;
   const tier = getRoleTier(role);
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const {
     data,
@@ -124,7 +127,20 @@ function FacultyStudentDirectoryInner() {
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
                   {students.map((s) => (
-                    <tr key={s.id} className="hover:bg-bg-elevated/30 transition-colors">
+                    <tr
+                      key={s.id}
+                      onClick={() => inspect(buildStudentDirectoryInspection(s))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          inspect(buildStudentDirectoryInspection(s));
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect student ${s.name}`}
+                      className="cursor-pointer hover:bg-bg-elevated/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary"
+                    >
                       <td className="py-2.5 pr-4 px-4 text-text-secondary">{s.name}</td>
                       <td className="py-2.5 pr-4 px-4 font-mono text-xs text-text-secondary">{s.roll ?? s.uniqueId ?? "—"}</td>
                       <td className="py-2.5 pr-4 px-4 text-text-muted">{s.department ?? "—"}</td>
@@ -140,6 +156,7 @@ function FacultyStudentDirectoryInner() {
         </div>
       </WidgetBoundary>
 
+      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
     </div>
   );
 }
