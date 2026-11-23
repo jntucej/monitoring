@@ -6,8 +6,31 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { useUIStore } from "@/stores/uiStore";
 import { useApi } from "@/hooks/useApi";
+import { useEntityInspector } from "@/components/shared/useEntityInspector";
+import { useEntityResolver, type EntityInspection } from "@/components/shared/entityResolvers";
+import { EntityInspector } from "@/components/shared/EntityInspector";
 import {DoorOpen, Plus, Pencil, Power, Trash2, Search, UserCog, X, Monitor}  from "lucide-react";
 import { GateClaimCodePanel } from "@/components/supervisor/GateClaimCodePanel";
+
+/**
+ * Per-row child component: lazily resolves the "gate" kind when the card
+ * is clicked, then hands the full inspection back to the page's inspector
+ * state. Hooks must live in a component, not in the page's map callback.
+ */
+function GateCardInspector({ gate, onInspect }: { gate: Gate; onInspect: (m: EntityInspection) => void }) {
+  const { inspection, loading, error } = useEntityResolver("gate", gate.id);
+  useEffect(() => {
+    if (inspection) onInspect(inspection);
+  }, [inspection, onInspect]);
+  if (loading || error) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-text-muted px-3 py-4">
+        {error ? "Could not load gate details" : "Loading gate…"}
+      </div>
+    );
+  }
+  return null;
+}
 
 interface Gate {
   id: string;
@@ -56,6 +79,7 @@ const GATE_TYPES = [
 
 export default function SysAdminGatesPage() {
 const api = useApi();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
 
   const { addToast } = useUIStore();
 
@@ -64,6 +88,8 @@ const api = useApi();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Gate | null>(null);
   const [assigningGate, setAssigningGate] = useState<Gate | null>(null);
+  /** The gate card whose inspector child is currently fetching. */
+  const [inspectingGate, setInspectingGate] = useState<Gate | null>(null);
 
   const [form, setForm] = useState({ gateCode: "", name: "", location: "", type: "main", audience: "all" });
 
@@ -231,6 +257,10 @@ const api = useApi();
 
   const gateCodeOf = (g: Gate) => g.gate_code || g.gateCode || "";
 
+  // Card click → mount the per-row resolver child, which fetches the full
+  // "gate" inspection and hands it to the shared inspector state.
+  const openGateInspector = (g: Gate) => setInspectingGate(g);
+
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
@@ -250,7 +280,7 @@ const api = useApi();
         {/* Gates grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {gates.map((g) => (
-            <div key={g.id} className="surface-card bg-bg-elevated p-4 space-y-3">
+            <div key={g.id} className="surface-card bg-bg-elevated p-4 space-y-3 cursor-pointer hover:bg-bg-surface transition-colors" onClick={() => openGateInspector(g)}>
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <div className="text-sm font-bold text-white">{g.name}</div>
@@ -265,7 +295,7 @@ const api = useApi();
                 <span className="surface-card px-2 py-0.5 bg-purple-500/10 text-purple-300">{g.type || "—"}</span>
                 {g.audience && <span className="surface-card px-2 py-0.5 bg-amber-500/10 text-action-warning capitalize">{g.audience}</span>}
               </div>
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <div className="flex flex-wrap items-center gap-1.5 pt-1" onClick={(e) => e.stopPropagation()}>
                 <button type="button" onClick={() => { setEditing(g); setForm({ gateCode: gateCodeOf(g), name: g.name, location: g.location || "", type: g.type || "main", audience: g.audience || "all" }); setShowAdd(true); }}
                   className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-info" title="Edit"><Pencil className="w-4 h-4" /></button>
                 <button type="button" onClick={() => setAssigningGate(g)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Assign user to this gate"><UserCog className="w-4 h-4" /></button>
@@ -373,6 +403,10 @@ const api = useApi();
         )}
 
         {/* Gate-claim codes (OTP strings the operator enters to self-assign) */}
+        {inspectingGate && (
+          <GateCardInspector gate={inspectingGate} onInspect={(m) => { inspect(m); setInspectingGate(null); }} />
+        )}
+
         <WidgetBoundary title="Gate-Claim Codes (OTP assign)">
           <div className="surface-card bg-bg-elevated p-4 sm:p-5">
             <p className="text-xs text-text-muted mb-4">
@@ -445,6 +479,8 @@ const api = useApi();
             )}
           </div>
         </WidgetBoundary>
+
+        <EntityInspector inspection={inspection} onClose={() => { closeInspection(); setInspectingGate(null); }} />
       </div>
     </AuthGuard>
   );

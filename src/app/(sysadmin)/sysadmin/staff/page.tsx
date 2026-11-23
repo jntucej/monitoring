@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useApi } from "@/hooks/useApi";
 import { useUIStore } from "@/stores/uiStore";
+import { useEntityInspector } from "@/components/shared/useEntityInspector";
+import { EntityInspector, KVPairs, InspectorButton, type EntityInspection } from "@/components/shared/EntityInspector";
 
 interface StaffRecord {
   id: string;
@@ -41,6 +43,7 @@ export default function SysAdminStaffPage() {
 const api = useApi();
 
   const { addToast } = useUIStore();
+  const { inspection, inspect, closeInspection } = useEntityInspector();
   const [staffList, setStaffList] = useState<StaffRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -243,6 +246,46 @@ const api = useApi();
     return c[role] || "bg-bg-elevated text-text-secondary border-border";
   };
 
+  // Inline entity inspection from the row data already loaded by /api/users —
+  // no extra fetch.
+  const buildStaffInspection = useCallback((s: StaffRecord): EntityInspection => {
+    const overview: Array<{ label: string; value: React.ReactNode }> = [
+      { label: "Employee ID", value: <code className="font-mono">{s.uniqueId || s.id}</code> },
+      { label: "Email", value: s.email || "—" },
+      { label: "Phone", value: s.phone || "—" },
+      { label: "Role", value: s.role },
+      { label: "Department", value: s.department || "—" },
+      { label: "Designation", value: s.designation || "—" },
+      { label: "Status", value: s.status },
+      { label: "Hostel scope", value: s.hostel_scope || s.hostelScope || "—" },
+    ];
+    return {
+      kind: "staff",
+      title: s.name,
+      subtitle: s.uniqueId || s.id,
+      status: (
+        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${s.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-rose-500/10 text-rose-600 border border-rose-500/20"}`}>
+          {s.status}
+        </span>
+      ),
+      sections: [
+        { title: "Overview", content: <KVPairs items={overview} /> },
+        {
+          title: "Actions",
+          content: (
+            <div className="flex flex-wrap gap-2">
+              <InspectorButton onClick={() => openEditModal(s)}>Edit staff</InspectorButton>
+              <InspectorButton onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} variant="ghost">Enrollment code</InspectorButton>
+              <InspectorButton onClick={() => handleToggleStatus(s)} variant="ghost">{s.status === "ACTIVE" ? "Suspend" : "Activate"}</InspectorButton>
+            </div>
+          ),
+        },
+      ],
+      detailHref: "/sysadmin/staff",
+      detailLabel: "Staff register",
+    };
+  }, [openEditModal, handleToggleStatus]);
+
   return (
     <AuthGuard allowedRoles={["sysadmin", "admin"]}>
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
@@ -385,14 +428,14 @@ const api = useApi();
                   <tr><td colSpan={7} className="px-4 py-12 text-center text-text-muted">No staff members found.</td></tr>
                 ) : (
                   filteredStaff.map((s) => (
-                    <tr key={s.id} className="hover:bg-bg-elevated transition-colors">
+                    <tr key={s.id} className="cursor-pointer hover:bg-bg-elevated transition-colors" onClick={() => inspect(buildStaffInspection(s))}>
                       <td className="px-4 py-3 font-mono text-xs text-action-primary">{s.uniqueId || "—"}</td>
                       <td className="px-4 py-3 font-medium text-text-primary">{s.name}</td>
                       <td className="px-4 py-3 text-text-muted text-xs"><Mail className="size-3.5 inline mr-1" />{s.email}</td>
                       <td className="px-4 py-3"><span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${roleBadge(s.role)}`}><ShieldCheck className="size-3.5" />{s.role}</span></td>
                       <td className="px-4 py-3 text-text-secondary text-xs">{s.department || "—"}</td>
                       <td className="px-4 py-3"><span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${s.status === "ACTIVE" ? "bg-entry-subtle" : "bg-exit-subtle"}`}>{s.status}</span></td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setEnrollmentModalUser({ id: s.id, name: s.name })} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-success" title="Enrollment Code"><KeyRound className="w-4 h-4" /></button>
                           <button onClick={() => openEditModal(s)} className="surface-card p-2 min-h11 min-w11 flex items-center justify-center hover:bg-bg-elevated text-action-info" title="Edit"><Edit className="w-4 h-4" /></button>
@@ -588,6 +631,8 @@ const api = useApi();
             </div>
           </div>
         )}
+
+        <EntityInspector inspection={inspection} onClose={closeInspection} />
       </div>
     </AuthGuard>
   );
