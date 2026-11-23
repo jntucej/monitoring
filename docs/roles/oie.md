@@ -1,73 +1,82 @@
-# OIE — how it works
+# Officer-in-Charge of Examinations (OIE) — how it works
 
-## Role in institutional life
-The OIE (Office of the Registrar/Examination Officer) at JNTUH CEJ is the operational office that handles exam queue triage, access and exception intake, candidate attendance reconciliation, and decision queues. The OIE is the first point of contact for exam-related queries and exceptions.
+## Overview
+The Officer-in-Charge of Examinations (OIE) manages the operational desk within the Examination Branch at JNTUH CEJ. The OIE acts as the critical triage layer between day-to-day examination operations (hall seating, hall tickets, candidate attendance) and senior academic leadership (Controller of Examinations, Vice-Principal, Principal).
 
-In the Gate Monitor system, the OIE:
-- Triages exam queue (candidate attendance, access requests, exceptions)
-- Handles access and exception intake
-- Reconciles candidate attendance
-- Manages the decision queue for exam-day decisions
-- Works under the Vice-Principal and Principal
+The OIE oversees candidate eligibility disputes, condonation issues, late arrivals, and exam-day access exceptions. When an exam session begins, candidates facing attendance blocks, missing hall tickets, or gate access anomalies route through the OIE's **Decision Queue**. The OIE evaluates each case and either issues emergency clearance, assigns a conditional pass, or escalates severe irregularities to the Vice-Principal or Exam Superintendent.
 
-Per JNTUH exam office procedures, the OIE is the operational office that handles the day-to-day exam matters. The Vice-Principal discharges OIE duties during the Principal's absence.
+The OIE workspace is styled in an orange theme (`#fff7ed` surface tint) with composed motion, anchored by the `DecisionQueue` and `DecisionHistory` widgets.
 
-## Operational standards
-Per JNTUH exam office procedures:
-- Exam queue triage: OIE triages all exam-related queries and exceptions
-- Access intake: OIE handles candidate access requests and verifies eligibility
-- Candidate attendance: OIE reconciles candidate attendance with registered lists
-- Decision queue: OIE manages the decision queue for exam-day decisions
-- Exception handling: OIE handles spot exceptions and escalates to Vice-Principal/Principal
+## Pages & workflows
 
-Per Indian university exam office standards:
-- OIE is the first point of contact for exam-related matters
-- OIE works under the Vice-Principal and Principal
-- OIE does NOT process results (that's the exam branch office)
-- OIE does NOT control hall access (that's the Chief Superintendent)
+### 1. Decision Triage & Queue Management
+* **OIE Command Center (`/oie`):** Central landing dashboard presenting prioritized decision streams, pending queues, and active exam-day alerts.
+* **Decision Queue (`/oie/queue`, `/oie/queue/pending`, `/oie/queue/escalated`, `/oie/queue/history`):** The operational core where requests for hall-entry permissions, fee clearance waivers, and attendance condonations are sorted by urgency and processed.
+* **Decision History & Records (`/oie/decision-history`, `/oie/records`):** Historical archive of all adjudicated candidate exceptions, audit trails, and examination decisions.
 
-## Accountability and escalation
-- OIE reports to Vice-Principal (primary) and Principal (final authority)
-- Exam queue: OIE triages → Vice-Principal reviews → Principal decides
-- Access requests: OIE verifies → Vice-Principal approves
-- Candidate attendance: OIE reconciles → Vice-Principal verifies
-- Exceptions: OIE handles → Vice-Principal → Principal (if major)
+### 2. Examination Operations & Exception Handling
+* **Examination Day Access (`/oie/examination-day-access`):** Real-time monitoring of campus gate desks and exam hall entry points during exam windows. Handles candidate biometric or RFID scan failures.
+* **Candidate Attendance Reconciliation (`/oie/candidate-attendance`):** Reconciles hall seating plans against actual candidate entry scans, highlighting absentees and unallocated candidates.
+* **Access Exceptions (`/oie/access-exceptions`):** Generates spot exceptions for candidates detained by fee or gate issues, granting conditional admission to examination halls.
+* **Exam Branch & VP Coordination (`/oie/exam-branch-coordination`, `/exam/permissions/oie`, `/vice-principal/*`):** Bridges exam-day incident escalation with the Examination Branch desk and Vice-Principal.
 
-## What we have in the app
-- /oie — Dashboard with exam queue, access requests, candidate attendance
-- /oie/queue — Exam queue triage
-- /oie/access — Access and exception intake
-- /oie/attendance — Candidate attendance reconciliation
-- /oie/decisions — Decision queue for exam-day decisions
+## Key API endpoints
 
-Key API endpoints:
-- GET /api/oie/queue — Exam queue
-- POST /api/oie/access — Handle access request
-- GET /api/oie/attendance — Candidate attendance
-- POST /api/oie/attendance/reconcile — Reconcile attendance
-- GET /api/oie/decisions — Decision queue
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/oie/queue` | `GET` | Fetches prioritized list of candidate access requests and exam disputes. |
+| `/exam/access` | `GET,POST` | Retrieves or creates examination hall access grants and verifies biometric credentials. |
+| `/exam/access-exceptions` | `GET,PATCH,POST` | Generates, reviews, and modifies emergency candidate entry permissions. |
+| `/exam/candidate-attendance` | `GET` | Provides live attendance reconciliation across active examination halls. |
+| `/exam/eligibility-rules` | `GET,POST` | Evaluates student exam eligibility against attendance and condonation criteria. |
+| `/exam/hall-tickets/generate` | `POST` | Issues emergency or duplicate hall ticket authorizations. |
+| `/permissions/[ticket]` | `GET,PATCH` | Inspects permission tickets or records OIE approval decisions. |
+| `/permissions/[ticket]/escalate` | `POST` | Escalates intractable malpractice or eligibility cases to the Vice-Principal. |
+| `/permissions/[ticket]/sign` | `POST` | Digitally signs off on a candidate exception or temporary entry pass. |
+| `/permissions/[ticket]/verify` | `GET` | Validates authenticity and validity of student exam passes against gate records. |
+| `/complaints/[id]` | `DELETE,GET,PATCH` | Reviews student examination grievances and logs official responses. |
 
-Data flow: OIE actions are logged in audit_events with full context. Exam queue is triaged in real time. Candidate attendance is reconciled against registered lists.
+## Data flow
+1. **Discrepancy Identification:** A candidate is flagged at the gate or exam hall (e.g., biometric mismatch, attendance deficit, missing hall ticket).
+2. **Queue Intake:** The issue generates an access exception in the OIE Decision Queue (`/oie/queue`).
+3. **Assessment & Resolution:** The OIE inspects eligibility via `/exam/eligibility-rules` and student logs:
+   - **Approve:** Issues an exception pass (`/exam/access-exceptions`) signed via `/permissions/[ticket]/sign`.
+   - **Reject:** Denies hall entry, recording the justification in the audit trail.
+   - **Escalate:** If malpractice or policy violations are suspected, the OIE forwards the ticket to the Vice-Principal or Exam Superintendent.
+4. **Gate & Hall Sync:** Approvals immediately propagate to the gate desk and examination superintendent console, permitting physical entry.
 
-## What is missing
-1. Exam queue dashboard — no visual exam queue with priority and status
-2. Access request workflow — no structured access request workflow
-3. Attendance reconciliation alerts — no alerts when attendance discrepancy is detected
-4. Decision queue SLA — no SLA timers for decision queue items
-5. OIE KPI dashboard — no KPI view of OIE performance
-6. Exception categorization — no structured categorization of exam exceptions
-7. OIE exam day view — no dedicated exam day view for OIE
-8. Communication log — no structured log of OIE communications with candidates
+## Security notes
+* **Authentication:** Secured via rotating JWTs stored in HttpOnly cookies, validated through `/api/auth/session`.
+* **RBAC & Authorization:** Protected by server-side `withAuthorization({ requiredRole: ['oie', ...] })` checks. UI access is locked using `AuthGuard allowedRoles={['oie']}`.
+* **Separation of Duties:** The OIE can issue conditional day-of-exam access exceptions, but cannot alter published results or permanently clear academic suspensions without HOD and Controller sign-off.
+* **Tamper-Evident Logs:** Every exception granted during an active exam window is tagged with the candidate ID, timestamp, proctor station, and OIE user ID.
 
-## Implementation notes for dashboard/agent
+
+## Gaps & Research
+
+### Institutional context
+The OIE (Office of the Registrar/Examination Officer) is the operational office that handles exam queue triage, access and exception intake, candidate attendance reconciliation, and decision queues. The Vice-Principal discharges OIE duties during the Principal's absence.
+
+Per JNTUH exam office procedures, the OIE is the first point of contact for exam-related queries and exceptions. The OIE does NOT process results (that's the exam branch office) and does NOT control hall access (that's the Chief Superintendent).
+
+### Missing (not in app yet)
+1. **Exam queue dashboard** — no visual exam queue with priority and status
+2. **Access request workflow** — no structured access request workflow
+3. **Attendance reconciliation alerts** — no alerts when attendance discrepancy is detected
+4. **Decision queue SLA** — no SLA timers for decision queue items
+5. **OIE KPI dashboard** — no KPI view of OIE performance
+6. **Exception categorization** — no structured categorization of exam exceptions
+7. **OIE exam day view** — no dedicated exam day view for OIE
+8. **Communication log** — no structured log of OIE communications with candidates
+
+### Implementation notes
 - Dashboard leads with exam queue, access requests, candidate attendance
 - OIE agent is the first point of contact for exam matters
 - Queue: structured triage with priority and status
 - Access: structured workflow with verification and approval
 - Attendance: reconciliation with discrepancy alerts
 
-## Agent persona
-When acting as the oie role:
+### Agent persona
 - Focus: exam queue, access requests, candidate attendance, decision queue
 - Can: triage exam queue, handle access requests, reconcile attendance
 - Cannot: process results (exam branch), control hall access (Chief Superintendent)
