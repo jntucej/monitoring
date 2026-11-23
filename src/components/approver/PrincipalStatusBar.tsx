@@ -49,11 +49,11 @@ export function PrincipalStatusBar({
 
   return (
     <footer
-      className="surface-card flex items-center justify-between gap-4 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
+      className="surface-card flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 bg-bg-surface/95 backdrop-blur-md text-xs text-text-secondary select-none"
       aria-label="Principal status bar"
     >
-      {/* Left: principal summary */}
-      <div className="flex items-center gap-4 min-w-0">
+      {/* Left: principal summary — wraps to its own line on mobile */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
         <span className="inline-flex items-center gap-1.5 min-w-0">
           <span
             className={`size-2 rounded-full shrink-0 ${
@@ -85,7 +85,8 @@ export function PrincipalStatusBar({
         </span>
       </div>
 
-      {/* Right: last updated + refresh indicator */}
+      {/* Right: last updated + refresh indicator — hides the verbose label on
+          very narrow screens, keeps just the clock + time */}
       <div className="flex items-center gap-3 shrink-0">
         {refreshing ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin text-text-muted" />
@@ -93,7 +94,7 @@ export function PrincipalStatusBar({
         {lastScan ? (
           <span className="inline-flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-text-muted" />
-            <span className="text-text-muted">last updated</span>
+            <span className="text-text-muted hidden sm:inline">last updated</span>
             <span className="font-mono tabular-nums text-text-secondary">
               {fmt(lastScan)}
             </span>
