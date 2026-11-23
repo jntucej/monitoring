@@ -34,6 +34,10 @@ interface PermissionRequestRow {
   sla_deadline?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  student?: {
+    name?: string;
+    student_details?: { roll?: string } | null;
+  } | null;
 }
 
 interface PermissionsResponse {

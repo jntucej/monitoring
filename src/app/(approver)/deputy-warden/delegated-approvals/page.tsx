@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useMemo } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
@@ -26,6 +26,10 @@ import {
   delegationStatusInspection,
   type VPPermissionRow,
 } from "@/components/approver/wardenConsoleModels";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 /* response shapes */
 
@@ -120,6 +124,7 @@ function DeputyWardenDelegatedApprovalsInner() {
   const role = (user?.role ?? "deputy_warden") as Role;
   const tier = getRoleTier(role);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const inspectFirstBreached = () => {
     const first = rows.find((r) => {
@@ -313,7 +318,14 @@ function DeputyWardenDelegatedApprovalsInner() {
         </WidgetBoundary>
       )}
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

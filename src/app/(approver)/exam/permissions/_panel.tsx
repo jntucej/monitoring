@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 
@@ -17,6 +18,10 @@ import {
   Inbox,
 } from "lucide-react";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 export type ExamQueue = "oie" | "vice_principal";
 
@@ -69,6 +74,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
   const user = useAuthStore((s) => s.user);
   const role = (user?.role ?? "exam_branch") as Role;
   const tier = getRoleTier(role);
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
 
   const isExamBranchRole = role === "exam_branch";
 
@@ -195,6 +201,7 @@ export function ExamPermissionsPanel({ queue }: { queue: ExamQueue }) {
         </WidgetBoundary>
       )}
 
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }

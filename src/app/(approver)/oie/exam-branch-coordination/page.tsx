@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useState } from "react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { PageLoading, TableSkeleton } from "@/components/shared/LoadingStates";
@@ -21,6 +21,10 @@ import {
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { ticketRowInspection } from "@/components/approver/wardenConsoleModels";
 import type { WorkflowType, PermissionStatus } from "@/lib/types";
+import {
+  ApproverStageDrawer,
+  type StagePivotItem,
+} from "@/components/nav/level2/ApproverStageDrawer";
 
 interface CoordinationRow {
   id: string;
@@ -73,6 +77,7 @@ function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => voi
 
 function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [stageItem, setStageItem] = useState<StagePivotItem | null>(null);
   const onInspect = (r: CoordinationRow) => {
     inspect(
       ticketRowInspection(
@@ -101,6 +106,16 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
         { detailHref: "/oie/exam-branch-coordination", detailLabel: "Coordination queue" },
       ),
     );
+    setStageItem({
+      ticketId: r.id,
+      ticketNumber: r.ticket_number,
+      workflowType: r.workflow_type,
+      currentStage: r.current_stage,
+      status: r.status,
+      studentName: r.student?.name,
+      studentRoll: r.student?.student_details?.roll,
+      stages: ["student", "oie", "exam_branch", "vice_principal"],
+    });
   };
   if (rows.length === 0) {
     return (
@@ -173,7 +188,14 @@ function CoordinationTable({ rows }: { rows: CoordinationRow[] }) {
           Open Exam Branch Desk <ArrowRight className="w-3.5 h-3.5" />
         </a>
       </div>
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel
+        inspection={inspection}
+        onClose={() => {
+          closeInspection();
+          setStageItem(null);
+        }}
+      />
+      <ApproverStageDrawer item={stageItem} onClose={() => setStageItem(null)} />
     </div>
   );
 }
