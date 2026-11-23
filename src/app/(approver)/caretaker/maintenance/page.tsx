@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, Suspense } from "react";
+import { useCallback, Suspense, useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { requestInspection } from "@/components/shared/roleInspectors";
 import { ClipboardList, Loader2, Inbox, Clock } from "lucide-react";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 /**
  * Caretaker maintenance queue — plumbing, electrical, and sanitation repair
@@ -50,6 +52,8 @@ function CaretakerMaintenanceInner() {
     { ttlMs: 30_000 },
   );
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  // L1 FrontlinePivot: duty-scoped subject sheet.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
 
   const tickets = data?.data?.tickets ?? [];
   const summary = data?.data?.summary;
@@ -154,11 +158,29 @@ function CaretakerMaintenanceInner() {
                       {t.hostelBlock ? ` · block ${t.hostelBlock}` : ""}
                     </p>
                   </div>
-                  <span
-                    className={`surface-card px-2 py-0.5 text-xs font-medium shrink-0 ${statusTone(t.status)}`}
-                  >
-                    {t.status || "PENDING"}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFrontlineSubject({
+                          id: t.ticketNumber,
+                          name: t.studentName ?? "Unattributed",
+                          code: t.ticketNumber,
+                          statusTag: t.status || "PENDING",
+                          locationOrScope: t.hostelBlock ? `Block ${t.hostelBlock}` : undefined,
+                        });
+                      }}
+                      className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                    >
+                      Verify
+                    </button>
+                    <span
+                      className={`surface-card px-2 py-0.5 text-xs font-medium ${statusTone(t.status)}`}
+                    >
+                      {t.status || "PENDING"}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -167,6 +189,12 @@ function CaretakerMaintenanceInner() {
       </WidgetBoundary>
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+
+      {/* L1 FrontlinePivot: duty-scoped subject sheet */}
+      <FrontlineSubjectSheet
+        subject={frontlineSubject}
+        onClose={() => setFrontlineSubject(null)}
+      />
     </div>
   );
 }

@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 interface MessIssue {
   id: string;
@@ -140,6 +142,8 @@ function MessIssuesInner() {
   const [raiseOpen, setRaiseOpen] = useState(false);
   const [eventType, setEventType] = useState("NO_SHOW_FLAGGED");
   const [description, setDescription] = useState("");
+  // L1 FrontlinePivot: duty-scoped subject sheet.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
 
   const refreshAll = useCallback(async () => {
     clearCache();
@@ -288,6 +292,7 @@ function MessIssuesInner() {
                     <th className="text-left px-4 py-2.5">Status</th>
                     <th className="text-left px-4 py-2.5">Meal Date</th>
                     <th className="text-left px-4 py-2.5">Raised</th>
+                    <th className="text-left px-4 py-2.5">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -319,6 +324,24 @@ function MessIssuesInner() {
                       <td className="px-4 py-2.5 text-text-muted text-xs whitespace-nowrap">
                         {fmtTs(issue.createdAt)}
                       </td>
+                      <td className="px-4 py-2.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFrontlineSubject({
+                              id: issue.id,
+                              name: issue.eventType.replace(/_/g, " "),
+                              code: issue.id,
+                              statusTag: issue.status,
+                              locationOrScope: issue.channel,
+                            });
+                          }}
+                          className="surface-card min-h11 px-2 py-0.5 text-xs font-semibold bg-bg-elevated text-text-secondary hover:bg-bg-surface transition-colors"
+                        >
+                          Verify
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -337,6 +360,12 @@ function MessIssuesInner() {
       </WidgetBoundary>
 
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+
+      {/* L1 FrontlinePivot: duty-scoped subject sheet */}
+      <FrontlineSubjectSheet
+        subject={frontlineSubject}
+        onClose={() => setFrontlineSubject(null)}
+      />
     </div>
   );
 }

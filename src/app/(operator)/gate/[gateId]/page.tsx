@@ -33,6 +33,8 @@ import { BiometricPrompt } from "@/components/operator/BiometricPrompt";
 import { formatTime } from "@/lib/utils";
 import { useOperatorShiftClock } from "@/hooks/useOperatorShiftClock";
 import type { GateMode } from "@/lib/gate-operations";
+import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
+import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 
 /**
  * Option A gate desk — a scanning surface, not a dashboard.
@@ -302,6 +304,8 @@ const shift = useOperatorShiftClock();
   // (advisory, not load-bearing) and surface it above the button bar.
   const [passPreview, setPassPreview] = useState<{ roll: string; reason: string; ticketNumber?: string } | null>(null);
   const [biometricPending, setBiometricPending] = useState(false);
+  // L1 FrontlinePivot: subject sheet for idle-state recent-scan / pass-preview taps.
+  const [frontlineSubject, setFrontlineSubject] = useState<FrontlineSubject | null>(null);
   const doConfirm = useCallback(
     (dir: "IN" | "OUT", reason?: string, et?: "hosteller" | "day_scholar", buttonId?: EntryButtonId) => {
       void confirmScan(addToast, dir, reason, et, buttonId as EntryButtonId);
@@ -482,6 +486,29 @@ const shift = useOperatorShiftClock();
           <PassPreviewFetcher roll={passPreview.roll} reason={passPreview.reason} />
         )}
 
+        {/* L1: open the frontline subject sheet from the pass-preview / recent-scans surface
+            when the desk is idle (no scan in flight). */}
+        {state === "idle" && recentScans.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              const latest = recentScans[0];
+              if (!latest) return;
+              setFrontlineSubject({
+                id: latest.id,
+                name: latest.name || latest.roll,
+                code: latest.roll,
+                statusTag: latest.direction === "IN" ? "ENTRY" : "EXIT",
+                locationOrScope: latest.gateName || gateName,
+              });
+            }}
+            className="surface-card absolute right-4 z-40 min-h11 px-3 py-1.5 bg-bg-elevated text-xs font-semibold text-text-secondary hover:bg-bg-surface transition-colors"
+            aria-label="Open frontline subject sheet for latest scan"
+          >
+            Verify subject
+          </button>
+        )}
+
         {/* O10: biometric gate for high-risk OUT (home_out with valid pass).
             Hardware note: the reader <Input> is the integration point — wire
             only after a fingerprint reader is tested on the kiosk. Kept
@@ -517,6 +544,14 @@ const shift = useOperatorShiftClock();
 
         {/* O9: swipe-up recent scans sheet above the decision bar */}
         <RecentScansSheet scans={recentScans} gateName={gateName} />
+
+        {/* L1 FrontlinePivot: duty-scoped subject sheet, idle-only */}
+        {state === "idle" && (
+          <FrontlineSubjectSheet
+            subject={frontlineSubject}
+            onClose={() => setFrontlineSubject(null)}
+          />
+        )}
       </div>
 
       {/* ── Manual entry: one button, inline sheet (not a mode) ── */}
