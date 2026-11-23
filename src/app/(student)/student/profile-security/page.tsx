@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { UserProfileTab } from "@/components/shared/UserProfileTab";
 import { PageLoading } from "@/components/shared/LoadingStates";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 
 import {User, KeyRound, Bell, ArrowRight, Lock, Eye}  from "lucide-react";
 
@@ -107,6 +108,10 @@ function StudentProfileSecurityInner() {
           can never approve their own access exceptions. If you notice anything that looks
           out of place, use the support strip below.
         </p>
+      </div>
+
+      <div className="flex justify-end">
+        <RoleLogoutButton />
       </div>
 
     </div>

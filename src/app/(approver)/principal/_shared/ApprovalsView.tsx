@@ -10,6 +10,7 @@ import { PrincipalEmptyReconciler } from "@/components/nav/level3/PrincipalRecor
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import { ActionFirstApprovalsWorkspace } from "@/components/nav/ActionFirstApprovalsWorkspace";
 import { RoleExportButton } from "@/components/shared/RoleExportButton";
+import { ActiveFilterBar } from "@/components/shared/ActiveFilterBar";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector, KVPairs } from "@/components/shared/EntityInspector";
 import { HoverPreview } from "@/components/shared/HoverPreview";
@@ -334,6 +335,20 @@ export function ApprovalsView({
             />
           </nav>
         </header>
+
+        <ActiveFilterBar
+          chips={[
+            {
+              key: "status",
+              label: "Slice",
+              value: status,
+              onRemove: () => {},
+            },
+          ]}
+          shownCount={rows.length}
+          totalCount={data?.total ?? rows.length}
+          noun="requests"
+        />
 
         {loading && rows.length === 0 ? (
           <ListSkeleton rows={6} />

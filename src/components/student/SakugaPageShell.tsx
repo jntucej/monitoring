@@ -24,9 +24,11 @@
 // ticks (the theme is set post-login by ClientProviders) and watches for
 // live theme switches via the shared useIsSakuga gate.
 
-import { Suspense, lazy, type ReactNode } from "react";
+import { createContext, Suspense, lazy, useContext, type ReactNode } from "react";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+
+const SakugaShellContext = createContext(false);
 
 const SakugaLoadingSplash = lazy(
   () => import("@/components/SakugaLoadingSplash").then((m) => ({
@@ -35,16 +37,17 @@ const SakugaLoadingSplash = lazy(
 );
 
 export function SakugaPageShell({ children }: { children: ReactNode }) {
+  const alreadyInsideShell = useContext(SakugaShellContext);
   const isSakuga = useIsSakuga();
 
-  // Non-sakuga users: no overlay, no extra nodes — just the content.
-  if (!isSakuga) return <>{children}</>;
+  // Prevent double-mounting splash when layout.tsx + page.tsx both wrap in SakugaPageShell.
+  if (alreadyInsideShell || !isSakuga) return <>{children}</>;
 
-  // Sakuga users: show the content under the anime splash until it settles.
-  // Suspense so the lazily-loaded splash doesn't block first paint.
   return (
-    <Suspense fallback={<PageLoading />}>
-      <SakugaLoadingSplash>{children}</SakugaLoadingSplash>
-    </Suspense>
+    <SakugaShellContext.Provider value={true}>
+      <Suspense fallback={<PageLoading />}>
+        <SakugaLoadingSplash>{children}</SakugaLoadingSplash>
+      </Suspense>
+    </SakugaShellContext.Provider>
   );
 }

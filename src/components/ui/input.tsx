@@ -48,6 +48,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               placeholder={props.placeholder}
               disabled={props.disabled}
               required={props.required}
+              onInput={(e: React.FormEvent<HTMLElement>) => {
+                if (props.onChange) {
+                  const target = e.currentTarget as HTMLInputElement;
+                  props.onChange({
+                    ...e,
+                    target,
+                    currentTarget: target,
+                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+                }
+              }}
               onChange={props.onChange}
               label={label ?? props.placeholder ?? "input"}
               className={cn("w-full", className)}

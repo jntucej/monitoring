@@ -5,6 +5,7 @@ import {
   Clock, CalendarX, FileDown, RefreshCw,
 } from "lucide-react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
 import { WidgetBoundary } from "@/components/admin/shared/WidgetBoundary";
 import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { EmptyState } from "@/components/admin/shared/EmptyState";
@@ -254,6 +255,26 @@ function SysadminGateScheduleInner() {
           )}
         </div>
       </WidgetBoundary>
+
+      <LifefulCalendarAgenda
+        selectedDateLabel={new Date().toISOString().slice(0, 10)}
+        isToday={true}
+        items={rules.slice(0, 6).map((r) => ({
+          id: r.id,
+          title: r.name,
+          category: r.policy ?? "gate_rule",
+          timeRange:
+            r.start_time || r.end_time
+              ? `${r.start_time ?? "—"}–${r.end_time ?? "—"}`
+              : null,
+          location: r.gate_id ?? "All Gates",
+          status: "active",
+        }))}
+        quickLinks={[
+          { label: "Gate Config", href: "/sysadmin/gates" },
+          { label: "Maintenance", href: "/sysadmin/maintenance" },
+        ]}
+      />
     </div>
   );
 }

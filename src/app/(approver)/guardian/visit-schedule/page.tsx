@@ -7,6 +7,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
 import {
   Loader2,
   AlertTriangle,
@@ -309,6 +310,23 @@ function VisitScheduleInner() {
           </div>
         )}
       </div>
+
+      <LifefulCalendarAgenda
+        selectedDateLabel={new Date().toISOString().slice(0, 10)}
+        isToday={true}
+        items={events.slice(0, 6).map((ev) => ({
+          id: ev.id,
+          title: ev.title,
+          category: ev.category,
+          timeRange: ev.time ?? null,
+          location: ev.location ?? null,
+          status: "upcoming",
+        }))}
+        quickLinks={[
+          { label: "Child Requests", href: "/guardian/child-requests" },
+          { label: "Contact Info", href: "/guardian/contact-info" },
+        ]}
+      />
     </div>
   );
 }

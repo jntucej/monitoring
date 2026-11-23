@@ -14,8 +14,10 @@
  */
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 export type StudentPageCluster =
   | "passes"
@@ -67,6 +69,8 @@ export function StudentPageLoop({
   cluster: StudentPageCluster;
   className?: string;
 }) {
+  const router = useRouter();
+  const isSakuga = useIsSakuga();
   const pivots = CLUSTER_PIVOTS[cluster];
   if (pivots.length === 0) return null;
 
@@ -76,16 +80,29 @@ export function StudentPageLoop({
         Next in {cluster}:
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {pivots.map((pivot) => (
-          <Link
-            key={pivot.href + pivot.label}
-            href={pivot.href}
-            className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-surface hover:text-action-primary transition-colors motion-reduce:transition-none"
-          >
-            <span className="max-w-48 truncate">{pivot.label}</span>
-            <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-text-muted" aria-hidden />
-          </Link>
-        ))}
+        {pivots.map((pivot) =>
+          isSakuga ? (
+            <sakuga-button
+              key={pivot.href + pivot.label}
+              variant="secondary"
+              onClick={() => router.push(pivot.href)}
+            >
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <span className="max-w-48 truncate">{pivot.label}</span>
+                <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              </span>
+            </sakuga-button>
+          ) : (
+            <Link
+              key={pivot.href + pivot.label}
+              href={pivot.href}
+              className="surface-card inline-flex items-center gap-1.5 bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-primary hover:bg-bg-surface hover:text-action-primary transition-colors motion-reduce:transition-none"
+            >
+              <span className="max-w-48 truncate">{pivot.label}</span>
+              <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-text-muted" aria-hidden />
+            </Link>
+          ),
+        )}
       </div>
     </div>
   );

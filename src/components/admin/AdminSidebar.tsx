@@ -57,6 +57,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AdminSidebarInfographic } from "./AdminSidebarInfographic";
 import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import manifest from "../../../packages/admin-console-kit/manifest/ia.json";
 
 // ── Admin overview payload shape (subset the infographic reads) ───────────
@@ -740,8 +741,11 @@ export function AdminSidebar({ overview, forceExpanded, onNavigate }: AdminSideb
       </nav>
 
       {/* Account footer: profile button + appearance + sign out */}
-      <div className="surface-card shrink-0 p-2">
+      <div className="surface-card shrink-0 p-2 space-y-1.5">
         <ProfileMenuButton consoleRoot="/admin" compact={isCollapsed} />
+        {!isCollapsed && (
+          <RoleLogoutButton variant="compact" className="w-full justify-center" />
+        )}
       </div>
     </aside>
   );

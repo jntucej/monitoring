@@ -6,6 +6,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 interface ActionItem {
   label: string;
@@ -14,6 +16,8 @@ interface ActionItem {
 }
 
 export function ActionItemsStrip() {
+  const router = useRouter();
+  const isSakuga = useIsSakuga();
   const [items, setItems] = useState<ActionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -86,23 +90,33 @@ export function ActionItemsStrip() {
         Needs your attention
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {items.map((it, i) => (
-          <a
-            key={i}
-            href={it.href}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-              it.tone === "danger"
-                ? "bg-rose-500/10 border-rose-500/30 text-action-danger hover:bg-rose-500/20"
-                : it.tone === "warning"
-                  ? "bg-amber-500/10 border-amber-500/30 text-action-warning hover:bg-amber-500/20"
-                  : it.tone === "success"
-                    ? "bg-emerald-500/10 border-emerald-500/30 text-action-success hover:bg-emerald-500/20"
-                    : "bg-bg-elevated/50 border-border text-text-secondary hover:bg-bg-elevated"
-            }`}
-          >
-            {it.label}
-          </a>
-        ))}
+        {items.map((it, i) =>
+          isSakuga ? (
+            <sakuga-button
+              key={i}
+              variant={it.tone === "danger" || it.tone === "warning" ? "primary" : "secondary"}
+              onClick={() => router.push(it.href)}
+            >
+              <span className="text-xs">{it.label}</span>
+            </sakuga-button>
+          ) : (
+            <a
+              key={i}
+              href={it.href}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                it.tone === "danger"
+                  ? "bg-rose-500/10 border-rose-500/30 text-action-danger hover:bg-rose-500/20"
+                  : it.tone === "warning"
+                    ? "bg-amber-500/10 border-amber-500/30 text-action-warning hover:bg-amber-500/20"
+                    : it.tone === "success"
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-action-success hover:bg-emerald-500/20"
+                      : "bg-bg-elevated/50 border-border text-text-secondary hover:bg-bg-elevated"
+              }`}
+            >
+              {it.label}
+            </a>
+          ),
+        )}
       </div>
     </div>
   );

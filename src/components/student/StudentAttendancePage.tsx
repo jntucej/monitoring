@@ -40,6 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUIStore } from "@/stores/uiStore";
 import { PERIOD_OPTIONS } from "@/lib/period";
 import type { PeriodKey } from "@/lib/period";
+import { AttendanceNextPeriodRadar } from "@/components/student/AttendanceNextPeriodRadar";
+import { ErrorRecoveryBanner } from "@/components/shared/ErrorRecoveryBanner";
 import {
   useEntityInspector,
   EntityInspectorPanel,
@@ -328,15 +330,34 @@ export function StudentAttendancePage() {
 
         {/* Error */}
         {error && !loading && (
-          <div className="rounded-xl bg-action-danger/10 p-4 text-sm text-action-danger">
-            <AlertTriangle className="h-4 w-4 inline mr-1" /> {error}
-            <button type="button" onClick={() => void load()} className="ml-2 underline">Retry</button>
-          </div>
+          <ErrorRecoveryBanner
+            error={error}
+            onRetry={() => void load()}
+            safeHomeHref="/student"
+            safeHomeLabel="Back to Student Home"
+          />
         )}
 
         {/* Data */}
         {data && s && !loading && (
           <>
+            <AttendanceNextPeriodRadar
+              overallAttended={s.present}
+              overallTotal={s.total}
+              upcomingPeriods={(data.nextClasses ?? [])
+                .filter((c) => !c.end || c.end > nowStr)
+                .map((c, idx) => ({
+                  id: `p-${c.periodNo ?? idx}`,
+                  periodNumber: c.periodNo ?? idx + 1,
+                  subjectCode: c.subject ?? "CLASS",
+                  subjectName: c.subject ?? "Scheduled Class",
+                  facultyName: c.faculty ?? null,
+                  roomNumber: c.hall ?? null,
+                  startTime: c.start,
+                  endTime: c.end,
+                  status: "scheduled" as const,
+                }))}
+            />
             {/* KPI row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* This period */}

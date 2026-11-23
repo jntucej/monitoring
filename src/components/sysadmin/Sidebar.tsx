@@ -39,6 +39,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SidebarInfographic } from "./SidebarInfographic";
 import { ProfileMenuButton } from "@/components/shared/ProfileMenuButton";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import manifest from "../../../packages/sysadmin-console-kit/manifest/ia.json";
 
 // ── Payload shape ─────────────────────────────────────────────────────────
@@ -646,8 +647,11 @@ export function Sidebar({ overview, forceExpanded, onNavigate }: SidebarProps) {
       </nav>
 
       {/* Account footer: profile button + appearance + sign out */}
-      <div className="surface-card shrink-0 p-2">
+      <div className="surface-card shrink-0 p-2 space-y-1.5">
         <ProfileMenuButton consoleRoot="/sysadmin" compact={collapsed} />
+        {!collapsed && (
+          <RoleLogoutButton variant="compact" className="w-full justify-center" />
+        )}
       </div>
     </aside>
   );

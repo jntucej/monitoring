@@ -225,6 +225,35 @@ export function ComplaintDetail({ role }: { role: string }) {
         </p>
       </div>
 
+      {(c.targetRole || c.targetUserId || c.presenceMark) && (
+        <div
+          data-testid="complaint-hierarchy-target"
+          className="surface-card bg-bg-elevated p-2.5 space-y-1 text-xs"
+        >
+          <h2 className="font-medium text-text-primary">Hierarchy Target &amp; Presence</h2>
+          <div className="flex flex-wrap gap-2 text-text-muted">
+            {c.targetRole && (
+              <span>
+                Target Role: <strong className="text-text-primary">{c.targetRole}</strong>
+              </span>
+            )}
+            {c.targetUserId && (
+              <span>
+                Person: <strong className="font-mono text-text-primary">{c.targetUserId}</strong>
+              </span>
+            )}
+            {c.presenceMark && (
+              <span>
+                Presence: <strong className="text-text-primary">{c.presenceMark}</strong>
+              </span>
+            )}
+          </div>
+          {c.presenceNote && (
+            <p className="text-text-muted">{c.presenceNote}</p>
+          )}
+        </div>
+      )}
+
       {c.respondent_details && (
         <div className="surface-card bg-bg-elevated p-2.5 space-y-2">
           <h2 className="font-medium text-text-primary">About</h2>

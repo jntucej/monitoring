@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ChevronDown, ChevronRight, Target } from "lucide-react";
+import { ChevronDown, ChevronRight, Flame, Target } from "lucide-react";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { cn } from "@/lib/utils";
 import {
   HOD_NAV,
@@ -131,6 +132,8 @@ export function HodSidebar({
         >
           Account settings
         </Link>
+
+        <RoleLogoutButton variant="compact" className="w-full justify-center" />
       </footer>
     </div>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronRight, Flame, Target } from "lucide-react";
+import { RoleLogoutButton } from "@/components/shared/RoleLogoutButton";
 import { cn } from "@/lib/utils";
 import { useVPRetention } from "@/stores/vpRetentionStore";
 import {
@@ -134,6 +135,8 @@ export function VPSidebar({
         >
           Account settings
         </Link>
+
+        <RoleLogoutButton variant="compact" className="w-full justify-center" />
       </footer>
     </div>
   );

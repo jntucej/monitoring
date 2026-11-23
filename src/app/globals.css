@@ -420,6 +420,19 @@ p, li, .text-body { color: var(--color-text-secondary); }
   border-radius: var(--sk-r);
 }
 
+[data-theme="sakuga"] sakuga-input {
+  --sk-input-width: 100%;
+  display: block;
+  width: 100%;
+}
+
+[data-theme="sakuga"] sakuga-input::part(input) {
+  color: var(--sk-ink);
+  background: var(--sk-card);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ── PERF: skip offscreen section render ──────────────────────── */
 .section-offscreen {
   content-visibility: auto;
@@ -604,9 +617,7 @@ p, li, .text-body { color: var(--color-text-secondary); }
   border-radius: var(--sk-r, 15px);
 }
 
-[data-theme="sakura"][data-mode="dark"],
-[data-theme="sakuga"][data-mode="dark"],
-.dark[data-theme="sakuga"] {
+[data-theme="sakura"][data-mode="dark"] {
   --color-canvas: #140b10;
   --color-surface: #21121a;
   --color-surface-muted: #2e1824;
@@ -618,14 +629,37 @@ p, li, .text-body { color: var(--color-text-secondary); }
   --color-text-muted: #d8a7b8;
   --color-border: #472436;
   --color-action-primary: #f472b6;
+}
+
+[data-theme="sakuga"][data-mode="dark"],
+.dark[data-theme="sakuga"] {
+  color-scheme: dark;
+  --color-canvas: #131126;
+  --color-surface: #1d1a38;
+  --color-surface-muted: #28244a;
+  --color-bg-base: #131126;
+  --color-bg-surface: #1d1a38;
+  --color-bg-elevated: #28244a;
+  --color-text-primary: #f4f2ff;
+  --color-text-secondary: #d4cff7;
+  --color-text-muted: #a8a2d8;
+  --color-text-muted-strong: #c4bef0;
+  --color-border: #433d73;
+  --color-border-strong: #8f8df7;
+  --color-action-primary: #9d9bff;
+  --color-action-primary-hover: #b3b1ff;
+  --color-action-danger: #ff6eb4;
+  --color-action-warning: #fbbf24;
+  --color-action-success: #4ade80;
+  --color-action-info: #818cf8;
   /* sakuga-vfx Dark tokens */
-  --sk-card: #21121a;
-  --sk-ink: #fdf2f6;
-  --sk-dim: #d8a7b8;
-  --sk-soft: #5c2b44;
-  --sk-pri: #a78bfa;
-  --sk-pri-ink: #140b10;
-  --sk-acc: #f472b6;
-  --sk-track: #472436;
-  --sk-on-pri: #140b10;
+  --sk-card: #1d1a38;
+  --sk-ink: #f4f2ff;
+  --sk-dim: #a8a2d8;
+  --sk-soft: #433d73;
+  --sk-pri: #9d9bff;
+  --sk-pri-ink: #131126;
+  --sk-acc: #ff6eb4;
+  --sk-track: #2e2954;
+  --sk-on-pri: #131126;
 }

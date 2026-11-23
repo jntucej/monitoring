@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { AttendanceNextPeriodRadar } from "@/components/student/AttendanceNextPeriodRadar";
+import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
+import { ErrorRecoveryBanner } from "@/components/shared/ErrorRecoveryBanner";
 
 
 import { CalendarDays, CheckCircle2, XCircle, Clock, Loader2, ArrowRight } from "lucide-react";
@@ -125,9 +128,19 @@ function StudentAttendanceCalendarInner() {
       )}
 
       {error && (
-        <div className="surface-card bg-rose-500/10 p-3 text-sm text-action-danger">
-          Attendance data unavailable: {error}. Check your connection or retry later.
-        </div>
+        <ErrorRecoveryBanner
+          error={error}
+          safeHomeHref="/student"
+          safeHomeLabel="Back to Student Home"
+        />
+      )}
+
+      {summary && (
+        <AttendanceNextPeriodRadar
+          overallAttended={summary.present}
+          overallTotal={summary.present + summary.absent}
+          upcomingPeriods={[]}
+        />
       )}
 
       <div className="surface-card bg-bg-surface p-4 min-w-0">
@@ -248,24 +261,34 @@ function StudentAttendanceCalendarInner() {
 
       {/* Day detail */}
       {selected && (
-        <div className="surface-card bg-bg-elevated p-4 text-xs min-w-0">
-          <p className="font-bold text-text-primary mb-2">{selected.date}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <p className="text-text-muted">Time in</p>
-              <p className="font-mono text-text-primary">{selected.time_in || "—"}</p>
-            </div>
-            <div>
-              <p className="text-text-muted">Time out</p>
-              <p className="font-mono text-text-primary">{selected.time_out || "—"}</p>
-            </div>
-          </div>
-          {selected.status && (
-            <p className="mt-2 text-text-muted">
-              Status: <span className="font-bold text-text-primary">{selected.status}</span>
-            </p>
-          )}
-        </div>
+        <LifefulCalendarAgenda
+          selectedDateLabel={selected.date}
+          isToday={selected.date === new Date().toISOString().slice(0, 10)}
+          onJumpToday={() => {
+            const today = new Date();
+            setYear(today.getFullYear());
+            setMonth(today.getMonth());
+            setSelectedDate(today.toISOString().slice(0, 10));
+          }}
+          items={[
+            {
+              id: `att-${selected.date}`,
+              title: `Attendance: ${selected.status ?? "Unmarked"}`,
+              category: "attendance",
+              timeRange:
+                selected.time_in || selected.time_out
+                  ? `${selected.time_in || "—"} → ${selected.time_out || "—"}`
+                  : null,
+              status: selected.status ?? "unmarked",
+              actionLabel: "Verify Gate Scan Log",
+              actionHref: "/student/history",
+            },
+          ]}
+          quickLinks={[
+            { label: "Full Week Calendar", href: "/student/calendar" },
+            { label: "Report Discrepancy", href: "/student/complaints/new" },
+          ]}
+        />
       )}
 
       {/* Monthly summary */}

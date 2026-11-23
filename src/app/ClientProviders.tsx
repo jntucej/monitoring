@@ -15,6 +15,7 @@ import { LiveEventToaster } from "@/components/shared/LiveEventToaster";
 import { ShakeDetector } from "@/components/shared/ShakeDetector";
 import { RoleThemeProvider } from "@/components/RoleThemeProvider";
 import { InspectOverlay } from "@/components/shared/InspectOverlay";
+import { RoleCommandPalette } from "@/components/nav/RoleCommandPalette";
 
 // The floating bot pulls in `three` + `@react-three/fiber` (the listening
 // canvas) plus speech hooks. Loading it eagerly would bloat the shared chunk
@@ -133,6 +134,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
               secrets. */}
           <InspectOverlay />
         </ToastProvider>
+        <RoleCommandPalette />
       </NavigationProvider>
       </RoleThemeProvider>
     </GlassProvider>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
+import { useIsSakuga } from "@/components/student/useIsSakuga";
 
 export type ToastVariant = "success" | "error" | "info" | "warning";
 
@@ -72,10 +73,35 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastContainer() {
   const ctx = React.useContext(ToastContext);
+  const isSakuga = useIsSakuga();
+  const sakugaToastRef = React.useRef<HTMLElement & { show?: (text?: string) => void }>(null);
+  const lastShownIdRef = React.useRef<string | null>(null);
+
+  const visibleToasts = ctx ? ctx.toasts.slice(-3) : [];
+  const latestToast = visibleToasts[visibleToasts.length - 1];
+
+  React.useEffect(() => {
+    if (!isSakuga || !latestToast || latestToast.id === lastShownIdRef.current) return;
+    lastShownIdRef.current = latestToast.id;
+    const text = latestToast.title
+      ? `${latestToast.title}: ${latestToast.message}`
+      : latestToast.message;
+    sakugaToastRef.current?.show?.(text);
+  }, [isSakuga, latestToast]);
+
   if (!ctx) return null;
 
-  // Fix 7: max 3 toasts visible at once
-  const visibleToasts = ctx.toasts.slice(-3);
+  if (isSakuga) {
+    return (
+      <div
+        className="fixed bottom-6 left-6 z-toast pointer-events-auto"
+        aria-live="polite"
+        aria-atomic="false"
+      >
+        <sakuga-toast ref={sakugaToastRef} duration="2.8" />
+      </div>
+    );
+  }
 
   return (
     <div

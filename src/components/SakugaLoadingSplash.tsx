@@ -75,49 +75,72 @@ export function SakugaLoadingSplash({ children }: Props) {
     return () => { cancelled = true; };
   }, []);
 
-  // Drive the progress bar and auto-dismiss the splash.
-  // Strategy:
-  //  1. Watch for the sakuga:done event from the <sakuga-progress> element.
-  //  2. As a fallback, auto-dismiss after 4 s (the widgets are lightweight
-  //     and fetch from cache or local API; 4 s is generous).
-  //  3. Drive the progress value from a simulated ramp (0→1 over ~2.5 s)
-  //     so the storm-cloud VFX plays even without real per-widget signals.
+  // Drive the progress bar from real DOM widget settlement (MutationObserver
+  // watching [data-loading="true"], [aria-busy="true"], and .animate-pulse
+  // skeletons) with a 1.2s max cap so it never stalls or double-plays.
   useEffect(() => {
     if (!isSakuga || splashGone) return;
 
-    // Simulate a loading ramp: 0 → 1 over 2.5 s, with a slight ease.
     const start = performance.now();
     let raf = 0;
-    const DURATION_MS = 2500;
+    let settled = false;
+    const MAX_MS = 1200;
+
+    const countPending = () =>
+      document.querySelectorAll(
+        '[data-loading="true"], [aria-busy="true"], .animate-pulse',
+      ).length;
+
+    let peakPending = Math.max(1, countPending());
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      if (progressRef.current?.set) {
+        progressRef.current.set(1, true);
+      }
+      setTimeout(() => setSplashGone(true), 180);
+    };
+
+    const observer = new MutationObserver(() => {
+      const pending = countPending();
+      if (pending > peakPending) peakPending = pending;
+      if (pending === 0 && performance.now() - start > 220) {
+        finish();
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-loading", "aria-busy", "class"],
+    });
 
     const tick = (now: number) => {
+      if (settled) return;
       const elapsed = now - start;
-      const t = Math.min(1, elapsed / DURATION_MS);
-      // Ease-out: fast start, slow finish (matches the storm-cloud VFX feel).
-      const eased = 1 - Math.pow(1 - t, 3);
-      const pct = eased;
+      const pending = countPending();
+      if (pending > peakPending) peakPending = pending;
+      const domRatio = pending === 0 ? 1 : Math.max(0.15, 1 - pending / peakPending);
+      const timeRatio = Math.min(1, elapsed / MAX_MS);
+      const pct = Math.min(1, Math.max(domRatio * 0.85, timeRatio));
 
-      // Drive the sakuga-progress element if it's registered.
       if (progressRef.current?.set) {
         progressRef.current.set(pct, true);
       }
 
-      if (t < 1) {
-        raf = requestAnimationFrame(tick);
+      if ((pending === 0 && elapsed > 220) || elapsed >= MAX_MS) {
+        finish();
       } else {
-        // Finished — wait for the done animation (burst + check), then hide.
-        const onDone = () => setSplashGone(true);
-        const el = progressRef.current;
-        if (el) {
-          el.addEventListener("sakuga:done", onDone, { once: true });
-        }
-        // Safety: always hide after 1 s regardless.
-        setTimeout(() => setSplashGone(true), 1000);
+        raf = requestAnimationFrame(tick);
       }
     };
 
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
   }, [isSakuga, splashGone]);
 
   // Non-sakuga or splash done: render children directly.

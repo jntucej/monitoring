@@ -19,6 +19,7 @@ import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { CalendarLayerPicker, STUDENT_CALENDAR_LAYERS } from "@/components/shared/calendar/CalendarLayerPicker";
+import { LifefulCalendarAgenda } from "@/components/nav/LifefulCalendarAgenda";
 import { getAuthHeaders } from "@/lib/utils";
 
 export default function StudentCalendarPage() {
@@ -58,6 +59,23 @@ export default function StudentCalendarPage() {
       <WidgetBoundary name="calendar">
         <UnifiedCampusCalendar />
       </WidgetBoundary>
+
+      <LifefulCalendarAgenda
+        selectedDateLabel={new Date().toISOString().slice(0, 10)}
+        isToday={true}
+        items={layers.map((layer) => ({
+          id: `layer-${layer}`,
+          title: `${layer.replace(/[_-]+/g, " ")} layer active`,
+          category: layer,
+          status: "active",
+        }))}
+        quickLinks={[
+          { label: "Attendance Calendar", href: "/student/attendance-calendar" },
+          { label: "Gate Scan Log", href: "/student/history" },
+          { label: "Pass Hub", href: "/student/passes" },
+          { label: "Assignments", href: "/student/assignments" },
+        ]}
+      />
 
       {/* The event sheet is rendered on tap by the calendar's own day
           detail; this page is the composition point that adds the

@@ -13,7 +13,7 @@ import { CampusPulseStrip } from "@/components/student/home/CampusPulseStrip";
 import { MyDayStrip } from "@/components/student/home/MyDayStrip";
 import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
-import { SakugaConsole } from "@/components/student/SakugaConsole";
+import { StudentLivingHub } from "@/components/student/StudentLivingHub";
 import {
   StudentModeSwitcher,
   StudentModeBody,
@@ -206,10 +206,20 @@ function StudentHomeInner() {
     <div className="mx-auto max-w-2xl space-y-3 p-3 md:p-5">
       <Greeting />
       <CustomRoleGreeting name={user?.name} role={user?.role ?? "student"} />
-      <SakugaConsole />
       <OfflineBanner onRetry={handleRetry} retrying={retrying} />
       <RoleOnboarding />
       <StudentModeSwitcher mode={mode} onChange={setMode} />
+      <StudentLivingHub
+        snapshot={{
+          campusState: "INSIDE",
+          attendancePct: 82,
+          safeSkipsRemaining: 3,
+          pendingAssignments: 0,
+          unratedMealsCount: 0,
+          activeStreakDays: 5,
+          unreadAlerts: 0,
+        }}
+      />
       {mode === "today" ? (
         personaDataWidgets.map((id) => {
           const Render = ALL_WIDGET_COMPONENTS[id];
@@ -226,16 +236,7 @@ function StudentHomeInner() {
     </div>
   );
 
-  // Sakuga theme: wrap in the anime VFX loading splash (only for sakuga users).
-  // Graphite/default theme: standard PageLoading skeleton.
-  if (isSakuga) {
-    return (
-      <SakugaLoadingSplash>
-        {dashboardContent}
-      </SakugaLoadingSplash>
-    );
-  }
-
+  // SakugaLoadingSplash is already provided once by (student)/layout.tsx -> SakugaPageShell.
   return dashboardContent;
 }
 

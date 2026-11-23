@@ -26,6 +26,7 @@ import type { VoiceCommand } from "@/lib/voice";
 import { FrontlineSubjectSheet } from "@/components/nav/level1/FrontlinePivot";
 import type { FrontlineSubject } from "@/components/nav/level1/FrontlinePivot";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
+import { PostIncidentBanner } from "@/components/operator/PostIncidentBanner";
 
 interface LookupPerson {
   id: string;
@@ -156,6 +157,11 @@ function OperatorLookupInner() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-5 py-6 min-w-0">
+      <PostIncidentBanner
+        incidents={[]}
+        onAcknowledge={() => {}}
+        onResolve={() => {}}
+      />
       {/* Search form */}
       <OperatorWidgetBoundary title="Person Lookup">
         {/* O12: voice-assisted lookup — prefill the id field */}

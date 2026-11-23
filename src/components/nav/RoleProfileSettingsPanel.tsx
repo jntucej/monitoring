@@ -8,6 +8,9 @@ import {
   type OccasionalSettingItem,
 } from "@/lib/role-profile-settings";
 import { useIsSakuga } from "@/components/student/useIsSakuga";
+import { useUIStore } from "@/stores/uiStore";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { UnsavedChangesBar } from "@/components/shared/UnsavedChangesBar";
 
 export function RoleProfileSettingsPanel({
   role,
@@ -17,8 +20,9 @@ export function RoleProfileSettingsPanel({
   storagePrefix?: string;
 }) {
   const isSakuga = useIsSakuga();
+  const addToast = useUIStore((s) => s.addToast);
   const items = getOccasionalProfileSettings(role);
-  const [values, setValues] = useState<Record<string, string | boolean>>(() => {
+  const loadSaved = () => {
     const initial: Record<string, string | boolean> = {};
     for (const item of items) {
       if (item.defaultValue !== undefined) {
@@ -35,16 +39,36 @@ export function RoleProfileSettingsPanel({
       }
     }
     return initial;
-  });
+  };
+  const [values, setValues] = useState<Record<string, string | boolean>>(loadSaved);
+  const [dirty, setDirty] = useState(false);
+  useUnsavedChangesGuard(dirty);
 
   const updateValue = (id: string, next: string | boolean) => {
     setValues((prev) => ({ ...prev, [id]: next }));
+    setDirty(true);
+  };
+
+  const handleSave = () => {
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(
-        `${storagePrefix}:${role ?? "default"}:${id}`,
-        String(next),
-      );
+      for (const [id, val] of Object.entries(values)) {
+        window.localStorage.setItem(
+          `${storagePrefix}:${role ?? "default"}:${id}`,
+          String(val),
+        );
+      }
     }
+    setDirty(false);
+    addToast({
+      variant: "success",
+      title: "Settings Saved",
+      message: "Role preferences updated.",
+    });
+  };
+
+  const handleDiscard = () => {
+    setValues(loadSaved());
+    setDirty(false);
   };
 
   return (
@@ -67,6 +91,12 @@ export function RoleProfileSettingsPanel({
           </div>
         </div>
       </div>
+
+      <UnsavedChangesBar
+        hasUnsavedChanges={dirty}
+        onSave={handleSave}
+        onDiscard={handleDiscard}
+      />
 
       <div className="divide-y divide-border">
         {items.map((item: OccasionalSettingItem) => {

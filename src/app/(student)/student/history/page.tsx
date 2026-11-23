@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Loader2, Filter } from "lucide-react";
 import type { Scan } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
 import { useAuthStore } from "@/stores/authStore";
+import { ActiveFilterBar } from "@/components/shared/ActiveFilterBar";
 
 export default function StudentHistoryPage() {
 const api = useApi();
@@ -68,7 +69,26 @@ const api = useApi();
       </div>
 
       <div className="bg-bg-surface rounded-xl border border-border overflow-hidden">
-        {loading ? (
+        <ActiveFilterBar
+        chips={
+          filter === "ALL"
+            ? []
+            : [
+                {
+                  key: "direction",
+                  label: "Direction",
+                  value: filter,
+                  onRemove: () => setFilter("ALL"),
+                },
+              ]
+        }
+        shownCount={filtered.length}
+        totalCount={scans.length}
+        onClearAll={() => setFilter("ALL")}
+        noun="scans"
+      />
+
+      {loading ? (
           <div className="p-8 flex items-center justify-center gap-2 text-text-muted text-sm">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading history…
           </div>
