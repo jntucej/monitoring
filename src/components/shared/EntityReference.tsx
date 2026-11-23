@@ -31,6 +31,12 @@
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  canInspectEntity,
+  getFullPageRoute,
+  type EntityKind,
+} from "@/lib/entity-access";
 import { useEntityResolver, hasResolver } from "@/components/shared/entityResolvers";
 import {
   EntityInspector,
@@ -74,7 +80,7 @@ export interface EntityReferenceProps {
 
 /* ── helpers ───────────────────────────────────────────────────────────── */
 
-function statusPill(status: string | ReactNode | undefined, kind: string) {
+function statusPill(status: string | ReactNode | undefined) {
   if (status === undefined || status === null) return null;
   if (typeof status === "string") {
     const cls: Record<string, string> = {
@@ -110,13 +116,16 @@ export function EntityReference({
   id,
   label,
   status,
-  detailHref,
+  detailHref: detailHrefProp,
   className,
   linkMode = false,
   context,
 }: EntityReferenceProps) {
+  // The resolver hook must run on every render of this component (Rules of
+  // Hooks). Call it first, before any conditional branch below.
   const resolver = useEntityResolver(linkMode ? null : kind, linkMode ? null : id, context);
   const [inspecting, setInspecting] = useState(false);
+  const { role } = useAuth();
 
   const handleClick = useCallback(() => {
     if (linkMode) return; // plain link, no inspector
@@ -134,6 +143,31 @@ export function EntityReference({
     }
   }, [linkMode, resolver.inspection, resolver.loading, resolver.error]);
 
+  // UI-side role gate: if this role can't inspect this kind, render the chip
+  // as muted, non-interactive text so the relationship stays visible without
+  // an action the user can't perform. API RBAC is the real enforcement
+  // (defense in depth); this just hides the affordance.
+  const kindAsEntity = kind as EntityKind;
+  const allowed = canInspectEntity(role ?? null, kindAsEntity);
+  const detailHref =
+    detailHrefProp ??
+    (allowed ? getFullPageRoute(role ?? null, kindAsEntity, id) : null);
+
+  if (!allowed) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs text-text-muted cursor-default opacity-70",
+          className,
+        )}
+        title="Not available for your role"
+      >
+        <span className="font-mono text-[10px] uppercase">{kind}</span>
+        <span className="truncate max-w-40">{label}</span>
+      </span>
+    );
+  }
+
   // In link mode, render a plain anchor.
   if (linkMode) {
     const href = detailHref ?? "";
@@ -147,7 +181,7 @@ export function EntityReference({
       >
         <span className="font-mono text-text-muted uppercase text-[10px]">{kind}</span>
         <span className="text-text-primary font-medium truncate max-w-40">{label}</span>
-        {statusPill(status, kind)}
+        {statusPill(status)}
       </a>
     );
   }
@@ -165,7 +199,7 @@ export function EntityReference({
       >
         <span className="font-mono text-text-muted uppercase text-[10px]">{kind}</span>
         <span className="text-text-primary font-medium truncate max-w-40">{label}</span>
-        {statusPill(status, kind)}
+        {statusPill(status)}
       </span>
     );
   }
@@ -192,7 +226,7 @@ export function EntityReference({
         </span>
 
         {/* Status pill */}
-        {statusPill(status, kind)}
+        {statusPill(status)}
 
         {/* Optional external-link affordance */}
         {detailHref ? (
@@ -284,7 +318,7 @@ export function EntityReferenceButton({
   id,
   label,
   status,
-  detailHref,
+  detailHref: _detailHref,
   className,
   context,
   onResolved,
@@ -327,7 +361,7 @@ export function EntityReferenceButton({
       <span className="font-mono text-text-muted uppercase text-[10px] shrink-0">{kind}</span>
       {resolver.loading ? <Loader2 className="size-3 animate-spin text-text-muted" /> : null}
       <span className="text-text-primary font-medium truncate max-w-40">{label}</span>
-      {statusPill(status, kind)}
+      {statusPill(status)}
     </button>
   );
 }
