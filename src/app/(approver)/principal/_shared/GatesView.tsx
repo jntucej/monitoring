@@ -14,6 +14,7 @@ import {
   type GateRecord,
   type RoleGate,
 } from "./entityInspectionModels";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface Gate {
   id: string;
@@ -42,8 +43,26 @@ export function GatesView() {
   const [inspection, setInspection] = useState<
     ReturnType<typeof buildGateInspection> | null
   >(null);
-  const inspect = (g: Gate) =>
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
+
+  const inspect = (g: Gate) => {
     setInspection(buildGateInspection(g as GateRecord, gate));
+    setPivot({
+      kind: "gate",
+      id: g.id,
+      title: g.name,
+      subtitle: `${g.location ?? g.code ?? "Main Campus"} · ${g.status ?? "ACTIVE"}`,
+      fullRoute: `/admin/gates/${g.id}`,
+      relatedLinks: [
+        { label: "Gate Activity", href: "/principal/operations/gates" },
+        { label: "Incidents", href: "/principal/operations/incidents" },
+        { label: "Hostel", href: "/principal/operations/hostel" },
+        { label: "People", href: "/principal/people" },
+        { label: "Approvals", href: "/principal/approvals" },
+        { label: "Cases", href: "/principal/cases" },
+      ],
+    });
+  };
 
   const gates = Array.isArray(data?.data) ? data.data : [];
   const activeCount = gates.filter((g) => g.status === "ACTIVE" || !g.status).length;
@@ -127,7 +146,8 @@ export function GatesView() {
         </>
       )}
 
-      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
+      <EntityInspector inspection={inspection} onClose={() => { setInspection(null); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }

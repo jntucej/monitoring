@@ -10,6 +10,7 @@ import {
   type RoleGate,
 } from "./entityInspectionModels";
 import type { Person } from "@/lib/types";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface PersonsResponse {
   success?: boolean;
@@ -38,12 +39,34 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
     { enabled: true, ttlMs: 30_000 }
   );
   const [active, setActive] = useState<Person | null>(null);
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
+
+  const openPerson = (p: Person) => {
+    setActive(p);
+    setPivot({
+      kind: p.role === "faculty" || p.personType === "faculty" ? "faculty" : "student",
+      id: p.id,
+      title: p.fullName || p.name || p.uniqueId,
+      subtitle: `${p.uniqueId} · ${p.role ?? p.personType}`,
+      fullRoute: p.role === "faculty" || p.personType === "faculty"
+        ? `/admin/faculty/${p.id}`
+        : `/admin/students/${p.id}`,
+      relatedLinks: [
+        { label: "People", href: "/principal/people" },
+        { label: "Gates", href: "/principal/operations/gates" },
+        { label: "Incidents", href: "/principal/operations/incidents" },
+        { label: "Hostel", href: "/principal/operations/hostel" },
+        { label: "Approvals", href: "/principal/approvals" },
+        { label: "Cases", href: "/principal/cases" },
+      ],
+    });
+  };
 
   const people = useMemo(() => (Array.isArray(data?.data) ? data.data : []), [data]);
 
   const target = personParam ? people.find((p) => p.id === personParam || p.uniqueId === personParam) : null;
   useEffect(() => {
-    if (target) setActive(target);
+    if (target) openPerson(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personParam]);
 
@@ -68,7 +91,7 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
             <li key={p.id}>
               <button
                 type="button"
-                onClick={() => setActive(p)}
+                onClick={() => openPerson(p)}
                 className="surface-card w-full p-3 text-left hover:bg-bg-elevated transition-colors"
               >
                 <p className="text-sm font-medium text-text-primary truncate">
@@ -83,7 +106,8 @@ export function PeopleRegisterView({ personParam }: { personParam: string | null
         </ul>
       )}
 
-      <EntityInspector inspection={inspection} onClose={() => setActive(null)} />
+      <EntityInspector inspection={inspection} onClose={() => { setActive(null); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { errMsg } from "@/lib/err-msg";
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { EntityInspector, KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 import { CalendarDays, CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Scan, Student } from "@/lib/types";
 import { useApi } from "@/hooks/useApi";
@@ -33,6 +34,26 @@ const api = useApi();
   const [error, setError] = useState<string | null>(null);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [active, setActive] = useState<Row | null>(null);
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
+
+  const handleRowClick = (r: Row) => {
+    setActive(r);
+    setPivot({
+      kind: "student",
+      id: r.roll,
+      title: r.name,
+      subtitle: `${r.department || "Unknown dept"} · ${r.status} · ${date}`,
+      fullRoute: `/admin/students/${r.roll}`,
+      relatedLinks: [
+        { label: "Gate Logs", href: "/admin/attendance" },
+        { label: "Student Directory", href: "/admin/students" },
+        { label: "Gate Overview", href: "/admin/gates" },
+        { label: "Incidents", href: "/admin/alerts" },
+        { label: "Hostel", href: "/admin/occupancy" },
+        { label: "Reports", href: "/admin/reports" },
+      ],
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -167,7 +188,7 @@ const api = useApi();
         </div>
       <DataTable
         mobileLayout="cards"
-        onRowClick={(r) => setActive(r)}
+        onRowClick={(r) => handleRowClick(r)}
         columns={[
           { header: "Student", accessor: (r) => r.name, className: "font-medium" },
           { header: "Roll No", accessor: (r) => r.roll, className: "font-mono text-text-muted" },
@@ -249,6 +270,8 @@ const api = useApi();
         } : null}
         onClose={() => setActive(null)}
       />
+
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
       </div>
     
     

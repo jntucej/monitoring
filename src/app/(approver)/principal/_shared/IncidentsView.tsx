@@ -14,6 +14,7 @@ import {
   type IncidentRecord,
   type RoleGate,
 } from "./entityInspectionModels";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface AlertItem {
   id: string;
@@ -47,7 +48,9 @@ export function IncidentsView() {
   const [inspection, setInspection] = useState<
     ReturnType<typeof buildIncidentInspection> | null
   >(null);
-  const inspect = (a: AlertItem) =>
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
+
+  const inspect = (a: AlertItem) => {
     setInspection(
       buildIncidentInspection(
         {
@@ -61,6 +64,22 @@ export function IncidentsView() {
         gate
       )
     );
+    setPivot({
+      kind: "gate",
+      id: a.gate_id ?? a.id,
+      title: a.title ?? a.message ?? "Alert",
+      subtitle: `${a.severity ?? "alert"} · ${a.status ?? "OPEN"}${a.gate_name ? " · " + a.gate_name : ""}`,
+      fullRoute: a.gate_id ? `/admin/gates/${a.gate_id}` : `/admin/alerts`,
+      relatedLinks: [
+        { label: "Gate Activity", href: "/principal/operations/gates" },
+        { label: "Incidents", href: "/principal/operations/incidents" },
+        { label: "Hostel", href: "/principal/operations/hostel" },
+        { label: "People", href: "/principal/people" },
+        { label: "Escalations", href: "/principal/escalations" },
+        { label: "Cases", href: "/principal/cases" },
+      ],
+    });
+  };
 
   const alerts = Array.isArray(data?.data) ? data.data : [];
   const highSeverity = alerts.filter(
@@ -155,7 +174,8 @@ export function IncidentsView() {
         </>
       )}
 
-      <EntityInspector inspection={inspection} onClose={() => setInspection(null)} />
+      <EntityInspector inspection={inspection} onClose={() => { setInspection(null); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { Inbox, CheckCircle2, XCircle, ArrowUpRight, ShieldCheck } from "lucide-
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { escalationInspection } from "@/components/approver/wardenConsoleModels";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 
 /* ── response shapes ── */
@@ -43,6 +44,7 @@ function slaBreached(row: PermissionRequestRow): boolean {
 function VpPendingApprovalsInner() {
   const user = useAuthStore((s) => s.user);
   const { inspection, inspect, closeInspection } = useEntityInspector();
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
 
   const inspectRow = (r: PermissionRequestRow) => {
     inspect(
@@ -59,6 +61,21 @@ function VpPendingApprovalsInner() {
           : null,
       }),
     );
+    setPivot({
+      kind: "ticket",
+      id: r.ticket_number,
+      title: r.student?.name || r.ticket_number,
+      subtitle: `${r.workflow_type.replace(/_/g, " ")} · ${r.current_stage} · ${r.status}${slaBreached(r) ? " · SLA BREACHED" : ""}`,
+      fullRoute: `/permissions/${encodeURIComponent(r.ticket_number)}`,
+      relatedLinks: [
+        { label: "VP Approvals", href: "/vice-principal/pending-approvals" },
+        { label: "Escalated", href: "/vice-principal/approvals/escalated" },
+        { label: "Decision History", href: "/vice-principal/decision-history" },
+        { label: "Academics", href: "/vice-principal/academics" },
+        { label: "Hostel Security", href: "/vice-principal/hostel-security-summaries" },
+        { label: "Delegated", href: "/vice-principal/delegated-responsibilities" },
+      ],
+    });
   };
 
 
@@ -256,7 +273,8 @@ function VpPendingApprovalsInner() {
         </div>
       </WidgetBoundary>
 
-      <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
+      <EntityInspectorPanel inspection={inspection} onClose={() => { closeInspection(); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
     </div>
   );
 }

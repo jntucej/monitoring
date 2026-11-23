@@ -11,6 +11,7 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
 import { DetailSheet } from "./DetailSheet";
 import { WeekBar } from "./WeekBar";
+import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface EscalationsResponse {
   success: boolean;
@@ -25,6 +26,7 @@ interface EscalationsResponse {
 
 export function EscalationsView() {
   const [selected, setSelected] = useState<PermissionItem | null>(null);
+  const [pivot, setPivot] = useState<CommandPivotTarget | null>(null);
   const { inspection, inspect, closeInspection, role } = useRoleInspectorHost();
 
   const { data, loading, refresh } = useApiResource<EscalationsResponse>(
@@ -63,6 +65,21 @@ export function EscalationsView() {
         },
       ),
     );
+    setPivot({
+      kind: "ticket",
+      id: item.ticket_number,
+      title: item.student?.name ?? item.ticket_number,
+      subtitle: `${item.workflow_type} · ${item.current_stage} · ${item.status}`,
+      fullRoute: `/permissions/${encodeURIComponent(item.ticket_number)}`,
+      relatedLinks: [
+        { label: "Escalations", href: "/supervisor/response/escalations" },
+        { label: "Incidents", href: "/supervisor/response/incidents" },
+        { label: "Gates", href: "/supervisor/gates" },
+        { label: "Team", href: "/supervisor/team" },
+        { label: "Shifts", href: "/supervisor/shift" },
+        { label: "Reports", href: "/supervisor/reports" },
+      ],
+    });
   };
   // The API returns data as an object (not a bare array): {
   //   escalatedPermissions: PermissionItem[], activeAlerts, recentDecisions,
@@ -146,7 +163,8 @@ export function EscalationsView() {
         </>
       )}
 
-      <EntityInspector inspection={inspection} onClose={closeInspection} />
+      <EntityInspector inspection={inspection} onClose={() => { closeInspection(); setPivot(null); }} />
+      <CommandPivotDrawer target={pivot} onClose={() => setPivot(null)} />
 
       <DetailSheet
         item={selected}
