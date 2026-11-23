@@ -172,7 +172,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                 onClick={() => setFilter(f.id)}
                 className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
                   filter === f.id
-                    ? "bg-indigo-500/20 text-indigo-300"
+                    ? "bg-indigo-500/20 text-action-primary"
                     : "text-text-muted hover:text-text-primary"
                 }`}
               >
@@ -219,7 +219,7 @@ export function CampusFeed({ limit = 20 }: { limit?: number }) {
                     <p className="truncate text-sm font-semibold text-text-primary">{item.title}</p>
                     {item.isOfficial && <VerifiedBadge />}
                     {item.followed && (
-                      <span className="surface-card inline-flex items-center gap-1 bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-indigo-300">
+                      <span className="surface-card inline-flex items-center gap-1 bg-indigo-500/15 px-2 py-0.5 text-xs font-medium text-action-primary">
                         <Star className="size-3.5" aria-hidden />
                         Followed
                       </span>

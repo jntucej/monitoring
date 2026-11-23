@@ -127,7 +127,7 @@ export function PassHistory({ className }: { className?: string }) {
             {filtered.slice(0, 20).map((p) => (
               <div key={p.id} className="rounded-lg border border-border bg-bg-base px-3 py-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-text-primary capitalize">{p.code.replace(/_/g, " ")}</span>
+                  <span className="font-medium text-text-primary capitalize">{(p.code ?? "PASS").replace(/_/g, " ")}</span>
                   <span
                     className={cn(
                       "uppercase font-semibold",
