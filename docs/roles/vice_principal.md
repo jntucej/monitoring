@@ -1,18 +1,69 @@
 # Vice-Principal — how it works
 
-## Role in institutional life
-The Vice-Principal is the second-highest authority at JNTUH CEJ, reporting directly to the Principal. The Vice-Principal discharges the Principal's duties during leave and handles the exam office queue, OIE (Office of the Registrar/Examination Officer) duties, academic exceptions, and department-level academic review.
+## Overview
+The Vice-Principal (VP) serves as the chief operational deputy at JNTUH CEJ, reporting directly to the Principal. The VP oversees academic departmental performance, acts as the primary triage authority for approvals flowing upstream from departments and hostels, and bridges campus operations to the executive office.
 
-In the Gate Monitor system, the Vice-Principal has a capability-gated view: the Principal Bridge widget shows what the Principal has delegated or flagged. The VP can view live class state, confirm a faculty's class on their behalf, view exam coordination, and view hostel aggregate (no PII).
+The Vice-Principal plays a pivotal role in the institutional approval and escalation ladder. Standard leave requests, gate exceptions, academic disputes, and examination permissions escalate from HODs, Deputy Wardens, and the Exam Branch to the Vice-Principal. The VP can either resolve approvals directly or flag complex/high-impact issues up to the Principal via the dedicated **Principal Bridge**. In the absence of the Principal, delegated responsibilities allow the Vice-Principal to discharge administrative duties without modifying underlying database roles.
 
-Per JNTUH convention, the Vice-Principal is the first point of escalation for:
-- Exam office queue (candidate attendance, hall access, spot exceptions)
-- Academic exceptions (late submissions, exam re-sits, grade disputes)
-- Department-level academic review (HOD reports, curriculum changes)
-- Principal's absence (all approvals flow to VP)
+The Vice-Principal interface utilizes a royal-purple theme (`#faf5ff` surface tint) with composed motion, featuring `ApprovalsQueue`, `DepartmentPerformance`, and `PrincipalBridge`.
 
-## Operational standards
-Per Indian university governance:
+## Pages & workflows
+
+### 1. Operations & Decision Triage
+* **VP Command Center (`/vice-principal`, `/vice-principal/home`):** Real-time command center showing pending approvals, department KPI health, and active upstream items flagged to the Principal.
+* **Approval Pipeline (`/vice-principal/approvals`, `/vice-principal/approvals/pending`, `/vice-principal/approvals/escalated`, `/vice-principal/approvals/all`):** Central desk for acting on permission requests, leave passes, and student gate exceptions that require institutional deputy sign-off.
+* **Principal Bridge & Delegations (`/vice-principal/delegated-responsibilities`, `/vice-principal/decision-history`):** Tracks incoming delegations assigned by the Principal, alongside outgoing flags and formal annotations routed upward to the Principal.
+
+### 2. Academic & Departmental Performance
+* **Department Oversight (`/vice-principal/academics`, `/vice-principal/academics/departments`, `/vice-principal/department-performance`):** Monitors syllabus completion, class conduction, live class states across B.Tech departments, and attendance anomalies.
+* **Academic Exceptions (`/vice-principal/academics/exceptions`, `/vice-principal/attendance-exceptions`):** Reviews attendance threshold exemptions, internal exam clashes, and faculty-escalated academic discrepancies.
+
+### 3. Examination & Hostel Synchronization
+* **Examination Coordination (`/vice-principal/examinations`, `/vice-principal/examination-coordination`, `/oie/*`):** Synchronizes with the Office of the Controller of Examinations and OIE regarding examination scheduling, malpractice reviews, and candidate hall access.
+* **Hostel & Security Summaries (`/vice-principal/hostel-security-summaries`):** Aggregated, non-PII operational view of hostel block curfews, mess operations, and campus perimeter integrity.
+
+## Key API endpoints
+
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/vp/dashboard` | `GET` | Fetches operational metrics: pending approval count, department status, and system alerts. |
+| `/vp/bridge` | `GET,POST` | Retrieves or creates escalation items flagged directly to the Principal's executive queue. |
+| `/vp/academics` | `GET` | Compiles academic metrics, live class tracking, and departmental performance indicators. |
+| `/vp/history` | `GET` | Queries historical approval actions, decisions, and annotations made by the VP. |
+| `/vp/hostel-summary` | `GET` | Retrieves aggregate hostel occupancy, curfew statistics, and security breach summaries. |
+| `/vp/retention` | `GET` | Gathers engagement metrics, morning brief status, and operational streak telemetry. |
+| `/permissions/[ticket]` | `GET,PATCH` | Evaluates permission details and records approve, reject, or comment actions. |
+| `/permissions/[ticket]/amend` | `POST` | Modifies parameters (validity, times, conditions) of an in-flight gate pass or leave request. |
+| `/permissions/[ticket]/forward` | `POST` | Reroutes an approval ticket to another officer or specific committee. |
+| `/permissions/[ticket]/escalate` | `POST` | Escalates an unresolved or high-consequence request to the Principal. |
+| `/permissions/[ticket]/sign` | `POST` | Authorizes and applies official digital sign-off to a pass or leave approval. |
+| `/academic-status` | `GET,POST` | Reviews pending academic sanctions (`DEBARRED`, `SUSPENDED`) and submits approvals. |
+| `/complaints/[id]/cosign` | `POST` | Co-signs or endorses an escalated disciplinary or grievance resolution. |
+
+## Data flow
+1. **Submission & Inflow:** Department HODs, Hostel Managers, and OIE escalate unapproved tickets or high-risk requests to the VP approval queue (`/vice-principal/approvals/pending`).
+2. **Review & Action:** The Vice-Principal reviews evidence and selects one of four pathways:
+   - **Approve/Sign:** Dispatches `/permissions/[ticket]/sign`, unlocking gate entry or academic standing.
+   - **Amend:** Updates parameters via `/permissions/[ticket]/amend` before signing.
+   - **Bridge/Escalate:** Uses `/vp/bridge` or `/permissions/[ticket]/escalate` to route the item to the Principal.
+   - **Reject/Revoke:** Disapproves the request with recorded audit reasoning.
+3. **Audit Trail:** Actions update the ticket timeline, trigger audit logging, and reflect on the Principal's strategic scorecard.
+
+## Security notes
+* **Session & Token Architecture:** Authenticated using rotating JWT tokens in HttpOnly cookies, verified on every request through `/api/auth/session`.
+* **Server-Side RBAC:** Gated strictly via `withAuthorization({ requiredRole: ['vice_principal', ...] })`.
+* **Audit Compliance:** All actions via the Principal Bridge are stamped with the VP's user ID, timestamp, and justification.
+* **Delegation Boundaries:** When acting under a delegated Principal role, the user's base identity remains `vice_principal`, operating under verified time-bound delegation rules stored in the database.
+
+
+## Gaps & Research
+
+### Institutional context
+The Vice-Principal is the second-highest authority at JNTUH CEJ, reporting directly to the Principal. Discharges the Principal's duties during leave and handles the exam office queue, OIE duties, academic exceptions, and department-level academic review.
+
+In the Gate Monitor system, the VP has a capability-gated view: the Principal Bridge widget shows what the Principal has delegated or flagged. The VP can view live class state, confirm a faculty's class on their behalf, view exam coordination, and view hostel aggregate (no PII).
+
+### Operational standards
 - The Vice-Principal acts as Principal's delegate with time-boxed authority
 - Exam office queue: OIE handles candidate attendance reconciliation, hall access, and exceptions
 - Academic exceptions: the VP reviews and signs off on late submissions, re-sits, and grade disputes
@@ -20,54 +71,50 @@ Per Indian university governance:
 - The VP can confirm a faculty's class on their behalf if the faculty is absent
 - Hostel aggregate: the VP sees occupancy and curfew compliance but no individual student PII
 
-Per JNTUH exam office procedures, the Vice-Principal works with the exam branch office under the Controller of Examinations for result processing and exam-day operations.
+### Missing (not in app yet)
+1. **Exam-day command center** — no dedicated view for exam-day operations (candidate attendance, hall access, exceptions)
+2. **OIE queue management** — no structured queue for candidate attendance reconciliation
+3. **Academic exception workflow** — no formal process for late submissions, re-sits, grade disputes
+4. **Principal leave handoff** — no formal process for VP to take over when Principal is on leave
+5. **Department KPI dashboard** — no single view comparing all 5 B.Tech + 5 M.Tech departments
+6. **VP action log** — no structured log of all VP decisions and their outcomes
+7. **Cross-exam coordination** — no view showing all exam centers, candidates, and exceptions in one screen
+8. **Hostel aggregate alerting** — no proactive alert when hostel curfew compliance drops below threshold
 
-## Accountability and escalation
-- VP reports to Principal (campus head)
-- Exam matters: OIE → VP → Principal (as Chief Superintendent)
-- Academic exceptions: HOD → VP → Principal
-- Delegation: VP receives delegated authority from Principal with time-box
-- VP can flag items to the Principal via the Principal Bridge
-- VP cannot self-approve; all VP actions require Principal sign-off for final authority
-
-## What we have in the app
-- /vice-principal — Dashboard with exam office queue, OIE duties, academic exceptions
-- /vice-principal/bridge — Principal Bridge: items flagged by or for the Principal
-- /vice-principal/exams — Exam coordination view
-- /vice-principal/departments — Department performance review
-- /vice-principal/classes — Live class state, faculty confirmation
-
-Key API endpoints:
-- GET /api/vice-principal/bridge — View Principal bridge items
-- POST /api/vice-principal/bridge/[id]/flag — Flag an item to Principal
-- GET /api/vice-principal/exams — Exam coordination
-- POST /api/vice-principal/classes/[id]/confirm — Confirm faculty's class on behalf
-- GET /api/vice-principal/departments — Department performance
-
-Data flow: VP actions are logged in audit_events. Principal Bridge creates a flag record with context. Delegation records are time-boxed and auto-revoke.
-
-## What is missing
-1. Exam-day command center — no dedicated view for exam-day operations (candidate attendance, hall access, exceptions)
-2. OIE queue management — no structured queue for candidate attendance reconciliation
-3. Academic exception workflow — no formal process for late submissions, re-sits, grade disputes
-4. Principal leave handoff — no formal process for VP to take over when Principal is on leave
-5. Department KPI dashboard — no single view comparing all 5 B.Tech + 5 M.Tech departments
-6. VP action log — no structured log of all VP decisions and their outcomes
-7. Cross-exam coordination — no view showing all exam centers, candidates, and exceptions in one screen
-8. Hostel aggregate alerting — no proactive alert when hostel curfew compliance drops below threshold
-
-## Implementation notes for dashboard/agent
+### Implementation notes
 - Dashboard leads with exam office queue, OIE duties, academic exceptions
 - VP agent has capability-gated view: what it can see/do is data-driven, not hardcoded
 - Principal Bridge is the signature widget: shows what the Principal has flagged or delegated
-- VP agent should escalate to Principal for all final approvals
 - Exam-day: the VP console should show candidate attendance, hall access, spot exceptions in real time
 
-## Agent persona
-When acting as the vice_principal role:
+### Agent persona
 - Focus: exam office queue, OIE duties, academic exceptions, department review
 - Can: view live class state, confirm faculty's class, view exam coordination, view hostel aggregate
 - Cannot: self-approve; all final authority rests with Principal
-- Escalation: to Principal for all final decisions
-- Three escalation paths: exam → OIE → VP → Principal; academic → HOD → VP → Principal; hostel → hostel_manager → VP → Principal
+- Escalation: exam → OIE → VP → Principal; academic → HOD → VP → Principal
+
+
+
+## Cross-Role Dependencies
+
+### VP should see (read-only)
+- **principal**: flagged items, delegation chain, exam coordination → What Principal expects
+- **hod**: department KPIs, exam proposals, academic status → Department health
+- **oie**: exam queue, candidate attendance, exceptions → Exam status
+- **exam_branch**: result processing status, hall ticket distribution → Exam progress
+- **hostel_manager**: hostel aggregate (no PII) → Hostel KPIs
+
+### VP should NOT see
+- **sysadmin**: infra, MFA, RLS → not VP's concern
+- **admin**: user governance, audit → not VP's concern
+
+### VP escalates to
+- **principal**: all final approvals, DEBARRED, lockdown
+- **dean**: academic governance, compliance
+- **exam_branch**: result processing, exam disputes
+
+### VP borrows from
+- **principal**: flagged items via Principal Bridge (vp flags, principal responds)
+- **hod**: exam proposals, academic status (hod creates, vp reviews)
+- **oie**: exam queue (oie triages, vp sees)
 

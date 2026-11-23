@@ -1,70 +1,100 @@
 # Caretaker — how it works
 
-## Role in institutional life
-The Caretaker is a residential block caretaker at JNTUH CEJ, responsible for day-to-day facilities maintenance within their assigned hostel block. Per JNTUH CEJ's hostel staff page, caretakers support the Hostel Manager and Deputy Wardens: "The Hostel Manager and Deputy Wardens are appointed from the teaching faculty as in-charge, who in turn are supported by the respective hostel Care Takers."
+## Overview
+The `caretaker` role represents residential block caretakers responsible for day-to-day facilities maintenance, student grievance resolution, housekeeping tracking, and physical asset upkeep within assigned hostel blocks.
 
-In the Gate Monitor system, the Caretaker:
-- Handles day-to-day facilities maintenance (electricity, plumbing, furniture, housekeeping)
-- Resolves student housing grievances at the block level
-- Tracks housekeeping and physical asset upkeep
-- Manages maintenance tickets for their assigned block
-- Reports major issues to the Deputy Warden
+Caretakers operate primarily through the complaints and maintenance workflow engine. They receive, triage, assign, and resolve maintenance tickets (plumbing, electrical, carpentry, cleanliness) raised by hostel residents, and oversee ground maintenance staff and workers.
 
-## Operational standards
-Per Indian university hostel maintenance standards:
-- Facilities maintenance: caretaker is the first responder for block-level issues
-- Student grievance resolution: caretaker handles routine housing issues; escalates to Deputy Warden for major issues
-- Housekeeping tracking: caretaker tracks housekeeping standards and reports compliance
-- Physical asset upkeep: caretaker maintains inventory of physical assets and reports damage
-- Maintenance ticket workflow: issue reported → caretaker assigned → resolution → verification → closure
+## Pages & workflows
+- **/caretaker and /caretaker/home**: Caretaker operational landing page and summary dashboard. Integrates the `ComplaintConsole` (`/caretaker/complaints`) and displays key metrics from `/api/caretaker/summary` (pending repairs, SLA breaches, active workers).
+- **/caretaker/complaints and /caretaker/complaints/[id]**: Core complaint resolution interface. Lists student grievances filtered by category, urgency, and block. The detail view permits updating complaint status, adding internal work notes, uploading repair proof photos, assigning workers, and recording resolution details.
+- **/caretaker/maintenance**: Maintenance scheduling and task tracker for routine block inspections, servicing cycles, and preventive upkeep.
+- **/caretaker/workers**: Roster and task assignment portal for maintenance workers and housekeeping staff assigned to the block.
+- **/hostel/permissions**: Resident permission queue allowing caretakers to review and verify student leave requests and block-level permissions within their hostel scope.
 
-Per JNTUH CEJ hostel rules, the caretaker is the first step in the approval chain: caretaker → deputy_warden → hostel_manager → principal.
+## Key API endpoints
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/caretaker/summary` | GET | Returns high-level operational counts: open complaints, high-priority issues, active workers, and today's completed tasks. |
+| `/caretaker/maintenance` | GET | Retrieves scheduled maintenance tasks and block servicing records. |
+| `/complaints` | GET, POST | Lists complaints scoped to the caretaker's assigned hostel blocks; allows caretakers to lodge tickets on behalf of facilities. |
+| `/complaints/[id]` | DELETE, GET, PATCH | Reads full ticket details, attaches notes, reassigns priority, or marks a complaint in-progress / resolved. |
+| `/complaints/[id]/timeline` | GET | Retrieves complete audit history and state transition logs for a ticket. |
+| `/complaints/[id]/attachments` | GET, POST | Uploads inspection images, repair evidence, or invoice documents for a ticket. |
+| `/complaints/[id]/attachments/[attId]` | DELETE, GET | Fetches or removes a specific attachment file from a complaint. |
+| `/complaints/[id]/feedback` | POST | Records resident sign-off or caretaker verification feedback on completed repairs. |
+| `/complaints/[id]/reopen` | POST | Reopens a ticket if repairs fail post-resolution inspection. |
+| `/complaints/categories` | GET | Fetches the taxonomy of complaint domains (electrical, civil, water, hygiene). |
+| `/complaints/analytics/summary` | GET | Aggregates resolution time metrics, open ticket age, and SLA adherence. |
+| `/complaints/analytics/sla-breaches` | GET | Lists overdue complaints that have breached designated response or resolution SLAs. |
+| `/complaints/search` | GET | Full-text search across resident complaints by roll number, room number, or description. |
+| `/complaints/audit/trail` | GET | Audit log recording status transitions, reassignments, and notes. |
 
-## Accountability and escalation
-- Caretaker reports to Deputy Warden (block-level)
-- Routine maintenance: caretaker resolves directly
-- Major issues: caretaker → Deputy Warden → Hostel Manager
-- Student grievances: caretaker → Deputy Warden (if unresolved)
-- Housekeeping non-compliance: caretaker → Deputy Warden → Hostel Manager
+## Data flow
+1. **Ticket Triage & Assignment**:
+   - A resident submits a complaint; the system routes it to the block caretaker based on hostel block taxonomy.
+   - The caretaker opens `/caretaker/complaints/[id]`, reviews the issue, updates status to `IN_PROGRESS` via `PATCH /api/complaints/[id]`, and dispatches a worker via `/caretaker/workers`.
+2. **Resolution & Sign-Off**:
+   - The maintenance worker completes physical repairs.
+   - The caretaker inspects the work, uploads proof photos via `POST /api/complaints/[id]/attachments`, and marks the ticket `RESOLVED`.
+   - The student receives an alert to provide satisfaction feedback (`POST /api/complaints/[id]/feedback`).
 
-## What we have in the app
-- /caretaker — Dashboard with block maintenance status, ticket queue
-- /caretaker/tickets — Maintenance ticket workflow
-- /caretaker/grievances — Student housing grievance tracking
-- /caretaker/housekeeping — Housekeeping compliance tracking
-- /caretaker/inventory — Physical asset inventory for block
+## Security notes
+- **Authentication**: JWT access token delivered via HttpOnly cookie and Authorization Bearer header, paired with rotating refresh tokens (`/api/auth/refresh`). Session state is revalidated against `/api/auth/session`.
+- **Device Binding (M4)**: Validates incoming requests against the `device_id` cookie matching the JWT `dh` claim.
+- **Hostel Block Scoping**: Caretakers are restricted via `withAuthorization` and row-level database filters to complaints and assets located within their assigned hostel blocks (`users.hostel_scope`). Attempts to access other blocks return 403 or empty sets.
+- **Audit Logging**: Every status transition, note addition, and attachment change writes an entry to `complaint_timeline` with user attribution.
 
-Key API endpoints:
-- POST /api/caretaker/tickets — Create maintenance ticket
-- POST /api/caretaker/tickets/[id]/resolve — Resolve ticket
-- POST /api/caretaker/grievances — Log student grievance
-- GET /api/caretaker/housekeeping — View housekeeping status
-- GET /api/caretaker/inventory — View block inventory
 
-Data flow: Caretaker actions are scoped to their assigned block. Tickets are tracked through the maintenance ticket workflow. Grievances are logged and escalated as needed.
+## Gaps & Research
 
-## What is missing
-1. Ticket SLA tracking — no SLA timers for maintenance ticket resolution
-2. Housekeeping score — no structured housekeeping score per block
-3. Asset damage reporting — no structured reporting of asset damage with photos
-4. Caretaker task scheduling — no way to schedule recurring maintenance tasks
-5. Student satisfaction — no periodic student satisfaction survey for housing
-6. Maintenance cost tracking — no tracking of maintenance costs per block
-7. Emergency maintenance — no fast-track workflow for emergency maintenance issues
-8. Caretaker shift management — no shift scheduling for block caretakers
+### Institutional context
+Per JNTUH CEJ's hostel staff page: caretakers support the Hostel Manager and Deputy Wardens: "The Hostel Manager and Deputy Wardens are appointed from the teaching faculty as in-charge, who in turn are supported by the respective hostel Care Takers."
 
-## Implementation notes for dashboard/agent
+The Caretaker handles day-to-day facilities maintenance, student grievance resolution, housekeeping tracking, and physical asset upkeep within assigned hostel blocks.
+
+### Missing (not in app yet)
+1. **Ticket SLA tracking** — no SLA timers for maintenance ticket resolution
+2. **Housekeeping score** — no structured housekeeping score per block
+3. **Asset damage reporting** — no structured reporting of asset damage with photos
+4. **Caretaker task scheduling** — no way to schedule recurring maintenance tasks
+5. **Student satisfaction** — no periodic student satisfaction survey for housing
+6. **Maintenance cost tracking** — no tracking of maintenance costs per block
+7. **Emergency maintenance** — no fast-track workflow for emergency maintenance issues
+8. **Caretaker shift management** — no shift scheduling for block caretakers
+
+### Implementation notes
 - Dashboard leads with block maintenance status, ticket queue
 - Caretaker agent is scoped to a single block
 - Tickets: structured workflow with priority, SLA, resolution status
 - Grievances: logged with type, severity, resolution status
 - Housekeeping: weekly compliance score per block
 
-## Agent persona
-When acting as the caretaker role:
+### Agent persona
 - Focus: block maintenance, ticket resolution, student grievances
 - Scoped to: a single hostel block
 - Can: create/resolve tickets, log grievances, track housekeeping
 - Cannot: escalate to DEBARRED (Principal-only), approve cross-block changes
 - Escalation: to Deputy Warden for major issues; to Hostel Manager for cross-block decisions
+
+
+
+## Cross-Role Dependencies
+
+### Caretaker should see (read-only)
+- **deputy_warden**: block incidents, maintenance priorities → What to fix
+- **hostel_manager**: room allot/vacate, block occupancy → Who's in the block
+- **emo**: infrastructure complaints, vendor status → What's being fixed
+
+### Caretaker should NOT see
+- **sysadmin**: infra, MFA, RLS → not caretaker's concern
+- **admin**: user governance, audit → not caretaker's concern
+
+### Caretaker escalates to
+- **deputy_warden**: major maintenance issues, student grievances
+- **emo**: infrastructure failures, vendor issues
+
+### Caretaker borrows from
+- **deputy_warden**: incident log (dw logs, caretaker fixes)
+- **emo**: maintenance ticket assignment (emo assigns, caretaker completes)
 

@@ -1,78 +1,126 @@
 # Student — how it works
 
-## Role in institutional life
-The Student role represents enrolled students at JNTUH CEJ, partitioned into two operational personas: day scholars and hostel residents. In the Gate Monitor system, students use the web application to manage gate movement passes, track attendance and academic milestones, view mess menus and tokens, submit campus complaints, and respond to curfew or security notifications.
+## Overview
+The student role represents enrolled students at JNTUH CEJ, partitioned into two operational personas: day scholars and hostel residents. Students use the web application to manage gate movement passes, track attendance and academic milestones, view mess menus and tokens, submit campus complaints, and respond to curfew or security notifications.
 
-Per JNTUH CEJ, the student is the primary user of the system. The student's experience is the most context-aware in the app:
-- Day scholars see: Day Out, Early Leave, Late Arrival, and academic milestones
+## Pages & workflows
+The student interface spans 45 routes categorized into core functional workflows:
+
+### 1. Dashboard & Status
+- `/student`: Persona-aware landing dashboard. For day scholars, it prioritizes real-time class attendance percentages, today's schedule (`MyDayStrip`), and action items; for hostellers, it highlights curfew countdowns, active hostel passes (`ActivePassCard`), and resident status.
+- `/student/recap`, `/student/activity`, `/student/calendar`: Academic milestone reviews, personal activity history, and combined academic/campus calendar.
+- `/student/id`: Digital student ID card with live identity tokens for gate and campus verification.
+
+### 2. Gate Passes & Permission Requests
+- `/student/passes`, `/student/passes/[ticket]`: View active, historical, and pending gate passes, inspection of approval chain status, QR pass display for gate scanner scanning, and feedback submission.
+- `/student/permissions`, `/student/permissions/new`, `/student/pass-application`, `/student/gate-pass`, `/student/leave-requests`: Request entry, exit, or residential passes.
+  - *Pass Request Workflow*: Student navigates to `/student/permissions/new` -> selects pass type (e.g., Late Arrival, Early Leave, Outpass, Medical Leave) -> fills destination, reason, and departure/expected return dates -> system checks persona rules (e.g. 4/month quota for hosteller Outpass) -> submits request (`POST /passes`) -> tracks progress at `/student/request-tracking` or `/student/passes/[ticket]`.
+  - For day scholars, Day Out / Early Leave / Late Arrival are auto-approved (`Self`); hosteller Outpass requires parent consent followed by hostel administration approvals (`caretaker -> deputy_warden -> hostel_manager -> principal`).
+
+### 3. Academics & Attendance
+- `/student/attendance`, `/student/attendance-calendar`: Overview of aggregate attendance, subject-by-subject percentage, and date-by-date calendar breakdown.
+- `/student/assignments`, `/student/marks`, `/student/exams`: Assignment submission tracking, internal marks view, and upcoming examination schedules.
+- `/student/class-requests`: Track requests related to class attendance, leaves, or session conflicts.
+- `/student/library`, `/student/fees`, `/student/scholarships`: Borrowed book tracking/fines, tuition/exam fee ledger, and scholarship entitlement tracking.
+
+### 4. Hostel & Mess (Hosteller Persona)
+- `/student/mess`, `/student/mess-bill`, `/student/mess/reviews`: Daily dining menu, monthly mess billing and rebate calculations, and mess feedback reviews.
+- `/student/mess/token`, `/student/mess/token/[eventId]`, `/student/mess/special`: Digital dining token redemption and registration for special feasts.
+- Meal opt-out can be requested through the mess interface, creating rebate records.
+
+### 5. Campus Community, Complaints & Safety
+- `/student/complaints`, `/student/complaints/new`, `/student/complaints/[id]`: File institutional grievances (hostel maintenance, ragging, academic issues) with attachments, view real-time resolver timelines, and add cosigners.
+- `/student/anti-ragging`: Specialized grievance and emergency reporting channel for campus safety.
+- `/student/campus`, `/student/my-events`, `/student/achievements`, `/student/knowledge`: Campus event discovery/registration, community feed, student achievements, and resource knowledge base.
+- `/student/notifications`, `/student/notifications/alerts`, `/student/notifications/announcements`: Emergency broadcast feeds, gate pass alerts, and curfew acknowledgement notices.
+
+### 6. Profile & Security
+- `/student/profile`, `/student/profile/privacy`, `/student/coordinator`: Personal student details, data consent settings, and assigned faculty counselor/coordinator contact info.
+- `/student/profile-security`, `/student/profile-security/sessions`: Password changes, WebAuthn/Passkey registration, and active device session revoking.
+
+## Key API endpoints
+
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/passes` | GET, POST | Lists student's gate passes or submits a new gate pass request. |
+| `/passes/[passId]` | GET, PUT | Retrieves pass details/QR verification payload or updates a pending pass. |
+| `/passes/[passId]/action` | POST | Executes student pass lifecycle actions (e.g. pass cancellation). |
+| `/student/dashboard` | GET | Fetches aggregated student overview (attendance %, active pass, alerts). |
+| `/student/attendance` | GET | Returns subject-wise attendance percentages and session details. |
+| `/student/attendance-calendar` | GET | Retrieves calendar-grid attendance records for date ranges. |
+| `/student/attendance/dispute` | POST | Submits an attendance dispute to faculty for an erroneous mark. |
+| `/student/assignments` | GET | Returns list of coursework assignments with submission deadlines. |
+| `/student/marks` | GET | Retrieves midterm and internal examination scores. |
+| `/student/next-exam` | GET | Fetches next scheduled examination metadata and hall ticket eligibility. |
+| `/student/meal-opt-out` | GET, POST | Views meal exemption dates or files a mess-off opt-out rebate. |
+| `/student/curfew-acknowledge` | POST | Acknowledges curfew check-in notices issued by hostel supervisors. |
+| `/student/guardian-link` | GET, POST | Checks linked parent/guardian information or submits a guardian connection request. |
+| `/emergency/sos` | GET, POST | Triggers an immediate campus SOS alert notifying security and supervisors. |
+| `/complaints` | GET, POST | Lists student-submitted grievances or lodges a new complaint ticket. |
+
+## Data flow
+Upon navigating to `/student`, the dashboard performs parallel GET requests to `/api/student/dashboard`, `/api/passes`, and `/api/student/attendance/overview`. When submitting a pass, the form POSTs JSON payload to `/api/passes`; if parent consent is mandated, background notifications are queued and the pass ticket enters `PENDING_PARENT_CONSENT`. Real-time gate scan events and curfew broadcast alerts stream via server-sent events (`/api/gate/stream`) or periodic polling via `usePolling`. Authentication uses a JWT access token stored in an HttpOnly cookie alongside a Bearer token header, backed by a rotating refresh token; session integrity is validated on layout mount via `/api/auth/session`.
+
+## Security notes
+Students are strictly isolated under row-level security (Postgres RLS) to access only their own records (`auth.uid() = user_id`). A student cannot approve passes, override attendance, clear gate violations, or inspect other students' profiles or passes. Pass issuance employs fail-close validation: if `student_details.academic_status` is `DEBARRED` or `SUSPENDED`, or if monthly outpass quotas (4/month for hostellers) are exceeded, pass generation is blocked at the API layer. Day scholars are prevented from requesting hosteller-restricted overnight passes without explicit caretaker pre-clearance.
+
+
+## Gaps & Research
+
+### Institutional context
+The student is the primary user of the system. Per JNTUH CEJ, the student's gate-pass experience is the core of the system: request → approval chain → QR pass → gate scan → check-in/check-out.
+
+The student's experience is the most context-aware in the app:
+- Day scholars see: Day Out, Early Leave, Late Arrival, academic milestones
 - Hostel residents see: Curfew countdown, ActivePassCard, Expected Return, Overstay alerts
 
-The student's gate-pass experience is the core of the system: request → approval chain → QR pass → gate scan → check-in/check-out.
+### Missing (not in app yet)
+1. **Attendance alerts** — no proactive alert when attendance drops below 75% threshold
+2. **Fee payment integration** — no direct payment link for fee dues
+3. **Mess menu personalization** — no way to customize menu preferences
+4. **Academic planning** — no structured academic planning (electives, projects, internships)
+5. **Library digital resources** — no integration with digital library
+6. **Exam preparation** — no structured exam preparation resources
+7. **Hostel visit booking** — no structured booking for parent visits to hostel
+8. **Student feedback** — no structured feedback on campus facilities and services
 
-## Operational standards
-Per Indian university student portal best practices:
-- Gate pass request: student selects pass type, fills destination/reason/dates, system checks persona rules (e.g. 4/month quota for hosteller Outpass)
-- Attendance tracking: real-time view of attendance % per subject and overall
-- Academic milestones: recap, activity, calendar views
-- Mess: menu view, token balance, special requests, reviews
-- Complaints: structured complaint submission and tracking
-- Library: digital library access and account status
-- Marks: internal and external exam marks
-- Curfew: hostel residents see curfew countdown, overstay alerts, and expected return
-
-Per JNTUH CEJ gate-pass rules, the student's pass request flows through: student → HOD (for academic reasons) → Hostel Manager (for hostel students) → Parent acknowledgement (for hostel students) → gate pass issued.
-
-## Accountability and escalation
-- Student reports to HOD for academic matters
-- Gate-pass disputes: student → HOD → Hostel Manager → Principal
-- Mess complaints: student → Mess In-charge → Hostel Manager
-- Hostel complaints: student → Deputy Warden → Hostel Manager → Principal
-- Fee disputes: student → College Office → Principal
-
-## What we have in the app
-- /student — Persona-aware landing dashboard (day scholar vs hosteller)
-- /student/passes — Gate pass requests and tracking
-- /student/attendance — Attendance tracking and analytics
-- /student/mess — Mess menu, tokens, special requests, reviews
-- /student/complaints — Structured complaint submission
-- /student/fees — Fee dues and payment status
-- /student/marks — Internal and external exam marks
-- /student/calendar — Academic and campus calendar
-- /student/achievements — Achievements and awards
-- /student/recap — Academic milestone reviews
-- /student/coordinator — Class coordinator view
-
-Key API endpoints:
-- POST /api/student/passes — Request gate pass
-- GET /api/student/attendance — View attendance
-- POST /api/student/complaints — Submit complaint
-- GET /api/student/fees — View fee status
-- GET /api/student/marks — View marks
-
-Data flow: Student pass requests create a pass record with approval chain. Attendance is tracked per subject and overall. Mess tokens are issued per resident, per meal, per day.
-
-## What is missing
-1. Attendance alerts — no proactive alert when attendance drops below 75% threshold
-2. Fee payment integration — no direct payment link for fee dues
-3. Mess menu personalization — no way to customize menu preferences
-4. Academic planning — no structured academic planning (electives, projects, internships)
-5. Library digital resources — no integration with digital library
-6. Exam preparation — no structured exam preparation resources
-7. Hostel visit booking — no structured booking for parent visits to hostel
-8. Student feedback — no structured feedback on campus facilities and services
-
-## Implementation notes for dashboard/agent
+### Implementation notes
 - Dashboard is persona-aware: day scholar vs hosteller
 - Day scholar: Day Out, Early Leave, Late Arrival, academic milestones
 - Hosteller: Curfew countdown, ActivePassCard, Expected Return, Overstay
 - Pass request: structured form with persona rules and approval chain
 - Attendance: real-time view with 75% threshold alerts
 
-## Agent persona
-When acting as the student role:
+### Agent persona
 - Focus: gate passes, attendance, mess, complaints, fees, marks
 - Persona: day scholar or hosteller (drives the entire UI)
 - Can: request passes, view attendance, submit complaints, view fees/marks
 - Cannot: approve their own passes (needs HOD/Hostel Manager/Parent)
 - Escalation: to HOD for academic; to Hostel Manager for hostel; to Principal for disputes
+
+
+
+## Cross-Role Dependencies
+
+### Student should see (read-only)
+- **faculty**: marks, assignments, study material → Academic progress
+- **mess_incharge**: menu, token balance → What's being served
+- **deputy_warden**: curfew status, expected return → Hostel compliance
+- **parent**: gate pass acknowledgements → Parent knows child's status
+- **guardian**: leave requests → Guardian tracks child's leave
+
+### Student should NOT see
+- **sysadmin**: infra, MFA, RLS → not student's concern
+- **admin**: user governance, audit → not student's concern
+
+### Student escalates to
+- **faculty**: academic issues, marks disputes
+- **deputy_warden**: hostel issues, curfew disputes
+- **mess_incharge**: mess complaints, menu issues
+- **admin**: general complaints, fee disputes
+
+### Student borrows from
+- **faculty**: class schedule, marks, assignments (read-only)
+- **mess_incharge**: menu, token balance (read-only)
+- **deputy_warden**: curfew status, overstay alerts (read-only)
 

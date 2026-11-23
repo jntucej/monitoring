@@ -1,75 +1,108 @@
-# Mess In-charge — how it works
+# Mess Incharge — how it works
 
-## Role in institutional life
-The Mess In-charge / Warden (Mess) at JNTUH CEJ is the operational authority for all hostel mess facilities. Per JNTUH CEJ's hostel staff page, the Hostel Manager is "entrusted with the twin responsibilities of allotment of rooms in hostels as well as looking after the day-to-day mess facilities to the boarders." The Mess In-charge is the dedicated role for mess operations.
+## Overview
+The `mess_incharge` role represents the operational manager of campus dining halls and mess facilities (Warden Mess / Mess Committee lead). The mess incharge is responsible for daily meal planning, meal session attendance tracking, QR token issuance and verification, inventory stock reconciliation, food consumption analytics, student mess feedback review, and vendor compliance.
 
-In the Gate Monitor system, the Mess In-charge:
-- Finalizes the weekly/daily menu with the Mess Committee
-- Issues food tokens to hostel residents
-- Reconciles consumption vs inventory
-- Manages vendor/contractor compliance
-- Verifies mess bills
-- Maintains the rebate ledger
-- Handles food safety and hygiene compliance
+The mess incharge balances operational dining logistics (verifying student meal tokens at dining counters, managing buffer meals) with administrative inventory controls (raw ingredient consumption, supplier invoices, mess rebate calculations).
 
-## Operational standards
-Per Indian university mess management best practices (referenced from TMU Mess Policy and similar institutional frameworks):
-- Menu finalization: Mess In-charge works with the Mess Committee; menu is published 3 days in advance
-- Token issuance: tokens are issued per resident, per meal, per day; usage is tracked
-- Consumption vs inventory: weekly reconciliation between consumed food and purchased inventory
-- Vendor compliance: vendors are contracted for specific items; compliance is audited quarterly
-- Mess bill verification: bills are verified against actual consumption before payment
-- Rebate ledger: rebates (cashbacks, discounts) are tracked and reconciled
-- Food safety: FSSAI compliance, hygiene checks, and waste management
+## Pages & workflows
+- **/mess**: Mess incharge overview console. Integrates `RoleDashboardPanel` pulling from `/api/mess/analytics`, presenting key performance indicators: daily diners count, meal attendance rates, inventory burn rate, and pending reviews.
+- **/mess/scan**: Active counter scanning terminal. Operates high-throughput QR code and barcode scanning to check students in for Breakfast, Lunch, Snacks, or Dinner.
+- **/mess/verify-token**: Dedicated meal token verification screen allowing manual token entry, single-token validation, and emergency manual meal approvals.
+- **/mess/meal-attendance**: Real-time meal participation tracking by hostel block, course, and session, contrasting registered boarders with actual attendees.
+- **/mess/menu-management**: Weekly and monthly meal schedule planning. Allows defining daily breakfast, lunch, snacks, and dinner dishes, dietary flags, and contractor menu instructions.
+- **/mess/inventory-stock**: Raw grocery and ration inventory management. Tracks stock in hand, daily inward supply receipts, storage thresholds, and reorder warnings.
+- **/mess/daily-meal-counts**: Consolidated meal census reporting buffer requirements and attendance variations across academic semesters and holidays.
+- **/mess/consumption-reports**: Analytical auditing matching food ingredient consumption against diner counts to detect inventory leaks or contractor overbilling.
+- **/mess/special-events**: Management of feast days, banquet events, and special meal tokens (e.g. college day, festivals), including token generation and guest token reconciliation.
+- **/mess/reviews**: Student meal feedback monitoring. Tracks dish ratings, taste and hygiene feedback, student complaints, and official replies.
+- **/mess/mess-issues**: Operational incident log covering equipment breakdowns, cold chain failures, contractor disputes, and kitchen hygiene issues.
+- **/mess/operational-requests**: Administrative workflows for requisitioning additional kitchen equipment, emergency provisions, or staff overtime.
 
-Per TMU Mess Policy (teerthankermahaveeruniversity.ac.in): "Provide hygienic, wholesome, nutritious and balanced meals at reasonable and approved rates. Maintain standards for food quality, preparation, storage, serving, sanitation and waste management. Ensure transparent management of mess operations, fees, procurement, vendor performance and user feedback."
+## Key API endpoints
+| Endpoint | Method(s) | What it does |
+|---|---|---|
+| `/mess/scan` (via `/mess/serve`) | POST | Validates a student meal token or student roll number and records meal service in real time. |
+| `/mess/token/verify` | GET | Validates token code validity, session match (e.g. lunch vs dinner), and previous redemption status. |
+| `/mess/analytics` | GET | Aggregates daily diners, attendance percentages, revenue/billing numbers, and rating trends. |
+| `/mess/attendance` | GET | Fetches time-series meal attendance logs filtered by meal session, date, and hostel block. |
+| `/mess/menu` | GET | Returns active weekly menu items grouped by day and meal session. |
+| `/mess/menu-items` | GET, POST | Adds, modifies, or deactivates dish definitions and nutritional parameters. |
+| `/mess/inventory` | GET | Retrieves current stock balances of raw provisions, unit costs, and reorder levels. |
+| `/mess/consumption` | GET | Returns consumption logs detailing ingredient usage against diners served. |
+| `/mess/meal-counts` | GET | Computes predicted vs actual meal counts for kitchen prep estimation. |
+| `/mess/reconcile` | GET, POST | Reconciles raw material consumption with student scan counts to identify anomalies. |
+| `/mess/reviews` | GET, POST | Retrieves student food reviews and posts administrative responses. |
+| `/mess/reviews/aggregate` | GET | Generates rating aggregates, sentiment breakdown, and dish satisfaction indices. |
+| `/mess/special-events` | GET, POST | Configures special banquet events, guest passes, and event-specific menus. |
+| `/mess/events/[id]/tokens` | GET | Lists tokens minted for a special dining event with redemption status. |
+| `/mess/token/[code]/revoke` | POST | Cancels a compromised or duplicate meal token. |
 
-## Accountability and escalation
-- Mess In-charge reports to Hostel Manager (for hostel mess) and Principal (for campus mess)
-- Menu disputes: Mess In-charge → Hostel Manager → Principal
-- Vendor non-compliance: Mess In-charge → Hostel Manager → Principal
-- Food safety issues: Mess In-charge → Principal → Health Authority
-- Bill disputes: Mess In-charge → Hostel Manager → Principal
+## Data flow
+1. **Meal Service Counter Scanning**:
+   - The student presents their digital meal token or scanned card at the mess entrance.
+   - The counter operator runs `/mess/scan` (calling `POST /api/mess/serve`).
+   - The server verifies that the token is valid for the current meal session (Breakfast, Lunch, Snacks, Dinner), confirms it has not been redeemed already, and marks it used.
+   - Real-time attendance counters update immediately on `/mess/meal-attendance`.
+2. **Menu Planning & Cost Reconciliation**:
+   - The mess incharge updates the weekly cycle at `/mess/menu-management` (`POST /api/mess/menu-items`).
+   - At end-of-day, the incharge records ingredient depletion via `/api/mess/consumption`.
+   - The system triggers `/api/mess/reconcile` to compare ingredient burn rate against student scan tallies, flagging discrepancies.
 
-## What we have in the app
-- /mess — Dashboard with menu, token status, consumption vs inventory
-- /mess/menu — Menu finalization and publication
-- /mess/tokens — Token issuance and usage tracking
-- /mess/inventory — Consumption vs inventory reconciliation
-- /mess/vendors — Vendor/contractor compliance
-- /mess/bills — Mess bill verification
-- /mess/rebates — Rebate ledger
+## Security notes
+- **Authentication**: JWT access token delivered via HttpOnly cookie and Authorization Bearer header, paired with rotating refresh tokens (`/api/auth/refresh`). Session state is revalidated against `/api/auth/session`.
+- **Device Binding (M4)**: Enforces `device_id` cookie verification matching the token's `dh` SHA-256 hash.
+- **Role Scoping**: Enforced via `withAuthorization` with `ROLES.MESS_INCHARGE` (and admin/sysadmin). Meal attendance modification, token revocation, and inventory reconciliation endpoints require valid mess incharge credentials.
+- **Double-Redemption Prevention**: Meal token redemptions use database atomic transactions to prevent duplicate scans across parallel counters.
 
-Key API endpoints:
-- POST /api/mess/menu/finalize — Finalize menu
-- POST /api/mess/tokens/issue — Issue tokens
-- GET /api/mess/inventory — View consumption vs inventory
-- POST /api/mess/bills/verify — Verify mess bill
-- GET /api/mess/vendors — Vendor compliance
 
-Data flow: Menu finalization creates a menu record with publication date. Token issuance updates the token balance. Consumption vs inventory is calculated weekly. Bill verification is a structured approval flow.
+## Gaps & Research
 
-## What is missing
-1. Menu publication calendar — no visual calendar showing upcoming menus
-2. Token balance alerts — no alert when a resident's token balance is low
-3. Inventory low-stock alerts — no proactive alert when inventory is below threshold
-4. Vendor performance dashboard — no structured vendor KPI tracking
-5. Food safety audit — no structured FSSAI compliance audit checklist
-6. Waste tracking — no tracking of food waste vs consumption
-7. Resident feedback — no structured resident feedback on food quality
-8. Cost per plate tracking — no tracking of cost per meal served
+### Institutional context
+Per JNTUH CEJ's hostel staff page: the Hostel Manager is "entrusted with the twin responsibilities of allotment of rooms in hostels as well as looking after the day-to-day mess facilities to the boarders." The Mess In-charge is the dedicated role for mess operations.
 
-## Implementation notes for dashboard/agent
+Per TMU Mess Policy: "Provide hygienic, wholesome, nutritious and balanced meals at reasonable and approved rates. Maintain standards for food quality, preparation, storage, serving, sanitation and waste management. Ensure transparent management of mess operations, fees, procurement, vendor performance and user feedback."
+
+### Missing (not in app yet)
+1. **Menu publication calendar** — no visual calendar showing upcoming menus
+2. **Token balance alerts** — no alert when a resident's token balance is low
+3. **Inventory low-stock alerts** — no proactive alert when inventory is below threshold
+4. **Vendor performance dashboard** — no structured vendor KPI tracking
+5. **Food safety audit** — no structured FSSAI compliance audit checklist
+6. **Waste tracking** — no tracking of food waste vs consumption
+7. **Resident feedback** — no structured resident feedback on food quality
+8. **Cost per plate tracking** — no tracking of cost per meal served
+
+### Implementation notes
 - Dashboard leads with menu, token status, consumption vs inventory
 - Mess In-charge agent is scoped to mess operations
 - Menu: structured finalization with publication date and Mess Committee sign-off
-- Tokens: per resident, per meal, per day; usage is tracked in real time
+- Tokens: per resident, per meal, per day; usage tracked in real time
 - Inventory: weekly reconciliation with low-stock alerts
 
-## Agent persona
-When acting as the mess_incharge role:
+### Agent persona
 - Focus: menu, tokens, inventory, vendors, bills, rebates
 - Can: finalize menu, issue tokens, verify bills, track vendor compliance
 - Cannot: approve bill payment (needs Hostel Manager/Principal), self-approve menu changes
 - Escalation: to Hostel Manager for mess disputes; to Principal for food safety
+
+
+
+## Cross-Role Dependencies
+
+### Mess In-charge should see (read-only)
+- **hostel_manager**: hostel occupancy, mess menu oversight → Who's eating
+- **student**: token balance, mess complaints → What residents need
+- **admin**: mess bill status, vendor contracts → Financial status
+
+### Mess In-charge should NOT see
+- **sysadmin**: infra, MFA, RLS → not MI's concern
+
+### Mess In-charge escalates to
+- **hostel_manager**: menu disputes, mess rule violations
+- **principal**: food safety incidents, vendor contract changes
+
+### Mess In-charge borrows from
+- **hostel_manager**: occupancy data (hm tracks, mi plans menu)
+- **student**: token usage (student consumes, mi issues)
 
