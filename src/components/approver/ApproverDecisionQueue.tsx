@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, RefreshCw } from "lucide-react";
 import { DecisionItemCard } from "@/components/shared/DecisionItemCard";
 import { clearCache } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface PermissionRow {
@@ -131,6 +132,8 @@ export function ApproverDecisionQueue({
   useEffect(() => {
     void loadQueue();
   }, [loadQueue]);
+
+  usePolling(loadQueue, { intervalMs: 30_000, enabled: true });
 
   const handleDecide = async (
     ticket: string,
