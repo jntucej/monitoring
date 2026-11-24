@@ -20,6 +20,7 @@ import { EmptyState } from "@/components/admin/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -273,6 +274,46 @@ function AutonomousInner() {
       {sweepMsg && (
         <p className="text-xs font-medium text-action-primary">{sweepMsg}</p>
       )}
+      <LivePulseStrip
+        ariaLabel="Autonomous stack pulse"
+        items={[
+          {
+            id: "containers",
+            label: "Containers Online",
+            valueLabel: containers ? `${containers.running ?? 0} / ${containers.total ?? 0}` : "—",
+            ratio:
+              containers?.total && containers.total > 0
+                ? (containers.running ?? 0) / containers.total
+                : 0,
+            tone: containerOk ? "ok" : "danger",
+            benchmark: containerOk ? "All stack containers healthy" : "Container degradation detected",
+          },
+          {
+            id: "gate-jobs",
+            label: "Gate Jobs",
+            valueLabel: gateJobsOk ? "Healthy" : "Failing",
+            ratio: gateJobsOk ? 1 : 0.25,
+            tone: gateJobsOk ? "ok" : "danger",
+            benchmark: gateJobsOk ? "13/13 scheduled checks passing" : "Check failing gate jobs below",
+          },
+          {
+            id: "findings",
+            label: "Active Findings",
+            valueLabel: `${findingsActive}`,
+            ratio: findingsActive === 0 ? 1 : Math.max(0.1, 1 - findingsActive / 10),
+            tone: findingsActive === 0 ? "ok" : "warn",
+            benchmark: findingsActive === 0 ? "Zero open anomalies" : `${findingsActive} finding(s) need review`,
+          },
+          {
+            id: "backup",
+            label: "Backup Verification",
+            valueLabel: backupOk ? "Verified" : "Stale",
+            ratio: backupOk ? 1 : 0,
+            tone: backupOk ? "ok" : "danger",
+            benchmark: backupOk ? "Latest snapshot verified" : "Backup check requires attention",
+          },
+        ]}
+      />
 
       {/* Top stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

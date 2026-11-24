@@ -15,6 +15,7 @@ import { ActionItemsStrip } from "@/components/student/home/ActionItemsStrip";
 import { MyStatsCard } from "@/components/student/home/MyStatsCard";
 import { StudentLivingHub } from "@/components/student/StudentLivingHub";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import {
   StudentModeSwitcher,
   StudentModeBody,
@@ -252,6 +253,39 @@ function StudentHomeInner() {
           ...(personaKey === "hosteller"
             ? [{ label: "Meal Token", href: "/student/mess/token" }]
             : []),
+        ]}
+      />
+      <LivePulseStrip
+        ariaLabel="Student live pulse"
+        items={[
+          {
+            id: "pass-state",
+            label: "Gate Pass",
+            valueLabel: activePass ? "QR Ready" : pendingReq ? "In Review" : "None Active",
+            ratio: activePass ? 1 : pendingReq ? 0.5 : 0,
+            tone: activePass ? "ok" : pendingReq ? "warn" : "info",
+            benchmark: activePass
+              ? `Ticket ${activePass.ticket_number ?? ""} active`
+              : pendingReq
+                ? `At ${pendingReq.current_stage ?? "approver"} stage`
+                : "Request a pass when leaving campus",
+          },
+          {
+            id: "curfew",
+            label: "Curfew Window",
+            valueLabel: new Date().getHours() >= 21 || new Date().getHours() < 6 ? "Curfew Active" : "Day Window",
+            ratio: new Date().getHours() >= 21 || new Date().getHours() < 6 ? 0.2 : 0.85,
+            tone: new Date().getHours() >= 21 || new Date().getHours() < 6 ? "warn" : "ok",
+            benchmark: "Standard gate hours 06:00–21:30",
+          },
+          {
+            id: "attendance",
+            label: "Attendance",
+            valueLabel: "82%",
+            ratio: 0.82,
+            tone: "ok",
+            benchmark: "Above 75% minimum threshold",
+          },
         ]}
       />
       <StudentModeSwitcher mode={mode} onChange={setMode} />

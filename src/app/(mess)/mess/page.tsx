@@ -9,6 +9,7 @@ import { KpiCard } from "@/components/shared/KpiCard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { mealDayInspection } from "@/components/approver/wardenConsoleModels";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 interface MessAnalytics {
   declaredPresent: number;
@@ -64,6 +65,34 @@ function MessDashboardInner() {
           { label: "Daily Meal Counts", href: "/mess/daily-meal-counts" },
           { label: "Menu Management", href: "/mess/menu-management" },
           { label: "Operational Requests", href: "/mess/operational-requests" },
+        ]}
+      />
+      <LivePulseStrip
+        ariaLabel="Mess service pulse"
+        items={[
+          {
+            id: "served",
+            label: "Meals Served",
+            valueLabel: `${confirmed} / ${declared}`,
+            ratio: declared > 0 ? confirmed / declared : 0,
+            tone: rate >= 70 ? "ok" : rate >= 40 ? "warn" : "info",
+            benchmark: `${rate}% of declared diners served`,
+          },
+          {
+            id: "remaining",
+            label: "Pending Diners",
+            valueLabel: `${Math.max(0, declared - confirmed)}`,
+            ratio: declared > 0 ? Math.max(0, declared - confirmed) / declared : 0,
+            tone: declared - confirmed > 0 ? "warn" : "ok",
+            benchmark: declared - confirmed > 0 ? "Tokens still awaiting scan" : "All declared diners served",
+          },
+          {
+            id: "date",
+            label: "Service Date",
+            valueLabel: mealDate,
+            tone: "info",
+            benchmark: "Active dining window",
+          },
         ]}
       />
       <WidgetBoundary name="MessDashboardKpis" title="Mess Incharge Dashboard">
