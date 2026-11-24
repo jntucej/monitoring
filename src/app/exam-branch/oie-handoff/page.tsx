@@ -11,9 +11,21 @@ import { useApiResource, clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
-import { Loader2, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
+import { TaskRecordsList } from "@/components/shared/TaskRecordsList";
+import { Loader2, ShieldCheck, AlertTriangle, ArrowRight, ListChecks } from "lucide-react";
+import { getAuthHeaders } from "@/lib/utils";
 
 /* response shapes */
+
+interface PermissionItem {
+  id: string;
+  ticket_number: string;
+  workflow_type?: string;
+  status?: string;
+  current_stage?: string;
+  created_at?: string;
+  sla_deadline?: string;
+}
 
 interface DataResponse {
   success: boolean;
@@ -41,20 +53,24 @@ function ExamBranchOiehandoffInner() {
   usePolling(refreshAll, { intervalMs: 30_000, enabled: !!user });
 
   const busy = loading && !data;
+  const items = (Array.isArray((data as DataResponse | null)?.data)
+    ? ((data as DataResponse | null)!.data as unknown as PermissionItem[])
+    : []);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-6 min-w-0">
       {/* Back link */}
       <Link
-        href="/exam-branch/calendar"
+        href="/exam-branch"
         className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
       >
-        <ArrowRight className="size-3.5 rotate-180" /> Back to Exam Calendar
+        <ArrowRight className="size-3.5 rotate-180" /> Back to Pass Queue
       </Link>
 
       {/* Page toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">
+          <h1 className="text-base font-semibold text-white">OIE Handoff</h1>
           <p className="mt-1 text-sm text-text-muted min-w-0">
             Signed in as <span className="font-medium capitalize text-text-secondary">{role.replace(/_/g, " ")}</span>
             {user?.name ? ` · ${user.name}` : ""}
@@ -66,8 +82,13 @@ function ExamBranchOiehandoffInner() {
         roleLabel="Exam Branch"
         purpose="Batch forward verified student clearance bundles to the OIE for sign-off."
         contextLabel="OIE Handoff"
-        statusTone="info"
-        statusSummary="Prepare and forward verified student clearance bundles for final OIE approval."
+        statusTone={items.length > 0 ? "warn" : "ok"}
+        statusPill={items.length > 0 ? `${items.length} pending` : "Queue clear"}
+        statusSummary={
+          items.length > 0
+            ? `${items.length} exam clearance bundle(s) awaiting OIE sign-off. Forward from the Pass Queue.`
+            : "No exam clearance bundles awaiting OIE sign-off."
+        }
         primaryAction={{ label: "Pass Queue", href: "/exam-branch" }}
         secondaryActions={[
           { label: "OIE Requests", href: "/exam-branch/oie-approval-requests" },
@@ -95,47 +116,60 @@ function ExamBranchOiehandoffInner() {
         <div className="rounded-xl border border-border bg-bg-base overflow-hidden min-w-0">
           <div className="surface-card px-4 py-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              <ShieldCheck className="w-4 h-4 text-action-success shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">OIE Handoff</span>
+              <ListChecks className="w-4 h-4 text-action-success shrink-0" />
+              <span className="text-sm font-semibold text-white truncate">Pending OIE Sign-off</span>
             </div>
             <span className="text-xs text-text-muted shrink-0">
-              {(data as DataResponse | null)?.total ?? 0} item(s)
+              {(data as DataResponse | null)?.total ?? items.length} item(s)
             </span>
           </div>
           {busy ? (
             <div className="p-4 flex items-center gap-2 text-sm text-text-muted min-w-0">
               <Loader2 className="w-4 h-4 animate-spin motion-reduce:animate-none shrink-0" /> Loading OIE Handoff…
             </div>
-          ) : (
-            <div className="p-4 min-w-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-w-0">
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Status</p>
-                  <p className="mt-1 text-lg font-bold text-action-success">Live</p>
-                  <p className="text-xs text-text-muted">OIE Handoff data streams from the campus gate network.</p>
-                </div>
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Last Updated</p>
-                  <p className="mt-1 text-lg font-bold text-action-info">
-                    {new Date().toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <p className="text-xs text-text-muted">Auto-refreshes every 30 seconds.</p>
-                </div>
-                <div className="surface-card bg-bg-surface/40 p-3 min-w-0">
-                  <p className="text-xs text-text-muted uppercase tracking-wide">Records</p>
-                  <p className="mt-1 text-lg font-bold text-action-warning">
-                    {Array.isArray((data as unknown as { data?: unknown[] })?.data)
-                      ? (data as unknown as { data?: unknown[] }).data!.length
-                      : 0}
-                  </p>
-                  <p className="text-xs text-text-muted">Entries currently visible in this view.</p>
-                </div>
-              </div>
+          ) : items.length === 0 ? (
+            <div className="p-6 text-center min-w-0">
+              <ShieldCheck className="size-6 mx-auto text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">No clearance bundles awaiting OIE sign-off.</p>
+              <p className="text-xs text-text-muted mt-1">
+                Bundules appear here once the exam branch forwards them via{" "}
+                <Link href="/exam-branch" className="underline decoration-dotted hover:text-sky-400">
+                  Pass Queue
+                </Link>
+                .
+              </p>
             </div>
+          ) : (
+            <TaskRecordsList
+              title="Pending OIE Sign-off"
+              records={items.map((r) => ({
+                id: r.id,
+                identifier: r.ticket_number ?? r.id,
+                status: r.status ?? "PENDING",
+                created_at: r.created_at,
+                sla_deadline: r.sla_deadline,
+                meta: r.current_stage,
+                actionLabel: "Forward to OIE",
+                onAction: async () => {
+                  const res = await fetch(
+                    `/api/permissions/${encodeURIComponent(r.ticket_number ?? r.id)}/forward`,
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+                      body: JSON.stringify({ targetRole: "oie", comment: "Forwarded to OIE for clearance" }),
+                    },
+                  );
+                  if (!res.ok) {
+                    console.error("[exam-branch] forward to OIE failed", res.status);
+                    return;
+                  }
+                  await refreshAll();
+                },
+              }))}
+            />
           )}
         </div>
       </WidgetBoundary>
-
     </div>
   );
 }
