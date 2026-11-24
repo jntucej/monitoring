@@ -16,7 +16,10 @@ export default function LibraryPage() {
           contextLabel="Library & Books"
           statusSummary="Manage your issued volumes, track upcoming return deadlines, and discover library resources."
           primaryAction={{ label: "Assignments", href: "/student/assignments" }}
-          secondaryAction={{ label: "Student Home", href: "/student" }}
+          secondaryActions={[
+            { label: "Report Library Issue", href: "/student/complaints/new" },
+            { label: "Student Home", href: "/student" },
+          ]}
         />
         <Suspense fallback={null}>
           <StudentLibraryPage />

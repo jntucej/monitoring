@@ -16,7 +16,10 @@ export default function ExamsPage() {
           contextLabel="Examinations & Assessments"
           statusSummary="Access upcoming examination timetables, assessment schedules, and room allocations."
           primaryAction={{ label: "Academic Marks", href: "/student/marks" }}
-          secondaryAction={{ label: "Coursework Assignments", href: "/student/assignments" }}
+          secondaryActions={[
+            { label: "Coursework Assignments", href: "/student/assignments" },
+            { label: "Raise Class Request", href: "/student/class-requests" },
+          ]}
         />
         <Suspense fallback={null}>
           <StudentExamsPage />

@@ -16,7 +16,10 @@ export default function ScholarshipsPage() {
           contextLabel="Scholarships & Financial Aid"
           statusSummary="Explore eligible scholarship programs, application statuses, and disbursement records."
           primaryAction={{ label: "College Fees", href: "/student/fees" }}
-          secondaryAction={{ label: "Student Home", href: "/student" }}
+          secondaryActions={[
+            { label: "Report Aid Issue", href: "/student/complaints/new" },
+            { label: "Student Home", href: "/student" },
+          ]}
         />
         <Suspense fallback={null}>
           <StudentScholarshipsPage />

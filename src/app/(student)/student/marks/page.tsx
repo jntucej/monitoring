@@ -16,7 +16,10 @@ export default function MarksPage() {
           contextLabel="Grades & Academic Marks"
           statusSummary="Track your subject-wise continuous evaluation, internal marks, and semester GPA."
           primaryAction={{ label: "Exams Schedule", href: "/student/exams" }}
-          secondaryAction={{ label: "Assignments", href: "/student/assignments" }}
+          secondaryActions={[
+            { label: "Assignments", href: "/student/assignments" },
+            { label: "Raise Class Request", href: "/student/class-requests" },
+          ]}
         />
         <Suspense fallback={null}>
           <StudentMarksPage />

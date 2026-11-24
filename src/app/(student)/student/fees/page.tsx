@@ -16,7 +16,10 @@ export default function FeesPage() {
           contextLabel="Fees & Financial Dues"
           statusSummary="Track fee payment installments, outstanding college balances, and transaction receipts."
           primaryAction={{ label: "Scholarships", href: "/student/scholarships" }}
-          secondaryAction={{ label: "Mess Bill", href: "/student/mess-bill" }}
+          secondaryActions={[
+            { label: "Mess Bill", href: "/student/mess-bill" },
+            { label: "Report Fee Issue", href: "/student/complaints/new" },
+          ]}
         />
         <Suspense fallback={null}>
           <StudentFeesPage />
