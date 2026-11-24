@@ -7,6 +7,7 @@ import {
   ContextualActionRow,
   type ActorEventContext,
 } from "@/components/shared/ContextualActionRow";
+import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -313,9 +314,16 @@ export function ApproverDecisionQueue({
           Loading pending decisions…
         </div>
       ) : items.length === 0 ? (
-        <div className="surface-card bg-bg-surface p-6 text-xs text-text-muted">
-          No pending requests in your {roleLabel} queue right now.
-        </div>
+        <LifefulZeroState
+          title={`All ${roleLabel} requests cleared`}
+          whyEmpty={`No pending requests are waiting in your ${roleLabel} queue right now.`}
+          examplePreview="Incoming student or staff requests appear here with SLA countdown, prior actor rationale, and one-tap Approve / Forward / Reject controls."
+          actions={
+            relatedHref
+              ? [{ label: relatedLabel, href: relatedHref, tone: "primary" }]
+              : []
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {items.map((row) => {
