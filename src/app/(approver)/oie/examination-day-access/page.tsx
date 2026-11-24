@@ -12,6 +12,7 @@ import { usePolling } from "@/hooks/usePolling";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { buildOieExaminationDayAccessInspection } from "@/lib/role-registers/oieInspections";
 import {
@@ -220,6 +221,12 @@ function ExaminationDayAccessInner() {
           { label: "OIE Overview", href: "/oie" },
           { label: "Exceptions", href: "/oie/access-exceptions" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="OIE"
+        forwardLabel="Forward to Principal"
+        relatedHref="/oie/access-exceptions"
+        relatedLabel="Access Exceptions"
       />
 
       {error && (
