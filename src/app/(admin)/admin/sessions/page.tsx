@@ -79,19 +79,16 @@ function AdminSessionsInner() {
   if (loading) {
     return (
       <div className="space-y-4 p-4 md:p-6">
-      <ContextSituationBar
-        roleLabel="Campus Admin"
-        purpose="Live JWT / refresh-token sessions — revoke any that look off"
-        contextLabel="Live JWT / refresh-token sessions — revoke any that look off"
-        statusSummary="Review current live jwt / refresh-token sessions — revoke any that look off state and take action below."
-        primaryAction={{ label: "Admin Overview", href: "/admin" }}
-        secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
-      />
         <Skeleton className="h-10 w-48" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
     );
   }
+
+  const staleCount = rows.filter((r) => {
+    const ts = new Date(r.lastActive).getTime();
+    return !Number.isNaN(ts) && Date.now() - ts > 24 * 60 * 60 * 1000;
+  }).length;
 
   return (
     <div className="space-y-6 p-4 md:p-6">
@@ -99,6 +96,20 @@ function AdminSessionsInner() {
         title="Active Sessions"
         subtitle="Live JWT / refresh-token sessions — revoke any that look off"
         onRefresh={load}
+      />
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Monitor live JWT and refresh-token sessions and revoke stale or suspicious access."
+        contextLabel="Active Sessions"
+        statusTone={staleCount > 0 ? "warn" : "ok"}
+        statusPill={staleCount > 0 ? `${staleCount} stale (>24h)` : `${rows.length} active`}
+        statusSummary={
+          staleCount > 0
+            ? `${rows.length} active sessions (${staleCount} inactive for over 24 hours). Review and revoke any unexpected devices.`
+            : `${rows.length} active session${rows.length === 1 ? "" : "s"} currently live.`
+        }
+        primaryAction={{ label: "Refresh Sessions", onClick: () => void load() }}
+        secondaryAction={{ label: "Audit Logs", href: "/admin/audit-logs" }}
       />
 
       <WidgetBoundary title="Session list">

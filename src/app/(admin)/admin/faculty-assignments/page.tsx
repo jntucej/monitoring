@@ -161,6 +161,26 @@ function AdminFacultyAssignmentsInner() {
         subtitle="Assign faculty to classes and subjects"
         onRefresh={load}
       />
+      <ContextSituationBar
+        roleLabel="Campus Admin"
+        purpose="Bind faculty members to classes and subjects so attendance and class-teacher approvals route accurately."
+        contextLabel="Faculty-Class Bindings"
+        statusTone={
+          classes.filter((c) => !rows.some((r) => r.classId === c.id)).length > 0
+            ? "warn"
+            : "ok"
+        }
+        statusPill={`${rows.length} bindings`}
+        statusSummary={(() => {
+          const unassignedClasses = classes.filter((c) => !rows.some((r) => r.classId === c.id)).length;
+          const unassignedFaculty = faculty.filter((f) => !rows.some((r) => r.facultyId === f.id)).length;
+          return unassignedClasses > 0 || unassignedFaculty > 0
+            ? `${unassignedClasses} class${unassignedClasses === 1 ? "" : "es"} and ${unassignedFaculty} faculty member${unassignedFaculty === 1 ? "" : "s"} have no active assignment.`
+            : `All ${classes.length} classes and ${faculty.length} faculty members have active bindings.`;
+        })()}
+        primaryAction={{ label: "Manage Subjects", href: "/admin/subjects" }}
+        secondaryAction={{ label: "Admin Overview", href: "/admin" }}
+      />
 
       <WidgetBoundary title="New assignment">
         <form onSubmit={assign} className="surface-card p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
