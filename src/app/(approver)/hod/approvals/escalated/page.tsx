@@ -1,6 +1,7 @@
 "use client";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { ApprovalsView } from "../../_shared/ApprovalsView";
 
 export default function EscalatedApprovalsPage() {
@@ -17,6 +18,12 @@ export default function EscalatedApprovalsPage() {
           { label: "Today Overview", href: "/hod/home" },
           { label: "Faculty Directory", href: "/hod/faculty/directory" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="HOD"
+        forwardLabel="Forward to Vice Principal"
+        relatedHref="/hod/approvals/pending"
+        relatedLabel="Pending Queue"
       />
       <ApprovalsView status="ESCALATED" title="Escalated to you" />
     </div>

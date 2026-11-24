@@ -25,6 +25,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
 export default function CaretakerPage() {
   const { inspection, inspect, closeInspection } = useEntityInspector();
@@ -46,6 +47,12 @@ export default function CaretakerPage() {
               { label: "Complaint Console", href: "/caretaker" },
               { label: "Workers Status", href: "/caretaker/workers" },
             ]}
+          />
+          <ApproverDecisionQueue
+            roleLabel="Caretaker"
+            forwardLabel="Forward to Deputy Warden"
+            relatedHref="/caretaker/maintenance"
+            relatedLabel="Maintenance Queue"
           />
           <WidgetBoundary name="RoleDashboardPanel" title="Caretaker Dashboard">
             <RoleDashboardPanel
