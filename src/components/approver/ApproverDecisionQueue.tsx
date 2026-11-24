@@ -11,6 +11,7 @@ import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
 import { SlaCountdownPill } from "@/components/shared/SlaCountdownPill";
 import { WhatHappenedReceipt } from "@/components/shared/WhatHappenedReceipt";
 import { LiveFreshnessBar } from "@/components/shared/LiveFreshnessBar";
+import { SmartCrossLinkChip } from "@/components/shared/SmartCrossLinkChip";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -227,13 +228,12 @@ export function ApproverDecisionQueue({
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {relatedHref && (
-            <Link
+            <SmartCrossLinkChip
               href={relatedHref}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary"
-            >
-              {relatedLabel}
-              <ArrowUpRight className="size-3.5" />
-            </Link>
+              label={relatedLabel}
+              count={items.length}
+              tone={items.length > 0 ? "warn" : "info"}
+            />
           )}
           <LiveFreshnessBar
             lastUpdatedAt={lastUpdatedAt}
