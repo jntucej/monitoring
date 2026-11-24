@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
@@ -94,9 +95,9 @@ export default function HostelManagerRoomsPage() {
       )}
       <p className="text-xs text-text-muted">
         Room-level and resident-level detail is available in the{" "}
-        <a href="/admin/students" className="text-action-primary hover:underline">
+        <Link href="/admin/students" className="text-action-primary hover:underline">
           admin student roster
-        </a>
+        </Link>
         .
       </p>
       <EntityInspectorPanel inspection={inspection} onClose={closeInspection} />
