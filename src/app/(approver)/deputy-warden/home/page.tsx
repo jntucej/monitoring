@@ -9,7 +9,6 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -21,6 +20,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 export default function DeputyWardenPage() {
     const [active, setActive] = useState<HMBoardRow | null>(null);
@@ -45,6 +45,7 @@ return (
               { label: "Shift Handover", href: "/deputy-warden/shift-handover" },
             ]}
           />
+      <LivePulseStrip items={[{ id: "curfew", label: "Curfew Watch", valueLabel: "21:30", tone: "warn", benchmark: "Track unreturned hostel residents" }, { id: "hostel", label: "Hostel L2", valueLabel: "Live", tone: "info", benchmark: "Approve leave & resolve curfew alerts" }]} />
           <WidgetBoundary name="RoleDashboardPanel" title="Deputy Warden Dashboard">
             <RoleDashboardPanel
               title="Deputy Warden dashboard"
@@ -72,7 +73,6 @@ return (
             onClose={() => setActive(null)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
           <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
           <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>

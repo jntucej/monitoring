@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 import {
   ShieldCheck,
@@ -19,7 +20,6 @@ import {
 } from "lucide-react";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
@@ -278,6 +278,7 @@ function GuardianOverviewInner() {
         primaryAction={{ label: "Submit Pass / Leave", href: "/guardian/pass-leave-submission" }}
         secondaryAction={{ label: "Ward Requests", href: "/guardian/child-requests" }}
       />
+      <LivePulseStrip items={[{ id: "wards", label: "Linked Wards", valueLabel: "Live", tone: "ok", benchmark: "Track campus presence & last gate scan" }, { id: "requests", label: "Pass / Leave", valueLabel: "Submit", tone: "info", benchmark: "Initiate requests for campus approval" }]} />
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -391,7 +392,6 @@ function GuardianOverviewInner() {
             <QuickActions />
             <NotificationCenter />
           </div>
-          <PersonalizedCampusHome />
           <AttentionQueue />
           <ActivityTimeline />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

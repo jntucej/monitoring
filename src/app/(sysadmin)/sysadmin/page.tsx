@@ -7,7 +7,6 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { CommandCenterContent } from "@/components/sysadmin/domains/overview/CommandCenterContent";
 import type { CommandCenterData } from "@/components/sysadmin/domains/overview/types";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { QuickActions } from "@/components/shared/QuickActions";
@@ -17,6 +16,7 @@ import { SysadminHealthPanel } from "@/components/approver/SysadminHealthPanel";
 import { AdminAlertsPanel } from "@/components/approver/AdminAlertsPanel";
 import { DevMessagesPanel } from "@/components/admin/DevMessagesPanel";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 /**
  * SysAdmin Command Center — the live operational-state cockpit.
@@ -69,10 +69,6 @@ export default function SysadminCommandCenterPage() {
           </WidgetBoundary>
         )
       )}
-
-      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-        <PersonalizedCampusHome />
-      </WidgetBoundary>
       <WidgetBoundary name="TaskContinuity" title="Task Continuity">
         <TaskContinuity />
       </WidgetBoundary>
@@ -111,6 +107,7 @@ function CommandCenterSkeleton() {
         primaryAction={{ label: "SysAdmin Overview", href: "/sysadmin" }}
         secondaryAction={{ label: "System Health", href: "/sysadmin/health" }}
       />
+      <LivePulseStrip items={[{ id: "stack", label: "System Health", valueLabel: "Live", tone: "ok", benchmark: "Containers, DB, Redis & backups" }, { id: "maker", label: "Two-Person", valueLabel: "Active", tone: "warn", benchmark: "Review pending academic status & actions" }]} />
       <Skeleton className="h-20 w-full rounded-2xl" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Skeleton className="h-28 rounded-2xl" />

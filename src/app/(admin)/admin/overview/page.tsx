@@ -34,10 +34,10 @@ import { DataFreshness } from "@/components/shared/DataFreshness";
 
 import { getAuthHeaders } from "@/lib/utils";
 import { usePolling } from "@/hooks/usePolling";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Activity,
@@ -257,6 +257,7 @@ function AdminOverviewInner() {
         primaryAction={{ label: "Admin Overview", href: "/admin" }}
         secondaryAction={{ label: "Campus Reports", href: "/admin/reports" }}
       />
+      <LivePulseStrip items={[{ id: "campus", label: "Campus Admin", valueLabel: "Live", tone: "ok", benchmark: "Users, gates, passes & lockdown control" }, { id: "policies", label: "Governance", valueLabel: "Active", tone: "info", benchmark: "Manage classes, faculty & policies" }]} />
       <h1 className="sr-only">Campus administration overview</h1>
       <PageHeader title="Admin" subtitle="Campus administration" onRefresh={load} refreshing={isRefreshing} />
 
@@ -489,9 +490,6 @@ function AdminOverviewInner() {
       <section aria-label="Secondary campus widgets">
         <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">Secondary</h2>
         <div className="space-y-6">
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-            <PersonalizedCampusHome />
-          </WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity">
             <TaskContinuity />
           </WidgetBoundary>

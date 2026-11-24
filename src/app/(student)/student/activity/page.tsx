@@ -5,8 +5,6 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { RecentActivity } from "@/components/student/RecentActivity";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
-
 // Relocated self-history widgets (moved off the home screen).
 export default function ActivityPage() {
   return (
@@ -30,9 +28,6 @@ export default function ActivityPage() {
       </WidgetBoundary>
       <WidgetBoundary name="task-continuity">
         <TaskContinuity />
-      </WidgetBoundary>
-      <WidgetBoundary name="personalized-campus-home">
-        <PersonalizedCampusHome />
       </WidgetBoundary>
     </div>
   );

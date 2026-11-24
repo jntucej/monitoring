@@ -9,7 +9,6 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -22,6 +21,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 export default function HostelManagerPage() {
     const [active, setActive] = useState<HMBoardRow | null>(null);
@@ -46,6 +46,7 @@ return (
               { label: "Resource Management", href: "/hostel-manager/resource-management" },
             ]}
           />
+      <LivePulseStrip items={[{ id: "blocks", label: "Hostel Blocks", valueLabel: "Live", tone: "ok", benchmark: "Monitor occupancy & resident passes" }, { id: "complaints", label: "Maintenance", valueLabel: "Active", tone: "warn", benchmark: "Triage block complaints & repairs" }]} />
           <WidgetBoundary name="RoleDashboardPanel" title="Hostel Manager Dashboard">
             <RoleDashboardPanel
               title="Hostel Manager dashboard"
@@ -74,7 +75,6 @@ return (
             <AllocationPanel />
           </WidgetBoundary>
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
           <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
           <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>

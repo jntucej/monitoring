@@ -18,7 +18,6 @@ import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPrevie
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -28,6 +27,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { gateLiveInspection, shiftInspection, useRoleInspectorHost } from "@/components/shared/roleInspectors";
 
@@ -212,6 +212,7 @@ export default function SupervisorTodayPage() {
           primaryAction={{ label: "Live Gate Desk", href: "/supervisor/gates/live" }}
           secondaryAction={{ label: "Shift Handover", href: "/supervisor/shift/handover" }}
         />
+      <LivePulseStrip items={[{ id: "gates", label: "Gate Wall", valueLabel: "Live", tone: "ok", benchmark: "Monitor active terminals & claim codes" }, { id: "escalations", label: "Escalations", valueLabel: "Actionable", tone: "warn", benchmark: "Acknowledge, resolve, or escalate to VP" }]} />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {kpis.map((k) => <KpiTile key={k.label} {...k} />)}
         </div>
@@ -304,10 +305,6 @@ export default function SupervisorTodayPage() {
 
         <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
           <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-          <PersonalizedCampusHome />
         </WidgetBoundary>
 
         <WidgetBoundary name="TaskContinuity" title="Task Continuity">

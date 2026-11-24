@@ -15,10 +15,10 @@ import { Loader2, BookOpen, PencilLine } from "lucide-react";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -89,6 +89,7 @@ function FacultyInner() {
             { label: "Directory", href: "/faculty/student-directory" },
           ]}
         />
+      <LivePulseStrip items={[{ id: "classes", label: "My Classes", valueLabel: "Live", tone: "ok", benchmark: "Manage class attendance & messages" }, { id: "requests", label: "Student Passes", valueLabel: "Active", tone: "info", benchmark: "Review mentor/class-level requests" }]} />
         <EmptyState
           title="Not assigned as class teacher"
           description="You have no class assigned. Ask your Head of Department (HOD) to assign you to a class."
@@ -176,9 +177,6 @@ return (
             inspection={active ? scanInspection(active) : null}
             onClose={() => setActive(null)}
           />
-      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-        <PersonalizedCampusHome />
-      </WidgetBoundary>
       <WidgetBoundary name="TaskContinuity" title="Task Continuity">
         <TaskContinuity />
       </WidgetBoundary>

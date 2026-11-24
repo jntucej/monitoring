@@ -4,12 +4,12 @@ import { Wrench, AlertTriangle, ArrowRight } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { ComplaintConsole } from "@/components/complaints/ComplaintConsole";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -55,6 +55,7 @@ export default function EmoLandingPage() {
         primaryAction={{ label: "Open Complaint Queue", href: "/emo/complaints", badgeCount: openBacklog }}
         secondaryAction={{ label: "Resolved Tickets", href: "/emo/complaints?status=resolved" }}
       />
+      <LivePulseStrip items={[{ id: "emo", label: "Electrical Ops", valueLabel: "Live", tone: "warn", benchmark: "Triage campus power & lab complaints" }, { id: "sla", label: "Resolution", valueLabel: "Active", tone: "info", benchmark: "Update status & close resolved tickets" }]} />
 
       <WidgetBoundary name="EmoKpis" title="EMO KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -103,7 +104,6 @@ export default function EmoLandingPage() {
           More workspace tools &amp; calendar
         </summary>
         <div className="mt-4 space-y-4">
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
           <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
           <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>

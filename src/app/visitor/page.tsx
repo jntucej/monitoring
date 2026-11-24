@@ -6,6 +6,7 @@ import { useApiResource } from "@/hooks/useApiResource";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import type { VisitorsMineResponse } from "./types";
 
 // 1.8 — status home: shows the visitor's live visit state + check-in/out CTA,
@@ -48,6 +49,7 @@ export default function VisitorLandingPage() {
         }}
         secondaryAction={{ label: "Request Visit", href: "/visitor/request" }}
       />
+      <LivePulseStrip items={[{ id: "visit", label: "Visit Pass", valueLabel: "Self-Service", tone: "info", benchmark: "Check in on arrival, check out on exit" }, { id: "gate", label: "Gate Access", valueLabel: "QR / ID", tone: "ok", benchmark: "Valid during approved visit window" }]} />
 
       <WidgetBoundary name="VisitorStatusHome" title="Your visit">
         {loading ? (

@@ -21,7 +21,6 @@ import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPrevie
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -30,6 +29,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 interface PriorityItem {
   id: string;
@@ -158,6 +158,7 @@ export default function HodTodayPage() {
             { label: "Department Reports", href: "/hod/reports" },
           ]}
         />
+      <LivePulseStrip items={[{ id: "queue", label: "HOD Queue", valueLabel: "Live", tone: "warn", benchmark: "Review pending department requests" }, { id: "sla", label: "SLA Target", valueLabel: "< 2h", tone: "info", benchmark: "Forward approved passes to VP" }]} />
         <WidgetBoundary name="HodKpis" title="HOD KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <KpiTile label="Pending approvals" value={d?.counts.pending ?? 0} />
@@ -251,10 +252,6 @@ export default function HodTodayPage() {
         {/* 9. Retention & Analytics Widgets */}
         <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
           <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-          <PersonalizedCampusHome />
         </WidgetBoundary>
 
         <WidgetBoundary name="TaskContinuity" title="Task Continuity">

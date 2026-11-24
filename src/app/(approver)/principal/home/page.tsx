@@ -22,12 +22,12 @@ import { EmergencyPulse } from "../_retention/EmergencyPulse";
 import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPreview";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { OverallClassSatisfactionCard } from "@/components/principal/OverallClassSatisfactionCard";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
@@ -191,6 +191,7 @@ export default function PrincipalTodayPage() {
           primaryAction={{ label: "Command Center", href: "/principal" }}
           secondaryAction={{ label: "Attention Queue", href: "/principal/attention" }}
         />
+      <LivePulseStrip items={[{ id: "exec", label: "Executive Queue", valueLabel: "Live", tone: "warn", benchmark: "Final sign-off & emergency overrides" }, { id: "campus", label: "Campus Ops", valueLabel: "Active", tone: "ok", benchmark: "Gates, hostels & exam governance" }]} />
         <WidgetBoundary name="PrincipalKpis" title="Principal KPIs">
           {error && !loading && data === null ? (
             // Recoverable error with retry — mirrors the admin overview pattern (RC8/SD2).
@@ -340,10 +341,6 @@ export default function PrincipalTodayPage() {
 
         <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
           <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-          <PersonalizedCampusHome />
         </WidgetBoundary>
 
         <WidgetBoundary name="TaskContinuity" title="Task Continuity">

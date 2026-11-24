@@ -19,7 +19,6 @@ import { VpBridgeFlagCard } from "@/components/vp/VpBridgeFlagCard";
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -28,6 +27,7 @@ import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { KpiCard } from "../_shared/KpiCard";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { KVPairs, ActionRow, InspectorButton } from "@/components/shared/EntityInspector";
@@ -185,6 +185,7 @@ export default function VPTodayPage() {
           primaryAction={{ label: "Pending Approvals", href: "/vice-principal/pending-approvals" }}
           secondaryAction={{ label: "Exam Coordination", href: "/vice-principal/examination-coordination" }}
         />
+      <LivePulseStrip items={[{ id: "vp-queue", label: "VP Approvals", valueLabel: "Live", tone: "warn", benchmark: "Co-sign HOD-approved & escalated passes" }, { id: "governance", label: "Campus Scope", valueLabel: "All Depts", tone: "info", benchmark: "Academic & hostel oversight" }]} />
         <WidgetBoundary name="VpKpis" title="Vice Principal KPIs">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <KpiCard
@@ -272,10 +273,6 @@ export default function VPTodayPage() {
         {/* 7. Retention & Analytics Widgets */}
         <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
           <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-          <PersonalizedCampusHome />
         </WidgetBoundary>
 
         <WidgetBoundary name="TaskContinuity" title="Task Continuity">

@@ -5,12 +5,12 @@ import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -44,6 +44,7 @@ export default function ExamBranchPage() {
               { label: "Verification Desk", href: "/exam-branch/verification" },
             ]}
           />
+      <LivePulseStrip items={[{ id: "exam-branch", label: "Exam Branch", valueLabel: "Live", tone: "info", benchmark: "Verify clearances & forward to OIE" }, { id: "presence", label: "Candidates", valueLabel: "Tracked", tone: "ok", benchmark: "Cross-check campus presence matrix" }]} />
 
           <WidgetBoundary name="RoleDashboardPanel" title="Exam Branch Dashboard">
             <RoleDashboardPanel
@@ -59,7 +60,6 @@ export default function ExamBranchPage() {
             onSelect={(row) => setActive(row)}
           />
           <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
           <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
           <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>

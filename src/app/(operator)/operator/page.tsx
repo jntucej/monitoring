@@ -1,5 +1,6 @@
 "use client";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
 import Link from "next/link";
 import { Suspense } from "react";
@@ -92,6 +93,7 @@ export default function OperatorPage() {
             primaryAction={{ label: "Open Gate Desk", href: "/operator/claim" }}
             secondaryAction={{ label: "Pass Verification", href: "/operator/pass-verification" }}
           />
+      <LivePulseStrip items={[{ id: "gate", label: "Gate Desk", valueLabel: "Assigned", tone: "ok", benchmark: "Claim or open your assigned gate" }, { id: "curfew", label: "Curfew Rule", valueLabel: "06:00–21:30", tone: "info", benchmark: "Student day window; worker 06:00–22:00" }, { id: "mode", label: "Verification", valueLabel: "QR + Bio", tone: "ok", benchmark: "Live scan & manual entry ready" }]} />
           <OperatorDeskHero />
           <WidgetBoundary name="DigitalHandover" title="Digital Handover">
             <DigitalHandover />

@@ -14,7 +14,6 @@ import { QuickActions } from "@/components/shared/QuickActions";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { AttentionQueue } from "@/components/engagement/AttentionQueue";
 import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { PersonalizedCampusHome } from "@/components/retention/PersonalizedCampusHome";
 import { TaskContinuity } from "@/components/retention/TaskContinuity";
 import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
@@ -25,6 +24,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { RoleStarterGuide } from "@/components/shared/RoleStarterGuide";
 import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 
@@ -49,6 +49,7 @@ export default function CaretakerPage() {
               { label: "Workers Status", href: "/caretaker/workers" },
             ]}
           />
+      <LivePulseStrip items={[{ id: "triage", label: "Caretaker Desk", valueLabel: "Live", tone: "warn", benchmark: "Triage hostel tickets & worker tasks" }, { id: "commands", label: "Quick Actions", valueLabel: "Inline", tone: "info", benchmark: "Approve, forward, or use command bar" }]} />
           <ApproverDecisionQueue
             roleLabel="Caretaker"
             forwardLabel="Forward to Deputy Warden"
@@ -101,9 +102,6 @@ export default function CaretakerPage() {
           </WidgetBoundary>
           <WidgetBoundary name="AttentionQueue" title="Attention Queue">
             <AttentionQueue />
-          </WidgetBoundary>
-          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home">
-            <PersonalizedCampusHome />
           </WidgetBoundary>
           <WidgetBoundary name="TaskContinuity" title="Task Continuity">
             <TaskContinuity />

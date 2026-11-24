@@ -6,6 +6,7 @@ import { OperatorPageLoading } from "@/components/operator/shared/OperatorLoadin
 import { OperatorWidgetBoundary } from "@/components/operator/shared/OperatorWidgetBoundary";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 
 export default function WorkerPage() {
@@ -23,6 +24,7 @@ export default function WorkerPage() {
             primaryAction={{ label: "View Shifts", href: "/worker/shifts" }}
             secondaryAction={{ label: "Work Orders", href: "/worker/work-orders" }}
           />
+      <LivePulseStrip items={[{ id: "shift", label: "Shift Window", valueLabel: "06:00–22:00", tone: "ok", benchmark: "Mon–Sat worker access hours" }, { id: "status", label: "Duty Status", valueLabel: "Active", tone: "info", benchmark: "Check assigned zone & work orders" }]} />
 
           <OperatorWidgetBoundary name="RoleDashboardPanel" title="Worker Dashboard">
             <RoleDashboardPanel
