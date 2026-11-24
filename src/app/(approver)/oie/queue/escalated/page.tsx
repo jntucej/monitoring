@@ -4,6 +4,7 @@ import { useState } from "react";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver/wardenConsoleModels";
 
 export default function Page() {
@@ -24,6 +25,12 @@ export default function Page() {
           { label: "OIE Overview", href: "/oie" },
           { label: "Exceptions", href: "/oie/access-exceptions" },
         ]}
+      />
+      <ApproverDecisionQueue
+        roleLabel="OIE"
+        forwardLabel="Forward to Principal"
+        relatedHref="/oie/queue/pending"
+        relatedLabel="Pending Queue"
       />
       <KanbanBoard
         source="/api/oie/queue?status=ESCALATED"

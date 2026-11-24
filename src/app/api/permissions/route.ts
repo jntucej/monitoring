@@ -17,7 +17,7 @@ import type { AuthContext } from "@/lib/authContext";
 // that both "principal" and "warden_or_principal" stages are relevant.
 const STAGES_BY_ROLE: Record<string, string[]> = {
   principal:       ["principal", "warden_or_principal"],
-  vice_principal:  ["principal", "warden_or_principal"],
+  vice_principal:  ["vice_principal", "principal", "warden_or_principal"],
   hod:             ["hod"],
   faculty:         ["hod"], // faculty escalates to HOD
   deputy_warden:   ["deputy_warden"],

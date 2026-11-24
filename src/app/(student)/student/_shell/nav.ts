@@ -17,15 +17,15 @@ export const STUDENT_NAV: NavEntry[] = [
   { kind: "link", href: "/student", label: "Home", icon: Home },
   {
     kind: "group", id: "permissions", label: "Passes & Requests", icon: CheckSquare,
+    when: isHosteller, // hostel-leave surfaces: hostellers only
     children: [
-      { href: "/student/passes", label: "Active Gate Passes" },
-      { href: "/student/permissions", label: "My Requests" },
-      { href: "/student/permissions/new", label: "New Request" },
+      { href: "/student/passes", label: "Active Gate Passes", when: isHosteller },
+      { href: "/student/permissions", label: "My Requests", when: isHosteller },
+      { href: "/student/permissions/new", label: "New Request", when: isHosteller },
     ],
   },
   {
     kind: "group", id: "mess", label: "Mess & Dining", icon: UtensilsCrossed,
-    when: isHosteller,
     children: [
       { href: "/student/mess", label: "Mess Overview" },
       { href: "/student/mess/token", label: "Meal Token & Menu" },

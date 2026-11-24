@@ -18,7 +18,7 @@
 // teaching-binding), so the review lands in the faculty's dashboard.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import { query } from "@/lib/postgres";
 import { addAudit } from "@/lib/db";
@@ -153,4 +153,4 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ reviewId: result.id, sessionId, submitted: true });
 }
 
-export const POST = withAuthorization(handlePost);
+export const POST = withMutationGuard(handlePost);

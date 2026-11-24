@@ -20,6 +20,8 @@ import {
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
 import { stockItemInspection, type MessInventoryItem } from "@/components/approver/wardenConsoleModels";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
+import { SmartCrossLinkChip } from "@/components/shared/SmartCrossLinkChip";
 
 interface InventoryItem {
   id: string;
@@ -93,6 +95,18 @@ function MessInventoryStockInner() {
       >
         Back to Mess Overview
       </Link>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <SmartCrossLinkChip href="/mess/menu-management" label="Add or Edit Menu Items" count={d?.total} tone="info" />
+        <SmartCrossLinkChip href="/mess/operational-requests" label="Operational Requests" tone="info" />
+      </div>
+
+      <LivePulseStrip
+        items={[
+          { id: "total", label: "Active Items", valueLabel: String(d?.total ?? 0), tone: "ok", benchmark: "Catalog items in rotation" },
+          { id: "primary", label: "Primary Items", valueLabel: String(d?.primaryCount ?? 0), tone: "info", benchmark: "Core daily meal staples" },
+        ]}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0">
         <div className="min-w-0">

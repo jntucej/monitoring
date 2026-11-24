@@ -32,7 +32,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<{
 }> {
   const { rows: [a] } = await query<{ id: string }>(
     `INSERT INTO public.assignments
-       (class_id, subject_code, faculty_id, title, description, due_at, max_marks)
+       (class_id, subject_code, faculty_id, title, description, due_at, max_score)
      VALUES ($1::uuid, $2, $3::uuid, $4, $5, $6::timestamptz, $7)
      RETURNING id`,
     [input.classId, input.subjectCode, input.facultyId,
@@ -90,7 +90,7 @@ export async function listAssignments(opts: {
     title: string; description: string | null; due_at: string; max_marks: number | null;
   }>(
     `SELECT a.id::text, a.class_id::text, a.subject_code, a.faculty_id::text,
-            a.title, a.description, a.due_at::text, a.max_marks
+            a.title, a.description, a.due_at::text, a.max_score::float8 AS max_marks
        FROM public.assignments a
       WHERE ${where}
       ORDER BY a.due_at ASC`,

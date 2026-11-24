@@ -47,7 +47,8 @@ async function handleGet(_req: NextRequest, _ctx: { auth: AuthContext }) {
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
   try {
     const body = await req.json().catch(() => null);
-    const code: string = (body?.code ?? "").toString().trim();
+    const ALLOWED_CODES = ["VEG", "NON_VEG", "CHICKEN", "PANEER", "SWEET", "CURD", "PAPAD"];
+    const code: string = (body?.code ?? "").toString().trim().toUpperCase();
     const label: string = (body?.label ?? "").toString().trim();
     const isPrimary: boolean = body?.isPrimary === true;
     const sortOrder: number = Number.isFinite(body?.sortOrder) ? Number(body.sortOrder) : 99;
@@ -56,6 +57,9 @@ async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
       : ["HM", "HF"];
 
     if (!code || !label) return fail("MISSING_PARAM", "code and label are required", 400);
+    if (!ALLOWED_CODES.includes(code)) {
+      return fail("VALIDATION_ERROR", `code must be one of: ${ALLOWED_CODES.join(", ")}`, 400);
+    }
 
     const dup = await query(
       `SELECT id FROM mess_menu_items WHERE code = $1 LIMIT 1`,

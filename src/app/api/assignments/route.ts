@@ -21,23 +21,28 @@ async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const classId = url.searchParams.get("classId") ?? undefined;
   const scope = url.searchParams.get("scope");
 
-  let results;
-  if (auth.role === "faculty" || AUTHORITY.includes(auth.role)) {
-    const isAuthority = AUTHORITY.includes(auth.role) && auth.role !== "faculty";
-    const fid = url.searchParams.get("facultyId") ?? auth.userId;
-    results = await listAssignments({ classId, mineId: isAuthority ? fid : auth.userId });
-  } else {
-    // Student: assignments for the classes they're enrolled in.
-    if (!classId) return fail("VALIDATION_ERROR", "classId required for students", 400);
-    results = await listAssignments({ classId });
-    // Only assignments the student can see (their class).
+  let results: Awaited<ReturnType<typeof listAssignments>> = [];
+  try {
+    if (["faculty", "subject_faculty"].includes(auth.role) || AUTHORITY.includes(auth.role)) {
+      const isAuthority = AUTHORITY.includes(auth.role);
+      const fid = url.searchParams.get("facultyId") ?? auth.userId;
+      results = await listAssignments({ classId, mineId: isAuthority ? fid : auth.userId });
+    } else {
+      // Student: assignments for the classes they're enrolled in.
+      if (!classId) return fail("VALIDATION_ERROR", "classId required for students", 400);
+      results = await listAssignments({ classId });
+      // Only assignments the student can see (their class).
+    }
+  } catch (err) {
+    console.error("[api/assignments GET]", err);
+    return ok({ assignments: [] });
   }
 
   return ok({ assignments: results });
 }
 
 async function handlePost(req: NextRequest, { auth }: { auth: AuthContext }) {
-  if (auth.role !== "faculty" && !AUTHORITY.includes(auth.role)) {
+  if (!["faculty", "subject_faculty"].includes(auth.role) && !AUTHORITY.includes(auth.role)) {
     return fail("FORBIDDEN", "Only faculty (or an authority) may create assignments", 403);
   }
   const body = (await req.json().catch(() => ({}))) as {

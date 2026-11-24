@@ -4,8 +4,8 @@
 // the registration feedback_given.
 
 import { NextRequest, NextResponse } from "next/server";
-import { withAuthorization, type AuthContext } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { type AuthContext } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { query } from "@/lib/postgres";
 
 function getEventId(req: NextRequest): string {
@@ -64,7 +64,7 @@ async function handlePost(req: NextRequest, ctx: { auth: AuthContext }) {
   return NextResponse.json({ success: true, rating, tags });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(handlePost, { requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"] }),
-  { keyPrefix: "event-feedback", maxRequests: 10, windowMs: 60_000 },
-);
+export const POST = withMutationGuard(handlePost, {
+  requiredRole: ["student", "guardian", "parent", "admin", "sysadmin"],
+  rateLimit: { maxRequests: 10, windowMs: 60_000 },
+});

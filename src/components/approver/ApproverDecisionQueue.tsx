@@ -363,7 +363,19 @@ export function ApproverDecisionQueue({
             const campus = row.campus_status ?? row.campusStatus ?? "Campus status unknown";
             const sla = formatSlaRemaining(row.sla_deadline ?? row.slaDeadline);
             const reason = row.reason?.trim() || "No reason text provided.";
-            const history = row.stage_history ?? row.stageHistory ?? [];
+            const rawHistory = row.stage_history ?? row.stageHistory;
+            const history: NonNullable<PermissionRow["stage_history"]> = Array.isArray(rawHistory)
+              ? rawHistory
+              : typeof rawHistory === "string"
+                ? (() => {
+                    try {
+                      const parsed = JSON.parse(rawHistory);
+                      return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                      return [];
+                    }
+                  })()
+                : [];
             const last = history.length > 0 ? history[history.length - 1] : null;
             const latestActorEvent: ActorEventContext | undefined = last
               ? {

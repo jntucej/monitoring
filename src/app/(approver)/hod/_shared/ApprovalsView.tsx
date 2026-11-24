@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useApiResource } from "@/hooks/useApiResource";
+import { usePolling } from "@/hooks/usePolling";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { DataTable } from "@/components/ui/DataTable";
 import { SlaBadge } from "@/components/approver/SlaBadge";
@@ -59,6 +60,7 @@ export function ApprovalsView({
   const { data, loading, refresh } = useApiResource<PermissionsResponse>(url, {
     ttlMs: 15_000,
   });
+  usePolling(refresh, { intervalMs: 15_000 });
 
   const rows = data?.data ?? [];
 

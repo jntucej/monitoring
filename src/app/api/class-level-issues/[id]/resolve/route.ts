@@ -2,7 +2,7 @@
 // POST — HOD/VP/admin resolves a class-level issue; flips all linked requests.
 
 import { NextRequest } from "next/server";
-import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 import { resolveClassLevelIssue } from "@/lib/class-requests";
@@ -29,4 +29,4 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   }
 }
 
-export const POST = withAuthorization(implPost, {});
+export const POST = withMutationGuard(implPost, {});

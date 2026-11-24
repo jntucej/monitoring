@@ -14,6 +14,7 @@
 
 import { NextRequest } from "next/server";
 import { withAuthorization } from "@/middleware/authorization";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 import { query } from "@/lib/postgres";
@@ -154,4 +155,4 @@ async function implPostDispatch(req: NextRequest, ctx: { auth: AuthContext }) {
   return fail("NOT_FOUND", "unknown sub-route; use /rule /toggle /override", 404);
 }
 
-export const POST = withAuthorization(implPostDispatch, {});
+export const POST = withMutationGuard(implPostDispatch, {});

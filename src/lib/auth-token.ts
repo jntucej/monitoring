@@ -5,11 +5,13 @@ import { SignJWT, jwtVerify, JWTPayload } from "jose";
 // crashing at import time. All JWT functions are Node-only; the edge
 // runtime gets a no-op stub.
 import { createRequire } from "module";
-const require_ = typeof process !== "undefined" && process.versions?.node
-  ? createRequire(import.meta.url)
-  : (_mod: string) => {
-      throw new Error(`auth-token: Node module '${_mod}' unavailable in edge runtime`);
-    };
+const require_ = typeof require === "function"
+  ? require
+  : typeof process !== "undefined" && process.versions?.node
+    ? createRequire(`${process.cwd()}/package.json`)
+    : (_mod: string) => {
+        throw new Error(`auth-token: Node module '${_mod}' unavailable in edge runtime`);
+      };
 const { randomUUID, createHash } = (() => {
   try {
     const c = require_("crypto");

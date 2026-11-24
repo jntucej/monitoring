@@ -274,6 +274,24 @@ export function CaretakerCommandBar({ role, open, onClose }: CaretakerCommandBar
           </kbd>
         </div>
 
+        {/* Always-visible quick command chips */}
+        <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 border-b border-border bg-bg-elevated/50">
+          <span className="text-[11px] font-medium text-text-muted mr-1">Commands:</span>
+          {COMMAND_DEFS.map((cmd) => (
+            <button
+              key={cmd.id}
+              type="button"
+              onClick={() => {
+                setQuery(cmd.id === "view-assets" ? "view-assets" : `${cmd.id} `);
+                inputRef.current?.focus();
+              }}
+              className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-bg-surface border border-border text-text-secondary hover:text-text-primary hover:border-action-primary/50 transition-colors"
+            >
+              {cmd.id}
+            </button>
+          ))}
+        </div>
+
         {/* Parsed-command preview */}
         {parsedPreview && parsedPreview.action !== "UNKNOWN" && parsedPreview.action !== "VIEW_ASSETS" ? (
           <div className="surface-card px-4 py-2 bg-bg-elevated text-xs text-text-secondary">

@@ -52,7 +52,7 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const callerFilter =
     `(pr.stage_history IS NOT NULL
        AND jsonb_array_length(pr.stage_history) > 0
-       AND (pr.stage_history ->> -1 ->> 'actor_id') = $1::text)`;
+       AND (pr.stage_history -> -1 ->> 'actor_id') = $1::text)`;
 
   const fromClause = from ? `AND pr.updated_at::date >= $3::date` : "";
   const params: unknown[] = [auth.userId, to, ...(from ? [from] : [])];
@@ -68,10 +68,10 @@ async function implGet(req: NextRequest, { auth }: { auth: AuthContext }) {
     `SELECT pr.ticket_number,
             pr.workflow_type,
             pr.status,
-            (pr.stage_history ->> -1 -> 'action') AS last_action,
-            (pr.stage_history ->> -1 -> 'comment') AS last_comment,
+            (pr.stage_history -> -1 ->> 'action') AS last_action,
+            (pr.stage_history -> -1 ->> 'comment') AS last_comment,
             COALESCE(
-              to_char((pr.stage_history ->> -1 -> 'timestamp')::timestamptz, 'YYYY-MM-DD HH24:MI'),
+              to_char((pr.stage_history -> -1 ->> 'timestamp')::timestamptz, 'YYYY-MM-DD HH24:MI'),
               to_char(pr.updated_at, 'YYYY-MM-DD HH24:MI')
             ) AS last_at
        FROM permission_requests pr

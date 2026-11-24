@@ -9,8 +9,7 @@
 
 import { NextRequest } from "next/server";
 import { query } from "@/lib/postgres";
-import { withAuthorization } from "@/middleware/authorization";
-import { withRateLimit } from "@/lib/rate-limit";
+import { withMutationGuard } from "@/server/http/mutation-guard";
 import { ok, fail } from "@/server/http/response";
 import type { AuthContext } from "@/lib/authContext";
 
@@ -44,7 +43,7 @@ async function implPost(req: NextRequest, { auth }: { auth: AuthContext }) {
   return ok({ id: result.rows[0].id, status: "OPEN" });
 }
 
-export const POST = withRateLimit(
-  withAuthorization(implPost, { requiredRole: ["student"] }),
-  { keyPrefix: "student-attendance-dispute", maxRequests: 10, windowMs: 60_000 }
-);
+export const POST = withMutationGuard(implPost, {
+  requiredRole: ["student"],
+  rateLimit: { maxRequests: 10, windowMs: 60_000 },
+});
