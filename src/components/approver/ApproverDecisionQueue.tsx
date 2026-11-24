@@ -69,6 +69,8 @@ export function ApproverDecisionQueue({
   const [error, setError] = useState<string | null>(null);
   const [busyTicket, setBusyTicket] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<"APPROVE" | "FORWARD" | "REJECT" | null>(null);
+  const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const loadQueue = useCallback(async () => {
@@ -157,6 +159,7 @@ export function ApproverDecisionQueue({
       setItems((prev) =>
         prev.filter((r) => (r.ticket_number ?? r.ticketNumber ?? r.id) !== ticket),
       );
+      setSelectedTickets((prev) => prev.filter((t) => t !== ticket));
       clearCache();
       if (action === "APPROVE") {
         setFeedback(`Ticket ${ticket} approved — pass/stage updated.`);
@@ -223,6 +226,56 @@ export function ApproverDecisionQueue({
         </div>
       )}
 
+      {selectedTickets.length > 0 && (
+        <div className="surface-card flex flex-wrap items-center justify-between gap-2 bg-bg-surface px-4 py-2.5 text-xs">
+          <span className="font-semibold text-text-primary">
+            {selectedTickets.length} ticket{selectedTickets.length === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={async () => {
+                setBulkBusy(true);
+                setFeedback(null);
+                try {
+                  const res = await fetch("/api/permissions/bulk", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+                    credentials: "include",
+                    body: JSON.stringify({ tickets: selectedTickets, action: "APPROVE" }),
+                  });
+                  const json = await res.json().catch(() => ({}));
+                  if (res.ok && json?.success !== false) {
+                    setItems((prev) =>
+                      prev.filter((r) => !selectedTickets.includes(r.ticket_number ?? r.ticketNumber ?? r.id)),
+                    );
+                    setFeedback(`Bulk approved ${selectedTickets.length} ticket(s).`);
+                    setSelectedTickets([]);
+                    clearCache();
+                  } else {
+                    setFeedback(json?.error?.message || "Bulk approve failed.");
+                  }
+                } finally {
+                  setBulkBusy(false);
+                }
+              }}
+              className="min-h-11 rounded-lg bg-action-primary px-3 py-1.5 font-semibold text-white disabled:opacity-50"
+            >
+              {bulkBusy ? "Applying…" : "Bulk Approve"}
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => setSelectedTickets([])}
+              className="min-h-11 rounded-lg bg-bg-elevated px-3 py-1.5 font-medium text-text-secondary"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       {error ? (
         <div className="surface-card bg-bg-surface p-4 text-xs text-action-danger">
           {error}
@@ -262,7 +315,21 @@ export function ApproverDecisionQueue({
                   ]}
                   onDecide={(act, comment) => handleDecide(ticket, act, comment)}
                 />
-                <div className="flex items-center justify-end gap-3 px-1 text-[11px] text-text-muted">
+                <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-text-muted">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedTickets.includes(ticket)}
+                      onChange={(e) =>
+                        setSelectedTickets((prev) =>
+                          e.target.checked ? [...prev, ticket] : prev.filter((t) => t !== ticket),
+                        )
+                      }
+                      aria-label={`Select ${ticket} for bulk action`}
+                    />
+                    <span>Select</span>
+                  </label>
+                  <div className="flex items-center gap-3">
                   <Link
                     href={`${detailBaseHref}/${encodeURIComponent(ticket)}`}
                     className="hover:text-action-primary inline-flex items-center gap-1"
@@ -277,6 +344,7 @@ export function ApproverDecisionQueue({
                       {relatedLabel} <ArrowUpRight className="size-3" />
                     </Link>
                   )}
+                  </div>
                 </div>
               </div>
             );

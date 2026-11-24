@@ -98,6 +98,51 @@ function AcademicStatusInner() {
   const [draftReason, setDraftReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [pendingFlags, setPendingFlags] = useState<
+    Array<{
+      user_id: string;
+      roll: string;
+      name: string;
+      department: string | null;
+      academic_status: string | null;
+      status_reason: string | null;
+    }>
+  >([]);
+  const [pendingBusy, setPendingBusy] = useState<string | null>(null);
+  const [pendingMsg, setPendingMsg] = useState<string | null>(null);
+
+  const loadPending = useCallback(async () => {
+    try {
+      const res = await fetch("/api/academic-status/pending", { headers: getAuthHeaders() });
+      if (!res.ok) return;
+      const body = await res.json().catch(() => ({}));
+      setPendingFlags(Array.isArray(body?.data) ? body.data : []);
+    } catch {
+      /* non-approver roles get 403; ignore */
+    }
+  }, []);
+
+  const decidePending = async (userId: string, action: "approve" | "reject") => {
+    setPendingBusy(userId);
+    setPendingMsg(null);
+    try {
+      const res = await fetch("/api/academic-status/pending", {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || body?.success === false) {
+        setPendingMsg(body?.error?.message ?? `Failed to ${action} pending flag.`);
+        return;
+      }
+      setPendingFlags((prev) => prev.filter((p) => p.user_id !== userId));
+      setPendingMsg(`Pending academic status ${action}d.`);
+      await load();
+    } finally {
+      setPendingBusy(null);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -113,7 +158,8 @@ function AcademicStatusInner() {
 
   useEffect(() => {
     load();
-  }, [load]);
+    void loadPending();
+  }, [load, loadPending]);
 
   const filteredGroups = useMemo(() => {
     if (!roster) return [];
@@ -216,6 +262,49 @@ function AcademicStatusInner() {
           aria-label="Search students"
         />
       </div>
+
+      {(pendingFlags.length > 0 || pendingMsg) && (
+        <section className="surface-card bg-bg-surface p-4 space-y-3" aria-label="Pending Academic Status Approvals">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-text-primary">
+              Pending Two-Person Approvals ({pendingFlags.length})
+            </h2>
+            {pendingMsg && <span className="text-xs font-medium text-action-primary">{pendingMsg}</span>}
+          </div>
+          <div className="space-y-2">
+            {pendingFlags.map((pf) => (
+              <div key={pf.user_id} className="flex flex-wrap items-center justify-between gap-3 py-2 text-xs">
+                <div className="min-w-0">
+                  <p className="font-semibold text-text-primary">
+                    {pf.name} ({pf.roll}) · {pf.academic_status ?? "FLAG"}
+                  </p>
+                  <p className="text-text-muted">
+                    {pf.department ?? "—"} · {pf.status_reason ?? "No reason provided"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={pendingBusy === pf.user_id}
+                    onClick={() => void decidePending(pf.user_id, "approve")}
+                    className="min-h-11 bg-action-primary px-3 py-1.5 font-semibold text-white disabled:opacity-50"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pendingBusy === pf.user_id}
+                    onClick={() => void decidePending(pf.user_id, "reject")}
+                    className="min-h-11 bg-action-danger px-3 py-1.5 font-semibold text-white disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Flag legend */}
       <div className="flex flex-wrap gap-3">

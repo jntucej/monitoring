@@ -60,6 +60,9 @@ export function getDefaultRouteForRole(role: Role | string, _gateId?: string): s
     exam_superintendent: "/exam/superintendent",
     mess_incharge: "/mess",
     emo: "/emo",
+    dean: "/sysadmin/academic-status",
+    chief_warden: "/principal/approvals",
+    controller_examinations: "/oie",
   };
   return routes[role] || "/login";
 }

@@ -11,6 +11,7 @@ import type { PermissionItem } from "@/components/approver/PermissionRow";
 import { ListSkeleton } from "./ListSkeleton";
 import { DetailSheet } from "./DetailSheet";
 import { WeekBar } from "./WeekBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { CommandPivotDrawer, type CommandPivotTarget } from "@/components/nav/level3/CommandPivotDrawer";
 
 interface EscalationsResponse {
@@ -108,6 +109,13 @@ export function EscalationsView() {
           {rows.length} open escalation{rows.length === 1 ? "" : "s"} needing supervisor action
         </p>
       </header>
+
+      <ApproverDecisionQueue
+        roleLabel="Supervisor"
+        forwardLabel="Escalate to VP"
+        relatedHref="/supervisor/gates/live"
+        relatedLabel="Live Gates"
+      />
 
       {loading && rows.length === 0 ? (
         <ListSkeleton rows={6} />
