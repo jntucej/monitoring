@@ -6,6 +6,7 @@ import Link from "next/link";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
 import { getAuthHeaders, cn } from "@/lib/utils";
 import { useExport } from "@/hooks/useExport";
+import { usePolling } from "@/hooks/usePolling";
 import { getComplaintRulesForRole } from "@/lib/complaint-rules";
 import { SmartTextRef } from "@/components/nav/SmartTextRef";
 import {
@@ -96,6 +97,8 @@ export function ComplaintConsole({
   useEffect(() => {
     load().catch(() => {});
   }, [load]);
+
+  usePolling(load, { intervalMs: 30_000, enabled: true });
 
   // Resolution stats for the visible set
   const stats = useMemo(() => {
