@@ -18,12 +18,7 @@ import { UpcomingPreview, type UpcomingItem } from "../_retention/UpcomingPrevie
 import { CelebrateOverlay } from "../_retention/CelebrateOverlay";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { DigitalHandover } from "@/components/retention/DigitalHandover";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -301,26 +296,6 @@ export default function SupervisorTodayPage() {
         {/* 8. Retention & Handover Widgets */}
         <WidgetBoundary name="DigitalHandover" title="Digital Handover">
           <DigitalHandover />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
-          <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-          <TaskContinuity />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-          <UnifiedCampusCalendar />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="QuickActions" title="Quick Actions">
-          <QuickActions />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="NotificationCenter" title="Notification Center">
-          <NotificationCenter />
         </WidgetBoundary>
 
       </div>

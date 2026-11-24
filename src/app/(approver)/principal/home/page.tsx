@@ -26,15 +26,9 @@ import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 import { PrincipalWidgetBoundary as WidgetBoundary } from "@/components/principal/shared/PrincipalWidgetBoundary";
 import { OverallClassSatisfactionCard } from "@/components/principal/OverallClassSatisfactionCard";
 import { PrincipalDigest } from "@/components/retention/PrincipalDigest";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { CampusKnowledgeCentre } from "@/components/retention/CampusKnowledgeCentre";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
 import { PageHeader } from "@/components/principal/shared/PrincipalPageHeader";
-import { QuickActions } from "@/components/principal/shared/PrincipalQuickActions";
-import { NotificationCenter } from "@/components/principal/shared/PrincipalNotificationCenter";
 import { useEntityInspector, EntityInspectorPanel } from "@/components/shared/useEntityInspector";
-import { buildNotificationInspection, type NotificationItem } from "@/lib/principal/notificationInspection";
 import { Greeting } from "@/components/Greeting";
 import { RoleOnboarding } from "@/components/RoleOnboarding";
 import { HoverPreview, MetricPreview } from "@/components/shared/HoverPreview";
@@ -129,13 +123,9 @@ export default function PrincipalTodayPage() {
 
   const sessionDecisions = usePrincipalRetention((s) => s.sessionDecisions);
 
-  // §13 notification → inspector bridge: clicking a notification that
-  // references a record opens the shared inspector; info-only ones stay mark-read.
-  const { inspection, inspect, closeInspection } = useEntityInspector();
-  const handleInspectNotification = (item: NotificationItem) => {
-    const insp = buildNotificationInspection(item);
-    if (insp) inspect(insp);
-  };
+  // §13 notification → shared inspector (kept mounted; the home no longer
+  // renders a NotificationCenter so the bridge is currently dormant).
+  const { inspection, closeInspection } = useEntityInspector();
 
   const d = data?.data;
   const pending =
@@ -339,23 +329,9 @@ export default function PrincipalTodayPage() {
           <PrincipalDigest />
         </WidgetBoundary>
 
-        <WidgetBoundary name="RoleAnalytics" title="Role Analytics">
-          <RoleAnalytics />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="TaskContinuity" title="Task Continuity">
-          <TaskContinuity />
-        </WidgetBoundary>
-
-        <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar">
-          <UnifiedCampusCalendar />
-        </WidgetBoundary>
-
         <WidgetBoundary name="CampusKnowledgeCentre" title="Campus Knowledge Centre">
           <CampusKnowledgeCentre />
         </WidgetBoundary>
-<WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter onInspect={handleInspectNotification} /></WidgetBoundary>
         </div>
 
       </div>

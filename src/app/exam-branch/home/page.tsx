@@ -7,13 +7,6 @@ import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { LivePulseStrip } from "@/components/shared/LivePulseStrip";
 
-import { QuickActions } from "@/components/shared/QuickActions";
-import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { AttentionQueue } from "@/components/engagement/AttentionQueue";
-import { ActivityTimeline } from "@/components/engagement/ActivityTimeline";
-import { TaskContinuity } from "@/components/retention/TaskContinuity";
-import { UnifiedCampusCalendar } from "@/components/retention/UnifiedCampusCalendar";
-import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 import { RoleDashboardPanel } from "@/components/approver/RoleDashboardPanel";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import type { BoardRow } from "@/components/shared/Board";
@@ -59,13 +52,6 @@ export default function ExamBranchPage() {
             columns={["PENDING", "VERIFYING", "APPROVED", "REJECTED"]}
             onSelect={(row) => setActive(row)}
           />
-          <WidgetBoundary name="AttentionQueue" title="Attention Queue"><AttentionQueue /></WidgetBoundary>
-          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
-          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
-          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
-          <WidgetBoundary name="ActivityTimeline" title="Activity Timeline"><ActivityTimeline /></WidgetBoundary>
-          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
         <EntityInspector
           inspection={active ? scanInspection(active) : null}
           onClose={() => setActive(null)}
