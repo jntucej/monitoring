@@ -8,6 +8,7 @@ import {
   type ActorEventContext,
 } from "@/components/shared/ContextualActionRow";
 import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
+import { InlineDiffBadge } from "@/components/shared/InlineDiffBadge";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -99,6 +100,7 @@ export function ApproverDecisionQueue({
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [lastDiff, setLastDiff] = useState<{ label: string; before: string; after: string } | null>(null);
 
   const loadQueue = useCallback(async () => {
     setLoading(true);
@@ -192,10 +194,13 @@ export function ApproverDecisionQueue({
       clearCache();
       if (action === "APPROVE") {
         setFeedback(`Ticket ${ticket} approved — pass/stage updated.`);
+        setLastDiff({ label: ticket, before: "PENDING", after: "APPROVED" });
       } else if (action === "FORWARD") {
         setFeedback(`Ticket ${ticket} forwarded to the next approval stage.`);
+        setLastDiff({ label: ticket, before: "PENDING", after: "FORWARDED" });
       } else {
         setFeedback(`Ticket ${ticket} rejected with reason.`);
+        setLastDiff({ label: ticket, before: "PENDING", after: "REJECTED" });
       }
     } catch {
       setFeedback(`Network error while updating ${ticket}.`);
@@ -249,9 +254,19 @@ export function ApproverDecisionQueue({
       )}
 
       {feedback && (
-        <div className="surface-card flex items-center gap-2 bg-bg-surface px-4 py-2.5 text-xs font-medium text-action-success">
-          <CheckCircle2 className="size-4 shrink-0" />
-          <span>{feedback}</span>
+        <div className="surface-card flex flex-wrap items-center justify-between gap-2 bg-bg-surface px-4 py-2.5 text-xs font-medium text-action-success">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 shrink-0" />
+            <span>{feedback}</span>
+          </span>
+          {lastDiff && (
+            <InlineDiffBadge
+              label={lastDiff.label}
+              before={lastDiff.before}
+              after={lastDiff.after}
+              tone={lastDiff.after === "REJECTED" ? "danger" : "ok"}
+            />
+          )}
         </div>
       )}
 

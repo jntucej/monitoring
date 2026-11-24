@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/admin/shared/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthHeaders } from "@/lib/utils";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { InlineDiffBadge } from "@/components/shared/InlineDiffBadge";
 
 interface PassRow {
   id: string;
@@ -189,7 +190,17 @@ function AdminPassesInner() {
                   </div>
                 )}
                 {revokeMsg && (
-                  <p className="text-xs font-medium text-action-primary">{revokeMsg}</p>
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-action-primary">{revokeMsg}</p>
+                    {activePass.status === "CANCELLED" && (
+                      <InlineDiffBadge
+                        label="Pass Status"
+                        before="ACTIVE"
+                        after="CANCELLED"
+                        tone="danger"
+                      />
+                    )}
+                  </div>
                 )}
               </div>
             ),
