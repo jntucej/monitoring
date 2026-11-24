@@ -1,6 +1,7 @@
 "use client";
 
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
+import { ApproverDecisionQueue } from "@/components/approver/ApproverDecisionQueue";
 import { IncidentsView } from "../../_shared/IncidentsView";
 import { EntityInspector } from "@/components/shared/EntityInspector";
 import { useEntityInspector } from "@/components/shared/useEntityInspector";
@@ -17,6 +18,12 @@ export default function IncidentsPage() {
         severity="critical"
         primaryAction={{ label: "Escalations Desk", href: "/supervisor/response/escalations" }}
         secondaryAction={{ label: "Live Gates", href: "/supervisor/gates/live" }}
+      />
+      <ApproverDecisionQueue
+        roleLabel="Gate Supervisor"
+        forwardLabel="Escalate to VP"
+        relatedHref="/supervisor/gates/live"
+        relatedLabel="Live Gates"
       />
       <IncidentsView onInspect={inspect} />
       <EntityInspector inspection={inspection} onClose={closeInspection} />
