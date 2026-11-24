@@ -15,12 +15,14 @@ import type { Role } from "@/lib/types";
 
 function getId(req: NextRequest): string {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
-  return decodeURIComponent(segments[segments.length - 2] ?? "");
+  return decodeURIComponent(segments[segments.length - 1] ?? "");
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function handleGet(req: NextRequest, { auth }: { auth: AuthContext }) {
   const complaintId = getId(req);
-  if (!complaintId) return fail("VALIDATION_ERROR", "ID required", 400);
+  if (!complaintId || !UUID_RE.test(complaintId)) return fail("VALIDATION_ERROR", "Valid complaint ID required", 400);
 
   const { rows: complaints } = await query<any>(
     `SELECT c.*, cc.label AS "categoryLabel", cc.domain AS "categoryDomain",
@@ -114,7 +116,7 @@ async function handlePatch(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (csrf) return csrf;
 
   const complaintId = getId(req);
-  if (!complaintId) return fail("VALIDATION_ERROR", "ID required", 400);
+  if (!complaintId || !UUID_RE.test(complaintId)) return fail("VALIDATION_ERROR", "Valid complaint ID required", 400);
 
   const body = (await req.json().catch(() => ({}))) as {
     action?: string;
@@ -261,7 +263,7 @@ async function handleDelete(req: NextRequest, { auth }: { auth: AuthContext }) {
   if (csrf) return csrf;
 
   const complaintId = getId(req);
-  if (!complaintId) return fail("VALIDATION_ERROR", "ID required", 400);
+  if (!complaintId || !UUID_RE.test(complaintId)) return fail("VALIDATION_ERROR", "Valid complaint ID required", 400);
 
   const { rows } = await query<{ raised_by: string | null; status: string }>(
     `SELECT raised_by, status FROM public.complaints WHERE id = $1 AND deleted_at IS NULL LIMIT 1`,
