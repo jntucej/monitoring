@@ -108,13 +108,15 @@ export default function FacultyClassRequestsPage() {
   const [publishing, setPublishing] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const userId = user?.id;
+  const userRole = user?.role;
   const load = useCallback(async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     setLoading(true);
     try {
       const [qRes, iRes] = await Promise.all([
         fetch(`/api/class-requests?status=open`, { headers: getAuthHeaders(), cache: "no-store" }),
-        user?.role === "hod" || user?.role === "vice_principal"
+        userRole === "hod" || userRole === "vice_principal"
           ? fetch("/api/class-level-issues", { headers: getAuthHeaders(), cache: "no-store" })
           : Promise.resolve(null),
       ]);
@@ -126,7 +128,7 @@ export default function FacultyClassRequestsPage() {
       }
     } catch { /* network */ }
     setLoading(false);
-  }, [user?.id, user?.role]);
+  }, [userId, userRole]);
 
   useEffect(() => { void load(); }, [load]);
 

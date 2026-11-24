@@ -95,6 +95,7 @@ function OperatorLookupInner() {
   const [quickBusy, setQuickBusy] = useState<"IN" | "OUT" | null>(null);
   const [quickFeedback, setQuickFeedback] = useState<string | null>(null);
 
+  const gateId = user?.gateId;
   const handleQuickRecord = useCallback(
     async (direction: "IN" | "OUT") => {
       if (!result) return;
@@ -108,7 +109,7 @@ function OperatorLookupInner() {
             roll: result.uniqueId,
             direction,
             reason: quickReason.trim() || `Operator lookup ${direction}`,
-            gateId: user?.gateId,
+            gateId,
             ...(result.personType === "student" && direction === "IN"
               ? { entryType: quickEntryType }
               : {}),
@@ -129,7 +130,7 @@ function OperatorLookupInner() {
         setQuickBusy(null);
       }
     },
-    [result, quickReason, quickEntryType, user?.gateId],
+    [result, quickReason, quickEntryType, gateId],
   );
 
   // O12: voice-assisted lookup — prefill the id field on high-confidence
