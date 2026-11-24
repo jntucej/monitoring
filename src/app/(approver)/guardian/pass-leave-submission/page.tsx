@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { PageLoading } from "@/components/shared/LoadingStates";
 import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
@@ -78,8 +79,10 @@ function PassLeaveSubmissionInner() {
     enabled: !!userId,
   });
 
+  const searchParams = useSearchParams();
+  const preselectedWardId = searchParams.get("wardId") ?? "";
   const wards: Person[] = persons?.data ?? [];
-  const [wardId, setWardId] = useState<string>("");
+  const [wardId, setWardId] = useState<string>(preselectedWardId);
   const [passType, setPassType] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
@@ -99,8 +102,12 @@ function PassLeaveSubmissionInner() {
   );
 
   useEffect(() => {
-    if (!wardId && wards[0]) setWardId(wards[0].id);
-  }, [wards, wardId]);
+    if (preselectedWardId && wards.some((w) => w.id === preselectedWardId)) {
+      setWardId(preselectedWardId);
+    } else if (!wardId && wards[0]) {
+      setWardId(wards[0].id);
+    }
+  }, [wards, wardId, preselectedWardId]);
 
   useEffect(() => {
     if (passTypes.length > 0 && !passType) setPassType(passTypes[0].code);

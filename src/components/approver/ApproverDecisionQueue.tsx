@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, RefreshCw } from "lucide-react";
 import { DecisionItemCard } from "@/components/shared/DecisionItemCard";
+import { clearCache } from "@/hooks/useApiResource";
 import { getAuthHeaders } from "@/lib/utils";
 
 interface PermissionRow {
@@ -156,6 +157,7 @@ export function ApproverDecisionQueue({
       setItems((prev) =>
         prev.filter((r) => (r.ticket_number ?? r.ticketNumber ?? r.id) !== ticket),
       );
+      clearCache();
       if (action === "APPROVE") {
         setFeedback(`Ticket ${ticket} approved — pass/stage updated.`);
       } else if (action === "FORWARD") {
