@@ -108,7 +108,8 @@ export function mapPermissionToActionableVM(
     urgencyRank = 1;
   }
 
-  const history = row.stage_history ?? row.stageHistory ?? [];
+  const rawHistory = row.stage_history ?? row.stageHistory;
+  const history = Array.isArray(rawHistory) ? rawHistory : [];
   const last = history.length > 0 ? history[history.length - 1] : null;
 
   return {
