@@ -90,6 +90,47 @@ function OperatorLookupInner() {
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [result, setResult] = useState<LookupPerson | null>(null);
   const [lookupError, setLookupError] = useState<string | null>(null);
+  const [quickEntryType, setQuickEntryType] = useState<"REGULAR" | "LATE" | "RETURN">("REGULAR");
+  const [quickReason, setQuickReason] = useState("");
+  const [quickBusy, setQuickBusy] = useState<"IN" | "OUT" | null>(null);
+  const [quickFeedback, setQuickFeedback] = useState<string | null>(null);
+
+  const handleQuickRecord = useCallback(
+    async (direction: "IN" | "OUT") => {
+      if (!result) return;
+      setQuickBusy(direction);
+      setQuickFeedback(null);
+      try {
+        const res = await fetch("/api/operator/manual-entry", {
+          method: "POST",
+          headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roll: result.uniqueId,
+            direction,
+            reason: quickReason.trim() || `Operator lookup ${direction}`,
+            gateId: user?.gateId,
+            ...(result.personType === "student" && direction === "IN"
+              ? { entryType: quickEntryType }
+              : {}),
+          }),
+          cache: "no-store",
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok) {
+          setQuickFeedback(json?.error?.message || `Failed to record ${direction}.`);
+          return;
+        }
+        setResult((prev) => (prev ? { ...prev, onCampus: direction === "IN" } : prev));
+        setQuickReason("");
+        setQuickFeedback(`Recorded ${direction} for ${result.name} (${result.uniqueId}).`);
+      } catch {
+        setQuickFeedback(`Network error while recording ${direction}.`);
+      } finally {
+        setQuickBusy(null);
+      }
+    },
+    [result, quickReason, quickEntryType, user?.gateId],
+  );
 
   // O12: voice-assisted lookup — prefill the id field on high-confidence
   // recognition so the operator confirms before searching.
@@ -322,6 +363,59 @@ function OperatorLookupInner() {
                 </dl>
               </div>
             </div>
+          </div>
+
+          {/* Inline Record IN / OUT without leaving lookup */}
+          <div className="surface-card bg-bg-surface p-4 space-y-2.5">
+            {!user?.gateId && (
+              <div className="flex items-center justify-between gap-2 bg-amber-500/10 px-3 py-2 text-xs text-action-warning">
+                <span>No gate claimed for this session.</span>
+                <Link href="/operator/claim" className="font-semibold underline">
+                  Claim Gate
+                </Link>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {result.personType === "student" && (
+                <select
+                  aria-label="Entry type"
+                  value={quickEntryType}
+                  onChange={(e) => setQuickEntryType(e.target.value as "REGULAR" | "LATE" | "RETURN")}
+                  className="min-h-11 rounded-lg bg-bg-elevated px-2.5 py-1.5 text-xs text-text-primary"
+                >
+                  <option value="REGULAR">Regular Entry</option>
+                  <option value="RETURN">Pass Return</option>
+                  <option value="LATE">Late Entry</option>
+                </select>
+              )}
+              <input
+                type="text"
+                value={quickReason}
+                onChange={(e) => setQuickReason(e.target.value)}
+                placeholder="Reason (optional)…"
+                aria-label="Scan reason"
+                className="min-h-11 flex-1 min-w-[140px] rounded-lg bg-bg-elevated px-3 py-1.5 text-xs text-text-primary"
+              />
+              <button
+                type="button"
+                disabled={Boolean(quickBusy)}
+                onClick={() => void handleQuickRecord("IN")}
+                className="min-h-11 rounded-lg bg-action-success px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                {quickBusy === "IN" ? "Recording…" : "Record IN"}
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(quickBusy)}
+                onClick={() => void handleQuickRecord("OUT")}
+                className="min-h-11 rounded-lg bg-action-danger px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                {quickBusy === "OUT" ? "Recording…" : "Record OUT"}
+              </button>
+            </div>
+            {quickFeedback && (
+              <p className="text-xs font-medium text-action-primary">{quickFeedback}</p>
+            )}
           </div>
 
           {/* Last scan + gate status */}

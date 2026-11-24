@@ -67,6 +67,7 @@ function OperatorModeInner() {
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pendingMode, setPendingMode] = useState<GateMode | null>(null);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
 
   const loadMode = useCallback(async () => {
@@ -129,7 +130,13 @@ function OperatorModeInner() {
         roleLabel="Gate Operator"
         purpose="Manage gate operational states between standard scanning, curfew strictness, and maintenance"
         contextLabel="Terminal Operation Mode"
-        statusSummary="Switch terminal operational mode or review emergency perimeter lockdown protocols."
+        statusTone={mode === "OPEN" ? "ok" : mode === "CURFEW" ? "warn" : mode === "MAINTENANCE" ? "critical" : "info"}
+        statusPill={mode ?? "Loading"}
+        statusSummary={
+          mode
+            ? `All gates are currently in ${mode} mode. Switching mode requires confirmation.`
+            : "Switch terminal operational mode or review emergency perimeter lockdown protocols."
+        }
         primaryAction={{ label: "Gate Desk", href: "/operator" }}
         secondaryAction={{ label: "Operator Announcements", href: "/operator/announcements" }}
       />
@@ -195,9 +202,37 @@ function OperatorModeInner() {
               }
               selected={mode === m.mode}
               disabled={submitting}
-              onClick={() => void handleSetMode(m.mode)}
+              onClick={() => setPendingMode(m.mode)}
             />
           ))}
+          {pendingMode && (
+            <div className="surface-card bg-bg-surface p-4 space-y-3">
+              <p className="text-xs font-semibold text-text-primary">
+                Confirm switching all gates to <span className="text-action-warning">{pendingMode}</span> mode?
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => {
+                    const target = pendingMode;
+                    setPendingMode(null);
+                    void handleSetMode(target);
+                  }}
+                  className="min-h-11 rounded-lg bg-action-primary px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  {submitting ? "Switching…" : `Confirm ${pendingMode}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPendingMode(null)}
+                  className="min-h-11 rounded-lg bg-bg-elevated px-4 py-2 text-xs font-medium text-text-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-1.5 pt-2 min-w-0">
             <label htmlFor="mode-reason" className="text-xs font-semibold text-text-muted uppercase tracking-wide">
