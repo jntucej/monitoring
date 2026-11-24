@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowUpRight, CheckCircle2, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, RefreshCw } from "lucide-react";
 import {
   ContextualActionRow,
   type ActorEventContext,
 } from "@/components/shared/ContextualActionRow";
 import { LifefulZeroState } from "@/components/shared/LifefulZeroState";
-import { InlineDiffBadge } from "@/components/shared/InlineDiffBadge";
 import { SlaCountdownPill } from "@/components/shared/SlaCountdownPill";
+import { WhatHappenedReceipt } from "@/components/shared/WhatHappenedReceipt";
 import { clearCache } from "@/hooks/useApiResource";
 import { usePolling } from "@/hooks/usePolling";
 import { getAuthHeaders } from "@/lib/utils";
@@ -255,20 +255,26 @@ export function ApproverDecisionQueue({
       )}
 
       {feedback && (
-        <div className="surface-card flex flex-wrap items-center justify-between gap-2 bg-bg-surface px-4 py-2.5 text-xs font-medium text-action-success">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="size-4 shrink-0" />
-            <span>{feedback}</span>
-          </span>
-          {lastDiff && (
-            <InlineDiffBadge
-              label={lastDiff.label}
-              before={lastDiff.before}
-              after={lastDiff.after}
-              tone={lastDiff.after === "REJECTED" ? "danger" : "ok"}
-            />
-          )}
-        </div>
+        <WhatHappenedReceipt
+          summary={feedback}
+          affectedNote={`${Math.max(0, items.length)} item(s) remaining in ${roleLabel} queue · Student & guardian notified`}
+          diff={
+            lastDiff
+              ? {
+                  label: lastDiff.label,
+                  before: lastDiff.before,
+                  after: lastDiff.after,
+                  tone: lastDiff.after === "REJECTED" ? "danger" : "ok",
+                }
+              : null
+          }
+          nextHref={relatedHref}
+          nextLabel={relatedHref ? `Open ${relatedLabel}` : undefined}
+          onDismiss={() => {
+            setFeedback(null);
+            setLastDiff(null);
+          }}
+        />
       )}
 
       {selectedTickets.length > 0 && (
