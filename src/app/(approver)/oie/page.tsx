@@ -20,14 +20,42 @@ import { boardRowTicketInspection, type HMBoardRow } from "@/components/approver
 import { PageHeader } from "@/components/shared/PageHeader";
 
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
-  return (
+function KpiTile({
+  label,
+  value,
+  tone = "ok",
+  linkHref,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "ok" | "warn" | "bad";
+  /** (UX-006) Drill-down target to the underlying records. */
+  linkHref?: string;
+}) {
+  const toneClass =
+    tone === "bad"
+      ? "text-red-400"
+      : tone === "warn"
+        ? "text-action-warning"
+        : "text-text-primary";
+  const tile = (
     <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
       <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
+  if (linkHref) {
+    return (
+      <a
+        href={linkHref}
+        aria-label={`${label}: ${value}. View records`}
+        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary transition-colors hover:bg-[var(--bg-elev-2)]"
+      >
+        {tile}
+      </a>
+    );
+  }
+  return tile;
 }
 
 export default function OiePage() {
@@ -71,9 +99,9 @@ return (
       <LivePulseStrip items={[{ id: "oie-queue", label: "Exam Clearances", valueLabel: "Live", tone: "warn", benchmark: "Adjudicate exam-day hall permits" }, { id: "access", label: "Day Access", valueLabel: "Active", tone: "info", benchmark: "Verify candidate gate & hall entry" }]} />
           <WidgetBoundary name="OieKpis" title="OIE KPIs">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <KpiTile label="Queue depth" value={queue.length} tone={queue.length > 0 ? "warn" : "ok"} />
-              <KpiTile label="Pending clearances" value={pendingCount} />
-              <KpiTile label="Exceptions open" value={escalatedCount} tone={escalatedCount > 0 ? "warn" : "ok"} />
+              <KpiTile label="Queue depth" value={queue.length} tone={queue.length > 0 ? "warn" : "ok"} linkHref="/oie/queue/pending" />
+              <KpiTile label="Pending clearances" value={pendingCount} linkHref="/oie/queue/pending" />
+              <KpiTile label="Exceptions open" value={escalatedCount} tone={escalatedCount > 0 ? "warn" : "ok"} linkHref="/oie/access-exceptions" />
             </div>
           </WidgetBoundary>
           <KanbanBoard

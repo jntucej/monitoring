@@ -17,14 +17,42 @@ import { RoleAnalytics } from "@/components/retention/RoleAnalytics";
 interface ComplaintRow { id?: string; status?: string; [k: string]: unknown; }
 type ComplaintsData = ComplaintRow[] | { data?: { complaints?: ComplaintRow[] } };
 
-function KpiTile({ label, value, tone = "ok" }: { label: string; value: string | number; tone?: "ok" | "warn" | "bad" }) {
-  const toneClass = tone === "bad" ? "text-red-400" : tone === "warn" ? "text-action-warning" : "text-text-primary";
-  return (
+function KpiTile({
+  label,
+  value,
+  tone = "ok",
+  linkHref,
+}: {
+  label: string;
+  value: string | number;
+  tone?: "ok" | "warn" | "bad";
+  /** (UX-006) Drill-down target to the underlying records. */
+  linkHref?: string;
+}) {
+  const toneClass =
+    tone === "bad"
+      ? "text-red-400"
+      : tone === "warn"
+        ? "text-action-warning"
+        : "text-text-primary";
+  const tile = (
     <div className="surface-card bg-[var(--bg-elev-1)] p-4 min-w-0">
       <div className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</div>
       <div className={`mt-1 text-2xl font-bold ${toneClass}`}>{value}</div>
     </div>
   );
+  if (linkHref) {
+    return (
+      <a
+        href={linkHref}
+        aria-label={`${label}: ${value}. View records`}
+        className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-primary transition-colors hover:bg-[var(--bg-elev-2)]"
+      >
+        {tile}
+      </a>
+    );
+  }
+  return tile;
 }
 
 export default function EmoLandingPage() {
@@ -59,8 +87,8 @@ export default function EmoLandingPage() {
 
       <WidgetBoundary name="EmoKpis" title="EMO KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <KpiTile label="Assigned complaints" value={rows.length} />
-          <KpiTile label="Open backlog" value={openBacklog} tone={openBacklog > 0 ? "warn" : "ok"} />
+          <KpiTile label="Assigned complaints" value={rows.length} linkHref="/emo/complaints" />
+          <KpiTile label="Open backlog" value={openBacklog} tone={openBacklog > 0 ? "warn" : "ok"} linkHref="/emo/complaints" />
         </div>
       </WidgetBoundary>
 
