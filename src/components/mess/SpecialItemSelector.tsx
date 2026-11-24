@@ -18,6 +18,7 @@ import {
 // JSX declaration for sakuga-button
 type SakugaButtonProps = Record<string, unknown> & { children?: React.ReactNode };
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "sakuga-button": SakugaButtonProps;
