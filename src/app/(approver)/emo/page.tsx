@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Wrench, AlertTriangle, ArrowRight } from "lucide-react";
 import { useApiResource } from "@/hooks/useApiResource";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { WidgetBoundary } from "@/components/shared/WidgetBoundary";
 
 import { QuickActions } from "@/components/shared/QuickActions";
@@ -41,6 +42,19 @@ export default function EmoLandingPage() {
           Manage campus electrical and lab-power maintenance complaints.
         </p>
       </div>
+
+      <ContextSituationBar
+        contextLabel="Electrical Maintenance Queue"
+        statusTone={openBacklog > 0 ? "warn" : "ok"}
+        statusPill={openBacklog > 0 ? `${openBacklog} open` : "All clear"}
+        summary={
+          openBacklog > 0
+            ? `${openBacklog} electrical or lab-power complaint${openBacklog === 1 ? "" : "s"} need attention.`
+            : "No open electrical maintenance complaints right now."
+        }
+        primaryAction={{ label: "Open Complaint Queue", href: "/emo/complaints", badgeCount: openBacklog }}
+        secondaryAction={{ label: "Resolved Tickets", href: "/emo/complaints?status=resolved" }}
+      />
 
       <WidgetBoundary name="EmoKpis" title="EMO KPIs">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -84,12 +98,19 @@ export default function EmoLandingPage() {
         <ComplaintConsole role="emo" basePath="/emo/complaints" />
       </WidgetBoundary>
 
-      <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
-      <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
-      <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
-      <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
-      <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
-      <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+      <details className="surface-card bg-bg-surface p-4">
+        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          More workspace tools &amp; calendar
+        </summary>
+        <div className="mt-4 space-y-4">
+          <WidgetBoundary name="PersonalizedCampusHome" title="Personalized Campus Home"><PersonalizedCampusHome /></WidgetBoundary>
+          <WidgetBoundary name="TaskContinuity" title="Task Continuity"><TaskContinuity /></WidgetBoundary>
+          <WidgetBoundary name="UnifiedCampusCalendar" title="Unified Campus Calendar"><UnifiedCampusCalendar /></WidgetBoundary>
+          <WidgetBoundary name="RoleAnalytics" title="Role Analytics"><RoleAnalytics /></WidgetBoundary>
+          <WidgetBoundary name="QuickActions" title="Quick Actions"><QuickActions /></WidgetBoundary>
+          <WidgetBoundary name="NotificationCenter" title="Notification Center"><NotificationCenter /></WidgetBoundary>
+        </div>
+      </details>
 
     </div>
   );

@@ -5,6 +5,7 @@ import React, { useState, useCallback } from "react";
 import { ClipboardList, Plus, Inbox, AlertCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/shared/AuthGuard";
+import { ContextSituationBar } from "@/components/shared/ContextSituationBar";
 import { PermissionTicketCard } from "@/components/student/PermissionTicketCard";
 import { PermissionDetailPanel } from "@/components/approver/PermissionDetailPanel";
 import type { PermissionItem } from "@/components/approver/PermissionRow";
@@ -162,6 +163,8 @@ export default function StudentPermissionsPage() {
 
   const filtered =
     filter === "ALL" ? tickets : tickets.filter((t) => t.status === filter);
+  const pendingCount = tickets.filter((t) => t.status === "PENDING").length;
+  const approvedCount = tickets.filter((t) => t.status === "APPROVED").length;
 
   return (
     <AuthGuard allowedRoles={["student"]}>
@@ -182,6 +185,29 @@ export default function StudentPermissionsPage() {
             </Button>
           </Link>
         </div>
+
+        <ContextSituationBar
+          contextLabel="Request Status"
+          statusTone={pendingCount > 0 ? "warn" : approvedCount > 0 ? "ok" : "info"}
+          statusPill={
+            loading
+              ? "Checking…"
+              : pendingCount > 0
+                ? `${pendingCount} pending`
+                : approvedCount > 0
+                  ? `${approvedCount} approved`
+                  : "No active requests"
+          }
+          summary={
+            pendingCount > 0
+              ? `You have ${pendingCount} request${pendingCount === 1 ? "" : "s"} awaiting faculty or warden approval.`
+              : approvedCount > 0
+                ? `You have ${approvedCount} approved request${approvedCount === 1 ? "" : "s"} ready to use as a gate pass.`
+                : "Submit a new request whenever you need outing, leave, or late-entry approval."
+          }
+          primaryAction={{ label: "View Active Passes", href: "/student/passes", badgeCount: approvedCount }}
+          secondaryAction={{ label: "New Request", href: "/student/permissions/new" }}
+        />
 
         {error && (
           <div className="surface-card p-4 bg-[color-mix(in_srgb,var(--action-danger)_12%,transparent)] text-action-danger text-xs md:text-sm flex items-center gap-2">
