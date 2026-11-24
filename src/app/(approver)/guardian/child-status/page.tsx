@@ -188,6 +188,7 @@ function ChildStatusInner() {
   // the parent ChildStatus component polls).
   const [statuses, setStatuses] = useState<Record<string, PersonStatus>>({});
   const [statusLoading, setStatusLoading] = useState(true);
+  const [statusError, setStatusError] = useState<string | null>(null);
   const [activity, setActivity] = useState<Scan[]>([]);
   const [activityWard, setActivityWard] = useState<string | null>(null);
 
@@ -197,7 +198,9 @@ function ChildStatusInner() {
       return;
     }
     setStatusLoading(true);
+    setStatusError(null);
     const next: Record<string, PersonStatus> = {};
+    let hadError = false;
     await Promise.all(
       wards.map(async (w) => {
         const roll = w.uniqueId || w.roll || "";
@@ -207,7 +210,8 @@ function ChildStatusInner() {
             headers: getAuthHeaders(),
             cache: "no-store",
           });
-          const json = await res.json();
+          if (!res.ok) hadError = true;
+          const json = await res.json().catch(() => ({}));
           next[roll] = json?.data?.campusStatus
             ? {
                 campusStatus: json.data.campusStatus,
@@ -215,6 +219,7 @@ function ChildStatusInner() {
               }
             : { campusStatus: "OUT", lastScan: null };
         } catch {
+          hadError = true;
           next[roll] = { campusStatus: "OUT", lastScan: null };
         }
       })
@@ -232,12 +237,17 @@ function ChildStatusInner() {
             headers: getAuthHeaders(),
             cache: "no-store",
           });
-          const json = await res.json();
+          if (!res.ok) hadError = true;
+          const json = await res.json().catch(() => ({}));
           setActivity(Array.isArray(json?.data?.history) ? json.data.history : []);
         } catch {
+          hadError = true;
           setActivity([]);
         }
       }
+    }
+    if (hadError) {
+      setStatusError("Some ward status or movement records could not be refreshed.");
     }
     setStatusLoading(false);
   }, [wards]);
@@ -292,7 +302,27 @@ function ChildStatusInner() {
           <button
             type="button"
             onClick={() => void refreshPersons()}
-            className="surface-card inline-flex items-center gap-1.5 bg-action-danger/20 px-3 py-1.5 text-xs font-semibold text-action-danger hover:bg-action-danger/30"
+            className="min-h-11 px-3 text-xs font-semibold underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {statusError && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="surface-card bg-amber-500/10 p-3 text-xs text-action-warning flex items-center justify-between gap-3"
+        >
+          <span className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {statusError}
+          </span>
+          <button
+            type="button"
+            onClick={() => void loadStatuses()}
+            className="min-h-11 px-3 font-semibold underline"
           >
             Retry
           </button>
